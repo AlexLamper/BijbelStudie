@@ -25,42 +25,47 @@ const merriweather = Merriweather({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://scriptura.cloud'),
+  metadataBase: new URL('https://bijbel-studie.com'),
   title: {
-    default: "Scriptura - Online Bible Study & Biblical Education Platform",
-    template: "%s | Scriptura"
+    default: "BijbelStudie - Online Bijbelstudie & Digitale Bijbelcursussen",
+    template: "%s | BijbelStudie"
   },
-  description: "Join Scriptura for comprehensive online Bible study. Access interactive courses, quizzes, and a supportive community. Start your journey with the best study bible online. Bijbel studie online voor iedereen.",
+  description: "BijbelStudie - Bijbel studie online voor iedereen! Ontdek interactieve bijbelcursussen, gids bibelstudies, bijbelcommentaren en online bijbellessen. Start je gratis vandaag.",
   keywords: [
-    "scriptura",
-    "bible study online",
-    "study bible online",
+    "bijbelstudie",
+    "bijbel studie",
     "bijbel studie online",
-    "scriptura bible study",
-    "scriptura bible",
-    "online bible courses",
-    "biblical education",
-    "faith",
-    "christian learning",
-    "bible quizzes",
-    "theology",
-    "christelijk onderwijs",
-    "bijbelcursus",
-    "bijbelse educatie",
+    "online bijbelstudie",
+    "bijbel lezen",
+    "bijbel studie app",
     "online bijbelcursussen",
-    "spiritual growth",
-    "holy bible",
-    "bible verses",
-    "scripture study",
-    "bible lessons",
+    "bijbelcursus online",
+    "bijbelcommentaren",
+    "gids bijbelstudie",
+    "leesplan bijbel",
+    "bijbelboeken",
+    "christelijk onderwijs",
+    "bijbelse educatie",
+    "theologie online",
+    "bijbelkennis",
+    "schriftstudie",
+    "bijbelversussen",
+    "heilige bijbel online",
+    "bijbelstudies",
+    "bijbellessen",
+    "bijbelconferences",
+    "bijbelcommunity",
+    "faith learning",
+    "theology course",
+    "bible study course",
+    "scripture study online",
+    "Christian education",
     "biblical knowledge",
-    "religious education",
-    "online learning",
-    "christian community"
+    "spiritual growth"
   ],
-  authors: [{ name: "Scriptura Team" }],
-  creator: "Scriptura",
-  publisher: "Scriptura",
+  authors: [{ name: "BijbelStudie Team" }],
+  creator: "BijbelStudie",
+  publisher: "BijbelStudie",
   robots: {
     index: true,
     follow: true,
@@ -74,25 +79,25 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: 'website',
-    locale: 'en_US',
-    url: 'https://scriptura.cloud',
-    title: 'Scriptura - Online Bible Study & Biblical Education',
-    description: 'Experience the Bible like never before with Scriptura. Interactive courses, community study, and advanced tools for spiritual growth. The best study bible online.',
-    siteName: 'Scriptura',
+    locale: 'nl_NL',
+    url: 'https://bijbel-studie.com',
+    title: 'BijbelStudie - Online Bijbelstudie & Bijbelcursussen',
+    description: 'Bijbel studie online met interactieve cursussen, commentaren en studiematerialen. Leer systematisch Gods Woord met BijbelStudie.',
+    siteName: 'BijbelStudie',
     images: [
       {
-        url: "https://scriptura.cloud/og-image.svg",
+        url: "https://bijbel-studie.com/og-image.svg",
         width: 1200,
         height: 630,
-        alt: "Scriptura - Online Bible Courses and Quizzes",
+        alt: "BijbelStudie - Online Bijbelstudie en Bijbelcursussen",
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Scriptura - Online Bible Study',
-    description: 'Join Scriptura for comprehensive online Bible study. Access interactive courses, quizzes, and a supportive community.',
-    images: ["https://scriptura.cloud/og-image.svg"],
+    title: 'BijbelStudie - Online Bijbelstudie',
+    description: 'Bijbel studie online - Interactieve cursussen, commentaren en studiematerialen voor serieuze bijbelstudenten.',
+    images: ["https://bijbel-studie.com/og-image.svg"],
   }
 };
 
@@ -107,16 +112,44 @@ export default async function RootLayout({
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    url: "https://scriptura.cloud",
-    logo: "https://scriptura.cloud/favicon.ico",
-    name: "Scriptura",
-    description:
-      "Scriptura is an online learning platform offering a wide range of Bible courses, interactive quizzes, and a supportive community to deepen your biblical knowledge and faith.",
+    "@id": "https://bijbel-studie.com",
+    url: "https://bijbel-studie.com",
+    logo: "https://bijbel-studie.com/favicon.ico",
+    name: "BijbelStudie",
+    alternateName: ["Bijbel Studie", "Bijbelstudie", "Bible Study Online"],
+    description: "BijbelStudie - Online bijbelstudie platform met interactieve bijbelcursussen, commentaren, leesplannen en een ondersteunende christelijke gemeenschap.",
     sameAs: [
-      "https://www.facebook.com/YourFacebookPage",
-      "https://www.twitter.com/YourTwitterHandle",
-      "https://www.instagram.com/YourInstagramHandle",
+      "https://www.facebook.com/BijbelStudie",
+      "https://www.twitter.com/BijbelStudie",
+      "https://www.instagram.com/BijbelStudie",
+      "https://github.com/AlexLamper/BijbelStudie"
     ],
+    offers: {
+      "@type": "AggregateOffer",
+      priceCurrency: "EUR",
+      offers: [
+        {
+          "@type": "Offer",
+          name: "Basis Plan",
+          price: "0",
+          priceCurrency: "EUR",
+          description: "Gratis toegang tot basis bijbelstudie tools"
+        },
+        {
+          "@type": "Offer",
+          name: "Pro Plan",
+          price: "9.99",
+          priceCurrency: "EUR",
+          priceValidUntil: "2027-12-31",
+          description: "Maandelijks abonnement voor serieuze bijbelstudenten"
+        }
+      ]
+    },
+    contactPoint: {
+      "@type": "ContactPoint",
+      contactType: "Customer Support",
+      url: "https://bijbel-studie.com/contact"
+    }
   };
 
   return (
@@ -128,15 +161,15 @@ export default async function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta
           name="description"
-          content="Scriptura - Online Bible Courses, Quizzes & Community for Biblical Education"
+          content="BijbelStudie - Online Bible Courses, Quizzes & Community for Biblical Education"
         />
         <meta
           name="keywords"
-          content="Bible,Online Bible Courses,Bible Study,Biblical Education,Scripture,Faith,Christian Learning,Quizzes,Online Quizzes,Bible Quizzes,Scriptura,Bible Lessons,Bible Courses,Biblical Knowledge,Bible Community,Religious Education,Theology,Christelijk onderwijs,Bijbelstudie,Bijbelcursus,Bijbelse educatie,Bijbelse kennis,Christelijk geloof,Online bijbelcursussen,Online leren,Online onderwijs,Spirituele groei,Geloof,Heilige Schrift,Bijbel,Bible Verses,Bible Quotes,Scripture Study,Online Learning,Educational Platform,Bible Education Platform,Bible Quizzes Platform,Interactive Quizzes,Learning Community,Spiritual Community,Online Community,Biblical Studies,Christian Community,Biblical Courses,Bible Training,Faith Education,Bible Insights,Biblical Insights,Biblical Wisdom,Christian Insights,Bible Trivia,Religious Trivia,Biblical Trivia,Bible Challenges,Learning Bible,Digital Bible Learning,Scripture Learning,Bible Tools,Bible Study Tools,Online Faith Courses,Digital Church,Modern Bible Study,Bible Curriculum,Bible Education Resources,Biblical Resources,Theology Courses,Online Theology,Church Education,Gospel,Online Gospel Studies,Spiritual Learning,Divine Wisdom,Holy Bible Studies,Scripture Education,Bible Community Platform,Christian Platform,Religious Learning Platform,Bible Knowledge Hub,Faith Community,Biblical Community,Bible Study Community,Bible Quiz App,Bible Learning App,Mobile Bible Courses,Mobile Bible Study,Digital Bible Courses,E-Learning Bible,Biblical E-Learning,Faith Based Learning,God’s Word,Divine Learning,Bible App,Christelijk platform,Bijbelse quizzen,Bijbel leren,Geloofscursus,Bijbelse trivia,Bijbelse uitdagingen,Online kerk,Bijbelse wijsheid"
+          content="Bible,Online Bible Courses,Bible Study,Biblical Education,Scripture,Faith,Christian Learning,Quizzes,Online Quizzes,Bible Quizzes,BijbelStudie,Bible Lessons,Bible Courses,Biblical Knowledge,Bible Community,Religious Education,Theology,Christelijk onderwijs,Bijbelstudie,Bijbelcursus,Bijbelse educatie,Bijbelse kennis,Christelijk geloof,Online bijbelcursussen,Online leren,Online onderwijs,Spirituele groei,Geloof,Heilige Schrift,Bijbel,Bible Verses,Bible Quotes,Scripture Study,Online Learning,Educational Platform,Bible Education Platform,Bible Quizzes Platform,Interactive Quizzes,Learning Community,Spiritual Community,Online Community,Biblical Studies,Christian Community,Biblical Courses,Bible Training,Faith Education,Bible Insights,Biblical Insights,Biblical Wisdom,Christian Insights,Bible Trivia,Religious Trivia,Biblical Trivia,Bible Challenges,Learning Bible,Digital Bible Learning,Scripture Learning,Bible Tools,Bible Study Tools,Online Faith Courses,Digital Church,Modern Bible Study,Bible Curriculum,Bible Education Resources,Biblical Resources,Theology Courses,Online Theology,Church Education,Gospel,Online Gospel Studies,Spiritual Learning,Divine Wisdom,Holy Bible Studies,Scripture Education,Bible Community Platform,Christian Platform,Religious Learning Platform,Bible Knowledge Hub,Faith Community,Biblical Community,Bible Study Community,Bible Quiz App,Bible Learning App,Mobile Bible Courses,Mobile Bible Study,Digital Bible Courses,E-Learning Bible,Biblical E-Learning,Faith Based Learning,God’s Word,Divine Learning,Bible App,Christelijk platform,Bijbelse quizzen,Bijbel leren,Geloofscursus,Bijbelse trivia,Bijbelse uitdagingen,Online kerk,Bijbelse wijsheid"
         />
 
         {/* Canonical URL */}
-        <link rel="canonical" href="https://scriptura.cloud" />
+        <link rel="canonical" href="https://bijbel-studie.com" />
 
         {/* Favicons and Icons */}
         <link rel="icon" href="/favicon.ico" />

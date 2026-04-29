@@ -9,12 +9,12 @@ import { cookieName, fallbackLng } from "../i18n/settings";
 
 export const metadata: Metadata = {
   title: {
-    absolute: "Scriptura | User Profile",
+    absolute: "BijbelStudie | User Profile",
   },
-  description: "Manage your Scriptura user profile, track your progress, and personalize your biblical learning experience.",
+  description: "Manage your BijbelStudie user profile, track your progress, and personalize your biblical learning experience.",
   keywords: [
     "User profile",
-    "Scriptura profile",
+    "BijbelStudie profile",
     "Profile management",
     "Account settings",
     "User dashboard",
@@ -65,16 +65,16 @@ export const metadata: Metadata = {
     "Profile forums",
   ],
   openGraph: {
-    title: "Scriptura | User Profile",
-    description: "Access and manage your Scriptura user profile to enhance your personalized biblical learning journey.",
-    url: "https://scriptura-edu.com/profile",
-    siteName: "Scriptura",
+    title: "BijbelStudie | User Profile",
+    description: "Access and manage your BijbelStudie user profile to enhance your personalized biblical learning journey.",
+    url: "https://bijbelstudie-edu.com/profile",
+    siteName: "BijbelStudie",
     images: [
       {
-        url: "https://scriptura-edu.com/og-profile.jpg",
+        url: "https://bijbelstudie-edu.com/og-profile.jpg",
         width: 1200,
         height: 630,
-        alt: "Scriptura - User Profile",
+        alt: "BijbelStudie - User Profile",
       },
     ],
     locale: "en_US",
@@ -82,11 +82,11 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Scriptura | User Profile",
-    description: "Personalize your Scriptura experience by managing your user profile and tracking your biblical learning progress.",
-    site: "@ScripturaEdu",
-    creator: "@ScripturaEdu",
-    images: ["https://scriptura-edu.com/og-profile.jpg"],
+    title: "BijbelStudie | User Profile",
+    description: "Personalize your BijbelStudie experience by managing your user profile and tracking your biblical learning progress.",
+    site: "@BijbelStudieEdu",
+    creator: "@BijbelStudieEdu",
+    images: ["https://bijbelstudie-edu.com/og-profile.jpg"],
   },
   robots: {
     index: true,
@@ -100,7 +100,7 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: "https://scriptura-edu.com/profile",
+    canonical: "https://bijbelstudie-edu.com/profile",
   },
 };
 

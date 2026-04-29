@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-We currently support the following versions of **Scriptura** with security updates:
+We currently support the following versions of **BijbelStudie** with security updates:
 
 | Version | Supported          |
 | ------- | ------------------ |
@@ -10,7 +10,7 @@ We currently support the following versions of **Scriptura** with security updat
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in **Scriptura**, please follow the steps below to report it:
+If you discover a security vulnerability in **BijbelStudie**, please follow the steps below to report it:
 
 1. **Contact Us**  
    - Report security vulnerabilities privately by emailing [devlamper06@gmail.com](mailto:devlamper06@gmail.com).
@@ -30,4 +30,4 @@ If you discover a security vulnerability in **Scriptura**, please follow the ste
    - Once a vulnerability is confirmed and fixed, we will publicly disclose it after it is patched in a stable release.
    - Credit will be given to the reporter unless anonymity is requested.
 
-Your assistance helps us keep **Scriptura** secure and reliable for all users. Thank you for your responsible disclosure.
+Your assistance helps us keep **BijbelStudie** secure and reliable for all users. Thank you for your responsible disclosure.

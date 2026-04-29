@@ -132,7 +132,7 @@ export default function ForgotPasswordPage() {
           <div className="flex items-center justify-center mb-8">
             <Image
               src="/images/logo-text.svg"
-              alt="Scriptura Logo"
+              alt="BijbelStudie Logo"
               width={30}
               height={30}
               className="object-contain w-40 h-15 mr-3 dark:invert"

@@ -131,7 +131,7 @@ export default function SignInPage() {
             <div className="flex items-center">
               <Image
                 src="/images/logo-text.svg"
-                alt="Scriptura Logo"
+                alt="BijbelStudie Logo"
                 width={20}
                 height={20}
                 className="object-contain w-40 h-15 mr-3 dark:invert"

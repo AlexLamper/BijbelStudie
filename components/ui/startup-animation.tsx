@@ -62,7 +62,7 @@ export default function StartupAnimation({ isReady, onComplete }: StartupAnimati
             <div className="relative w-full h-full dark:hidden">
               <Image
                 src="/images/logo-text.svg"
-                alt="Scriptura"
+                alt="BijbelStudie"
                 fill
                 className="object-contain"
                 priority
@@ -71,7 +71,7 @@ export default function StartupAnimation({ isReady, onComplete }: StartupAnimati
             <div className="relative w-full h-full hidden dark:block">
               <Image
                 src="/images/Logo-text-dark-mode.svg"
-                alt="Scriptura"
+                alt="BijbelStudie"
                 fill
                 className="object-contain"
                 priority

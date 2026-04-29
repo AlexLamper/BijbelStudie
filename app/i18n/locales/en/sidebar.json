@@ -1,5 +1,5 @@
 {
-  "scriptura": "Scriptura",
+  "bijbelstudie": "BijbelStudie",
   "main_navigation": "Main Navigation",
   "dashboard": "Dashboard",
   "study": "Study",
@@ -21,5 +21,5 @@
   "pricing": "Pricing",
   "canceled": "Canceled",
   "auth": "Authentication",
-  "try_pro_now": "Try Scriptura Pro Now!"
+  "try_pro_now": "Try BijbelStudie Pro Now!"
 }

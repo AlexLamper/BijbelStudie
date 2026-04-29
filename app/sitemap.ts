@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://scriptura.cloud";
+  const baseUrl = "https://bijbel-studie.com";
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${baseUrl}`, lastModified: new Date() },
     { url: `${baseUrl}/study`, lastModified: new Date() },

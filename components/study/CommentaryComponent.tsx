@@ -280,7 +280,7 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
                 Premium Commentary
               </h3>
               <p className="text-gray-600 dark:text-gray-400 text-sm">
-                Unlock deep insights with King Comments and other premium study materials by subscribing to Scriptura Pro.
+                Unlock deep insights with King Comments and other premium study materials by subscribing to BijbelStudie Pro.
               </p>
             </div>
             <Button 

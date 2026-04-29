@@ -1,6 +1,6 @@
-# Contributing to Scriptura
+# Contributing to BijbelStudie
 
-Thank you for your interest in contributing to **Scriptura** — a platform dedicated to helping people deepen their knowledge of the Bible.
+Thank you for your interest in contributing to **BijbelStudie** — a platform dedicated to helping people deepen their knowledge of the Bible.
 We welcome all contributions, whether you are fixing a bug, proposing a new feature, or enhancing the documentation. Your support helps us build a more comprehensive and impactful learning experience.
 
 ---
@@ -10,12 +10,12 @@ We welcome all contributions, whether you are fixing a bug, proposing a new feat
 ### Steps to Contribute
 
 1. **Fork the Repository**  
-   Fork the Scriptura repository to create your own copy.
+   Fork the BijbelStudie repository to create your own copy.
 
 2. **Clone Your Fork**  
    Clone your forked repository to your local machine:
    ```bash
-   git clone https://github.com/<your-username>/Scriptura.git
+   git clone https://github.com/<your-username>/BijbelStudie.git
    ```
 
 3. **Create a Branch**  
@@ -41,7 +41,7 @@ We welcome all contributions, whether you are fixing a bug, proposing a new feat
    ```
 
 7. **Open a Pull Request**  
-   Navigate to the original Scriptura repository and open a pull request from your branch.
+   Navigate to the original BijbelStudie repository and open a pull request from your branch.
    Provide a detailed explanation of your changes and their purpose.
 
 ---
@@ -55,7 +55,7 @@ We welcome all contributions, whether you are fixing a bug, proposing a new feat
 
 ### Reporting Bugs
 If you identify a bug:
-1. Check the [issues](https://github.com/<your-repo>/Scriptura/issues) page to see if it has already been reported.
+1. Check the [issues](https://github.com/<your-repo>/BijbelStudie/issues) page to see if it has already been reported.
 2. If the bug has not been reported, open a new issue and include the following details:
    - A clear and descriptive title.
    - Steps to reproduce the issue.
@@ -64,7 +64,7 @@ If you identify a bug:
 
 ### Proposing Features
 If you have a suggestion for a new feature:
-1. Review the [issues](https://github.com/<your-repo>/Scriptura/issues) page to check if the feature has already been proposed.
+1. Review the [issues](https://github.com/<your-repo>/BijbelStudie/issues) page to check if the feature has already been proposed.
 2. If not, open a new issue with:
    - A clear and descriptive title.
    - A detailed explanation of the feature and its potential benefits.
@@ -88,9 +88,9 @@ If you have any questions or run into any issues, please do not hesitate to:
 - Open an issue on GitHub.
 - Contact us at [devlamper06@gmail.com](mailto:devlamper06@gmail.com).
 
-We appreciate your support and collaboration in making **Scriptura** a valuable resource for Bible learning.
+We appreciate your support and collaboration in making **BijbelStudie** a valuable resource for Bible learning.
 
 ---
 
-Thank you for contributing to **Scriptura**.
+Thank you for contributing to **BijbelStudie**.
 

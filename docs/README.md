@@ -1,36 +1,36 @@
-# Scriptura - Interactive Bible Learning Platform
+# BijbelStudie - Interactive Bible Learning Platform
 
 <p>
   <!-- Latest release version -->
-  <!--   <img src="https://img.shields.io/github/v/release/AlexLamper/Scriptura?style=for-the-badge" alt="Release Version" /> -->
+  <!--   <img src="https://img.shields.io/github/v/release/AlexLamper/BijbelStudie?style=for-the-badge" alt="Release Version" /> -->
   <!-- License -->
-  <img src="https://img.shields.io/github/license/AlexLamper/Scriptura?style=for-the-badge" alt="License" />
+  <img src="https://img.shields.io/github/license/AlexLamper/BijbelStudie?style=for-the-badge" alt="License" />
   <!-- Open issues -->
-  <img src="https://img.shields.io/github/issues/AlexLamper/Scriptura?style=for-the-badge&logo=github" alt="Issues" />
+  <img src="https://img.shields.io/github/issues/AlexLamper/BijbelStudie?style=for-the-badge&logo=github" alt="Issues" />
   <!-- Contributors -->
-  <img src="https://img.shields.io/github/contributors/AlexLamper/Scriptura?style=for-the-badge&logo=github" alt="Contributors" />
+  <img src="https://img.shields.io/github/contributors/AlexLamper/BijbelStudie?style=for-the-badge&logo=github" alt="Contributors" />
   <!-- Instagram follow -->
-  <a href="https://www.instagram.com/scriptura_edu/">
-    <img src="https://img.shields.io/badge/Follow%20@scriptura__edu-E4405F?logo=instagram&logoColor=white&style=for-the-badge" alt="Follow on Instagram" />
+  <a href="https://www.instagram.com/bijbelstudie_edu/">
+    <img src="https://img.shields.io/badge/Follow%20@bijbelstudie__edu-E4405F?logo=instagram&logoColor=white&style=for-the-badge" alt="Follow on Instagram" />
   </a>
 </p>
 
 
 **Your Interactive Bible Learning Platform**
 
-![Scriptura Banner Screenshot](public/screenshot1.png)
+![BijbelStudie Banner Screenshot](public/screenshot1.png)
 <p>
-  <a href="https://scriptura.cloud">
-    <img src="https://img.shields.io/badge/Live_Demo-▶️-blue?style=for-the-badge" alt="Visit Scriptura" />
+  <a href="https://bijbel-studie.com">
+    <img src="https://img.shields.io/badge/Live_Demo-▶️-blue?style=for-the-badge" alt="Visit BijbelStudie" />
   </a>
   <a href="#get-started">
     <img src="https://img.shields.io/badge/Get_Started-🚀-green?style=for-the-badge" alt="Get Started" />
   </a>
 </p>
 
-## About Scriptura
+## About BijbelStudie
 
-*Scriptura* is a modern, web-based learning platform designed to help users explore and study the Bible interactively. Whether you're just beginning your spiritual journey or have extensive Bible knowledge, *Scriptura* provides personalized tools, quizzes, and resources to deepen your understanding.
+*BijbelStudie* is a modern, web-based learning platform designed to help users explore and study the Bible interactively. Whether you're just beginning your spiritual journey or have extensive Bible knowledge, *BijbelStudie* provides personalized tools, quizzes, and resources to deepen your understanding.
 
 ## Table of Contents
 
@@ -73,13 +73,13 @@
 
 ## API
 
-*Scriptura* integrates with the **Bible API** to provide dynamic, real-time access to Bible verses and related content. Learn more about the API [here](https://rapidapi.com/ajith/api/holy-bible).
+*BijbelStudie* integrates with the **Bible API** to provide dynamic, real-time access to Bible verses and related content. Learn more about the API [here](https://rapidapi.com/ajith/api/holy-bible).
 
 ## Roadmap
 
 - **v1.0.1** — Integrated Dark and Light Mode
 - **v1.0.2** — Internationalization for English, Dutch and German
-- **v1.0.3** — Added Scriptura Pro Subscription
+- **v1.0.3** — Added BijbelStudie Pro Subscription
 
 ## Contributing
 
@@ -89,7 +89,7 @@ We welcome contributions! To get involved:
 2. Implement your changes with clear commit messages.  
 3. Submit a pull request describing your contributions.
 
-> *Every contribution helps improve Scriptura — thank you!*
+> *Every contribution helps improve BijbelStudie — thank you!*
 
 ## Sponsors
 
@@ -103,14 +103,14 @@ This project is licensed under the [MIT License](LICENSE). See the full text in 
 
 ## Version
 
-**Current Version:** [v1.0.1](https://github.com/AlexLamper/Scriptura/releases/tag/v1.0.1)  
+**Current Version:** [v1.0.1](https://github.com/AlexLamper/BijbelStudie/releases/tag/v1.0.1)  
 
 ## FAQ
 
 <details>
-<summary >Is Scriptura free to use?</summary>
+<summary >Is BijbelStudie free to use?</summary>
 
-Yes. Scriptura is completely free to use for anyone. Scriptura also has a Pro plan with extra features which is available for only €9.99/month.
+Yes. BijbelStudie is completely free to use for anyone. BijbelStudie also has a Pro plan with extra features which is available for only €9.99/month.
 
 </details>
 
@@ -124,18 +124,18 @@ Currently, we support the King James Version (KJV). More translations (e.g., N
 <details>
 <summary>How do I report a bug or request a feature?</summary>
 
-Please open an issue on our [GitHub Issues page](https://github.com/AlexLamper/Scriptura/issues) with as much detail as possible.
+Please open an issue on our [GitHub Issues page](https://github.com/AlexLamper/BijbelStudie/issues) with as much detail as possible.
 
 </details>
 
 ## Contact
 
 For questions or feedback:  
-- Open an [issue on GitHub](https://github.com/AlexLamper/Scriptura/issues)  
+- Open an [issue on GitHub](https://github.com/AlexLamper/BijbelStudie/issues)  
 - Email: [devlamper06@gmail.com](mailto:devlamper06@gmail.com)  
 - GitHub: [@AlexLamper](https://github.com/AlexLamper)
 
 ---
 
-Thank you for exploring *Scriptura* — we hope it enriches your Bible learning experience.
+Thank you for exploring *BijbelStudie* — we hope it enriches your Bible learning experience.
 

@@ -3,24 +3,24 @@
   "faq_subtitle": "Alles, was du über unsere Bibelstudie-Plattform wissen musst.",
   "items": [
     {
-      "question": "Was ist Scriptura?",
-      "answer": "Scriptura ist eine Online-Bibelstudie-Plattform, die entwickelt wurde, um Nutzern beim Studium der Bibel zu helfen. Scriptura bietet interaktive Studienhilfen, strukturierte Lesepläne, induktive Studienmethoden und mehrere Bibelübersetzungen, um dir zu helfen, Gottes Wort besser zu verstehen."
+      "question": "Was ist BijbelStudie?",
+      "answer": "BijbelStudie ist eine Online-Bibelstudie-Plattform, die entwickelt wurde, um Nutzern beim Studium der Bibel zu helfen. BijbelStudie bietet interaktive Studienhilfen, strukturierte Lesepläne, induktive Studienmethoden und mehrere Bibelübersetzungen, um dir zu helfen, Gottes Wort besser zu verstehen."
     },
     {
-      "question": "Ist Scriptura für Anfänger geeignet?",
-      "answer": "Absolut. Scriptura wurde für alle Altersgruppen entwickelt und bietet eine intuitive Benutzererfahrung für Anfänger. Gleichzeitig bietet es genug Tiefe für Fortgeschrittene. Von einfachen Leseplänen bis hin zu tiefgehenden theologischen Einsichten. Für jeden ist etwas dabei."
+      "question": "Ist BijbelStudie für Anfänger geeignet?",
+      "answer": "Absolut. BijbelStudie wurde für alle Altersgruppen entwickelt und bietet eine intuitive Benutzererfahrung für Anfänger. Gleichzeitig bietet es genug Tiefe für Fortgeschrittene. Von einfachen Leseplänen bis hin zu tiefgehenden theologischen Einsichten. Für jeden ist etwas dabei."
     },
     {
-      "question": "Kann ich Scriptura als Informationsquelle nutzen?",
-      "answer": "Scriptura ist kein Ersatz für die Bibel und auch keine Informationsquelle. Es ist ein Werkzeug, mit dem du die Bibel studieren und verstehen kannst. Es ist eine Plattform, die als Ergänzung zum reinen Lesen der Bibel genutzt werden sollte."
+      "question": "Kann ich BijbelStudie als Informationsquelle nutzen?",
+      "answer": "BijbelStudie ist kein Ersatz für die Bibel und auch keine Informationsquelle. Es ist ein Werkzeug, mit dem du die Bibel studieren und verstehen kannst. Es ist eine Plattform, die als Ergänzung zum reinen Lesen der Bibel genutzt werden sollte."
     },
     {
-      "question": "Welche Bibelübersetzungen sind auf Scriptura verfügbar?",
-      "answer": "Derzeit bietet Scriptura Zugang zu mehreren beliebten Bibelübersetzungen, darunter die Statenvertaling, Herziene Statenvertaling, Afrikaans, American Standard Version und die King-James-Version. Wir möchten in Zukunft weitere Übersetzungen hinzufügen, je nach Version."
+      "question": "Welche Bibelübersetzungen sind auf BijbelStudie verfügbar?",
+      "answer": "Derzeit bietet BijbelStudie Zugang zu mehreren beliebten Bibelübersetzungen, darunter die Statenvertaling, Herziene Statenvertaling, Afrikaans, American Standard Version und die King-James-Version. Wir möchten in Zukunft weitere Übersetzungen hinzufügen, je nach Version."
     },
     {
-      "question": "Was sind die Systemanforderungen für die Nutzung von Scriptura?",
-      "answer": "Scriptura ist eine webbasierte Plattform und kann auf jedem Gerät mit einem modernen Webbrowser verwendet werden. Für die beste Erfahrung empfehlen wir eine aktuelle Version von Chrome, Firefox, Safari oder Edge. Stelle sicher, dass du eine stabile Internetverbindung hast."
+      "question": "Was sind die Systemanforderungen für die Nutzung von BijbelStudie?",
+      "answer": "BijbelStudie ist eine webbasierte Plattform und kann auf jedem Gerät mit einem modernen Webbrowser verwendet werden. Für die beste Erfahrung empfehlen wir eine aktuelle Version von Chrome, Firefox, Safari oder Edge. Stelle sicher, dass du eine stabile Internetverbindung hast."
     }
   ]
 }

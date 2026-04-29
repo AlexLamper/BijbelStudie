@@ -23,7 +23,7 @@ export function Header() {
               <div className="relative w-28 h-10 sm:w-32 sm:h-12">
                 <Image
                   src="/images/logo-text.svg"
-                  alt="Scriptura"
+                  alt="BijbelStudie"
                   fill
                   className="object-contain rounded-md group-hover:scale-102 transition-transform dark:invert"
                 />

@@ -32,7 +32,7 @@ export async function middleware(req: NextRequest) {
 
   if (pathname.startsWith("/api/")) {
     const response = NextResponse.next();
-    response.headers.set("Access-Control-Allow-Origin", "https://scriptura.cloud");
+    response.headers.set("Access-Control-Allow-Origin", "https://bijbel-studie.com");
     response.headers.set("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
     response.headers.set("Access-Control-Allow-Headers", "Content-Type");
     return response;

@@ -58,7 +58,7 @@ export default function BookmarkSystem({
 
   // Load bookmarks from localStorage on mount
   useEffect(() => {
-    const savedBookmarks = localStorage.getItem('scriptura-bookmarks');
+    const savedBookmarks = localStorage.getItem('bijbelstudie-bookmarks');
     if (savedBookmarks) {
       try {
         const parsed = JSON.parse(savedBookmarks).map((b: Omit<BookmarkItem, 'createdAt'> & { createdAt: string }) => ({
@@ -74,7 +74,7 @@ export default function BookmarkSystem({
 
   // Save bookmarks to localStorage whenever bookmarks change
   useEffect(() => {
-    localStorage.setItem('scriptura-bookmarks', JSON.stringify(bookmarks));
+    localStorage.setItem('bijbelstudie-bookmarks', JSON.stringify(bookmarks));
   }, [bookmarks]);
 
   const isCurrentPassageBookmarked = () => {

@@ -12,10 +12,10 @@ export function Footer() {
       <div className="container mx-auto px-6 lg:px-8">
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-12 max-w-6xl mx-auto">
-          {/* About Scriptura */}
+          {/* About BijbelStudie */}
           <div className="space-y-4">
             <h3 className="font-['Inter'] text-lg font-semibold text-white dark:text-card-foreground mb-6">
-              {t("about_scriptura")}
+              {t("about_bijbelstudie")}
             </h3>
             <ul className="space-y-3">
               <li>
@@ -156,7 +156,7 @@ export function Footer() {
         {/* Bottom Copyright Section */}
         <div className="mt-12 pt-8 border-t border-gray-600 text-center">
           <p className="font-['Inter'] text-gray-400">
-            &copy; {new Date().getFullYear()} Scriptura. All rights reserved.
+            &copy; {new Date().getFullYear()} BijbelStudie. All rights reserved.
           </p>
         </div>
       </div>

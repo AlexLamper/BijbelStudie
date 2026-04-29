@@ -10,19 +10,19 @@ interface PageMetadataConfig {
 const pageConfigs: Record<string, PageMetadataConfig> = {
   dashboard: {
     titleKey: 'dashboard',
-    descriptionKey: 'Access your personalized dashboard on Scriptura to manage courses, track progress, and engage with the community.',
+    descriptionKey: 'Access your personalized dashboard on BijbelStudie to manage courses, track progress, and engage with the community.',
     path: '/dashboard',
     type: 'website'
   },
   study: {
     titleKey: 'study',
-    descriptionKey: 'Explore and study the Bible online with advanced tools. Scriptura offers the best study bible online experience.',
+    descriptionKey: 'Verken de Bijbel online met geavanceerde studiehulpmiddelen. BijbelStudie biedt de beste bijbelstudie online ervaring.',
     path: '/study',
     type: 'website'
   },
   plans: {
     titleKey: 'plans',
-    descriptionKey: 'Discover and follow Bible reading plans. Enhance your spiritual journey with Scriptura bible study plans.',
+    descriptionKey: 'Volg bijbelleesplannen en verbeter je bijbelstudie. BijbelStudie leesprogramma\'s voor serieuze bijbelstudenten.',
     path: '/plans',
     type: 'website'
   },
@@ -34,97 +34,97 @@ const pageConfigs: Record<string, PageMetadataConfig> = {
   },
   quizzes: {
     titleKey: 'quizzes',
-    descriptionKey: 'Engage with interactive Bible quizzes. Test your biblical knowledge with Scriptura\'s online bible courses and quizzes.',
+    descriptionKey: 'Engage with interactive Bible quizzes. Test your biblical knowledge with BijbelStudie\'s online bible courses and quizzes.',
     path: '/quizzes',
     type: 'website'
   },
   profile: {
     titleKey: 'profile',
-    descriptionKey: 'Manage your Scriptura user profile, track your progress, and personalize your experience.',
+    descriptionKey: 'Manage your BijbelStudie user profile, track your progress, and personalize your experience.',
     path: '/profile',
     type: 'profile'
   },
   resources: {
     titleKey: 'resources',
-    descriptionKey: 'Explore a comprehensive collection of Bible study resources. Your go-to for biblical education and study bible online materials.',
+    descriptionKey: 'Verken een uitgebreide verzameling bijbelstudiematerialen en -resources. Alles wat je nodig hebt voor serieuze bijbelstudie online.',
     path: '/resources',
     type: 'website'
   },
   settings: {
     titleKey: 'settings',
-    descriptionKey: 'Manage your Scriptura account settings and preferences.',
+    descriptionKey: 'Manage your BijbelStudie account settings and preferences.',
     path: '/settings',
     type: 'website'
   },
   read: {
     titleKey: 'study',
-    descriptionKey: 'Read and study the Bible online. Use our interactive tools for deep scriptura bible study.',
+    descriptionKey: 'Lees en bestudeer de Bijbel online. Gebruik onze interactieve tools voor diepgaande bijbelstudie.',
     path: '/read',
     type: 'website'
   },
   community: {
     titleKey: 'community',
-    descriptionKey: 'Join the Scriptura community. Connect with fellow learners for bible study online and spiritual growth.',
+    descriptionKey: 'Sluit je aan bij de BijbelStudie-gemeenschap. Ontmoet andere bijbelstudenten en groei spiritueel.',
     path: '/community',
     type: 'website'
   },
   admin: {
     titleKey: 'admin',
-    descriptionKey: 'Admin dashboard for managing Scriptura platform.',
+    descriptionKey: 'Admin dashboard for managing BijbelStudie platform.',
     path: '/admin',
     type: 'website'
   },
   subscribe: {
     titleKey: 'subscribe',
-    descriptionKey: 'Subscribe to Scriptura for exclusive biblical learning resources. Unlock the full potential of your study bible online.',
+    descriptionKey: 'Abonneer je op BijbelStudie voor exclusieve bijbelstudie resources. Ontgrendel al onze premium bijbelcursussen en commentaren.',
     path: '/subscribe',
     type: 'website'
   },
   success: {
     titleKey: 'success',
-    descriptionKey: 'Subscription successful! Welcome to Scriptura.',
+    descriptionKey: 'Subscription successful! Welcome to BijbelStudie.',
     path: '/success',
     type: 'website'
   },
   home: {
     titleKey: 'home',
-    descriptionKey: 'Scriptura - Online Bible Study & Biblical Education Platform',
+    descriptionKey: 'BijbelStudie - Online Bible Study & Biblical Education Platform',
     path: '/',
     type: 'website'
   },
   signin: {
     titleKey: 'signin',
-    descriptionKey: 'Sign in to Scriptura to access your courses and community.',
+    descriptionKey: 'Sign in to BijbelStudie to access your courses and community.',
     path: '/auth/signin',
     type: 'website'
   },
   register: {
     titleKey: 'register',
-    descriptionKey: 'Create a Scriptura account to start your biblical education journey.',
+    descriptionKey: 'Create a BijbelStudie account to start your biblical education journey.',
     path: '/auth/register',
     type: 'website'
   },
   forgotPassword: {
     titleKey: 'forgotPassword',
-    descriptionKey: 'Reset your Scriptura password.',
+    descriptionKey: 'Reset your BijbelStudie password.',
     path: '/auth/forgot-password',
     type: 'website'
   },
   resetPassword: {
     titleKey: 'resetPassword',
-    descriptionKey: 'Set a new password for your Scriptura account.',
+    descriptionKey: 'Set a new password for your BijbelStudie account.',
     path: '/auth/reset-password',
     type: 'website'
   },
   privacyPolicy: {
     titleKey: 'privacyPolicy',
-    descriptionKey: 'Scriptura Privacy Policy.',
+    descriptionKey: 'BijbelStudie Privacy Policy.',
     path: '/privacy-policy',
     type: 'website'
   },
   termsOfService: {
     titleKey: 'termsOfService',
-    descriptionKey: 'Scriptura Terms of Service.',
+    descriptionKey: 'BijbelStudie Terms of Service.',
     path: '/terms-of-service',
     type: 'website'
   },
@@ -146,7 +146,7 @@ export function generatePageMetadata(
   
   if (!config) {
     return {
-      title: 'Scriptura',
+      title: 'BijbelStudie',
       description: 'Interactive Bible Learning Platform'
     };
   }
@@ -223,26 +223,26 @@ export function generatePageMetadata(
     }
   };
 
-  const pageTitle = customTitle || titleTranslations[lng]?.[config.titleKey] || titleTranslations['en'][config.titleKey] || 'Scriptura';
-  const baseUrl = 'https://scriptura.cloud';
+  const pageTitle = customTitle || titleTranslations[lng]?.[config.titleKey] || titleTranslations['en'][config.titleKey] || 'BijbelStudie';
+  const baseUrl = 'https://bijbel-studie.com';
   const fullUrl = `${baseUrl}${config.path}`;
 
   return {
     title: {
-      absolute: `Scriptura | ${pageTitle}`,
+      absolute: `BijbelStudie | ${pageTitle}`,
     },
     description: customDescription || config.descriptionKey,
     openGraph: {
-      title: `Scriptura | ${pageTitle}`,
+      title: `BijbelStudie | ${pageTitle}`,
       description: customDescription || config.descriptionKey,
       url: fullUrl,
-      siteName: 'Scriptura',
+      siteName: 'BijbelStudie',
       images: [
         {
           url: `${baseUrl}/og-image.svg`,
           width: 1200,
           height: 630,
-          alt: `Scriptura - ${pageTitle}`,
+          alt: `BijbelStudie - ${pageTitle}`,
         },
       ],
       locale: lng === 'en' ? 'en_US' : lng === 'nl' ? 'nl_NL' : 'de_DE',
@@ -250,10 +250,10 @@ export function generatePageMetadata(
     },
     twitter: {
       card: 'summary_large_image',
-      title: `Scriptura | ${pageTitle}`,
+      title: `BijbelStudie | ${pageTitle}`,
       description: customDescription || config.descriptionKey,
-      site: '@ScripturaEdu',
-      creator: '@ScripturaEdu',
+      site: '@BijbelStudieEdu',
+      creator: '@BijbelStudieEdu',
       images: [`${baseUrl}/og-image.svg`],
     },
     robots: {

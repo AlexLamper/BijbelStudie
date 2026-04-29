@@ -79,7 +79,7 @@ export function AppSidebar({ ...props }) {
           <Link href={'/study'} className="flex items-center m-1">
             <Image 
               src={isDarkMode ? "/images/Logo-text-dark-mode.svg" : "/images/logo-text.svg"} 
-              alt="Scriptura Logo" 
+              alt="BijbelStudie Logo" 
               width={100} 
               height={32} 
               className="object-contain ml-2 mt-2 mb-2 mr-4" 

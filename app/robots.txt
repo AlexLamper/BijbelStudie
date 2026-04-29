@@ -9,4 +9,4 @@ Allow: /
 # Crawl-delay: 10
 
 # Sitemap location
-Sitemap: https://scriptura.cloud/sitemap.xml
+Sitemap: https://bijbel-studie.com/sitemap.xml

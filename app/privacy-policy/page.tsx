@@ -27,7 +27,7 @@ export default function PrivacyPolicyPage() {
           <h2 className="text-2xl font-semibold mb-4">2. How We Use Your Information</h2>
           <p className="mb-4">
             We use the information we collect to provide, maintain, and improve our services, to communicate with you,
-            and to personalize your experience on Scriptura.
+            and to personalize your experience on BijbelStudie.
           </p>
 
           <h2 className="text-2xl font-semibold mb-4">3. Information Sharing and Disclosure</h2>
@@ -44,7 +44,7 @@ export default function PrivacyPolicyPage() {
 
           <h2 className="text-2xl font-semibold mb-4">5. Your Choices</h2>
           <p className="mb-4">
-            You can access and update certain information about your account by logging into your Scriptura account
+            You can access and update certain information about your account by logging into your BijbelStudie account
             settings. You can also opt-out of receiving promotional communications from us by following the instructions
             in those communications.
           </p>
@@ -63,7 +63,7 @@ export default function PrivacyPolicyPage() {
 
           <h2 className="text-2xl font-semibold mb-4">8. Contact Us</h2>
           <p className="mb-4">
-            If you have any questions about this Privacy Policy, please contact us at privacy@scriptura.com.
+            If you have any questions about this Privacy Policy, please contact us at privacy@bijbelstudie.com.
           </p>
         </div>
         <div className="text-center">
