@@ -25,10 +25,17 @@ const merriweather = Merriweather({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://bijbel-studie.com'),
+  metadataBase: new URL("https://www.bijbel-studie.com"),
+  manifest: "/site.webmanifest",
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+  },
+  alternates: {
+    canonical: "/",
+  },
   title: {
     default: "BijbelStudie - Online Bijbelstudie & Digitale Bijbelcursussen",
-    template: "%s | BijbelStudie"
+    template: "%s | BijbelStudie",
   },
   description: "BijbelStudie - Bijbel studie online voor iedereen! Ontdek interactieve bijbelcursussen, gids bibelstudies, bijbelcommentaren en online bijbellessen. Start je gratis vandaag.",
   keywords: [
@@ -78,15 +85,15 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    type: 'website',
-    locale: 'nl_NL',
-    url: 'https://bijbel-studie.com',
-    title: 'BijbelStudie - Online Bijbelstudie & Bijbelcursussen',
-    description: 'Bijbel studie online met interactieve cursussen, commentaren en studiematerialen. Leer systematisch Gods Woord met BijbelStudie.',
-    siteName: 'BijbelStudie',
+    type: "website",
+    locale: "nl_NL",
+    url: "https://www.bijbel-studie.com",
+    title: "BijbelStudie - Online Bijbelstudie & Bijbelcursussen",
+    description: "Bijbel studie online met interactieve cursussen, commentaren en studiematerialen. Leer systematisch Gods Woord met BijbelStudie.",
+    siteName: "BijbelStudie",
     images: [
       {
-        url: "https://bijbel-studie.com/og-image.svg",
+        url: "https://www.bijbel-studie.com/og-image.svg",
         width: 1200,
         height: 630,
         alt: "BijbelStudie - Online Bijbelstudie en Bijbelcursussen",
@@ -94,11 +101,11 @@ export const metadata: Metadata = {
     ],
   },
   twitter: {
-    card: 'summary_large_image',
-    title: 'BijbelStudie - Online Bijbelstudie',
-    description: 'Bijbel studie online - Interactieve cursussen, commentaren en studiematerialen voor serieuze bijbelstudenten.',
-    images: ["https://bijbel-studie.com/og-image.svg"],
-  }
+    card: "summary_large_image",
+    title: "BijbelStudie - Online Bijbelstudie",
+    description: "Bijbel studie online - Interactieve cursussen, commentaren en studiematerialen voor serieuze bijbelstudenten.",
+    images: ["https://www.bijbel-studie.com/og-image.svg"],
+  },
 };
 
 export default async function RootLayout({
@@ -112,9 +119,9 @@ export default async function RootLayout({
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    "@id": "https://bijbel-studie.com",
-    url: "https://bijbel-studie.com",
-    logo: "https://bijbel-studie.com/favicon.ico",
+    "@id": "https://www.bijbel-studie.com/#organization",
+    url: "https://www.bijbel-studie.com",
+    logo: "https://www.bijbel-studie.com/icon.svg",
     name: "BijbelStudie",
     alternateName: ["Bijbel Studie", "Bijbelstudie", "Bible Study Online"],
     description: "BijbelStudie - Online bijbelstudie platform met interactieve bijbelcursussen, commentaren, leesplannen en een ondersteunende christelijke gemeenschap.",
@@ -148,40 +155,32 @@ export default async function RootLayout({
     contactPoint: {
       "@type": "ContactPoint",
       contactType: "Customer Support",
-      url: "https://bijbel-studie.com/contact"
-    }
+      url: "https://www.bijbel-studie.com/contact",
+    },
+  };
+
+  const webSiteData = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": "https://www.bijbel-studie.com/#website",
+    url: "https://www.bijbel-studie.com",
+    name: "BijbelStudie",
+    publisher: {
+      "@id": "https://www.bijbel-studie.com/#organization",
+    },
   };
 
   return (
     <html lang={lng}>
       <head>
         <meta charSet="UTF-8" />
-
-        {/* Essential meta tags for responsiveness */}
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta
-          name="description"
-          content="BijbelStudie - Online Bible Courses, Quizzes & Community for Biblical Education"
-        />
-        <meta
-          name="keywords"
-          content="Bible,Online Bible Courses,Bible Study,Biblical Education,Scripture,Faith,Christian Learning,Quizzes,Online Quizzes,Bible Quizzes,BijbelStudie,Bible Lessons,Bible Courses,Biblical Knowledge,Bible Community,Religious Education,Theology,Christelijk onderwijs,Bijbelstudie,Bijbelcursus,Bijbelse educatie,Bijbelse kennis,Christelijk geloof,Online bijbelcursussen,Online leren,Online onderwijs,Spirituele groei,Geloof,Heilige Schrift,Bijbel,Bible Verses,Bible Quotes,Scripture Study,Online Learning,Educational Platform,Bible Education Platform,Bible Quizzes Platform,Interactive Quizzes,Learning Community,Spiritual Community,Online Community,Biblical Studies,Christian Community,Biblical Courses,Bible Training,Faith Education,Bible Insights,Biblical Insights,Biblical Wisdom,Christian Insights,Bible Trivia,Religious Trivia,Biblical Trivia,Bible Challenges,Learning Bible,Digital Bible Learning,Scripture Learning,Bible Tools,Bible Study Tools,Online Faith Courses,Digital Church,Modern Bible Study,Bible Curriculum,Bible Education Resources,Biblical Resources,Theology Courses,Online Theology,Church Education,Gospel,Online Gospel Studies,Spiritual Learning,Divine Wisdom,Holy Bible Studies,Scripture Education,Bible Community Platform,Christian Platform,Religious Learning Platform,Bible Knowledge Hub,Faith Community,Biblical Community,Bible Study Community,Bible Quiz App,Bible Learning App,Mobile Bible Courses,Mobile Bible Study,Digital Bible Courses,E-Learning Bible,Biblical E-Learning,Faith Based Learning,God’s Word,Divine Learning,Bible App,Christelijk platform,Bijbelse quizzen,Bijbel leren,Geloofscursus,Bijbelse trivia,Bijbelse uitdagingen,Online kerk,Bijbelse wijsheid"
-        />
-
-        {/* Canonical URL */}
-        <link rel="canonical" href="https://bijbel-studie.com" />
-
-        {/* Favicons and Icons */}
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-        <link rel="manifest" href="/site.webmanifest" />
-
-        {/* Structured Data for SEO */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteData) }}
         />
       </head>
       <body className={`antialiased bg-gray-100 ${inter.variable} ${merriweather.variable} font-sans`}>

@@ -1,0 +1,18 @@
+{
+  "name": "BijbelStudie",
+  "short_name": "BijbelStudie",
+  "description": "Read and study Scripture online with BijbelStudie.",
+  "start_url": "https://www.bijbel-studie.com/",
+  "scope": "https://www.bijbel-studie.com/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#262626",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

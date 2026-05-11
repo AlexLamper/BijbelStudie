@@ -1,24 +1,15 @@
 import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://bijbel-studie.com";
+  const baseUrl = "https://www.bijbel-studie.com";
+  const now = new Date();
+
   const staticRoutes: MetadataRoute.Sitemap = [
-    { url: `${baseUrl}`, lastModified: new Date() },
-    { url: `${baseUrl}/study`, lastModified: new Date() },
-    { url: `${baseUrl}/community`, lastModified: new Date() },
-    { url: `${baseUrl}/subscribe`, lastModified: new Date() },
-    { url: `${baseUrl}/privacy-policy`, lastModified: new Date() },
-    { url: `${baseUrl}/profile`, lastModified: new Date() },
-    { url: `${baseUrl}/resources`, lastModified: new Date() },
-    { url: `${baseUrl}/settings`, lastModified: new Date() },
-    { url: `${baseUrl}/terms-of-service`, lastModified: new Date() },
-    { url: `${baseUrl}/auth/signin`, lastModified: new Date() },
-    { url: `${baseUrl}/auth/register`, lastModified: new Date() },
-    { url: `${baseUrl}/help`, lastModified: new Date() },
-    { url: `${baseUrl}/contact`, lastModified: new Date() },
-    { url: `${baseUrl}/read`, lastModified: new Date() },
-    { url: `${baseUrl}/plans`, lastModified: new Date() },
-    { url: `${baseUrl}/notes`, lastModified: new Date() },
+    { url: `${baseUrl}/`, lastModified: now, changeFrequency: "daily", priority: 1.0 },
+    { url: `${baseUrl}/help`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${baseUrl}/contact`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${baseUrl}/privacy-policy`, lastModified: now, changeFrequency: "yearly", priority: 0.4 },
+    { url: `${baseUrl}/terms-of-service`, lastModified: now, changeFrequency: "yearly", priority: 0.4 },
   ];
 
   return staticRoutes;

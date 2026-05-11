@@ -1,12 +1,22 @@
-# Block API endpoints from being crawled
+# Allow crawling of public pages and preserve crawl budget
 User-agent: *
-Disallow: /api/
 
-# Allow all other content to be crawled
+# Block private/app routes
+Disallow: /api/
+Disallow: /admin/
+Disallow: /auth/
+Disallow: /study/
+Disallow: /community/
+Disallow: /resources/
+Disallow: /notes/
+Disallow: /profile/
+Disallow: /settings/
+Disallow: /subscribe/
+Disallow: /success/
+Disallow: /canceled/
+
+# Explicitly allow the public landing pages
 Allow: /
 
-# Optional: Uncomment the following if you need to slow down crawling (not all bots support Crawl-delay)
-# Crawl-delay: 10
-
-# Sitemap location
-Sitemap: https://bijbel-studie.com/sitemap.xml
+# Canonical sitemap location
+Sitemap: https://www.bijbel-studie.com/sitemap.xml

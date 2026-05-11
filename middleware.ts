@@ -29,10 +29,17 @@ function getLocale(request: NextRequest): string {
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+  const host = req.headers.get("host");
+
+  if (host === "bijbel-studie.com") {
+    const redirectUrl = req.nextUrl.clone();
+    redirectUrl.host = "www.bijbel-studie.com";
+    return NextResponse.redirect(redirectUrl, 308);
+  }
 
   if (pathname.startsWith("/api/")) {
     const response = NextResponse.next();
-    response.headers.set("Access-Control-Allow-Origin", "https://bijbel-studie.com");
+    response.headers.set("Access-Control-Allow-Origin", "https://www.bijbel-studie.com");
     response.headers.set("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
     response.headers.set("Access-Control-Allow-Headers", "Content-Type");
     return response;

@@ -154,9 +154,12 @@ export function Footer() {
         </div>
 
         {/* Bottom Copyright Section */}
-        <div className="mt-12 pt-8 border-t border-gray-600 text-center">
+        <div className="mt-12 pt-8 border-t border-gray-600 flex flex-col gap-3 text-center md:flex-row md:items-center md:justify-between md:text-left">
           <p className="font-['Inter'] text-gray-400">
             &copy; {new Date().getFullYear()} BijbelStudie. All rights reserved.
+          </p>
+          <p className="font-['Inter'] text-gray-400 md:ml-auto md:text-right">
+            Gemaakt door <span className="text-gray-300">Alex Lamper</span>
           </p>
         </div>
       </div>

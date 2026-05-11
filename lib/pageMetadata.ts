@@ -5,6 +5,7 @@ interface PageMetadataConfig {
   descriptionKey: string;
   path: string;
   type?: string;
+  indexable?: boolean;
 }
 
 const pageConfigs: Record<string, PageMetadataConfig> = {
@@ -72,7 +73,8 @@ const pageConfigs: Record<string, PageMetadataConfig> = {
     titleKey: 'admin',
     descriptionKey: 'Admin dashboard for managing BijbelStudie platform.',
     path: '/admin',
-    type: 'website'
+    type: 'website',
+    indexable: false
   },
   subscribe: {
     titleKey: 'subscribe',
@@ -84,7 +86,8 @@ const pageConfigs: Record<string, PageMetadataConfig> = {
     titleKey: 'success',
     descriptionKey: 'Subscription successful! Welcome to BijbelStudie.',
     path: '/success',
-    type: 'website'
+    type: 'website',
+    indexable: false
   },
   home: {
     titleKey: 'home',
@@ -96,25 +99,29 @@ const pageConfigs: Record<string, PageMetadataConfig> = {
     titleKey: 'signin',
     descriptionKey: 'Sign in to BijbelStudie to access your courses and community.',
     path: '/auth/signin',
-    type: 'website'
+    type: 'website',
+    indexable: false
   },
   register: {
     titleKey: 'register',
     descriptionKey: 'Create a BijbelStudie account to start your biblical education journey.',
     path: '/auth/register',
-    type: 'website'
+    type: 'website',
+    indexable: false
   },
   forgotPassword: {
     titleKey: 'forgotPassword',
     descriptionKey: 'Reset your BijbelStudie password.',
     path: '/auth/forgot-password',
-    type: 'website'
+    type: 'website',
+    indexable: false
   },
   resetPassword: {
     titleKey: 'resetPassword',
     descriptionKey: 'Set a new password for your BijbelStudie account.',
     path: '/auth/reset-password',
-    type: 'website'
+    type: 'website',
+    indexable: false
   },
   privacyPolicy: {
     titleKey: 'privacyPolicy',
@@ -132,7 +139,8 @@ const pageConfigs: Record<string, PageMetadataConfig> = {
     titleKey: 'canceled',
     descriptionKey: 'Payment canceled.',
     path: '/canceled',
-    type: 'website'
+    type: 'website',
+    indexable: false
   }
 };
 
@@ -224,8 +232,9 @@ export function generatePageMetadata(
   };
 
   const pageTitle = customTitle || titleTranslations[lng]?.[config.titleKey] || titleTranslations['en'][config.titleKey] || 'BijbelStudie';
-  const baseUrl = 'https://bijbel-studie.com';
+  const baseUrl = 'https://www.bijbel-studie.com';
   const fullUrl = `${baseUrl}${config.path}`;
+  const isIndexable = config.indexable ?? true;
 
   return {
     title: {
@@ -257,10 +266,10 @@ export function generatePageMetadata(
       images: [`${baseUrl}/og-image.svg`],
     },
     robots: {
-      index: true,
+      index: isIndexable,
       follow: true,
       googleBot: {
-        index: true,
+        index: isIndexable,
         follow: true,
         'max-video-preview': -1,
         'max-image-preview': 'large',

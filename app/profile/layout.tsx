@@ -67,11 +67,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: "BijbelStudie | User Profile",
     description: "Access and manage your BijbelStudie user profile to enhance your personalized biblical learning journey.",
-    url: "https://bijbelstudie-edu.com/profile",
+    url: "https://www.bijbel-studie.com/profile",
     siteName: "BijbelStudie",
     images: [
       {
-        url: "https://bijbelstudie-edu.com/og-profile.jpg",
+        url: "https://www.bijbel-studie.com/og-image.svg",
         width: 1200,
         height: 630,
         alt: "BijbelStudie - User Profile",
@@ -86,13 +86,13 @@ export const metadata: Metadata = {
     description: "Personalize your BijbelStudie experience by managing your user profile and tracking your biblical learning progress.",
     site: "@BijbelStudieEdu",
     creator: "@BijbelStudieEdu",
-    images: ["https://bijbelstudie-edu.com/og-profile.jpg"],
+    images: ["https://www.bijbel-studie.com/og-image.svg"],
   },
   robots: {
-    index: true,
+    index: false,
     follow: true,
     googleBot: {
-      index: true,
+      index: false,
       follow: true,
       "max-video-preview": -1,
       "max-image-preview": "large",
@@ -100,7 +100,7 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: "https://bijbelstudie-edu.com/profile",
+    canonical: "https://www.bijbel-studie.com/profile",
   },
 };
 
