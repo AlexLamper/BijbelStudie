@@ -1,4 +1,4 @@
-import { Button } from "../../components/ui/button"
+﻿import { Button } from "../../components/ui/button"
 import Link from "next/link"
 import { Metadata } from "next";
 import { cookies } from "next/headers";
@@ -13,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen py-12 bg-gray-100 dark:bg-[#18181bf2]">
+    <div className="min-h-screen py-12 bg-background">
       <div className="container mx-auto px-4">
         <h1 className="text-3xl font-bold mb-8">Privacy Policy</h1>
         <div className="shadow-md rounded-lg p-6 mb-8 bg-gray-200 dark:bg-[#3d3d3ff2]">

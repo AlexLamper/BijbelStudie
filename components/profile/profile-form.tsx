@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import type React from "react"
 import { useEffect, useState } from "react"
@@ -102,10 +102,10 @@ export function ProfileForm({ initialName, initialEmail, initialBio }: ProfileFo
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400 mt-0.5" />
                 <div>
-                  <h3 className="font-['Inter'] font-semibold text-green-800 dark:text-green-400">
+                  <h3 className=" font-semibold text-green-800 dark:text-green-400">
                     {t("profile_updated")}
                   </h3>
-                  <p className="font-['Inter'] text-sm text-green-700 dark:text-green-500 mt-1">
+                  <p className=" text-sm text-green-700 dark:text-green-500 mt-1">
                     {t("profile_updated_success")}
                   </p>
                 </div>
@@ -125,10 +125,10 @@ export function ProfileForm({ initialName, initialEmail, initialBio }: ProfileFo
               <div className="flex items-start gap-3">
                 <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400 mt-0.5" />
                 <div>
-                  <h3 className="font-['Inter'] font-semibold text-red-800 dark:text-red-400">
+                  <h3 className=" font-semibold text-red-800 dark:text-red-400">
                     {t("error")}
                   </h3>
-                  <p className="font-['Inter'] text-sm text-red-700 dark:text-red-500 mt-1">
+                  <p className=" text-sm text-red-700 dark:text-red-500 mt-1">
                     {t("failed_update_profile_try_again")}
                   </p>
                 </div>
@@ -141,37 +141,37 @@ export function ProfileForm({ initialName, initialEmail, initialBio }: ProfileFo
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="name" className="font-['Inter'] text-gray-900 dark:text-gray-300">{t("display_name")}</Label>
+            <Label htmlFor="name" className=" text-gray-900 dark:text-gray-300">{t("display_name")}</Label>
             <Input
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="font-['Inter'] bg-gray-50 dark:bg-background border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white mt-2"
+              className=" bg-gray-50 dark:bg-background border-border text-foreground mt-2"
             />
           </div>
         </div>
         <div>
-          <Label htmlFor="email" className="font-['Inter'] text-gray-900 dark:text-gray-300">{t("email")}</Label>
+          <Label htmlFor="email" className=" text-gray-900 dark:text-gray-300">{t("email")}</Label>
           <Input
             id="email"
             type="email"
             value={initialEmail}
             disabled
-            className="font-['Inter'] bg-gray-50 dark:bg-background border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white mt-2 opacity-70"
+            className=" bg-gray-50 dark:bg-background border-border text-foreground mt-2 opacity-70"
           />
-          <p className="font-['Inter'] text-sm text-gray-600 dark:text-gray-400 mt-1">{t("email_cannot_change")}</p>
+          <p className=" text-sm text-muted-foreground mt-1">{t("email_cannot_change")}</p>
         </div>
         <div>
-          <Label htmlFor="bio" className="font-['Inter'] text-gray-900 dark:text-gray-300">{t("bio")}</Label>
+          <Label htmlFor="bio" className=" text-gray-900 dark:text-gray-300">{t("bio")}</Label>
           <textarea
             id="bio"
-            className="font-['Inter'] w-full min-h-[100px] p-2 border bg-gray-50 dark:bg-background border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white mt-2"
+            className=" w-full min-h-[100px] p-2 border bg-gray-50 dark:bg-background border-border text-foreground mt-2"
             value={bio}
             onChange={(e) => setBio(e.target.value)}
           ></textarea>
         </div>
         <div className="flex items-center space-x-2">
-          <Button type="submit" disabled={isLoading} className="bg-brand hover:bg-brand/90 dark:bg-[#e0e0e0] dark:hover:bg-[#d0d0d0] text-white dark:text-black rounded-none">
+          <Button type="submit" disabled={isLoading} className="bg-teal-600 hover:bg-teal-700 text-white rounded-lg">
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("saving")}
@@ -194,7 +194,7 @@ export function ProfileForm({ initialName, initialEmail, initialBio }: ProfileFo
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
-              className="font-['Inter'] text-sm text-green-600 dark:text-green-400 flex items-center"
+              className=" text-sm text-green-600 dark:text-green-400 flex items-center"
             >
               <CheckCircle2 className="mr-1 h-4 w-4" />
               {t("changes_saved")}
@@ -205,3 +205,4 @@ export function ProfileForm({ initialName, initialEmail, initialBio }: ProfileFo
     </div>
   )
 }
+

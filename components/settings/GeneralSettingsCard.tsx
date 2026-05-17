@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
@@ -44,7 +44,7 @@ export function GeneralSettingsCard() {
 
   if (loading || versionsLoading) {
       return (
-        <Card className="border border-gray-200 dark:border-gray-700 shadow-none rounded-lg bg-white dark:bg-card">
+        <Card className="border border-border shadow-none rounded-lg bg-white dark:bg-card">
             <CardContent className="p-6 flex justify-center">
                 <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
             </CardContent>
@@ -53,9 +53,9 @@ export function GeneralSettingsCard() {
   }
 
   return (
-    <Card className="border border-gray-200 dark:border-gray-700 shadow-none rounded-lg bg-white dark:bg-card">
-      <CardHeader className="pb-4 border-b border-gray-200 dark:border-gray-700">
-        <CardTitle className="font-['Merriweather'] text-xl font-bold text-gray-800 dark:text-white">
+    <Card className="border border-border shadow-none rounded-lg bg-white dark:bg-card">
+      <CardHeader className="pb-4 border-b border-border">
+        <CardTitle className=" text-xl font-bold text-gray-800 dark:text-white">
           {t('general_settings', { defaultValue: 'General Settings' })}
         </CardTitle>
       </CardHeader>
@@ -70,7 +70,7 @@ export function GeneralSettingsCard() {
             value={settings.language} 
             onValueChange={(val) => updateSettings({ language: val })}
           >
-            <SelectTrigger id="language" className="w-full bg-white dark:bg-secondary border-gray-200 dark:border-gray-700">
+            <SelectTrigger id="language" className="w-full bg-white dark:bg-secondary border-border">
               <SelectValue placeholder="Select Language" />
             </SelectTrigger>
             <SelectContent>
@@ -92,7 +92,7 @@ export function GeneralSettingsCard() {
             value={settings.translation} 
             onValueChange={(val) => updateSettings({ translation: val })}
           >
-            <SelectTrigger id="translation" className="w-full bg-white dark:bg-secondary border-gray-200 dark:border-gray-700">
+            <SelectTrigger id="translation" className="w-full bg-white dark:bg-secondary border-border">
               <SelectValue placeholder="Select Version" />
             </SelectTrigger>
             <SelectContent>
@@ -109,3 +109,4 @@ export function GeneralSettingsCard() {
     </Card>
   );
 }
+

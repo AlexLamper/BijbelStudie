@@ -1,412 +1,290 @@
-"use client";
+"use client"
 
-import React, { useState, useEffect, useCallback } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import { useTranslation } from "../i18n/client";
-import { 
-  BookOpen, 
-  Search, 
-  Filter, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Calendar,
-  Tag,
-  Eye,
-  EyeOff,
-  ChevronDown,
-  StickyNote,
-  Highlighter
-} from "lucide-react";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger,
-  DropdownMenuSeparator
-} from "../../components/ui/dropdown-menu";
-import { EditNoteModal } from "../../components/study/EditNoteModal";
-import { LoadingSpinner } from "../../components/ui/loading-spinner";
+import React, { useState, useEffect, useCallback } from "react"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import {
+  BookOpen, Search, Filter, Plus, Edit, Trash2,
+  Calendar, Tag, Eye, EyeOff, ChevronDown,
+  StickyNote, Highlighter, FileText,
+} from "lucide-react"
+import { Button } from "../../components/ui/button"
+import { Input } from "../../components/ui/input"
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuTrigger, DropdownMenuSeparator,
+} from "../../components/ui/dropdown-menu"
+import { EditNoteModal } from "../../components/study/EditNoteModal"
+import { LoadingSpinner } from "../../components/ui/loading-spinner"
 
 interface Note {
-  _id: string;
-  verseReference: string;
-  book: string;
-  chapter: number;
-  verse?: number;
-  verseText: string;
-  translation: string;
-  noteText: string;
-  highlightColor: string;
-  tags: string[];
-  isPrivate: boolean;
-  type: "note" | "highlight" | "both";
-  language: string;
-  createdAt: string;
-  updatedAt: string;
+  _id: string
+  verseReference: string
+  book: string
+  chapter: number
+  verse?: number
+  verseText: string
+  translation: string
+  noteText: string
+  highlightColor: string
+  tags: string[]
+  isPrivate: boolean
+  type: "note" | "highlight" | "both"
+  language: string
+  createdAt: string
+  updatedAt: string
+}
+
+const TYPE_LABELS: Record<string, string> = {
+  note: "Notitie", highlight: "Markering", both: "Notitie & markering",
 }
 
 export default function NotesPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-  const { t, i18n } = useTranslation("notes");
-  const lng = i18n.resolvedLanguage || "en";
-  
-  const [notes, setNotes] = useState<Note[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedType, setSelectedType] = useState<string>("all");
-  const [selectedBook, setSelectedBook] = useState<string>("all");
-  const [selectedTag, setSelectedTag] = useState<string>("all");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [editingNote, setEditingNote] = useState<Note | null>(null);
-  const [showEditModal, setShowEditModal] = useState(false);
+  const { data: session, status } = useSession()
+  const router = useRouter()
 
-  // Get unique books and tags from notes for filters
-  const uniqueBooks = Array.from(new Set(notes.map(note => note.book))).sort();
-  const uniqueTags = Array.from(new Set(notes.flatMap(note => note.tags))).sort();
+  const [notes, setNotes]               = useState<Note[]>([])
+  const [loading, setLoading]           = useState(true)
+  const [error, setError]               = useState<string | null>(null)
+  const [searchTerm, setSearchTerm]     = useState("")
+  const [selectedType, setSelectedType] = useState("all")
+  const [selectedBook, setSelectedBook] = useState("all")
+  const [selectedTag, setSelectedTag]   = useState("all")
+  const [currentPage, setCurrentPage]   = useState(1)
+  const [totalPages, setTotalPages]     = useState(1)
+  const [editingNote, setEditingNote]   = useState<Note | null>(null)
+  const [showEditModal, setShowEditModal] = useState(false)
 
-  // Redirect if not authenticated
+  const uniqueBooks = Array.from(new Set(notes.map(n => n.book))).sort()
+  const uniqueTags  = Array.from(new Set(notes.flatMap(n => n.tags))).sort()
+
   useEffect(() => {
-    if (status === "loading") return;
-    if (!session) {
-      router.push(`/auth/signin`);
-      return;
-    }
-  }, [session, status, router]);
+    if (status === "loading") return
+    if (!session) router.push("/auth/signin")
+  }, [session, status, router])
 
-  // Fetch notes
   const fetchNotes = useCallback(async () => {
     try {
-      setLoading(true);
-      const params = new URLSearchParams();
-      
-      if (selectedBook !== "all") params.append("book", selectedBook);
-      if (selectedTag !== "all") params.append("tag", selectedTag);
-      if (selectedType !== "all") params.append("type", selectedType);
-      params.append("page", currentPage.toString());
-      params.append("limit", "20");
-
-      const response = await fetch(`/api/notes?${params.toString()}`);
-      
-      if (!response.ok) {
-        throw new Error("Failed to fetch notes");
-      }
-
-      const data = await response.json();
-      setNotes(data.notes);
-      setTotalPages(data.pagination.totalPages);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      setLoading(true)
+      const params = new URLSearchParams()
+      if (selectedBook !== "all") params.append("book", selectedBook)
+      if (selectedTag  !== "all") params.append("tag",  selectedTag)
+      if (selectedType !== "all") params.append("type", selectedType)
+      params.append("page",  currentPage.toString())
+      params.append("limit", "20")
+      const res  = await fetch(`/api/notes?${params}`)
+      const data = await res.json()
+      setNotes(data.notes)
+      setTotalPages(data.pagination.totalPages)
+      setError(null)
+    } catch {
+      setError("Notities konden niet worden geladen.")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  }, [selectedBook, selectedTag, selectedType, currentPage]);
+  }, [selectedBook, selectedTag, selectedType, currentPage])
 
-  useEffect(() => {
-    if (session) {
-      fetchNotes();
-    }
-  }, [session, fetchNotes]);
+  useEffect(() => { if (session) fetchNotes() }, [session, fetchNotes])
 
-  // Filter notes by search term (client-side filtering for better UX)
-  const filteredNotes = notes.filter(note => 
-    note.verseReference.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    note.verseText.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    note.noteText.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    note.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filtered = notes.filter(n =>
+    n.verseReference.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    n.verseText.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    n.noteText.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    n.tags.some(t => t.toLowerCase().includes(searchTerm.toLowerCase()))
+  )
 
-  const deleteNote = async (noteId: string) => {
-    if (!confirm(t("confirm_delete", { defaultValue: "Are you sure you want to delete this note?" }))) {
-      return;
-    }
-
+  const deleteNote = async (id: string) => {
+    if (!confirm("Weet u zeker dat u deze notitie wilt verwijderen?")) return
     try {
-      const response = await fetch(`/api/notes/${noteId}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to delete note");
-      }
-
-      // Remove note from local state
-      setNotes(notes.filter(note => note._id !== noteId));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete note");
+      await fetch(`/api/notes/${id}`, { method: "DELETE" })
+      setNotes(notes.filter(n => n._id !== id))
+    } catch {
+      setError("Verwijderen mislukt.")
     }
-  };
-
-  const editNote = (note: Note) => {
-    setEditingNote(note);
-    setShowEditModal(true);
-  };
-
-  const handleEditNoteSaved = (updatedNote: Note) => {
-    // Update the note in the local state
-    setNotes(notes.map(note => 
-      note._id === updatedNote._id ? updatedNote : note
-    ));
-    setShowEditModal(false);
-    setEditingNote(null);
-  };
-
-  const handleEditModalClose = () => {
-    setShowEditModal(false);
-    setEditingNote(null);
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString(lng, { 
-      year: "numeric", 
-      month: "short", 
-      day: "numeric" 
-    });
-  };
-
-  if (status === "loading" || !session) {
-    return <LoadingSpinner fullHeight message="Loading..." />;
   }
+
+  const editNote = (note: Note) => { setEditingNote(note); setShowEditModal(true) }
+  const handleSaved = (updated: Note) => {
+    setNotes(notes.map(n => n._id === updated._id ? updated : n))
+    setShowEditModal(false); setEditingNote(null)
+  }
+
+  if (status === "loading" || !session) return <LoadingSpinner fullHeight message="Laden..." />
 
   return (
     <div className="w-full h-full overflow-y-auto">
-      <div className="w-full p-6">
+      <div className="px-6 xl:px-10 py-6 space-y-6">
+
         {/* Header */}
-        <div className="flex items-center justify-between gap-4 mb-8">
+        <div className="flex items-center justify-between gap-4">
           <div>
-            <h1 className="font-['Merriweather'] text-2xl lg:text-3xl font-bold text-[#262626] dark:text-white mb-2">
-              {t("page_title", { defaultValue: "My Notes & Highlights" })}
-            </h1>
-            <p className="font-['Inter'] text-gray-600 dark:text-gray-300">
-              {t("page_description", { defaultValue: "Manage all your Bible study notes and highlights in one place" })}
-            </p>
+            <h1 className="text-2xl font-bold text-foreground">Notities & Markeringen</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">Beheer al uw bijbelstudienotities op één plek</p>
           </div>
-          <Button 
-            onClick={() => router.push(`/study`)}
-            className="bg-brand hover:bg-brand/90 dark:bg-[#e0e0e0] dark:hover:bg-[#d0d0d0] text-white dark:text-black whitespace-nowrap rounded-md"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            {t("create_note", { defaultValue: "Create Note" })}
+          <Button
+            onClick={() => router.push("/study")}
+            className="bg-teal-600 hover:bg-teal-700 text-white gap-2 shrink-0">
+            <Plus className="h-4 w-4" /> Notitie aanmaken
           </Button>
         </div>
 
-        {/* Filters and Search */}
-        <div className="mb-8">
-          <div className="flex flex-col lg:flex-row gap-4">
-            {/* Search */}
-            <div className="flex-1 max-w-md">
-              <div className="relative">
-                <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <Input
-                  placeholder={t("search_placeholder", { defaultValue: "Search notes, verses, or tags..." })}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-white dark:bg-card border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white"
-                />
-              </div>
-            </div>
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Zoek notities, verzen of tags..."
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="pl-9 bg-white dark:bg-card"
+            />
+          </div>
 
-            {/* Filters */}
-            <div className="flex gap-2 flex-wrap">
-              {/* Type Filter */}
+          <div className="flex gap-2 flex-wrap">
+            {/* Type filter */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="bg-white dark:bg-card gap-2">
+                  <Filter className="h-4 w-4" />
+                  {selectedType === "all" ? "Alle typen" : TYPE_LABELS[selectedType]}
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={() => setSelectedType("all")}>Alle typen</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSelectedType("note")}><StickyNote className="h-4 w-4 mr-2" />Notities</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSelectedType("highlight")}><Highlighter className="h-4 w-4 mr-2" />Markeringen</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSelectedType("both")}>Notities & Markeringen</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Book filter */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="bg-white dark:bg-card gap-2">
+                  <BookOpen className="h-4 w-4" />
+                  {selectedBook === "all" ? "Alle boeken" : selectedBook}
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="max-h-60 overflow-y-auto">
+                <DropdownMenuItem onClick={() => setSelectedBook("all")}>Alle boeken</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                {uniqueBooks.map(b => <DropdownMenuItem key={b} onClick={() => setSelectedBook(b)}>{b}</DropdownMenuItem>)}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Tag filter */}
+            {uniqueTags.length > 0 && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="bg-white dark:bg-card border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800">
-                    <Filter className="h-4 w-4 mr-2" />
-                    {selectedType === "all" ? t("all_types", { defaultValue: "All Types" }) : selectedType}
-                    <ChevronDown className="h-4 w-4 ml-2" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => setSelectedType("all")}>
-                    {t("all_types", { defaultValue: "All Types" })}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setSelectedType("note")}>
-                    <StickyNote className="h-4 w-4 mr-2" />
-                    {t("notes_only", { defaultValue: "Notes Only" })}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setSelectedType("highlight")}>
-                    <Highlighter className="h-4 w-4 mr-2" />
-                    {t("highlights_only", { defaultValue: "Highlights Only" })}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setSelectedType("both")}>
-                    {t("both_types", { defaultValue: "Notes & Highlights" })}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              {/* Book Filter */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800">
-                    <BookOpen className="h-4 w-4 mr-2" />
-                    {selectedBook === "all" ? t("all_books", { defaultValue: "All Books" }) : selectedBook}
-                    <ChevronDown className="h-4 w-4 ml-2" />
+                  <Button variant="outline" size="sm" className="bg-white dark:bg-card gap-2">
+                    <Tag className="h-4 w-4" />
+                    {selectedTag === "all" ? "Alle tags" : selectedTag}
+                    <ChevronDown className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="max-h-60 overflow-y-auto">
-                  <DropdownMenuItem onClick={() => setSelectedBook("all")}>
-                    {t("all_books", { defaultValue: "All Books" })}
-                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSelectedTag("all")}>Alle tags</DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  {uniqueBooks.map(book => (
-                    <DropdownMenuItem key={book} onClick={() => setSelectedBook(book)}>
-                      {book}
-                    </DropdownMenuItem>
-                  ))}
+                  {uniqueTags.map(t => <DropdownMenuItem key={t} onClick={() => setSelectedTag(t)}>#{t}</DropdownMenuItem>)}
                 </DropdownMenuContent>
               </DropdownMenu>
-
-              {/* Tag Filter */}
-              {uniqueTags.length > 0 && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800">
-                      <Tag className="h-4 w-4 mr-2" />
-                      {selectedTag === "all" ? t("all_tags", { defaultValue: "All Tags" }) : selectedTag}
-                      <ChevronDown className="h-4 w-4 ml-2" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="max-h-60 overflow-y-auto">
-                    <DropdownMenuItem onClick={() => setSelectedTag("all")}>
-                      {t("all_tags", { defaultValue: "All Tags" })}
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    {uniqueTags.map(tag => (
-                      <DropdownMenuItem key={tag} onClick={() => setSelectedTag(tag)}>
-                        #{tag}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-            </div>
+            )}
           </div>
         </div>
 
-        {/* Error Message */}
+        {/* Error */}
         {error && (
-          <div className="mb-6 p-4 shadow-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30">
-            <p className="text-red-700 dark:text-red-300">{error}</p>
+          <div className="p-4 rounded-lg border border-destructive/30 bg-destructive/10 text-destructive text-sm">
+            {error}
           </div>
         )}
 
-        {/* Loading State */}
-        {loading && (
-          <LoadingSpinner />
-        )}
+        {/* Loading */}
+        {loading && <LoadingSpinner />}
 
-        {/* Notes Grid */}
+        {/* Notes grid */}
         {!loading && (
           <>
-            {filteredNotes.length === 0 ? (
-              <div className="p-12 text-center shadow-lg border dark:shadow-gray-900/20 bg-white dark:bg-card">
-                <StickyNote className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="font-['Merriweather'] text-xl font-semibold text-[#262626] dark:text-white mb-2">
-                  {t("no_notes_title", { defaultValue: "No notes found" })}
-                </h3>
-                <p className="font-['Inter'] text-gray-600 dark:text-gray-300 mb-6">
-                  {t("no_notes_description", { defaultValue: "Start taking notes while studying to see them here." })}
+            {filtered.length === 0 ? (
+              <div className="bg-white dark:bg-card border border-border rounded-xl p-16 text-center">
+                <div className="h-12 w-12 rounded-xl bg-muted flex items-center justify-center mx-auto mb-4">
+                  <FileText className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <h3 className="font-semibold text-foreground mb-1">Geen notities gevonden</h3>
+                <p className="text-sm text-muted-foreground mb-6">
+                  Begin met bestuderen om hier uw notities te zien.
                 </p>
-                <Button onClick={() => router.push(`/study`)} className="bg-brand hover:bg-brand/90 dark:bg-[#e0e0e0] dark:hover:bg-[#d0d0d0] text-white dark:text-black rounded-none">
-                  <Plus className="h-4 w-4 mr-2" />
-                  {t("start_studying", { defaultValue: "Start Studying" })}
+                <Button onClick={() => router.push("/study")} className="bg-teal-600 hover:bg-teal-700 text-white gap-2">
+                  <Plus className="h-4 w-4" /> Begin met bestuderen
                 </Button>
               </div>
             ) : (
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {filteredNotes.map((note) => (
-                  <div key={note._id} className={`shadow-lg dark:shadow-gray-900/20 bg-white dark:bg-card hover:shadow-xl transition-shadow ${
-                    note.type === "highlight" ? `border border-gray-200 dark:border-transparent border-l-4 border-l-[#d4af37]` : "border border-gray-200 dark:border-none"
-                  }`}>
-                    <div className="p-6">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                          <h3 className="font-['Merriweather'] text-lg font-semibold text-[#262626] dark:text-white mb-1">
-                            {note.verseReference}
-                          </h3>
-                          <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 font-['Inter']">
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {filtered.map(note => (
+                  <div key={note._id}
+                    className="bg-white dark:bg-card border border-border rounded-xl overflow-hidden hover:shadow-sm transition-shadow">
+                    {/* Colored accent top strip for highlights */}
+                    {note.type === "highlight" && (
+                      <div className="h-1 bg-teal-500" />
+                    )}
+                    <div className="p-5">
+                      <div className="flex items-start justify-between mb-3">
+                        <div>
+                          <h3 className="font-semibold text-foreground text-sm">{note.verseReference}</h3>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
                             <Calendar className="h-3 w-3" />
-                            {formatDate(note.createdAt)}
-                            {!note.isPrivate ? (
-                              <Eye className="h-3 w-3" />
-                            ) : (
-                              <EyeOff className="h-3 w-3" />
-                            )}
+                            {new Date(note.createdAt).toLocaleDateString("nl-NL", { day: "numeric", month: "short", year: "numeric" })}
+                            {note.isPrivate ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
                           </div>
                         </div>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
-                              <Edit className="h-4 w-4" />
+                            <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-muted-foreground">
+                              <Edit className="h-3.5 w-3.5" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent>
+                          <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => editNote(note)}>
-                              <Edit className="h-4 w-4 mr-2" />
-                              {t("edit_note", { defaultValue: "Edit" })}
+                              <Edit className="h-4 w-4 mr-2" /> Bewerken
                             </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onClick={() => deleteNote(note._id)}
-                              className="text-red-600 dark:text-red-400"
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              {t("delete_note", { defaultValue: "Delete" })}
+                            <DropdownMenuItem onClick={() => deleteNote(note._id)} className="text-destructive">
+                              <Trash2 className="h-4 w-4 mr-2" /> Verwijderen
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
 
-                      {/* Bible Verse */}
-                      <blockquote className="italic text-gray-700 dark:text-gray-300 border-l-4 border-gray-300 dark:border-gray-600 pl-4 mb-4 font-['Inter']">
+                      {/* Bible verse */}
+                      <blockquote className="text-sm text-muted-foreground border-l-2 border-teal-300 pl-3 mb-3 italic leading-relaxed">
                         &ldquo;{note.verseText}&rdquo;
-                        <footer className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                          — {note.translation}
-                        </footer>
+                        <footer className="text-xs mt-1 not-italic">— {note.translation}</footer>
                       </blockquote>
 
-                      {/* User Note */}
-                      <div className="text-gray-900 dark:text-gray-100 mb-4 font-['Inter']">
-                        {note.noteText}
-                      </div>
+                      {/* Note text */}
+                      {note.noteText && (
+                        <p className="text-sm text-foreground mb-3 leading-relaxed line-clamp-3">{note.noteText}</p>
+                      )}
 
                       {/* Tags */}
                       {note.tags.length > 0 && (
                         <div className="flex flex-wrap gap-1 mb-3">
-                          {note.tags.map((tag, index) => (
-                            <span key={index} className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-['Inter']">
+                          {note.tags.map((tag, i) => (
+                            <span key={i} className="text-xs px-2 py-0.5 bg-muted text-muted-foreground rounded-full">
                               #{tag}
                             </span>
                           ))}
                         </div>
                       )}
 
-                      {/* Type Badge */}
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-['Inter']">
-                          {note.type === "note" && <StickyNote className="h-3 w-3 mr-1 inline" />}
-                          {note.type === "highlight" && <Highlighter className="h-3 w-3 mr-1 inline" />}
-                          {note.type === "both" && (
-                            <>
-                              <StickyNote className="h-3 w-3 mr-1 inline" />
-                              <Highlighter className="h-3 w-3 inline" />
-                            </>
-                          )}
-                          {t(`type_${note.type}`, { defaultValue: note.type })}
-                        </span>
-                        
-                        {note.type === "highlight" && (
-                          <div className="w-4 h-4 border-2 border-[#d4af37] bg-[#d4af37]/20" />
-                        )}
-                      </div>
+                      {/* Type badge */}
+                      <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 bg-teal-50 text-teal-700 dark:bg-teal-950/30 dark:text-teal-400 rounded-full">
+                        {note.type === "note"      && <StickyNote  className="h-3 w-3" />}
+                        {note.type === "highlight" && <Highlighter className="h-3 w-3" />}
+                        {note.type === "both"      && <StickyNote  className="h-3 w-3" />}
+                        {TYPE_LABELS[note.type]}
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -415,41 +293,32 @@ export default function NotesPage() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex justify-center mt-8">
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                    disabled={currentPage === 1}
-                    className="border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50"
-                  >
-                    Previous
-                  </Button>
-                  <span className="flex items-center px-4 text-sm text-gray-600 dark:text-gray-400 font-['Inter']">
-                    Page {currentPage} of {totalPages}
-                  </span>
-                  <Button
-                    variant="outline"
-                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                    disabled={currentPage === totalPages}
-                    className="border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50"
-                  >
-                    Next
-                  </Button>
-                </div>
+              <div className="flex items-center justify-center gap-3 pt-4">
+                <Button variant="outline" size="sm" className="bg-white dark:bg-card"
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}>
+                  Vorige
+                </Button>
+                <span className="text-sm text-muted-foreground">
+                  Pagina {currentPage} van {totalPages}
+                </span>
+                <Button variant="outline" size="sm" className="bg-white dark:bg-card"
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}>
+                  Volgende
+                </Button>
               </div>
             )}
           </>
         )}
       </div>
 
-      {/* Edit Note Modal */}
       <EditNoteModal
         isOpen={showEditModal}
-        onClose={handleEditModalClose}
+        onClose={() => { setShowEditModal(false); setEditingNote(null) }}
         note={editingNote}
-        onSave={handleEditNoteSaved}
+        onSave={handleSaved}
       />
     </div>
-  );
+  )
 }

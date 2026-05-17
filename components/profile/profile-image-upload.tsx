@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import type React from "react"
 import { useState, useRef, useEffect } from "react"
@@ -114,7 +114,7 @@ export function ProfileImageUpload({ initialImage, userName }: ProfileImageUploa
         </Avatar>
         <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageChange} />
       </div>
-      <Button onClick={handleImageClick} disabled={isUploading} className="bg-transparent border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 font-inter rounded-none">
+      <Button onClick={handleImageClick} disabled={isUploading} className="bg-transparent border border-gray-300 dark:border-gray-600 text-foreground hover:bg-accent font-inter rounded-lg">
         {isUploading ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t("uploading")}
@@ -126,3 +126,4 @@ export function ProfileImageUpload({ initialImage, userName }: ProfileImageUploa
     </div>
   )
 }
+

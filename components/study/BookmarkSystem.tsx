@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
@@ -368,7 +368,7 @@ export default function BookmarkSystem({
               >
                 Cancel
               </Button>
-              <Button onClick={addBookmark} className="bg-brand hover:bg-brand/90 dark:bg-[#e0e0e0] dark:hover:bg-[#d0d0d0] text-white dark:text-black rounded-none">
+              <Button onClick={addBookmark} className="bg-teal-600 hover:bg-teal-700 text-white rounded-lg">
                 Add Bookmark
               </Button>
             </div>
@@ -378,3 +378,4 @@ export default function BookmarkSystem({
     </div>
   );
 }
+

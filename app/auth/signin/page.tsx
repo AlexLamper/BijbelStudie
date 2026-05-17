@@ -1,341 +1,270 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect } from "react"
-import { useTranslation } from "../../i18n/client"
 import Link from "next/link"
 import Image from "next/image"
-import { Button } from "../../../components/ui/button"
-import { LanguageSwitcher } from "../../../components/language-switcher"
-import { ModeToggle } from "../../../components/dark-mode-toggle"
 import { getProviders, signIn, ClientSafeProvider } from "next-auth/react"
-import { Loader2, Eye, EyeOff } from "lucide-react"
+import { Loader2, Eye, EyeOff, BookOpen, ArrowLeft } from "lucide-react"
 
-export default function SignInPage() {
-  const { t } = useTranslation("auth")
-  
-  const [providers, setProviders] = useState<Record<string, ClientSafeProvider> | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [loadingProvider, setLoadingProvider] = useState<string | null>(null)
-  
-  // Email/Password sign-in state
-  const [emailFormData, setEmailFormData] = useState({
-    email: "",
-    password: "",
-  })
-  const [showPassword, setShowPassword] = useState(false)
-  const [emailSignInLoading, setEmailSignInLoading] = useState(false)
-  const [emailSignInError, setEmailSignInError] = useState("")
+const GOOGLE_SVG = (
+  <svg width="18" height="18" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M47.532 24.553C47.532 22.921 47.4 21.281 47.117 19.676H24.48V28.918H37.443C36.906 31.899 35.177 34.536 32.646 36.211V42.208H40.38C44.922 38.028 47.532 31.855 47.532 24.553Z" fill="#4285F4"/>
+    <path d="M24.48 48.002C30.953 48.002 36.412 45.876 40.389 42.208L32.655 36.211C30.503 37.675 27.725 38.504 24.489 38.504C18.228 38.504 12.919 34.28 11.014 28.601H3.033V34.782C7.107 42.887 15.406 48.002 24.48 48.002Z" fill="#34A853"/>
+    <path d="M11.005 28.601C9.999 25.62 9.999 22.392 11.005 19.412V13.23H3.033C-0.371 20.011 -0.371 28.001 3.033 34.782L11.005 28.601Z" fill="#FBBC04"/>
+    <path d="M24.48 9.499C27.902 9.446 31.209 10.734 33.687 13.097L40.539 6.245C36.2 2.171 30.441-0.069 24.48 0.002C15.406 0.002 7.107 5.116 3.033 13.23L11.005 19.412C12.901 13.723 18.219 9.499 24.48 9.499Z" fill="#EA4335"/>
+  </svg>
+)
 
-  // Carousel state for right side
-  const slides = [
-    {
-      image: "/images/dashboard.png",
-      heading: t("signin.features.introducingFeatures"),
-      text: t("signin.features.analyzeTrends")
-    },
-    {
-      image: "/images/signin/nature.jpg",
-      heading: t("signin.features.trackProgress"),
-      text: t("signin.features.trackProgressDesc")
-    },
-    {
-      image: "/images/signin/sea.jpg",
-      heading: t("signin.features.joinCommunity"),
-      text: t("signin.features.joinCommunityDesc")
-    }
-  ]
-  const [current, setCurrent] = useState(0)
-  
-  const goNext = () => setCurrent((prev) => (prev + 1) % slides.length)
-  const goPrev = () => setCurrent((prev) => (prev - 1 + slides.length) % slides.length)
+import { BookMarked, StickyNote, Library } from "lucide-react"
 
-  useEffect(() => {
-    const fetchProviders = async () => {
-      const res = await getProviders()
-      setProviders(res)
-    }
-    fetchProviders()
-  }, [])
+const PANEL_FEATURES = [
+  { icon: BookOpen,    title: "Meerdere vertalingen",  desc: "Statenvertaling, HSV, KJV en meer" },
+  { icon: BookMarked,  title: "Leesplannen",            desc: "Lees de Bijbel systematisch door" },
+  { icon: StickyNote,  title: "Notities & markering",   desc: "Maak aantekeningen bij verzen" },
+  { icon: Library,     title: "Studiemethoden",         desc: "Inductief, SOAP, SOLVAT en meer" },
+]
 
-  const handleSignIn = async (providerId: string) => {
-    setIsLoading(true)
-    setLoadingProvider(providerId)
-    await signIn(providerId, { callbackUrl: `/study` })
-    // Note: The page will redirect, but we set this in case there's a delay
-    setTimeout(() => {
-      setIsLoading(false)
-      setLoadingProvider(null)
-    }, 5000)
-  }
-
-  const handleEmailSignIn = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setEmailSignInError("")
-
-    if (!emailFormData.email || !emailFormData.password) {
-      setEmailSignInError(t("signin.errors.missingFields"))
-      return
-    }
-
-    setEmailSignInLoading(true)
-
-    try {
-      const result = await signIn("credentials", {
-        email: emailFormData.email,
-        password: emailFormData.password,
-        redirect: false,
-      })
-
-      if (result?.error) {
-        setEmailSignInError(t("signin.errors.invalidCredentials"))
-      } else if (result?.ok) {
-        window.location.href = `/study`
-      }
-    } catch (error) {
-      console.error("Sign in error:", error)
-      setEmailSignInError(t("signin.errors.signInFailed"))
-    } finally {
-      setEmailSignInLoading(false)
-    }
-  }
-
-  const handleEmailFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setEmailFormData(prev => ({ ...prev, [name]: value }))
-    setEmailSignInError("")
-  }
-
+function FeaturePanel() {
   return (
-    <div>
-      {/* Top-left back button */}
-      <div className="fixed top-4 left-4 z-30">
-        <Link href={`/`} className="flex items-center gap-2 text-gray-500 dark:text-muted-foreground hover:text-[#798777] dark:hover:text-foreground text-sm font-['Inter'] font-medium transition-colors">
-          <svg width="20" height="20" fill="none" viewBox="0 0 20 20" className="inline-block">
-            <path d="M12.5 16L7.5 10L12.5 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          {t("signin.backButton")}
-        </Link>
-      </div>
-      
-      {/* Top-right global controls */}
-      <div className="fixed top-4 right-4 z-30 flex items-center gap-3 w-auto">
-        <LanguageSwitcher />
-        <ModeToggle />
-      </div>
+    <div className="hidden lg:flex lg:w-1/2 flex-col justify-center px-12 xl:px-16 relative overflow-hidden"
+      style={{ backgroundColor: "#1F2937" }}>
+      <div className="absolute top-0 right-0 w-56 h-56 rounded-full opacity-10"
+        style={{ background: "radial-gradient(circle, #0D9488, transparent)", transform: "translate(30%, -30%)" }} />
+      <div className="absolute bottom-0 left-0 w-40 h-40 rounded-full opacity-10"
+        style={{ background: "radial-gradient(circle, #0D9488, transparent)", transform: "translate(-30%, 30%)" }} />
 
-      <div className="min-h-screen flex flex-col md:flex-row bg-white dark:bg-background text-[#262626] dark:text-foreground relative">
-        {/* Left Side: Sign In Form */}
-        <div className="w-full md:w-1/2 flex flex-col justify-center items-center px-8 py-16 md:py-0 relative z-10 bg-white dark:bg-background">
-          {/* Logo above form */}
-          <div className="w-full max-w-md mx-auto mb-6">
-            <div className="flex items-center">
-              <Image
-                src="/images/logo-text.svg"
-                alt="BijbelStudie Logo"
-                width={20}
-                height={20}
-                className="object-contain w-40 h-15 mr-3 dark:invert"
-                priority
-              />
-            </div>
-          </div>
-          
-          <div className="w-full max-w-md mx-auto bg-white dark:bg-card shadow-xl border border-gray-200 dark:border-border p-8">
-            <h1 className="font-['Merriweather'] text-4xl font-bold text-[#262626] dark:text-card-foreground mb-2 text-left">{t("signin.title")}</h1>
-            <p className="font-['Inter'] text-sm text-gray-600 dark:text-muted-foreground mb-6 text-left">
-              {t("signin.alreadyHaveAccount")} <Link href={`/auth/register`} className="text-[#798777] hover:text-[#6a7a68] dark:text-[#e0e0e0] dark:hover:text-[#d0d0d0] font-medium">{t("signin.createNow")}</Link>
-            </p>
-            
-            {/* Error Message */}
-            {emailSignInError && (
-              <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 text-sm font-['Inter']">
-                {emailSignInError}
-              </div>
-            )}
-
-            <form onSubmit={handleEmailSignIn} className="space-y-5">
-              <div className="text-left">
-                <label htmlFor="email" className="block text-sm font-medium font-['Inter'] text-[#262626] dark:text-card-foreground mb-1">{t("signin.email")}</label>
-                <input 
-                  id="email" 
-                  name="email" 
-                  type="email" 
-                  autoComplete="email" 
-                  placeholder={t("signin.email")}
-                  value={emailFormData.email}
-                  onChange={handleEmailFormChange}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-border bg-white dark:bg-background text-[#262626] dark:text-foreground font-['Inter'] focus:outline-none focus:border-[#798777] dark:focus:border-[#9aaa98] transition-colors" 
-                />
-              </div>
-              
-              <div className="text-left">
-                <label htmlFor="password" className="block text-sm font-medium font-['Inter'] text-[#262626] dark:text-card-foreground mb-1">{t("signin.password")}</label>
-                <div className="relative">
-                  <input 
-                    id="password" 
-                    name="password" 
-                    type={showPassword ? "text" : "password"} 
-                    autoComplete="current-password" 
-                    placeholder={t("signin.password")}
-                    value={emailFormData.password}
-                    onChange={handleEmailFormChange}
-                    className="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-border bg-white dark:bg-background text-[#262626] dark:text-foreground font-['Inter'] focus:outline-none focus:border-[#798777] dark:focus:border-[#9aaa98] transition-colors" 
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#798777] dark:hover:text-[#9aaa98] transition-colors"
-                  >
-                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-between mb-2">
-                <label className="flex items-center text-sm font-['Inter'] text-gray-600 dark:text-muted-foreground">
-                  <input type="checkbox" className="mr-2 border-gray-300 dark:border-border text-[#798777] focus:ring-[#798777]" />
-                  {t("signin.saveAccount")}
-                </label>
-                <Link href={`/auth/forgot-password`} className="text-xs font-['Inter'] text-[#798777] hover:text-[#6a7a68] dark:text-[#e0e0e0] dark:hover:text-[#d0d0d0] font-medium">{t("signin.forgotPassword")}</Link>
-              </div>
-              
-              <button 
-                type="submit" 
-                disabled={emailSignInLoading}
-                className="w-full py-3 bg-brand hover:bg-brand/90 dark:bg-[#e0e0e0] dark:hover:bg-[#d0d0d0] disabled:bg-gray-400 text-white dark:text-black font-['Inter'] font-medium text-lg transition-colors"
-              >
-                {emailSignInLoading ? (
-                  <span className="flex items-center justify-center">
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    {t("signin.signingInEmail")}
-                  </span>
-                ) : (
-                  t("signin.signInButton")
-                )}
-              </button>
-              
-              <div className="flex items-center my-4">
-                <div className="flex-grow h-px bg-gray-300 dark:bg-border" />
-                <span className="mx-4 text-gray-500 dark:text-muted-foreground text-sm font-['Inter']">{t("signin.or")}</span>
-                <div className="flex-grow h-px bg-gray-300 dark:bg-border" />
-              </div>
-
-              {/* Dynamic Provider Buttons - Exclude credentials provider */}
-              {providers ? (
-                Object.values(providers)
-                  .filter((provider) => provider.id !== "credentials")
-                  .map((provider) => (
-                  <Button
-                    key={provider.id}
-                    variant="outline"
-                    onClick={() => handleSignIn(provider.id)}
-                    disabled={isLoading}
-                    className="w-full flex items-center justify-center gap-2 border border-gray-300 dark:border-border py-3 text-[#262626] dark:text-foreground bg-white dark:bg-background hover:bg-gray-50 dark:hover:bg-accent font-['Inter'] font-medium transition-colors rounded-none"
-                  >
-                    {isLoading && loadingProvider === provider.id ? (
-                      <span className="flex items-center justify-center">
-                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                        {t("signin.signingIn")}
-                      </span>
-                    ) : (
-                      <>
-                        {provider.name === "Google" && (
-                          <span className="mr-2 flex items-center">
-                            <svg width="22" height="22" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M47.532 24.5528C47.532 22.9214 47.3997 21.2811 47.1175 19.6761H24.48V28.9181H37.4434C36.9055 31.8988 35.177 34.5356 32.6461 36.2111V42.2078H40.3801C44.9217 38.0278 47.532 31.8547 47.532 24.5528Z" fill="#4285F4"/>
-                              <path d="M24.48 48.0016C30.9529 48.0016 36.4116 45.8764 40.3888 42.2078L32.6549 36.2111C30.5031 37.675 27.7252 38.5039 24.4888 38.5039C18.2275 38.5039 12.9187 34.2798 11.0139 28.6006H3.03296V34.7825C7.10718 42.8868 15.4056 48.0016 24.48 48.0016Z" fill="#34A853"/>
-                              <path d="M11.0051 28.6006C9.99973 25.6199 9.99973 22.3922 11.0051 19.4115V13.2296H3.03298C-0.371021 20.0112 -0.371021 28.0009 3.03298 34.7825L11.0051 28.6006Z" fill="#FBBC04"/>
-                              <path d="M24.48 9.49932C27.9016 9.44641 31.2086 10.7339 33.6866 13.0973L40.5387 6.24523C36.2 2.17101 30.4414 -0.068932 24.48 0.00161733C15.4055 0.00161733 7.10718 5.11644 3.03296 13.2296L11.005 19.4115C12.901 13.7235 18.2187 9.49932 24.48 9.49932Z" fill="#EA4335"/>
-                            </svg>
-                          </span>
-                        )}
-                        {provider.name === "Facebook" && (
-                          <span className="text-lg">📘</span>
-                        )}
-                        {t("signin.signInWith")} {provider.name}
-                      </>
-                    )}
-                  </Button>
-                ))
-              ) : (
-                <div className="flex justify-center py-4">
-                  <Loader2 className="h-8 w-8 animate-spin text-gray-500 dark:text-muted-foreground" />
-                </div>
-              )}
-            </form>
-          </div>
+      <div className="relative z-10 space-y-8">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "#2DD4BF" }}>BijbelStudie Platform</p>
+          <h2 className="text-3xl xl:text-4xl font-extrabold text-white leading-tight">
+            Bestudeer de Bijbel<br />systematisch en diep
+          </h2>
+          <p className="mt-4 leading-relaxed text-sm" style={{ color: "#9CA3AF" }}>
+            Interactieve bijbelstudie met commentaren, leesplannen en bewezen studiemethoden.
+          </p>
         </div>
-        
-        {/* Right Side: Carousel (hidden on small screens, visible md+ ) */}
-        <div className="hidden md:flex w-full md:w-1/2 min-h-[400px] items-center justify-center relative overflow-hidden dark:bg-card shadow-[0_2px_8px_-2px_rgba(0,0,0,0.1)] dark:shadow-none">
-          <div className="absolute inset-0 bg-background dark:bg-card z-0" />
-            <div className="relative z-10 flex flex-col items-center justify-center px-8 py-16 w-full">
-              <div className="mb-8 w-full flex justify-center items-center gap-4">
-                
-                {/* Backward arrow */}
-                <button
-                  aria-label="Previous"
-                  onClick={goPrev}
-                  className="p-3 hover:opacity-70 transition-opacity"
-                  style={{ lineHeight: 0 }}
-                  type="button"
-                >
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M15 19l-7-7 7-7"
-                      className="stroke-[#798777] dark:stroke-[#e0e0e0]"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
 
-                {/* Image container */}
-                <div className="relative w-[90%] max-w-[480px] aspect-video overflow-hidden shadow-[0_4px_12px_-2px_rgba(0,0,0,0.15),0_8px_24px_-4px_rgba(0,0,0,0.1)] bg-gray-100 dark:bg-[#1a1d2a]">
-                  <Image
-                    src={slides[current].image}
-                    alt={slides[current].heading}
-                    fill
-                    className="object-cover transition-all duration-300"
-                    sizes="(max-width: 768px) 80vw, (max-width: 1200px) 50vw, 480px"
-                    quality={95}
-                    priority
-                    style={{
-                      filter: 'brightness(0.98) saturate(1.1)',
-                    }}
-                  />
-                </div>
-
-                {/* Forward arrow */}
-                <button
-                  aria-label="Next"
-                  onClick={goNext}
-                  className="p-3 hover:opacity-70 transition-opacity"
-                  style={{ lineHeight: 0 }}
-                  type="button"
-                >
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M9 5l7 7-7 7"
-                      className="stroke-[#798777] dark:stroke-[#e0e0e0]"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
-              </div>
-
-              <h2 className="font-['Merriweather'] font-semibold text-2xl md:text-3xl text-[#262626] dark:text-foreground text-center tracking-normal mb-3">
-                {slides[current].heading}
-              </h2>
-              <p className="font-['Inter'] font-normal text-sm md:text-base text-gray-600 dark:text-muted-foreground text-center max-w-2xl leading-relaxed mb-1">
-                {slides[current].text}
-              </p>
+        <div className="rounded-xl p-5 border" style={{ backgroundColor: "rgba(255,255,255,0.06)", borderColor: "rgba(255,255,255,0.1)" }}>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="h-8 w-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: "#0D9488" }}>
+              <BookOpen className="h-4 w-4 text-white" />
+            </div>
+            <div>
+              <p className="text-white text-sm font-semibold">Johannes 3:16</p>
+              <p className="text-xs" style={{ color: "#9CA3AF" }}>Statenvertaling</p>
             </div>
           </div>
+          <p className="text-sm leading-relaxed italic" style={{ color: "rgba(255,255,255,0.8)" }}>
+            &ldquo;Want alzo lief heeft God de wereld gehad, dat Hij Zijn eniggeboren Zoon gegeven heeft.&rdquo;
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          {PANEL_FEATURES.map(({ icon: Icon, title, desc }) => (
+            <div key={title} className="rounded-xl p-4 border" style={{ backgroundColor: "rgba(255,255,255,0.05)", borderColor: "rgba(255,255,255,0.08)" }}>
+              <Icon className="h-4 w-4 mb-2" style={{ color: "#2DD4BF" }} />
+              <p className="text-white text-xs font-semibold">{title}</p>
+              <p className="text-xs mt-0.5" style={{ color: "#9CA3AF" }}>{desc}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )
 }
+
+export default function SignInPage() {
+  const [providers, setProviders] = useState<Record<string, ClientSafeProvider> | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [loadingProvider, setLoadingProvider] = useState<string | null>(null)
+  const [formData, setFormData] = useState({ email: "", password: "" })
+  const [showPassword, setShowPassword] = useState(false)
+  const [emailLoading, setEmailLoading] = useState(false)
+  const [error, setError] = useState("")
+
+  useEffect(() => {
+    getProviders().then(setProviders)
+  }, [])
+
+  const handleOAuth = async (providerId: string) => {
+    setIsLoading(true)
+    setLoadingProvider(providerId)
+    await signIn(providerId, { callbackUrl: "/dashboard" })
+    setTimeout(() => { setIsLoading(false); setLoadingProvider(null) }, 5000)
+  }
+
+  const handleEmailSignIn = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError("")
+    if (!formData.email || !formData.password) {
+      setError("Vul je e-mail en wachtwoord in.")
+      return
+    }
+    setEmailLoading(true)
+    try {
+      const result = await signIn("credentials", {
+        email: formData.email,
+        password: formData.password,
+        redirect: false,
+      })
+      if (result?.error) {
+        setError("Onjuist e-mailadres of wachtwoord.")
+      } else if (result?.ok) {
+        window.location.href = "/dashboard"
+      }
+    } catch {
+      setError("Er is iets misgegaan. Probeer het opnieuw.")
+    } finally {
+      setEmailLoading(false)
+    }
+  }
+
+  return (
+    <div className="min-h-screen flex bg-white dark:bg-gray-950">
+      {/* Left: Form */}
+      <div className="flex-1 lg:w-1/2 flex flex-col justify-center px-6 sm:px-10 md:px-16 xl:px-24 py-12 relative">
+        {/* Back link */}
+        <Link href="/" className="absolute top-6 left-6 flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <ArrowLeft className="h-4 w-4" />
+          Terug
+        </Link>
+
+        <div className="max-w-sm mx-auto w-full space-y-8">
+          {/* Logo */}
+          <div className="flex items-center gap-2.5">
+            <Image src="/images/favicon.ico" alt="BijbelStudie" width={28} height={28} className="rounded-md" priority />
+            <span className="font-bold text-lg text-foreground">BijbelStudie</span>
+          </div>
+
+          {/* Heading */}
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground">
+              Welkom terug
+            </h1>
+            <p className="text-muted-foreground text-sm mt-1.5">
+              Nog geen account?{" "}
+              <Link href="/auth/register" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                Maak er gratis een aan
+              </Link>
+            </p>
+          </div>
+
+          {/* Error */}
+          {error && (
+            <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm px-4 py-3 rounded-lg">
+              {error}
+            </div>
+          )}
+
+          {/* Email form */}
+          <form onSubmit={handleEmailSignIn} className="space-y-4">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                E-mailadres
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={formData.email}
+                onChange={e => { setFormData(p => ({ ...p, email: e.target.value })); setError("") }}
+                className="w-full px-3.5 py-2.5 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-foreground rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors placeholder:text-gray-400"
+                placeholder="jouw@email.nl"
+              />
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Wachtwoord
+                </label>
+                <Link href="/auth/forgot-password" className="text-xs text-blue-600 dark:text-blue-400 hover:underline">
+                  Vergeten?
+                </Link>
+              </div>
+              <div className="relative">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  required
+                  value={formData.password}
+                  onChange={e => { setFormData(p => ({ ...p, password: e.target.value })); setError("") }}
+                  className="w-full px-3.5 py-2.5 pr-10 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-foreground rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors placeholder:text-gray-400"
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={emailLoading}
+              className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold rounded-lg text-sm transition-colors flex items-center justify-center gap-2 shadow-sm"
+            >
+              {emailLoading ? (
+                <><Loader2 className="h-4 w-4 animate-spin" /> Inloggen...</>
+              ) : "Inloggen"}
+            </button>
+          </form>
+
+          {/* Divider */}
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-800" />
+            <span className="text-xs text-muted-foreground">of ga verder met</span>
+            <div className="flex-1 h-px bg-gray-200 dark:bg-gray-800" />
+          </div>
+
+          {/* OAuth providers */}
+          {providers ? (
+            <div className="space-y-3">
+              {Object.values(providers)
+                .filter(p => p.id !== "credentials")
+                .map(provider => (
+                  <button
+                    key={provider.id}
+                    onClick={() => handleOAuth(provider.id)}
+                    disabled={isLoading}
+                    className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-border bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium transition-colors disabled:opacity-60"
+                  >
+                    {isLoading && loadingProvider === provider.id ? (
+                      <><Loader2 className="h-4 w-4 animate-spin" /> Verbinden...</>
+                    ) : (
+                      <>
+                        {provider.name === "Google" && GOOGLE_SVG}
+                        Verdergaan met {provider.name}
+                      </>
+                    )}
+                  </button>
+                ))}
+            </div>
+          ) : (
+            <div className="flex justify-center py-3">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            </div>
+          )}
+
+          <p className="text-xs text-center text-muted-foreground">
+            Door in te loggen ga je akkoord met onze{" "}
+            <Link href="/terms-of-service" className="underline hover:text-foreground">servicevoorwaarden</Link>
+            {" "}en{" "}
+            <Link href="/privacy-policy" className="underline hover:text-foreground">privacybeleid</Link>.
+          </p>
+        </div>
+      </div>
+
+      {/* Right: Feature panel */}
+      <FeaturePanel />
+    </div>
+  )
+}
+

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '../ui/button';
 import { toast } from '../../hooks/use-toast';
@@ -176,38 +176,38 @@ export default function PlanCard({ plan, onEnrollmentChange }: PlanCardProps) {
   };
   
   return (
-    <div className="h-full bg-white dark:bg-card border border-gray-200 dark:border-none shadow-lg dark:shadow-gray-900/20 flex flex-col">
-      <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+    <div className="h-full bg-white dark:bg-card border border-border rounded-xl overflow-hidden flex flex-col hover:shadow-sm transition-shadow">
+      <div className="p-5 border-b border-border">
         <div className="flex justify-between items-start gap-4">
           <div className="flex-1">
-            <h3 className="text-lg font-merriweather font-semibold text-gray-900 dark:text-white">{plan.title}</h3>
-            <p className="text-sm font-inter text-gray-600 dark:text-gray-400 mt-1">{plan.description}</p>
+            <h3 className="text-base font-semibold text-foreground">{plan.title}</h3>
+            <p className="text-sm text-muted-foreground mt-1">{plan.description}</p>
           </div>
-          <span className="inline-block px-3 py-1 bg-gray-100 dark:bg-background text-gray-700 dark:text-gray-300 text-xs font-inter rounded-none border border-gray-200 dark:border-gray-700">
+          <span className="inline-block px-2.5 py-1 bg-teal-50 text-teal-700 dark:bg-teal-950/30 dark:text-teal-400 text-xs rounded-full">
             {plan.category}
           </span>
         </div>
       </div>
       
       <div className="flex-1 p-6 space-y-4">
-        <div className="flex justify-between text-sm font-inter text-gray-600 dark:text-gray-400">
+        <div className="flex justify-between text-sm text-muted-foreground">
           <span>{plan.duration || plan.readings?.length || 0} dagen</span>
           <span>{plan.readings?.length || 0} lezingen</span>
         </div>
         
         {plan.isEnrolled && (
-          <div className="bg-gray-50 dark:bg-background p-3 border border-gray-200 dark:border-gray-700">
-            <div className="flex justify-between text-sm font-inter">
-              <span className="text-gray-900 dark:text-gray-300">Voortgang</span>
-              <span className="text-gray-900 dark:text-gray-300">{plan.progressPercentage || 0}%</span>
+          <div className="bg-muted rounded-lg p-3">
+            <div className="flex justify-between text-sm">
+              <span className="text-foreground font-medium">Voortgang</span>
+              <span className="text-teal-600 font-semibold">{plan.progressPercentage || 0}%</span>
             </div>
-            <div className="w-full bg-gray-200 dark:bg-gray-700 h-2 mt-1">
+            <div className="w-full bg-border h-1.5 mt-2 rounded-full">
               <div
-                className="bg-brand dark:bg-[#e0e0e0] h-2"
+                className="bg-teal-600 h-1.5 rounded-full transition-all"
                 style={{ width: `${plan.progressPercentage || 0}%` }}
               ></div>
             </div>
-            <p className="text-xs font-inter text-gray-500 dark:text-gray-400 mt-1">
+            <p className="text-xs text-muted-foreground mt-1.5">
               {plan.completedDays || 0} van {plan.duration || plan.readings?.length || 0} dagen voltooid
             </p>
           </div>
@@ -218,14 +218,14 @@ export default function PlanCard({ plan, onEnrollmentChange }: PlanCardProps) {
             <>
               <Button 
                 onClick={handleEnrollment} 
-                className="flex-1 bg-brand hover:bg-brand/90 dark:bg-[#e0e0e0] dark:hover:bg-[#d0d0d0] text-white dark:text-black rounded-none font-inter"
+                className="flex-1 bg-teal-600 hover:bg-teal-700 text-white rounded-lg"
                 disabled={isLoading}
               >
                 {isLoading ? 'Bezig...' : 'Inschrijven'}
               </Button>
               <Button 
                 onClick={handleStartReading}
-                className="bg-white dark:bg-background text-gray-900 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-[#262626] rounded-none font-inter"
+                className="border border-border text-foreground hover:bg-accent rounded-lg"
                 disabled={isLoading}
               >
                 Preview
@@ -236,7 +236,7 @@ export default function PlanCard({ plan, onEnrollmentChange }: PlanCardProps) {
             <>
               <Button 
                 onClick={handleContinue}
-                className="flex-1 bg-brand hover:bg-brand/90 dark:bg-[#e0e0e0] dark:hover:bg-[#d0d0d0] text-white dark:text-black rounded-none font-inter"
+                className="flex-1 bg-teal-600 hover:bg-teal-700 text-white rounded-lg"
                 disabled={isLoading}
               >
                 Lees verder
@@ -265,3 +265,4 @@ export default function PlanCard({ plan, onEnrollmentChange }: PlanCardProps) {
     </div>
   );
 }
+

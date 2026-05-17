@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { Loader2, AlertCircle, Plus } from 'lucide-react';
 import { CreateNoteModal } from './CreateNoteModal';
 import { ReadingPreferences } from '../../hooks/useReadingPreferences';
@@ -174,7 +174,7 @@ export default function ChapterViewer({
             {Object.entries(verses).map(([verseNumber, text]) => (
               <div key={verseNumber} className="group relative">
                 <p className={cn(
-                  "dark:text-foreground text-[#262626]",
+                  "dark:text-foreground text-gray-900",
                   fontSizeClass,
                   fontFamilyClass,
                   lineHeightClass,

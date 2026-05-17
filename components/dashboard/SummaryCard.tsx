@@ -1,4 +1,4 @@
-// Dashboard component commented out - Study page is now the default
+﻿// Dashboard component commented out - Study page is now the default
 export function SummaryCard() {
   return null;
 }
@@ -17,7 +17,7 @@ interface SummaryCardProps {
 
 export function SummaryCardOld({ icon, value, description }: SummaryCardProps) {
   return (
-  <Card className="p-6 bg-white shadow-sm rounded-none">
+  <Card className="p-6 bg-white shadow-sm rounded-lg">
       <CardContent className="p-0">
         <div className="flex items-center gap-4 flex-wrap">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">{icon}</div>
@@ -36,3 +36,4 @@ export function SummaryCardOld({ icon, value, description }: SummaryCardProps) {
   );
 }
 */
+

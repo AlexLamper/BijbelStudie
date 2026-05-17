@@ -1,4 +1,4 @@
-/*
+﻿/*
 "use client";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "../../app/i18n/client";
@@ -33,10 +33,10 @@ export function WelcomeCard({ lng }: WelcomeCardProps) {
   return (
     <div className="p-8 shadow-lg border dark:shadow-gray-900/20 bg-white dark:bg-[#23263a]">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <h2 className="font-['Merriweather'] text-2xl lg:text-3xl font-bold text-[#262626] dark:text-white">
+        <h2 className=" text-2xl lg:text-3xl font-bold text-foreground">
           {t(greeting)}, {userName}!
         </h2>
-        <p className="font-['Inter'] text-gray-600 dark:text-gray-300 text-right">
+        <p className=" text-gray-600 dark:text-gray-300 text-right">
           {new Intl.DateTimeFormat(lng, { dateStyle: "full" }).format(new Date())}
         </p>
       </div>
@@ -49,3 +49,4 @@ export function WelcomeCard({ lng }: WelcomeCardProps) {
 export function WelcomeCard() {
   return null;
 }
+

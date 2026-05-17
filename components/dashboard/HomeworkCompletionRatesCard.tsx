@@ -1,4 +1,4 @@
-// Dashboard component commented out - Study page is now the default
+﻿// Dashboard component commented out - Study page is now the default
 export function HomeworkCompletionRatesCard() {
   return null;
 }
@@ -16,7 +16,7 @@ interface HomeworkCompletionRatesCardProps {
 
 export function HomeworkCompletionRatesCardOld({ BarChart }: HomeworkCompletionRatesCardProps) {
   return (
-  <Card className="lg:col-span-2 p-6 bg-white shadow-sm rounded-none">
+  <Card className="lg:col-span-2 p-6 bg-white shadow-sm rounded-lg">
       <CardHeader className="flex flex-row items-center justify-between p-0 pb-4">
         <CardTitle className="text-lg font-semibold text-gray-800">Course Completion Rates</CardTitle>
         <DropdownMenu>
@@ -39,3 +39,4 @@ export function HomeworkCompletionRatesCardOld({ BarChart }: HomeworkCompletionR
   );
 }
 */
+

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import { Minus, Plus, RotateCcw } from 'lucide-react';
@@ -51,9 +51,9 @@ export function ReadingPreferencesCard() {
   };
 
   return (
-    <Card className="border border-gray-200 dark:border-gray-700 shadow-none rounded-lg bg-white dark:bg-card">
-      <CardHeader className="pb-4 border-b border-gray-200 dark:border-gray-700 flex flex-row items-center justify-between">
-        <CardTitle className="font-['Merriweather'] text-xl font-bold text-gray-800 dark:text-white">
+    <Card className="border border-border shadow-none rounded-lg bg-white dark:bg-card">
+      <CardHeader className="pb-4 border-b border-border flex flex-row items-center justify-between">
+        <CardTitle className=" text-xl font-bold text-gray-800 dark:text-white">
           {t('reading_preferences')}
         </CardTitle>
         <Button 
@@ -195,3 +195,4 @@ export function ReadingPreferencesCard() {
     </Card>
   );
 }
+

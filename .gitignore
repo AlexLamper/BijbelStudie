@@ -49,3 +49,6 @@ next-env.d.ts
 # todo.txt
 todo.txt
 /todo.txt
+
+# Bible translation data files - kept local, not pushed to GitHub
+/public/data/bibles/

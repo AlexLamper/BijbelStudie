@@ -1,0 +1,255 @@
+
+Prestatieproblemen diagnosticeren
+87
+Prestaties
+84
+Toegankelijkheid
+100
+Praktische tips
+100
+SEO
+87
+FCP
++10
+LCP
++16
+TBT
++27
+CLS
++25
+SI
++10
+Prestaties
+Waarden worden geschat en kunnen variëren. De prestatiescore wordt rechtstreeks berekend op basis van deze statistieken.Rekenmachine bekijken
+0–49
+50–89
+90–100
+Final Screenshot
+
+Statistieken
+Weergave uitvouwen
+First Contentful Paint
+0,9 s
+Largest Contentful Paint
+3,6 s
+Total Blocking Time
+200 ms
+Cumulative Layout Shift
+0
+Speed Index
+2,6 s
+Captured at 17 mei 2026, 21:34 CEST
+Moto G Power geëmuleerd with Lighthouse 13.0.1
+Sessie waarbij één pagina wordt geladen
+Eerste keer laden van de pagina
+Langzame 4G-throttling
+Using HeadlessChromium 146.0.7680.177 with lr
+Treemap bekijken
+Screenshot
+Screenshot
+Screenshot
+Screenshot
+Screenshot
+Screenshot
+Screenshot
+Screenshot
+Audits laten zien die relevant zijn voor:
+
+All
+
+FCP
+
+LCP
+
+TBT
+Inzichten
+Afbeeldingslevering verbeteren Geschatte besparingen van 63 KiB
+Als je de downloadtijd van afbeeldingen verkort, kunnen de waargenomen laadtijd van de pagina en LCP verbeteren. Meer informatie over hoe je de afbeeldingsgrootte optimaliseertLCPFCPZonder score
+URL
+Brongrootte
+Geschatte besparingen
+bijbel-studie.com 1e partij
+128,1 KiB	63,4 KiB
+Scripture study illustration
+<img alt="Scripture study illustration" loading="lazy" width="1200" height="800" decoding="async" data-nimg="1" class="w-full h-auto rounded-2xl dark:brightness-95" style="color:transparent" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 70vw" srcset="/_next/image?url=%2Fimages%2Fdashboard.png&amp;w=640&amp;q=95 640w, /_next/image?u…" src="https://www.bijbel-studie.com/_next/image?url=%2Fimages%2Fdashboard.png&amp;w=…">
+/_next/image?url=%2Fimages%2Fdashboard.png&w=750&q=95(www.bijbel-studie.com)
+72,4 KiB
+36,1 KiB
+Als je de afbeeldingscompressiefactor verhoogt, kan dit de downloadgrootte van deze afbeelding verbeteren.
+22,1 KiB
+Dit afbeeldingsbestand is groter dan nodig (750x412) voor de getoonde afmetingen (637x350). Gebruik responsieve afbeeldingen om de downloadgrootte van de afbeelding te verkleinen.
+20,2 KiB
+Scripture study illustration
+<img alt="Scripture study illustration" decoding="async" data-nimg="fill" class="object-cover opacity-90" style="position: absolute; height: 100%; width: 100%; inset: 0px;" sizes="100vw" srcset="/_next/image?url=%2Fimages%2Fhero.png&amp;w=640&amp;q=95 640w, /_next/image?url=%2…" src="https://www.bijbel-studie.com/_next/image?url=%2Fimages%2Fhero.png&amp;w=750&amp;q…">
+/_next/image?url=%2Fimages%2Fhero.png&w=750&q=95(www.bijbel-studie.com)
+55,7 KiB
+27,2 KiB
+Als je de afbeeldingscompressiefactor verhoogt, kan dit de downloadgrootte van deze afbeelding verbeteren.
+27,2 KiB
+Verouderde JavaScript-code Geschatte besparingen van 12 KiB
+Met polyfills en transformaties kunnen oudere browsers nieuwe JavaScript-functies gebruiken. Voor moderne browsers is dit meestal niet nodig. Overweeg om je JavaScript-buildproces aan te passen zodat Baseline-functies niet worden getranspileerd, tenzij je weet dat je oudere browsers moet ondersteunen. Meer informatie over waarom de meeste sites ES6+-code kunnen implementeren zonder transpilerenLCPFCPZonder score
+URL
+Verspilde bytes
+bijbel-studie.com 1e partij
+11,5 KiB
+…chunks/1684-cc6a12f42655159e.js(www.bijbel-studie.com)
+11,5 KiB
+…chunks/1684-cc6a12f42655159e.js:1:106588(www.bijbel-studie.com)
+Array.prototype.at
+…chunks/1684-cc6a12f42655159e.js:1:105976(www.bijbel-studie.com)
+Array.prototype.flat
+…chunks/1684-cc6a12f42655159e.js:1:106089(www.bijbel-studie.com)
+Array.prototype.flatMap
+…chunks/1684-cc6a12f42655159e.js:1:106465(www.bijbel-studie.com)
+Object.fromEntries
+…chunks/1684-cc6a12f42655159e.js:1:106723(www.bijbel-studie.com)
+Object.hasOwn
+…chunks/1684-cc6a12f42655159e.js:1:105718(www.bijbel-studie.com)
+String.prototype.trimEnd
+…chunks/1684-cc6a12f42655159e.js:1:105633(www.bijbel-studie.com)
+String.prototype.trimStart
+Verzoeken voor renderblokkering Geschatte besparingen van 410 ms
+Verzoeken blokkeren de eerste keer renderen van de pagina, waardoor LCP kan worden vertraagd. Door verzoeken uit te stellen of in te sluiten kun je deze netwerkverzoeken van de kritieke route verwijderen.LCPFCPZonder score
+URL
+Overdrachtsgrootte
+Duur
+bijbel-studie.com 1e partij
+17,2 KiB	810 ms
+…css/2f24207729e50a12.css(www.bijbel-studie.com)
+1,5 KiB
+490 ms
+…css/380a0e88e0f4b9ef.css(www.bijbel-studie.com)
+15,7 KiB
+330 ms
+LCP-verzoekdetectie
+Optimaliseer LCP door de LCP-afbeelding vindbaar te maken vanuit de HTML en lazy loading te voorkomenLCPZonder score
+Lazy loading niet toegepast
+fetchpriority=high moet worden toegepast
+Verzoek is vindbaar in het oorspronkelijke document
+Scripture study illustration
+<img alt="Scripture study illustration" decoding="async" data-nimg="fill" class="object-cover opacity-90" style="position: absolute; height: 100%; width: 100%; inset: 0px;" sizes="100vw" srcset="/_next/image?url=%2Fimages%2Fhero.png&amp;w=640&amp;q=95 640w, /_next/image?url=%2…" src="https://www.bijbel-studie.com/_next/image?url=%2Fimages%2Fhero.png&amp;w=750&amp;q…">
+Netwerkafhankelijkheidsstructuur
+Vermijd het doorlinken van kritieke verzoeken door de lengte van ketens te verkleinen, de downloadgrootte van resources te beperken of het downloaden van onnodige resources uit te stellen om de laadtijd van de pagina te verbeteren.LCPZonder score
+Maximum latentie voor kritiek pad: 494 ms
+Beginnavigatie
+https://www.bijbel-studie.com - 431 ms, 11,42 KiB
+…css/380a0e88e0f4b9ef.css(www.bijbel-studie.com) - 491 ms, 15,73 KiB
+…css/2f24207729e50a12.css(www.bijbel-studie.com) - 494 ms, 1,45 KiB
+Vooraf gekoppelde oorsprongen
+Met preconnect-hints kan de browser eerder tijdens het laden van de pagina een verbinding tot stand brengen, waardoor er tijd wordt bespaard wanneer het eerste verzoek voor die oorsprong wordt gedaan. Dit zijn de oorsprongen waarmee de pagina een preconnect heeft gemaakt.
+er zijn geen oorsprongen vooraf gekoppeld
+Kandidaten voor preconnect
+Voeg preconnect-hints toe aan je belangrijkste oorsprongen, maar probeer er niet meer dan 4 te gebruiken.
+Er zijn geen extra oorsprongen die goede kandidaten zijn voor verbinding vooraf (preconnect)
+Efficiënte levensduur voor het cachegeheugen gebruiken Geschatte besparingen van 245 KiB
+Een lange levensduur voor het cachegeheugen kan herhaalde bezoeken aan je pagina versnellen. Meer informatieLCPFCPZonder score
+Verzoek
+Cache-TTL
+Overdrachtsgrootte
+Stripe utility 
+249 KiB
+/v3/(js.stripe.com)
+2 m
+232 KiB
+/out-4.5.45.js(m.stripe.network)
+5 m
+17 KiB
+DOM-grootte optimaliseren
+LCP-uitsplitsing
+Derden
+Deze inzichten zijn ook beschikbaar in het deelvenster Prestaties van Chrome DevTools. Neem een tracering op om meer gedetailleerde informatie te bekijken.
+Diagnostische gegevens
+Beperk niet-gebruikte css Geschatte besparingen van 13 KiB
+Beperk niet-gebruikte regels uit stylesheets en stel css uit die niet wordt gebruikt voor content boven de vouw zodat er minder bytes worden verbruikt door netwerkactiviteit. Meer informatie over hoe je ongebruikte CSS vermindertLCPFCPZonder score
+URL
+Overdrachtsgrootte
+Geschatte besparingen
+bijbel-studie.com 1e partij
+15,1 KiB	12,9 KiB
+…css/380a0e88e0f4b9ef.css(www.bijbel-studie.com)
+15,1 KiB
+12,9 KiB
+Beperk niet-gebruikt JavaScript Geschatte besparingen van 169 KiB
+Beperk niet-gebruikt JavaScript en stel het laden van scripts uit totdat ze nodig zijn zodat er minder bytes worden verbruikt door netwerkactiviteit. Meer informatie over hoe je ongebruikt JavaScript vermindertLCPFCPZonder score
+URL
+Overdrachtsgrootte
+Geschatte besparingen
+Stripe utility 
+231,4 KiB	169,3 KiB
+/v3/(js.stripe.com)
+231,4 KiB
+169,3 KiB
+Lange taken in de primaire thread vermijden 5 lange taken gevonden
+Meer informatie over de prestaties van je app. Deze cijfers hebben geen directe invloed op de prestatiescore.
+Geslaagde controles (15)
+Tonen
+84
+Toegankelijkheid
+Deze controles wijzen op mogelijkheden om de toegankelijkheid van je web-app te verbeteren. Automatische detectie kan alleen een subset van problemen vaststellen en biedt geen garantie voor de toegankelijkheid van je web-app. Daarom wordt ook handmatig testen aanbevolen.
+Namen en labels
+Knoppen hebben geen toegankelijke naam
+Als een knop geen toegankelijke naam heeft, kondigen schermlezers deze aan als 'knop', waardoor de knop onbruikbaar wordt voor gebruikers die afhankelijk zijn van schermlezers. Meer informatie over hoe je knoppen toegankelijker maakt
+Mislukte elementen
+div.relative > div.flex > div.flex > button#radix-«Rbkjmdb»
+<button class="inline-flex items-center justify-center whitespace-nowrap ring-offset-back…" type="button" id="radix-«Rbkjmdb»" aria-haspopup="menu" aria-expanded="false" data-state="closed">
+div.container > div.relative > div.flex > button.inline-flex
+<button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm fo…">
+Links hebben geen herkenbare naam
+Met linktekst (en alternatieve tekst voor afbeeldingen, indien gebruikt als links) die herkenbaar, uniek en focusbaar is, verbeter je de navigatiefunctionaliteit voor gebruikers van een schermlezer. Meer informatie over hoe je links toegankelijk maakt
+Mislukte elementen
+div.grid > div.space-y-4 > div.flex > a.w-10
+<a class="w-10 h-10 bg-brand dark:bg-secondary hover:bg-brand/90 dark:hover:bg-secon…" href="#">
+div.grid > div.space-y-4 > div.flex > a.w-10
+<a class="w-10 h-10 bg-brand dark:bg-secondary hover:bg-brand/90 dark:hover:bg-secon…" href="#">
+div.grid > div.space-y-4 > div.flex > a.w-10
+<a class="w-10 h-10 bg-brand dark:bg-secondary hover:bg-brand/90 dark:hover:bg-secon…" href="#">
+div.grid > div.space-y-4 > div.flex > a.w-10
+<a class="w-10 h-10 bg-brand dark:bg-secondary hover:bg-brand/90 dark:hover:bg-secon…" href="#">
+Dit zijn suggesties om de semantiek van de opties in je app te verbeteren. Zo kun je de functionaliteit verbeteren voor gebruikers van hulptechnologie, zoals een schermlezer.
+Contrast
+De contrastverhouding van achtergrond- en voorgrondkleuren is niet voldoende
+Voor veel gebruikers is tekst met weinig contrast moeilijk of onmogelijk te lezen. Meer informatie over hoe je voor voldoende kleurcontrast zorgt
+Mislukte elementen
+Start now
+<button class="inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offse…">
+Discover now
+<button class="inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offse…">
+Most Popular
+<div class="absolute -top-4 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-brand dar…">
+Start Free Trial
+<button class="inline-flex items-center justify-center gap-2 whitespace-nowrap ring-offse…">
+Dit zijn suggesties om de leesbaarheid van je content te verbeteren.
+Praktische tips
+Het document heeft geen hoofdoriëntatiepunt.
+Een hoofdoriëntatiepunt helpt gebruikers van een schermlezer om op een webpagina te navigeren. Meer informatie over oriëntatiepunten
+Mislukte elementen
+html.light
+<html lang="en" class="light" style="color-scheme: light;">
+Deze items geven praktische tips voor algemene toegankelijkheid aan.
+Aanvullende items om handmatig te controleren (10)
+Tonen
+Deze items gaan over gebieden die niet kunnen worden getest met een automatische testtool. Bekijk meer informatie in onze gids over het uitvoeren van een toegankelijkheidscontrole.
+Geslaagde controles (19)
+Tonen
+N.v.t. (37)
+Tonen
+100
+Praktische tips
+Vertrouwen en veiligheid
+Zorgen dat het CSP effectief is tegen XSS-aanvallen
+Een sterk HSTS-beleid gebruiken
+Zorgen voor de juiste bronisolatie met COOP
+De gevolgen van clickjacking beperken met XFO of CSP
+DOM-gebaseerde XSS beperken met Vertrouwde typen
+Geslaagde controles (13)
+Tonen
+N.v.t. (2)
+Tonen
+100
+SEO
+Deze checks zorgen ervoor dat je pagina het algemene advies voor zoekmachineoptimalisatie volgt. Er zijn veel aanvullende factoren waarvoor Lighthouse hier geen score geeft, maar die wel van invloed kunnen zijn op je zoekpositie, waaronder de prestaties voor Site-vitaliteit. Meer informatie over Google Search Essentials
+Aanvullende items om handmatig te controleren (1)
+Verbergen
+De gestructureerde gegevens zijn geldig
+Voer deze extra validators op je site uit om aanvullende praktische tips voor SEO te controleren.
+Geslaagde controles (10)

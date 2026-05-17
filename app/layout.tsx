@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { Inter, Merriweather } from "next/font/google";
+import { Inter, Lora, Merriweather } from "next/font/google";
 import "./globals.css";
-import Script from "next/script";
 import { ThemeProvider } from "../components/providers/theme-provider";
 import { cookieName, fallbackLng } from "./i18n/settings";
 import { cookies } from "next/headers";
@@ -15,6 +14,14 @@ const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
   display: "swap",
+  preload: true,
+});
+
+const lora = Lora({
+  subsets: ["latin"],
+  variable: "--font-lora",
+  display: "swap",
+  preload: false,
 });
 
 const merriweather = Merriweather({
@@ -22,13 +29,16 @@ const merriweather = Merriweather({
   subsets: ["latin"],
   variable: "--font-merriweather",
   display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.bijbel-studie.com"),
   manifest: "/site.webmanifest",
   icons: {
-    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    icon: [{ url: "/images/favicon.ico", type: "image/x-icon" }],
+    shortcut: "/images/favicon.ico",
+    apple: "/images/favicon.ico",
   },
   alternates: {
     canonical: "/",
@@ -39,36 +49,12 @@ export const metadata: Metadata = {
   },
   description: "BijbelStudie - Bijbel studie online voor iedereen! Ontdek interactieve bijbelcursussen, gids bibelstudies, bijbelcommentaren en online bijbellessen. Start je gratis vandaag.",
   keywords: [
-    "bijbelstudie",
-    "bijbel studie",
-    "bijbel studie online",
-    "online bijbelstudie",
-    "bijbel lezen",
-    "bijbel studie app",
-    "online bijbelcursussen",
-    "bijbelcursus online",
-    "bijbelcommentaren",
-    "gids bijbelstudie",
-    "leesplan bijbel",
-    "bijbelboeken",
-    "christelijk onderwijs",
-    "bijbelse educatie",
-    "theologie online",
-    "bijbelkennis",
-    "schriftstudie",
-    "bijbelversussen",
-    "heilige bijbel online",
-    "bijbelstudies",
-    "bijbellessen",
-    "bijbelconferences",
-    "bijbelcommunity",
-    "faith learning",
-    "theology course",
-    "bible study course",
-    "scripture study online",
-    "Christian education",
-    "biblical knowledge",
-    "spiritual growth"
+    "bijbelstudie", "bijbel studie", "bijbel studie online", "online bijbelstudie",
+    "bijbel lezen", "bijbel studie app", "online bijbelcursussen", "bijbelcursus online",
+    "bijbelcommentaren", "gids bijbelstudie", "leesplan bijbel", "bijbelboeken",
+    "christelijk onderwijs", "bijbelse educatie", "theologie online", "bijbelkennis",
+    "schriftstudie", "bijbelstudies", "bijbellessen", "bijbelcommunity",
+    "bible study course", "Christian education", "biblical knowledge", "spiritual growth"
   ],
   authors: [{ name: "BijbelStudie Team" }],
   creator: "BijbelStudie",
@@ -89,21 +75,19 @@ export const metadata: Metadata = {
     locale: "nl_NL",
     url: "https://www.bijbel-studie.com",
     title: "BijbelStudie - Online Bijbelstudie & Bijbelcursussen",
-    description: "Bijbel studie online met interactieve cursussen, commentaren en studiematerialen. Leer systematisch Gods Woord met BijbelStudie.",
+    description: "Bijbel studie online met interactieve cursussen, commentaren en studiematerialen.",
     siteName: "BijbelStudie",
-    images: [
-      {
-        url: "https://www.bijbel-studie.com/og-image.svg",
-        width: 1200,
-        height: 630,
-        alt: "BijbelStudie - Online Bijbelstudie en Bijbelcursussen",
-      },
-    ],
+    images: [{
+      url: "https://www.bijbel-studie.com/og-image.svg",
+      width: 1200,
+      height: 630,
+      alt: "BijbelStudie",
+    }],
   },
   twitter: {
     card: "summary_large_image",
     title: "BijbelStudie - Online Bijbelstudie",
-    description: "Bijbel studie online - Interactieve cursussen, commentaren en studiematerialen voor serieuze bijbelstudenten.",
+    description: "Bijbel studie online - Interactieve cursussen, commentaren en studiematerialen.",
     images: ["https://www.bijbel-studie.com/og-image.svg"],
   },
 };
@@ -111,84 +95,50 @@ export const metadata: Metadata = {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const session = await getServerSession(authOptions);
+  // Stale JWT cookies from old sessions can fail to decrypt — catch gracefully
+  let session = null;
+  try {
+    session = await getServerSession(authOptions);
+  } catch {
+    // non-critical — user will be treated as unauthenticated
+  }
   const cookieStore = await cookies();
-  const lng = cookieStore.get(cookieName)?.value || fallbackLng;
 
-  // Structured Data for search engines using JSON-LD
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Organization",
     "@id": "https://www.bijbel-studie.com/#organization",
     url: "https://www.bijbel-studie.com",
-    logo: "https://www.bijbel-studie.com/icon.svg",
+    logo: "https://www.bijbel-studie.com/images/favicon.ico",
     name: "BijbelStudie",
-    alternateName: ["Bijbel Studie", "Bijbelstudie", "Bible Study Online"],
-    description: "BijbelStudie - Online bijbelstudie platform met interactieve bijbelcursussen, commentaren, leesplannen en een ondersteunende christelijke gemeenschap.",
-    sameAs: [
-      "https://www.facebook.com/BijbelStudie",
-      "https://www.twitter.com/BijbelStudie",
-      "https://www.instagram.com/BijbelStudie",
-      "https://github.com/AlexLamper/BijbelStudie"
-    ],
-    offers: {
-      "@type": "AggregateOffer",
-      priceCurrency: "EUR",
-      offers: [
-        {
-          "@type": "Offer",
-          name: "Basis Plan",
-          price: "0",
-          priceCurrency: "EUR",
-          description: "Gratis toegang tot basis bijbelstudie tools"
-        },
-        {
-          "@type": "Offer",
-          name: "Pro Plan",
-          price: "9.99",
-          priceCurrency: "EUR",
-          priceValidUntil: "2027-12-31",
-          description: "Maandelijks abonnement voor serieuze bijbelstudenten"
-        }
-      ]
-    },
+    alternateName: ["Bijbel Studie", "Bijbelstudie"],
+    description: "BijbelStudie - Online bijbelstudie platform met interactieve bijbelcursussen, commentaren en leesplannen.",
     contactPoint: {
       "@type": "ContactPoint",
-      contactType: "Customer Support",
+      contactType: "Klantenservice",
       url: "https://www.bijbel-studie.com/contact",
     },
   };
 
-  const webSiteData = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "@id": "https://www.bijbel-studie.com/#website",
-    url: "https://www.bijbel-studie.com",
-    name: "BijbelStudie",
-    publisher: {
-      "@id": "https://www.bijbel-studie.com/#organization",
-    },
-  };
-
   return (
-    <html lang={lng}>
+    <html lang="nl" suppressHydrationWarning>
       <head>
         <meta charSet="UTF-8" />
+        <link rel="icon" href="/images/favicon.ico" sizes="any" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteData) }}
-        />
       </head>
-      <body className={`antialiased bg-gray-100 ${inter.variable} ${merriweather.variable} font-sans`}>
+      <body className={`antialiased bg-background ${inter.variable} ${lora.variable} ${merriweather.variable} font-sans`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
-          enableSystem
+          enableSystem={false}
           disableTransitionOnChange
+          storageKey="bijbelstudie-theme-v2"
         >
           <PrefetchProvider>
             <div id="main-content" className="min-h-screen mx-auto w-full">
@@ -199,8 +149,6 @@ export default async function RootLayout({
             )}
           </PrefetchProvider>
         </ThemeProvider>
-        {/* Load External Scripts After Interactive */}
-        <Script src="https://js.stripe.com/v3/" strategy="afterInteractive" />
         <SpeedInsights />
       </body>
     </html>

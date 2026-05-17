@@ -4,21 +4,13 @@ import { GeneralSettingsCard } from "../../components/settings/GeneralSettingsCa
 export default function SettingsPage() {
   return (
     <div className="w-full h-full overflow-y-auto">
-      <div className="w-full p-6">
-        <div className="mb-8">
-          <h1 className="font-['Merriweather'] text-2xl lg:text-3xl font-bold text-[#262626] dark:text-white mb-2">
-            Settings
-          </h1>
-          <p className="font-['Inter'] text-gray-600 dark:text-gray-300">
-            Manage your application preferences and account settings
-          </p>
+      <div className="px-6 xl:px-10 py-6 space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Instellingen</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Beheer uw accountvoorkeuren en leesopties</p>
         </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* General Settings */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <GeneralSettingsCard />
-          
-          {/* Reading Preferences */}
           <ReadingPreferencesCard />
         </div>
       </div>

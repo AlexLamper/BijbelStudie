@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
@@ -35,9 +35,9 @@ export default function InductiveStudy({
   };
 
   return (
-    <Card className="border-0 shadow-none rounded-none dark:bg-card">
+    <Card className="border-0 shadow-none rounded-lg dark:bg-card">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 font-merriweather text-[#262626] dark:text-foreground">
+        <CardTitle className="flex items-center gap-2 font-merriweather text-gray-900 dark:text-foreground">
           <Brain className="w-6 h-6 text-[#798777] dark:text-[#9aaa98]" />
           Inductieve Bijbelstudie: {book} {chapter}
         </CardTitle>
@@ -52,7 +52,7 @@ export default function InductiveStudy({
               <div className="w-8 h-8 bg-[#798777] text-white flex items-center justify-center">
                 <Eye size={16} />
               </div>
-              <h3 className="font-merriweather text-lg font-semibold text-[#262626] dark:text-foreground">
+              <h3 className="font-merriweather text-lg font-semibold text-gray-900 dark:text-foreground">
                 1. Wat zie je?
               </h3>
             </div>
@@ -63,7 +63,7 @@ export default function InductiveStudy({
               placeholder="Wat staat er in de tekst? Schrijf op wat je ziet..."
               value={studyData.observation}
               onChange={(e) => updateStudyData('observation', e.target.value)}
-              className="min-h-[120px] font-inter border border-gray-300 dark:border-border focus:border-[#798777] dark:focus:border-[#9aaa98] dark:bg-background rounded-none"
+              className="min-h-[120px] font-inter border border-gray-300 dark:border-border focus:border-[#798777] dark:focus:border-[#9aaa98] dark:bg-background rounded-lg"
             />
           </div>
           {/* Step 2: Interpretation */}
@@ -72,7 +72,7 @@ export default function InductiveStudy({
               <div className="w-8 h-8 bg-[#798777] text-white flex items-center justify-center">
                 <Brain size={16} />
               </div>
-              <h3 className="font-merriweather text-lg font-semibold text-[#262626] dark:text-foreground">
+              <h3 className="font-merriweather text-lg font-semibold text-gray-900 dark:text-foreground">
                 2. Wat betekent het?
               </h3>
             </div>
@@ -83,7 +83,7 @@ export default function InductiveStudy({
               placeholder="Wat is de betekenis? Wat wil God je leren?"
               value={studyData.interpretation}
               onChange={(e) => updateStudyData('interpretation', e.target.value)}
-              className="min-h-[120px] font-inter border border-gray-300 dark:border-border focus:border-[#798777] dark:focus:border-[#9aaa98] dark:bg-background rounded-none"
+              className="min-h-[120px] font-inter border border-gray-300 dark:border-border focus:border-[#798777] dark:focus:border-[#9aaa98] dark:bg-background rounded-lg"
             />
           </div>
           {/* Step 3: Application */}
@@ -92,7 +92,7 @@ export default function InductiveStudy({
               <div className="w-8 h-8 bg-[#798777] text-white flex items-center justify-center">
                 <Heart size={16} />
               </div>
-              <h3 className="font-merriweather text-lg font-semibold text-[#262626] dark:text-foreground">
+              <h3 className="font-merriweather text-lg font-semibold text-gray-900 dark:text-foreground">
                 3. Hoe pas je het toe?
               </h3>
             </div>
@@ -103,10 +103,11 @@ export default function InductiveStudy({
               placeholder="Hoe ga je dit toepassen in je leven?"
               value={studyData.application}
               onChange={(e) => updateStudyData('application', e.target.value)}
-              className="min-h-[120px] font-inter border border-gray-300 dark:border-border focus:border-[#798777] dark:focus:border-[#9aaa98] dark:bg-background rounded-none"
+              className="min-h-[120px] font-inter border border-gray-300 dark:border-border focus:border-[#798777] dark:focus:border-[#9aaa98] dark:bg-background rounded-lg"
             />
           </div>
       </CardContent>
     </Card>
   );
 }
+

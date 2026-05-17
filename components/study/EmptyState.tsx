@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import { BookOpen } from 'lucide-react';
@@ -43,7 +43,7 @@ export default function EmptyState({
           <BookOpen className="w-8 h-8 text-[#798777] dark:text-[#9aaa98]" />
         </div>
         <div>
-          <h3 className="text-lg font-merriweather font-medium text-[#262626] dark:text-foreground mb-2">
+          <h3 className="text-lg font-merriweather font-medium text-gray-900 dark:text-foreground mb-2">
             {t('ready_to_study')}
           </h3>
           <div className="text-sm font-inter space-y-1">
@@ -59,3 +59,4 @@ export default function EmptyState({
     </div>
   );
 }
+

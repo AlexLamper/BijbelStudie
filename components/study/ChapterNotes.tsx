@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
@@ -88,7 +88,7 @@ export function ChapterNotes({ book, chapter }: ChapterNotesProps) {
   {/* Error State */}
   if (error) {
     return (
-      <Card className="border-0 shadow-none rounded-none dark:bg-card">
+      <Card className="border-0 shadow-none rounded-lg dark:bg-card">
         <CardContent className="py-12 text-center">
           <p className="font-inter text-red-600 dark:text-red-400 text-sm">{error}</p>
         </CardContent>
@@ -99,7 +99,7 @@ export function ChapterNotes({ book, chapter }: ChapterNotesProps) {
   {/* Empty State */}
   if (notes.length === 0) {
     return (
-      <Card className="border-0 shadow-none rounded-none dark:bg-card">
+      <Card className="border-0 shadow-none rounded-lg dark:bg-card">
         <CardContent className="py-12 text-center text-gray-500 dark:text-muted-foreground">
           <p className="font-inter text-sm">Nog geen notities voor dit hoofdstuk.</p>
         </CardContent>
@@ -109,9 +109,9 @@ export function ChapterNotes({ book, chapter }: ChapterNotesProps) {
 
   {/* Notes Content */}
   return (
-    <Card className="border-0 shadow-none rounded-none dark:bg-card">
+    <Card className="border-0 shadow-none rounded-lg dark:bg-card">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 font-merriweather text-[#262626] dark:text-foreground">
+        <CardTitle className="flex items-center gap-2 font-merriweather text-gray-900 dark:text-foreground">
           <StickyNote className="w-6 h-6 text-[#798777] dark:text-[#9aaa98]" />
           {t("notes")} {book} {chapter}
         </CardTitle>

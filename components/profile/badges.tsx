@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import {
   BadgeCheck,
@@ -61,10 +61,10 @@ export default function UserBadges({ earned }: UserBadgesProps) {
               <TooltipTrigger asChild>
                 <div
                   className={cn(
-                    "p-2 rounded-none border flex items-center justify-center cursor-pointer hover:shadow-md transition-shadow",
+                    "p-2 rounded-lg border flex items-center justify-center cursor-pointer hover:shadow-md transition-shadow",
                     earned.includes(b.id)
-                      ? "bg-brand text-white border-brand dark:bg-[#e0e0e0] dark:text-black dark:border-[#e0e0e0]"
-                      : "bg-gray-100 dark:bg-background text-gray-400 dark:text-gray-600 opacity-50 border-gray-200 dark:border-gray-700"
+                      ? "bg-brand text-white border-teal-600 dark:bg-[#e0e0e0] dark:text-black dark:border-[#e0e0e0]"
+                      : "bg-gray-100 dark:bg-background text-gray-400 dark:text-gray-600 opacity-50 border-border"
                   )}
                 >
                   <IconComponent className="w-5 h-5" />

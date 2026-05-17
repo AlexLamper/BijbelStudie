@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useEffect, useState } from 'react';
 import { Loader2, AlertCircle, ChevronDown, Lock } from 'lucide-react';
@@ -234,7 +234,7 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
   });
 
   return (
-    <Card className={`border-0 shadow-none rounded-none dark:bg-card ${height ? 'h-full flex flex-col' : ''}`}>
+    <Card className={`border-0 shadow-none rounded-lg dark:bg-card ${height ? 'h-full flex flex-col' : ''}`}>
       {/* Source Selector */}
       <div className="px-4 sm:px-6 py-3 border-b border-gray-100 dark:border-border flex items-center justify-between bg-gray-50/50 dark:bg-card">
         <span className="text-sm font-medium text-gray-600 dark:text-muted-foreground">Source:</span>
@@ -279,7 +279,7 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
               <h3 className="font-merriweather font-bold text-xl text-gray-900 dark:text-gray-100">
                 Premium Commentary
               </h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">
+              <p className="text-muted-foreground text-sm">
                 Unlock deep insights with King Comments and other premium study materials by subscribing to BijbelStudie Pro.
               </p>
             </div>
@@ -318,7 +318,7 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
         ) : (
             Object.entries(commentary).map(([key, text]) => (
             <div key={key} className="border-b border-gray-100 dark:border-border pb-4 last:border-0 pr-2">
-                <h3 className="font-merriweather font-semibold text-[#262626] dark:text-foreground mb-2">
+                <h3 className="font-merriweather font-semibold text-gray-900 dark:text-foreground mb-2">
                 {key === 'intro' ? 'Inleiding' : `Vers ${key}`}
                 </h3>
                 <div 
@@ -334,3 +334,4 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
 };
 
 export default CommentaryComponent;
+

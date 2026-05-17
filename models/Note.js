@@ -51,9 +51,14 @@ const NoteSchema = new mongoose.Schema(
       enum: ["note", "highlight", "both"],
       default: "note" 
     },
-    language: { 
-      type: String, 
-      default: "en" // Language of the UI when note was created
+    language: {
+      type: String,
+      default: "nl"
+    },
+    groupId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "StudyGroup",
+      default: null
     }
   },
   { 

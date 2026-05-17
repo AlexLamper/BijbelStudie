@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
 import { Loader2, Info, AlertCircle } from 'lucide-react';
@@ -60,9 +60,9 @@ export default function HistoricalContext({ book, chapter, t }: HistoricalContex
   }
 
   return (
-    <Card className="border-0 shadow-none rounded-none dark:bg-card h-full flex flex-col">
+    <Card className="border-0 shadow-none rounded-lg dark:bg-card h-full flex flex-col">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 font-merriweather text-[#262626] dark:text-foreground">
+        <CardTitle className="flex items-center gap-2 font-merriweather text-gray-900 dark:text-foreground">
           <Info className="w-6 h-6 text-[#798777] dark:text-[#9aaa98]" />
           {t('historical.general_info_title').replace('{{book}}', book)}
         </CardTitle>
@@ -92,3 +92,4 @@ export default function HistoricalContext({ book, chapter, t }: HistoricalContex
     </Card>
   );
 }
+

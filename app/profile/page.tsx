@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect } from "react"
 import { useTranslation } from "../i18n/client"
@@ -77,8 +77,8 @@ export default function ProfilePage() {
     return (
       <div className="w-full pb-6 pt-0">
         <div className="p-4 shadow-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30">
-          <h2 className="font-['Merriweather'] text-lg font-bold text-red-700 dark:text-red-300">{t("error_loading_profile")}</h2>
-          <p className="font-['Inter'] mt-2 text-red-600 dark:text-red-400">{error || t("user_not_found")}</p>
+          <h2 className=" text-lg font-bold text-red-700 dark:text-red-300">{t("error_loading_profile")}</h2>
+          <p className=" mt-2 text-red-600 dark:text-red-400">{error || t("user_not_found")}</p>
         </div>
       </div>
     )
@@ -91,7 +91,7 @@ export default function ProfilePage() {
         <div className="flex items-center justify-between gap-4 mb-8">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <h1 className="font-['Merriweather'] text-2xl lg:text-3xl font-bold text-[#262626] dark:text-white">
+              <h1 className="text-2xl font-bold text-foreground">
                 {t("your_profile")}
               </h1>
               {user.isAdmin && (
@@ -101,7 +101,7 @@ export default function ProfilePage() {
                 </span>
               )}
             </div>
-            <p className="font-['Inter'] text-gray-600 dark:text-gray-300">
+            <p className=" text-muted-foreground">
               {t("profile_description", { defaultValue: "Manage your account settings and preferences" })}
             </p>
           </div>
@@ -110,9 +110,9 @@ export default function ProfilePage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Profile Section */}
           <div className="lg:col-span-2 space-y-8">
-            <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-gray-700">
-              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                <h2 className="font-['Merriweather'] text-lg font-bold text-[#262626] dark:text-white">
+            <div className="bg-white dark:bg-card rounded-lg border border-border">
+              <div className="p-6 border-b border-border">
+                <h2 className=" text-lg font-bold text-foreground">
                   {t("personal_information")}
                 </h2>
               </div>
@@ -126,9 +126,9 @@ export default function ProfilePage() {
             </div>
 
             {/* Badges Section */}
-            <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-gray-700">
-              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                <h2 className="font-['Merriweather'] text-lg font-bold text-[#262626] dark:text-white">
+            <div className="bg-white dark:bg-card rounded-lg border border-border">
+              <div className="p-6 border-b border-border">
+                <h2 className=" text-lg font-bold text-foreground">
                   {t("your_badges", { defaultValue: "Your Badges" })}
                 </h2>
               </div>
@@ -141,9 +141,9 @@ export default function ProfilePage() {
           {/* Sidebar */}
           <div className="space-y-8">
             {/* Profile Picture */}
-            <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-gray-700">
-              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                <h2 className="font-['Merriweather'] text-lg font-bold text-[#262626] dark:text-white">
+            <div className="bg-white dark:bg-card rounded-lg border border-border">
+              <div className="p-6 border-b border-border">
+                <h2 className=" text-lg font-bold text-foreground">
                   {t("profile_picture")}
                 </h2>
               </div>
@@ -168,3 +168,4 @@ export default function ProfilePage() {
     </div>
   )
 }
+

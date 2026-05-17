@@ -71,11 +71,28 @@ export default {
         sm: "calc(var(--radius) - 4px)"
       },
       fontFamily: {
-        sans: ["var(--font-inter)", "sans-serif"],
-        serif: ["var(--font-merriweather)", "serif"],
-        inter: ["var(--font-inter)", "sans-serif"],
-        merriweather: ["var(--font-merriweather)", "serif"],
-      }
+        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        serif: ["var(--font-lora)", "Georgia", "serif"],
+        inter: ["var(--font-inter)", "system-ui", "sans-serif"],
+        lora: ["var(--font-lora)", "Georgia", "serif"],
+        merriweather: ["var(--font-merriweather)", "Georgia", "serif"],
+        display: ["var(--font-inter)", "system-ui", "sans-serif"],
+        playfair: ["var(--font-inter)", "system-ui", "sans-serif"],
+      },
+      animation: {
+        "fade-in": "fadeIn 0.3s ease-in-out",
+        "slide-up": "slideUp 0.25s ease-out",
+      },
+      keyframes: {
+        fadeIn: {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        slideUp: {
+          "0%": { opacity: "0", transform: "translateY(6px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+      },
     }
   },
   plugins: [],

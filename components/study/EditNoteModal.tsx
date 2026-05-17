@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState, useEffect } from "react";
 import { Save, X, Palette, Eye, EyeOff } from "lucide-react";
@@ -310,7 +310,7 @@ export function EditNoteModal({
           <Button
             onClick={handleSave}
             disabled={isSaving || !noteText.trim()}
-            className="gap-2 bg-brand hover:bg-brand/90 dark:bg-[#e0e0e0] dark:hover:bg-[#d0d0d0] text-white dark:text-black rounded-none"
+            className="gap-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg"
           >
             {isSaving ? (
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
@@ -324,3 +324,4 @@ export function EditNoteModal({
     </Modal>
   );
 }
+

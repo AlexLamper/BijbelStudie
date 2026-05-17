@@ -1,258 +1,227 @@
-"use client";
+﻿"use client"
 
-import { useState } from "react";
-import { useTranslation } from "../../i18n/client";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Button } from "../../../components/ui/button";
-import { LanguageSwitcher } from "../../../components/language-switcher";
-import Image from "next/image";
-import { Loader2, Eye, EyeOff } from "lucide-react";
-import { ModeToggle } from "../../../components/dark-mode-toggle";
+import { useState } from "react"
+import Link from "next/link"
+import Image from "next/image"
+import { useRouter } from "next/navigation"
+import { Loader2, Eye, EyeOff, ArrowLeft, Check } from "lucide-react"
+
+const BENEFITS = [
+  "Bijbel lezen in meerdere vertalingen",
+  "Persoonlijke notities bij verzen",
+  "Bijbelleesplannen volgen",
+  "Bewezen studiemethoden gebruiken",
+  "Voortgang en streak bijhouden",
+]
 
 export default function RegisterPage() {
-  const { t } = useTranslation("auth");
-  const router = useRouter();
+  const router = useRouter()
+  const [formData, setFormData] = useState({ name: "", email: "", password: "", confirmPassword: "" })
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
 
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData(p => ({ ...p, [name]: value }))
+    setError("")
+  }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    setError(""); // Clear error when user types
-  };
-
-  const validateForm = () => {
+  const validate = () => {
     if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
-      setError(t("register.errors.allFieldsRequired"));
-      return false;
+      setError("Vul alle velden in."); return false
     }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      setError(t("register.errors.invalidEmail"));
-      return false;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      setError("Voer een geldig e-mailadres in."); return false
     }
-
     if (formData.password.length < 8) {
-      setError(t("register.errors.passwordTooShort"));
-      return false;
+      setError("Wachtwoord moet minimaal 8 tekens bevatten."); return false
     }
-
     if (formData.password !== formData.confirmPassword) {
-      setError(t("register.errors.passwordMismatch"));
-      return false;
+      setError("Wachtwoorden komen niet overeen."); return false
     }
-
-    return true;
-  };
+    return true
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-
-    setIsLoading(true);
-    setError("");
-
+    e.preventDefault()
+    if (!validate()) return
+    setIsLoading(true)
     try {
-      const response = await fetch("/api/auth/register", {
+      const res = await fetch("/api/auth/register", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        // Registration successful, redirect to sign in
-        router.push(`/auth/signin?message=Registration successful! Please sign in.`);
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: formData.name, email: formData.email, password: formData.password }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        router.push("/auth/signin?registered=true")
       } else {
-        setError(data.error || t("register.errors.registrationFailed"));
+        setError(data.error || "Registratie mislukt. Probeer het opnieuw.")
       }
-    } catch (error) {
-      console.error("Registration error:", error);
-      setError(t("register.errors.registrationFailed"));
+    } catch {
+      setError("Er is iets misgegaan. Probeer het opnieuw.")
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
-    <div>
-      {/* Top-left back button */}
-      <div className="fixed top-4 left-4 z-30">
-        <Link href={`/auth/signin`} className="flex items-center gap-2 text-gray-500 dark:text-muted-foreground hover:text-[#798777] dark:hover:text-foreground text-sm font-['Inter'] font-medium transition-colors">
-          <svg width="20" height="20" fill="none" viewBox="0 0 20 20" className="inline-block">
-            <path d="M12.5 16L7.5 10L12.5 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          {t("register.backButton")}
+    <div className="min-h-screen flex bg-white dark:bg-gray-950">
+      {/* Left: Form */}
+      <div className="flex-1 flex flex-col justify-center px-6 sm:px-10 md:px-16 xl:px-24 py-12 relative">
+        <Link href="/" className="absolute top-6 left-6 flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <ArrowLeft className="h-4 w-4" />
+          Terug
         </Link>
-      </div>
 
-      {/* Top-right controls */}
-      <div className="fixed top-4 right-4 z-30 flex items-center gap-3">
-        <LanguageSwitcher />
-        <ModeToggle />
-      </div>
-
-      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-background text-[#262626] dark:text-foreground px-4">
-        <div className="w-full max-w-md mx-auto bg-white dark:bg-card shadow-xl border border-gray-200 dark:border-border p-8">
+        <div className="max-w-sm mx-auto w-full space-y-7">
           {/* Logo */}
-          <div className="flex items-center justify-center mb-8">
-            <Image
-              src="/images/logo-text.svg"
-              alt="BijbelStudie Logo"
-              width={30}
-              height={30}
-              className="object-contain w-40 h-15 mr-3 dark:invert"
-              priority
-            />
+          <div className="flex items-center gap-2.5">
+            <Image src="/images/favicon.ico" alt="BijbelStudie" width={28} height={28} className="rounded-md" priority />
+            <span className="font-bold text-lg text-foreground">BijbelStudie</span>
           </div>
 
-          {/* Header */}
-          <h1 className="font-['Merriweather'] text-4xl font-bold text-[#262626] dark:text-card-foreground mb-2 text-center">{t("register.title")}</h1>
-          <p className="font-['Inter'] text-sm text-gray-600 dark:text-muted-foreground mb-6 text-center">{t("register.subtitle")}</p>
+          {/* Heading */}
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground">
+              Account aanmaken
+            </h1>
+            <p className="text-muted-foreground text-sm mt-1.5">
+              Al een account?{" "}
+              <Link href="/auth/signin" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                Log hier in
+              </Link>
+            </p>
+          </div>
 
-          {/* Error Message */}
+          {/* Error */}
           {error && (
-            <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 text-sm font-['Inter']">
+            <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm px-4 py-3 rounded-lg">
               {error}
             </div>
           )}
 
-          {/* Registration Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Name Field */}
-            <div className="text-left">
-              <label htmlFor="name" className="block text-sm font-medium font-['Inter'] text-[#262626] dark:text-card-foreground mb-1">
-                {t("register.name")}
-              </label>
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Naam</label>
               <input
-                id="name"
-                name="name"
-                type="text"
-                required
-                value={formData.name}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 dark:border-border bg-white dark:bg-background text-[#262626] dark:text-foreground font-['Inter'] focus:outline-none focus:border-[#798777] dark:focus:border-[#9aaa98] transition-colors"
-                placeholder={t("register.name")}
+                id="name" name="name" type="text" required autoComplete="name"
+                value={formData.name} onChange={handleChange}
+                className="w-full px-3.5 py-2.5 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-foreground rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400"
+                placeholder="Jouw naam"
               />
             </div>
 
-            {/* Email Field */}
-            <div className="text-left">
-              <label htmlFor="email" className="block text-sm font-medium font-['Inter'] text-[#262626] dark:text-card-foreground mb-1">
-                {t("register.email")}
-              </label>
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">E-mailadres</label>
               <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                value={formData.email}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border border-gray-300 dark:border-border bg-white dark:bg-background text-[#262626] dark:text-foreground font-['Inter'] focus:outline-none focus:border-[#798777] dark:focus:border-[#9aaa98] transition-colors"
-                placeholder={t("register.email")}
+                id="email" name="email" type="email" required autoComplete="email"
+                value={formData.email} onChange={handleChange}
+                className="w-full px-3.5 py-2.5 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-foreground rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400"
+                placeholder="jouw@email.nl"
               />
             </div>
 
-            {/* Password Field */}
-            <div className="text-left">
-              <label htmlFor="password" className="block text-sm font-medium font-['Inter'] text-[#262626] dark:text-card-foreground mb-1">
-                {t("register.password")}
-              </label>
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Wachtwoord</label>
               <div className="relative">
                 <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  required
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-border bg-white dark:bg-background text-[#262626] dark:text-foreground font-['Inter'] focus:outline-none focus:border-[#798777] dark:focus:border-[#9aaa98] transition-colors"
-                  placeholder={t("register.password")}
+                  id="password" name="password" type={showPassword ? "text" : "password"} required autoComplete="new-password"
+                  value={formData.password} onChange={handleChange}
+                  className="w-full px-3.5 py-2.5 pr-10 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-foreground rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400"
+                  placeholder="Minimaal 8 tekens"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#798777] dark:hover:text-[#9aaa98] transition-colors"
-                >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
-              <p className="text-xs font-['Inter'] text-gray-500 dark:text-muted-foreground mt-1">{t("register.passwordRequirements")}</p>
-            </div>
-
-            {/* Confirm Password Field */}
-            <div className="text-left">
-              <label htmlFor="confirmPassword" className="block text-sm font-medium font-['Inter'] text-[#262626] dark:text-card-foreground mb-1">
-                {t("register.confirmPassword")}
-              </label>
-              <div className="relative">
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
-                  required
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-border bg-white dark:bg-background text-[#262626] dark:text-foreground font-['Inter'] focus:outline-none focus:border-[#798777] dark:focus:border-[#9aaa98] transition-colors"
-                  placeholder={t("register.confirmPassword")}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#798777] dark:hover:text-[#9aaa98] transition-colors"
-                >
-                  {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                <button type="button" onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
             </div>
 
-            {/* Submit Button */}
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="w-full py-3 bg-brand hover:bg-brand/90 dark:bg-[#e0e0e0] dark:hover:bg-[#d0d0d0] disabled:bg-gray-400 text-white dark:text-black font-['Inter'] font-medium text-lg transition-colors rounded-none"
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Bevestig wachtwoord</label>
+              <div className="relative">
+                <input
+                  id="confirmPassword" name="confirmPassword" type={showConfirm ? "text" : "password"} required autoComplete="new-password"
+                  value={formData.confirmPassword} onChange={handleChange}
+                  className="w-full px-3.5 py-2.5 pr-10 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-foreground rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400"
+                  placeholder="Herhaal wachtwoord"
+                />
+                <button type="button" onClick={() => setShowConfirm(!showConfirm)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                  {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit" disabled={isLoading}
+              className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold rounded-lg text-sm transition-colors flex items-center justify-center gap-2 shadow-sm mt-2"
             >
               {isLoading ? (
-                <span className="flex items-center justify-center">
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  {t("register.creating")}
-                </span>
-              ) : (
-                t("register.createAccount")
-              )}
-            </Button>
+                <><Loader2 className="h-4 w-4 animate-spin" /> Account aanmaken...</>
+              ) : "Account aanmaken"}
+            </button>
           </form>
 
-          {/* Sign In Link */}
-          <p className="font-['Inter'] text-sm text-gray-600 dark:text-muted-foreground mt-6 text-center">
-            {t("register.alreadyHaveAccount")}{" "}
-            <Link href={`/auth/signin`} className="text-[#798777] hover:text-[#6a7a68] dark:text-[#e0e0e0] dark:hover:text-[#d0d0d0] font-medium">
-              {t("register.signIn")}
-            </Link>
+          <p className="text-xs text-center text-muted-foreground">
+            Door te registreren ga je akkoord met onze{" "}
+            <Link href="/terms-of-service" className="underline hover:text-foreground">servicevoorwaarden</Link>
+            {" "}en{" "}
+            <Link href="/privacy-policy" className="underline hover:text-foreground">privacybeleid</Link>.
           </p>
         </div>
       </div>
+
+      {/* Right: Benefits panel */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-blue-800 dark:from-blue-900 dark:to-slate-900 flex-col justify-center px-12 xl:px-16 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
+
+        <div className="relative z-10 space-y-8">
+          <div>
+            <p className="text-blue-200 text-sm font-semibold uppercase tracking-widest mb-3">Gratis beginnen</p>
+            <h2 className="text-3xl xl:text-4xl font-extrabold text-white leading-tight">
+              Alles wat je nodig hebt<br />voor Bijbelstudie
+            </h2>
+            <p className="text-blue-100 mt-4 leading-relaxed">
+              Maak in minder dan een minuut een gratis account aan.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            {BENEFITS.map((b) => (
+              <div key={b} className="flex items-center gap-3">
+                <div className="h-6 w-6 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+                  <Check className="h-3.5 w-3.5 text-white" />
+                </div>
+                <p className="text-white text-sm">{b}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="bg-white/10 rounded-2xl p-5 border border-white/10">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center text-white font-bold">
+                A
+              </div>
+              <div>
+                <p className="text-white text-sm font-semibold">Alex</p>
+                <div className="flex gap-0.5">
+                  {[1,2,3,4,5].map(i => <span key={i} className="text-amber-400 text-xs">★</span>)}
+                </div>
+              </div>
+            </div>
+            <p className="text-blue-100 text-sm italic leading-relaxed">
+              &ldquo;BijbelStudie heeft mijn dagelijks bijbellezen compleet getransformeerd. De studiemethoden zijn geweldig.&rdquo;
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
-  );
+  )
 }
+

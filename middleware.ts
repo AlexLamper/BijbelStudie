@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
-import { match } from '@formatjs/intl-localematcher';
-import Negotiator from 'negotiator';
 import { getToken } from "next-auth/jwt";
 import type { NextRequest } from "next/server";
-import { fallbackLng, languages, cookieName } from "./app/i18n/settings";
+import { fallbackLng, cookieName } from "./app/i18n/settings";
 
 export const config = {
   matcher: [
@@ -11,21 +9,12 @@ export const config = {
   ],
 };
 
-function getLocale(request: NextRequest): string {
-  const savedLocale = request.cookies.get(cookieName)?.value;
-  if (savedLocale && languages.includes(savedLocale)) {
-    return savedLocale;
-  }
-
-  const acceptLanguageHeader = request.headers.get('accept-language');
-  if (acceptLanguageHeader) {
-    const headers = { 'accept-language': acceptLanguageHeader };
-    const userLanguages = new Negotiator({ headers }).languages();
-    const matchedLocale = match(userLanguages, languages, fallbackLng);
-    return matchedLocale;
-  }
-  return fallbackLng;
-}
+const SESSION_COOKIES = [
+  "next-auth.session-token",
+  "__Secure-next-auth.session-token",
+  "next-auth.callback-url",
+  "__Secure-next-auth.callback-url",
+];
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -45,27 +34,45 @@ export async function middleware(req: NextRequest) {
     return response;
   }
 
-  const locale = getLocale(req);
+  // Always set Dutch
   const response = NextResponse.next();
-
-  if (!req.cookies.has(cookieName) || req.cookies.get(cookieName)?.value !== locale) {
-    response.cookies.set(cookieName, locale, { 
+  if (req.cookies.get(cookieName)?.value !== fallbackLng) {
+    response.cookies.set(cookieName, fallbackLng, {
       path: "/",
-      maxAge: 60 * 60 * 24 * 365, // 1 year
-      httpOnly: false, 
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax'
+      maxAge: 60 * 60 * 24 * 365,
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
     });
   }
 
-  const session = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-
-  if (session && pathname === `/`) {
-    return NextResponse.redirect(new URL(`/study`, req.url));
+  // Decode token — auto-clear stale/corrupt cookies instead of looping errors
+  let session = null;
+  try {
+    session = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  } catch {
+    // Stale JWT cookie (wrong secret or old format) — clear it automatically
+    const clearResponse = NextResponse.next();
+    for (const name of SESSION_COOKIES) {
+      clearResponse.cookies.set(name, "", { path: "/", maxAge: 0 });
+    }
+    clearResponse.cookies.set(cookieName, fallbackLng, {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+    });
+    return clearResponse;
   }
-  
-  if (!session && (pathname.startsWith("/study") || pathname.startsWith("/admin"))) {
-    return NextResponse.redirect(new URL(`/`, req.url));
+
+  if (session && pathname === "/") {
+    return NextResponse.redirect(new URL("/dashboard", req.url));
+  }
+
+  const protectedRoutes = ["/study", "/dashboard", "/admin", "/notes", "/plans", "/profile", "/settings", "/resources", "/groepen"];
+  if (!session && protectedRoutes.some(route => pathname.startsWith(route))) {
+    return NextResponse.redirect(new URL("/", req.url));
   }
 
   return response;

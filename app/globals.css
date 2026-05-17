@@ -2,94 +2,118 @@
 @tailwind components;
 @tailwind utilities;
 
-*{
-  scroll-behavior: smooth;
-}
-
-
+* { scroll-behavior: smooth; }
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-    --brand: 111 6% 50%;
-    --brand-foreground: 0 0% 100%;
+    /* ── Style 5: Slate & Teal ── */
+    --background:          220 9%  96%;    /* #F3F4F6 */
+    --foreground:          222 47% 11%;    /* #111827 */
+    --card:                0   0%  100%;
+    --card-foreground:     222 47% 11%;
+    --popover:             0   0%  100%;
+    --popover-foreground:  222 47% 11%;
+    --primary:             215 28% 17%;    /* #1F2937 */
+    --primary-foreground:  0   0%  100%;
+    --secondary:           220 13% 91%;    /* #E5E7EB */
+    --secondary-foreground:222 47% 20%;
+    --muted:               220 9%  96%;    /* #F3F4F6 */
+    --muted-foreground:    220 9%  46%;    /* #6B7280 */
+    --accent:              220 13% 93%;    /* hover tint */
+    --accent-foreground:   222 47% 11%;
+    --destructive:         0   72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border:              220 13% 91%;    /* #E5E7EB */
+    --input:               220 13% 91%;
+    --ring:                174 77% 31%;    /* teal-600 */
+    --radius:              0.5rem;
+
+    /* Brand = teal */
+    --brand:               174 77% 31%;    /* #0D9488 */
+    --brand-foreground:    0   0%  100%;
+
+    /* Sidebar — dark charcoal */
+    --sidebar-background:  215 28% 17%;    /* #1F2937 */
+    --sidebar-foreground:  215 14% 62%;
+    --sidebar-primary:     174 60% 44%;    /* lighter teal for active */
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent:      215 25% 22%;    /* hover state */
+    --sidebar-accent-foreground: 215 14% 85%;
+    --sidebar-border:      215 25% 22%;
+    --sidebar-ring:        174 77% 31%;
+
+    --chart-1: 174 77% 31%;
+    --chart-2: 220 26% 14%;
+    --chart-3: 262 80% 50%;
+    --chart-4: 43  96% 56%;
+    --chart-5: 12  76% 61%;
   }
+
   .dark {
-    --background: 220 15% 10%;
-    --foreground: 220 10% 96%;
-    --card: 220 15% 14%;
-    --card-foreground: 220 10% 96%;
-    --popover: 220 15% 14%;
-    --popover-foreground: 220 10% 96%;
-    --primary: 220 10% 96%;
-    --primary-foreground: 220 15% 10%;
-    --secondary: 220 15% 20%;
-    --secondary-foreground: 220 10% 96%;
-    --muted: 220 15% 20%;
-    --muted-foreground: 220 10% 60%;
-    --accent: 220 15% 20%;
-    --accent-foreground: 220 10% 96%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 220 10% 96%;
-    --border: 220 15% 20%;
-    --input: 220 15% 20%;
-    --ring: 220 10% 96%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
+    --background:          222 47% 9%;     /* #0F172A */
+    --foreground:          220 9%  91%;    /* #E5E7EB */
+    --card:                215 28% 13%;    /* #1a2030 */
+    --card-foreground:     220 9%  91%;
+    --popover:             215 28% 13%;
+    --popover-foreground:  220 9%  91%;
+    --primary:             220 9%  91%;
+    --primary-foreground:  222 47% 9%;
+    --secondary:           215 25% 20%;
+    --secondary-foreground:220 9%  80%;
+    --muted:               215 25% 20%;
+    --muted-foreground:    220 9%  52%;
+    --accent:              215 25% 22%;
+    --accent-foreground:   220 9%  91%;
+    --destructive:         0   62% 35%;
+    --destructive-foreground: 220 9% 91%;
+    --border:              215 25% 22%;
+    --input:               215 25% 22%;
+    --ring:                174 60% 44%;
+    --brand:               174 60% 44%;
+    --brand-foreground:    222 47% 9%;
+
+    --sidebar-background:  222 47% 6%;
+    --sidebar-foreground:  215 14% 58%;
+    --sidebar-primary:     174 60% 48%;
+    --sidebar-primary-foreground: 222 47% 6%;
+    --sidebar-accent:      215 25% 14%;
+    --sidebar-accent-foreground: 215 14% 82%;
+    --sidebar-border:      215 25% 14%;
+    --sidebar-ring:        174 60% 48%;
+
+    --chart-1: 174 60% 48%;
+    --chart-2: 220 55% 55%;
+    --chart-3: 262 70% 60%;
+    --chart-4: 43  96% 56%;
     --chart-5: 340 75% 55%;
-    --sidebar-background: 220 15% 10%;
-    --sidebar-foreground: 220 10% 96%;
-    --sidebar-primary: 220 10% 96%;
-    --sidebar-primary-foreground: 220 15% 10%;
-    --sidebar-accent: 220 15% 20%;
-    --sidebar-accent-foreground: 220 10% 96%;
-    --sidebar-border: 220 15% 20%;
-    --sidebar-ring: 220 10% 96%;
-    /* Lighter Sage Green for Dark Mode - Harmonious, readable, keeps identity */
-    --brand: 115 15% 75%;
-    --brand-foreground: 220 15% 10%;
   }
 }
 
 @layer base {
-  * {
-    @apply border-solid;
-  }
+  * { @apply border-border; }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
+
+/* Bible text */
+.bible-text {
+  font-family: var(--font-lora), Georgia, serif;
+  line-height: 1.9;
+}
+.verse-number {
+  @apply text-teal-600 font-sans text-xs font-semibold;
+  vertical-align: super;
+  margin-right: 2px;
+}
+
+/* Minimal scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground) / 0.4); }
+
+:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Button } from "../../components/ui/button";
 import Link from "next/link";
@@ -9,7 +9,7 @@ export default function TermsOfServicePage() {
   const { t } = useTranslation("terms-of-service");
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-[#18181bf2] flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       <main className="flex-grow container mx-auto px-4 py-8 md:py-16">
         <h1 className="text-3xl md:text-4xl font-bold mb-8 text-center">{t("terms_of_service")}</h1>
 

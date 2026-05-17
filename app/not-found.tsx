@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { Button } from "../components/ui/button"
 import { ArrowLeft, Home } from "lucide-react"
@@ -28,14 +28,14 @@ export default function NotFound() {
       <div className="max-w-md w-full text-center space-y-8">
         <div className="space-y-4">
           <div className="text-6xl font-light text-gray-400 dark:text-gray-500">404</div>
-          <h1 className="text-2xl font-medium text-gray-900 dark:text-white">
+          <h1 className="text-2xl font-medium text-foreground">
             {t("page_not_found") || "Page Not Found"}
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-muted-foreground">
             {t("page_not_found_message") || "The page you're looking for doesn't exist."}
           </p>
-          <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+          <div className="pt-4 border-t border-border">
+            <p className="text-sm text-muted-foreground">
               {t("page_not_found_description") || "Sorry, we couldn't find the page you were looking for."}
             </p>
             <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">

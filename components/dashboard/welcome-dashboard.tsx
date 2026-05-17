@@ -1,4 +1,4 @@
-// Dashboard component commented out - Study page is now the default
+﻿// Dashboard component commented out - Study page is now the default
 export default function WelcomeBanner() {
   return null;
 }
@@ -45,7 +45,7 @@ export default function WelcomeBannerOld({ params: { lng } }: WelcomeBannerProps
     <div className="rounded-xl p-6 max-md:p-4 border mb-8 max-md:mb-6 bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-pink-500/10 dark:border-[#91969e52]">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex flex-col">
-          <h1 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">
+          <h1 className="text-2xl font-bold mb-2 text-foreground">
             {t(greeting)}, {userName}!
           </h1>
           <p className="text-gray-600 dark:text-gray-300">{t("continue_your_biblical_journey")}</p>
@@ -69,3 +69,4 @@ export default function WelcomeBannerOld({ params: { lng } }: WelcomeBannerProps
   )
 }
 */
+

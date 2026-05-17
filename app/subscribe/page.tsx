@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { Button } from "../../components/ui/button"
 import { ArrowRight, CheckCircle, Loader2 } from "lucide-react"
@@ -114,15 +114,15 @@ export default function SubscribePage() {
         <div className="w-full max-w-lg text-center px-6">
           <div className="p-8">
             <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
-            <h1 className="text-2xl font-['Merriweather'] font-bold text-gray-800 dark:text-white mb-2">
+            <h1 className="text-2xl  font-bold text-gray-800 dark:text-white mb-2">
               {t("already_subscribed_title")}
             </h1>
-            <p className="text-gray-600 dark:text-gray-300 mb-6 font-['Inter']">
+            <p className="text-muted-foreground mb-6 ">
               {t("already_subscribed_message")}
             </p>
             <Button
               onClick={() => router.push("/profile")}
-              className="bg-brand hover:bg-brand/90 dark:bg-[#e0e0e0] dark:hover:bg-[#d0d0d0] text-white dark:text-black font-['Inter'] rounded-none"
+              className="bg-teal-600 hover:bg-teal-700 text-white  rounded-lg"
             >
               {t("go_to_profile")}
             </Button>
@@ -136,20 +136,20 @@ export default function SubscribePage() {
     <main className="mt-12 bg-gray-100 flex flex-col items-center justify-center bg-background overflow-hidden mb-12">
       <div className="w-full max-w-lg text-center px-6">
         <header className="mb-8">
-          <h1 className="text-4xl font-['Merriweather'] font-bold text-gray-800 dark:text-white mb-2">
+          <h1 className="text-4xl  font-bold text-gray-800 dark:text-white mb-2">
             {t("title")}
           </h1>
-          <p className="text-lg font-['Inter'] text-gray-600 dark:text-gray-300">
+          <p className="text-lg  text-muted-foreground">
             {t("subtitle")}
           </p>
         </header>
 
         <div className="bg-white dark:bg-card border border-gray-200 dark:border-none rounded-2xl p-8 shadow-lg dark:shadow-gray-900/20">
           <div className="mb-6">
-            <div className="text-5xl font-['Merriweather'] font-bold text-gray-800 dark:text-white mb-1">
+            <div className="text-5xl  font-bold text-gray-800 dark:text-white mb-1">
               €9.99
             </div>
-            <div className="text-gray-600 dark:text-gray-400 font-['Inter'] text-xs">
+            <div className="text-muted-foreground  text-xs">
               {t("billing_info")}
             </div>
           </div>
@@ -158,7 +158,7 @@ export default function SubscribePage() {
             size="lg"
             onClick={handleCheckout}
             disabled={loading || !session}
-            className="w-full px-4 py-4 bg-brand hover:bg-brand/90 dark:bg-[#e0e0e0] dark:hover:bg-[#d0d0d0] text-white dark:text-black font-['Inter'] font-normal text-lg rounded-none"
+            className="w-full px-4 py-4 bg-teal-600 hover:bg-teal-700 text-white  font-normal text-lg rounded-lg"
           >
             {loading ? "Processing..." : t("cta")}
             {!loading && <ArrowRight className="ml-2 w-5 h-5" />}
@@ -168,16 +168,16 @@ export default function SubscribePage() {
             {sellingPoints.map((item, index) => (
               <div
                 key={index}
-                className="flex items-center justify-center text-xs font-['Inter'] text-gray-600 dark:text-gray-400"
+                className="flex items-center justify-center text-xs  text-muted-foreground"
               >
-                <CheckCircle className="h-3 w-3 mr-2 text-brand dark:text-[#9aaa98]" />
+                <CheckCircle className="h-3 w-3 mr-2 text-teal-600 dark:text-[#9aaa98]" />
                 <span>{item}</span>
               </div>
             ))}
           </div>
         </div>
 
-        <section className="mt-10 text-gray-700 dark:text-gray-400 font-['Inter'] text-sm leading-relaxed max-w-md mx-auto">
+        <section className="mt-10 text-gray-700 dark:text-gray-400  text-sm leading-relaxed max-w-md mx-auto">
           <p className="mb-3">{t("description")}</p>
           <ul className="space-y-1">
             {features.map((feature, index) => (

@@ -1,4 +1,4 @@
-// Dashboard component commented out - Study page is now the default
+﻿// Dashboard component commented out - Study page is now the default
 export function AssignmentsCard() {
   return null;
 }
@@ -30,7 +30,7 @@ function AssignmentItem({ text, completed, dueDate }: AssignmentItemProps) {
 
 export function AssignmentsCard() {
   return (
-  <Card className="p-6 bg-white shadow-sm rounded-none">
+  <Card className="p-6 bg-white shadow-sm rounded-lg">
       <CardHeader className="flex flex-row items-center justify-between p-0 pb-4 gap-2">
         <CardTitle className="text-lg font-semibold text-gray-800">Assignments</CardTitle>
         <DropdownMenu>

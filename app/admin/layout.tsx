@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import SessionProvider from "../../components/providers/SessionProvider";
 import { Header } from "../../components/layout/header";
@@ -29,7 +29,7 @@ export default async function AdminLayout({
   const lng = cookieStore.get(cookieName)?.value || fallbackLng;
 
   return (
-    <div className="antialiased bg-gray-100 dark:bg-[#18181bf2]">
+    <div className="antialiased bg-background">
       <SessionProvider session={session}>
         <SidebarProvider>
           <AppSidebar />
@@ -44,3 +44,4 @@ export default async function AdminLayout({
     </div>
   );
 }
+

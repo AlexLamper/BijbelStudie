@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import { Save, X, Palette, Eye, EyeOff } from "lucide-react";
@@ -159,17 +159,17 @@ export function CreateNoteModal({
       <div className="space-y-6">
         {/* Bible Verse Preview */}
         <div className="bg-gray-50 dark:bg-muted p-4 border-l-4 border-[#798777]">
-          <p className="italic font-['Inter'] text-gray-700 dark:text-foreground text-sm leading-relaxed">
+          <p className="italic  text-gray-700 dark:text-foreground text-sm leading-relaxed">
             &ldquo;{verseText}&rdquo;
           </p>
-          <p className="font-['Inter'] text-xs text-gray-500 dark:text-muted-foreground mt-2">
+          <p className=" text-xs text-gray-500 dark:text-muted-foreground mt-2">
             — {verseReference} ({translation})
           </p>
         </div>
 
         {/* Note Type Selection */}
         <div>
-          <label className="block text-sm font-['Inter'] font-medium mb-2">{t("note_type_label")}</label>
+          <label className="block text-sm  font-medium mb-2">{t("note_type_label")}</label>
           <div className="flex gap-2">
             <Button
               type="button"
@@ -223,7 +223,7 @@ export function CreateNoteModal({
 
         {/* Note Text */}
         <div>
-          <label className="block text-sm font-['Inter'] font-medium mb-2">{t("note_thoughts_label")}</label>
+          <label className="block text-sm  font-medium mb-2">{t("note_thoughts_label")}</label>
           <Textarea
             value={noteText}
             onChange={(e) => setNoteText(e.target.value)}
@@ -235,7 +235,7 @@ export function CreateNoteModal({
 
         {/* Tags */}
         <div>
-          <label className="block text-sm font-['Inter'] font-medium mb-2">{t("tags_label")}</label>
+          <label className="block text-sm  font-medium mb-2">{t("tags_label")}</label>
           <div className="flex flex-wrap gap-1 mb-2">
             {tags.map((tag) => (
               <Badge key={tag} variant="secondary" className="gap-1">
@@ -308,7 +308,7 @@ export function CreateNoteModal({
           <Button
             onClick={handleSave}
             disabled={isSaving || !noteText.trim()}
-            className="gap-2 bg-brand hover:bg-brand/90 dark:bg-[#e0e0e0] dark:hover:bg-[#d0d0d0] text-white dark:text-black rounded-none"
+            className="gap-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg"
           >
             {isSaving ? (
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
@@ -322,3 +322,4 @@ export function CreateNoteModal({
     </Modal>
   );
 }
+

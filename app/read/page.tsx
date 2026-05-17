@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from 'react'
 import React from 'react'
@@ -251,16 +251,16 @@ export default function ReadPage() {
               </div>
             </div>
           )}
-          <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          <h1 className="text-2xl lg:text-3xl font-bold text-foreground mb-2">
             {fromPlan ? t('daily_reading', { defaultValue: 'Daily Reading' }) : t('read_scripture')}
           </h1>
-          <p className="text-gray-600 dark:text-gray-300 text-sm lg:text-base">
+          <p className="text-muted-foreground text-sm lg:text-base">
             {fromPlan ? t('follow_plan_reading', { defaultValue: 'Follow your reading plan' }) : t('explore_bible')}
           </p>
         </div>
 
         {/* Bible Selector */}
-        <div className="mb-6 lg:mb-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 lg:p-6">
+        <div className="mb-6 lg:mb-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-border p-4 lg:p-6">
           <BibleSelector
             versions={versions}
             books={books}
@@ -282,7 +282,7 @@ export default function ReadPage() {
         </div>
 
         {/* Chapter Viewer */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-border">
           <ChapterViewer
             version={selectedVersion}
             book={selectedBook}
@@ -292,9 +292,9 @@ export default function ReadPage() {
           
           {/* Plan Progress Controls */}
           {fromPlan && planDay && (
-            <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="p-4 border-t border-border">
               <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-600 dark:text-gray-300">
+                <div className="text-sm text-muted-foreground">
                   {t('reading_progress', { defaultValue: 'Reading Progress' })}
                 </div>
                 <div className="flex gap-2">
@@ -322,3 +322,4 @@ export default function ReadPage() {
     </div>
   )
 }
+
