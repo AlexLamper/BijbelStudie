@@ -1,13 +1,15 @@
-﻿"use client";
+"use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Save, X, Palette, Eye, EyeOff } from "lucide-react";
 import { Button } from "../ui/button";
-import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Badge } from "../ui/badge";
+import { Input } from "../ui/input";
 import { Modal } from "../ui/modal";
 import { useTranslation } from "../../app/i18n/client";
+
+type Scope = "vers" | "gedeelte" | "hoofdstuk";
 
 interface Note {
   _id: string;
@@ -15,6 +17,7 @@ interface Note {
   book: string;
   chapter: number;
   verse?: number;
+  verseEnd?: number;
   verseText: string;
   translation: string;
   noteText: string;
@@ -37,107 +40,145 @@ interface CreateNoteModalProps {
   verseText: string;
   translation?: string;
   onSave?: (note: Note) => void;
+  availableVerses?: number[];
+  defaultScope?: Scope;
 }
 
 const highlightColors = [
   { name: "yellow", class: "bg-yellow-200 border-yellow-300", hex: "#FEF3C7" },
-  { name: "blue", class: "bg-blue-200 border-blue-300", hex: "#DBEAFE" },
-  { name: "green", class: "bg-green-200 border-green-300", hex: "#D1FAE5" },
-  { name: "pink", class: "bg-pink-200 border-pink-300", hex: "#FCE7F3" },
-  { name: "purple", class: "bg-purple-200 border-purple-300", hex: "#E9D5FF" },
-  { name: "orange", class: "bg-orange-200 border-orange-300", hex: "#FED7AA" },
+  { name: "blue",   class: "bg-blue-200 border-blue-300",   hex: "#DBEAFE" },
+  { name: "green",  class: "bg-green-200 border-green-300",  hex: "#D1FAE5" },
+  { name: "pink",   class: "bg-pink-200 border-pink-300",   hex: "#FCE7F3" },
+  { name: "purple", class: "bg-purple-200 border-purple-300",hex: "#E9D5FF" },
+  { name: "orange", class: "bg-orange-200 border-orange-300",hex: "#FED7AA" },
 ];
 
 export function CreateNoteModal({
   isOpen,
   onClose,
-  verseReference,
   book,
   chapter,
   verse,
   verseText,
-  translation = "ASV",
+  translation = "statenvertaling",
   onSave,
+  availableVerses = [],
+  defaultScope,
 }: CreateNoteModalProps) {
   const { t } = useTranslation("notes");
-  const [noteText, setNoteText] = useState("");
-  const [tags, setTags] = useState<string[]>([]);
-  const [newTag, setNewTag] = useState("");
+
+  // Determine initial scope
+  const initScope: Scope = defaultScope ?? "vers";
+  const [scope, setScope]             = useState<Scope>(initScope);
+  const [verseStart, setVerseStart]   = useState<number>(verse ?? availableVerses[0] ?? 1);
+  const [verseEnd, setVerseEnd]       = useState<number>(verse ?? availableVerses[0] ?? 1);
+
+  const [noteText, setNoteText]       = useState("");
+  const [tags, setTags]               = useState<string[]>([]);
+  const [newTag, setNewTag]           = useState("");
   const [selectedColor, setSelectedColor] = useState("yellow");
-  const [noteType, setNoteType] = useState<"note" | "highlight" | "both">("note");
-  const [isPrivate, setIsPrivate] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [noteType, setNoteType]       = useState<"note" | "highlight" | "both">("note");
+  const [isPrivate, setIsPrivate]     = useState(true);
+  const [isSaving, setIsSaving]       = useState(false);
+  const [error, setError]             = useState<string | null>(null);
+  const [myGroups, setMyGroups]       = useState<{ _id: string; name: string }[]>([]);
+  const [selectedGroupId, setGroupId] = useState("");
+  const [loadingGroups, setLoadingGroups] = useState(false);
+
+  // Fetch user's groups once when modal first opens
+  useEffect(() => {
+    if (!isOpen || myGroups.length > 0 || loadingGroups) return;
+    setLoadingGroups(true);
+    fetch("/api/groepen?mine=true")
+      .then(r => r.ok ? r.json() : { groups: [] })
+      .then(d => setMyGroups(d.groups || []))
+      .catch(() => {})
+      .finally(() => setLoadingGroups(false));
+  }, [isOpen]);
+
+  // Sync verse selectors when verse prop or scope changes
+  useEffect(() => {
+    if (verse != null) {
+      setVerseStart(verse);
+      setVerseEnd(verse);
+    }
+  }, [verse]);
+
+  // Keep verseEnd >= verseStart
+  useEffect(() => {
+    if (verseEnd < verseStart) setVerseEnd(verseStart);
+  }, [verseStart, verseEnd]);
+
+  const computedReference = () => {
+    if (scope === "hoofdstuk") return `${book} ${chapter}`;
+    if (scope === "gedeelte")  return `${book} ${chapter}:${verseStart}-${verseEnd}`;
+    return `${book} ${chapter}:${verse ?? verseStart}`;
+  };
+
+  const displayVerseText = () => {
+    if (scope === "hoofdstuk") return `(Heel ${book} ${chapter})`;
+    if (scope === "gedeelte")  return `(Verzen ${verseStart}–${verseEnd})`;
+    return verseText;
+  };
 
   const handleAddTag = () => {
-    if (newTag.trim() && !tags.includes(newTag.trim().toLowerCase())) {
-      setTags([...tags, newTag.trim().toLowerCase()]);
+    const tag = newTag.trim().toLowerCase();
+    if (tag && !tags.includes(tag)) {
+      setTags([...tags, tag]);
       setNewTag("");
     }
   };
 
-  const handleRemoveTag = (tagToRemove: string) => {
-    setTags(tags.filter(tag => tag !== tagToRemove));
-  };
-
-  const resetForm = () => {
+  const reset = () => {
+    setScope(initScope);
     setNoteText("");
     setTags([]);
     setNewTag("");
     setSelectedColor("yellow");
     setNoteType("note");
     setIsPrivate(true);
+    setGroupId("");
     setError(null);
+    if (verse != null) { setVerseStart(verse); setVerseEnd(verse); }
   };
 
   const handleSave = async () => {
-    if (!noteText.trim()) {
-      setError(t("error_note_text_required"));
-      return;
-    }
-
+    if (!noteText.trim()) { setError(t("error_note_text_required")); return; }
     setIsSaving(true);
     setError(null);
 
     try {
       const noteData = {
-        verseReference,
+        verseReference: computedReference(),
         book,
         chapter,
-        verse,
-        verseText,
+        verse:    scope === "vers"     ? (verse ?? verseStart) : scope === "gedeelte" ? verseStart : undefined,
+        verseEnd: scope === "gedeelte" ? verseEnd : undefined,
+        verseText: displayVerseText(),
         translation,
         noteText: noteText.trim(),
         highlightColor: selectedColor,
         tags,
         isPrivate,
-        type: noteType
+        type: noteType,
+        groupId: selectedGroupId || null,
       };
 
-      const response = await fetch("/api/notes", {
+      const res = await fetch("/api/notes", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(noteData),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || t("error_save_failed"));
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || t("error_save_failed"));
       }
 
-      const savedNote = await response.json();
-      
-      // Reset form and close modal
-      resetForm();
+      const saved = await res.json();
+      reset();
       onClose();
-
-      // Call callback if provided
-      if (onSave) {
-        onSave(savedNote);
-      }
-
+      if (onSave) onSave(saved);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("error_save_failed"));
     } finally {
@@ -145,75 +186,124 @@ export function CreateNoteModal({
     }
   };
 
-  const handleClose = () => {
-    resetForm();
-    onClose();
+  const handleClose = () => { reset(); onClose(); };
+
+  const scopeLabels: Record<Scope, string> = {
+    vers:      "Vers",
+    gedeelte:  "Gedeelte",
+    hoofdstuk: "Hoofdstuk",
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={handleClose}
-      title={`${t("modal_title")} ${verseReference}`}
-    >
-      <div className="space-y-6">
-        {/* Bible Verse Preview */}
-        <div className="bg-gray-50 dark:bg-muted p-4 border-l-4 border-[#798777]">
-          <p className="italic  text-gray-700 dark:text-foreground text-sm leading-relaxed">
-            &ldquo;{verseText}&rdquo;
-          </p>
-          <p className=" text-xs text-gray-500 dark:text-muted-foreground mt-2">
-            — {verseReference} ({translation})
-          </p>
-        </div>
+    <Modal isOpen={isOpen} onClose={handleClose} title="Nieuwe notitie">
+      <div className="space-y-5">
 
-        {/* Note Type Selection */}
+        {/* Scope selector */}
         <div>
-          <label className="block text-sm  font-medium mb-2">{t("note_type_label")}</label>
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant={noteType === "note" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setNoteType("note")}
-            >
-              {t("type_note")}
-            </Button>
-            <Button
-              type="button"
-              variant={noteType === "highlight" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setNoteType("highlight")}
-            >
-              {t("type_highlight")}
-            </Button>
-            <Button
-              type="button"
-              variant={noteType === "both" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setNoteType("both")}
-            >
-              {t("type_both")}
-            </Button>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
+            Notitie voor
+          </label>
+          <div className="flex rounded-lg border border-gray-200 bg-gray-50 p-0.5 gap-0.5">
+            {(["vers", "gedeelte", "hoofdstuk"] as Scope[]).map(s => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => setScope(s)}
+                className="flex-1 py-1.5 text-sm font-medium rounded-md transition-colors"
+                style={{
+                  backgroundColor: scope === s ? "#fff" : "transparent",
+                  color: scope === s ? "#111827" : "#6B7280",
+                  boxShadow: scope === s ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
+                }}
+              >
+                {scopeLabels[s]}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Highlight Color Selection */}
+        {/* Verse range selectors for 'gedeelte' */}
+        {scope === "gedeelte" && availableVerses.length > 0 && (
+          <div className="flex items-end gap-3">
+            <div className="flex-1">
+              <label className="text-xs text-gray-500 mb-1 block">Van vers</label>
+              <select
+                value={verseStart}
+                onChange={e => setVerseStart(Number(e.target.value))}
+                className="w-full rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:ring-2"
+                style={{ '--tw-ring-color': '#0D9488' } as React.CSSProperties}
+              >
+                {availableVerses.map(v => <option key={v} value={v}>{v}</option>)}
+              </select>
+            </div>
+            <span className="text-gray-400 pb-2">-</span>
+            <div className="flex-1">
+              <label className="text-xs text-gray-500 mb-1 block">Tot vers</label>
+              <select
+                value={verseEnd}
+                onChange={e => setVerseEnd(Number(e.target.value))}
+                className="w-full rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:ring-2"
+              >
+                {availableVerses.filter(v => v >= verseStart).map(v => <option key={v} value={v}>{v}</option>)}
+              </select>
+            </div>
+          </div>
+        )}
+
+        {/* Reference preview */}
+        <div
+          className="rounded-lg p-4 border-l-4"
+          style={{ backgroundColor: "rgba(13,148,136,0.05)", borderColor: "#0D9488" }}
+        >
+          <p className="text-xs font-semibold mb-1" style={{ color: "#0D9488" }}>
+            {computedReference()}
+          </p>
+          {scope === "vers" && verseText && (
+            <p className="italic text-gray-700 text-sm leading-relaxed">
+              &ldquo;{verseText}&rdquo;
+            </p>
+          )}
+          {scope !== "vers" && (
+            <p className="text-sm text-gray-400 italic">{displayVerseText()}</p>
+          )}
+        </div>
+
+        {/* Note type */}
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
+            {t("note_type_label")}
+          </label>
+          <div className="flex gap-2">
+            {(["note", "highlight", "both"] as const).map(type => (
+              <Button
+                key={type}
+                type="button"
+                variant={noteType === type ? "default" : "outline"}
+                size="sm"
+                onClick={() => setNoteType(type)}
+                className={noteType === type ? "bg-teal-600 hover:bg-teal-700 text-white" : ""}
+              >
+                {type === "note" ? t("type_note") : type === "highlight" ? t("type_highlight") : t("type_both")}
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        {/* Highlight color */}
         {(noteType === "highlight" || noteType === "both") && (
           <div>
-            <label className="block text-sm font-medium mb-2">
-              <Palette className="h-4 w-4 inline mr-1" />
+            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
+              <Palette className="h-3 w-3 inline mr-1" />
               {t("highlight_color_label")}
             </label>
             <div className="flex gap-2">
-              {highlightColors.map((color) => (
+              {highlightColors.map(color => (
                 <button
                   key={color.name}
                   type="button"
                   onClick={() => setSelectedColor(color.name)}
-                  className={`w-8 h-8 rounded-full border-2 ${color.class} ${
-                    selectedColor === color.name ? "ring-2 ring-indigo-500 ring-offset-1" : ""
-                  }`}
+                  className={`w-7 h-7 rounded-full border-2 ${color.class} ${selectedColor === color.name ? "ring-2 ring-offset-1" : ""}`}
+                  style={{ '--tw-ring-color': '#0D9488' } as React.CSSProperties}
                   title={color.name}
                 />
               ))}
@@ -221,13 +311,15 @@ export function CreateNoteModal({
           </div>
         )}
 
-        {/* Note Text */}
+        {/* Note text */}
         <div>
-          <label className="block text-sm  font-medium mb-2">{t("note_thoughts_label")}</label>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
+            {t("note_thoughts_label")}
+          </label>
           <Textarea
             value={noteText}
-            onChange={(e) => setNoteText(e.target.value)}
-            placeholder={t("note_thoughts_placeholder")}
+            onChange={e => setNoteText(e.target.value)}
+            placeholder="Schrijf je gedachten, inzichten of vragen..."
             rows={4}
             className="resize-none"
           />
@@ -235,16 +327,14 @@ export function CreateNoteModal({
 
         {/* Tags */}
         <div>
-          <label className="block text-sm  font-medium mb-2">{t("tags_label")}</label>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
+            {t("tags_label")}
+          </label>
           <div className="flex flex-wrap gap-1 mb-2">
-            {tags.map((tag) => (
+            {tags.map(tag => (
               <Badge key={tag} variant="secondary" className="gap-1">
                 #{tag}
-                <button
-                  type="button"
-                  onClick={() => handleRemoveTag(tag)}
-                  className="text-gray-500 hover:text-gray-700"
-                >
+                <button type="button" onClick={() => setTags(tags.filter(t => t !== tag))}>
                   <X className="h-3 w-3" />
                 </button>
               </Badge>
@@ -253,68 +343,63 @@ export function CreateNoteModal({
           <div className="flex gap-2">
             <Input
               value={newTag}
-              onChange={(e) => setNewTag(e.target.value)}
+              onChange={e => setNewTag(e.target.value)}
               placeholder={t("tag_placeholder")}
               className="flex-1"
-              onKeyPress={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  handleAddTag();
-                }
-              }}
+              onKeyPress={e => { if (e.key === "Enter") { e.preventDefault(); handleAddTag(); } }}
             />
-            <Button
-              type="button"
-              onClick={handleAddTag}
-              variant="outline"
-              size="sm"
-            >
+            <Button type="button" onClick={handleAddTag} variant="outline" size="sm">
               {t("add_tag")}
             </Button>
           </div>
         </div>
 
-        {/* Privacy Setting */}
+        {/* Privacy */}
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium">{t("privacy_label")}</span>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => setIsPrivate(!isPrivate)}
-            className="gap-2"
-          >
+          <Button type="button" variant="outline" size="sm" onClick={() => setIsPrivate(!isPrivate)} className="gap-2">
             {isPrivate ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             {isPrivate ? t("privacy_private") : t("privacy_public")}
           </Button>
         </div>
 
-        {/* Error Message */}
+        {/* Share with group */}
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
+            Deel met groep
+          </label>
+          {loadingGroups ? (
+            <div className="h-9 bg-gray-100 dark:bg-secondary rounded-lg animate-pulse" />
+          ) : (
+            <select
+              value={selectedGroupId}
+              onChange={e => setGroupId(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-200 dark:border-border rounded-lg text-sm bg-white dark:bg-card text-gray-900 dark:text-foreground focus:outline-none focus:ring-2"
+              style={{ '--tw-ring-color': '#0D9488' } as React.CSSProperties}
+            >
+              <option value="">Geen - privé</option>
+              {myGroups.map(g => (
+                <option key={g._id} value={g._id}>{g.name}</option>
+              ))}
+            </select>
+          )}
+        </div>
+
         {error && (
-          <div className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/50 p-3 rounded border border-red-200 dark:border-red-900">
-            {error}
-          </div>
+          <div className="text-sm text-red-600 bg-red-50 p-3 rounded border border-red-200">{error}</div>
         )}
 
-        {/* Action Buttons */}
-        <div className="flex gap-3 justify-end pt-4 border-t border-gray-200 dark:border-border">
-          <Button
-            onClick={handleClose}
-            variant="outline"
-            disabled={isSaving}
-          >
+        {/* Actions */}
+        <div className="flex gap-3 justify-end pt-2 border-t border-gray-200">
+          <Button onClick={handleClose} variant="outline" disabled={isSaving}>
             {t("cancel")}
           </Button>
           <Button
             onClick={handleSave}
             disabled={isSaving || !noteText.trim()}
-            className="gap-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg"
+            className="gap-2 bg-teal-600 hover:bg-teal-700 text-white"
           >
-            {isSaving ? (
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-            ) : (
-              <Save className="h-4 w-4" />
-            )}
+            {isSaving ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" /> : <Save className="h-4 w-4" />}
             {isSaving ? t("saving") : t("save_note")}
           </Button>
         </div>
@@ -322,4 +407,3 @@ export function CreateNoteModal({
     </Modal>
   );
 }
-

@@ -1,25 +1,14 @@
 "use client"
 
 import React, { useEffect, useState } from 'react'
-import Image from 'next/image'
-import { motion } from 'framer-motion'
-import { MapPin, ExternalLink, Info } from 'lucide-react'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../ui/dialog"
-import { Badge } from "../ui/badge"
-import { ScrollArea } from "../ui/scroll-area"
-import { Skeleton } from "../ui/skeleton"
+import { createPortal } from 'react-dom'
+import { MapPin, ExternalLink, X } from 'lucide-react'
 import { useTranslation } from '../../app/i18n/client'
 
 interface GeoImage {
   id: string;
   url: string;
+  fileUrl: string;
   thumbnailUrl: string;
   description: string;
   credit: string;
@@ -34,155 +23,331 @@ interface GeoImagesProps {
   book: string;
   chapter: number;
   className?: string;
+  variant?: 'grid' | 'strip';
 }
 
-export default function GeoImages({ book, chapter, className }: GeoImagesProps) {
+/** Best available image URL: fileUrl is a direct upload.wikimedia.org path that always loads */
+function imgSrc(img: GeoImage): string {
+  return img.fileUrl || img.thumbnailUrl;
+}
+
+/** Shared lightbox — rendered via createPortal in both strip and grid variants */
+function LightboxContent({ selected, onClose, t }: { selected: GeoImage; onClose: () => void; t: (k: string) => string }) {
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      style={{
+        position: 'fixed', inset: 0, zIndex: 9999,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: 20, backgroundColor: 'rgba(0,0,0,0.72)',
+        backdropFilter: 'blur(4px)',
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          backgroundColor: '#fff', borderRadius: 20,
+          boxShadow: '0 32px 64px rgba(0,0,0,0.35)',
+          width: '100%', maxWidth: 560, overflow: 'hidden',
+        }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Cover image */}
+        <div style={{ position: 'relative', aspectRatio: '16/9', backgroundColor: '#E5E7EB', overflow: 'hidden' }}>
+          <img
+            src={imgSrc(selected)}
+            alt={selected.placeName}
+            loading="eager"
+            style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover' }}
+            onError={e => { (e.currentTarget as HTMLImageElement).src = selected.thumbnailUrl; }}
+          />
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 40%)',
+            pointerEvents: 'none',
+          }} />
+          <button
+            onClick={onClose}
+            style={{
+              position: 'absolute', top: 12, right: 12,
+              width: 34, height: 34, borderRadius: '50%',
+              border: 'none', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              backgroundColor: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(6px)',
+              transition: 'background-color 0.15s',
+            }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(0,0,0,0.65)'}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(0,0,0,0.45)'}
+          >
+            <X size={15} color="#fff" />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div style={{ padding: '20px 24px 24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+            <div style={{ width: 3, height: 28, borderRadius: 2, backgroundColor: '#0D9488', flexShrink: 0 }} />
+            <div>
+              <p style={{ fontSize: 18, fontWeight: 700, color: '#111827', margin: 0, lineHeight: 1.2 }}>
+                {selected.placeName}
+              </p>
+              {selected.modernId && (
+                <p style={{ fontSize: 11, color: '#9CA3AF', margin: '2px 0 0' }}>{selected.modernId}</p>
+              )}
+            </div>
+          </div>
+
+          {selected.verses.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 14 }}>
+              {selected.verses.map(v => (
+                <span key={v} style={{
+                  fontSize: 11, fontWeight: 500, padding: '3px 9px', borderRadius: 999,
+                  backgroundColor: 'rgba(13,148,136,0.07)', color: '#0D9488',
+                  border: '1px solid rgba(13,148,136,0.18)',
+                }}>{v}</span>
+              ))}
+            </div>
+          )}
+
+          {selected.description && (
+            <p style={{ fontSize: 14, color: '#4B5563', lineHeight: 1.7, margin: '0 0 16px' }}>
+              {selected.description}
+            </p>
+          )}
+
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            paddingTop: 14, borderTop: '1px solid #F3F4F6', gap: 8, flexWrap: 'wrap',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              {selected.license && (
+                <span style={{
+                  fontSize: 10, fontWeight: 600, letterSpacing: '0.04em',
+                  padding: '2px 7px', borderRadius: 5,
+                  backgroundColor: '#F3F4F6', color: '#6B7280', textTransform: 'uppercase',
+                }}>{selected.license}</span>
+              )}
+              {selected.credit && (
+                <span style={{ fontSize: 12, color: '#9CA3AF' }}>© {selected.credit}</span>
+              )}
+            </div>
+            {selected.creditUrl && (
+              <a
+                href={selected.creditUrl} target="_blank" rel="noopener noreferrer"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 500, color: '#0D9488', textDecoration: 'none' }}
+                onMouseEnter={e => (e.currentTarget as HTMLElement).style.textDecoration = 'underline'}
+                onMouseLeave={e => (e.currentTarget as HTMLElement).style.textDecoration = 'none'}
+              >
+                Bekijk bron <ExternalLink size={11} />
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function GeoImages({ book, chapter, className, variant = 'grid' }: GeoImagesProps) {
   const { t } = useTranslation('study');
-  const [images, setImages] = useState<GeoImage[]>([]);
+  const [images, setImages]   = useState<GeoImage[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [selected, setSelected] = useState<GeoImage | null>(null);
+  const [mounted, setMounted]   = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
-    const fetchImages = async () => {
-      if (!book || !chapter) return;
-      
-      setLoading(true);
-      setError(null);
-      console.log(`[GeoImages] Fetching images for ${book} ${chapter}`);
-      try {
-        const res = await fetch(`/api/geo/images?book=${encodeURIComponent(book)}&chapter=${chapter}`);
-        if (!res.ok) throw new Error('Failed to fetch images');
-        const data = await res.json();
-        setImages(data.images || []);
-      } catch (err) {
-        console.error(err);
-        setError(t('geo_images.error_loading'));
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (!book || !chapter) return;
+    setLoading(true);
+    setImages([]);
 
-    fetchImages();
-  }, [book, chapter, t]);
+    fetch(`/api/geo/images?book=${encodeURIComponent(book)}&chapter=${chapter}`)
+      .then(r => r.ok ? r.json() : { images: [] })
+      .then(data => setImages(data.images || []))
+      .catch(() => setImages([]))
+      .finally(() => setLoading(false));
+  }, [book, chapter]);
+
+  // Close on Escape key
+  useEffect(() => {
+    if (!selected) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setSelected(null); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [selected]);
 
   if (loading) {
+    if (variant === 'strip') {
+      return (
+        <div style={{ borderBottom: '1px solid #F3F4F6', backgroundColor: '#FAFAFA', flexShrink: 0 }}>
+          <div style={{ display: 'flex', gap: 10, padding: '12px 20px', overflowX: 'auto', scrollbarWidth: 'none' }}>
+            {[1, 2, 3].map(i => (
+              <div key={i} style={{ flexShrink: 0, width: 130, borderRadius: 10, overflow: 'hidden', border: '1px solid #F3F4F6' }}>
+                <div className="animate-pulse bg-gray-100" style={{ height: 78 }} />
+                <div style={{ padding: '6px 10px 8px', display: 'flex', flexDirection: 'column', gap: 5 }}>
+                  <div className="animate-pulse bg-gray-100 rounded" style={{ height: 9, width: '70%' }} />
+                  <div className="animate-pulse bg-gray-100 rounded" style={{ height: 7, width: '50%' }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
     return (
-      <div className={`space-y-4 ${className || 'mt-8'}`}>
-        <h3 className="text-lg font-semibold flex items-center gap-2 font-merriweather">
-          <MapPin className="w-5 h-5" />
-          {t('geo_images.locations_in_chapter')}
-        </h3>
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-4">
-          {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-48 w-full rounded-lg" />
+      <div className={className}>
+        <div className="flex items-center gap-2 mb-4">
+          <MapPin className="w-4 h-4" style={{ color: '#0D9488' }} />
+          <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Locaties in dit hoofdstuk</span>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="rounded-xl border border-gray-100 dark:border-border overflow-hidden">
+              <div className="bg-gray-100 dark:bg-secondary animate-pulse" style={{ height: 110 }} />
+              <div className="p-3 space-y-1.5">
+                <div className="h-2.5 bg-gray-100 dark:bg-secondary rounded animate-pulse w-3/4" />
+                <div className="h-2 bg-gray-100 dark:bg-secondary rounded animate-pulse w-1/2" />
+              </div>
+            </div>
           ))}
         </div>
       </div>
     );
   }
 
-  if (error || images.length === 0) {
-    return null;
-  }
+  if (images.length === 0 && !loading) return null;
 
-  return (
-    <div className={`space-y-4 ${className || 'mt-8'}`}>
-      <h3 className="text-lg font-semibold flex items-center gap-2 font-merriweather">
-        <MapPin className="w-5 h-5" />
-        {t('geo_images.locations_in_book_chapter', { book, chapter })}
-      </h3>
-      
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-4">
-        {images.map((image, index) => (
-          <Dialog key={`${image.id}-${index}`}>
-            <DialogTrigger asChild>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="group cursor-pointer relative overflow-hidden rounded-lg border bg-card text-card-foreground shadow-sm hover:shadow-md transition-all"
-              >
-                <div className="aspect-video relative overflow-hidden">
-                  <Image
-                    src={image.thumbnailUrl}
-                    alt={image.description}
-                    fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-105"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    unoptimized
-                  />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <span className="text-white font-medium flex items-center gap-2">
-                      <Info className="w-4 h-4" />
-                      {t('geo_images.view_details')}
-                    </span>
-                  </div>
-                </div>
-                <div className="p-3">
-                  <h4 className="font-medium text-sm truncate" title={image.placeName}>
-                    {image.placeName}
-                  </h4>
-                  <p className="text-xs text-muted-foreground truncate" title={image.description}>
-                    {image.description}
-                  </p>
-                </div>
-              </motion.div>
-            </DialogTrigger>
-            
-            <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <MapPin className="w-5 h-5 text-primary" />
-                  {image.placeName}
-                </DialogTitle>
-                <DialogDescription>
-                  {t('geo_images.mentioned_in')} {image.verses.join(', ')}
-                </DialogDescription>
-              </DialogHeader>
-              
-              <ScrollArea className="flex-1 pr-4">
-                <div className="space-y-4">
-                  <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-muted">
-                    <Image
-                      src={image.thumbnailUrl.replace('640px', '1280px')} // Try to get higher res
-                      alt={image.description}
-                      fill
-                      className="object-contain"
-                      unoptimized // Since we're replacing URL parts, next/image optimization might be tricky or unnecessary for external
+  /* ── Strip variant ─────────────────────────────────────────── */
+  if (variant === 'strip') {
+    return (
+      <>
+        {/* Pinned strip — no scroll needed to see it */}
+        <div style={{
+          borderBottom: '1px solid #F3F4F6',
+          backgroundColor: '#FAFAFA',
+          flexShrink: 0,
+        }}>
+          <div style={{
+              display: 'flex', gap: 10, padding: '12px 20px',
+              overflowX: 'auto',
+              scrollbarWidth: 'none',
+            }}>
+              {images.map((image, index) => (
+                <button
+                  key={`${image.id}-${index}`}
+                  onClick={() => setSelected(image)}
+                  style={{
+                    flexShrink: 0, width: 130,
+                    borderRadius: 10, overflow: 'hidden',
+                    border: '1px solid #E5E7EB',
+                    backgroundColor: '#fff',
+                    cursor: 'pointer', padding: 0,
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+                    transition: 'box-shadow 0.15s, transform 0.15s',
+                    textAlign: 'left',
+                  }}
+                  onMouseEnter={e => {
+                    (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 12px rgba(0,0,0,0.12)';
+                    (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)';
+                  }}
+                  onMouseLeave={e => {
+                    (e.currentTarget as HTMLElement).style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)';
+                    (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
+                  }}
+                >
+                  <div style={{ height: 78, overflow: 'hidden', backgroundColor: '#F3F4F6' }}>
+                    <img
+                      src={imgSrc(image)}
+                      alt={image.placeName}
+                      loading="eager"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                      onLoad={() => console.log(`[GeoImages] ✓ Strip loaded: ${imgSrc(image)}`)}
+                      onError={() => console.error(`[GeoImages] ✗ Strip FAILED: ${imgSrc(image)}`)}
                     />
                   </div>
-                  
-                  <div className="space-y-2">
-                    <h4 className="font-semibold">{t('geo_images.description')}</h4>
-                    <p className="text-sm text-muted-foreground">
-                      {image.description}
+                  <div style={{ padding: '5px 8px 7px' }}>
+                    <p style={{
+                      fontSize: 11, fontWeight: 600, color: '#111827', margin: 0,
+                      whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                    }}>
+                      {image.placeName}
                     </p>
                   </div>
+                </button>
+              ))}
+            </div>
+        </div>
 
-                  <div className="flex flex-wrap gap-2">
-                    <Badge variant="secondary">{t('geo_images.modern_id')} {image.modernId}</Badge>
-                    <Badge variant="outline">{image.license}</Badge>
-                  </div>
+        {/* Lightbox — same portal as grid variant */}
+        {selected && mounted && createPortal(
+          <LightboxContent selected={selected} onClose={() => setSelected(null)} t={t} />,
+          document.body
+        )}
+      </>
+    );
+  }
 
-                  <div className="text-xs text-muted-foreground border-t pt-4 mt-4">
-                    <p>{t('geo_images.credit')} {image.credit}</p>
-                    {image.creditUrl && (
-                      <a 
-                        href={image.creditUrl} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-primary hover:underline mt-1"
-                      >
-                        {t('geo_images.view_source')} <ExternalLink className="w-3 h-3" />
-                      </a>
-                    )}
-                  </div>
-                </div>
-              </ScrollArea>
-            </DialogContent>
-          </Dialog>
-        ))}
+  /* ── Grid variant (default) ────────────────────────────────── */
+  const lightbox = selected && mounted
+    ? createPortal(<LightboxContent selected={selected} onClose={() => setSelected(null)} t={t} />, document.body)
+    : null;
+
+  return (
+    <>
+      <div className={className}>
+        {/* Section header */}
+        <div className="flex items-center gap-2 mb-4">
+          <MapPin className="w-4 h-4 flex-shrink-0" style={{ color: '#0D9488' }} />
+          <span className="text-sm font-semibold text-gray-700">
+            {t('geo_images.locations_in_book_chapter', { book, chapter })}
+          </span>
+        </div>
+
+        {/* Image grid */}
+        <div className="grid grid-cols-2 gap-3">
+          {images.map((image, index) => (
+            <button
+              key={`${image.id}-${index}`}
+              onClick={() => setSelected(image)}
+              className="group text-left rounded-xl overflow-hidden border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow focus:outline-none"
+            >
+              {/* Thumbnail — thumbnailUrl is always a valid image URL */}
+              <div style={{ height: 110, overflow: 'hidden', backgroundColor: '#F3F4F6' }}>
+                <img
+                  src={imgSrc(image)}
+                  alt={image.placeName}
+                  loading="eager"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block',
+                    transition: 'transform 0.3s',
+                  }}
+                  className="group-hover:scale-105"
+                  onLoad={() => console.log(`[GeoImages] ✓ Loaded: ${imgSrc(image)}`)}
+                  onError={() => console.error(`[GeoImages] ✗ FAILED: ${imgSrc(image)}`)}
+                />
+              </div>
+              {/* Caption */}
+              <div style={{ padding: '8px 12px 10px' }}>
+                <p style={{ fontSize: 12, fontWeight: 600, color: '#111827', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', margin: 0 }}>
+                  {image.placeName}
+                </p>
+                {image.description && (
+                  <p style={{ fontSize: 11, color: '#9CA3AF', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', marginTop: 2 }}>
+                    {image.description}
+                  </p>
+                )}
+              </div>
+            </button>
+          ))}
+        </div>
       </div>
-    </div>
-  )
+
+      {lightbox}
+    </>
+  );
 }

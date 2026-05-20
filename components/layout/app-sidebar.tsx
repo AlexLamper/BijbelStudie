@@ -18,18 +18,10 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import React, { useEffect, useState } from "react"
 
-/* ── Palette (hardcoded to guarantee rendering) ──────────────── */
-const BG = "#1F2937"   // gray-800 — used everywhere in sidebar
-const ACTIVE_BG   = "rgba(13,148,136,0.18)"
-const ACTIVE_TEXT = "#2DD4BF"   // teal-300 — high contrast on dark bg
-const ACTIVE_BORDER = "#0D9488"
-const INACTIVE_TEXT = "rgba(255,255,255,0.58)"
-const HOVER_BG    = "rgba(255,255,255,0.07)"
-
 const mainNav = [
   { title: "Dashboard",    url: "/dashboard", icon: LayoutDashboard },
   { title: "Bijbelstudie", url: "/study",     icon: BookOpen },
-  { title: "Leesplannen",  url: "/plans",     icon: BookMarked },
+  { title: "Studies",      url: "/plans",     icon: BookMarked },
   { title: "Groepen",      url: "/groepen",   icon: Users },
   { title: "Notities",     url: "/notes",     icon: StickyNote },
   { title: "Hulpbronnen",  url: "/resources", icon: Library },
@@ -45,37 +37,17 @@ function NavLink({ url, title, icon: Icon }: { url: string; title: string; icon:
   const active = pathname === url || (url !== "/dashboard" && pathname?.startsWith(url))
 
   return (
-    <li style={{ listStyle: "none" }}>
+    <li className="list-none">
       <Link
         href={url}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "10px",
-          padding: "7px 12px",
-          borderRadius: "8px",
-          fontSize: "13.5px",
-          fontWeight: active ? 600 : 400,
-          color: active ? ACTIVE_TEXT : INACTIVE_TEXT,
-          backgroundColor: active ? ACTIVE_BG : "transparent",
-          borderLeft: active ? `2px solid ${ACTIVE_BORDER}` : "2px solid transparent",
-          transition: "all 0.15s ease",
-          textDecoration: "none",
-        }}
-        onMouseEnter={e => {
-          if (!active) {
-            (e.currentTarget as HTMLElement).style.backgroundColor = HOVER_BG
-            ;(e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.85)"
-          }
-        }}
-        onMouseLeave={e => {
-          if (!active) {
-            (e.currentTarget as HTMLElement).style.backgroundColor = "transparent"
-            ;(e.currentTarget as HTMLElement).style.color = INACTIVE_TEXT
-          }
-        }}
+        className={[
+          "flex items-center gap-2.5 px-3 py-[7px] rounded-lg text-[13.5px] transition-colors no-underline",
+          active
+            ? "font-semibold bg-[rgba(13,148,136,0.08)] text-[#0D9488] dark:bg-[rgba(13,148,136,0.12)] dark:text-[#2DD4BF]"
+            : "font-normal text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-secondary hover:text-gray-900 dark:hover:text-foreground",
+        ].join(" ")}
       >
-        <Icon size={16} style={{ flexShrink: 0, opacity: active ? 1 : 0.6 }} />
+        <Icon size={16} className="flex-shrink-0" />
         <span>{title}</span>
       </Link>
     </li>
@@ -99,23 +71,12 @@ function ProCTA() {
   if (!checked || isSubscribed) return null
 
   return (
-    <div style={{ padding: "12px 8px 0" }}>
+    <div className="pt-3 px-1">
       <button
         onClick={() => router.push("/subscribe")}
-        style={{
-          width: "100%",
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          padding: "10px 12px",
-          borderRadius: "8px",
-          backgroundColor: "rgba(13,148,136,0.12)",
-          border: "1px solid rgba(13,148,136,0.25)",
-          cursor: "pointer",
-          color: "#2DD4BF",
-          fontSize: "13px",
-          fontWeight: 500,
-        }}
+        className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-colors
+          bg-[rgba(13,148,136,0.06)] border border-[rgba(13,148,136,0.2)] text-[#0D9488]
+          hover:bg-[rgba(13,148,136,0.1)] dark:bg-[rgba(13,148,136,0.08)] dark:border-[rgba(13,148,136,0.25)]"
       >
         <Sparkles size={14} />
         Probeer Pro nu
@@ -128,34 +89,43 @@ export function AppSidebar({ ...props }) {
   return (
     <Sidebar
       {...props}
-      style={{ backgroundColor: BG } as React.CSSProperties}
-      className="border-r-0"
+      className="border-r-0 bg-white dark:bg-card border-r border-border"
     >
-      {/* Header */}
-      <SidebarHeader
-        style={{ backgroundColor: BG, borderBottom: "1px solid rgba(255,255,255,0.06)", padding: "16px 14px" }}
-      >
-        <Link href="/dashboard" style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none" }}>
-          <Image src="/images/favicon.ico" alt="" width={26} height={26} style={{ borderRadius: "6px" }} priority />
-          <span style={{ color: "white", fontWeight: 700, fontSize: "15px", letterSpacing: "-0.01em" }}>
+      {/* Header — same height as navbar (h-14), logo centered both axes */}
+      <SidebarHeader className="
+        h-14 border-b border-border
+        bg-white dark:bg-card
+        !p-0 !gap-0 flex-none
+      ">
+        <Link
+          href="/dashboard"
+          className="flex items-center gap-2.5 no-underline pl-3 h-full"
+        >
+          <Image
+            src="/images/favicon.ico"
+            alt=""
+            width={26}
+            height={26}
+            className="rounded-md"
+            priority
+          />
+          <span className="text-[15px] font-bold tracking-tight text-gray-900 dark:text-foreground">
             BijbelStudie
           </span>
         </Link>
       </SidebarHeader>
 
       {/* Main nav */}
-      <SidebarContent style={{ backgroundColor: BG, padding: "8px" }}>
-        <ul style={{ margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "2px" }}>
+      <SidebarContent className="bg-white dark:bg-card !p-2">
+        <ul className="m-0 p-0 flex flex-col gap-0.5">
           {mainNav.map(item => <NavLink key={item.url} {...item} />)}
         </ul>
         <ProCTA />
       </SidebarContent>
 
       {/* Footer nav */}
-      <SidebarFooter
-        style={{ backgroundColor: BG, borderTop: "1px solid rgba(255,255,255,0.06)", padding: "8px" }}
-      >
-        <ul style={{ margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "2px" }}>
+      <SidebarFooter className="bg-white dark:bg-card border-t border-border !p-2">
+        <ul className="m-0 p-0 flex flex-col gap-0.5">
           {bottomNav.map(item => <NavLink key={item.url} {...item} />)}
         </ul>
       </SidebarFooter>

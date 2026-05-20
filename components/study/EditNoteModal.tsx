@@ -23,6 +23,7 @@ interface Note {
   isPrivate: boolean;
   type: "note" | "highlight" | "both";
   language: string;
+  groupId?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -58,6 +59,9 @@ export function EditNoteModal({
   const [isPrivate, setIsPrivate] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [myGroups, setMyGroups]       = useState<{ _id: string; name: string }[]>([]);
+  const [selectedGroupId, setGroupId] = useState("");
+  const [loadingGroups, setLoadingGroups] = useState(false);
 
   // Populate form when note changes
   useEffect(() => {
@@ -67,9 +71,21 @@ export function EditNoteModal({
       setSelectedColor(note.highlightColor);
       setNoteType(note.type);
       setIsPrivate(note.isPrivate);
+      setGroupId(note.groupId ?? "");
       setError(null);
     }
   }, [note]);
+
+  // Fetch user's groups once when modal first opens
+  useEffect(() => {
+    if (!isOpen || myGroups.length > 0 || loadingGroups) return;
+    setLoadingGroups(true);
+    fetch("/api/groepen?mine=true")
+      .then(r => r.ok ? r.json() : { groups: [] })
+      .then(d => setMyGroups(d.groups || []))
+      .catch(() => {})
+      .finally(() => setLoadingGroups(false));
+  }, [isOpen]);
 
   const handleAddTag = () => {
     if (newTag.trim() && !tags.includes(newTag.trim().toLowerCase())) {
@@ -113,6 +129,7 @@ export function EditNoteModal({
         tags,
         isPrivate,
         type: noteType,
+        groupId: selectedGroupId || null,
       };
 
       const response = await fetch(`/api/notes/${note._id}`, {
@@ -165,7 +182,7 @@ export function EditNoteModal({
             &ldquo;{note.verseText}&rdquo;
           </p>
           <p className="text-xs text-gray-500 dark:text-muted-foreground mt-2">
-            — {note.verseReference} ({note.translation})
+            - {note.verseReference} ({note.translation})
           </p>
         </div>
 
@@ -289,6 +306,28 @@ export function EditNoteModal({
             {isPrivate ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             {isPrivate ? t("privacy_private") : t("privacy_public")}
           </Button>
+        </div>
+
+        {/* Share with group */}
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-muted-foreground mb-2">
+            Deel met groep
+          </label>
+          {loadingGroups ? (
+            <div className="h-9 bg-gray-100 dark:bg-secondary rounded-lg animate-pulse" />
+          ) : (
+            <select
+              value={selectedGroupId}
+              onChange={e => setGroupId(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-200 dark:border-border rounded-lg text-sm bg-white dark:bg-card text-gray-900 dark:text-foreground focus:outline-none focus:ring-2"
+              style={{ '--tw-ring-color': '#0D9488' } as React.CSSProperties}
+            >
+              <option value="">Geen - privé</option>
+              {myGroups.map(g => (
+                <option key={g._id} value={g._id}>{g.name}</option>
+              ))}
+            </select>
+          )}
         </div>
 
         {/* Error Message */}

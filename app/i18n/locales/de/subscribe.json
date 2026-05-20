@@ -2,6 +2,11 @@
   "title": "BijbelStudie Pro",
   "subtitle": "Erschließe ein tieferes Verständnis der Bibel mit fortgeschrittenen Studienwerkzeugen und Ressourcen.",
   "billing_info": "/Monat, monatlich abgerechnet",
+  "billing_annual_info": "/Jahr, jährlich abgerechnet",
+  "billing_monthly": "Monatlich",
+  "billing_annual": "Jährlich",
+  "billing_annual_savings": "42% Rabatt",
+  "per_month": "pro Monat",
   "cta": "Jetzt abonnieren",
   "selling_points": [
     "Jederzeit kündbar",
@@ -10,9 +15,14 @@
   ],
   "description": "Mit BijbelStudie Pro erhältst du Zugriff auf eine wachsende Bibliothek tiefgehender Bibelstudien, Kommentarvergleiche, Sprachanalysen und Lernwerkzeuge, um die Heilige Schrift wie nie zuvor zu entdecken.",
   "features": [
-    "Zugang zu exklusiven Bibelstudienmaterialien",
-    "Interaktive Vers-für-Vers-Tools",
-    "Querverweise, Karten und Kontextvisualisierungen",
-    "Regelmäßig aktualisierte Inhalte und Lektionen"
-  ]
+    "Unbegrenzte Notizen & Markierungen",
+    "Unbegrenzte Bibellesepläne",
+    "Zugang zu Bibelkommentaren",
+    "Historischer Kontext & Einblicke",
+    "Studiengruppen erstellen",
+    "Streak-Einfrierungen nutzen"
+  ],
+  "already_subscribed_title": "Du bist bereits abonniert!",
+  "already_subscribed_message": "Danke, dass du Premium-Mitglied bist. Du hast vollen Zugriff auf alle Funktionen.",
+  "go_to_profile": "Zum Profil"
 }

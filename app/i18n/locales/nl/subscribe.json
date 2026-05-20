@@ -2,6 +2,11 @@
   "title": "BijbelStudie Pro",
   "subtitle": "Ontgrendel een dieper begrip van de Bijbel met geavanceerde studiehulpmiddelen en bronnen.",
   "billing_info": "/maand, maandelijks gefactureerd",
+  "billing_annual_info": "/jaar, jaarlijks gefactureerd",
+  "billing_monthly": "Maandelijks",
+  "billing_annual": "Jaarlijks",
+  "billing_annual_savings": "42% korting",
+  "per_month": "per maand",
   "cta": "Abonneer Nu",
   "selling_points": [
     "Altijd opzegbaar",
@@ -13,7 +18,9 @@
     "Onbeperkt notities & markeringen",
     "Onbeperkt bijbelleesplannen",
     "Toegang tot bijbelcommentaren",
-    "Historische context & inzichten"
+    "Historische context & inzichten",
+    "Studiegroepen aanmaken",
+    "Streak-bevriezingen gebruiken"
   ],
   "already_subscribed_title": "Je bent al geabonneerd!",
   "already_subscribed_message": "Bedankt dat je een premium lid bent. Je hebt volledige toegang tot alle functies.",

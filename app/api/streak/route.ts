@@ -52,7 +52,7 @@ export async function POST(request: Request) {
     if (last && (today.getTime() - last.getTime()) / 86400000 === 1) {
       newStreak += 1
     } else if (last && (today.getTime() - last.getTime()) / 86400000 > 1) {
-      if (newFreezes > 0) {
+      if (newFreezes > 0 && user.subscribed) {
         newFreezes -= 1
       } else {
         newStreak = 1

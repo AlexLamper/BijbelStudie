@@ -1,165 +1,106 @@
 "use client"
 
 import Link from "next/link"
-import { Facebook, Twitter, Instagram, Youtube } from 'lucide-react'
+import Image from "next/image"
 import { useTranslation } from "../../app/i18n/client"
 
 export function Footer() {
   const { t } = useTranslation("footer")
 
   return (
-    <footer className="bg-[#262626] dark:bg-card py-16 lg:py-20">
-      <div className="container mx-auto px-6 lg:px-8">
-        {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-12 max-w-6xl mx-auto">
-          {/* About BijbelStudie */}
+    <footer style={{ backgroundColor: "#1F2937", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+      <div className="max-w-6xl mx-auto px-6 lg:px-8 py-14 lg:py-16">
+
+        {/* Main grid */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 lg:gap-12">
+
+          {/* Brand column */}
           <div className="space-y-4">
-            <h3 className="font-['Inter'] text-lg font-semibold text-white dark:text-card-foreground mb-6">
+            <div className="flex items-center gap-2">
+              <Image src="/images/favicon.ico" alt="BijbelStudie" width={22} height={22} className="rounded-md" />
+              <span className="font-bold text-sm text-white">BijbelStudie</span>
+            </div>
+            <p className="text-sm leading-relaxed" style={{ color: "#9CA3AF" }}>
+              Online bijbelstudie platform voor serieuze bijbelstudenten. Gratis beginnen, altijd.
+            </p>
+          </div>
+
+          {/* About */}
+          <div className="space-y-4">
+            <h3 className="text-xs font-bold uppercase tracking-widest text-white">
               {t("about_bijbelstudie")}
             </h3>
-            <ul className="space-y-3">
-              <li>
-                <Link
-                  href={`/#about`}
-                  className="font-['Inter'] text-gray-300 dark:text-muted-foreground hover:text-white dark:hover:text-card-foreground transition-colors duration-200"
-                >
-                  {t("about_us")}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href={`/#features`}
-                  className="font-['Inter'] text-gray-300 dark:text-muted-foreground hover:text-white dark:hover:text-card-foreground transition-colors duration-200"
-                >
-                  {t("features")}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href={`/#pricing`}
-                  className="font-['Inter'] text-gray-300 dark:text-muted-foreground hover:text-white dark:hover:text-card-foreground transition-colors duration-200"
-                >
-                  {t("pricing")}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href={`/#faq`}
-                  className="font-['Inter'] text-gray-300 dark:text-muted-foreground hover:text-white dark:hover:text-card-foreground transition-colors duration-200"
-                >
-                  {t("faq")}
-                </Link>
-              </li>
+            <ul className="space-y-2.5">
+              {[
+                { href: "/#about",    label: t("about_us") },
+                { href: "/#features", label: t("features") },
+                { href: "/#pricing",  label: t("pricing") },
+                { href: "/#faq",      label: t("faq") },
+              ].map(({ href, label }) => (
+                <li key={href}>
+                  <Link href={href}
+                    className="text-sm transition-colors hover:text-white"
+                    style={{ color: "#9CA3AF" }}>
+                    {label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
           {/* Support */}
           <div className="space-y-4">
-            <h3 className="font-['Inter'] text-lg font-semibold text-white dark:text-card-foreground mb-6">
+            <h3 className="text-xs font-bold uppercase tracking-widest text-white">
               {t("support")}
             </h3>
-            <ul className="space-y-3">
-              <li>
-                <Link
-                  href={`/auth/signin`}
-                  className="font-['Inter'] text-gray-300 dark:text-muted-foreground hover:text-white dark:hover:text-card-foreground transition-colors duration-200"
-                >
-                  {t("signin")}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href={`/auth/register`}
-                  className="font-['Inter'] text-gray-300 dark:text-muted-foreground hover:text-white dark:hover:text-card-foreground transition-colors duration-200"
-                >
-                  {t("signup")}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href={`/help`}
-                  className="font-['Inter'] text-gray-300 dark:text-muted-foreground hover:text-white dark:hover:text-card-foreground transition-colors duration-200"
-                >
-                  {t("help")}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href={`/contact`}
-                  className="font-['Inter'] text-gray-300 dark:text-muted-foreground hover:text-white dark:hover:text-card-foreground transition-colors duration-200"
-                >
-                  {t("contact")}
-                </Link>
-              </li>
+            <ul className="space-y-2.5">
+              {[
+                { href: "/auth/signin",   label: t("signin") },
+                { href: "/auth/register", label: t("signup") },
+                { href: "/help",          label: t("help") },
+                { href: "/contact",       label: t("contact") },
+              ].map(({ href, label }) => (
+                <li key={href}>
+                  <Link href={href}
+                    className="text-sm transition-colors hover:text-white"
+                    style={{ color: "#9CA3AF" }}>
+                    {label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
           {/* Legal */}
           <div className="space-y-4">
-            <h3 className="font-['Inter'] text-lg font-semibold text-white dark:text-card-foreground mb-6">
+            <h3 className="text-xs font-bold uppercase tracking-widest text-white">
               {t("legal")}
             </h3>
-            <ul className="space-y-3">
-              <li>
-                <Link
-                  href={`/privacy-policy`}
-                  className="font-['Inter'] text-gray-300 dark:text-muted-foreground hover:text-white dark:hover:text-card-foreground transition-colors duration-200"
-                >
-                  {t("privacy_policy")}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href={`/terms-of-service`}
-                  className="font-['Inter'] text-gray-300 dark:text-muted-foreground hover:text-white dark:hover:text-card-foreground transition-colors duration-200"
-                >
-                  {t("terms_of_service")}
-                </Link>
-              </li>
+            <ul className="space-y-2.5">
+              {[
+                { href: "/privacy-policy",   label: t("privacy_policy") },
+                { href: "/terms-of-service", label: t("terms_of_service") },
+              ].map(({ href, label }) => (
+                <li key={href}>
+                  <Link href={href}
+                    className="text-sm transition-colors hover:text-white"
+                    style={{ color: "#9CA3AF" }}>
+                    {label}
+                  </Link>
+                </li>
+              ))}
             </ul>
-          </div>
-
-          {/* Connect/Social */}
-          <div className="space-y-4">
-            <h3 className="font-['Inter'] text-lg font-semibold text-white dark:text-card-foreground mb-6">
-              {t("connect")}
-            </h3>
-            <div className="flex space-x-4">
-              <Link 
-                href="#" 
-                className="w-10 h-10 bg-brand dark:bg-secondary hover:bg-brand/90 dark:hover:bg-secondary/80 text-white dark:text-foreground hover:text-white rounded-full flex items-center justify-center transition-all duration-200"
-              >
-                <Facebook className="w-5 h-5" />
-              </Link>
-              <Link 
-                href="#" 
-                className="w-10 h-10 bg-brand dark:bg-secondary hover:bg-brand/90 dark:hover:bg-secondary/80 text-white dark:text-foreground hover:text-white rounded-full flex items-center justify-center transition-all duration-200"
-              >
-                <Twitter className="w-5 h-5" />
-              </Link>
-              <Link 
-                href="#" 
-                className="w-10 h-10 bg-brand dark:bg-secondary hover:bg-brand/90 dark:hover:bg-secondary/80 text-white dark:text-foreground hover:text-white rounded-full flex items-center justify-center transition-all duration-200"
-              >
-                <Instagram className="w-5 h-5" />
-              </Link>
-              <Link 
-                href="#" 
-                className="w-10 h-10 bg-brand dark:bg-secondary hover:bg-brand/90 dark:hover:bg-secondary/80 text-white dark:text-foreground hover:text-white rounded-full flex items-center justify-center transition-all duration-200"
-              >
-                <Youtube className="w-5 h-5" />
-              </Link>
-            </div>
           </div>
         </div>
 
-        {/* Bottom Copyright Section */}
-        <div className="mt-12 pt-8 border-t border-gray-600 flex flex-col gap-3 text-center md:flex-row md:items-center md:justify-between md:text-left">
-          <p className="font-['Inter'] text-gray-400">
-            &copy; {new Date().getFullYear()} BijbelStudie. All rights reserved.
+        {/* Bottom bar */}
+        <div className="mt-12 pt-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+          style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+          <p className="text-xs" style={{ color: "#6B7280" }}>
+            &copy; {new Date().getFullYear()} BijbelStudie. Alle rechten voorbehouden.
           </p>
-          <p className="font-['Inter'] text-gray-400 md:ml-auto md:text-right">
-            Gemaakt door <span className="text-gray-300">Alex Lamper</span>
+          <p className="text-xs" style={{ color: "#6B7280" }}>
+            Gemaakt door <span style={{ color: "#2DD4BF" }}>Alex Lamper</span>
           </p>
         </div>
       </div>

@@ -11,6 +11,7 @@ function generateCode(length = 6) {
 }
 
 // GET — list public groups + caller's groups
+// ?mine=true returns only the caller's groups (minimal fields for dropdowns)
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.email) return NextResponse.json({ error: "Niet ingelogd" }, { status: 401 })
@@ -21,17 +22,23 @@ export async function GET(req: NextRequest) {
 
   const userId = (user as { _id: { toString(): string } })._id.toString()
 
-  const [publicGroups, myGroups] = await Promise.all([
-    StudyGroup.find({ isPublic: true })
-      .sort({ createdAt: -1 })
-      .limit(50)
-      .populate("createdBy", "name image")
-      .lean(),
-    StudyGroup.find({ "members.userId": userId })
-      .sort({ updatedAt: -1 })
-      .populate("createdBy", "name image")
-      .lean(),
-  ])
+  const myGroups = await StudyGroup.find({ "members.userId": userId })
+    .sort({ updatedAt: -1 })
+    .populate("createdBy", "name image")
+    .lean()
+
+  // Minimal response for note-modal dropdowns
+  if (req.nextUrl.searchParams.get("mine") === "true") {
+    return NextResponse.json({
+      groups: myGroups.map((g: Record<string, unknown>) => ({ _id: g._id, name: g.name })),
+    })
+  }
+
+  const publicGroups = await StudyGroup.find({ isPublic: true })
+    .sort({ createdAt: -1 })
+    .limit(50)
+    .populate("createdBy", "name image")
+    .lean()
 
   return NextResponse.json({ publicGroups, myGroups })
 }
@@ -50,7 +57,14 @@ export async function POST(req: NextRequest) {
   const user = await User.findOne({ email: session.user.email }).lean()
   if (!user) return NextResponse.json({ error: "Gebruiker niet gevonden" }, { status: 404 })
 
-  const userId = (user as { _id: unknown })._id
+  const userId = (user as { _id: unknown; subscribed?: boolean })._id
+
+  if (!(user as { subscribed?: boolean }).subscribed) {
+    return NextResponse.json(
+      { error: "Upgrade naar Premium om een studiegroep aan te maken.", code: "SUBSCRIPTION_REQUIRED" },
+      { status: 403 }
+    )
+  }
 
   // Generate unique invite code
   let inviteCode = generateCode()

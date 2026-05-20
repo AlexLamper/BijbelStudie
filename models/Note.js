@@ -19,9 +19,12 @@ const NoteSchema = new mongoose.Schema(
       type: Number, 
       required: true 
     },
-    verse: { 
-      type: Number 
+    verse: {
+      type: Number
     }, // Optional, for specific verse highlights
+    verseEnd: {
+      type: Number
+    }, // Optional, end verse for passage notes (e.g. verse 1-5)
     verseText: { 
       type: String, 
       required: true // The actual Bible text

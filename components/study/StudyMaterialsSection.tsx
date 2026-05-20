@@ -28,53 +28,55 @@ export default function StudyMaterialsSection({
   onPrevChapter,
   onCommentaryChange,
   onDownload,
-  t
+  t,
 }: StudyMaterialsSectionProps) {
   const [activeTab, setActiveTab] = useState('commentary');
 
   const tabs = [
-    { id: 'commentary', label: t('tabs.commentary'), icon: MessageCircle },
-    { id: 'inductive', label: t('tabs.inductive_study'), icon: Brain },
-    { id: 'historical', label: t('tabs.general_info'), icon: Info },
-    { id: 'notes', label: t('tabs.notes'), icon: Users },
+    { id: 'commentary', label: t('tabs.commentary'),      icon: MessageCircle },
+    { id: 'historical', label: t('tabs.general_info'),    icon: Info },
+    { id: 'inductive',  label: t('tabs.inductive_study'), icon: Brain },
+    { id: 'notes',      label: t('tabs.notes'),           icon: Users },
   ];
 
   return (
-    <section 
-      className="bg-white shadow-sm flex flex-col h-full dark:bg-card"
-    >
-      {/* Header with Tabs */}
-      <div className="h-14 flex items-center px-4 border-b border-gray-200 dark:border-border bg-white dark:bg-card flex-none overflow-x-auto">
-        <div className="flex space-x-1">
-          {tabs.map((tab) => {
-            const isActive = activeTab === tab.id;
-            const Icon = tab.icon;
+    <section className="flex flex-col h-full bg-white dark:bg-background">
+
+      {/* Tab bar */}
+      <div className="h-14 flex items-center px-3 flex-none border-b overflow-x-auto bg-gray-50 dark:bg-card border-gray-200 dark:border-border">
+        <div className="flex gap-0.5">
+          {tabs.map(({ id, label, icon: Icon }) => {
+            const active = activeTab === id;
             return (
               <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center space-x-2 px-2 sm:px-3 py-2 text-xs sm:text-sm font-inter font-medium transition whitespace-nowrap rounded-md ${
-                  isActive
-                    ? 'bg-[#798777]/10 text-[#798777] dark:bg-accent dark:text-[#9aaa98]'
-                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50 dark:text-muted-foreground dark:hover:text-foreground dark:hover:bg-accent'
-                }`}
+                key={id}
+                onClick={() => setActiveTab(id)}
+                className={[
+                  'relative flex items-center gap-2 px-3 py-2 text-xs sm:text-sm font-medium rounded-lg whitespace-nowrap transition-colors',
+                  active
+                    ? 'text-[#0D9488] bg-[rgba(13,148,136,0.07)] dark:bg-[rgba(13,148,136,0.12)]'
+                    : 'text-gray-500 dark:text-muted-foreground hover:text-gray-700 dark:hover:text-foreground hover:bg-gray-100 dark:hover:bg-secondary',
+                ].join(' ')}
               >
-                <Icon size={14} className="sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline">{tab.label}</span>
+                <Icon size={14} />
+                <span className="hidden sm:inline">{label}</span>
+                {active && (
+                  <span className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full bg-[#0D9488]" />
+                )}
               </button>
             );
           })}
         </div>
       </div>
-      
-      {/* Tab Content */}
-      <div className="flex-1 min-h-0 overflow-hidden flex flex-col relative">
-        <TabComponent 
-          selectedBook={selectedBook} 
-          selectedChapter={selectedChapter} 
+
+      {/* Content */}
+      <div className="flex-1 min-h-0 overflow-hidden flex flex-col relative bg-white dark:bg-background">
+        <TabComponent
+          selectedBook={selectedBook}
+          selectedChapter={selectedChapter}
           selectedVersion={selectedVersion}
           selectedCommentary={selectedCommentary}
-          t={t} 
+          t={t}
           versions={versions}
           onNextChapter={onNextChapter}
           onPrevChapter={onPrevChapter}
@@ -83,8 +85,8 @@ export default function StudyMaterialsSection({
           height={1}
           activeTab={activeTab}
         />
-        {/* Bottom Blur Fade */}
-        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent pointer-events-none z-10 dark:from-card" />
+        <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none z-10
+          bg-gradient-to-t from-white dark:from-background to-transparent" />
       </div>
     </section>
   );

@@ -191,7 +191,7 @@ export function CreateNote({
             &ldquo;{verseText}&rdquo;
           </p>
           <p className="text-xs text-gray-500 dark:text-muted-foreground mt-1">
-            — {verseReference} ({translation})
+            - {verseReference} ({translation})
           </p>
         </div>
 

@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { bookNameMap } from './book-mapping';
+import { translatePlaceName } from './place-name-translations';
 
 // OSIS Book Codes
 const OSIS_CODES: Record<string, string> = {
@@ -113,6 +114,7 @@ interface ImageEntry {
 export interface GeoImage {
   id: string;
   url: string;
+  fileUrl: string;       // direct upload.wikimedia.org image URL — always loads
   thumbnailUrl: string;
   description: string;
   credit: string;
@@ -159,66 +161,55 @@ export class GeoDataService {
 
   public getImagesForChapter(bookName: string, chapter: number): GeoImage[] {
     this.loadData();
-    
-    // Normalize book name to OSIS
-    // First check if it's a Dutch name, map to English
+
     const englishName = bookNameMap[bookName] || bookName;
     const osisBook = OSIS_CODES[englishName] || englishName;
-    
-    const chapterPrefix = `${osisBook}.${chapter}.`; // e.g. "Gen.1."
-    const chapterExact = `${osisBook}.${chapter}`; // e.g. "Obad.1" (single chapter books sometimes?) - actually OSIS usually uses chapter numbers.
+    const chapterPrefix = `${osisBook}.${chapter}.`;
+    const chapterExact  = `${osisBook}.${chapter}`;
+
+    if (!osisBook || osisBook === englishName && !OSIS_CODES[englishName]) return [];
 
     const results: GeoImage[] = [];
     const seenImageIds = new Set<string>();
 
     for (const place of this.ancientData || []) {
-      // Check if this place is mentioned in the requested chapter
-      const relevantVerses = place.verses?.filter(v => 
+      const relevantVerses = place.verses?.filter(v =>
         v.osis.startsWith(chapterPrefix) || v.osis === chapterExact
       );
-
       if (!relevantVerses || relevantVerses.length === 0) continue;
 
-      // Look for images in identifications
       if (place.identifications) {
         for (const ident of place.identifications) {
-          if (ident.media?.thumbnail?.image_id) {
-            const imageId = ident.media.thumbnail.image_id;
-            if (seenImageIds.has(imageId)) continue;
+          if (!ident.media?.thumbnail?.image_id) continue;
 
-            const imageEntry = this.imageData?.get(imageId);
-            if (imageEntry) {
-              seenImageIds.add(imageId);
-              
-              // Construct the result
-              // Use the description for this specific modern ID if available
-              const description = imageEntry.descriptions[ident.id] || 
-                                ident.media.thumbnail.description || 
-                                place.friendly_id;
+          const imageId = ident.media.thumbnail.image_id;
+          if (seenImageIds.has(imageId)) continue;
 
-              // Construct thumbnail URL (replace #### with width)
-              // Default to 640px for now
-              const thumbUrl = imageEntry.thumbnail_url_pattern.replace('####', '640');
+          const imageEntry = this.imageData?.get(imageId);
+          if (!imageEntry) continue;
 
-              results.push({
-                id: imageId,
-                url: imageEntry.url,
-                thumbnailUrl: thumbUrl,
-                description: description.replace(/<[^>]*>/g, ''), // Strip HTML tags
-                credit: imageEntry.credit,
-                creditUrl: imageEntry.credit_url,
-                license: imageEntry.license,
-                placeName: place.friendly_id,
-                verses: relevantVerses.map(v => v.readable),
-                modernId: ident.id
-              });
-            }
-          }
+          seenImageIds.add(imageId);
+
+          const thumbUrl = imageEntry.thumbnail_url_pattern.replace('####', '640');
+          const description = (imageEntry.descriptions[ident.id] ||
+                               ident.media.thumbnail.description ||
+                               place.friendly_id).replace(/<[^>]*>/g, '');
+
+          results.push({
+            id: imageId,
+            url: imageEntry.url,
+            fileUrl: imageEntry.file_url,
+            thumbnailUrl: thumbUrl,
+            description,
+            credit: imageEntry.credit,
+            creditUrl: imageEntry.credit_url,
+            license: imageEntry.license,
+            placeName: translatePlaceName(place.friendly_id),
+            verses: relevantVerses.map(v => v.readable),
+            modernId: ident.id,
+          });
         }
       }
-      
-      // Also check 'extra' field for associations if needed
-      // (The 'identifications' array seems to cover the main images shown in the example)
     }
 
     return results;

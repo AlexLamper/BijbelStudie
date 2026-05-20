@@ -1,67 +1,87 @@
-﻿"use client"
+"use client"
 
-import { Button } from "../components/ui/button"
-import { ArrowLeft, Home } from "lucide-react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useTranslation } from "./i18n/client"
+import { ArrowLeft, BookOpen, Home } from "lucide-react"
 import "./globals.css"
 
 export default function NotFound() {
   const router = useRouter()
-  
-  const { t } = useTranslation("common")
-
-  const handleGoBack = () => {
-    if (typeof window !== 'undefined' && window.history.length > 1) {
-      router.back()
-    } else {
-      router.push('/')
-    }
-  }
-
-  const handleGoHome = () => {
-    router.push('/')
-  }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
-      <div className="max-w-md w-full text-center space-y-8">
-        <div className="space-y-4">
-          <div className="text-6xl font-light text-gray-400 dark:text-gray-500">404</div>
-          <h1 className="text-2xl font-medium text-foreground">
-            {t("page_not_found") || "Page Not Found"}
-          </h1>
-          <p className="text-muted-foreground">
-            {t("page_not_found_message") || "The page you're looking for doesn't exist."}
-          </p>
-          <div className="pt-4 border-t border-border">
-            <p className="text-sm text-muted-foreground">
-              {t("page_not_found_description") || "Sorry, we couldn't find the page you were looking for."}
-            </p>
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-              {t("continue_your_study") || "Continue your study"}
-            </p>
-          </div>
+    <div
+      className="min-h-screen flex flex-col items-center justify-center p-6"
+      style={{ backgroundColor: "#F9FAFB", fontFamily: "Inter, system-ui, sans-serif" }}
+    >
+      <div className="w-full max-w-md text-center space-y-8">
+
+        {/* Icon */}
+        <div
+          className="h-16 w-16 rounded-2xl flex items-center justify-center mx-auto"
+          style={{ backgroundColor: "rgba(13,148,136,0.08)" }}
+        >
+          <BookOpen className="h-8 w-8" style={{ color: "#0D9488" }} />
         </div>
 
-        <div className="flex gap-4 justify-center">
-          <Button 
-            onClick={handleGoBack} 
-            variant="outline" 
-            className="flex items-center gap-2 bg-transparent hover:bg-gray-100 dark:bg-transparent dark:hover:bg-gray-800 dark:text-white dark:border-gray-600"
+        {/* Text */}
+        <div className="space-y-3">
+          <p
+            className="text-xs font-bold uppercase tracking-widest"
+            style={{ color: "#0D9488" }}
+          >
+            404
+          </p>
+          <h1
+            className="text-2xl font-extrabold"
+            style={{ color: "#111827" }}
+          >
+            Pagina niet gevonden
+          </h1>
+          <p
+            className="text-sm leading-relaxed"
+            style={{ color: "#6B7280" }}
+          >
+            De pagina die je zoekt bestaat niet of is verplaatst.
+            Ga terug naar het dashboard om verder te studeren.
+          </p>
+        </div>
+
+        {/* Actions */}
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <button
+            onClick={() => router.back()}
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors"
+            style={{
+              border: "1px solid #E5E7EB",
+              backgroundColor: "#FFFFFF",
+              color: "#374151",
+            }}
+            onMouseEnter={e => (e.currentTarget.style.backgroundColor = "#F3F4F6")}
+            onMouseLeave={e => (e.currentTarget.style.backgroundColor = "#FFFFFF")}
           >
             <ArrowLeft className="h-4 w-4" />
-            {t("go_back") || "Go Back"}
-          </Button>
+            Ga terug
+          </button>
 
-          <Button 
-            onClick={handleGoHome} 
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white"
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors"
+            style={{ backgroundColor: "#0D9488" }}
+            onMouseEnter={e => ((e.currentTarget as HTMLElement).style.backgroundColor = "#0F766E")}
+            onMouseLeave={e => ((e.currentTarget as HTMLElement).style.backgroundColor = "#0D9488")}
           >
             <Home className="h-4 w-4" />
-            {t("home") || "Home"}
-          </Button>
+            Naar dashboard
+          </Link>
         </div>
+
+        {/* Footer hint */}
+        <p className="text-xs" style={{ color: "#9CA3AF" }}>
+          Of ga direct naar{" "}
+          <Link href="/study" style={{ color: "#0D9488", fontWeight: 600 }}>
+            Bijbelstudie
+          </Link>
+        </p>
       </div>
     </div>
   )

@@ -149,8 +149,8 @@ export default function ChapterViewer({
       {loading && (
         <div className="flex items-center justify-center py-24">
           <div className="text-center">
-            <Loader2 className="h-10 w-10 animate-spin text-[#798777] dark:text-[#9aaa98] mx-auto mb-6" />
-            <p className="font-inter text-gray-700 text-lg font-medium dark:text-muted-foreground">Bijbeltekst laden...</p>
+            <Loader2 className="h-10 w-10 animate-spin mx-auto mb-6" style={{ color: '#0D9488' }} />
+            <p className="font-inter text-gray-700 dark:text-muted-foreground text-lg font-medium">Bijbeltekst laden...</p>
           </div>
         </div>
       )}
@@ -189,14 +189,14 @@ export default function ChapterViewer({
                       {verseNumber}
                     </sup>
                   )}
-                  <span className="hover:bg-[#798777]/10 dark:hover:bg-[#9aaa98]/20 cursor-pointer transition-colors px-1"
+                  <span className="hover:bg-[#0D9488]/10 cursor-pointer transition-colors px-1"
                         onClick={() => handleVerseClick(verseNumber, text)}>
                     {text}
                   </span>
                 </p>
                 <button
                   onClick={() => handleVerseClick(verseNumber, text)}
-                  className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity bg-[#798777] hover:bg-[#6a7a68] text-white p-1.5 shadow-[0_2px_4px_-1px_rgba(0,0,0,0.1)]"
+                  className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity bg-[#0D9488] hover:bg-[#0f766e] text-white p-1.5 shadow-[0_2px_4px_-1px_rgba(0,0,0,0.1)]"
                   title="Add note to this verse"
                 >
                   <Plus className="h-3 w-3" />
@@ -217,6 +217,7 @@ export default function ChapterViewer({
               verseText={selectedVerse.text}
               translation={version || "statenvertaling"}
               onSave={handleNoteSaved}
+              availableVerses={Object.keys(verses).map(Number).sort((a, b) => a - b)}
             />
           )}
         </>

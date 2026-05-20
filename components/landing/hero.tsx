@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import Link from "next/link"
 import { Button } from "../../components/ui/button"
@@ -138,7 +138,7 @@ export function HeroSection() {
 
             <p className="text-lg text-muted-foreground leading-relaxed max-w-lg">
               Interactieve bijbelstudie met commentaren, leesplannen en bewezen studiemethoden.
-              Verdiep je kennis van Gods Woord — gratis te beginnen.
+              Verdiep je kennis van Gods Woord - gratis te beginnen.
             </p>
 
             {/* CTA Buttons */}

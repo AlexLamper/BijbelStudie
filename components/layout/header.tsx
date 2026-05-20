@@ -78,7 +78,7 @@ export function Header({ title }: HeaderProps) {
   }
 
   return (
-    <header className="flex items-center justify-between px-4 sm:px-6 h-14 border-b border-border bg-background sticky top-0 z-50">
+    <header className="flex items-center justify-between px-4 sm:px-6 h-14 border-b border-border bg-white dark:bg-background sticky top-0 z-50">
       {/* Left: Sidebar trigger + page title */}
       <div className="flex items-center gap-3">
         <SidebarTrigger className="text-muted-foreground hover:text-foreground" />

@@ -93,9 +93,9 @@ export async function POST(request: NextRequest) {
     // Check note limit for free users
     if (!user.subscribed) {
       const noteCount = await Note.countDocuments({ userId: user._id });
-      if (noteCount >= 10) {
+      if (noteCount >= 25) {
         return NextResponse.json(
-          { error: "Free limit reached. Upgrade to Pro to create unlimited notes." },
+          { error: "Free limit reached. Upgrade to Pro to create unlimited notes.", code: "NOTE_LIMIT_REACHED" },
           { status: 403 }
         );
       }
@@ -114,7 +114,8 @@ export async function POST(request: NextRequest) {
       tags,
       isPrivate,
       type,
-      language
+      language,
+      groupId,
     } = body;
 
     // Validate required fields
@@ -138,7 +139,8 @@ export async function POST(request: NextRequest) {
       tags: tags || [],
       isPrivate: isPrivate !== undefined ? isPrivate : true,
       type: type || "note",
-      language: language || "en"
+      language: language || "en",
+      groupId: groupId || null,
     });
 
     const savedNote = await newNote.save();

@@ -24,6 +24,8 @@ export async function POST(req: NextRequest) {
 
     if (!priceId) {
       priceId = process.env.STRIPE_PRICE_ID
+    }
+    if (!priceId) {
       return NextResponse.json({ error: "Missing priceId" }, { status: 400 })
     }
 

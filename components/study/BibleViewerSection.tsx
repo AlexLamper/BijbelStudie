@@ -47,32 +47,32 @@ export default function BibleViewerSection({
   onNextChapter,
   t,
   preferences,
-  onUpdatePreferences
+  onUpdatePreferences,
 }: BibleViewerSectionProps) {
   return (
-    <section className="bg-white shadow-sm flex flex-col h-full dark:bg-card dark:border-r dark:border-border">
-      {/* Header with Navigation and Selectors */}
-      <div className="h-14 flex items-center justify-between px-4 border-b border-gray-200 dark:border-border bg-white dark:bg-card flex-none gap-2">
-        {/* Reading Preferences Menu (moved left) */}
-        <ReadingPreferencesMenu 
-          preferences={preferences}
-          onUpdate={onUpdatePreferences}
-        />
-        <div className="h-6 w-px bg-gray-200 dark:bg-border mx-1" />
+    <section className="flex flex-col h-full bg-white dark:bg-background">
 
-        {/* Previous Chapter Button */}
+      {/* Toolbar */}
+      <div className="h-14 flex items-center justify-between px-3 flex-none gap-2 border-b bg-gray-50 dark:bg-card border-gray-200 dark:border-border">
+        <ReadingPreferencesMenu preferences={preferences} onUpdate={onUpdatePreferences} />
+
+        <div className="w-px h-5 mx-1 bg-gray-200 dark:bg-border" />
+
+        {/* Previous */}
         <button
           onClick={onPreviousChapter}
           disabled={selectedChapter <= 1}
-          className="p-1 sm:p-2 bg-gray-100 hover:bg-gray-200 hover:ring-2 hover:ring-[#798777] transition shadow-[0_1px_3px_0_rgba(0,0,0,0.1)] dark:bg-card dark:hover:bg-accent dark:hover:ring-[#9aaa98] dark:text-foreground disabled:opacity-50 disabled:cursor-not-allowed rounded-md"
           title={t('previous_chapter')}
+          className="flex items-center justify-center rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed w-8 h-8
+            bg-gray-100 dark:bg-secondary border border-gray-200 dark:border-border
+            text-gray-700 dark:text-foreground hover:bg-gray-200 dark:hover:bg-secondary/70"
         >
-          <ChevronLeft className="w-5 h-5" />
+          <ChevronLeft className="w-4 h-4" />
         </button>
 
-        {/* Bible Selector */}
-        <div className="flex-1 px-2 sm:px-4 flex justify-center">
-           <BibleSelector
+        {/* Selector */}
+        <div className="flex-1 px-1 sm:px-3 flex justify-center">
+          <BibleSelector
             versions={versions}
             books={books}
             chapters={chapters}
@@ -89,19 +89,21 @@ export default function BibleViewerSection({
           />
         </div>
 
-        {/* Next Chapter Button */}
+        {/* Next */}
         <button
           onClick={onNextChapter}
           disabled={selectedChapter >= maxChapter}
-          className="p-1 sm:p-2 bg-gray-100 hover:bg-gray-200 hover:ring-2 hover:ring-[#798777] transition shadow-[0_1px_3px_0_rgba(0,0,0,0.1)] dark:bg-card dark:hover:bg-accent dark:hover:ring-[#9aaa98] dark:text-foreground disabled:opacity-50 disabled:cursor-not-allowed rounded-md"
           title={t('next_chapter')}
+          className="flex items-center justify-center rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed w-8 h-8
+            bg-gray-100 dark:bg-secondary border border-gray-200 dark:border-border
+            text-gray-700 dark:text-foreground hover:bg-gray-200 dark:hover:bg-secondary/70"
         >
-          <ChevronRight className="w-5 h-5" />
+          <ChevronRight className="w-4 h-4" />
         </button>
       </div>
 
       {/* Content */}
-      <div className="flex-1 relative min-h-0">
+      <div className="flex-1 relative min-h-0 bg-white dark:bg-background">
         <div className="h-full overflow-y-auto p-4 sm:p-6 pb-24">
           {selectedBook && selectedChapter && selectedVersion ? (
             <ChapterViewer
@@ -125,8 +127,8 @@ export default function BibleViewerSection({
             />
           )}
         </div>
-        {/* Bottom Blur Fade */}
-        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent pointer-events-none z-10 dark:from-card" />
+        <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none z-10
+          bg-gradient-to-t from-white dark:from-background to-transparent" />
       </div>
     </section>
   );

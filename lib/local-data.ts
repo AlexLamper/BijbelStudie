@@ -1,4 +1,4 @@
-import { getBookNameVariants, getBookNameFromNumber, englishToDutchMap, BIBLE_BOOKS_ORDER, normalizeBookName } from './book-mapping';
+import { getBookNameVariants, getBookNameFromNumber, CANONICAL_NL, BIBLE_BOOKS_ORDER, normalizeBookName } from './book-mapping';
 import { headers } from 'next/headers';
 
 // Interfaces
@@ -131,15 +131,15 @@ async function getBooksIndex(): Promise<Record<string, string[]> | null> {
 async function findEntry(version: string) {
     const manifest = await getManifest();
     const versionKey = version.toLowerCase().replace(/\s+/g, '');
-    
+
     // Check bibles
-    let entry = manifest.bibles.find(e => 
+    let entry = manifest.bibles.find(e =>
         e.name.toLowerCase().replace(/[-_]/g, '').replace('.json', '') === versionKey.replace(/[-_]/g, '')
     );
     if (entry) return { ...entry, category: 'bibles' };
 
     // Check commentaries
-    entry = manifest.commentaries.find(e => 
+    entry = manifest.commentaries.find(e =>
         e.name.toLowerCase().replace(/[-_]/g, '').replace('.json', '') === versionKey.replace(/[-_]/g, '')
     );
     if (entry) return { ...entry, category: 'commentaries' };
@@ -265,7 +265,7 @@ export async function getBooks(version: string) {
 
          // Translate to Dutch if version is HSV
         if (version.toLowerCase() === 'hsv') {
-            return books.map(book => englishToDutchMap[book] || book);
+            return books.map(book => CANONICAL_NL[book] || book);
         }
         return books;
     }
@@ -327,7 +327,7 @@ export async function getBooks(version: string) {
 
     // Translate to Dutch if version is HSV
     if (version.toLowerCase() === 'hsv') {
-        return books.map(book => englishToDutchMap[book] || book);
+        return books.map(book => CANONICAL_NL[book] || book);
     }
 
     return books;

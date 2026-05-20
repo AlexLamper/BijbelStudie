@@ -103,6 +103,55 @@ const bookNameMap: Record<string, string> = {
   'Openbaring': 'Revelation',
 };
 
+function formatCommentaryText(raw: string): string {
+  // Already HTML — just strip leftover markdown escapes
+  if (/<[a-zA-Z][^>]*>/.test(raw)) {
+    return raw.replace(/([A-Za-z0-9])\\\./g, '$1.');
+  }
+
+  // Strip markdown-escaped periods: "1\." → "1.", "a\." → "a."
+  const text = raw.replace(/([A-Za-z0-9])\\\./g, '$1.');
+
+  // Split on two or more newlines to get paragraph blocks
+  const blocks = text.split(/\n{2,}/);
+
+  return blocks.map(block => {
+    const trimmed = block.trim();
+    if (!trimmed) return '';
+
+    // Collapse single newlines to spaces within a block
+    const line = trimmed.replace(/\n+/g, ' ');
+
+    // Roman numeral header: I., II., III., IV., V. etc.
+    if (/^(I{1,3}|IV|VI{0,3}|IX|X{1,3})\.\s/.test(line)) {
+      return `<p style="margin-top:1.5em;margin-bottom:0.25em;line-height:1.65">${line}</p>`;
+    }
+
+    // Numbered point: 1., 2., 3.
+    if (/^\d+\.\s/.test(line)) {
+      return `<p style="padding-left:1.25em;margin-top:0.75em;line-height:1.75">${line}</p>`;
+    }
+
+    // Capital-letter point: A., B., C.
+    if (/^[A-Z]\.\s/.test(line)) {
+      return `<p style="padding-left:1.25em;margin-top:0.75em;line-height:1.75">${line}</p>`;
+    }
+
+    // Lowercase lettered sub-point: a., b., c.
+    if (/^[a-z]\.\s/.test(line)) {
+      return `<p style="padding-left:2.5em;margin-top:0.5em;line-height:1.75">${line}</p>`;
+    }
+
+    // Parenthetical numbered sub-sub-point: (1). or (1)
+    if (/^\(\d+\)[.)\s]/.test(line)) {
+      return `<p style="padding-left:3.75em;margin-top:0.5em;line-height:1.75">${line}</p>`;
+    }
+
+    // Regular paragraph
+    return `<p style="margin-top:0.75em;line-height:1.75">${line}</p>`;
+  }).filter(Boolean).join('');
+}
+
 const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
   book,
   chapter,
@@ -236,8 +285,8 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
   return (
     <Card className={`border-0 shadow-none rounded-lg dark:bg-card ${height ? 'h-full flex flex-col' : ''}`}>
       {/* Source Selector */}
-      <div className="px-4 sm:px-6 py-3 border-b border-gray-100 dark:border-border flex items-center justify-between bg-gray-50/50 dark:bg-card">
-        <span className="text-sm font-medium text-gray-600 dark:text-muted-foreground">Source:</span>
+      <div className="px-4 sm:px-6 py-3 border-b border-gray-100 dark:border-border flex items-center justify-between bg-gray-50 dark:bg-card">
+        <span className="text-sm font-medium text-gray-600 dark:text-muted-foreground">Commentaarbron</span>
         <div className="relative">
             <select 
                 value={selectedSource}
@@ -248,7 +297,7 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
                     onSourceChange(newSource);
                   }
                 }}
-                className="appearance-none bg-white dark:bg-secondary border border-gray-200 dark:border-border rounded-md py-1 pl-3 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-[#798777] dark:text-foreground"
+                className="appearance-none bg-white dark:bg-secondary border border-gray-200 dark:border-border rounded-md py-1 pl-3 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-[#0D9488] dark:text-foreground"
             >
                 {availableSources.length > 0 ? (
                     sortedLanguages.map(lang => (
@@ -285,7 +334,7 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
             </div>
             <Button 
               onClick={() => router.push('/subscribe')}
-              className="bg-[#798777] hover:bg-[#687566] text-white"
+              className="bg-[#0D9488] hover:bg-[#0f766e] text-white"
             >
               Upgrade to Pro
             </Button>
@@ -293,8 +342,8 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
         ) : loading ? (
             <div className="flex items-center justify-center py-12">
                 <div className="text-center">
-                <Loader2 className="h-8 w-8 animate-spin text-[#798777] dark:text-[#9aaa98] mx-auto mb-4" />
-                <p className="font-inter text-gray-700 text-base font-medium dark:text-muted-foreground">
+                <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" style={{ color: '#0D9488' }} />
+                <p className="font-inter text-gray-700 text-base font-medium">
                     Commentaar laden...
                 </p>
                 </div>
@@ -319,11 +368,11 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
             Object.entries(commentary).map(([key, text]) => (
             <div key={key} className="border-b border-gray-100 dark:border-border pb-4 last:border-0 pr-2">
                 <h3 className="font-merriweather font-semibold text-gray-900 dark:text-foreground mb-2">
-                {key === 'intro' ? 'Inleiding' : `Vers ${key}`}
+                {key === 'intro' || key === '0' ? 'Inleiding' : `Vers ${key}`}
                 </h3>
-                <div 
-                    className="font-inter text-gray-700 text-base leading-loose dark:text-foreground whitespace-pre-wrap prose dark:prose-invert max-w-none"
-                    dangerouslySetInnerHTML={{ __html: text }}
+                <div
+                    className="font-inter text-gray-700 text-base dark:text-foreground max-w-none"
+                    dangerouslySetInnerHTML={{ __html: formatCommentaryText(text) }}
                 />
             </div>
             ))

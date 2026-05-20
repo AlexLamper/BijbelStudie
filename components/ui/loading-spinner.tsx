@@ -24,7 +24,7 @@ export function LoadingSpinner({
   return (
     <div className={`flex items-center justify-center ${containerClass}`}>
       <div className="text-center">
-        <Loader2 className={`${sizeClasses[size]} animate-spin text-[#798777] mx-auto mb-4`} />
+        <Loader2 className={`${sizeClasses[size]} animate-spin text-[#0D9488] mx-auto mb-4`} />
         {message && (
           <p className="font-inter text-gray-700 text-base font-medium dark:text-gray-200">
             {message}

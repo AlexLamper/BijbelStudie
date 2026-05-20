@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import React, { useState, useEffect, useCallback } from "react"
 import { useSession } from "next-auth/react"
@@ -259,7 +259,7 @@ export default function NotesPage() {
                       {/* Bible verse */}
                       <blockquote className="text-sm text-muted-foreground border-l-2 border-teal-300 pl-3 mb-3 italic leading-relaxed">
                         &ldquo;{note.verseText}&rdquo;
-                        <footer className="text-xs mt-1 not-italic">— {note.translation}</footer>
+                        <footer className="text-xs mt-1 not-italic">- {note.translation}</footer>
                       </blockquote>
 
                       {/* Note text */}

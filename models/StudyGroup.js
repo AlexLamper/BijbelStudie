@@ -15,6 +15,23 @@ const StudyGroupSchema = new mongoose.Schema(
     createdBy:   { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     members:     [MemberSchema],
     planId:      { type: mongoose.Schema.Types.ObjectId, ref: "BiblePlan", default: null },
+    weeklyAssignment: {
+      book:    { type: String },
+      chapter: { type: Number },
+      title:   { type: String, default: "" },
+      setBy:   { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      setAt:   { type: Date, default: Date.now },
+      dueDate: { type: Date, default: null },
+      _id: false,
+    },
+    challenge: {
+      title:     { type: String },
+      type:      { type: String, enum: ["chapters", "notes"] },
+      target:    { type: Number },
+      startDate: { type: Date },
+      endDate:   { type: Date },
+      _id: false,
+    },
   },
   { timestamps: true }
 )

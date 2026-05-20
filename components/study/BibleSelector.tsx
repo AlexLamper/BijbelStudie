@@ -1,4 +1,5 @@
 import React from 'react';
+import { normalizeBookName, BIBLE_BOOKS_ORDER } from '../../lib/book-mapping';
 
 type Props = {
   versions: { id: string; name: string; language?: string }[];
@@ -17,11 +18,23 @@ type Props = {
 };
 
 const languageNames: Record<string, string> = {
-  en: 'English',
   nl: 'Nederlands',
   de: 'Deutsch',
   af: 'Afrikaans',
+  en: 'English',
 };
+
+const SELECT_CLS = [
+  'text-[13px]',
+  'border rounded-lg cursor-pointer outline-none',
+  'overflow-hidden text-ellipsis whitespace-nowrap',
+  // Light
+  'bg-gray-50 border-gray-200 text-gray-900',
+  // Dark
+  'dark:bg-secondary dark:border-border dark:text-foreground',
+  // Transition
+  'transition-opacity',
+].join(' ');
 
 export default function BibleSelector({
   versions,
@@ -36,88 +49,78 @@ export default function BibleSelector({
   loadingVersions,
   loadingBooks,
   loadingChapters,
-  t,
 }: Props) {
-
-  // Group versions by language
-  const groupedVersions = versions.reduce((acc, version) => {
-    const lang = version.language || 'en';
-    if (!acc[lang]) {
-      acc[lang] = [];
-    }
-    acc[lang].push(version);
+  const grouped = versions.reduce<Record<string, typeof versions>>((acc, v) => {
+    const lang = v.language || 'nl';
+    if (!acc[lang]) acc[lang] = [];
+    acc[lang].push(v);
     return acc;
-  }, {} as Record<string, typeof versions>);
+  }, {});
 
-  // Sort languages (optional, maybe put current language first?)
-  const sortedLanguages = Object.keys(groupedVersions).sort((a, b) => {
-      // Put 'nl' and 'en' first
-      if (a === 'nl') return -1;
-      if (b === 'nl') return 1;
-      if (a === 'en') return -1;
-      if (b === 'en') return 1;
-      return a.localeCompare(b);
-  });
+  const sortedLangs = Object.keys(grouped).sort(a => (a === 'nl' ? -1 : 1));
+
+  const ot = books.filter(b => BIBLE_BOOKS_ORDER.indexOf(normalizeBookName(b)) < 39);
+  const nt = books.filter(b => BIBLE_BOOKS_ORDER.indexOf(normalizeBookName(b)) >= 39);
 
   return (
-    <div className="flex flex-row gap-2 items-center w-full">
-      {/* Version Selector */}
+    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.2fr) minmax(0,1.4fr) 78px', gap: 6, width: '100%', alignItems: 'center' }}>
+
+      {/* Version */}
       <select
-        className="flex-1 w-full p-1 sm:p-2 text-sm bg-gray-100 hover:bg-gray-200 hover:ring-2 hover:ring-[#798777] transition shadow-[0_1px_3px_0_rgba(0,0,0,0.1)] dark:bg-card dark:hover:bg-accent dark:hover:ring-[#9aaa98] dark:text-foreground disabled:opacity-50 disabled:cursor-not-allowed rounded-md border-none focus:outline-none cursor-pointer"
-        value={selectedVersion || ''}
-        onChange={(e) => onVersionChange(e.target.value)}
+        className={`${SELECT_CLS} ${loadingVersions ? 'opacity-50' : ''}`}
+        style={{ padding: '5px 8px', appearance: 'auto' }}
+        value={selectedVersion ?? ''}
+        onChange={e => onVersionChange(e.target.value)}
         disabled={loadingVersions || versions.length === 0}
-        title={t('translation')}
+        title="Bijbelvertaling"
       >
-        <option value="" disabled>
-          {loadingVersions ? '...' : (versions.length === 0 ? t('no_translations') : 'Trans')}
-        </option>
-        {sortedLanguages.map((lang) => (
-          <optgroup key={lang} label={languageNames[lang] || lang.toUpperCase()}>
-            {groupedVersions[lang].map((version) => (
-              <option key={version.id} value={version.id}>
-                {version.name}
-              </option>
-            ))}
+        {versions.length === 0 && <option value="" disabled>Laden...</option>}
+        {sortedLangs.map(lang => (
+          <optgroup key={lang} label={languageNames[lang] ?? lang.toUpperCase()}>
+            {grouped[lang].map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
           </optgroup>
         ))}
       </select>
 
-      {/* Book Selector */}
+      {/* Book */}
       <select
-        className="flex-1 w-full p-1 sm:p-2 text-sm bg-gray-100 hover:bg-gray-200 hover:ring-2 hover:ring-[#798777] transition shadow-[0_1px_3px_0_rgba(0,0,0,0.1)] dark:bg-card dark:hover:bg-accent dark:hover:ring-[#9aaa98] dark:text-foreground disabled:opacity-50 disabled:cursor-not-allowed rounded-md border-none focus:outline-none cursor-pointer"
+        className={`${SELECT_CLS} ${loadingBooks || books.length === 0 ? 'opacity-50' : ''}`}
+        style={{ padding: '5px 8px', appearance: 'auto' }}
         value={selectedBook}
-        onChange={(e) => onBookChange(e.target.value)}
+        onChange={e => onBookChange(e.target.value)}
         disabled={loadingBooks || books.length === 0}
-        title={t('book')}
+        title="Bijbelboek"
       >
-        <option value="" disabled>
-          {loadingBooks ? '...' : (books.length === 0 ? t('no_books') : 'Book')}
-        </option>
-        {books.map((book) => (
-          <option key={book} value={book}>
-            {book}
-          </option>
-        ))}
+        {(loadingBooks || books.length === 0) && (
+          <option value="" disabled>{loadingBooks ? '...' : 'Geen boeken'}</option>
+        )}
+        {ot.length > 0 && (
+          <optgroup label="Oude Testament">
+            {ot.map(b => <option key={b} value={b}>{b}</option>)}
+          </optgroup>
+        )}
+        {nt.length > 0 && (
+          <optgroup label="Nieuwe Testament">
+            {nt.map(b => <option key={b} value={b}>{b}</option>)}
+          </optgroup>
+        )}
       </select>
 
-      {/* Chapter Selector */}
+      {/* Chapter */}
       <select
-        className="flex-1 w-full p-1 sm:p-2 text-sm bg-gray-100 hover:bg-gray-200 hover:ring-2 hover:ring-[#798777] transition shadow-[0_1px_3px_0_rgba(0,0,0,0.1)] dark:bg-card dark:hover:bg-accent dark:hover:ring-[#9aaa98] dark:text-foreground disabled:opacity-50 disabled:cursor-not-allowed rounded-md border-none focus:outline-none cursor-pointer"
+        className={`${SELECT_CLS} ${loadingChapters || chapters.length === 0 ? 'opacity-50' : ''}`}
+        style={{ padding: '5px 8px', appearance: 'auto', textAlign: 'center' }}
         value={selectedChapter}
-        onChange={(e) => onChapterChange(Number(e.target.value))}
+        onChange={e => onChapterChange(Number(e.target.value))}
         disabled={loadingChapters || chapters.length === 0}
-        title={t('chapter')}
+        title="Hoofdstuk"
       >
-        <option value={0} disabled>
-          {loadingChapters ? '...' : (chapters.length === 0 ? t('no_chapters') : 'Ch')}
-        </option>
-        {chapters.map((c) => (
-          <option key={c} value={c}>
-            {c}
-          </option>
-        ))}
+        {(loadingChapters || chapters.length === 0) && (
+          <option value={0} disabled>{loadingChapters ? '...' : '-'}</option>
+        )}
+        {chapters.map(c => <option key={c} value={c}>{c}</option>)}
       </select>
+
     </div>
   );
 }

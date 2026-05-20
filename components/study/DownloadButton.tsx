@@ -92,7 +92,7 @@ export default function DownloadButton({
   return (
     <div className="relative download-dropdown">
       <button 
-        className="p-1 sm:p-2 bg-gray-100 hover:bg-gray-200 hover:ring-2 hover:ring-[#798777] transition shadow-[0_1px_3px_0_rgba(0,0,0,0.1)] dark:bg-card dark:hover:bg-accent dark:hover:ring-[#9aaa98] dark:text-foreground disabled:opacity-50 disabled:cursor-not-allowed" 
+        className="p-1 sm:p-2 bg-gray-100 hover:bg-gray-200 hover:ring-2 hover:ring-[#0D9488] transition shadow-[0_1px_3px_0_rgba(0,0,0,0.1)] dark:bg-card dark:hover:bg-accent dark:hover:ring-[#0D9488] dark:text-foreground disabled:opacity-50 disabled:cursor-not-allowed" 
         title={t('print_download')}
         onClick={() => setShowDownloadOptions(!showDownloadOptions)}
       >

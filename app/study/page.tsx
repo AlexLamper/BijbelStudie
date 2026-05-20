@@ -1,22 +1,23 @@
 'use client';
 
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, Suspense } from 'react';
 import { useTranslation } from '../i18n/client';
+import { useSearchParams } from 'next/navigation';
 import { useBibleData } from '../../hooks/useBibleData';
 import { useReadingPreferences } from '../../hooks/useReadingPreferences';
 import BibleViewerSection from '../../components/study/BibleViewerSection';
 import StudyMaterialsSection from '../../components/study/StudyMaterialsSection';
 import StartupAnimation from '../../components/ui/startup-animation';
 
-export default function StudyPage() {
+function StudyPageInner() {
   const { t, i18n } = useTranslation('study');
   const lng = i18n.resolvedLanguage;
-  
+  const searchParams = useSearchParams();
+
   const { preferences, updatePreferences } = useReadingPreferences();
   const [showAnimation, setShowAnimation] = useState(false);
 
   useEffect(() => {
-    // Check if we've already shown the animation in this session
     const hasShown = sessionStorage.getItem('study-startup-shown');
     if (!hasShown) {
       setShowAnimation(true);
@@ -27,6 +28,10 @@ export default function StudyPage() {
     sessionStorage.setItem('study-startup-shown', 'true');
     setShowAnimation(false);
   };
+
+  const initialBook    = searchParams.get('book')    ?? undefined;
+  const initialChapter = searchParams.get('chapter') ? Number(searchParams.get('chapter')) : undefined;
+  const initialVersion = searchParams.get('version') ?? undefined;
 
   const {
     versions,
@@ -47,25 +52,22 @@ export default function StudyPage() {
     handleCommentaryChange,
     handlePreviousChapter,
     handleNextChapter,
-  } = useBibleData(lng);
+  } = useBibleData(lng ?? 'nl', { initialBook, initialChapter, initialVersion });
 
-  const handleDownload = useCallback(() => {
-    // This will be handled by the DownloadButton component
-    // Download triggered via keyboard shortcut
-  }, []);
+  const handleDownload = useCallback(() => {}, []);
 
   return (
     <div className="h-full flex flex-col font-inter overflow-hidden">
       {showAnimation && (
-        <StartupAnimation 
-          isReady={!isInitialLoading} 
-          onComplete={handleAnimationComplete} 
+        <StartupAnimation
+          isReady={!isInitialLoading}
+          onComplete={handleAnimationComplete}
         />
       )}
-      
+
       <div className="flex flex-col lg:flex-row h-full w-full">
-        {/* Left: Bible verse section (50% width) */}
-        <div className="h-full w-full lg:w-1/2 min-h-0 overflow-hidden border-r border-gray-200 dark:border-border">
+        {/* Left: Bible viewer */}
+        <div className="h-full w-full lg:w-1/2 min-h-0 overflow-hidden border-r border-border">
           <BibleViewerSection
             selectedBook={selectedBook}
             selectedChapter={selectedChapter}
@@ -88,7 +90,7 @@ export default function StudyPage() {
           />
         </div>
 
-        {/* Right: Study materials section (50% width) */}
+        {/* Right: Study materials */}
         <div className="h-full w-full lg:w-1/2 min-h-0 overflow-hidden">
           <StudyMaterialsSection
             selectedBook={selectedBook}
@@ -105,5 +107,13 @@ export default function StudyPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function StudyPage() {
+  return (
+    <Suspense>
+      <StudyPageInner />
+    </Suspense>
   );
 }

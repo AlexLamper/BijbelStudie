@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
@@ -14,37 +15,44 @@ interface ModalProps {
 }
 
 export function Modal({ isOpen, onClose, title, children, className = "" }: ModalProps) {
-  if (!isOpen) return null;
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
-      />
-      
-      {/* Modal Content */}
-      <div className={`relative z-10 w-full max-w-2xl max-h-[90vh] m-4 ${className}`}>
-        <Card className="shadow-2xl">
-          <CardHeader className="flex flex-row items-center justify-between pb-3">
-            <CardTitle className="text-lg font-semibold">
+  // Close on Escape
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isOpen, onClose]);
+
+  if (!isOpen || !mounted) return null;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 flex items-center justify-center p-4"
+      style={{ zIndex: 9999, backgroundColor: "rgba(0,0,0,0.55)", backdropFilter: "blur(4px)" }}
+      onClick={onClose}
+    >
+      <div
+        className={`relative w-full max-w-2xl max-h-[90vh] ${className}`}
+        onClick={e => e.stopPropagation()}
+      >
+        <Card className="shadow-2xl dark:bg-card">
+          <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-gray-100 dark:border-border">
+            <CardTitle className="text-lg font-semibold text-gray-900 dark:text-foreground">
               {title}
             </CardTitle>
-            <Button
-              onClick={onClose}
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0"
-            >
+            <Button onClick={onClose} variant="ghost" size="sm" className="h-8 w-8 p-0">
               <X className="h-4 w-4" />
             </Button>
           </CardHeader>
-          <CardContent className="max-h-[70vh] overflow-y-auto">
+          <CardContent className="max-h-[70vh] overflow-y-auto pt-5">
             {children}
           </CardContent>
         </Card>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

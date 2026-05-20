@@ -1,10 +1,10 @@
-﻿"use client"
+"use client"
 
 import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { Loader2, Eye, EyeOff, ArrowLeft, Check } from "lucide-react"
+import { Loader2, Eye, EyeOff, ArrowLeft, Check, BookOpen, BookMarked, StickyNote, Library } from "lucide-react"
 
 const BENEFITS = [
   "Bijbel lezen in meerdere vertalingen",
@@ -13,6 +13,64 @@ const BENEFITS = [
   "Bewezen studiemethoden gebruiken",
   "Voortgang en streak bijhouden",
 ]
+
+const PANEL_FEATURES = [
+  { icon: BookOpen,   title: "Meerdere vertalingen",  desc: "Statenvertaling, HSV en meer" },
+  { icon: BookMarked, title: "Leesplannen",            desc: "Lees de Bijbel systematisch" },
+  { icon: StickyNote, title: "Notities & markering",   desc: "Aantekeningen bij verzen" },
+  { icon: Library,    title: "Studiemethoden",         desc: "Inductief, SOAP, SOLVAT" },
+]
+
+function FeaturePanel() {
+  return (
+    <div
+      className="hidden lg:flex lg:w-1/2 flex-col justify-center px-12 xl:px-16 relative overflow-hidden"
+      style={{ backgroundColor: "#1F2937" }}
+    >
+      <div className="absolute top-0 right-0 w-56 h-56 rounded-full opacity-10"
+        style={{ background: "radial-gradient(circle, #0D9488, transparent)", transform: "translate(30%, -30%)" }} />
+      <div className="absolute bottom-0 left-0 w-40 h-40 rounded-full opacity-10"
+        style={{ background: "radial-gradient(circle, #0D9488, transparent)", transform: "translate(-30%, 30%)" }} />
+
+      <div className="relative z-10 space-y-8">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "#2DD4BF" }}>
+            Gratis beginnen
+          </p>
+          <h2 className="text-3xl xl:text-4xl font-extrabold text-white leading-tight">
+            Alles wat je nodig hebt<br />voor Bijbelstudie
+          </h2>
+          <p className="mt-4 leading-relaxed text-sm" style={{ color: "#9CA3AF" }}>
+            Maak in minder dan een minuut een gratis account aan.
+          </p>
+        </div>
+
+        <div className="space-y-2.5">
+          {BENEFITS.map((b) => (
+            <div key={b} className="flex items-center gap-3">
+              <div className="h-5 w-5 rounded-full flex items-center justify-center flex-shrink-0"
+                style={{ backgroundColor: "rgba(13,148,136,0.25)" }}>
+                <Check className="h-3 w-3" style={{ color: "#2DD4BF" }} />
+              </div>
+              <p className="text-sm" style={{ color: "rgba(255,255,255,0.85)" }}>{b}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          {PANEL_FEATURES.map(({ icon: Icon, title, desc }) => (
+            <div key={title} className="rounded-xl p-4 border"
+              style={{ backgroundColor: "rgba(255,255,255,0.05)", borderColor: "rgba(255,255,255,0.08)" }}>
+              <Icon className="h-4 w-4 mb-2" style={{ color: "#2DD4BF" }} />
+              <p className="text-white text-xs font-semibold">{title}</p>
+              <p className="text-xs mt-0.5" style={{ color: "#9CA3AF" }}>{desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function RegisterPage() {
   const router = useRouter()
@@ -90,7 +148,7 @@ export default function RegisterPage() {
             </h1>
             <p className="text-muted-foreground text-sm mt-1.5">
               Al een account?{" "}
-              <Link href="/auth/signin" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
+              <Link href="/auth/signin" className="text-teal-600 dark:text-teal-400 hover:underline font-medium">
                 Log hier in
               </Link>
             </p>
@@ -110,7 +168,7 @@ export default function RegisterPage() {
               <input
                 id="name" name="name" type="text" required autoComplete="name"
                 value={formData.name} onChange={handleChange}
-                className="w-full px-3.5 py-2.5 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-foreground rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400"
+                className="w-full px-3.5 py-2.5 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-foreground rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent placeholder:text-gray-400"
                 placeholder="Jouw naam"
               />
             </div>
@@ -120,7 +178,7 @@ export default function RegisterPage() {
               <input
                 id="email" name="email" type="email" required autoComplete="email"
                 value={formData.email} onChange={handleChange}
-                className="w-full px-3.5 py-2.5 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-foreground rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400"
+                className="w-full px-3.5 py-2.5 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-foreground rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent placeholder:text-gray-400"
                 placeholder="jouw@email.nl"
               />
             </div>
@@ -131,7 +189,7 @@ export default function RegisterPage() {
                 <input
                   id="password" name="password" type={showPassword ? "text" : "password"} required autoComplete="new-password"
                   value={formData.password} onChange={handleChange}
-                  className="w-full px-3.5 py-2.5 pr-10 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-foreground rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400"
+                  className="w-full px-3.5 py-2.5 pr-10 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-foreground rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent placeholder:text-gray-400"
                   placeholder="Minimaal 8 tekens"
                 />
                 <button type="button" onClick={() => setShowPassword(!showPassword)}
@@ -147,7 +205,7 @@ export default function RegisterPage() {
                 <input
                   id="confirmPassword" name="confirmPassword" type={showConfirm ? "text" : "password"} required autoComplete="new-password"
                   value={formData.confirmPassword} onChange={handleChange}
-                  className="w-full px-3.5 py-2.5 pr-10 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-foreground rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:text-gray-400"
+                  className="w-full px-3.5 py-2.5 pr-10 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-foreground rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent placeholder:text-gray-400"
                   placeholder="Herhaal wachtwoord"
                 />
                 <button type="button" onClick={() => setShowConfirm(!showConfirm)}
@@ -159,7 +217,7 @@ export default function RegisterPage() {
 
             <button
               type="submit" disabled={isLoading}
-              className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold rounded-lg text-sm transition-colors flex items-center justify-center gap-2 shadow-sm mt-2"
+              className="w-full py-2.5 bg-teal-600 hover:bg-teal-700 disabled:bg-teal-400 text-white font-semibold rounded-lg text-sm transition-colors flex items-center justify-center gap-2 shadow-sm mt-2"
             >
               {isLoading ? (
                 <><Loader2 className="h-4 w-4 animate-spin" /> Account aanmaken...</>
@@ -176,52 +234,8 @@ export default function RegisterPage() {
         </div>
       </div>
 
-      {/* Right: Benefits panel */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-blue-800 dark:from-blue-900 dark:to-slate-900 flex-col justify-center px-12 xl:px-16 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
-
-        <div className="relative z-10 space-y-8">
-          <div>
-            <p className="text-blue-200 text-sm font-semibold uppercase tracking-widest mb-3">Gratis beginnen</p>
-            <h2 className="text-3xl xl:text-4xl font-extrabold text-white leading-tight">
-              Alles wat je nodig hebt<br />voor Bijbelstudie
-            </h2>
-            <p className="text-blue-100 mt-4 leading-relaxed">
-              Maak in minder dan een minuut een gratis account aan.
-            </p>
-          </div>
-
-          <div className="space-y-3">
-            {BENEFITS.map((b) => (
-              <div key={b} className="flex items-center gap-3">
-                <div className="h-6 w-6 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
-                  <Check className="h-3.5 w-3.5 text-white" />
-                </div>
-                <p className="text-white text-sm">{b}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="bg-white/10 rounded-2xl p-5 border border-white/10">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center text-white font-bold">
-                A
-              </div>
-              <div>
-                <p className="text-white text-sm font-semibold">Alex</p>
-                <div className="flex gap-0.5">
-                  {[1,2,3,4,5].map(i => <span key={i} className="text-amber-400 text-xs">★</span>)}
-                </div>
-              </div>
-            </div>
-            <p className="text-blue-100 text-sm italic leading-relaxed">
-              &ldquo;BijbelStudie heeft mijn dagelijks bijbellezen compleet getransformeerd. De studiemethoden zijn geweldig.&rdquo;
-            </p>
-          </div>
-        </div>
-      </div>
+      {/* Right: Feature panel */}
+      <FeaturePanel />
     </div>
   )
 }
-

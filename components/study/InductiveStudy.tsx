@@ -38,7 +38,7 @@ export default function InductiveStudy({
     <Card className="border-0 shadow-none rounded-lg dark:bg-card">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 font-merriweather text-gray-900 dark:text-foreground">
-          <Brain className="w-6 h-6 text-[#798777] dark:text-[#9aaa98]" />
+          <Brain className="w-6 h-6 text-[#0D9488]" />
           Inductieve Bijbelstudie: {book} {chapter}
         </CardTitle>
         <p className="font-inter text-sm text-gray-600 dark:text-muted-foreground">
@@ -49,7 +49,7 @@ export default function InductiveStudy({
           {/* Step 1: Observation */}
           <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-[#798777] text-white flex items-center justify-center">
+              <div className="w-8 h-8 bg-[#0D9488] text-white flex items-center justify-center">
                 <Eye size={16} />
               </div>
               <h3 className="font-merriweather text-lg font-semibold text-gray-900 dark:text-foreground">
@@ -63,13 +63,13 @@ export default function InductiveStudy({
               placeholder="Wat staat er in de tekst? Schrijf op wat je ziet..."
               value={studyData.observation}
               onChange={(e) => updateStudyData('observation', e.target.value)}
-              className="min-h-[120px] font-inter border border-gray-300 dark:border-border focus:border-[#798777] dark:focus:border-[#9aaa98] dark:bg-background rounded-lg"
+              className="min-h-[120px] font-inter border border-gray-300 dark:border-border focus:border-[#0D9488] dark:bg-background rounded-lg"
             />
           </div>
           {/* Step 2: Interpretation */}
           <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-[#798777] text-white flex items-center justify-center">
+              <div className="w-8 h-8 bg-[#0D9488] text-white flex items-center justify-center">
                 <Brain size={16} />
               </div>
               <h3 className="font-merriweather text-lg font-semibold text-gray-900 dark:text-foreground">
@@ -83,13 +83,13 @@ export default function InductiveStudy({
               placeholder="Wat is de betekenis? Wat wil God je leren?"
               value={studyData.interpretation}
               onChange={(e) => updateStudyData('interpretation', e.target.value)}
-              className="min-h-[120px] font-inter border border-gray-300 dark:border-border focus:border-[#798777] dark:focus:border-[#9aaa98] dark:bg-background rounded-lg"
+              className="min-h-[120px] font-inter border border-gray-300 dark:border-border focus:border-[#0D9488] dark:bg-background rounded-lg"
             />
           </div>
           {/* Step 3: Application */}
           <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-[#798777] text-white flex items-center justify-center">
+              <div className="w-8 h-8 bg-[#0D9488] text-white flex items-center justify-center">
                 <Heart size={16} />
               </div>
               <h3 className="font-merriweather text-lg font-semibold text-gray-900 dark:text-foreground">
@@ -103,7 +103,7 @@ export default function InductiveStudy({
               placeholder="Hoe ga je dit toepassen in je leven?"
               value={studyData.application}
               onChange={(e) => updateStudyData('application', e.target.value)}
-              className="min-h-[120px] font-inter border border-gray-300 dark:border-border focus:border-[#798777] dark:focus:border-[#9aaa98] dark:bg-background rounded-lg"
+              className="min-h-[120px] font-inter border border-gray-300 dark:border-border focus:border-[#0D9488] dark:bg-background rounded-lg"
             />
           </div>
       </CardContent>

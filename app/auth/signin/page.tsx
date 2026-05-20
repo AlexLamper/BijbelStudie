@@ -50,12 +50,12 @@ function FeaturePanel() {
               <BookOpen className="h-4 w-4 text-white" />
             </div>
             <div>
-              <p className="text-white text-sm font-semibold">Johannes 3:16</p>
+              <p className="text-white text-sm font-semibold">Johannes 5:39</p>
               <p className="text-xs" style={{ color: "#9CA3AF" }}>Statenvertaling</p>
             </div>
           </div>
           <p className="text-sm leading-relaxed italic" style={{ color: "rgba(255,255,255,0.8)" }}>
-            &ldquo;Want alzo lief heeft God de wereld gehad, dat Hij Zijn eniggeboren Zoon gegeven heeft.&rdquo;
+            &ldquo;Onderzoekt de Schriften; want gij meent in dezelve het eeuwige leven te hebben; en die zijn het, die van Mij getuigen.&rdquo;
           </p>
         </div>
 
@@ -143,7 +143,7 @@ export default function SignInPage() {
             </h1>
             <p className="text-muted-foreground text-sm mt-1.5">
               Nog geen account?{" "}
-              <Link href="/auth/register" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
+              <Link href="/auth/register" className="text-teal-600 dark:text-teal-400 hover:underline font-medium">
                 Maak er gratis een aan
               </Link>
             </p>
@@ -170,7 +170,7 @@ export default function SignInPage() {
                 required
                 value={formData.email}
                 onChange={e => { setFormData(p => ({ ...p, email: e.target.value })); setError("") }}
-                className="w-full px-3.5 py-2.5 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-foreground rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors placeholder:text-gray-400"
+                className="w-full px-3.5 py-2.5 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-foreground rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors placeholder:text-gray-400"
                 placeholder="jouw@email.nl"
               />
             </div>
@@ -180,7 +180,7 @@ export default function SignInPage() {
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Wachtwoord
                 </label>
-                <Link href="/auth/forgot-password" className="text-xs text-blue-600 dark:text-blue-400 hover:underline">
+                <Link href="/auth/forgot-password" className="text-xs text-teal-600 dark:text-teal-400 hover:underline">
                   Vergeten?
                 </Link>
               </div>
@@ -193,7 +193,7 @@ export default function SignInPage() {
                   required
                   value={formData.password}
                   onChange={e => { setFormData(p => ({ ...p, password: e.target.value })); setError("") }}
-                  className="w-full px-3.5 py-2.5 pr-10 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-foreground rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors placeholder:text-gray-400"
+                  className="w-full px-3.5 py-2.5 pr-10 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-foreground rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-colors placeholder:text-gray-400"
                   placeholder="••••••••"
                 />
                 <button
@@ -209,7 +209,7 @@ export default function SignInPage() {
             <button
               type="submit"
               disabled={emailLoading}
-              className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold rounded-lg text-sm transition-colors flex items-center justify-center gap-2 shadow-sm"
+              className="w-full py-2.5 bg-teal-600 hover:bg-teal-700 disabled:bg-teal-400 text-white font-semibold rounded-lg text-sm transition-colors flex items-center justify-center gap-2 shadow-sm"
             >
               {emailLoading ? (
                 <><Loader2 className="h-4 w-4 animate-spin" /> Inloggen...</>

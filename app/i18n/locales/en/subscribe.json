@@ -2,6 +2,11 @@
   "title": "BijbelStudie Pro",
   "subtitle": "Unlock deeper understanding of the Bible with advanced study tools and resources.",
   "billing_info": "/month, billed monthly",
+  "billing_annual_info": "/year, billed annually",
+  "billing_monthly": "Monthly",
+  "billing_annual": "Yearly",
+  "billing_annual_savings": "42% off",
+  "per_month": "per month",
   "cta": "Subscribe Now",
   "selling_points": [
     "Cancel anytime",
@@ -13,7 +18,9 @@
     "Unlimited Notes & Highlights",
     "Unlimited Bible Reading Plans",
     "Access to Bible Commentaries",
-    "Historical Context & Insights"
+    "Historical Context & Insights",
+    "Create Study Groups",
+    "Use Streak Freezes"
   ],
   "already_subscribed_title": "You are already subscribed!",
   "already_subscribed_message": "Thank you for being a premium member. You have full access to all features.",
