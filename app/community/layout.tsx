@@ -26,8 +26,6 @@ export default async function CommunityLayout({
   children: React.ReactNode;
 }>) {
   const session = await getServerSession();
-  const cookieStore = await cookies();
-  const lng = cookieStore.get(cookieName)?.value || fallbackLng;
 
   return (
     <div className="antialiased bg-background">

@@ -23,8 +23,6 @@ export default async function StudyLayout({
   children,
 }: StudyLayoutProps) {
   const session = await getServerSession();
-  const cookieStore = await cookies();
-  const lng = cookieStore.get(cookieName)?.value || fallbackLng;
 
   return (
     <div className="antialiased bg-background h-screen flex flex-col overflow-hidden">

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Check, Copy, Shield, UserMinus, ChevronDown } from "lucide-react"
+import { Check, Copy, Shield, UserMinus } from "lucide-react"
 
 interface Member {
   _id: string; name: string; image?: string

@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import { Inter, Lora, Merriweather } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "../components/providers/theme-provider";
-import { cookieName, fallbackLng } from "./i18n/settings";
-import { cookies } from "next/headers";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../lib/authOptions";
 import { OnboardingWrapper } from "../components/onboarding/onboarding-wrapper";
@@ -102,8 +100,6 @@ export default async function RootLayout({
   } catch {
     // non-critical — user will be treated as unauthenticated
   }
-  const cookieStore = await cookies();
-
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Organization",

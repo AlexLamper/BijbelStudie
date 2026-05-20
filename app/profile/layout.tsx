@@ -4,8 +4,6 @@ import SessionProvider from "../../components/providers/SessionProvider";
 import { Header } from "../../components/layout/header";
 import { AppSidebar } from "../../components/layout/app-sidebar";
 import { SidebarProvider } from "../../components/ui/sidebar";
-import { cookies } from "next/headers";
-import { cookieName, fallbackLng } from "../i18n/settings";
 
 export const metadata: Metadata = {
   title: {
@@ -110,8 +108,6 @@ export default async function ProfileLayout({
   children: React.ReactNode;
 }>) {
   const session = await getServerSession();
-  const cookieStore = await cookies();
-  const lng = cookieStore.get(cookieName)?.value || fallbackLng;
 
   return (
     <div className="antialiased bg-background h-screen flex flex-col overflow-hidden">

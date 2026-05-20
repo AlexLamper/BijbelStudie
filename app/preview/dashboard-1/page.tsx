@@ -5,7 +5,7 @@
 import Link from "next/link"
 import {
   CheckCircle2, Circle, Flame, BookOpen, PenLine,
-  ArrowRight, ChevronRight, BarChart2, CalendarDays,
+  ArrowRight, ChevronRight, CalendarDays,
 } from "lucide-react"
 
 const NAV = [

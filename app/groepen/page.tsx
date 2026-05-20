@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import {
   Users, Plus, Search, Lock, Globe, BookMarked,
-  ChevronRight, ArrowRight, UserPlus, X,
+  ChevronRight, UserPlus, X,
 } from "lucide-react"
 
 interface Member { _id: string; name: string; image?: string }

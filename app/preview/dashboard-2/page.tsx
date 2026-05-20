@@ -3,7 +3,7 @@
 // Centrum: waar ben je in de Bijbel? Wat heb je al gelezen?
 
 import Link from "next/link"
-import { BookOpen, ChevronRight, MapPin, BookMarked, ArrowRight, CheckCircle2 } from "lucide-react"
+import { BookOpen, MapPin, BookMarked, ArrowRight, CheckCircle2 } from "lucide-react"
 
 const NAV = [
   { href: "/preview/dashboard-1", label: "Concept 1 — Dagelijks Kompas" },

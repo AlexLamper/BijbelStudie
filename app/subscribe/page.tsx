@@ -29,7 +29,7 @@ export default function SubscribePage() {
   const [loading, setLoading] = useState(false)
   const [checkingSubscription, setCheckingSubscription] = useState(true)
   const [isSubscribed, setIsSubscribed] = useState(false)
-  const [billing, setBilling] = useState<BillingInterval>("monthly")
+
   const { toast } = useToast()
   const router = useRouter()
 

@@ -4,7 +4,7 @@
 import Link from "next/link"
 import {
   LayoutDashboard, BookOpen, BookMarked, StickyNote,
-  Library, User, Settings, Flame, ChevronRight,
+  Library, User, Settings,
   Bell, Search, Moon,
 } from "lucide-react"
 

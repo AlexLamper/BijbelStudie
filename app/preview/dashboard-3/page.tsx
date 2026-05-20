@@ -4,7 +4,7 @@
 
 import Link from "next/link"
 import {
-  BookOpen, PenLine, Layers, MessageCircle,
+  PenLine, Layers, MessageCircle,
   ChevronRight, ArrowRight, Info, Lightbulb,
 } from "lucide-react"
 

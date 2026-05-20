@@ -270,7 +270,6 @@ export default function DiscussieTab({
   groupId,
   currentUserId,
   currentUserRole,
-  currentUserName,
 }: {
   groupId: string
   currentUserId: string
