@@ -55,6 +55,7 @@ function LightboxContent({ selected, onClose }: { selected: GeoImage; onClose: (
       >
         {/* Cover image */}
         <div style={{ position: 'relative', aspectRatio: '16/9', backgroundColor: '#E5E7EB', overflow: 'hidden' }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={imgSrc(selected)}
             alt={selected.placeName}
@@ -258,6 +259,7 @@ export default function GeoImages({ book, chapter, className, variant = 'grid' }
                   }}
                 >
                   <div style={{ height: 78, overflow: 'hidden', backgroundColor: '#F3F4F6' }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={imgSrc(image)}
                       alt={image.placeName}
@@ -315,6 +317,7 @@ export default function GeoImages({ book, chapter, className, variant = 'grid' }
             >
               {/* Thumbnail — thumbnailUrl is always a valid image URL */}
               <div style={{ height: 110, overflow: 'hidden', backgroundColor: '#F3F4F6' }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={imgSrc(image)}
                   alt={image.placeName}

@@ -305,6 +305,7 @@ export default function DiscussieTab({
   useEffect(() => {
     setLoading(true)
     fetchMessages(1).finally(() => setLoading(false))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [groupId])
 
   const handleLoadMore = async () => {

@@ -18,8 +18,9 @@ interface ActivityItem {
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   const session = await getServerSession(authOptions)
   if (!session?.user?.email) return NextResponse.json({ error: "Niet ingelogd" }, { status: 401 })
 
@@ -29,7 +30,7 @@ export async function GET(
 
   const userId = user._id.toString()
 
-  const group = await StudyGroup.findById(params.id)
+  const group = await StudyGroup.findById(id)
     .populate("members.userId", "name image")
     .lean() as unknown as {
       members: Array<{ userId: { _id: { toString(): string }; name: string; image?: string }; joinedAt: Date }>;
@@ -51,7 +52,7 @@ export async function GET(
 
   // 1. Shared notes
   const sharedNotes = await Note.find({
-    groupId: params.id,
+    groupId: id,
     createdAt: { $gte: cutoff },
   })
     .populate("userId", "name image")

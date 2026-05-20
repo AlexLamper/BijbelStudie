@@ -94,6 +94,7 @@ export function CreateNoteModal({
       .then(d => setMyGroups(d.groups || []))
       .catch(() => {})
       .finally(() => setLoadingGroups(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   // Sync verse selectors when verse prop or scope changes
