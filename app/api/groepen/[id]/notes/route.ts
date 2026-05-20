@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+﻿import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "../../../../../lib/authOptions"
 import connectMongoDB from "../../../../../lib/mongodb"
@@ -8,8 +8,9 @@ import User from "../../../../../models/User"
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   const session = await getServerSession(authOptions)
   if (!session?.user?.email) return NextResponse.json({ error: "Niet ingelogd" }, { status: 401 })
 
@@ -18,7 +19,7 @@ export async function GET(
   if (!user) return NextResponse.json({ error: "Gebruiker niet gevonden" }, { status: 404 })
 
   const userId  = (user as { _id: { toString(): string } })._id.toString()
-  const group   = await StudyGroup.findById(params.id).lean()
+  const group   = await StudyGroup.findById(id).lean()
   if (!group) return NextResponse.json({ error: "Groep niet gevonden" }, { status: 404 })
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -28,7 +29,7 @@ export async function GET(
   if (!isMember) return NextResponse.json({ error: "Geen toegang" }, { status: 403 })
 
   // Notes shared with this group — stored with groupId field
-  const notes = await Note.find({ groupId: params.id })
+  const notes = await Note.find({ groupId: id })
     .populate("userId", "name image")
     .sort({ createdAt: -1 })
     .limit(50)

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+﻿import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "../../../../../lib/authOptions"
 import connectMongoDB from "../../../../../lib/mongodb"
@@ -7,8 +7,9 @@ import User from "../../../../../models/User"
 
 export async function POST(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   const session = await getServerSession(authOptions)
   if (!session?.user?.email) return NextResponse.json({ error: "Niet ingelogd" }, { status: 401 })
 
@@ -17,7 +18,7 @@ export async function POST(
   if (!user) return NextResponse.json({ error: "Gebruiker niet gevonden" }, { status: 404 })
 
   const userId = (user as { _id: { toString(): string } })._id.toString()
-  const group  = await StudyGroup.findById(params.id)
+  const group  = await StudyGroup.findById(id)
   if (!group) return NextResponse.json({ error: "Groep niet gevonden" }, { status: 404 })
 
   const member = group.members.find(

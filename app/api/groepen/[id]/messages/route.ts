@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+﻿import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "../../../../../lib/authOptions"
 import connectMongoDB from "../../../../../lib/mongodb"
@@ -23,8 +23,9 @@ function getMemberRole(
 // GET — paginated discussion feed
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   const session = await getServerSession(authOptions)
   if (!session?.user?.email) return NextResponse.json({ error: "Niet ingelogd" }, { status: 401 })
 
@@ -34,7 +35,7 @@ export async function GET(
 
   const userId = user._id.toString()
 
-  const group = await StudyGroup.findById(params.id).lean() as unknown as { members: Array<{ userId: { toString(): string }; role: string }> } | null
+  const group = await StudyGroup.findById(id).lean() as unknown as { members: Array<{ userId: { toString(): string }; role: string }> } | null
   if (!group) return NextResponse.json({ error: "Groep niet gevonden" }, { status: 404 })
 
   const role = getMemberRole(group.members, userId)
@@ -47,7 +48,7 @@ export async function GET(
   const skip      = (page - 1) * limit
 
   const filter: Record<string, unknown> = {
-    groupId:   params.id,
+    groupId:   id,
     deletedAt: null,
     parentId:  parentId ? new mongoose.Types.ObjectId(parentId) : null,
   }
@@ -101,8 +102,9 @@ export async function GET(
 // POST — create a message
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   const session = await getServerSession(authOptions)
   if (!session?.user?.email) return NextResponse.json({ error: "Niet ingelogd" }, { status: 401 })
 
@@ -112,7 +114,7 @@ export async function POST(
 
   const userId = user._id.toString()
 
-  const group = await StudyGroup.findById(params.id).lean() as unknown as { members: Array<{ userId: { toString(): string }; role: string }> } | null
+  const group = await StudyGroup.findById(id).lean() as unknown as { members: Array<{ userId: { toString(): string }; role: string }> } | null
   if (!group) return NextResponse.json({ error: "Groep niet gevonden" }, { status: 404 })
 
   const role = getMemberRole(group.members, userId)
@@ -131,7 +133,7 @@ export async function POST(
   }
 
   const msg = await GroupMessage.create({
-    groupId:  params.id,
+    groupId:  id,
     userId:   user._id,
     type,
     content:  content.trim(),

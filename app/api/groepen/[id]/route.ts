@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+﻿import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "../../../../lib/authOptions"
 import connectMongoDB from "../../../../lib/mongodb"
@@ -6,14 +6,15 @@ import StudyGroup from "../../../../models/StudyGroup"
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   const session = await getServerSession(authOptions)
   if (!session?.user?.email) return NextResponse.json({ error: "Niet ingelogd" }, { status: 401 })
 
   await connectMongoDB()
 
-  const group = await StudyGroup.findById(params.id)
+  const group = await StudyGroup.findById(id)
     .populate("createdBy", "name image")
     .populate("members.userId", "name image")
     .populate("planId")
@@ -27,8 +28,9 @@ export async function GET(
 // PATCH — update group settings (leader only)
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   const session = await getServerSession(authOptions)
   if (!session?.user?.email) return NextResponse.json({ error: "Niet ingelogd" }, { status: 401 })
 
@@ -41,7 +43,7 @@ export async function PATCH(
 
   const callerId = callerUser._id.toString()
 
-  const group = await StudyGroup.findById(params.id).lean() as unknown as {
+  const group = await StudyGroup.findById(id).lean() as unknown as {
     members: Array<{ userId: { toString(): string }; role: string }>;
   } | null
   if (!group) return NextResponse.json({ error: "Groep niet gevonden" }, { status: 404 })
@@ -63,7 +65,7 @@ export async function PATCH(
   }
 
   const updated = await StudyGroup.findByIdAndUpdate(
-    params.id,
+    id,
     { $set: updates },
     { new: true }
   )

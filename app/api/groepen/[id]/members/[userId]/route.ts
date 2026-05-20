@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+﻿import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "../../../../../../lib/authOptions"
 import connectMongoDB from "../../../../../../lib/mongodb"
@@ -8,8 +8,9 @@ import User from "../../../../../../models/User"
 // PATCH — promote or demote a member (leader only)
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string; userId: string } }
+  { params }: { params: Promise<{ id: string; userId: string }> }
 ) {
+  const { id, userId } = await params
   const session = await getServerSession(authOptions)
   if (!session?.user?.email) return NextResponse.json({ error: "Niet ingelogd" }, { status: 401 })
 
@@ -19,7 +20,7 @@ export async function PATCH(
 
   const callerId = caller._id.toString()
 
-  const group = await StudyGroup.findById(params.id).lean() as unknown as {
+  const group = await StudyGroup.findById(id).lean() as unknown as {
     members: Array<{ userId: { toString(): string }; role: string }>;
   } | null
   if (!group) return NextResponse.json({ error: "Groep niet gevonden" }, { status: 404 })
@@ -36,7 +37,7 @@ export async function PATCH(
   }
 
   // Prevent demoting self if only leader
-  if (params.userId === callerId && role === "member") {
+  if (userId === callerId && role === "member") {
     const leaderCount = group.members.filter(m => m.role === "leader").length
     if (leaderCount <= 1) {
       return NextResponse.json({ error: "U kunt uzelf niet degraderen als enige leider" }, { status: 400 })
@@ -44,7 +45,7 @@ export async function PATCH(
   }
 
   await StudyGroup.updateOne(
-    { _id: params.id, "members.userId": params.userId },
+    { _id: id, "members.userId": userId },
     { $set: { "members.$.role": role } }
   )
 
@@ -54,8 +55,9 @@ export async function PATCH(
 // DELETE — remove a member (leader only)
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: { id: string; userId: string } }
+  { params }: { params: Promise<{ id: string; userId: string }> }
 ) {
+  const { id, userId } = await params
   const session = await getServerSession(authOptions)
   if (!session?.user?.email) return NextResponse.json({ error: "Niet ingelogd" }, { status: 401 })
 
@@ -65,7 +67,7 @@ export async function DELETE(
 
   const callerId = caller._id.toString()
 
-  const group = await StudyGroup.findById(params.id).lean() as unknown as {
+  const group = await StudyGroup.findById(id).lean() as unknown as {
     members: Array<{ userId: { toString(): string }; role: string }>;
   } | null
   if (!group) return NextResponse.json({ error: "Groep niet gevonden" }, { status: 404 })
@@ -75,13 +77,13 @@ export async function DELETE(
     return NextResponse.json({ error: "Alleen groepsleiders kunnen leden verwijderen" }, { status: 403 })
   }
 
-  if (params.userId === callerId) {
+  if (userId === callerId) {
     return NextResponse.json({ error: "Gebruik 'Groep verlaten' om uzelf te verwijderen" }, { status: 400 })
   }
 
   await StudyGroup.updateOne(
-    { _id: params.id },
-    { $pull: { members: { userId: params.userId } } }
+    { _id: id },
+    { $pull: { members: { userId: userId } } }
   )
 
   return NextResponse.json({ message: "Lid verwijderd" })

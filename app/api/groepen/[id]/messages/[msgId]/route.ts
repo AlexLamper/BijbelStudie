@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+﻿import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "../../../../../../lib/authOptions"
 import connectMongoDB from "../../../../../../lib/mongodb"
@@ -9,8 +9,9 @@ import User from "../../../../../../models/User"
 // DELETE — soft-delete a message (own message or leader)
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: { id: string; msgId: string } }
+  { params }: { params: Promise<{ id: string; msgId: string }> }
 ) {
+  const { id, msgId } = await params
   const session = await getServerSession(authOptions)
   if (!session?.user?.email) return NextResponse.json({ error: "Niet ingelogd" }, { status: 401 })
 
@@ -21,8 +22,8 @@ export async function DELETE(
   const userId = user._id.toString()
 
   const [group, msg] = await Promise.all([
-    StudyGroup.findById(params.id).lean() as unknown as Promise<{ members: Array<{ userId: { toString(): string }; role: string }> } | null>,
-    GroupMessage.findById(params.msgId).lean() as unknown as Promise<{ userId: { toString(): string }; deletedAt: Date | null } | null>,
+    StudyGroup.findById(id).lean() as unknown as Promise<{ members: Array<{ userId: { toString(): string }; role: string }> } | null>,
+    GroupMessage.findById(msgId).lean() as unknown as Promise<{ userId: { toString(): string }; deletedAt: Date | null } | null>,
   ])
 
   if (!group) return NextResponse.json({ error: "Groep niet gevonden" }, { status: 404 })
@@ -39,7 +40,7 @@ export async function DELETE(
     return NextResponse.json({ error: "Geen toestemming om dit bericht te verwijderen" }, { status: 403 })
   }
 
-  await GroupMessage.findByIdAndUpdate(params.msgId, { $set: { deletedAt: new Date() } })
+  await GroupMessage.findByIdAndUpdate(msgId, { $set: { deletedAt: new Date() } })
 
   return NextResponse.json({ message: "Bericht verwijderd" })
 }

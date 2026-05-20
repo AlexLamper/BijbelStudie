@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+﻿import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "../../../../../lib/authOptions"
 import connectMongoDB from "../../../../../lib/mongodb"
@@ -26,13 +26,14 @@ async function requireLeader(email: string, groupId: string) {
 // POST — set weekly reading assignment (leader only)
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   const session = await getServerSession(authOptions)
   if (!session?.user?.email) return NextResponse.json({ error: "Niet ingelogd" }, { status: 401 })
 
   await connectMongoDB()
-  const auth = await requireLeader(session.user.email, params.id)
+  const auth = await requireLeader(session.user.email, id)
   if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status })
 
   const body = await req.json()
@@ -42,7 +43,7 @@ export async function POST(
   if (!chapter || typeof chapter !== "number") return NextResponse.json({ error: "Hoofdstuk is verplicht" }, { status: 400 })
 
   const updated = await StudyGroup.findByIdAndUpdate(
-    params.id,
+    id,
     {
       $set: {
         weeklyAssignment: {
@@ -66,16 +67,17 @@ export async function POST(
 // DELETE — clear weekly assignment (leader only)
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   const session = await getServerSession(authOptions)
   if (!session?.user?.email) return NextResponse.json({ error: "Niet ingelogd" }, { status: 401 })
 
   await connectMongoDB()
-  const auth = await requireLeader(session.user.email, params.id)
+  const auth = await requireLeader(session.user.email, id)
   if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status })
 
-  await StudyGroup.findByIdAndUpdate(params.id, { $unset: { weeklyAssignment: "" } })
+  await StudyGroup.findByIdAndUpdate(id, { $unset: { weeklyAssignment: "" } })
 
   return NextResponse.json({ message: "Opdracht verwijderd" })
 }
