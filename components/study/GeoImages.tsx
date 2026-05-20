@@ -32,7 +32,7 @@ function imgSrc(img: GeoImage): string {
 }
 
 /** Shared lightbox — rendered via createPortal in both strip and grid variants */
-function LightboxContent({ selected, onClose, t }: { selected: GeoImage; onClose: () => void; t: (k: string) => string }) {
+function LightboxContent({ selected, onClose }: { selected: GeoImage; onClose: () => void }) {
   return (
     <div
       role="dialog"
@@ -282,7 +282,7 @@ export default function GeoImages({ book, chapter, className, variant = 'grid' }
 
         {/* Lightbox — same portal as grid variant */}
         {selected && mounted && createPortal(
-          <LightboxContent selected={selected} onClose={() => setSelected(null)} t={t} />,
+          <LightboxContent selected={selected} onClose={() => setSelected(null)} />,
           document.body
         )}
       </>
@@ -291,7 +291,7 @@ export default function GeoImages({ book, chapter, className, variant = 'grid' }
 
   /* ── Grid variant (default) ────────────────────────────────── */
   const lightbox = selected && mounted
-    ? createPortal(<LightboxContent selected={selected} onClose={() => setSelected(null)} t={t} />, document.body)
+    ? createPortal(<LightboxContent selected={selected} onClose={() => setSelected(null)} />, document.body)
     : null;
 
   return (

@@ -5,7 +5,6 @@ import { useSession } from "next-auth/react";
 import { StickyNote, Calendar, Loader2, Plus } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { CreateNoteModal } from "./CreateNoteModal";
-import { useTranslation } from "../../app/i18n/client";
 
 interface Note {
   _id: string;
@@ -23,7 +22,6 @@ interface ChapterNotesProps {
 
 export function ChapterNotes({ book, chapter }: ChapterNotesProps) {
   const { data: session } = useSession();
-  const { t } = useTranslation('study');
 
   const [notes, setNotes]         = useState<Note[]>([]);
   const [loading, setLoading]     = useState(false);

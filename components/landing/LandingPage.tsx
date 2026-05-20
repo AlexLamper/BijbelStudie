@@ -1,14 +1,14 @@
 ﻿"use client"
 
-import { useRef, useState, useEffect } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import {
-  BookOpen, BookMarked, StickyNote, Library, Search,
+  BookOpen, BookMarked, StickyNote, Library,
   ArrowRight, Check, ChevronDown, Users, Shield,
   Layers, FileText, Heart, Lightbulb, BarChart2,
-  Clock, Star, MessageSquare, ChevronLeft, ChevronRight,
+  Star, MessageSquare, ChevronLeft, ChevronRight,
   Flame, PenLine,
 } from "lucide-react"
 import { Footer } from "./footer"
