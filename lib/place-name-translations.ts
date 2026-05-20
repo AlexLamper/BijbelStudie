@@ -201,7 +201,6 @@ export const PLACE_NAME_NL: Record<string, string> = {
 
   // ── Bijzondere plaatsen ───────────────────────────────────────
   'Broad Wall':            'Brede Muur',
-  'Brook of Egypt':        'Beek van Egypte',
   'City of David':         'Stad van David',
   'City of Palms':         'Palmstad',
   'City of Salt':          'Zoutstad',
@@ -219,7 +218,6 @@ export const PLACE_NAME_NL: Record<string, string> = {
   'King\'s Highway':       'Koningsweg',
   'Lower Pool':            'Lagere Vijver',
   'Most Holy Place':       'Heilige der Heiligen',
-  'Mount of Olives':       'Olijfberg',
   'Old Pool':              'Oude Vijver',
   'Rock of Escape':        'Rots der Ontsnapping',
   'Serpent\'s Stone':      'Slangesteen',

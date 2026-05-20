@@ -8,7 +8,6 @@ export const bookNameMap: Record<string, string> = {
   'Deuteronomium': 'Deuteronomy',
   'Jozua': 'Joshua',
   'Richteren': 'Judges',
-  'Richteren': 'Judges',
   'Ruth': 'Ruth',
   '1 Samuel': '1 Samuel',
   '1 Samuël': '1 Samuel',       // statenvertaling variant (diacritic)
