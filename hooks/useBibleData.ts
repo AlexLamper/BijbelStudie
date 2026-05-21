@@ -6,7 +6,6 @@ import { bookNameMap, CANONICAL_NL, normalizeBookName, BIBLE_BOOKS_ORDER } from 
 /* ─── Static data - never changes ───────────────────────────── */
 const VERSIONS = [
   { id: 'statenvertaling', name: 'Statenvertaling', language: 'nl' },
-  { id: 'basisbijbel',     name: 'BasisBijbel',     language: 'nl' },
 ] as const;
 
 // Flat-file translations: stored as a single JSON, no per-book directory.

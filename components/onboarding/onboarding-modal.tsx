@@ -13,11 +13,6 @@ const BIBLE_VERSIONS = [
     label: "Statenvertaling",
     desc: "De klassieke Nederlandse bijbelvertaling (1637)",
   },
-  {
-    code: "basisbijbel",
-    label: "BasisBijbel",
-    desc: "Moderne, toegankelijke Nederlandse vertaling",
-  },
 ]
 
 const THEMES = [

@@ -18,7 +18,7 @@ const GOOGLE_SVG = (
 import { BookMarked, StickyNote, Library } from "lucide-react"
 
 const PANEL_FEATURES = [
-  { icon: BookOpen,    title: "Bijbelvertalingen",      desc: "Statenvertaling, BasisBijbel en meer" },
+  { icon: BookOpen,    title: "Bijbelvertalingen",      desc: "Lees de Statenvertaling en meer vertalingen" },
   { icon: BookMarked,  title: "10 begeleide studies",   desc: "Over personen, thema's en gebeurtenissen" },
   { icon: StickyNote,  title: "Notities & markering",   desc: "Sla inzichten op bij elk vers" },
   { icon: Library,     title: "Studiemethoden",         desc: "Inductief, SOAP, SOLVAT en meer" },
