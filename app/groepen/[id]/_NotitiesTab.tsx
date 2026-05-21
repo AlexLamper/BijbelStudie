@@ -53,7 +53,7 @@ export default function NotitiesTab({ groupId }: { groupId: string }) {
             Deel een notitie via de bijbelstudie tool — selecteer een groep bij het opslaan.
           </p>
         </div>
-        <Link href="/study"
+        <Link href="/studie"
           className="flex items-center gap-1 text-xs font-semibold whitespace-nowrap ml-3 flex-shrink-0"
           style={{ color: "#0D9488" }}>
           Open studie <ArrowRight size={12} />

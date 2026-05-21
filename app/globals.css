@@ -1,4 +1,4 @@
-@tailwind base;
+﻿@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -32,7 +32,7 @@
     --brand:               174 77% 31%;    /* #0D9488 */
     --brand-foreground:    0   0%  100%;
 
-    /* Sidebar — dark charcoal */
+    /* Sidebar - dark charcoal */
     --sidebar-background:  215 28% 17%;    /* #1F2937 */
     --sidebar-foreground:  215 14% 62%;
     --sidebar-primary:     174 60% 44%;    /* lighter teal for active */
@@ -50,7 +50,7 @@
   }
 
   .dark {
-    --background:          0   0%  9%;     /* #171717 — neutral near-black  */
+    --background:          0   0%  9%;     /* #171717 - neutral near-black  */
     --foreground:          0   0%  90%;    /* #E5E5E5 */
     --card:                0   0%  13%;    /* #212121 */
     --card-foreground:     0   0%  90%;

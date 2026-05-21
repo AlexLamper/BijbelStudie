@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
 import { AlertCircle, BookOpen } from 'lucide-react';
@@ -57,7 +57,7 @@ export default function HistoricalContext({ book, chapter }: HistoricalContextPr
   return (
     <div className="border-0 shadow-none h-full flex flex-col bg-white dark:bg-background">
 
-      {/* Header bar — matches commentary style exactly */}
+      {/* Header bar - matches commentary style exactly */}
       <div className="px-4 sm:px-6 py-3 border-b border-gray-100 dark:border-border flex items-center gap-2 bg-gray-50 dark:bg-card flex-none">
         <BookOpen className="w-4 h-4 flex-shrink-0" style={{ color: '#0D9488' }} />
         <span className="text-sm font-medium text-gray-600 dark:text-muted-foreground">{book}</span>
@@ -66,7 +66,7 @@ export default function HistoricalContext({ book, chapter }: HistoricalContextPr
       {/* Image strip */}
       <GeoImages book={book} chapter={chapter} variant="strip" />
 
-      {/* Scrollable content — matches commentary padding exactly */}
+      {/* Scrollable content - matches commentary padding exactly */}
       <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 pt-4 pb-24 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-secondary scrollbar-track-transparent">
         {isLoading ? (
           <SummarySkeleton />

@@ -45,7 +45,7 @@ export default function SidebarProCTA() {
   return (
     <div className="mt-auto px-3 pb-4">
       <div
-        onClick={() => router.push("/subscribe")}
+        onClick={() => router.push("/abonnement")}
         className="bg-[#798777]/8 dark:bg-[#798777]/12 shadow-sm border border-[#798777]/20 dark:border-[#798777]/30 overflow-hidden transition-colors duration-300 p-3 cursor-pointer flex items-center justify-between hover:bg-[#798777]/12 dark:hover:bg-[#798777]/16"
       >
         <div className="flex items-center">

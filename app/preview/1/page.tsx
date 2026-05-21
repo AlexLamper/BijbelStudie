@@ -1,4 +1,4 @@
-// STYLE PREVIEW 1 — "Clean & Professional"
+﻿// STYLE PREVIEW 1 - "Clean & Professional"
 // White content area · Dark navy sidebar · Blue-600 accent · Inter font
 
 import Link from "next/link"
@@ -25,7 +25,7 @@ export default function Preview1() {
   return (
     <div className="flex h-screen bg-white font-sans overflow-hidden" style={{ fontFamily: "Inter, system-ui, sans-serif" }}>
 
-      {/* Sidebar — dark navy */}
+      {/* Sidebar - dark navy */}
       <aside className="w-60 flex-shrink-0 flex flex-col" style={{ backgroundColor: "#0F172A" }}>
         {/* Logo */}
         <div className="px-5 py-5 border-b" style={{ borderColor: "#1E293B" }}>
@@ -161,7 +161,7 @@ export default function Preview1() {
 
       {/* Selector badge */}
       <div className="fixed bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-gray-900 text-white text-sm px-5 py-2.5 rounded-full shadow-xl z-50">
-        <span className="font-semibold">Stijl 1 — Clean & Professioneel</span>
+        <span className="font-semibold">Stijl 1 - Clean & Professioneel</span>
         <span className="text-gray-400">·</span>
         <Link href="/preview/2" className="text-blue-400 hover:text-blue-300">Stijl 2 →</Link>
         <Link href="/preview/3" className="text-blue-400 hover:text-blue-300">Stijl 3 →</Link>

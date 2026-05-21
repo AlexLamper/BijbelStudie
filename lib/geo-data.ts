@@ -1,4 +1,4 @@
-import fs from 'fs';
+﻿import fs from 'fs';
 import path from 'path';
 import { bookNameMap } from './book-mapping';
 import { translatePlaceName } from './place-name-translations';
@@ -114,7 +114,7 @@ interface ImageEntry {
 export interface GeoImage {
   id: string;
   url: string;
-  fileUrl: string;       // direct upload.wikimedia.org image URL — always loads
+  fileUrl: string;       // direct upload.wikimedia.org image URL - always loads
   thumbnailUrl: string;
   description: string;
   credit: string;

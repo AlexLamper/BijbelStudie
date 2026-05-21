@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import React, { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -31,7 +31,7 @@ function imgSrc(img: GeoImage): string {
   return img.fileUrl || img.thumbnailUrl;
 }
 
-/** Shared lightbox — rendered via createPortal in both strip and grid variants */
+/** Shared lightbox - rendered via createPortal in both strip and grid variants */
 function LightboxContent({ selected, onClose }: { selected: GeoImage; onClose: () => void }) {
   return (
     <div
@@ -224,7 +224,7 @@ export default function GeoImages({ book, chapter, className, variant = 'grid' }
   if (variant === 'strip') {
     return (
       <>
-        {/* Pinned strip — no scroll needed to see it */}
+        {/* Pinned strip - no scroll needed to see it */}
         <div style={{
           borderBottom: '1px solid #F3F4F6',
           backgroundColor: '#FAFAFA',
@@ -282,7 +282,7 @@ export default function GeoImages({ book, chapter, className, variant = 'grid' }
             </div>
         </div>
 
-        {/* Lightbox — same portal as grid variant */}
+        {/* Lightbox - same portal as grid variant */}
         {selected && mounted && createPortal(
           <LightboxContent selected={selected} onClose={() => setSelected(null)} />,
           document.body
@@ -315,7 +315,7 @@ export default function GeoImages({ book, chapter, className, variant = 'grid' }
               onClick={() => setSelected(image)}
               className="group text-left rounded-xl overflow-hidden border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow focus:outline-none"
             >
-              {/* Thumbnail — thumbnailUrl is always a valid image URL */}
+              {/* Thumbnail - thumbnailUrl is always a valid image URL */}
               <div style={{ height: 110, overflow: 'hidden', backgroundColor: '#F3F4F6' }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img

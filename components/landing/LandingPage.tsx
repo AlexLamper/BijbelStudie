@@ -378,12 +378,12 @@ function Hero() {
 /* ─── Features ───────────────────────────────────────────────── */
 function Features() {
   const features = [
-    { icon: BookOpen,   title: "Meerdere bijbelvertalingen",    desc: "Lees de Statenvertaling, BasisBijbel en andere vertalingen. Vergelijk verzen naast elkaar voor dieper begrip." },
-    { icon: Lightbulb,  title: "10 begeleide bijbelstudies",    desc: "Verdiep je in samengestelde studies over bijbelse personen (Abraham, David, Paulus), gebeurtenissen en thema's - met per les een gerichte passagevraag." },
-    { icon: StickyNote, title: "Persoonlijke notities",         desc: "Maak aantekeningen bij verzen, markeer tekst en organiseer uw bijbelstudienotities op één plek." },
-    { icon: Library,    title: "Bijbelcommentaren",             desc: "Toegang tot gerenommeerde commentaren zoals Matthew Henry en Karl August Dachsel bij elk bijbelgedeelte." },
-    { icon: Users,      title: "Bijbelgroepen",                 desc: "Studeer samen met anderen in een bijbelgroep. Deel notities, bespreek teksten en groei samen in Bijbelkennis." },
-    { icon: BarChart2,  title: "Voortgang bijhouden",           desc: "Houd bij hoeveel u gelezen heeft, bouw een leestreeks op en zie uw studiegewoonten groeien." },
+    { icon: BookOpen,   title: "Meerdere bijbelvertalingen",    desc: "Lees en vergelijk meerdere vertalingen naast elkaar." },
+    { icon: Lightbulb,  title: "10 begeleide bijbelstudies",    desc: "Studies over personen, gebeurtenissen en thema's - met gerichte vragen per les." },
+    { icon: StickyNote, title: "Persoonlijke notities",         desc: "Noteer gedachten bij verzen en bewaar alles op één plek." },
+    { icon: Library,    title: "Bijbelcommentaren",             desc: "Lees commentaren van Matthew Henry en anderen bij elk gedeelte." },
+    { icon: Users,      title: "Bijbelgroepen",                 desc: "Studeer samen, deel notities en bespreek teksten in een groep." },
+    { icon: BarChart2,  title: "Voortgang bijhouden",           desc: "Zie hoeveel je gelezen hebt en bouw een leestreeks op." },
   ]
 
   return (
@@ -626,7 +626,7 @@ function Pricing() {
                   </li>
                 ))}
               </ul>
-              <Link href="/subscribe"
+              <Link href="/abonnement"
                 className="block text-center font-semibold py-3 rounded-xl text-sm transition-colors hover:opacity-90"
                 style={{ backgroundColor: T.teal, color: "white" }}>
                 Pro proberen

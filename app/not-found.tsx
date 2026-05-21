@@ -78,7 +78,7 @@ export default function NotFound() {
         {/* Footer hint */}
         <p className="text-xs" style={{ color: "#9CA3AF" }}>
           Of ga direct naar{" "}
-          <Link href="/study" style={{ color: "#0D9488", fontWeight: 600 }}>
+          <Link href="/studie" style={{ color: "#0D9488", fontWeight: 600 }}>
             Bijbelstudie
           </Link>
         </p>

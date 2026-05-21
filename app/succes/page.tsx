@@ -20,7 +20,7 @@ export default function SuccessPage() {
   useEffect(() => {
     // Redirect if no sessionId is found
     if (!sessionId) {
-      router.replace("/subscribe")
+      router.replace("/abonnement")
       return
     }
 
@@ -39,10 +39,10 @@ export default function SuccessPage() {
           await update()
           setStatus("success")
         } else {
-          router.replace("/subscribe")
+          router.replace("/abonnement")
         }
       } catch {
-        router.replace("/subscribe")
+        router.replace("/abonnement")
       }
     }
 

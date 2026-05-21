@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { ArrowRight, CheckCircle, Loader2, Sparkles, Shield, BookOpen, Zap } from "lucide-react"
 import { useSession } from "next-auth/react"
@@ -138,7 +138,7 @@ export default function SubscribePage() {
         {/* Pricing cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
 
-          {/* Monthly — recommended */}
+          {/* Monthly - recommended */}
           <div className="relative rounded-2xl border-2 p-6 bg-white dark:bg-card flex flex-col"
             style={{ borderColor: "#0D9488" }}>
             {/* Badge */}

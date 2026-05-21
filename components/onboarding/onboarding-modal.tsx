@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect } from "react"
 import { Check, BookOpen, Sun, Moon, Monitor } from "lucide-react"
@@ -21,8 +21,8 @@ const BIBLE_VERSIONS = [
 ]
 
 const THEMES = [
-  { code: "light",  label: "Licht",   desc: "Helder wit — prettig overdag",           icon: Sun },
-  { code: "dark",   label: "Donker",  desc: "Rustgevend donker — minder vermoeiend",   icon: Moon },
+  { code: "light",  label: "Licht",   desc: "Helder wit - prettig overdag",           icon: Sun },
+  { code: "dark",   label: "Donker",  desc: "Rustgevend donker - minder vermoeiend",   icon: Moon },
   { code: "system", label: "Systeem", desc: "Volgt automatisch je apparaatinstelling", icon: Monitor },
 ]
 
@@ -77,9 +77,6 @@ export function OnboardingModal({ isOpen: initialIsOpen, onClose, onComplete }: 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && handleDismiss()}>
       <DialogContent className="sm:max-w-[440px] p-0 overflow-hidden gap-0 rounded-2xl border border-gray-200 dark:border-border shadow-2xl">
-
-        {/* Top accent bar */}
-        <div className="h-1 w-full" style={{ backgroundColor: "#0D9488" }} />
 
         {/* Header */}
         <div className="px-7 pt-7 pb-2">

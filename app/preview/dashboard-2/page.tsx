@@ -1,4 +1,4 @@
-// DASHBOARD CONCEPT 2 — "Bijbelreis"
+﻿// DASHBOARD CONCEPT 2 - "Bijbelreis"
 // Kerngedachte: het platform is een REIS door de Bijbel.
 // Centrum: waar ben je in de Bijbel? Wat heb je al gelezen?
 
@@ -6,10 +6,10 @@ import Link from "next/link"
 import { BookOpen, MapPin, BookMarked, ArrowRight, CheckCircle2 } from "lucide-react"
 
 const NAV = [
-  { href: "/preview/dashboard-1", label: "Concept 1 — Dagelijks Kompas" },
-  { href: "/preview/dashboard-2", label: "Concept 2 — Bijbelreis", active: true },
-  { href: "/preview/dashboard-3", label: "Concept 3 — Studiewerkblad" },
-  { href: "/preview/dashboard-4", label: "Concept 4 — Groeioverzicht" },
+  { href: "/preview/dashboard-1", label: "Concept 1 - Dagelijks Kompas" },
+  { href: "/preview/dashboard-2", label: "Concept 2 - Bijbelreis", active: true },
+  { href: "/preview/dashboard-3", label: "Concept 3 - Studiewerkblad" },
+  { href: "/preview/dashboard-4", label: "Concept 4 - Groeioverzicht" },
 ]
 
 const T = { teal: "#0D9488", border: "#E5E7EB", text: "#111827", muted: "#6B7280", bg: "#F9FAFB", card: "#FFFFFF" }
@@ -99,7 +99,7 @@ export default function DashboardConcept2() {
               <div style={{ width: "25%", height: "100%", backgroundColor: T.teal, borderRadius: 4 }} />
             </div>
             <p style={{ color: "#6B7280", fontSize: 11, margin: "0 0 14px" }}>25% van Mattheüs gelezen</p>
-            <Link href="/study" style={{
+            <Link href="/studie" style={{
               display: "inline-flex", alignItems: "center", gap: 6,
               color: "#2DD4BF", fontSize: 13, fontWeight: 600, textDecoration: "none",
             }}>
@@ -222,10 +222,10 @@ export default function DashboardConcept2() {
             <div>
               <p style={{ fontSize: 11, color: T.muted, margin: "0 0 2px" }}>Aanbevolen volgend boek</p>
               <p style={{ fontSize: 16, fontWeight: 700, color: T.text, margin: "0 0 2px" }}>Lukas</p>
-              <p style={{ fontSize: 12, color: T.muted, margin: 0 }}>24 hoofdstukken · Je las al Mattheüs en Markus — een logisch vervolg</p>
+              <p style={{ fontSize: 12, color: T.muted, margin: 0 }}>24 hoofdstukken · Je las al Mattheüs en Markus - een logisch vervolg</p>
             </div>
           </div>
-          <Link href="/study" style={{
+          <Link href="/studie" style={{
             padding: "10px 20px", borderRadius: 10, backgroundColor: T.teal, color: "white",
             fontSize: 13, fontWeight: 600, textDecoration: "none", display: "flex", alignItems: "center", gap: 6, whiteSpace: "nowrap",
           }}>

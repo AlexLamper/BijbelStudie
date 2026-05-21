@@ -1,4 +1,4 @@
-import type { NextAuthOptions } from "next-auth";
+﻿import type { NextAuthOptions } from "next-auth";
 import { decode as defaultDecode, encode as defaultEncode } from "next-auth/jwt";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -50,7 +50,7 @@ export const authOptions: NextAuthOptions = {
       try {
         return await defaultDecode(params);
       } catch {
-        // Old cookie encrypted with a different secret — treat as no session
+        // Old cookie encrypted with a different secret - treat as no session
         return null;
       }
     },
@@ -88,7 +88,7 @@ export const authOptions: NextAuthOptions = {
             session.user.onboardingCompleted = user.preferences?.onboardingCompleted || false;
           }
         } catch {
-          // Non-critical — return session without extra fields
+          // Non-critical - return session without extra fields
         }
       }
       return session;

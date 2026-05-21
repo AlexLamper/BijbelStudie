@@ -1,4 +1,4 @@
-// STYLE PREVIEW 4 — "Sky Blue Light"
+﻿// STYLE PREVIEW 4 - "Sky Blue Light"
 // Soft blue-tinted bg · Medium blue sidebar · Blue accents · Very readable
 
 import Link from "next/link"
@@ -171,7 +171,7 @@ export default function Preview4() {
       <div className="fixed bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3 text-white text-xs px-4 py-2 rounded-full shadow-xl z-50" style={{ backgroundColor: NAV_BG }}>
         <Link href="/preview/3" className="opacity-70 hover:opacity-100">← Stijl 3</Link>
         <span className="opacity-30">·</span>
-        <span className="font-semibold">Stijl 4 — Sky Blue</span>
+        <span className="font-semibold">Stijl 4 - Sky Blue</span>
         <span className="opacity-30">·</span>
         <Link href="/preview/5" className="opacity-70 hover:opacity-100">Stijl 5 →</Link>
         <Link href="/preview/6" className="opacity-70 hover:opacity-100">Stijl 6 →</Link>

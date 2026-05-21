@@ -1,5 +1,4 @@
-﻿import { Button } from "../../components/ui/button"
-import { Crown, ShieldCheck } from "lucide-react"
+import { Crown, Sparkles, ShieldCheck } from "lucide-react"
 import Link from "next/link"
 
 interface SubscriptionStatusProps {
@@ -15,58 +14,69 @@ export function SubscriptionStatus({
   isAdmin = false,
 }: SubscriptionStatusProps) {
   return (
-    <div className="shadow-lg border dark:border-none dark:shadow-gray-900/20 bg-white dark:bg-card">
-      <div className="p-6 border-b border-border">
-        <div className="flex items-center justify-between">
-          <h2 className="font-merriweather text-lg font-bold text-foreground">
-            Subscription Status
-          </h2>
+    <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-2xl overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center gap-2.5 px-5 py-4 border-b border-gray-100 dark:border-border">
+        <div className="h-7 w-7 rounded-lg flex items-center justify-center flex-shrink-0"
+          style={{ backgroundColor: "rgba(13,148,136,0.08)" }}>
+          <Crown size={14} style={{ color: "#0D9488" }} />
+        </div>
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <p className="text-sm font-bold text-gray-900 dark:text-foreground">Abonnement</p>
           {isAdmin && (
-            <span className="text-xs px-2 py-1 bg-purple-600 text-white flex items-center gap-1">
-              <ShieldCheck className="h-3 w-3" />
-              <span>Admin</span>
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full"
+              style={{ backgroundColor: "rgba(124,58,237,0.1)", color: "#7C3AED" }}>
+              <ShieldCheck size={10} /> Admin
             </span>
           )}
         </div>
       </div>
-      <div className="p-6">
-        {subscribed ? (
-          <div className="space-y-4">
+
+      {/* Content */}
+      <div className="p-5">
+        {subscribed || isAdmin ? (
+          <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <span className="text-xs px-2 py-1 bg-amber-500 text-white flex items-center gap-1">
-                <Crown className="h-3 w-3" />
-                <span>Premium</span>
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full"
+                style={{ backgroundColor: "rgba(13,148,136,0.1)", color: "#0D9488" }}>
+                <Sparkles size={11} />
+                {isAdmin ? "Admin toegang" : "Pro actief"}
               </span>
-              <span className="font-inter text-sm text-muted-foreground">Active</span>
             </div>
-            <p className="font-inter text-sm text-gray-900 dark:text-gray-100">
-              You have an active premium subscription. Enjoy access to all premium courses and features!
-            </p>
-            <div className="font-inter text-xs text-gray-500">
-              {stripeSubscriptionId && <p>Subscription ID: {stripeSubscriptionId}</p>}
-            </div>
-            <Link href={`/account/billing`}>
-              <Button variant="outline" className="w-full mt-4 border-border text-foreground hover:bg-accent">
-                Manage Subscription
-              </Button>
-            </Link>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <p className="font-inter text-sm text-gray-900 dark:text-gray-100">
+            <p className="text-sm text-gray-500 dark:text-muted-foreground leading-relaxed">
               {isAdmin
-                ? "As an admin, you have access to all premium content without a subscription."
-                : "Upgrade to premium to access exclusive courses and features."}
+                ? "Als admin heb je toegang tot alle Pro-functies zonder abonnement."
+                : "Je hebt een actief Pro-abonnement. Geniet van alle premium functies."}
             </p>
+            {stripeSubscriptionId && !isAdmin && (
+              <p className="text-xs text-gray-400 dark:text-muted-foreground font-mono">
+                ID: {stripeSubscriptionId}
+              </p>
+            )}
             {!isAdmin && (
-              <Link href={`/subscribe`}>
-                <Button className="w-full mt-4 bg-teal-600 hover:bg-teal-700 text-white rounded-lg">Upgrade to Premium</Button>
+              <Link
+                href="/abonnement"
+                className="inline-flex items-center text-xs font-semibold mt-1"
+                style={{ color: "#0D9488" }}>
+                Beheer abonnement →
               </Link>
             )}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-sm text-gray-500 dark:text-muted-foreground leading-relaxed">
+              Upgrade naar Pro voor commentaren, historische context en meer studiehulpmiddelen.
+            </p>
+            <Link
+              href="/abonnement"
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90"
+              style={{ backgroundColor: "#0D9488" }}>
+              <Sparkles size={14} />
+              Upgrade naar Pro
+            </Link>
           </div>
         )}
       </div>
     </div>
   )
 }
-

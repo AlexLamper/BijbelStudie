@@ -1,4 +1,4 @@
-// DASHBOARD CONCEPT 4 — "Groeioverzicht"
+﻿// DASHBOARD CONCEPT 4 - "Groeioverzicht"
 // Kerngedachte: het platform laat je GROEIEN als bijbelstudent.
 // Centrum: je voortgang en ontwikkeling over tijd. Data-gedreven zelfinzicht.
 
@@ -9,10 +9,10 @@ import {
 } from "lucide-react"
 
 const NAV = [
-  { href: "/preview/dashboard-1", label: "Concept 1 — Dagelijks Kompas" },
-  { href: "/preview/dashboard-2", label: "Concept 2 — Bijbelreis" },
-  { href: "/preview/dashboard-3", label: "Concept 3 — Studiewerkblad" },
-  { href: "/preview/dashboard-4", label: "Concept 4 — Groeioverzicht", active: true },
+  { href: "/preview/dashboard-1", label: "Concept 1 - Dagelijks Kompas" },
+  { href: "/preview/dashboard-2", label: "Concept 2 - Bijbelreis" },
+  { href: "/preview/dashboard-3", label: "Concept 3 - Studiewerkblad" },
+  { href: "/preview/dashboard-4", label: "Concept 4 - Groeioverzicht", active: true },
 ]
 
 const T = { teal: "#0D9488", border: "#E5E7EB", text: "#111827", muted: "#6B7280", bg: "#F9FAFB", card: "#FFFFFF" }
@@ -207,9 +207,9 @@ export default function DashboardConcept4() {
         <div style={{ backgroundColor: "#1F2937", borderRadius: 16, padding: "22px 28px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div>
             <p style={{ color: "#9CA3AF", fontSize: 12, margin: "0 0 2px" }}>Klaar voor vandaag?</p>
-            <p style={{ color: "white", fontSize: 16, fontWeight: 700, margin: 0 }}>Bouw je reeks uit — lees Mattheüs 7</p>
+            <p style={{ color: "white", fontSize: 16, fontWeight: 700, margin: 0 }}>Bouw je reeks uit - lees Mattheüs 7</p>
           </div>
-          <Link href="/study" style={{
+          <Link href="/studie" style={{
             display: "flex", alignItems: "center", gap: 6, padding: "10px 20px",
             borderRadius: 10, backgroundColor: T.teal, color: "white",
             fontSize: 13, fontWeight: 600, textDecoration: "none", whiteSpace: "nowrap",

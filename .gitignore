@@ -52,3 +52,5 @@ todo.txt
 
 # Bible translation data files - kept local, not pushed to GitHub
 /public/data/bibles/
+# Exception: basisbijbel flat file must be deployed to production
+!/public/data/bibles/basisbijbel.json

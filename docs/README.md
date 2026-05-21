@@ -1,4 +1,4 @@
-# BijbelStudie - Interactive Bible Learning Platform
+﻿# BijbelStudie - Interactive Bible Learning Platform
 
 <p>
   <!-- Latest release version -->
@@ -47,13 +47,13 @@
 
 ## Features
 
-- ![📖](https://img.shields.io/badge/📖-Personalized_Learning-lightgrey?style=flat-square) **Personalized Learning** — Track your progress with tailored suggestions and daily Bible reading prompts.  
-- ![🎓](https://img.shields.io/badge/🎓-Bible_Courses-lightgrey?style=flat-square) **Bible Courses** — Deepen your knowledge of Bible characters, events, and teachings through engaging courses.  
-- ![📝](https://img.shields.io/badge/📝-Bible_Quizzes-lightgrey?style=flat-square) **Bible Quizzes** — Learn more about the Bible through our quizzes and challenge yourself.  
-- ![📈](https://img.shields.io/badge/📈-Progress_Tracking-lightgrey?style=flat-square) **Progress Tracking** — Monitor your milestones, quiz scores, and daily Bible engagement.  
-- ![🏆](https://img.shields.io/badge/🏆-Leaderboards-lightgrey?style=flat-square) **Leaderboards** — Compete with others and see how your Bible knowledge stacks up.  
-- ![💬](https://img.shields.io/badge/💬-Community_Insights-lightgrey?style=flat-square) **Community Insights** — Share notes, reflections, and insights with fellow learners.  
-- ![✨](https://img.shields.io/badge/✨-Daily_Verses-lightgrey?style=flat-square) **Daily Verses and Teachings** — Reflect on daily Bible verses and thematic lessons.
+- ![📖](https://img.shields.io/badge/📖-Personalized_Learning-lightgrey?style=flat-square) **Personalized Learning** - Track your progress with tailored suggestions and daily Bible reading prompts.  
+- ![🎓](https://img.shields.io/badge/🎓-Bible_Courses-lightgrey?style=flat-square) **Bible Courses** - Deepen your knowledge of Bible characters, events, and teachings through engaging courses.  
+- ![📝](https://img.shields.io/badge/📝-Bible_Quizzes-lightgrey?style=flat-square) **Bible Quizzes** - Learn more about the Bible through our quizzes and challenge yourself.  
+- ![📈](https://img.shields.io/badge/📈-Progress_Tracking-lightgrey?style=flat-square) **Progress Tracking** - Monitor your milestones, quiz scores, and daily Bible engagement.  
+- ![🏆](https://img.shields.io/badge/🏆-Leaderboards-lightgrey?style=flat-square) **Leaderboards** - Compete with others and see how your Bible knowledge stacks up.  
+- ![💬](https://img.shields.io/badge/💬-Community_Insights-lightgrey?style=flat-square) **Community Insights** - Share notes, reflections, and insights with fellow learners.  
+- ![✨](https://img.shields.io/badge/✨-Daily_Verses-lightgrey?style=flat-square) **Daily Verses and Teachings** - Reflect on daily Bible verses and thematic lessons.
 
 ## Tech Stack
 
@@ -77,9 +77,9 @@
 
 ## Roadmap
 
-- **v1.0.1** — Integrated Dark and Light Mode
-- **v1.0.2** — Internationalization for English, Dutch and German
-- **v1.0.3** — Added BijbelStudie Pro Subscription
+- **v1.0.1** - Integrated Dark and Light Mode
+- **v1.0.2** - Internationalization for English, Dutch and German
+- **v1.0.3** - Added BijbelStudie Pro Subscription
 
 ## Contributing
 
@@ -89,7 +89,7 @@ We welcome contributions! To get involved:
 2. Implement your changes with clear commit messages.  
 3. Submit a pull request describing your contributions.
 
-> *Every contribution helps improve BijbelStudie — thank you!*
+> *Every contribution helps improve BijbelStudie - thank you!*
 
 ## Sponsors
 
@@ -137,5 +137,5 @@ For questions or feedback:
 
 ---
 
-Thank you for exploring *BijbelStudie* — we hope it enriches your Bible learning experience.
+Thank you for exploring *BijbelStudie* - we hope it enriches your Bible learning experience.
 

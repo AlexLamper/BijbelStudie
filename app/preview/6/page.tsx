@@ -1,4 +1,4 @@
-// STYLE PREVIEW 6 — "Indigo & White"
+﻿// STYLE PREVIEW 6 - "Indigo & White"
 // Pure white content · Deep indigo sidebar · Subtle shadows · Enterprise clean
 
 import Link from "next/link"
@@ -94,7 +94,7 @@ export default function Preview6() {
               </div>
             </div>
 
-            {/* Stats — horizontal row */}
+            {/* Stats - horizontal row */}
             <div className="grid grid-cols-4 gap-4">
               {[
                 { label: "Dagreeks",     value: "12",  sub: "dagen achter elkaar", icon: "🔥", change: "+2" },
@@ -114,7 +114,7 @@ export default function Preview6() {
             </div>
 
             <div className="grid grid-cols-5 gap-4">
-              {/* Daily verse — featured */}
+              {/* Daily verse - featured */}
               <div className="col-span-3 bg-white rounded-2xl p-6 border border-gray-100 shadow-sm relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 rounded-full opacity-5" style={{ background: `radial-gradient(circle, ${ACCENT}, transparent)`, transform: "translate(30%, -30%)" }} />
                 <div className="relative z-10">
@@ -194,7 +194,7 @@ export default function Preview6() {
         <span className="text-indigo-600">·</span>
         <Link href="/preview/5" className="text-indigo-300 hover:text-white">← Stijl 5</Link>
         <span className="text-indigo-600">·</span>
-        <span className="font-semibold">Stijl 6 — Indigo & White</span>
+        <span className="font-semibold">Stijl 6 - Indigo & White</span>
       </div>
     </div>
   )

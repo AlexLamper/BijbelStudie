@@ -1,4 +1,4 @@
-export const bookNameMap: Record<string, string> = {
+﻿export const bookNameMap: Record<string, string> = {
   // ── Dutch (Statenvertaling / HSV shared names) ────────────────
   'Genesis': 'Genesis',
   'Exodus': 'Exodus',
@@ -119,7 +119,7 @@ export const bookNameMap: Record<string, string> = {
 };
 
 // Create reverse map (English to Dutch)
-// Note: insertion order matters — last Dutch key wins; German entries may overwrite.
+// Note: insertion order matters - last Dutch key wins; German entries may overwrite.
 // Use CANONICAL_NL for reliable English→Dutch display names instead.
 export const englishToDutchMap: Record<string, string> = Object.entries(bookNameMap).reduce((acc, [dutch, english]) => {
     acc[english] = dutch;

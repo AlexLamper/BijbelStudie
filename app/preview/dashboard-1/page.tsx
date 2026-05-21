@@ -1,4 +1,4 @@
-// DASHBOARD CONCEPT 1 — "Dagelijks Kompas"
+﻿// DASHBOARD CONCEPT 1 - "Dagelijks Kompas"
 // Kerngedachte: het platform is er voor een DAGELIJKSE DISCIPLINE.
 // Centrum: wat moet ik vandaag doen? Heb ik het gedaan?
 
@@ -9,10 +9,10 @@ import {
 } from "lucide-react"
 
 const NAV = [
-  { href: "/preview/dashboard-1", label: "Concept 1 — Dagelijks Kompas", active: true },
-  { href: "/preview/dashboard-2", label: "Concept 2 — Bijbelreis" },
-  { href: "/preview/dashboard-3", label: "Concept 3 — Studiewerkblad" },
-  { href: "/preview/dashboard-4", label: "Concept 4 — Groeioverzicht" },
+  { href: "/preview/dashboard-1", label: "Concept 1 - Dagelijks Kompas", active: true },
+  { href: "/preview/dashboard-2", label: "Concept 2 - Bijbelreis" },
+  { href: "/preview/dashboard-3", label: "Concept 3 - Studiewerkblad" },
+  { href: "/preview/dashboard-4", label: "Concept 4 - Groeioverzicht" },
 ]
 
 const T = { teal: "#0D9488", border: "#E5E7EB", text: "#111827", muted: "#6B7280", bg: "#F9FAFB", card: "#FFFFFF" }
@@ -71,7 +71,7 @@ export default function DashboardConcept1() {
               </p>
               <p style={{ color: "#2DD4BF", fontSize: 12, fontWeight: 600, margin: 0 }}>Psalm 119:105 · Statenvertaling</p>
             </div>
-            <Link href="/study" style={{ marginTop: 20, display: "inline-flex", alignItems: "center", gap: 6, color: "#2DD4BF", fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
+            <Link href="/studie" style={{ marginTop: 20, display: "inline-flex", alignItems: "center", gap: 6, color: "#2DD4BF", fontSize: 13, fontWeight: 600, textDecoration: "none" }}>
               Lees dit hoofdstuk <ChevronRight size={14} />
             </Link>
           </div>
@@ -140,7 +140,7 @@ export default function DashboardConcept1() {
                 </div>
               </div>
             </div>
-            <Link href="/study" style={{
+            <Link href="/studie" style={{
               display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
               padding: "10px 0", borderRadius: 10, backgroundColor: T.teal, color: "white",
               fontSize: 13, fontWeight: 600, textDecoration: "none",
@@ -161,7 +161,7 @@ export default function DashboardConcept1() {
               <div style={{ width: 14, height: 14, borderRadius: 3, backgroundColor: T.border, border: `2px solid ${T.teal}` }} />
             </div>
             <p style={{ fontSize: 12, color: T.muted, margin: "0 0 10px" }}>Vandaag: Lukas 14-15</p>
-            <Link href="/plans" style={{ fontSize: 13, fontWeight: 600, color: T.teal, textDecoration: "none" }}>
+            <Link href="/studies" style={{ fontSize: 13, fontWeight: 600, color: T.teal, textDecoration: "none" }}>
               Open leesplan →
             </Link>
           </div>
@@ -174,12 +174,12 @@ export default function DashboardConcept1() {
               <PenLine size={16} color={T.teal} />
               <p style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: T.text, margin: 0 }}>Recente notities</p>
             </div>
-            <Link href="/notes" style={{ fontSize: 12, color: T.teal, textDecoration: "none", fontWeight: 600 }}>Alle notities →</Link>
+            <Link href="/notities" style={{ fontSize: 12, color: T.teal, textDecoration: "none", fontWeight: 600 }}>Alle notities →</Link>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
             {[
               { ref: "Mattheüs 5:3", text: "Zalig de armen van geest, want hunner is het Koninkrijk der hemelen..." },
-              { ref: "Psalm 23:1", text: "De Heere is mijn Herder — hieruit volgt alles. Geen tekort, geen vrees..." },
+              { ref: "Psalm 23:1", text: "De Heere is mijn Herder - hieruit volgt alles. Geen tekort, geen vrees..." },
               { ref: "Johannes 15:5", text: "Ik ben de Wijnstok. Verblijven in Hem betekent dagelijks afhankelijkheid..." },
             ].map(n => (
               <div key={n.ref} style={{ backgroundColor: T.bg, borderRadius: 10, padding: 14, border: `1px solid ${T.border}` }}>

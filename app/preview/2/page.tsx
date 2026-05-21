@@ -1,4 +1,4 @@
-// STYLE PREVIEW 2 — "Warm Scripture"
+﻿// STYLE PREVIEW 2 - "Warm Scripture"
 // Parchment background · Forest green sidebar · Amber accent · Lora serif headings
 
 import Link from "next/link"
@@ -24,7 +24,7 @@ export default function Preview2() {
   return (
     <div className="flex h-screen overflow-hidden" style={{ fontFamily: "Inter, system-ui, sans-serif", backgroundColor: "#FAF6EF" }}>
 
-      {/* Sidebar — warm forest green */}
+      {/* Sidebar - warm forest green */}
       <aside className="w-60 flex-shrink-0 flex flex-col" style={{ backgroundColor: "#1E3A2F" }}>
         {/* Logo */}
         <div className="px-5 py-5 border-b" style={{ borderColor: "#2D5240" }}>
@@ -106,7 +106,7 @@ export default function Preview2() {
             </div>
 
             <div className="grid grid-cols-3 gap-4">
-              {/* Daily verse — featured prominently */}
+              {/* Daily verse - featured prominently */}
               <div className="col-span-2 rounded-xl border p-6" style={{ backgroundColor: "#FFFDF8", borderColor: "#E8DFD0" }}>
                 <div className="flex items-center gap-2 mb-5">
                   <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: "#C17A3F" }}>✦ Vers van de dag</span>
@@ -115,7 +115,7 @@ export default function Preview2() {
                   &ldquo;Uw woord is een lamp voor mijn voet en een licht op mijn pad.&rdquo;
                 </blockquote>
                 <div className="mt-5 pt-5 border-t flex items-center justify-between" style={{ borderColor: "#E8DFD0" }}>
-                  <cite className="not-italic font-semibold text-sm" style={{ color: "#C17A3F" }}>Psalm 119:105 — Statenvertaling</cite>
+                  <cite className="not-italic font-semibold text-sm" style={{ color: "#C17A3F" }}>Psalm 119:105 - Statenvertaling</cite>
                   <button className="text-xs font-medium px-3 py-1.5 rounded-md" style={{ backgroundColor: "#F0E8DC", color: "#8B6A3E" }}>Lees context</button>
                 </div>
               </div>
@@ -161,7 +161,7 @@ export default function Preview2() {
       <div className="fixed bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3 text-white text-sm px-5 py-2.5 rounded-full shadow-xl z-50" style={{ backgroundColor: "#1E3A2F" }}>
         <Link href="/preview/1" className="text-green-300 hover:text-green-200">← Stijl 1</Link>
         <span className="opacity-40">·</span>
-        <span className="font-semibold">Stijl 2 — Warm Scripture</span>
+        <span className="font-semibold">Stijl 2 - Warm Scripture</span>
         <span className="opacity-40">·</span>
         <Link href="/preview/3" className="text-green-300 hover:text-green-200">Stijl 3 →</Link>
       </div>

@@ -1,4 +1,4 @@
-# BijbelStudie - Bible Study Platform
+﻿# BijbelStudie - Bible Study Platform
 
 <p>
   <!-- Latest release version -->
@@ -43,11 +43,11 @@
 
 ## Features
 
-- ![📖](https://img.shields.io/badge/📖-Personalized_Learning-lightgrey?style=flat-square) **Personalized Learning** — Track your progress with tailored suggestions and daily Bible reading prompts.
-- ![🎓](https://img.shields.io/badge/🎓-Bible_Courses-lightgrey?style=flat-square) **Reading Plans** — Deepen your knowledge of the Bible through our reading plans.
-- ![📈](https://img.shields.io/badge/📈-Progress_Tracking-lightgrey?style=flat-square) **Progress Tracking** — Monitor your study through scores, streaks and daily Bible engagement.  
-- ![💬](https://img.shields.io/badge/💬-Community_Insights-lightgrey?style=flat-square) **Notes & Bookmarks** — Write notes, reflections, or bookmark verses you want to come back to later.
-- ![✨](https://img.shields.io/badge/✨-Daily_Verses-lightgrey?style=flat-square) **Daily Verses and Teachings** — Reflect on daily Bible verses and thematic lessons.
+- ![📖](https://img.shields.io/badge/📖-Personalized_Learning-lightgrey?style=flat-square) **Personalized Learning** - Track your progress with tailored suggestions and daily Bible reading prompts.
+- ![🎓](https://img.shields.io/badge/🎓-Bible_Courses-lightgrey?style=flat-square) **Reading Plans** - Deepen your knowledge of the Bible through our reading plans.
+- ![📈](https://img.shields.io/badge/📈-Progress_Tracking-lightgrey?style=flat-square) **Progress Tracking** - Monitor your study through scores, streaks and daily Bible engagement.  
+- ![💬](https://img.shields.io/badge/💬-Community_Insights-lightgrey?style=flat-square) **Notes & Bookmarks** - Write notes, reflections, or bookmark verses you want to come back to later.
+- ![✨](https://img.shields.io/badge/✨-Daily_Verses-lightgrey?style=flat-square) **Daily Verses and Teachings** - Reflect on daily Bible verses and thematic lessons.
 
 ## Tech Stack
 
@@ -80,7 +80,7 @@ We welcome contributions! To get involved:
 2. Implement your changes with clear commit messages.  
 3. Submit a pull request describing your contributions.
 
-> *Every contribution helps improve BijbelStudie — thank you!*
+> *Every contribution helps improve BijbelStudie - thank you!*
 
 ## Sponsors
 

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * POST /api/admin/seed-group
  * Seeds a test bijbelstudiegroep, bypassing the subscription check.
  * Requires the user to be logged in. Safe to call multiple times (skips if already exists).
@@ -40,7 +40,7 @@ export async function POST() {
 
     const group = await StudyGroup.create({
       name: GROUP_NAME,
-      description: 'Een teststudiegroep voor Scriptura — lees de Bijbel samen en bespreek wat je leert.',
+      description: 'Een teststudiegroep voor Scriptura - lees de Bijbel samen en bespreek wat je leert.',
       isPublic: true,
       inviteCode,
       createdBy: user._id,

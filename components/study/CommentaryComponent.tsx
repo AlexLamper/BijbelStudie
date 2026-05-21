@@ -104,7 +104,7 @@ const bookNameMap: Record<string, string> = {
 };
 
 function formatCommentaryText(raw: string): string {
-  // Already HTML — just strip leftover markdown escapes
+  // Already HTML - just strip leftover markdown escapes
   if (/<[a-zA-Z][^>]*>/.test(raw)) {
     return raw.replace(/([A-Za-z0-9])\\\./g, '$1.');
   }

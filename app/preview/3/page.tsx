@@ -1,4 +1,4 @@
-// STYLE PREVIEW 3 — "Modern Dark"
+﻿// STYLE PREVIEW 3 - "Modern Dark"
 // Deep slate · Indigo gradient accents · High-contrast cards · Premium feel
 
 import Link from "next/link"
@@ -82,7 +82,7 @@ export default function Preview3() {
         <main className="flex-1 overflow-y-auto p-6" style={{ backgroundColor: "#0D1117" }}>
           <div className="max-w-5xl mx-auto space-y-6">
 
-            {/* Welcome — gradient banner */}
+            {/* Welcome - gradient banner */}
             <div className="rounded-2xl p-6 relative overflow-hidden" style={{ background: "linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #1E3A5F 100%)" }}>
               <div className="absolute top-0 right-0 w-48 h-48 rounded-full opacity-10" style={{ background: "radial-gradient(circle, #818CF8, transparent)", transform: "translate(30%, -30%)" }} />
               <div className="relative z-10">
@@ -175,7 +175,7 @@ export default function Preview3() {
         <span style={{ color: "#6E7681" }}>·</span>
         <Link href="/preview/2" className="hover:text-indigo-300" style={{ color: "#A5B4FC" }}>← Stijl 2</Link>
         <span style={{ color: "#6E7681" }}>·</span>
-        <span className="font-semibold">Stijl 3 — Modern Dark</span>
+        <span className="font-semibold">Stijl 3 - Modern Dark</span>
       </div>
     </div>
   )

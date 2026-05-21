@@ -1,9 +1,9 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { bookNameMap, CANONICAL_NL, normalizeBookName, BIBLE_BOOKS_ORDER } from '../lib/book-mapping';
 
-/* ─── Static data — never changes ───────────────────────────── */
+/* ─── Static data - never changes ───────────────────────────── */
 const VERSIONS = [
   { id: 'statenvertaling', name: 'Statenvertaling', language: 'nl' },
   { id: 'basisbijbel',     name: 'BasisBijbel',     language: 'nl' },
@@ -60,7 +60,7 @@ function resolveBooksFromIndex(index: Record<string, string[]>, version: string)
 
 /**
  * Fetch chapters.json directly from the static /public/data/ tree.
- * For HSV the display name is Dutch but the folder uses English — translate back.
+ * For HSV the display name is Dutch but the folder uses English - translate back.
  */
 async function fetchChaptersDirect(version: string, bookName: string): Promise<number[]> {
   const cacheKey = `${version}/${bookName}`;
@@ -126,7 +126,7 @@ interface UseBibleDataReturn {
 export function useBibleData(lng: string, options: UseBibleDataOptions = {}): UseBibleDataReturn {
   const { initialBook, initialChapter, initialVersion } = options;
 
-  // Versions are static — set immediately, no loading state needed
+  // Versions are static - set immediately, no loading state needed
   const [books, setBooks]               = useState<string[]>([]);
   const [chapters, setChapters]         = useState<number[]>([]);
   const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
@@ -147,7 +147,7 @@ export function useBibleData(lng: string, options: UseBibleDataOptions = {}): Us
     let cancelled = false;
 
     async function init() {
-      // Case A: URL params override everything — skip network calls
+      // Case A: URL params override everything - skip network calls
       if (initialBook && initialChapter && initialVersion) {
         const versionExists = VERSIONS.some(v => v.id === initialVersion);
         if (versionExists) {
@@ -389,7 +389,7 @@ export function useBibleData(lng: string, options: UseBibleDataOptions = {}): Us
     selectedChapter,
     selectedCommentary,
     maxChapter,
-    loadingVersions: false, // versions are hardcoded — always available
+    loadingVersions: false, // versions are hardcoded - always available
     loadingBooks,
     loadingChapters,
     isInitialLoading,

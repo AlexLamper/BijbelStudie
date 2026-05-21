@@ -1,6 +1,6 @@
-# Contributing to BijbelStudie
+﻿# Contributing to BijbelStudie
 
-Thank you for your interest in contributing to **BijbelStudie** — a platform dedicated to helping people deepen their knowledge of the Bible.
+Thank you for your interest in contributing to **BijbelStudie** - a platform dedicated to helping people deepen their knowledge of the Bible.
 We welcome all contributions, whether you are fixing a bug, proposing a new feature, or enhancing the documentation. Your support helps us build a more comprehensive and impactful learning experience.
 
 ---

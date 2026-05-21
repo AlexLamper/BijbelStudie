@@ -1,4 +1,4 @@
-// DASHBOARD CONCEPT 3 — "Studiewerkblad"
+﻿// DASHBOARD CONCEPT 3 - "Studiewerkblad"
 // Kerngedachte: het platform is een STUDIEHULPMIDDEL.
 // Centrum: de actieve studie-sessie. Tools zijn prominent; het gaat om DIEPTE.
 
@@ -9,10 +9,10 @@ import {
 } from "lucide-react"
 
 const NAV = [
-  { href: "/preview/dashboard-1", label: "Concept 1 — Dagelijks Kompas" },
-  { href: "/preview/dashboard-2", label: "Concept 2 — Bijbelreis" },
-  { href: "/preview/dashboard-3", label: "Concept 3 — Studiewerkblad", active: true },
-  { href: "/preview/dashboard-4", label: "Concept 4 — Groeioverzicht" },
+  { href: "/preview/dashboard-1", label: "Concept 1 - Dagelijks Kompas" },
+  { href: "/preview/dashboard-2", label: "Concept 2 - Bijbelreis" },
+  { href: "/preview/dashboard-3", label: "Concept 3 - Studiewerkblad", active: true },
+  { href: "/preview/dashboard-4", label: "Concept 4 - Groeioverzicht" },
 ]
 
 const T = { teal: "#0D9488", border: "#E5E7EB", text: "#111827", muted: "#6B7280", bg: "#F9FAFB", card: "#FFFFFF" }
@@ -73,7 +73,7 @@ export default function DashboardConcept3() {
                 <p style={{ fontSize: 18, fontWeight: 800, color: T.text, margin: "0 0 2px" }}>Mattheüs 5</p>
                 <p style={{ fontSize: 12, color: T.muted, margin: 0 }}>Statenvertaling · Inductieve methode</p>
               </div>
-              <Link href="/study" style={{
+              <Link href="/studie" style={{
                 display: "flex", alignItems: "center", gap: 6, padding: "8px 16px",
                 borderRadius: 8, backgroundColor: T.teal, color: "white",
                 fontSize: 13, fontWeight: 600, textDecoration: "none",
@@ -152,7 +152,7 @@ export default function DashboardConcept3() {
                 Mijn studieannotaties <span style={{ color: T.muted, fontWeight: 400 }}>· 34 notities</span>
               </p>
             </div>
-            <Link href="/notes" style={{ fontSize: 12, color: T.teal, textDecoration: "none", fontWeight: 600 }}>Alle notities →</Link>
+            <Link href="/notities" style={{ fontSize: 12, color: T.teal, textDecoration: "none", fontWeight: 600 }}>Alle notities →</Link>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>

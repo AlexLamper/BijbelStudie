@@ -44,7 +44,7 @@ export default function CanceledPage() {
           </div>
         </CardContent>
         <CardFooter className="flex justify-center">
-          <Link href="/subscribe">
+          <Link href="/abonnement">
             <Button>Try Again</Button>
           </Link>
         </CardFooter>

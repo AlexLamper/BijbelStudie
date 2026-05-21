@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server"
+﻿import { NextResponse } from "next/server"
 
 export async function GET() {
   try {
     const res = await fetch("https://bijbelapi.com/api/daytext?version=sv", {
-      next: { revalidate: 86400 }, // cache 24 hours — one verse per day
+      next: { revalidate: 86400 }, // cache 24 hours - one verse per day
     })
 
     if (!res.ok) {

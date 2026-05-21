@@ -18,9 +18,9 @@ const GOOGLE_SVG = (
 import { BookMarked, StickyNote, Library } from "lucide-react"
 
 const PANEL_FEATURES = [
-  { icon: BookOpen,    title: "Meerdere vertalingen",  desc: "Statenvertaling, HSV, KJV en meer" },
-  { icon: BookMarked,  title: "Leesplannen",            desc: "Lees de Bijbel systematisch door" },
-  { icon: StickyNote,  title: "Notities & markering",   desc: "Maak aantekeningen bij verzen" },
+  { icon: BookOpen,    title: "Bijbelvertalingen",      desc: "Statenvertaling, BasisBijbel en meer" },
+  { icon: BookMarked,  title: "10 begeleide studies",   desc: "Over personen, thema's en gebeurtenissen" },
+  { icon: StickyNote,  title: "Notities & markering",   desc: "Sla inzichten op bij elk vers" },
   { icon: Library,     title: "Studiemethoden",         desc: "Inductief, SOAP, SOLVAT en meer" },
 ]
 
@@ -37,10 +37,10 @@ function FeaturePanel() {
         <div>
           <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "#2DD4BF" }}>BijbelStudie Platform</p>
           <h2 className="text-3xl xl:text-4xl font-extrabold text-white leading-tight">
-            Bestudeer de Bijbel<br />systematisch en diep
+            Start vandaag met het dagelijks<br />bestuderen van de Bijbel
           </h2>
           <p className="mt-4 leading-relaxed text-sm" style={{ color: "#9CA3AF" }}>
-            Interactieve bijbelstudie met commentaren, leesplannen en bewezen studiemethoden.
+            Verdiep je geloof met commentaren, begeleide studies en persoonlijke notities - gratis te beginnen.
           </p>
         </div>
 

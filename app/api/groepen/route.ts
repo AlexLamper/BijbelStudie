@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+﻿import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "../../../lib/authOptions"
 import connectMongoDB from "../../../lib/mongodb"
@@ -10,7 +10,7 @@ function generateCode(length = 6) {
   return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join("")
 }
 
-// GET — list public groups + caller's groups
+// GET - list public groups + caller's groups
 // ?mine=true returns only the caller's groups (minimal fields for dropdowns)
 export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions)
@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ publicGroups, myGroups })
 }
 
-// POST — create a group
+// POST - create a group
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions)
   if (!session?.user?.email) return NextResponse.json({ error: "Niet ingelogd" }, { status: 401 })

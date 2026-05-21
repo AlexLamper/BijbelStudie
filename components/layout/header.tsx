@@ -128,7 +128,7 @@ export function Header({ title }: HeaderProps) {
                 <Button
                   variant="ghost"
                   className="w-full justify-start px-3 py-2 text-sm hover:bg-secondary rounded-none"
-                  onClick={() => { router.push("/profile"); setIsProfileOpen(false) }}
+                  onClick={() => { router.push("/profiel"); setIsProfileOpen(false) }}
                 >
                   <User className="h-4 w-4 mr-2 text-muted-foreground" />
                   Profiel
@@ -136,7 +136,7 @@ export function Header({ title }: HeaderProps) {
                 <Button
                   variant="ghost"
                   className="w-full justify-start px-3 py-2 text-sm hover:bg-secondary rounded-none"
-                  onClick={() => { router.push("/settings"); setIsProfileOpen(false) }}
+                  onClick={() => { router.push("/instellingen"); setIsProfileOpen(false) }}
                 >
                   <Settings className="h-4 w-4 mr-2 text-muted-foreground" />
                   Instellingen
@@ -174,11 +174,11 @@ export function Header({ title }: HeaderProps) {
                 <ModeToggle />
               </div>
               <Button variant="ghost" className="w-full justify-start px-3 py-2 text-sm hover:bg-secondary rounded-none"
-                onClick={() => { router.push("/profile"); setIsMenuOpen(false) }}>
+                onClick={() => { router.push("/profiel"); setIsMenuOpen(false) }}>
                 <User className="h-4 w-4 mr-2 text-muted-foreground" /> Profiel
               </Button>
               <Button variant="ghost" className="w-full justify-start px-3 py-2 text-sm hover:bg-secondary rounded-none"
-                onClick={() => { router.push("/settings"); setIsMenuOpen(false) }}>
+                onClick={() => { router.push("/instellingen"); setIsMenuOpen(false) }}>
                 <Settings className="h-4 w-4 mr-2 text-muted-foreground" /> Instellingen
               </Button>
               <div className="border-t border-border my-1" />

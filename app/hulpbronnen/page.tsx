@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import Link from "next/link"
 import {
@@ -44,7 +44,7 @@ const METHODS = [
       { letter: "A", title: "Toepassing", description: "Hoe is deze waarheid van toepassing op jouw leven? Wees concreet en persoonlijk." },
       { letter: "P", title: "Gebed", description: "Schrijf een gebed dat voortkomt uit wat je leerde. Bedank God en vraag om kracht om het te leven." },
     ],
-    tip: "De SOAP methode is ideaal voor dagelijks bijbellezen. Bewaar je notitieboekje — je kijkt er later met dankbaarheid op terug.",
+    tip: "De SOAP methode is ideaal voor dagelijks bijbellezen. Bewaar je notitieboekje - je kijkt er later met dankbaarheid op terug.",
   },
   {
     id: "solvat",
@@ -107,20 +107,20 @@ const RESOURCES = [
     iconBg: "rgba(59,130,246,0.1)",
     iconColor: "#3B82F6",
     items: [
-      { name: "Bijbel lezen met begrip — Gordon Fee", desc: "Klassiek handboek voor hermeneutiek en exegese", href: "#" },
-      { name: "Het Oude Testament spreekt — Vriezen", desc: "Standaardwerk voor OT-studie in het Nederlands", href: "#" },
-      { name: "Inleiding op het Nieuwe Testament — Guthrie", desc: "Uitgebreide inleiding op de boeken van het NT", href: "#" },
-      { name: "Hoe lees ik de Bijbel? — Goldingay", desc: "Toegankelijke gids voor Bijbellezen en -begrijpen", href: "#" },
+      { name: "Bijbel lezen met begrip - Gordon Fee", desc: "Klassiek handboek voor hermeneutiek en exegese", href: "#" },
+      { name: "Het Oude Testament spreekt - Vriezen", desc: "Standaardwerk voor OT-studie in het Nederlands", href: "#" },
+      { name: "Inleiding op het Nieuwe Testament - Guthrie", desc: "Uitgebreide inleiding op de boeken van het NT", href: "#" },
+      { name: "Hoe lees ik de Bijbel? - Goldingay", desc: "Toegankelijke gids voor Bijbellezen en -begrijpen", href: "#" },
     ],
   },
 ]
 
 const GLOSSARY = [
-  { term: "Exegese", def: "Het zorgvuldig uitleggen van een Bijbeltekst vanuit de originele taal, cultuur en context — letterlijk 'uit de tekst halen'." },
+  { term: "Exegese", def: "Het zorgvuldig uitleggen van een Bijbeltekst vanuit de originele taal, cultuur en context - letterlijk 'uit de tekst halen'." },
   { term: "Hermeneutiek", def: "De wetenschap van de Bijbeluitleg: de principes en methoden die helpen om teksten correct te interpreteren." },
   { term: "Context", def: "De directe omgeving van een Bijbeltekst (zinnen ervoor en erna), de bredere context van het boek, en de gehele Bijbel als context." },
   { term: "Canoniek", def: "Behorend tot de erkende verzameling van Bijbelboeken die door de kerk als gezaghebbend wordt beschouwd." },
-  { term: "Pericoop", def: "Een afgebakend gedeelte uit de Bijbel dat een afgeronde eenheid vormt — zoals een gelijkenis of een verhaal." },
+  { term: "Pericoop", def: "Een afgebakend gedeelte uit de Bijbel dat een afgeronde eenheid vormt - zoals een gelijkenis of een verhaal." },
   { term: "Parallelpassage", def: "Een ander Bijbelgedeelte dat hetzelfde onderwerp behandelt of hetzelfde verhaal vertelt vanuit een ander perspectief." },
   { term: "Typologie", def: "Personen, gebeurtenissen of instellingen uit het OT worden gezien als voorafschaduwing van wat in het NT vervuld wordt." },
   { term: "Allegorie", def: "Een verhaal of tekst die een verborgen, diepere betekenis heeft naast de letterlijke betekenis." },
@@ -199,7 +199,7 @@ export default function ResourcesPage() {
             Hulpbronnen
           </h1>
           <p className="text-gray-500 dark:text-muted-foreground text-sm max-w-2xl">
-            Bewezen studiemethoden, externe tools en een begrippenlijst — alles op één plek om Gods Woord dieper te verstaan.
+            Bewezen studiemethoden, externe tools en een begrippenlijst - alles op één plek om Gods Woord dieper te verstaan.
           </p>
         </div>
 
@@ -223,7 +223,7 @@ export default function ResourcesPage() {
           </div>
 
           <div className="mt-5">
-            <Link href="/study"
+            <Link href="/studie"
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90"
               style={{ backgroundColor: "#0D9488" }}>
               <BookOpen className="h-4 w-4" />
@@ -276,8 +276,8 @@ export default function ResourcesPage() {
 
           <div className="mt-5 flex flex-wrap gap-3">
             {[
-              { href: "/notes",  label: "Mijn notities",  icon: BookOpen },
-              { href: "/plans",  label: "Studies",         icon: BookMarked },
+              { href: "/notities",  label: "Mijn notities",  icon: BookOpen },
+              { href: "/studies",  label: "Studies",         icon: BookMarked },
             ].map(({ href, label, icon: Icon }) => (
               <Link key={href} href={href}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 dark:bg-secondary text-gray-700 dark:text-foreground hover:bg-gray-200 dark:hover:bg-secondary/80 transition-colors">

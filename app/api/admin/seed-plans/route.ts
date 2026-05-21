@@ -1,4 +1,4 @@
-/**
+﻿/**
  * POST /api/admin/seed-plans
  * Seeds realistic public Bible reading plans for testing.
  * Requires the user to be logged in. Safe to call multiple times (skips duplicates by title).
@@ -34,7 +34,7 @@ const PLANS = [
     })),
   },
   {
-    title: 'Psalmen — Lofzang en Gebed',
+    title: 'Psalmen - Lofzang en Gebed',
     description: 'Dertig geselecteerde Psalmen die samen een compleet beeld geven van het geestelijk leven: lofprijzing, klaagzang, berouw en vertrouwen.',
     duration: 30,
     category: 'psalmen',
@@ -65,7 +65,7 @@ const PLANS = [
     })),
   },
   {
-    title: 'Spreuken — Wijsheid voor Dagelijks Leven',
+    title: 'Spreuken - Wijsheid voor Dagelijks Leven',
     description: 'Vijftien dagelijkse lessen uit het boek Spreuken. Praktische Bijbelse wijsheid voor werk, relaties, taal en karakter.',
     duration: 15,
     category: 'proverbs',
@@ -106,7 +106,7 @@ const PLANS = [
     ].map(({ day, book, ch, t }) => ({ day, book, chapter: ch, title: t })),
   },
   {
-    title: 'Jesaja — De Profeet van de Verlossing',
+    title: 'Jesaja - De Profeet van de Verlossing',
     description: 'Veertien dagelijkse lessen uit het boek Jesaja. Oordeel en troost, de knecht des Heeren, en de heerlijke toekomst die God belooft.',
     duration: 14,
     category: 'profeten',
@@ -128,7 +128,7 @@ const PLANS = [
     ].map(({ day, ch, t }) => ({ day, book: 'Jesaja', chapter: ch, title: t })),
   },
   {
-    title: 'Openbaring — Hoop voor de Eindtijd',
+    title: 'Openbaring - Hoop voor de Eindtijd',
     description: 'Een dagelijkse lezing door het boek Openbaring. Jezus overwint, de gemeente wordt bemoedigd, en God maakt alles nieuw.',
     duration: 22,
     category: 'apocalyps',
@@ -152,7 +152,7 @@ const PLANS = [
     })),
   },
   {
-    title: 'De Bergrede — Verdiepingsstudie',
+    title: 'De Bergrede - Verdiepingsstudie',
     description: 'Zeven dagen intensief studie door Mattheüs 5-7. Leer wat Jezus bedoelde met de zaligsprekingen, het gebed, de Wet en het koninkrijk.',
     duration: 7,
     category: 'evangelie',
@@ -167,7 +167,7 @@ const PLANS = [
     ].map(({ day, ch, t }) => ({ day, book: 'Mattheüs', chapter: ch, title: t })),
   },
   {
-    title: 'Efeziërs & Filippenzen — Leven vanuit Genade',
+    title: 'Efeziërs & Filippenzen - Leven vanuit Genade',
     description: 'Paulus schrijft vanuit de gevangenis over de rijkdom in Christus en de vreugde die geen omstandigheid kan wegnemen.',
     duration: 10,
     category: 'brieven',

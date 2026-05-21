@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
@@ -188,7 +188,7 @@ export default function DashboardPage() {
           {/* ── Left column ───────────────────────────── */}
           <div className="flex flex-col gap-5 min-w-0">
 
-            {/* Hero CTA — most prominent element */}
+            {/* Hero CTA - most prominent element */}
             <div className="rounded-2xl p-6" style={{ background: "linear-gradient(135deg, #0D9488 0%, #0F766E 100%)" }}>
               {loading ? (
                 <div className="flex items-center justify-between gap-6">
@@ -226,7 +226,7 @@ export default function DashboardPage() {
                     <p className="text-white/70 text-sm mt-0.5">Lees dag voor dag door de Bijbel.</p>
                   </div>
                   <Link
-                    href="/study"
+                    href="/studie"
                     className="flex-shrink-0 bg-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 hover:bg-white/90 transition-colors no-underline"
                     style={{ color: "#0D9488" }}
                   >
@@ -302,12 +302,13 @@ export default function DashboardPage() {
                     const isStudied = state === "studied"
                     return (
                       <Link key={book} href={`/study?book=${encodeURIComponent(book)}&chapter=1&version=statenvertaling`} title={book}
+                        className={!isCurrent && !isStudied ? "border border-gray-200 dark:border-border bg-gray-50 dark:bg-secondary text-gray-500 dark:text-muted-foreground" : ""}
                         style={{
                           display: "inline-block", padding: "3px 9px", borderRadius: 6, fontSize: 11.5,
                           fontWeight: isCurrent ? 700 : isStudied ? 500 : 400,
-                          border: `1px solid ${isCurrent ? "#0D9488" : isStudied ? "rgba(13,148,136,0.35)" : "#E5E7EB"}`,
-                          backgroundColor: isCurrent ? "#0D9488" : isStudied ? "rgba(13,148,136,0.08)" : "#F9FAFB",
-                          color: isCurrent ? "white" : isStudied ? "#0D9488" : "#6B7280",
+                          ...(isCurrent ? { border: "1px solid #0D9488", backgroundColor: "#0D9488", color: "white" }
+                            : isStudied ? { border: "1px solid rgba(13,148,136,0.35)", backgroundColor: "rgba(13,148,136,0.08)", color: "#0D9488" }
+                            : {}),
                           textDecoration: "none", transition: "all 0.1s", whiteSpace: "nowrap",
                         }}
                       >{book}</Link>
@@ -327,12 +328,13 @@ export default function DashboardPage() {
                     const isStudied = state === "studied"
                     return (
                       <Link key={book} href={`/study?book=${encodeURIComponent(book)}&chapter=1&version=statenvertaling`} title={book}
+                        className={!isCurrent && !isStudied ? "border border-gray-200 dark:border-border bg-gray-50 dark:bg-secondary text-gray-500 dark:text-muted-foreground" : ""}
                         style={{
                           display: "inline-block", padding: "3px 9px", borderRadius: 6, fontSize: 11.5,
                           fontWeight: isCurrent ? 700 : isStudied ? 500 : 400,
-                          border: `1px solid ${isCurrent ? "#0D9488" : isStudied ? "rgba(13,148,136,0.35)" : "#E5E7EB"}`,
-                          backgroundColor: isCurrent ? "#0D9488" : isStudied ? "rgba(13,148,136,0.08)" : "#F9FAFB",
-                          color: isCurrent ? "white" : isStudied ? "#0D9488" : "#6B7280",
+                          ...(isCurrent ? { border: "1px solid #0D9488", backgroundColor: "#0D9488", color: "white" }
+                            : isStudied ? { border: "1px solid rgba(13,148,136,0.35)", backgroundColor: "rgba(13,148,136,0.08)", color: "#0D9488" }
+                            : {}),
                           textDecoration: "none", transition: "all 0.1s", whiteSpace: "nowrap",
                         }}
                       >{book}</Link>
@@ -355,7 +357,7 @@ export default function DashboardPage() {
                     <p className="text-xs text-gray-500 dark:text-muted-foreground">Kies een studie en begin vandaag</p>
                   </div>
                 </div>
-                <Link href="/plans" className="text-xs font-medium flex items-center gap-0.5 flex-shrink-0" style={{ color: "#0D9488" }}>
+                <Link href="/studies" className="text-xs font-medium flex items-center gap-0.5 flex-shrink-0" style={{ color: "#0D9488" }}>
                   Alle studies <ChevronRight size={12} />
                 </Link>
               </div>
@@ -501,7 +503,7 @@ export default function DashboardPage() {
                       <div className="h-1.5 rounded-full"
                         style={{ width: `${activePlan.progressPercentage}%`, backgroundColor: "#0D9488" }} />
                     </div>
-                    <Link href="/plans" className="text-xs font-semibold" style={{ color: "#0D9488" }}>
+                    <Link href="/studies" className="text-xs font-semibold" style={{ color: "#0D9488" }}>
                       Bekijk plan →
                     </Link>
                   </>
@@ -545,7 +547,7 @@ export default function DashboardPage() {
                         </p>
                       </Link>
                     ))}
-                    <Link href="/notes" className="text-xs font-medium pt-0.5" style={{ color: "#0D9488" }}>
+                    <Link href="/notities" className="text-xs font-medium pt-0.5" style={{ color: "#0D9488" }}>
                       Alle notities bekijken →
                     </Link>
                   </div>
@@ -560,9 +562,9 @@ export default function DashboardPage() {
               </p>
               <div className="flex flex-col gap-1">
                 {[
-                  { href: "/study",  label: "Bijbelstudie",  icon: BookOpen },
-                  { href: "/notes",  label: "Mijn notities", icon: StickyNote },
-                  { href: "/plans",  label: "Leesplannen",   icon: CalendarCheck2 },
+                  { href: "/studie",  label: "Bijbelstudie",  icon: BookOpen },
+                  { href: "/notities",  label: "Mijn notities", icon: StickyNote },
+                  { href: "/studies",  label: "Leesplannen",   icon: CalendarCheck2 },
                 ].map(({ href, label, icon: Icon }) => (
                   <Link key={href} href={href}
                     className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors hover:bg-gray-50 dark:hover:bg-secondary text-gray-700 dark:text-foreground">

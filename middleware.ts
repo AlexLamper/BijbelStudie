@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import type { NextRequest } from "next/server";
 import { fallbackLng, cookieName } from "./app/i18n/settings";
@@ -46,12 +46,12 @@ export async function middleware(req: NextRequest) {
     });
   }
 
-  // Decode token — auto-clear stale/corrupt cookies instead of looping errors
+  // Decode token - auto-clear stale/corrupt cookies instead of looping errors
   let session = null;
   try {
     session = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
   } catch {
-    // Stale JWT cookie (wrong secret or old format) — clear it automatically
+    // Stale JWT cookie (wrong secret or old format) - clear it automatically
     const clearResponse = NextResponse.next();
     for (const name of SESSION_COOKIES) {
       clearResponse.cookies.set(name, "", { path: "/", maxAge: 0 });

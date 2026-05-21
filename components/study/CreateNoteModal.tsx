@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Save, X, Palette, Eye, EyeOff } from "lucide-react";
+import { Save, X, Palette, Lock, Users } from "lucide-react";
 import { Button } from "../ui/button";
 import { Textarea } from "../ui/textarea";
 import { Badge } from "../ui/badge";
@@ -78,7 +78,6 @@ export function CreateNoteModal({
   const [newTag, setNewTag]           = useState("");
   const [selectedColor, setSelectedColor] = useState("yellow");
   const [noteType, setNoteType]       = useState<"note" | "highlight" | "both">("note");
-  const [isPrivate, setIsPrivate]     = useState(true);
   const [isSaving, setIsSaving]       = useState(false);
   const [error, setError]             = useState<string | null>(null);
   const [myGroups, setMyGroups]       = useState<{ _id: string; name: string }[]>([]);
@@ -137,7 +136,6 @@ export function CreateNoteModal({
     setNewTag("");
     setSelectedColor("yellow");
     setNoteType("note");
-    setIsPrivate(true);
     setGroupId("");
     setError(null);
     if (verse != null) { setVerseStart(verse); setVerseEnd(verse); }
@@ -160,7 +158,7 @@ export function CreateNoteModal({
         noteText: noteText.trim(),
         highlightColor: selectedColor,
         tags,
-        isPrivate,
+        isPrivate: !selectedGroupId,
         type: noteType,
         groupId: selectedGroupId || null,
       };
@@ -355,34 +353,63 @@ export function CreateNoteModal({
           </div>
         </div>
 
-        {/* Privacy */}
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium">{t("privacy_label")}</span>
-          <Button type="button" variant="outline" size="sm" onClick={() => setIsPrivate(!isPrivate)} className="gap-2">
-            {isPrivate ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            {isPrivate ? t("privacy_private") : t("privacy_public")}
-          </Button>
-        </div>
-
-        {/* Share with group */}
+        {/* Zichtbaarheid */}
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
-            Deel met groep
+            Zichtbaarheid
           </label>
           {loadingGroups ? (
             <div className="h-9 bg-gray-100 dark:bg-secondary rounded-lg animate-pulse" />
           ) : (
-            <select
-              value={selectedGroupId}
-              onChange={e => setGroupId(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-200 dark:border-border rounded-lg text-sm bg-white dark:bg-card text-gray-900 dark:text-foreground focus:outline-none focus:ring-2"
-              style={{ '--tw-ring-color': '#0D9488' } as React.CSSProperties}
-            >
-              <option value="">Geen - privé</option>
-              {myGroups.map(g => (
-                <option key={g._id} value={g._id}>{g.name}</option>
-              ))}
-            </select>
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={() => setGroupId("")}
+                className="flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all"
+                style={{
+                  borderColor: !selectedGroupId ? "#0D9488" : "#E5E7EB",
+                  backgroundColor: !selectedGroupId ? "rgba(13,148,136,0.05)" : "transparent",
+                }}
+              >
+                <Lock className="h-4 w-4 flex-shrink-0" style={{ color: !selectedGroupId ? "#0D9488" : "#9CA3AF" }} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-900 dark:text-foreground">Alleen voor mij</p>
+                  <p className="text-xs text-gray-400 dark:text-muted-foreground">Alleen jij kunt deze notitie zien</p>
+                </div>
+              </button>
+
+              {myGroups.length > 0 && (
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => !selectedGroupId && setGroupId(myGroups[0]._id)}
+                    className="w-full flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all"
+                    style={{
+                      borderColor: selectedGroupId ? "#0D9488" : "#E5E7EB",
+                      backgroundColor: selectedGroupId ? "rgba(13,148,136,0.05)" : "transparent",
+                    }}
+                  >
+                    <Users className="h-4 w-4 flex-shrink-0" style={{ color: selectedGroupId ? "#0D9488" : "#9CA3AF" }} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-gray-900 dark:text-foreground">Bijbelgroep</p>
+                      <p className="text-xs text-gray-400 dark:text-muted-foreground">Gedeeld met de leden van een groep</p>
+                    </div>
+                  </button>
+                  {selectedGroupId !== undefined && (
+                    <select
+                      value={selectedGroupId}
+                      onChange={e => setGroupId(e.target.value)}
+                      className="w-full mt-1.5 px-3 py-2 border border-gray-200 dark:border-border rounded-lg text-sm bg-white dark:bg-card text-gray-900 dark:text-foreground focus:outline-none"
+                    >
+                      <option value="">Kies een groep...</option>
+                      {myGroups.map(g => (
+                        <option key={g._id} value={g._id}>{g.name}</option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+              )}
+            </div>
           )}
         </div>
 

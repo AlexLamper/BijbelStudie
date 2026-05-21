@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { Inter, Lora, Merriweather } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "../components/providers/theme-provider";
@@ -93,12 +93,12 @@ export const metadata: Metadata = {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  // Stale JWT cookies from old sessions can fail to decrypt — catch gracefully
+  // Stale JWT cookies from old sessions can fail to decrypt - catch gracefully
   let session = null;
   try {
     session = await getServerSession(authOptions);
   } catch {
-    // non-critical — user will be treated as unauthenticated
+    // non-critical - user will be treated as unauthenticated
   }
   const structuredData = {
     "@context": "https://schema.org",

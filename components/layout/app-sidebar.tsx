@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -20,16 +20,16 @@ import React, { useEffect, useState } from "react"
 
 const mainNav = [
   { title: "Dashboard",    url: "/dashboard", icon: LayoutDashboard },
-  { title: "Bijbelstudie", url: "/study",     icon: BookOpen },
-  { title: "Studies",      url: "/plans",     icon: BookMarked },
+  { title: "Bijbelstudie", url: "/studie",     icon: BookOpen },
+  { title: "Studies",      url: "/studies",     icon: BookMarked },
   { title: "Groepen",      url: "/groepen",   icon: Users },
-  { title: "Notities",     url: "/notes",     icon: StickyNote },
-  { title: "Hulpbronnen",  url: "/resources", icon: Library },
+  { title: "Notities",     url: "/notities",     icon: StickyNote },
+  { title: "Hulpbronnen",  url: "/hulpbronnen", icon: Library },
 ]
 
 const bottomNav = [
-  { title: "Profiel",      url: "/profile",   icon: User },
-  { title: "Instellingen", url: "/settings",  icon: Settings },
+  { title: "Profiel",      url: "/profiel",   icon: User },
+  { title: "Instellingen", url: "/instellingen",  icon: Settings },
 ]
 
 function NavLink({ url, title, icon: Icon }: { url: string; title: string; icon: React.ElementType }) {
@@ -73,7 +73,7 @@ function ProCTA() {
   return (
     <div className="pt-3 px-1">
       <button
-        onClick={() => router.push("/subscribe")}
+        onClick={() => router.push("/abonnement")}
         className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-colors
           bg-[rgba(13,148,136,0.06)] border border-[rgba(13,148,136,0.2)] text-[#0D9488]
           hover:bg-[rgba(13,148,136,0.1)] dark:bg-[rgba(13,148,136,0.08)] dark:border-[rgba(13,148,136,0.25)]"
@@ -91,7 +91,7 @@ export function AppSidebar({ ...props }) {
       {...props}
       className="border-r-0 bg-white dark:bg-card border-r border-border"
     >
-      {/* Header — same height as navbar (h-14), logo centered both axes */}
+      {/* Header - same height as navbar (h-14), logo centered both axes */}
       <SidebarHeader className="
         h-14 border-b border-border
         bg-white dark:bg-card
