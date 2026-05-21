@@ -347,7 +347,7 @@ function StudyPageInner() {
 
 export default function StudyPage() {
   return (
-    <Suspense>
+    <Suspense fallback={null}>
       <StudyPageInner />
     </Suspense>
   );

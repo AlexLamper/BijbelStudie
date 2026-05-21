@@ -9,6 +9,7 @@ import {
 } from "lucide-react"
 import Image from "next/image"
 import { curatedStudies, BADGE_STYLES } from "../../lib/data/curated-studies"
+import { CHAPTER_COUNTS } from "../../lib/data/bible-chapter-counts"
 
 /* ── Dutch Bible book names (66) ─────────────────────────── */
 const OT = [
@@ -30,39 +31,7 @@ const NT = [
   "Judas","Openbaring",
 ]
 
-function norm(s: string) {
-  return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/\s+/g, " ").trim()
-}
 
-const NL_TO_EN: Record<string, string> = {
-  "genesis":"genesis","exodus":"exodus","leviticus":"leviticus","numeri":"numbers",
-  "deuteronomium":"deuteronomy","jozua":"joshua","richtere":"judges","ruth":"ruth",
-  "1 samuel":"1 samuel","2 samuel":"2 samuel","1 koningen":"1 kings","2 koningen":"2 kings",
-  "1 kronieken":"1 chronicles","2 kronieken":"2 chronicles","ezra":"ezra","nehemia":"nehemiah",
-  "esther":"esther","job":"job","psalmen":"psalms","spreuken":"proverbs",
-  "prediker":"ecclesiastes","hooglied":"song of solomon","jesaja":"isaiah","jeremia":"jeremiah",
-  "klaagliederen":"lamentations","ezechiel":"ezekiel","daniel":"daniel","hosea":"hosea",
-  "joel":"joel","amos":"amos","obadja":"obadiah","jona":"jonah","micha":"micah",
-  "nahum":"nahum","habakuk":"habakkuk","zefanja":"zephaniah","haggai":"haggai",
-  "zacharia":"zechariah","maleachi":"malachi","mattheus":"matthew","markus":"mark",
-  "lukas":"luke","johannes":"john","handelingen":"acts","romeinen":"romans",
-  "1 korinthe":"1 corinthians","2 korinthe":"2 corinthians","galaten":"galatians",
-  "efeziers":"ephesians","filippenzen":"philippians","kolossenzen":"colossians",
-  "1 thessalonicenzen":"1 thessalonians","2 thessalonicenzen":"2 thessalonians",
-  "1 timotheus":"1 timothy","2 timotheus":"2 timothy","titus":"titus",
-  "filemon":"philemon","hebreeen":"hebrews","jakobus":"james",
-  "1 petrus":"1 peter","2 petrus":"2 peter","1 johannes":"1 john","2 johannes":"2 john",
-  "3 johannes":"3 john","judas":"jude","openbaring":"revelation",
-}
-
-function bookMatchesNote(dutchBook: string, noteBook: string): boolean {
-  const d = norm(dutchBook)
-  const n = norm(noteBook)
-  if (d === n) return true
-  const enEquiv = NL_TO_EN[d]
-  if (enEquiv && enEquiv === n) return true
-  return false
-}
 
 interface LastRead   { book: string; chapter: number; version: string }
 interface Plan       { _id: string; title: string; progressPercentage: number; completedDays: number; duration: number }
@@ -84,7 +53,6 @@ export default function DashboardPage() {
   const [activePlan, setActivePlan] = useState<Plan | null>(null)
   const [verse, setVerse]           = useState<DailyVerse | null>(null)
   const [streak, setStreak]         = useState(0)
-  const [notedBooks, setNotedBooks] = useState<Set<string>>(new Set())
   const [loading, setLoading]           = useState(true)
   const [verseLoading, setVerseLoading] = useState(true)
   const [notesCount, setNotesCount]     = useState(0)
@@ -92,6 +60,8 @@ export default function DashboardPage() {
   const [weekTotal, setWeekTotal]       = useState(0)
   const [statsLoading, setStatsLoading] = useState(true)
   const [recentNotes, setRecentNotes]   = useState<Array<{ _id: string; book: string; chapter: number; verse?: number; noteText: string; createdAt: string }>>([])
+  const [readChapters, setReadChapters] = useState<Record<string, number[]>>({})
+  const [hoveredBook, setHoveredBook]   = useState<string | null>(null)
 
   useEffect(() => {
     fetch("/api/user/weekly-stats")
@@ -115,9 +85,10 @@ export default function DashboardPage() {
       fetch("/api/user/last-read"),
       fetch("/api/notes?limit=500"),
       fetch("/api/bible-plans"),
+      fetch("/api/user/reading-progress"),
     ])
       .then(rs => Promise.all(rs.map(r => r.ok ? r.json() : null)))
-      .then(([ud, ld, nd, pd]) => {
+      .then(([ud, ld, nd, pd, rp]) => {
         setStreak(ud?.user?.streak ?? 0)
 
         const lr = ld?.book ? ld : ld?.lastReadChapter
@@ -125,11 +96,6 @@ export default function DashboardPage() {
 
         if (Array.isArray(nd?.notes)) {
           setNotesCount(nd.notes.length)
-          const books = new Set<string>()
-          for (const n of nd.notes) {
-            if (n.book) books.add(norm(n.book))
-          }
-          setNotedBooks(books)
           const sorted = [...nd.notes].sort(
             (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
           )
@@ -140,6 +106,8 @@ export default function DashboardPage() {
           (p: Plan) => p.progressPercentage != null && p.progressPercentage > 0
         )
         if (enrolled) setActivePlan(enrolled)
+
+        if (rp?.readChapters) setReadChapters(rp.readChapters)
       })
       .catch(() => {})
       .finally(() => setLoading(false))
@@ -147,17 +115,25 @@ export default function DashboardPage() {
 
   const firstName = session?.user?.name?.split(" ")[0] || "Gebruiker"
 
-  function bookState(book: string): "current" | "studied" | "default" {
-    const isCurrent = lastRead?.book ? bookMatchesNote(book, lastRead.book) : false
-    const isStudied = [...notedBooks].some(nb =>
-      bookMatchesNote(book, nb) || NL_TO_EN[norm(book)] === nb
-    )
-    if (isCurrent) return "current"
-    if (isStudied) return "studied"
-    return "default"
+  function bookReadRatio(book: string): number {
+    const total = CHAPTER_COUNTS[book] ?? 1
+    const read = (readChapters[book] ?? []).length
+    return read / total
   }
 
-  const studiedCount = OT.concat(NT).filter(b => bookState(b) !== "default").length
+  function bookReadCount(book: string): number {
+    return (readChapters[book] ?? []).length
+  }
+
+  function progressColor(ratio: number): string {
+    if (ratio === 0) return "var(--progress-empty)"
+    if (ratio < 0.25) return "rgba(13,148,136,0.22)"
+    if (ratio < 0.50) return "rgba(13,148,136,0.45)"
+    if (ratio < 1.00) return "rgba(13,148,136,0.72)"
+    return "#0D9488"
+  }
+
+  const booksWithProgress = OT.concat(NT).filter(b => bookReadCount(b) > 0).length
 
   const EMPTY_DAYS = ["Ma","Di","Wo","Do","Vr","Za","Zo"].map(l => ({ label: l, count: 0, heightPct: 0, isToday: false }))
   const days = weekDays.length ? weekDays : EMPTY_DAYS
@@ -247,7 +223,7 @@ export default function DashboardPage() {
                 ))
               ) : [
                 { label: "Dagelijkse reeks", value: streak > 0 ? `${streak} dag${streak === 1 ? "" : "en"}` : "0 dagen", icon: Flame, color: streak > 0 ? "#EA580C" : "#9CA3AF" },
-                { label: "Bijbelboeken", value: `${studiedCount} / 66`, icon: BookOpen, color: "#0D9488" },
+                { label: "Bijbelboeken", value: `${booksWithProgress} / 66`, icon: BookOpen, color: "#0D9488" },
                 { label: "Notities geschreven", value: `${notesCount}`, icon: StickyNote, color: "#0D9488" },
               ].map(({ label, value, icon: Icon, color }) => (
                 <div key={label} className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-4">
@@ -270,74 +246,91 @@ export default function DashboardPage() {
                     <p className="text-sm font-bold text-gray-900 dark:text-foreground">Bijbelboeken</p>
                     {!loading && (
                       <p className="text-xs text-gray-500 dark:text-muted-foreground">
-                        {studiedCount} van 66 {studiedCount === 1 ? "boek" : "boeken"} aangeraakt
+                        {booksWithProgress} van 66 {booksWithProgress === 1 ? "boek" : "boeken"} geopend
                       </p>
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-muted-foreground">
-                  <span className="flex items-center gap-1.5">
-                    <span className="inline-block w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: "#0D9488" }} />
-                    Actief
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <span className="inline-block w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: "rgba(13,148,136,0.2)" }} />
-                    Notities
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <span className="inline-block w-2.5 h-2.5 rounded-sm bg-gray-100 dark:bg-secondary" />
-                    Nog te lezen
-                  </span>
+                <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-muted-foreground">
+                  <span className="text-[10px] mr-0.5">Minder</span>
+                  {[0, 0.15, 0.37, 0.75, 1].map((r, i) => (
+                    <span key={i}
+                      className={`inline-block w-3 h-3 rounded-sm flex-shrink-0 ${r === 0 ? "bg-gray-200 dark:bg-gray-700" : ""}`}
+                      style={r === 0 ? undefined : { backgroundColor: progressColor(r) }}
+                    />
+                  ))}
+                  <span className="text-[10px] ml-0.5">Meer</span>
                 </div>
               </div>
 
+              {/* Hover info line */}
+              <div className="h-5 mb-3 flex items-center">
+                {hoveredBook ? (
+                  <p className="text-xs text-gray-600 dark:text-muted-foreground">
+                    <span className="font-semibold" style={{ color: "#0D9488" }}>{hoveredBook}</span>
+                    {" — "}
+                    {bookReadCount(hoveredBook)} van {CHAPTER_COUNTS[hoveredBook] ?? "?"} hoofdstukken gelezen
+                  </p>
+                ) : (
+                  <p className="text-xs text-gray-400 dark:text-muted-foreground">
+                    Beweeg over een boek voor details
+                  </p>
+                )}
+              </div>
+
               <div className="mb-4">
-                <p className="text-xs font-semibold uppercase tracking-wider mb-2.5 text-gray-400 dark:text-muted-foreground">
+                <p className="text-xs font-semibold uppercase tracking-wider mb-2 text-gray-400 dark:text-muted-foreground">
                   Oude Testament <span className="font-normal normal-case">({OT.length} boeken)</span>
                 </p>
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap gap-[3px]">
                   {OT.map(book => {
-                    const state = loading ? "default" : bookState(book)
-                    const isCurrent = state === "current"
-                    const isStudied = state === "studied"
+                    const ratio = loading ? 0 : bookReadRatio(book)
+                    const isEmpty = ratio === 0
                     return (
-                      <Link key={book} href={`/studie?book=${encodeURIComponent(book)}&chapter=1&version=statenvertaling`} title={book}
-                        className={!isCurrent && !isStudied ? "border border-gray-200 dark:border-border bg-gray-50 dark:bg-secondary text-gray-500 dark:text-muted-foreground" : ""}
+                      <Link
+                        key={book}
+                        href={`/studie?book=${encodeURIComponent(book)}&chapter=1&version=statenvertaling`}
+                        onMouseEnter={() => setHoveredBook(book)}
+                        onMouseLeave={() => setHoveredBook(null)}
+                        className={`block rounded-sm transition-all duration-100 hover:scale-110 hover:z-10 relative flex-shrink-0 ${isEmpty ? "bg-gray-200 dark:bg-gray-700" : ""}`}
                         style={{
-                          display: "inline-block", padding: "3px 9px", borderRadius: 6, fontSize: 11.5,
-                          fontWeight: isCurrent ? 700 : isStudied ? 500 : 400,
-                          ...(isCurrent ? { border: "1px solid #0D9488", backgroundColor: "#0D9488", color: "white" }
-                            : isStudied ? { border: "1px solid rgba(13,148,136,0.35)", backgroundColor: "rgba(13,148,136,0.08)", color: "#0D9488" }
-                            : {}),
-                          textDecoration: "none", transition: "all 0.1s", whiteSpace: "nowrap",
+                          width: 18, height: 18,
+                          backgroundColor: isEmpty ? undefined : progressColor(ratio),
+                          textDecoration: "none",
+                          outline: hoveredBook === book ? "2px solid #0D9488" : "none",
+                          outlineOffset: 1,
                         }}
-                      >{book}</Link>
+                        title={book}
+                      />
                     )
                   })}
                 </div>
               </div>
 
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wider mb-2.5 text-gray-400 dark:text-muted-foreground">
+                <p className="text-xs font-semibold uppercase tracking-wider mb-2 text-gray-400 dark:text-muted-foreground">
                   Nieuwe Testament <span className="font-normal normal-case">({NT.length} boeken)</span>
                 </p>
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap gap-[3px]">
                   {NT.map(book => {
-                    const state = loading ? "default" : bookState(book)
-                    const isCurrent = state === "current"
-                    const isStudied = state === "studied"
+                    const ratio = loading ? 0 : bookReadRatio(book)
+                    const isEmpty = ratio === 0
                     return (
-                      <Link key={book} href={`/studie?book=${encodeURIComponent(book)}&chapter=1&version=statenvertaling`} title={book}
-                        className={!isCurrent && !isStudied ? "border border-gray-200 dark:border-border bg-gray-50 dark:bg-secondary text-gray-500 dark:text-muted-foreground" : ""}
+                      <Link
+                        key={book}
+                        href={`/studie?book=${encodeURIComponent(book)}&chapter=1&version=statenvertaling`}
+                        onMouseEnter={() => setHoveredBook(book)}
+                        onMouseLeave={() => setHoveredBook(null)}
+                        className={`block rounded-sm transition-all duration-100 hover:scale-110 hover:z-10 relative flex-shrink-0 ${isEmpty ? "bg-gray-200 dark:bg-gray-700" : ""}`}
                         style={{
-                          display: "inline-block", padding: "3px 9px", borderRadius: 6, fontSize: 11.5,
-                          fontWeight: isCurrent ? 700 : isStudied ? 500 : 400,
-                          ...(isCurrent ? { border: "1px solid #0D9488", backgroundColor: "#0D9488", color: "white" }
-                            : isStudied ? { border: "1px solid rgba(13,148,136,0.35)", backgroundColor: "rgba(13,148,136,0.08)", color: "#0D9488" }
-                            : {}),
-                          textDecoration: "none", transition: "all 0.1s", whiteSpace: "nowrap",
+                          width: 18, height: 18,
+                          backgroundColor: isEmpty ? undefined : progressColor(ratio),
+                          textDecoration: "none",
+                          outline: hoveredBook === book ? "2px solid #0D9488" : "none",
+                          outlineOffset: 1,
                         }}
-                      >{book}</Link>
+                        title={book}
+                      />
                     )
                   })}
                 </div>

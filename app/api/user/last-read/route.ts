@@ -62,7 +62,10 @@ export async function POST(request: NextRequest) {
 
     const user = await User.findOneAndUpdate(
       { email: session.user.email },
-      { $set: updateData },
+      {
+        $set: updateData,
+        $addToSet: { [`readChapters.${book}`]: chapter },
+      },
       { new: true }
     )
 

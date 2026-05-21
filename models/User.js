@@ -37,6 +37,7 @@ const UserSchema = new mongoose.Schema(
       commentary: { type: String },
       updatedAt: { type: Date }
     },
+    readChapters: { type: Map, of: [Number], default: {} },
   },
   { timestamps: true },
 )

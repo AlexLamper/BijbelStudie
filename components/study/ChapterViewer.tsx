@@ -113,7 +113,6 @@ export default function ChapterViewer({
         }
       } finally {
         setLoading(false);
-        console.groupEnd();
       }
     };
 
