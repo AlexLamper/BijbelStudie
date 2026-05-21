@@ -258,12 +258,12 @@ export function CreateNoteModal({
             {computedReference()}
           </p>
           {scope === "vers" && verseText && (
-            <p className="italic text-gray-700 text-sm leading-relaxed">
+            <p className="italic text-gray-700 dark:text-gray-200 text-sm leading-relaxed">
               &ldquo;{verseText}&rdquo;
             </p>
           )}
           {scope !== "vers" && (
-            <p className="text-sm text-gray-400 italic">{displayVerseText()}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 italic">{displayVerseText()}</p>
           )}
         </div>
 

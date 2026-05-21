@@ -7,6 +7,8 @@ import { useSession } from 'next-auth/react';
 import { Button } from '../ui/button';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '../../app/i18n/client';
+import { ReadingPreferences } from '../../hooks/useReadingPreferences';
+import { getPreferenceClasses, getPreferenceStyles } from '../../lib/preferenceClasses';
 
 interface CommentaryComponentProps {
   book: string;
@@ -14,6 +16,7 @@ interface CommentaryComponentProps {
   source?: string;
   onSourceChange?: (source: string) => void;
   height?: number;
+  preferences?: ReadingPreferences;
 }
 
 interface CommentarySource {
@@ -157,8 +160,11 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
   chapter,
   source: initialSource = 'matthew-henry',
   onSourceChange,
-  height
+  height,
+  preferences,
 }) => {
+  const prefClasses = getPreferenceClasses(preferences);
+  const prefStyles  = getPreferenceStyles(preferences);
   const [commentary, setCommentary] = useState<CommentaryData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -343,7 +349,7 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
             <div className="flex items-center justify-center py-12">
                 <div className="text-center">
                 <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" style={{ color: '#0D9488' }} />
-                <p className="font-inter text-gray-700 text-base font-medium">
+                <p className="font-inter text-gray-700 dark:text-muted-foreground text-base font-medium">
                     Commentaar laden...
                 </p>
                 </div>
@@ -371,7 +377,8 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
                 {key === 'intro' || key === '0' ? 'Inleiding' : `Vers ${key}`}
                 </h3>
                 <div
-                    className="font-inter text-gray-700 text-base dark:text-foreground max-w-none"
+                    className={`text-gray-700 dark:text-foreground max-w-none ${prefClasses}`}
+                    style={prefStyles}
                     dangerouslySetInnerHTML={{ __html: formatCommentaryText(text) }}
                 />
             </div>

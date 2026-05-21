@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { MessageCircle, Users, Brain, Info } from 'lucide-react';
 import TabComponent from './TabComponent';
 
+import { ReadingPreferences } from '../../hooks/useReadingPreferences';
+
 interface StudyMaterialsSectionProps {
   selectedBook: string;
   selectedChapter: number;
@@ -16,6 +18,7 @@ interface StudyMaterialsSectionProps {
   onDownload: () => void;
   t: (key: string) => string;
   height?: number;
+  preferences?: ReadingPreferences;
 }
 
 export default function StudyMaterialsSection({
@@ -29,6 +32,7 @@ export default function StudyMaterialsSection({
   onCommentaryChange,
   onDownload,
   t,
+  preferences,
 }: StudyMaterialsSectionProps) {
   const [activeTab, setActiveTab] = useState('commentary');
 
@@ -84,6 +88,7 @@ export default function StudyMaterialsSection({
           onDownload={onDownload}
           height={1}
           activeTab={activeTab}
+          preferences={preferences}
         />
         <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none z-10
           bg-gradient-to-t from-white dark:from-background to-transparent" />

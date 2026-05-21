@@ -6,6 +6,7 @@ import InductiveStudy from './InductiveStudy';
 import HistoricalContext from './HistoricalContext';
 import { useKeyboardShortcuts, KeyboardShortcut } from '../../hooks/useKeyboardShortcuts';
 import CommentaryComponent from './CommentaryComponent';
+import { ReadingPreferences } from '../../hooks/useReadingPreferences';
 
 interface TabComponentProps {
   selectedBook: string;
@@ -20,20 +21,22 @@ interface TabComponentProps {
   onCommentaryChange?: (commentary: string) => void;
   onDownload: () => void;
   height?: number;
+  preferences?: ReadingPreferences;
 }
 
-export default function TabComponent({ 
-  selectedBook, 
-  selectedChapter, 
-  selectedVersion, 
+export default function TabComponent({
+  selectedBook,
+  selectedChapter,
+  selectedVersion,
   selectedCommentary,
-  t, 
+  t,
   onNextChapter,
   onPrevChapter,
   onCommentaryChange,
   onDownload,
   height,
-  activeTab
+  activeTab,
+  preferences,
 }: TabComponentProps & { activeTab: string }) {
   // Define keyboard shortcuts
   const shortcuts: KeyboardShortcut[] = [
@@ -67,20 +70,23 @@ export default function TabComponent({
             source={selectedCommentary || "matthew-henry"}
             onSourceChange={onCommentaryChange}
             height={height}
+            preferences={preferences}
           />
         );
       case 'inductive':
-        return <InductiveStudy 
-          book={selectedBook || ''} 
-          chapter={selectedChapter || 0} 
-          version={selectedVersion || ''} 
+        return <InductiveStudy
+          book={selectedBook || ''}
+          chapter={selectedChapter || 0}
+          version={selectedVersion || ''}
+          preferences={preferences}
         />;
       case 'historical':
         return (
-          <HistoricalContext 
-            book={selectedBook || ''} 
-            chapter={selectedChapter || 0} 
+          <HistoricalContext
+            book={selectedBook || ''}
+            chapter={selectedChapter || 0}
             t={t}
+            preferences={preferences}
           />
         );
       case 'notes':

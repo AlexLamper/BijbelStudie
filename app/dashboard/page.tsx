@@ -209,7 +209,7 @@ export default function DashboardPage() {
                     <p className="text-white/70 text-sm mt-0.5">Hoofdstuk {lastRead.chapter} · {lastRead.version}</p>
                   </div>
                   <Link
-                    href={`/study?book=${encodeURIComponent(lastRead.book)}&chapter=${lastRead.chapter}&version=${encodeURIComponent(lastRead.version)}`}
+                    href={`/studie?book=${encodeURIComponent(lastRead.book)}&chapter=${lastRead.chapter}&version=${encodeURIComponent(lastRead.version)}`}
                     className="flex-shrink-0 bg-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 hover:bg-white/90 transition-colors no-underline"
                     style={{ color: "#0D9488" }}
                   >
@@ -301,7 +301,7 @@ export default function DashboardPage() {
                     const isCurrent = state === "current"
                     const isStudied = state === "studied"
                     return (
-                      <Link key={book} href={`/study?book=${encodeURIComponent(book)}&chapter=1&version=statenvertaling`} title={book}
+                      <Link key={book} href={`/studie?book=${encodeURIComponent(book)}&chapter=1&version=statenvertaling`} title={book}
                         className={!isCurrent && !isStudied ? "border border-gray-200 dark:border-border bg-gray-50 dark:bg-secondary text-gray-500 dark:text-muted-foreground" : ""}
                         style={{
                           display: "inline-block", padding: "3px 9px", borderRadius: 6, fontSize: 11.5,
@@ -327,7 +327,7 @@ export default function DashboardPage() {
                     const isCurrent = state === "current"
                     const isStudied = state === "studied"
                     return (
-                      <Link key={book} href={`/study?book=${encodeURIComponent(book)}&chapter=1&version=statenvertaling`} title={book}
+                      <Link key={book} href={`/studie?book=${encodeURIComponent(book)}&chapter=1&version=statenvertaling`} title={book}
                         className={!isCurrent && !isStudied ? "border border-gray-200 dark:border-border bg-gray-50 dark:bg-secondary text-gray-500 dark:text-muted-foreground" : ""}
                         style={{
                           display: "inline-block", padding: "3px 9px", borderRadius: 6, fontSize: 11.5,
@@ -368,7 +368,7 @@ export default function DashboardPage() {
                   return (
                     <Link
                       key={study.id}
-                      href={`/study?book=${encodeURIComponent(study.startBook)}&chapter=${study.startChapter}&version=${encodeURIComponent(study.startVersion)}`}
+                      href={`/studie?book=${encodeURIComponent(study.startBook)}&chapter=${study.startChapter}&version=${encodeURIComponent(study.startVersion)}`}
                       className="flex items-center rounded-xl overflow-hidden group transition-shadow hover:shadow-md border border-gray-100 dark:border-border"
                       style={{ textDecoration: "none" }}
                     >
@@ -427,7 +427,7 @@ export default function DashboardPage() {
                       </a>
                     </div>
                     <Link
-                      href={`/study?book=${encodeURIComponent(verse.book)}&chapter=${verse.chapter}&version=statenvertaling`}
+                      href={`/studie?book=${encodeURIComponent(verse.book)}&chapter=${verse.chapter}&version=statenvertaling`}
                       className="text-xs font-medium whitespace-nowrap text-gray-500 dark:text-muted-foreground">
                       Lees hoofdstuk →
                     </Link>
@@ -535,7 +535,7 @@ export default function DashboardPage() {
                     {recentNotes.map(note => (
                       <Link
                         key={note._id}
-                        href={`/study?book=${encodeURIComponent(note.book)}&chapter=${note.chapter}&version=statenvertaling`}
+                        href={`/studie?book=${encodeURIComponent(note.book)}&chapter=${note.chapter}&version=statenvertaling`}
                         className="group block"
                         style={{ textDecoration: "none" }}
                       >

@@ -34,7 +34,7 @@ const bottomNav = [
 
 function NavLink({ url, title, icon: Icon }: { url: string; title: string; icon: React.ElementType }) {
   const pathname = usePathname()
-  const active = pathname === url || (url !== "/dashboard" && pathname?.startsWith(url))
+  const active = pathname === url || (url !== "/dashboard" && pathname?.startsWith(url + "/"))
 
   return (
     <li className="list-none">

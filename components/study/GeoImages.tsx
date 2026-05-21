@@ -182,14 +182,14 @@ export default function GeoImages({ book, chapter, className, variant = 'grid' }
   if (loading) {
     if (variant === 'strip') {
       return (
-        <div style={{ borderBottom: '1px solid #F3F4F6', backgroundColor: '#FAFAFA', flexShrink: 0 }}>
+        <div className="border-b border-gray-100 dark:border-border bg-gray-50 dark:bg-card flex-shrink-0">
           <div style={{ display: 'flex', gap: 10, padding: '12px 20px', overflowX: 'auto', scrollbarWidth: 'none' }}>
             {[1, 2, 3].map(i => (
-              <div key={i} style={{ flexShrink: 0, width: 130, borderRadius: 10, overflow: 'hidden', border: '1px solid #F3F4F6' }}>
-                <div className="animate-pulse bg-gray-100" style={{ height: 78 }} />
+              <div key={i} className="border border-gray-100 dark:border-border" style={{ flexShrink: 0, width: 130, borderRadius: 10, overflow: 'hidden' }}>
+                <div className="animate-pulse bg-gray-100 dark:bg-secondary" style={{ height: 78 }} />
                 <div style={{ padding: '6px 10px 8px', display: 'flex', flexDirection: 'column', gap: 5 }}>
-                  <div className="animate-pulse bg-gray-100 rounded" style={{ height: 9, width: '70%' }} />
-                  <div className="animate-pulse bg-gray-100 rounded" style={{ height: 7, width: '50%' }} />
+                  <div className="animate-pulse bg-gray-100 dark:bg-secondary rounded" style={{ height: 9, width: '70%' }} />
+                  <div className="animate-pulse bg-gray-100 dark:bg-secondary rounded" style={{ height: 7, width: '50%' }} />
                 </div>
               </div>
             ))}
@@ -225,61 +225,49 @@ export default function GeoImages({ book, chapter, className, variant = 'grid' }
     return (
       <>
         {/* Pinned strip - no scroll needed to see it */}
-        <div style={{
-          borderBottom: '1px solid #F3F4F6',
-          backgroundColor: '#FAFAFA',
-          flexShrink: 0,
-        }}>
-          <div style={{
-              display: 'flex', gap: 10, padding: '12px 20px',
-              overflowX: 'auto',
-              scrollbarWidth: 'none',
-            }}>
-              {images.map((image, index) => (
-                <button
-                  key={`${image.id}-${index}`}
-                  onClick={() => setSelected(image)}
-                  style={{
-                    flexShrink: 0, width: 130,
-                    borderRadius: 10, overflow: 'hidden',
-                    border: '1px solid #E5E7EB',
-                    backgroundColor: '#fff',
-                    cursor: 'pointer', padding: 0,
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-                    transition: 'box-shadow 0.15s, transform 0.15s',
-                    textAlign: 'left',
-                  }}
-                  onMouseEnter={e => {
-                    (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 12px rgba(0,0,0,0.12)';
-                    (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)';
-                  }}
-                  onMouseLeave={e => {
-                    (e.currentTarget as HTMLElement).style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)';
-                    (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
-                  }}
-                >
-                  <div style={{ height: 78, overflow: 'hidden', backgroundColor: '#F3F4F6' }}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={imgSrc(image)}
-                      alt={image.placeName}
-                      loading="eager"
-                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                      onLoad={() => console.log(`[GeoImages] ✓ Strip loaded: ${imgSrc(image)}`)}
-                      onError={() => console.error(`[GeoImages] ✗ Strip FAILED: ${imgSrc(image)}`)}
-                    />
-                  </div>
-                  <div style={{ padding: '5px 8px 7px' }}>
-                    <p style={{
-                      fontSize: 11, fontWeight: 600, color: '#111827', margin: 0,
-                      whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                    }}>
-                      {image.placeName}
-                    </p>
-                  </div>
-                </button>
-              ))}
-            </div>
+        <div className="border-b border-gray-100 dark:border-border bg-gray-50 dark:bg-card flex-shrink-0">
+          <div style={{ display: 'flex', gap: 10, padding: '12px 20px', overflowX: 'auto', scrollbarWidth: 'none' }}>
+            {images.map((image, index) => (
+              <button
+                key={`${image.id}-${index}`}
+                onClick={() => setSelected(image)}
+                className="border border-gray-200 dark:border-border bg-white dark:bg-secondary text-left"
+                style={{
+                  flexShrink: 0, width: 130,
+                  borderRadius: 10, overflow: 'hidden',
+                  cursor: 'pointer', padding: 0,
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+                  transition: 'box-shadow 0.15s, transform 0.15s',
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 12px rgba(0,0,0,0.12)';
+                  (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)';
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLElement).style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)';
+                  (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
+                }}
+              >
+                <div className="bg-gray-100 dark:bg-secondary/60" style={{ height: 78, overflow: 'hidden' }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={imgSrc(image)}
+                    alt={image.placeName}
+                    loading="eager"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  />
+                </div>
+                <div style={{ padding: '5px 8px 7px' }}>
+                  <p className="text-gray-900 dark:text-foreground" style={{
+                    fontSize: 11, fontWeight: 600, margin: 0,
+                    whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                  }}>
+                    {image.placeName}
+                  </p>
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Lightbox - same portal as grid variant */}

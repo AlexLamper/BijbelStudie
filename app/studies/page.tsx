@@ -1,10 +1,12 @@
 'use client'
 
-import { useState } from 'react'
-import Link from 'next/link'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { ArrowRight, BookOpen, ChevronDown, ChevronUp, Clock } from 'lucide-react'
+import { ArrowRight, BookOpen, ChevronDown, ChevronUp, Clock, CheckCircle } from 'lucide-react'
 import { curatedStudies, BADGE_STYLES, type StudyType, type CuratedStudy } from '../../lib/data/curated-studies'
+
+const COMPLETED_KEY = 'bijbelstudie_completed_studies'
 
 const FILTERS: { label: string; value: StudyType | 'Alle' }[] = [
   { label: 'Alle',      value: 'Alle'      },
@@ -14,12 +16,29 @@ const FILTERS: { label: string; value: StudyType | 'Alle' }[] = [
   { label: 'Boek',      value: 'Boek'      },
 ]
 
-function StudyCard({ study }: { study: CuratedStudy }) {
+function saveAndNavigate(study: CuratedStudy, lessonIndex: number, router: ReturnType<typeof useRouter>) {
+  const lesson = study.lessons[lessonIndex]
+  sessionStorage.setItem('activeStudy', JSON.stringify({
+    studyId: study.id,
+    studyTitle: study.title,
+    lessons: study.lessons,
+    currentLessonIndex: lessonIndex,
+    completedLessons: [],
+  }))
+  router.push(
+    `/studie?book=${encodeURIComponent(lesson.book)}&chapter=${lesson.chapter}&version=statenvertaling`
+  )
+}
+
+function StudyCard({ study, completed }: { study: CuratedStudy; completed: boolean }) {
   const [open, setOpen] = useState(false)
+  const router = useRouter()
   const badge = BADGE_STYLES[study.type]
 
   return (
-    <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-2xl overflow-hidden flex flex-col">
+    <div className={`bg-white dark:bg-card border rounded-2xl overflow-hidden flex flex-col transition-colors ${
+      completed ? 'border-teal-300 dark:border-teal-700' : 'border-gray-200 dark:border-border'
+    }`}>
       {/* Image */}
       <div className="relative w-full" style={{ aspectRatio: '16/7' }}>
         <Image
@@ -36,6 +55,11 @@ function StudyCard({ study }: { study: CuratedStudy }) {
         >
           {study.type}
         </span>
+        {completed && (
+          <span className="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-teal-500 text-white">
+            <CheckCircle size={10} /> Voltooid
+          </span>
+        )}
       </div>
 
       {/* Content */}
@@ -51,13 +75,13 @@ function StudyCard({ study }: { study: CuratedStudy }) {
           <span className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-muted-foreground">
             <Clock size={12} /> {study.durationLabel}
           </span>
-          <Link
-            href={`/study?book=${encodeURIComponent(study.startBook)}&chapter=${study.startChapter}&version=${encodeURIComponent(study.startVersion)}`}
+          <button
+            onClick={() => saveAndNavigate(study, 0, router)}
             className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg text-white transition-opacity hover:opacity-90"
             style={{ backgroundColor: '#0D9488' }}
           >
             Begin studie <ArrowRight size={12} />
-          </Link>
+          </button>
         </div>
 
         {/* Lessons toggle */}
@@ -72,14 +96,12 @@ function StudyCard({ study }: { study: CuratedStudy }) {
         {/* Lesson list */}
         {open && (
           <div className="mt-1 flex flex-col gap-1.5 pt-1">
-            {study.lessons.map(lesson => (
-              <Link
+            {study.lessons.map((lesson, index) => (
+              <button
                 key={lesson.day}
-                href={`/study?book=${encodeURIComponent(lesson.book)}&chapter=${lesson.chapter}&version=statenvertaling`}
-                className="flex items-start gap-3 group rounded-lg px-2 py-2 hover:bg-gray-50 dark:hover:bg-secondary transition-colors"
-                style={{ textDecoration: 'none' }}
+                onClick={() => saveAndNavigate(study, index, router)}
+                className="flex items-start gap-3 group rounded-lg px-2 py-2 hover:bg-gray-50 dark:hover:bg-secondary transition-colors text-left w-full"
               >
-                {/* Day number */}
                 <span
                   className="flex-shrink-0 h-5 w-5 rounded-full text-[10px] font-bold flex items-center justify-center mt-0.5"
                   style={{ backgroundColor: 'rgba(13,148,136,0.10)', color: '#0D9488' }}
@@ -97,13 +119,13 @@ function StudyCard({ study }: { study: CuratedStudy }) {
                       {lesson.book} {lesson.chapter}{lesson.verseRange ? `:${lesson.verseRange}` : ''}
                     </span>
                   </div>
-                  <p className="text-[11px] text-gray-400 dark:text-muted-foreground mt-0.5 leading-relaxed">
+                  <p className="text-[11px] text-gray-400 dark:text-muted-foreground mt-0.5 leading-relaxed text-left">
                     {lesson.focus}
                   </p>
                 </div>
 
                 <ArrowRight size={12} className="flex-shrink-0 mt-1 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: '#0D9488' }} />
-              </Link>
+              </button>
             ))}
           </div>
         )}
@@ -114,6 +136,14 @@ function StudyCard({ study }: { study: CuratedStudy }) {
 
 export default function StudiesPage() {
   const [filter, setFilter] = useState<StudyType | 'Alle'>('Alle')
+  const [completedIds, setCompletedIds] = useState<string[]>([])
+
+  useEffect(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem(COMPLETED_KEY) || '[]')
+      setCompletedIds(stored)
+    } catch { /* noop */ }
+  }, [])
 
   const filtered = filter === 'Alle'
     ? curatedStudies
@@ -142,12 +172,12 @@ export default function StudiesPage() {
             <button
               key={f.value}
               onClick={() => setFilter(f.value)}
-              className="px-4 py-1.5 rounded-full text-sm font-medium transition-all"
-              style={
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
                 filter === f.value
-                  ? { backgroundColor: '#0D9488', color: 'white' }
-                  : { backgroundColor: 'rgba(0,0,0,0.04)', color: '#6B7280' }
-              }
+                  ? 'text-white'
+                  : 'bg-gray-100 dark:bg-secondary text-gray-500 dark:text-muted-foreground hover:bg-gray-200 dark:hover:bg-secondary/70'
+              }`}
+              style={filter === f.value ? { backgroundColor: '#0D9488' } : {}}
             >
               {f.label}
               {f.value !== 'Alle' && (
@@ -162,7 +192,7 @@ export default function StudiesPage() {
         {/* Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {filtered.map(study => (
-            <StudyCard key={study.id} study={study} />
+            <StudyCard key={study.id} study={study} completed={completedIds.includes(study.id)} />
           ))}
         </div>
 

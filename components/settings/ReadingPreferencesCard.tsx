@@ -181,14 +181,6 @@ export function ReadingPreferencesCard() {
               onCheckedChange={(checked) => updatePreferences({ showVerseNumbers: checked })}
             />
           </div>
-          <div className="flex items-center justify-between">
-            <Label htmlFor="card-high-contrast" className="text-sm font-medium text-gray-700 dark:text-gray-300">{t('high_contrast')}</Label>
-            <Switch
-              id="card-high-contrast"
-              checked={preferences.highContrast}
-              onCheckedChange={(checked) => updatePreferences({ highContrast: checked })}
-            />
-          </div>
         </div>
 
       </CardContent>

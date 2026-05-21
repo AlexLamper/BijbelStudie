@@ -10,6 +10,7 @@ type Props = {
   chapter: number;
   maxChapter: number;
   preferences?: ReadingPreferences;
+  highlightRange?: { start: number; end: number };
 };
 
 type VerseData = { [key: string]: string };
@@ -24,7 +25,8 @@ export default function ChapterViewer({
   version,
   book,
   chapter,
-  preferences
+  preferences,
+  highlightRange,
 }: Props) {
   const [verses, setVerses] = useState<VerseData>({});
   const [loading, setLoading] = useState(false);
@@ -124,6 +126,15 @@ export default function ChapterViewer({
     }
   }, [book, chapter, version]);
 
+  // Auto-scroll to the first highlighted verse when highlightRange or verses change
+  useEffect(() => {
+    if (!highlightRange || loading || Object.keys(verses).length === 0) return;
+    const el = document.getElementById(`verse-${highlightRange.start}`);
+    if (el) {
+      setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 120);
+    }
+  }, [highlightRange?.start, verses, loading]);
+
   const handleVerseClick = (verseNumber: string, text: string) => {
     const reference = `${book} ${chapter}:${verseNumber}`;
     setSelectedVerse({
@@ -171,20 +182,27 @@ export default function ChapterViewer({
             "space-y-2 text-justify",
             prefs.highContrast && "contrast-more:text-black dark:contrast-more:text-white"
           )}>
-            {Object.entries(verses).map(([verseNumber, text]) => (
-              <div key={verseNumber} className="group relative">
+            {Object.entries(verses).map(([verseNumber, text]) => {
+              const vNum = parseInt(verseNumber, 10);
+              const isHighlighted = highlightRange
+                ? vNum >= highlightRange.start && vNum <= highlightRange.end
+                : false;
+              return (
+              <div key={verseNumber} id={`verse-${verseNumber}`} className={cn(
+                "group relative rounded-sm -mx-1 px-1",
+                isHighlighted && "bg-teal-50 dark:bg-teal-950/30 border-l-2 border-teal-500 pl-2"
+              )}>
                 <p className={cn(
                   "dark:text-foreground text-gray-900",
                   fontSizeClass,
                   fontFamilyClass,
                   lineHeightClass,
                   letterSpacingClass,
-                  prefs.highContrast && "text-black dark:text-white font-medium"
                 )}>
                   {prefs.showVerseNumbers && (
                     <sup className={cn(
-                      "font-semibold text-gray-700 dark:text-muted-foreground mr-1",
-                      prefs.highContrast && "text-black dark:text-white"
+                      "font-semibold mr-1",
+                      isHighlighted ? "text-teal-600 dark:text-teal-400" : "text-gray-700 dark:text-muted-foreground"
                     )}>
                       {verseNumber}
                     </sup>
@@ -202,7 +220,8 @@ export default function ChapterViewer({
                   <Plus className="h-3 w-3" />
                 </button>
               </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Note Creation Modal */}

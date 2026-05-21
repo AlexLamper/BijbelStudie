@@ -4,11 +4,14 @@ import React, { useState, useEffect } from 'react';
 import { AlertCircle, BookOpen } from 'lucide-react';
 import { useTranslation } from '../../app/i18n/client';
 import GeoImages from './GeoImages';
+import { ReadingPreferences } from '../../hooks/useReadingPreferences';
+import { getPreferenceClasses, getPreferenceStyles } from '../../lib/preferenceClasses';
 
 interface HistoricalContextProps {
   book: string;
   chapter: number;
   t: (key: string) => string;
+  preferences?: ReadingPreferences;
 }
 
 function SummarySkeleton() {
@@ -34,7 +37,9 @@ function SummarySkeleton() {
   );
 }
 
-export default function HistoricalContext({ book, chapter }: HistoricalContextProps) {
+export default function HistoricalContext({ book, chapter, preferences }: HistoricalContextProps) {
+  const prefClasses = getPreferenceClasses(preferences);
+  const prefStyles  = getPreferenceStyles(preferences);
   const { i18n } = useTranslation('study');
   const lng = i18n.resolvedLanguage;
   const [isLoading, setIsLoading] = useState(true);
@@ -76,7 +81,7 @@ export default function HistoricalContext({ book, chapter }: HistoricalContextPr
             <p className="text-sm text-red-500">{error}</p>
           </div>
         ) : summary ? (
-          <div className="font-inter text-gray-700 dark:text-foreground text-base leading-loose whitespace-pre-wrap">
+          <div className={`text-gray-700 dark:text-foreground whitespace-pre-wrap ${prefClasses}`} style={prefStyles}>
             {summary}
           </div>
         ) : (

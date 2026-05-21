@@ -27,6 +27,8 @@ interface BibleViewerSectionProps {
   t: (key: string) => string;
   preferences: ReadingPreferences;
   onUpdatePreferences: (prefs: Partial<ReadingPreferences>) => void;
+  highlightRange?: { start: number; end: number };
+  bottomBar?: React.ReactNode;
 }
 
 export default function BibleViewerSection({
@@ -48,6 +50,8 @@ export default function BibleViewerSection({
   t,
   preferences,
   onUpdatePreferences,
+  highlightRange,
+  bottomBar,
 }: BibleViewerSectionProps) {
   return (
     <section className="flex flex-col h-full bg-white dark:bg-background">
@@ -112,6 +116,7 @@ export default function BibleViewerSection({
               chapter={selectedChapter}
               maxChapter={maxChapter}
               preferences={preferences}
+              highlightRange={highlightRange}
             />
           ) : (
             <EmptyState
@@ -130,6 +135,8 @@ export default function BibleViewerSection({
         <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none z-10
           bg-gradient-to-t from-white dark:from-background to-transparent" />
       </div>
+
+      {bottomBar}
     </section>
   );
 }

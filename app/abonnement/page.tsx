@@ -128,7 +128,7 @@ export default function SubscribePage() {
             BijbelStudie Pro
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-3 leading-tight">
-            Studeer dieper.<br />Begin vandaag.
+            Alles wat je nodig hebt<br />voor serieuze bijbelstudie.
           </h1>
           <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto text-base">
             Onbeperkte toegang tot commentaren, leesplannen, notities en meer - zonder jaarlijkse verplichting.
