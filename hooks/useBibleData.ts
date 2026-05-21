@@ -5,12 +5,17 @@ import { bookNameMap, CANONICAL_NL, normalizeBookName, BIBLE_BOOKS_ORDER } from 
 
 /* ─── Static data - never changes ───────────────────────────── */
 const VERSIONS = [
-  { id: 'statenvertaling', name: 'Statenvertaling', language: 'nl' },
+  { id: 'statenvertaling',      name: 'Statenvertaling',        language: 'nl' },
+  { id: 'heilige_schrift_1917', name: 'De Heilige Schrift 1917', language: 'nl' },
+  { id: 'canisiusbijbel',       name: 'Canisiusbijbel 1939',    language: 'nl' },
 ] as const;
 
 // Flat-file translations: stored as a single JSON, no per-book directory.
 // Chapters must be fetched via API instead of /data/bibles/{version}/{book}/chapters.json
-const FLAT_FILE_VERSIONS = new Set(['basisbijbel']);
+const FLAT_FILE_VERSIONS = new Set(['basisbijbel', 'heilige_schrift_1917', 'canisiusbijbel']);
+
+// Flat-file translations that store book names in English internally (need Dutch→English mapping)
+const ENGLISH_INTERNAL_VERSIONS = new Set(['basisbijbel']);
 
 type VersionId = typeof VERSIONS[number]['id'];
 
@@ -70,9 +75,12 @@ async function fetchChaptersDirect(version: string, bookName: string): Promise<n
     let sorted: number[] = [];
 
     if (FLAT_FILE_VERSIONS.has(version)) {
-      // basisbijbel stores books with English names internally; translate Dutch display name back
-      const englishBook = bookNameMap[bookName] || bookName;
-      const res = await fetch(`/api/bible/chapters?version=${version}&book=${encodeURIComponent(englishBook)}`);
+      // basisbijbel stores books with English names internally; translate Dutch display name back.
+      // Other flat-file translations (heilige_schrift_1917, canisiusbijbel) use Dutch names natively.
+      const bookParam = ENGLISH_INTERNAL_VERSIONS.has(version)
+        ? (bookNameMap[bookName] || bookName)
+        : bookName;
+      const res = await fetch(`/api/bible/chapters?version=${version}&book=${encodeURIComponent(bookParam)}`);
       if (res.ok) {
         const data: number[] = await res.json();
         sorted = Array.isArray(data) ? [...data].map(Number).sort((a, b) => a - b) : [];

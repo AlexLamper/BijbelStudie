@@ -7,6 +7,18 @@
       "type": "file"
     },
     {
+      "name": "canisiusbijbel.json",
+      "title": "Canisiusbijbel 1939",
+      "language": "nl",
+      "type": "file"
+    },
+    {
+      "name": "heilige_schrift_1917.json",
+      "title": "De Heilige Schrift 1917",
+      "language": "nl",
+      "type": "file"
+    },
+    {
       "name": "elberfelder_1905",
       "title": "Elberfelder 1905",
       "type": "dir",

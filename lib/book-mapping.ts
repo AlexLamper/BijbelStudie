@@ -79,6 +79,16 @@
   'Judas': 'Jude',
   'Openbaring': 'Revelation',
 
+  // ── Deuterocanonical books (Canisiusbijbel 1939) ──────────────
+  'Tobit': 'Tobit',
+  'Judit': 'Judith',
+  '1 Makkabeeën': '1 Maccabees',
+  '2 Makkabeeën': '2 Maccabees',
+  'Wijsheid': 'Wisdom',
+  'Wijsheid van Jezus Sirach': 'Sirach',
+  'Baruch': 'Baruch',
+  'Daniël (Grieks)': 'Daniel (Greek)',
+
   // ── German (Elberfelder 1905 / Luther 1912 / Schlachter 2000) ─
   '1 Mose': 'Genesis',
   '2 Mose': 'Exodus',
