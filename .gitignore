@@ -50,8 +50,12 @@ next-env.d.ts
 todo.txt
 /todo.txt
 
-# Bible translation data files - ignore everything except statenvertaling
+# Bible translation data files - ignore everything except committed translations
 /public/data/bibles/*
 !/public/data/bibles/statenvertaling
 !/public/data/bibles/statenvertaling/**
 !/public/data/bibles/basisbijbel.json
+!/public/data/bibles/heilige_schrift_1917
+!/public/data/bibles/heilige_schrift_1917/**
+!/public/data/bibles/canisiusbijbel
+!/public/data/bibles/canisiusbijbel/**

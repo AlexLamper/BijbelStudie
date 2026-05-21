@@ -12,7 +12,7 @@ const VERSIONS = [
 
 // Flat-file translations: stored as a single JSON, no per-book directory.
 // Chapters must be fetched via API instead of /data/bibles/{version}/{book}/chapters.json
-const FLAT_FILE_VERSIONS = new Set(['basisbijbel', 'heilige_schrift_1917', 'canisiusbijbel']);
+const FLAT_FILE_VERSIONS = new Set(['basisbijbel']);
 
 // Flat-file translations that store book names in English internally (need Dutch→English mapping)
 const ENGLISH_INTERNAL_VERSIONS = new Set(['basisbijbel']);

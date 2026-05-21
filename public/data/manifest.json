@@ -7,16 +7,18 @@
       "type": "file"
     },
     {
-      "name": "canisiusbijbel.json",
+      "name": "canisiusbijbel",
       "title": "Canisiusbijbel 1939",
       "language": "nl",
-      "type": "file"
+      "type": "dir",
+      "files": ["1 Corinthiërs","1 Johannes","1 Koningen","1 Kronieken","1 Makkabeeën","1 Petrus","1 Samuël","1 Thessalonicenzen","1 Timotheüs","2 Corinthiër","2 Johannes","2 Koningen","2 Kronieken","2 Makkabeeën","2 Petrus","2 Samuël","2 Thessalonicenzen","2 Timotheüs","3 Johannes","Amos","Baruch","Colossenzen","Daniël (Grieks)","Deuteronomium","Efeziërs","Esther","Exodus","Ezechiël","Ezra","Filémon","Filippenzen","Galaten","Genesis","Habakuk","Haggaï","Handelingen","Hebreeën","Hooglied","Hosea","Jakobus","Jeremia","Jesaja","Job","Joël","Johannes","Jona","Jozua","Judas","Judit","Klaagliederen","Leviticus","Lukas","Maleachi","Markus","Mattheüs","Micha","Nahum","Nehemia","Numberi","Obadja","Openbaring","Prediker","Psalmen","Richteren","Romeinen","Ruth","Spreuken","Titus","Tobit","Wijsheid","Wijsheid van Jezus Sirach","Zacharia","Zefanja"]
     },
     {
-      "name": "heilige_schrift_1917.json",
+      "name": "heilige_schrift_1917",
       "title": "De Heilige Schrift 1917",
       "language": "nl",
-      "type": "file"
+      "type": "dir",
+      "files": ["1 Corinthiërs","1 Johannes","1 Koningen","1 Kronieken","1 Petrus","1 Samuël","1 Thessalonicenzen","1 Timotheüs","2 Corinthiër","2 Johannes","2 Koningen","2 Kronieken","2 Petrus","2 Samuël","2 Thessalonicenzen","2 Timotheüs","3 Johannes","Amos","Colossenzen","Daniël","Deuteronomium","Efeziërs","Esther","Exodus","Ezechiël","Ezra","Filémon","Filippenzen","Galaten","Genesis","Habakuk","Haggaï","Handelingen","Hebreeën","Hooglied","Hosea","Jakobus","Jeremia","Jesaja","Job","Joël","Johannes","Jona","Jozua","Judas","Klaagliederen","Leviticus","Lukas","Maleachi","Markus","Mattheüs","Micha","Nahum","Nehemia","Numberi","Obadja","Openbaring","Prediker","Psalmen","Richteren","Romeinen","Ruth","Spreuken","Titus","Zacharia","Zefanja"]
     },
     {
       "name": "elberfelder_1905",
