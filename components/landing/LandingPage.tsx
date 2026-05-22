@@ -328,7 +328,7 @@ function Hero() {
           >
             <Link href="/auth/signin"
               className="inline-flex items-center justify-center gap-2 font-semibold text-white px-7 py-3.5 rounded-xl bg-teal-600 hover:bg-teal-700 transition-colors">
-              Begin gratis
+              Start nu
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link href="#functies"

@@ -26,7 +26,6 @@ interface TabComponentProps {
 export default function TabComponent({
   selectedBook,
   selectedChapter,
-  selectedVersion: _selectedVersion,
   selectedCommentary,
   t,
   onNextChapter,
