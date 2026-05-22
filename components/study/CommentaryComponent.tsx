@@ -106,53 +106,135 @@ const bookNameMap: Record<string, string> = {
   'Openbaring': 'Revelation',
 };
 
-function formatCommentaryText(raw: string): string {
-  // Already HTML - just strip leftover markdown escapes
-  if (/<[a-zA-Z][^>]*>/.test(raw)) {
-    return raw.replace(/([A-Za-z0-9])\\\./g, '$1.');
+// ── Dachsel formatter ─────────────────────────────────────────────
+// Handles ***Bible text 1) ref...*** blocks + numbered footnotes
+function formatDachselText(raw: string): string {
+  const P  = 'style="margin-top:0.85em;line-height:1.8"';
+  const blocks = raw.split(/\n{2,}/);
+
+  type Footnote = { num: string; lines: string[] };
+  let verseHtml = '';
+  const bodyParts: string[] = [];
+  const footnotes: Footnote[] = [];
+  let currentFn: Footnote | null = null;
+
+  for (const block of blocks) {
+    const trimmed = block.trim();
+    if (!trimmed) continue;
+    const line = trimmed.replace(/\n+/g, ' ');
+
+    // Bible verse citation block: ***N. text***
+    const verseMatch = line.match(/^\*{1,3}([\s\S]+?)\*{1,3}$/);
+    if (verseMatch) {
+      currentFn = null;
+      // Replace inline footnote markers "N)" preceded by a space/comma
+      const inner = verseMatch[1]
+        .replace(/^\d+\.\s*/, '')          // strip leading "1. "
+        .replace(/(?<=[\s,])(\d{1,2})\)(?=[\s,])/g,
+          '<sup style="color:#0D9488;font-weight:600;margin-left:1px">$1</sup>');
+      verseHtml = `<blockquote style="border-left:3px solid #0D9488;padding:0.6em 1em;margin:0.75em 0;background:rgba(13,148,136,0.05);border-radius:0 6px 6px 0;font-style:italic;line-height:1.75">${inner}</blockquote>`;
+      continue;
+    }
+
+    // Footnote start: "N) text..."
+    const fnMatch = line.match(/^(\d{1,2})\)\s+(.+)$/);
+    if (fnMatch) {
+      currentFn = { num: fnMatch[1], lines: [fnMatch[2]] };
+      footnotes.push(currentFn);
+      continue;
+    }
+
+    // Continuation of current footnote or regular paragraph
+    if (currentFn) {
+      currentFn.lines.push(line);
+    } else {
+      bodyParts.push(`<p ${P}>${line}</p>`);
+    }
   }
 
-  // Strip markdown-escaped periods: "1\." → "1.", "a\." → "a."
-  const text = raw.replace(/([A-Za-z0-9])\\\./g, '$1.');
+  let html = verseHtml + bodyParts.join('');
 
-  // Split on two or more newlines to get paragraph blocks
+  if (footnotes.length > 0) {
+    const fnItems = footnotes.map(fn => {
+      const text = fn.lines
+        .map((l, i) => i === 0 ? l : `<p ${P} style="margin-top:0.5em;line-height:1.75">${l}</p>`)
+        .join('');
+      return `<div style="margin-top:0.6em;padding-left:1.5em;position:relative">
+        <sup style="position:absolute;left:0;top:0.2em;color:#0D9488;font-weight:700">${fn.num}</sup>
+        <p style="margin:0;line-height:1.75">${text}</p>
+      </div>`;
+    }).join('');
+    html += `<div style="margin-top:1.5em;padding-top:1em;border-top:1px solid rgba(107,114,128,0.2);font-size:0.88em;color:inherit;opacity:0.85">${fnItems}</div>`;
+  }
+
+  return html;
+}
+
+// ── HTML commentary formatter (KingComments etc.) ─────────────────
+// Cleans up HTML from MySword and adds proper spacing
+function formatHtmlCommentary(raw: string): string {
+  return raw
+    .replace(/([A-Za-z0-9])\\\./g, '$1.')
+    // <br/> directly after closing h3 tag → remove (h3 already creates block)
+    .replace(/<\/h3>\s*<br\s*\/?>/gi, '</h3>')
+    .replace(/<br\s*\/?>\s*<\/h3>/gi, '</h3>')
+    // Internal MyBible links (#bBOOK.CH.V) → styled span (not navigable)
+    .replace(
+      /<a\s[^>]*href="#b[^"]*"[^>]*>(.*?)<\/a>/gi,
+      '<span style="color:#0D9488;font-style:italic;font-weight:500">$1</span>'
+    )
+    // h3 headings: add spacing + weight
+    .replace(
+      /<h3>/gi,
+      '<h3 style="font-size:1.05rem;font-weight:700;margin-top:1.75rem;margin-bottom:0.4rem;line-height:1.4">'
+    )
+    // h4 subheadings
+    .replace(
+      /<h4>/gi,
+      '<h4 style="font-size:0.95rem;font-weight:600;margin-top:1.25rem;margin-bottom:0.3rem;line-height:1.4">'
+    )
+    // Paragraphs: proper spacing + line height
+    .replace(/<p>/gi, '<p style="margin-top:0.85em;line-height:1.8">')
+    // Bold text
+    .replace(/<b>/gi, '<strong>')
+    .replace(/<\/b>/gi, '</strong>');
+}
+
+// ── Generic plain-text formatter (Matthew Henry etc.) ────────────
+function formatPlainText(raw: string): string {
+  const text = raw.replace(/([A-Za-z0-9])\\\./g, '$1.');
   const blocks = text.split(/\n{2,}/);
 
   return blocks.map(block => {
     const trimmed = block.trim();
     if (!trimmed) return '';
-
-    // Collapse single newlines to spaces within a block
     const line = trimmed.replace(/\n+/g, ' ');
 
-    // Roman numeral header: I., II., III., IV., V. etc.
-    if (/^(I{1,3}|IV|VI{0,3}|IX|X{1,3})\.\s/.test(line)) {
-      return `<p style="margin-top:1.5em;margin-bottom:0.25em;line-height:1.65">${line}</p>`;
-    }
-
+    // Roman numeral section heading: I., II., III., IV. etc.
+    if (/^(I{1,3}|IV|VI{0,3}|IX|X{1,3})\.\s/.test(line))
+      return `<p style="font-weight:700;font-size:0.95rem;margin-top:1.6em;margin-bottom:0.15em;line-height:1.5;border-left:3px solid #0D9488;padding-left:0.75em">${line}</p>`;
     // Numbered point: 1., 2., 3.
-    if (/^\d+\.\s/.test(line)) {
-      return `<p style="padding-left:1.25em;margin-top:0.75em;line-height:1.75">${line}</p>`;
-    }
-
+    if (/^\d+\.\s/.test(line))
+      return `<p style="padding-left:1.5em;margin-top:0.8em;line-height:1.8">${line}</p>`;
     // Capital-letter point: A., B., C.
-    if (/^[A-Z]\.\s/.test(line)) {
-      return `<p style="padding-left:1.25em;margin-top:0.75em;line-height:1.75">${line}</p>`;
-    }
+    if (/^[A-Z]\.\s/.test(line))
+      return `<p style="padding-left:1.5em;margin-top:0.8em;line-height:1.8">${line}</p>`;
+    // Lowercase sub-point: a., b., c.
+    if (/^[a-z]\.\s/.test(line))
+      return `<p style="padding-left:2.75em;margin-top:0.5em;line-height:1.8">${line}</p>`;
+    // Parenthetical: (1)
+    if (/^\(\d+\)[.)\s]/.test(line))
+      return `<p style="padding-left:3.75em;margin-top:0.5em;line-height:1.8">${line}</p>`;
 
-    // Lowercase lettered sub-point: a., b., c.
-    if (/^[a-z]\.\s/.test(line)) {
-      return `<p style="padding-left:2.5em;margin-top:0.5em;line-height:1.75">${line}</p>`;
-    }
-
-    // Parenthetical numbered sub-sub-point: (1). or (1)
-    if (/^\(\d+\)[.)\s]/.test(line)) {
-      return `<p style="padding-left:3.75em;margin-top:0.5em;line-height:1.75">${line}</p>`;
-    }
-
-    // Regular paragraph
-    return `<p style="margin-top:0.75em;line-height:1.75">${line}</p>`;
+    return `<p style="margin-top:0.85em;line-height:1.8">${line}</p>`;
   }).filter(Boolean).join('');
+}
+
+// ── Main dispatcher ───────────────────────────────────────────────
+function formatCommentaryText(raw: string): string {
+  if (/<[a-zA-Z][^>]*>/.test(raw)) return formatHtmlCommentary(raw);
+  if (/\*{3}/.test(raw))           return formatDachselText(raw);
+  return formatPlainText(raw);
 }
 
 const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
@@ -371,18 +453,33 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
                 <p className="font-inter">Geen commentaar beschikbaar voor dit hoofdstuk.</p>
             </div>
         ) : (
-            Object.entries(commentary).map(([key, text]) => (
-            <div key={key} className="border-b border-gray-100 dark:border-border pb-4 last:border-0 pr-2">
-                <h3 className="font-merriweather font-semibold text-gray-900 dark:text-foreground mb-2">
-                {key === 'intro' || key === '0' ? 'Inleiding' : `Vers ${key}`}
-                </h3>
-                <div
+            Object.entries(commentary).map(([key, text]) => {
+              const isHtml = /<[a-zA-Z][^>]*>/.test(text);
+              const label = key === 'intro' || key === '0'
+                ? 'Inleiding'
+                : `Vers ${key}`;
+              return (
+                <div key={key} className="border-b border-gray-100 dark:border-border pb-6 last:border-0 pr-2">
+                  {/* Verse label — compact chip for HTML commentaries, heading for plain text */}
+                  {isHtml ? (
+                    <div className="inline-flex items-center gap-1.5 mb-1">
+                      <span className="text-[11px] font-semibold tracking-wider uppercase text-[#0D9488] dark:text-teal-400 bg-[rgba(13,148,136,0.08)] dark:bg-[rgba(13,148,136,0.15)] px-2 py-0.5 rounded-full">
+                        {label}
+                      </span>
+                    </div>
+                  ) : (
+                    <h3 className="font-merriweather font-semibold text-gray-900 dark:text-foreground mb-2 mt-1">
+                      {label}
+                    </h3>
+                  )}
+                  <div
                     className={`text-gray-700 dark:text-foreground max-w-none ${prefClasses}`}
                     style={prefStyles}
                     dangerouslySetInnerHTML={{ __html: formatCommentaryText(text) }}
-                />
-            </div>
-            ))
+                  />
+                </div>
+              );
+            })
         )}
       </CardContent>
     </Card>

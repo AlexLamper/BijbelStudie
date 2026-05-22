@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { ChapterNotes } from './ChapterNotes';
-import InductiveStudy from './InductiveStudy';
 import HistoricalContext from './HistoricalContext';
 import { useKeyboardShortcuts, KeyboardShortcut } from '../../hooks/useKeyboardShortcuts';
 import CommentaryComponent from './CommentaryComponent';
@@ -73,13 +72,6 @@ export default function TabComponent({
             preferences={preferences}
           />
         );
-      case 'inductive':
-        return <InductiveStudy
-          book={selectedBook || ''}
-          chapter={selectedChapter || 0}
-          version={selectedVersion || ''}
-          preferences={preferences}
-        />;
       case 'historical':
         return (
           <HistoricalContext

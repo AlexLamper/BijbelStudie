@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { MessageCircle, Users, Brain, Info } from 'lucide-react';
+import { MessageCircle, Users, Info } from 'lucide-react';
 import TabComponent from './TabComponent';
 
 import { ReadingPreferences } from '../../hooks/useReadingPreferences';
@@ -37,10 +37,9 @@ export default function StudyMaterialsSection({
   const [activeTab, setActiveTab] = useState('commentary');
 
   const tabs = [
-    { id: 'commentary', label: t('tabs.commentary'),      icon: MessageCircle },
-    { id: 'historical', label: t('tabs.general_info'),    icon: Info },
-    { id: 'inductive',  label: t('tabs.inductive_study'), icon: Brain },
-    { id: 'notes',      label: t('tabs.notes'),           icon: Users },
+    { id: 'commentary', label: t('tabs.commentary'),   icon: MessageCircle },
+    { id: 'historical', label: t('tabs.general_info'), icon: Info },
+    { id: 'notes',      label: t('tabs.notes'),        icon: Users },
   ];
 
   return (

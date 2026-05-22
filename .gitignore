@@ -50,6 +50,10 @@ next-env.d.ts
 todo.txt
 /todo.txt
 
+# Bible source files (proprietary/large binaries used only for conversion)
+scripts/*.mybible
+scripts/*.cmt.mybible
+
 # Bible translation data files - ignore everything except committed translations
 /public/data/bibles/*
 !/public/data/bibles/statenvertaling
@@ -59,3 +63,8 @@ todo.txt
 !/public/data/bibles/heilige_schrift_1917/**
 !/public/data/bibles/canisiusbijbel
 !/public/data/bibles/canisiusbijbel/**
+
+# Commentaries - committed translations
+/public/data/commentaries/*
+!/public/data/commentaries/kingcomments_nl
+!/public/data/commentaries/kingcomments_nl/**

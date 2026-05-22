@@ -456,11 +456,13 @@ export async function getCommentary(source: string, bookName: string, chapterNum
 
 export async function getCommentaries() {
     const manifest = await getManifest();
-    return manifest.commentaries.map(c => ({
-        id: c.name.replace('.json', ''),
-        name: c.title || c.name.replace('.json', '').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-        language: c.language || 'en'
-    }));
+    return manifest.commentaries
+        .filter((c: { hidden?: boolean }) => !c.hidden)
+        .map(c => ({
+            id: c.name.replace('.json', ''),
+            name: c.title || c.name.replace('.json', '').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+            language: c.language || 'en'
+        }));
 }
 
 export async function getBibleSummary(bookName: string, language: string = 'en') {

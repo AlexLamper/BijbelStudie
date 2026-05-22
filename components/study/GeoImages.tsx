@@ -318,8 +318,7 @@ export default function GeoImages({ book, chapter, className, variant = 'grid' }
                     transition: 'transform 0.3s',
                   }}
                   className="group-hover:scale-105"
-                  onLoad={() => console.log(`[GeoImages] ✓ Loaded: ${imgSrc(image)}`)}
-                  onError={() => console.error(`[GeoImages] ✗ FAILED: ${imgSrc(image)}`)}
+                  onError={e => { (e.currentTarget as HTMLImageElement).src = image.thumbnailUrl; }}
                 />
               </div>
               {/* Caption */}

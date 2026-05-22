@@ -38,9 +38,13 @@ interface Plan       { _id: string; title: string; progressPercentage: number; c
 interface DailyVerse { text: string; reference: string; book: string; chapter: number }
 interface WeekDay    { label: string; count: number; heightPct: number; isToday: boolean }
 
-function greeting(name: string) {
+function getGreeting(name: string): string {
   const h = new Date().getHours()
-  return `${h < 12 ? "Goedemorgen" : h < 18 ? "Goedemiddag" : "Goedenavond"}, ${name}`
+  if (h >= 0 && h < 6)  return `Goedenacht, ${name}`
+  if (h < 12)            return `Goedemorgen, ${name}`
+  if (h < 18)            return `Goedemiddag, ${name}`
+  if (h < 22)            return `Goedenavond, ${name}`
+  return `Goedenacht, ${name}`
 }
 function formatDate() {
   return new Date().toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long" })
@@ -62,6 +66,18 @@ export default function DashboardPage() {
   const [recentNotes, setRecentNotes]   = useState<Array<{ _id: string; book: string; chapter: number; verse?: number; noteText: string; createdAt: string }>>([])
   const [readChapters, setReadChapters] = useState<Record<string, number[]>>({})
   const [hoveredBook, setHoveredBook]   = useState<string | null>(null)
+  const [greetingText, setGreetingText] = useState<string>('')
+
+  // Calculate greeting on client to use the user's local timezone
+  useEffect(() => {
+    const firstName = session?.user?.name?.split(' ')[0] || 'Gebruiker'
+    setGreetingText(getGreeting(firstName))
+    // Refresh every minute so the greeting stays correct as time passes
+    const interval = setInterval(() => {
+      setGreetingText(getGreeting(session?.user?.name?.split(' ')[0] || 'Gebruiker'))
+    }, 60_000)
+    return () => clearInterval(interval)
+  }, [session])
 
   useEffect(() => {
     fetch("/api/user/weekly-stats")
@@ -113,7 +129,7 @@ export default function DashboardPage() {
       .finally(() => setLoading(false))
   }, [])
 
-  const firstName = session?.user?.name?.split(" ")[0] || "Gebruiker"
+  const firstName = session?.user?.name?.split(' ')[0] || 'Gebruiker'
 
   function bookReadRatio(book: string): number {
     const total = CHAPTER_COUNTS[book] ?? 1
@@ -145,7 +161,7 @@ export default function DashboardPage() {
       <div className="px-6 xl:px-10 pt-7 pb-5 border-b border-border bg-background flex-shrink-0">
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-xl font-bold text-foreground">{greeting(firstName)}</h1>
+            <h1 className="text-xl font-bold text-foreground">{greetingText}</h1>
             <p className="text-sm text-muted-foreground mt-0.5 capitalize">{formatDate()}</p>
           </div>
           {streak > 0 && (

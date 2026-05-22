@@ -139,7 +139,9 @@ export function useBibleData(lng: string, options: UseBibleDataOptions = {}): Us
   const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
   const [selectedBook, setSelectedBook] = useState<string>('');
   const [selectedChapter, setSelectedChapter] = useState<number>(1);
-  const [selectedCommentary, setSelectedCommentary] = useState<string>('matthew_henry_nl');
+  const [selectedCommentary, setSelectedCommentary] = useState<string>(() => {
+    try { return localStorage.getItem('bijbelstudie_commentary') || 'matthew_henry_nl'; } catch { return 'matthew_henry_nl'; }
+  });
   const [maxChapter, setMaxChapter]     = useState<number>(1);
   const [loadingBooks, setLoadingBooks] = useState(true);
   const [loadingChapters, setLoadingChapters] = useState(false);
@@ -210,7 +212,10 @@ export function useBibleData(lng: string, options: UseBibleDataOptions = {}): Us
       }
 
       setSelectedVersion(version);
-      if (restoredCommentary) setSelectedCommentary(restoredCommentary);
+      if (restoredCommentary) {
+        setSelectedCommentary(restoredCommentary);
+        try { localStorage.setItem('bijbelstudie_commentary', restoredCommentary); } catch { /* noop */ }
+      }
 
       // Resolve books from cached index (no extra fetch)
       const bookList = index ? resolveBooksFromIndex(index, version) : [];
@@ -371,6 +376,7 @@ export function useBibleData(lng: string, options: UseBibleDataOptions = {}): Us
 
   const handleCommentaryChange = useCallback((commentary: string) => {
     setSelectedCommentary(commentary);
+    try { localStorage.setItem('bijbelstudie_commentary', commentary); } catch { /* noop */ }
   }, []);
 
   const handlePreviousChapter = useCallback(() => {
