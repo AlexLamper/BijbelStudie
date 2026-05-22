@@ -190,8 +190,12 @@ export class GeoDataService {
 
           seenImageIds.add(imageId);
 
-          const thumbUrl = imageEntry.thumbnail_url_pattern.replace('####', '640');
-          const description = (imageEntry.descriptions[ident.id] ||
+          if (!imageEntry.thumbnail_url_pattern && !imageEntry.file_url) continue;
+
+          const thumbUrl = imageEntry.thumbnail_url_pattern
+            ? imageEntry.thumbnail_url_pattern.replace('####', '640')
+            : imageEntry.file_url;
+          const description = (imageEntry.descriptions?.[ident.id] ||
                                ident.media.thumbnail.description ||
                                place.friendly_id).replace(/<[^>]*>/g, '');
 

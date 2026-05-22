@@ -95,9 +95,9 @@ export default function TabComponent({
   };
 
   return (
-    <div className={height ? "flex flex-col h-full" : "h-full"}>
+    <div className={height ? "flex flex-col h-full min-w-0" : "h-full min-w-0"}>
       {/* Tab Content */}
-      <div className={height ? "flex-1 min-h-0 overflow-hidden" : "min-h-[400px] h-full"}>
+      <div className={height ? "flex-1 min-h-0 min-w-0 overflow-hidden" : "min-h-[400px] h-full min-w-0"}>
         {renderTabContent()}
       </div>
     </div>

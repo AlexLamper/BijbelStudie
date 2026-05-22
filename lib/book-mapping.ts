@@ -4,7 +4,6 @@
   'Exodus': 'Exodus',
   'Leviticus': 'Leviticus',
   'Numeri': 'Numbers',
-  'Numberi': 'Numbers',          // statenvertaling variant
   'Deuteronomium': 'Deuteronomy',
   'Jozua': 'Joshua',
   'Richteren': 'Judges',
@@ -142,7 +141,7 @@ export const englishToDutchMap: Record<string, string> = Object.entries(bookName
  */
 export const CANONICAL_NL: Record<string, string> = {
   'Genesis': 'Genesis', 'Exodus': 'Exodus', 'Leviticus': 'Leviticus',
-  'Numbers': 'Numberi', 'Deuteronomy': 'Deuteronomium', 'Joshua': 'Jozua',
+  'Numbers': 'Numeri', 'Deuteronomy': 'Deuteronomium', 'Joshua': 'Jozua',
   'Judges': 'Richteren', 'Ruth': 'Ruth', '1 Samuel': '1 Samuël',
   '2 Samuel': '2 Samuël', '1 Kings': '1 Koningen', '2 Kings': '2 Koningen',
   '1 Chronicles': '1 Kronieken', '2 Chronicles': '2 Kronieken',

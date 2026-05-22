@@ -43,7 +43,7 @@ export default function StudyMaterialsSection({
   ];
 
   return (
-    <section className="flex flex-col h-full bg-white dark:bg-background">
+    <section className="flex flex-col h-full min-w-0 overflow-hidden bg-white dark:bg-background">
 
       {/* Tab bar */}
       <div className="h-14 flex items-center px-3 flex-none border-b overflow-x-auto bg-gray-50 dark:bg-card border-gray-200 dark:border-border">
@@ -73,7 +73,7 @@ export default function StudyMaterialsSection({
       </div>
 
       {/* Content */}
-      <div className="flex-1 min-h-0 overflow-hidden flex flex-col relative bg-white dark:bg-background">
+      <div className="flex-1 min-h-0 min-w-0 overflow-hidden flex flex-col relative bg-white dark:bg-background">
         <TabComponent
           selectedBook={selectedBook}
           selectedChapter={selectedChapter}

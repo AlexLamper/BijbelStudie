@@ -300,7 +300,7 @@ function StudyPageInner() {
       )}
 
       <div className="flex flex-col lg:flex-row h-full w-full overflow-hidden">
-        <div className="h-full w-full lg:w-1/2 lg:flex-none min-h-0 overflow-hidden border-r border-border">
+        <div className="h-full w-full lg:w-1/2 lg:flex-none min-h-0 min-w-0 overflow-hidden border-r border-border">
           <BibleViewerSection
             selectedBook={selectedBook}
             selectedChapter={selectedChapter}
@@ -325,7 +325,7 @@ function StudyPageInner() {
           />
         </div>
 
-        <div className="h-full w-full lg:w-1/2 lg:flex-none min-h-0 overflow-hidden">
+        <div className="h-full w-full lg:w-1/2 lg:flex-none min-h-0 min-w-0 overflow-hidden">
           <StudyMaterialsSection
             selectedBook={selectedBook}
             selectedChapter={selectedChapter}

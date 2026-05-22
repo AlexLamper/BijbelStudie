@@ -7,23 +7,63 @@ import GeoImages from './GeoImages';
 import { ReadingPreferences } from '../../hooks/useReadingPreferences';
 import { getPreferenceClasses, getPreferenceStyles } from '../../lib/preferenceClasses';
 
+function highlightRefs(text: string): string {
+  // Highlight Bible references like (Num 1:1-54) or (Gen 3:15)
+  return text.replace(
+    /\(([A-Z][a-z]{0,5}\.?\s*\d+:\d+[\d:,\s\-–]*)\)/g,
+    '(<span style="color:#0D9488;font-size:0.8em;font-weight:600;white-space:nowrap">$1</span>)'
+  );
+}
+
 function formatSummaryText(raw: string): string {
-  const P = 'style="margin-top:0.85em;line-height:1.8"';
-  const blocks = raw.split(/\n{2,}/);
+  if (!raw) return '';
 
-  return blocks.map(block => {
-    const trimmed = block.trim();
+  let paragraphs: string[];
+
+  if (/\n{2,}/.test(raw)) {
+    // Explicit double-newline paragraph breaks
+    paragraphs = raw.split(/\n{2,}/).map(p => p.replace(/\n/g, ' ').trim()).filter(Boolean);
+  } else {
+    // Single block: split into sentences, then group into paragraphs
+    const flat = raw.replace(/\n/g, ' ').trim();
+
+    // Mark sentence boundaries: ". " followed by a capital letter
+    const marked = flat.replace(/\.\s+(?=[A-ZÁÉÍÓÚÀÈÌÒÙ])/g, '.|SPLIT|');
+    const sentences = marked.split('|SPLIT|').map(s => s.trim()).filter(Boolean);
+
+    const paras: string[] = [];
+    let current: string[] = [];
+
+    for (const sentence of sentences) {
+      current.push(sentence);
+      // End paragraph after a sentence that closes with a Bible reference
+      const endsWithRef = /\([\w\s.:,\-–]+\)\.?\s*$/.test(sentence);
+      if (endsWithRef && current.length >= 2) {
+        paras.push(current.join(' '));
+        current = [];
+      } else if (current.length >= 4) {
+        paras.push(current.join(' '));
+        current = [];
+      }
+    }
+    if (current.length > 0) paras.push(current.join(' '));
+    paragraphs = paras.filter(Boolean);
+  }
+
+  return paragraphs.map((para, i) => {
+    const trimmed = para.trim();
     if (!trimmed) return '';
-    const line = trimmed.replace(/\n+/g, ' ');
 
-    // Section heading: bold line in ALL CAPS or ending with ':'
-    if (/^[A-Z\s]{5,}$/.test(line))
-      return `<p style="font-weight:700;font-size:0.95rem;margin-top:1.6em;margin-bottom:0.15em;line-height:1.5;border-left:3px solid #0D9488;padding-left:0.75em">${line}</p>`;
-    // Numbered point: 1., 2., 3.
-    if (/^\d+\.\s/.test(line))
-      return `<p style="padding-left:1.5em;margin-top:0.8em;line-height:1.8">${line}</p>`;
+    // ALL CAPS section heading
+    if (/^[A-Z\s]{6,}$/.test(trimmed))
+      return `<p style="font-weight:700;font-size:0.93rem;margin-top:1.6em;margin-bottom:0.2em;line-height:1.5;border-left:3px solid #0D9488;padding-left:0.75em">${trimmed}</p>`;
 
-    return `<p ${P}>${line}</p>`;
+    // Numbered point: 1., 2., ...
+    if (/^\d+\.\s/.test(trimmed))
+      return `<p style="padding-left:1.4em;margin-top:0.75em;line-height:1.85;font-size:0.9rem">${highlightRefs(trimmed)}</p>`;
+
+    const mt = i === 0 ? '0' : '1.1em';
+    return `<p style="margin-top:${mt};line-height:1.85;font-size:0.9rem">${highlightRefs(trimmed)}</p>`;
   }).filter(Boolean).join('');
 }
 
@@ -57,8 +97,6 @@ function SummarySkeleton() {
   );
 }
 
-const IMAGES_PREF_KEY = 'bijbelstudie_show_geo_images';
-
 export default function HistoricalContext({ book, chapter, preferences }: HistoricalContextProps) {
   const prefClasses = getPreferenceClasses(preferences);
   const prefStyles  = getPreferenceStyles(preferences);
@@ -67,17 +105,9 @@ export default function HistoricalContext({ book, chapter, preferences }: Histor
   const [isLoading, setIsLoading] = useState(true);
   const [summary, setSummary]     = useState<string | null>(null);
   const [error, setError]         = useState<string | null>(null);
-  const [showImages, setShowImages] = useState(() => {
-    try { return localStorage.getItem(IMAGES_PREF_KEY) !== 'false'; } catch { return true; }
-  });
+  const [showImages, setShowImages] = useState(true);
 
-  const toggleImages = () => {
-    setShowImages(prev => {
-      const next = !prev;
-      try { localStorage.setItem(IMAGES_PREF_KEY, String(next)); } catch { /* noop */ }
-      return next;
-    });
-  };
+  const toggleImages = () => setShowImages(prev => !prev);
 
   useEffect(() => {
     if (!book) return;
@@ -93,7 +123,7 @@ export default function HistoricalContext({ book, chapter, preferences }: Histor
   }, [book, lng]);
 
   return (
-    <div className="border-0 shadow-none h-full flex flex-col bg-white dark:bg-background">
+    <div className="border-0 shadow-none h-full flex flex-col bg-white dark:bg-background min-w-0 overflow-hidden">
 
       {/* Header bar - matches commentary style exactly */}
       <div className="px-4 sm:px-6 py-3 border-b border-gray-100 dark:border-border flex items-center gap-2 bg-gray-50 dark:bg-card flex-none">
