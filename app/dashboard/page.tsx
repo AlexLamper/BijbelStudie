@@ -129,8 +129,6 @@ export default function DashboardPage() {
       .finally(() => setLoading(false))
   }, [])
 
-  const firstName = session?.user?.name?.split(' ')[0] || 'Gebruiker'
-
   function bookReadRatio(book: string): number {
     const total = CHAPTER_COUNTS[book] ?? 1
     const read = (readChapters[book] ?? []).length

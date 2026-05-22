@@ -132,7 +132,7 @@ export default function ChapterViewer({
     if (el) {
       setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 120);
     }
-  }, [highlightRange?.start, verses, loading]);
+  }, [highlightRange, verses, loading]);
 
   const handleVerseClick = (verseNumber: string, text: string) => {
     const reference = `${book} ${chapter}:${verseNumber}`;
