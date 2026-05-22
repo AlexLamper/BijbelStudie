@@ -20,7 +20,8 @@ interface ManifestEntry {
     title?: string;
     language?: string;
     type: 'file' | 'dir';
-    files?: string[]; // For dirs
+    files?: string[];
+    hidden?: boolean;
 }
 
 interface Manifest {
