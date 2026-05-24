@@ -1,12 +1,6 @@
 {
   "bibles": [
     {
-      "name": "basisbijbel.json",
-      "title": "BasisBijbel",
-      "language": "nl",
-      "type": "file"
-    },
-    {
       "name": "canisiusbijbel",
       "title": "Canisiusbijbel 1939",
       "language": "nl",
@@ -235,80 +229,6 @@
       ]
     },
     {
-      "name": "hsv",
-      "title": "Herziene Statenvertaling",
-      "language": "nl",
-      "type": "dir",
-      "files": [
-        "1 Chronicles",
-        "1 Corinthians",
-        "1 John",
-        "1 Kings",
-        "1 Peter",
-        "1 Samuel",
-        "1 Thessalonians",
-        "1 Timothy",
-        "2 Chronicles",
-        "2 Corinthians",
-        "2 John",
-        "2 Kings",
-        "2 Peter",
-        "2 Samuel",
-        "2 Thessalonians",
-        "2 Timothy",
-        "3 John",
-        "Acts",
-        "Amos",
-        "Colossians",
-        "Daniel",
-        "Deuteronomy",
-        "Ecclesiastes",
-        "Ephesians",
-        "Esther",
-        "Exodus",
-        "Ezekiel",
-        "Ezra",
-        "Galatians",
-        "Genesis",
-        "Habakkuk",
-        "Haggaï",
-        "Hebrews",
-        "Hosea",
-        "Isaiah",
-        "James",
-        "Jeremiah",
-        "Job",
-        "Joel",
-        "John",
-        "Jonah",
-        "Joshua",
-        "Jude",
-        "Judges",
-        "Lamentations",
-        "Leviticus",
-        "Luke",
-        "Malachi",
-        "Mark",
-        "Matthew",
-        "Micah",
-        "Nahum",
-        "Nehemiah",
-        "Numbers",
-        "Obadiah",
-        "Philemon",
-        "Philippians",
-        "Proverbs",
-        "Psalms",
-        "Revelation",
-        "Romans",
-        "Ruth",
-        "Song of Solomon",
-        "Titus",
-        "Zechariah",
-        "Zephaniah"
-      ]
-    },
-    {
       "name": "luther_1912",
       "title": "Luther 1912",
       "language": "de",
@@ -528,6 +448,96 @@
         "Titus",
         "Zacharia",
         "Zefanja"
+      ]
+    },
+    {
+      "name": "kjv",
+      "title": "King James Version",
+      "language": "en",
+      "type": "dir",
+      "files": [
+        "1 Chronicles","1 Corinthians","1 John","1 Kings","1 Peter","1 Samuel","1 Thessalonians","1 Timothy",
+        "2 Chronicles","2 Corinthians","2 John","2 Kings","2 Peter","2 Samuel","2 Thessalonians","2 Timothy",
+        "3 John","Acts","Amos","Colossians","Daniel","Deuteronomy","Ecclesiastes","Ephesians","Esther","Exodus",
+        "Ezekiel","Ezra","Galatians","Genesis","Habakkuk","Haggai","Hebrews","Hosea","Isaiah","James","Jeremiah",
+        "Job","Joel","John","Jonah","Joshua","Jude","Judges","Lamentations","Leviticus","Luke","Malachi","Mark",
+        "Matthew","Micah","Nahum","Nehemiah","Numbers","Obadiah","Philemon","Philippians","Proverbs","Psalms",
+        "Revelation","Romans","Ruth","Song of Solomon","Titus","Zechariah","Zephaniah"
+      ]
+    },
+    {
+      "name": "asv",
+      "title": "American Standard Version",
+      "language": "en",
+      "type": "dir",
+      "files": [
+        "1 Chronicles","1 Corinthians","1 John","1 Kings","1 Peter","1 Samuel","1 Thessalonians","1 Timothy",
+        "2 Chronicles","2 Corinthians","2 John","2 Kings","2 Peter","2 Samuel","2 Thessalonians","2 Timothy",
+        "3 John","Acts","Amos","Colossians","Daniel","Deuteronomy","Ecclesiastes","Ephesians","Esther","Exodus",
+        "Ezekiel","Ezra","Galatians","Genesis","Habakkuk","Haggai","Hebrews","Hosea","Isaiah","James","Jeremiah",
+        "Job","Joel","John","Jonah","Joshua","Jude","Judges","Lamentations","Leviticus","Luke","Malachi","Mark",
+        "Matthew","Micah","Nahum","Nehemiah","Numbers","Obadiah","Philemon","Philippians","Proverbs","Psalms",
+        "Revelation","Romans","Ruth","Song of Solomon","Titus","Zechariah","Zephaniah"
+      ]
+    },
+    {
+      "name": "net",
+      "title": "NET Bible",
+      "language": "en",
+      "type": "dir",
+      "files": [
+        "1 Chronicles","1 Corinthians","1 John","1 Kings","1 Peter","1 Samuel","1 Thessalonians","1 Timothy",
+        "2 Chronicles","2 Corinthians","2 John","2 Kings","2 Peter","2 Samuel","2 Thessalonians","2 Timothy",
+        "3 John","Acts","Amos","Colossians","Daniel","Deuteronomy","Ecclesiastes","Ephesians","Esther","Exodus",
+        "Ezekiel","Ezra","Galatians","Genesis","Habakkuk","Haggai","Hebrews","Hosea","Isaiah","James","Jeremiah",
+        "Job","Joel","John","Jonah","Joshua","Jude","Judges","Lamentations","Leviticus","Luke","Malachi","Mark",
+        "Matthew","Micah","Nahum","Nehemiah","Numbers","Obadiah","Philemon","Philippians","Proverbs","Psalms",
+        "Revelation","Romans","Ruth","Song of Solomon","Titus","Zechariah","Zephaniah"
+      ]
+    },
+    {
+      "name": "web",
+      "title": "World English Bible",
+      "language": "en",
+      "type": "dir",
+      "files": [
+        "1 Chronicles","1 Corinthians","1 John","1 Kings","1 Peter","1 Samuel","1 Thessalonians","1 Timothy",
+        "2 Chronicles","2 Corinthians","2 John","2 Kings","2 Peter","2 Samuel","2 Thessalonians","2 Timothy",
+        "3 John","Acts","Amos","Colossians","Daniel","Deuteronomy","Ecclesiastes","Ephesians","Esther","Exodus",
+        "Ezekiel","Ezra","Galatians","Genesis","Habakkuk","Haggai","Hebrews","Hosea","Isaiah","James","Jeremiah",
+        "Job","Joel","John","Jonah","Joshua","Jude","Judges","Lamentations","Leviticus","Luke","Malachi","Mark",
+        "Matthew","Micah","Nahum","Nehemiah","Numbers","Obadiah","Philemon","Philippians","Proverbs","Psalms",
+        "Revelation","Romans","Ruth","Song of Solomon","Titus","Zechariah","Zephaniah"
+      ]
+    },
+    {
+      "name": "geneva",
+      "title": "Geneva Bible (1599)",
+      "language": "en",
+      "type": "dir",
+      "files": [
+        "1 Chronicles","1 Corinthians","1 John","1 Kings","1 Peter","1 Samuel","1 Thessalonians","1 Timothy",
+        "2 Chronicles","2 Corinthians","2 John","2 Kings","2 Peter","2 Samuel","2 Thessalonians","2 Timothy",
+        "3 John","Acts","Amos","Colossians","Daniel","Deuteronomy","Ecclesiastes","Ephesians","Esther","Exodus",
+        "Ezekiel","Ezra","Galatians","Genesis","Habakkuk","Haggai","Hebrews","Hosea","Isaiah","James","Jeremiah",
+        "Job","Joel","John","Jonah","Joshua","Jude","Judges","Lamentations","Leviticus","Luke","Malachi","Mark",
+        "Matthew","Micah","Nahum","Nehemiah","Numbers","Obadiah","Philemon","Philippians","Proverbs","Psalms",
+        "Revelation","Romans","Ruth","Song of Solomon","Titus","Zechariah","Zephaniah"
+      ]
+    },
+    {
+      "name": "coverdale",
+      "title": "Coverdale Bible (1535)",
+      "language": "en",
+      "type": "dir",
+      "files": [
+        "1 Chronicles","1 Corinthians","1 John","1 Kings","1 Peter","1 Samuel","1 Thessalonians","1 Timothy",
+        "2 Chronicles","2 Corinthians","2 John","2 Kings","2 Peter","2 Samuel","2 Thessalonians","2 Timothy",
+        "3 John","Acts","Amos","Colossians","Daniel","Deuteronomy","Ecclesiastes","Ephesians","Esther","Exodus",
+        "Ezekiel","Ezra","Galatians","Genesis","Habakkuk","Haggai","Hebrews","Hosea","Isaiah","James","Jeremiah",
+        "Job","Joel","John","Jonah","Joshua","Jude","Judges","Lamentations","Leviticus","Luke","Malachi","Mark",
+        "Matthew","Micah","Nahum","Nehemiah","Numbers","Obadiah","Philemon","Philippians","Proverbs","Psalms",
+        "Revelation","Romans","Ruth","Song of Solomon","Titus","Zechariah","Zephaniah"
       ]
     }
   ],

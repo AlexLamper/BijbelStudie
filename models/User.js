@@ -29,6 +29,7 @@ const UserSchema = new mongoose.Schema(
       letterSpacing: { type: String, default: "normal" },
       highContrast: { type: Boolean, default: false },
       showVerseNumbers: { type: Boolean, default: true },
+      ttsVoice: { type: String, default: "bram" },
       updatedAt: { type: Date },
     },
     lastReadChapter: {

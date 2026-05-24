@@ -9,6 +9,33 @@ import { useRouter } from 'next/navigation';
 import { useTranslation } from '../../app/i18n/client';
 import { ReadingPreferences } from '../../hooks/useReadingPreferences';
 import { getPreferenceClasses, getPreferenceStyles } from '../../lib/preferenceClasses';
+import SpeakButton from './SpeakButton';
+
+function stripHtml(html: string): string {
+  return html
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<br\s*\/?>/gi, ' ')
+    .replace(/<\/(p|div|li|h[1-6])>/gi, '. ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function buildCommentaryText(commentary: Record<string, string>): string {
+  return Object.entries(commentary)
+    .map(([key, text]) => {
+      const label = key === 'intro' || key === '0' ? 'Inleiding' : `Vers ${key}`;
+      return `${label}. ${stripHtml(text)}`;
+    })
+    .join(' ');
+}
 
 interface CommentaryComponentProps {
   book: string;
@@ -368,35 +395,43 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
   return (
     <Card className={`border-0 shadow-none rounded-lg dark:bg-card ${height ? 'h-full flex flex-col' : ''}`}>
       {/* Source Selector */}
-      <div className="px-4 sm:px-6 py-3 border-b border-gray-100 dark:border-border flex items-center justify-between bg-gray-50 dark:bg-card">
+      <div className="px-4 sm:px-6 py-3 border-b border-gray-100 dark:border-border flex items-center justify-between gap-2 bg-gray-50 dark:bg-card">
         <span className="text-sm font-medium text-gray-600 dark:text-muted-foreground">Commentaarbron</span>
-        <div className="relative">
-            <select 
-                value={selectedSource}
-                onChange={(e) => {
-                  const newSource = e.target.value;
-                  setSelectedSource(newSource);
-                  if (onSourceChange) {
-                    onSourceChange(newSource);
-                  }
-                }}
-                className="appearance-none bg-white dark:bg-secondary border border-gray-200 dark:border-border rounded-md py-1 pl-3 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-[#0D9488] dark:text-foreground"
-            >
-                {availableSources.length > 0 ? (
-                    sortedLanguages.map(lang => (
-                        <optgroup key={lang} label={languageNames[lang] || lang.toUpperCase()}>
-                            {groupedSources[lang].map(src => (
-                                <option key={src.id} value={src.id}>
-                                  {src.name}
-                                </option>
-                            ))}
-                        </optgroup>
-                    ))
-                ) : (
-                    <option value={selectedSource}>{formatSourceLabel(selectedSource)}</option>
-                )}
-            </select>
-            <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+        <div className="flex items-center gap-2">
+          {commentary && Object.keys(commentary).length > 0 && (
+            <SpeakButton
+              getText={() => buildCommentaryText(commentary)}
+              label="Lees commentaar voor"
+            />
+          )}
+          <div className="relative">
+              <select
+                  value={selectedSource}
+                  onChange={(e) => {
+                    const newSource = e.target.value;
+                    setSelectedSource(newSource);
+                    if (onSourceChange) {
+                      onSourceChange(newSource);
+                    }
+                  }}
+                  className="appearance-none bg-white dark:bg-secondary border border-gray-200 dark:border-border rounded-md py-1 pl-3 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-[#0D9488] dark:text-foreground"
+              >
+                  {availableSources.length > 0 ? (
+                      sortedLanguages.map(lang => (
+                          <optgroup key={lang} label={languageNames[lang] || lang.toUpperCase()}>
+                              {groupedSources[lang].map(src => (
+                                  <option key={src.id} value={src.id}>
+                                    {src.name}
+                                  </option>
+                              ))}
+                          </optgroup>
+                      ))
+                  ) : (
+                      <option value={selectedSource}>{formatSourceLabel(selectedSource)}</option>
+                  )}
+              </select>
+              <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+          </div>
         </div>
       </div>
 

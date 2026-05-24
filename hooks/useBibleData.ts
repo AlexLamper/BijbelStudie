@@ -1,23 +1,29 @@
 ﻿'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { bookNameMap, CANONICAL_NL, normalizeBookName, BIBLE_BOOKS_ORDER } from '../lib/book-mapping';
+import { bookNameMap, normalizeBookName, BIBLE_BOOKS_ORDER } from '../lib/book-mapping';
 
 /* ─── Static data - never changes ───────────────────────────── */
 const VERSIONS = [
-  { id: 'statenvertaling',      name: 'Statenvertaling',         language: 'nl' },
-  { id: 'hsv',                  name: 'Herziene Statenvertaling', language: 'nl' },
-  { id: 'heilige_schrift_1917', name: 'De Heilige Schrift 1917', language: 'nl' },
-  { id: 'canisiusbijbel',       name: 'Canisiusbijbel 1939',     language: 'nl' },
-  { id: 'basisbijbel',          name: 'BasisBijbel',             language: 'nl' },
+  // Nederlands
+  { id: 'statenvertaling',      name: 'Statenvertaling',          language: 'nl' },
+  { id: 'heilige_schrift_1917', name: 'De Heilige Schrift 1917',  language: 'nl' },
+  { id: 'canisiusbijbel',       name: 'Canisiusbijbel 1939',      language: 'nl' },
+  // English
+  { id: 'kjv',       name: 'King James Version',         language: 'en' },
+  { id: 'asv',       name: 'American Standard Version',  language: 'en' },
+  { id: 'net',       name: 'NET Bible',                  language: 'en' },
+  { id: 'web',       name: 'World English Bible',        language: 'en' },
+  { id: 'geneva',    name: 'Geneva Bible (1599)',        language: 'en' },
+  { id: 'coverdale', name: 'Coverdale Bible (1535)',     language: 'en' },
 ] as const;
 
 // Flat-file translations: stored as a single JSON, no per-book directory.
 // Chapters must be fetched via API instead of /data/bibles/{version}/{book}/chapters.json
-const FLAT_FILE_VERSIONS = new Set(['basisbijbel']);
+const FLAT_FILE_VERSIONS = new Set<string>();
 
 // Flat-file translations that store book names in English internally (need Dutch→English mapping)
-const ENGLISH_INTERNAL_VERSIONS = new Set(['basisbijbel']);
+const ENGLISH_INTERNAL_VERSIONS = new Set<string>();
 
 type VersionId = typeof VERSIONS[number]['id'];
 
@@ -56,11 +62,6 @@ function resolveBooksFromIndex(index: Record<string, string[]>, version: string)
     return a.localeCompare(b);
   });
 
-  // English-named translations: map to canonical Dutch names (matching statenvertaling)
-  const ENGLISH_NAMED = new Set(['basisbijbel']);
-  if (ENGLISH_NAMED.has(key)) {
-    return books.map(b => CANONICAL_NL[b] || b);
-  }
   return books;
 }
 
@@ -198,9 +199,13 @@ export function useBibleData(lng: string, options: UseBibleDataOptions = {}): Us
       let restoredChapter = 1;
       let restoredCommentary = '';
 
-      // Priority 1: last-read
+      // Priority 1: last-read (only if version is still available)
       const lr = lastReadData?.lastReadChapter ?? lastReadData; // handle both shapes
-      if (lr?.version && lr?.book && lr?.chapter && lr.book.toLowerCase() !== 'verses') {
+      if (
+        lr?.version && lr?.book && lr?.chapter &&
+        lr.book.toLowerCase() !== 'verses' &&
+        VERSIONS.some(v => v.id === lr.version)
+      ) {
         version          = lr.version;
         restoredBook     = lr.book;
         restoredChapter  = lr.chapter;

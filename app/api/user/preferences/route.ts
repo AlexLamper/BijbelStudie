@@ -25,7 +25,8 @@ export async function POST(request: NextRequest) {
       lineHeight,
       letterSpacing,
       highContrast,
-      showVerseNumbers
+      showVerseNumbers,
+      ttsVoice,
     } = await request.json();
 
     const updateData: Record<string, string | boolean | Date> = {
@@ -45,6 +46,7 @@ export async function POST(request: NextRequest) {
     if (letterSpacing) updateData["preferences.letterSpacing"] = letterSpacing;
     if (highContrast !== undefined) updateData["preferences.highContrast"] = highContrast;
     if (showVerseNumbers !== undefined) updateData["preferences.showVerseNumbers"] = showVerseNumbers;
+    if (ttsVoice) updateData["preferences.ttsVoice"] = ttsVoice;
 
     // Update user preferences
     const updatedUser = await User.findOneAndUpdate(

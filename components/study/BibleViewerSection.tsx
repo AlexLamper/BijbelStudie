@@ -108,7 +108,7 @@ export default function BibleViewerSection({
 
       {/* Content */}
       <div className="flex-1 relative min-h-0 bg-white dark:bg-background">
-        <div className="h-full overflow-y-auto p-4 sm:p-6 pb-36">
+        <div className="h-full overflow-y-auto px-4 sm:px-6 pt-3 pb-36">
           {selectedBook && selectedChapter && selectedVersion ? (
             <ChapterViewer
               version={selectedVersion}

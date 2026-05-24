@@ -4,21 +4,37 @@ import { useEffect, useState } from "react"
 import { useTheme } from "next-themes"
 import {
   BookOpen, Sparkles, Type, Sliders, Sun, Moon, Monitor,
-  Check, Loader2, RotateCcw, Eye, Minus, Plus,
+  Check, Loader2, RotateCcw, Eye, Minus, Plus, Volume2,
 } from "lucide-react"
 import { useGeneralSettings } from "../../hooks/useGeneralSettings"
 import { useReadingPreferences } from "../../hooks/useReadingPreferences"
 import { Switch } from "../../components/ui/switch"
+import { CLOUD_VOICES } from "../../lib/cloudVoices"
 
 const TEAL = "#0D9488"
 
 interface OptionItem { id: string; name: string; language?: string }
 
-const NL_VERSIONS: OptionItem[] = [
+const AVAILABLE_VERSIONS: OptionItem[] = [
+  // Nederlands
   { id: 'statenvertaling',      name: 'Statenvertaling',         language: 'nl' },
   { id: 'canisiusbijbel',       name: 'Canisiusvertaling',       language: 'nl' },
   { id: 'heilige_schrift_1917', name: 'De Heilige Schrift',      language: 'nl' },
+  // English
+  { id: 'kjv',       name: 'King James Version',        language: 'en' },
+  { id: 'asv',       name: 'American Standard Version', language: 'en' },
+  { id: 'net',       name: 'NET Bible',                 language: 'en' },
+  { id: 'web',       name: 'World English Bible',       language: 'en' },
+  { id: 'geneva',    name: 'Geneva Bible (1599)',       language: 'en' },
+  { id: 'coverdale', name: 'Coverdale Bible (1535)',    language: 'en' },
 ]
+
+const LANGUAGE_LABELS: Record<string, string> = {
+  nl: 'Nederlands',
+  en: 'English',
+  de: 'Deutsch',
+  af: 'Afrikaans',
+}
 
 const FONT_SIZES = ["sm", "base", "lg", "xl"] as const
 const FONT_FAMILIES = [
@@ -128,7 +144,22 @@ export default function SettingsPage() {
                     value={settings.translation}
                     onChange={(val) => updateSettings({ translation: val })}
                     disabled={settingsLoading}
-                    options={NL_VERSIONS.map(v => ({ value: v.id, label: v.name }))}
+                    options={AVAILABLE_VERSIONS.map(v => ({ value: v.id, label: v.name }))}
+                    groups={(() => {
+                      const byLang = new Map<string, OptionItem[]>()
+                      for (const v of AVAILABLE_VERSIONS) {
+                        const lang = v.language || 'nl'
+                        if (!byLang.has(lang)) byLang.set(lang, [])
+                        byLang.get(lang)!.push(v)
+                      }
+                      const order = ['nl', 'en', 'de', 'af']
+                      return [...byLang.keys()]
+                        .sort((a, b) => order.indexOf(a) - order.indexOf(b))
+                        .map(lang => ({
+                          label: LANGUAGE_LABELS[lang] || lang.toUpperCase(),
+                          options: byLang.get(lang)!.map(v => ({ value: v.id, label: v.name })),
+                        }))
+                    })()}
                     fallbackLabel={settingsLoading ? "Laden..." : "Selecteer vertaling"}
                   />
                 </PreferenceRow>
@@ -239,6 +270,48 @@ export default function SettingsPage() {
               </div>
             </SectionCard>
 
+            {/* Voorleesstem */}
+            <SectionCard
+              icon={Volume2}
+              title="Voorlezen"
+              subtitle="Welke stem standaard wordt gebruikt om Bijbeltekst en commentaar voor te lezen"
+            >
+              <PreferenceRow
+                label="Standaard stem"
+                hint="Wordt gebruikt zodra je op een voorlees-knop klikt"
+              >
+                <div className="inline-flex bg-gray-100 dark:bg-secondary p-1 rounded-lg">
+                  {CLOUD_VOICES.map(v => {
+                    const active = settings.ttsVoice === v.id
+                    return (
+                      <button
+                        key={v.id}
+                        onClick={() => updateSettings({ ttsVoice: v.id })}
+                        disabled={settingsLoading}
+                        className={[
+                          "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all disabled:opacity-50",
+                          active
+                            ? "bg-white dark:bg-card text-foreground shadow-sm"
+                            : "text-muted-foreground hover:text-foreground",
+                        ].join(" ")}
+                        style={active ? { color: TEAL } : undefined}
+                      >
+                        {v.gender === "F" ? "Vrouw" : "Man"}
+                      </button>
+                    )
+                  })}
+                </div>
+              </PreferenceRow>
+
+              <div className="mt-3 flex items-start gap-2 text-xs text-muted-foreground bg-gray-50 dark:bg-secondary/40 rounded-lg p-3">
+                <Sparkles size={12} style={{ color: TEAL, marginTop: 2, flexShrink: 0 }} />
+                <p>
+                  Je kunt de stem altijd per onderdeel wijzigen via het tandwiel-icoon naast de voorlees-knop.
+                  Deze keuze is je <strong className="text-foreground">standaard</strong> over alle apparaten waar je inlogt.
+                </p>
+              </div>
+            </SectionCard>
+
             {/* Appearance */}
             <SectionCard
               icon={Sliders}
@@ -293,7 +366,7 @@ export default function SettingsPage() {
                     Johannes 3:16
                   </p>
                   <p className="text-[10px] text-muted-foreground/60 truncate">
-                    {NL_VERSIONS.find(v => v.id === settings.translation)?.name}
+                    {AVAILABLE_VERSIONS.find(v => v.id === settings.translation)?.name}
                   </p>
                 </div>
                 {previewLoading ? (
@@ -332,7 +405,7 @@ export default function SettingsPage() {
                       <div className="flex items-center gap-2 text-xs">
                         <BookOpen size={11} style={{ color: TEAL }} />
                         <span className="text-foreground">
-                          {NL_VERSIONS.find(v => v.id === settings.translation)?.name || settings.translation}
+                          {AVAILABLE_VERSIONS.find(v => v.id === settings.translation)?.name || settings.translation}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 text-xs">
@@ -467,11 +540,12 @@ function SegmentedControl({
 }
 
 function NativeSelect({
-  value, onChange, options, disabled, fallbackLabel,
+  value, onChange, options, groups, disabled, fallbackLabel,
 }: {
   value: string
   onChange: (v: string) => void
   options: { value: string; label: string }[]
+  groups?: { label: string; options: { value: string; label: string }[] }[]
   disabled?: boolean
   fallbackLabel?: string
 }) {
@@ -490,6 +564,14 @@ function NativeSelect({
       >
         {disabled && fallbackLabel ? (
           <option value="">{fallbackLabel}</option>
+        ) : groups && groups.length > 0 ? (
+          groups.map(g => (
+            <optgroup key={g.label} label={g.label}>
+              {g.options.map(o => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </optgroup>
+          ))
         ) : (
           options.map(o => (
             <option key={o.value} value={o.value}>{o.label}</option>

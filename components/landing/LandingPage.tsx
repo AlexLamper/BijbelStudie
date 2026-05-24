@@ -1169,7 +1169,7 @@ function FAQItem({ q, a }: { q: string; a: string }) {
 function FAQ() {
   const faqs = [
     { q: "Is BijbelStudie helemaal gratis?",           a: "Het gratis plan geeft volledige toegang tot bijbellezen, notities, leesplannen en studiemethoden. De Pro versie (€9,99/maand) voegt commentaren en geavanceerde functies toe." },
-    { q: "Welke bijbelvertalingen zijn beschikbaar?",  a: "Wij ondersteunen de Statenvertaling, Herziene Statenvertaling, Elberfelder 1905, Luther 1912, Schlachter 2000 en meer. Het aanbod groeit regelmatig." },
+    { q: "Welke bijbelvertalingen zijn beschikbaar?",  a: "In het Nederlands ondersteunen wij de Statenvertaling, Canisiusvertaling 1939 en De Heilige Schrift 1917. Daarnaast bieden wij zes Engelse vertalingen aan: King James Version, American Standard Version, NET Bible, World English Bible, Geneva Bible (1599) en Coverdale Bible (1535)." },
     { q: "Worden mijn notities opgeslagen?",           a: "Ja. Al uw notities en voortgang worden automatisch opgeslagen in uw persoonlijke account en zijn op elk apparaat beschikbaar." },
     { q: "Hoe werkt een leesplan?",                    a: "U schrijft zich in voor een leesplan en ontvangt dagelijkse leesporties. Uw voortgang wordt bijgehouden en u kunt op elk moment verdergaan waar u gebleven was." },
     { q: "Is mijn persoonlijke data veilig?",          a: "Ja. Wij gebruiken beveiligde verbindingen (HTTPS/TLS) en slaan uw gegevens versleuteld op. Uw data wordt nooit verkocht aan derden." },

@@ -3,11 +3,13 @@ import { useState, useEffect, useCallback } from 'react';
 export interface GeneralSettings {
   translation: string;
   commentary: string;
+  ttsVoice: string;
 }
 
 const DEFAULT_SETTINGS: GeneralSettings = {
   translation: 'statenvertaling',
   commentary: 'matthew_henry_nl',
+  ttsVoice: 'bram',
 };
 
 export function useGeneralSettings() {
@@ -23,6 +25,7 @@ export function useGeneralSettings() {
         setSettings((prev) => ({
           translation: data.preferences.translation || prev.translation,
           commentary: data.preferences.commentary || prev.commentary,
+          ttsVoice: data.preferences.ttsVoice || prev.ttsVoice,
         }));
       })
       .catch(() => {})

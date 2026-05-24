@@ -3,6 +3,7 @@ import { Loader2, AlertCircle, Plus } from 'lucide-react';
 import { CreateNoteModal } from './CreateNoteModal';
 import { ReadingPreferences } from '../../hooks/useReadingPreferences';
 import { cn } from '../../lib/utils';
+import SpeakButton from './SpeakButton';
 
 type Props = {
   version: string | null;
@@ -14,6 +15,13 @@ type Props = {
 };
 
 type VerseData = { [key: string]: string };
+
+function buildChapterText(verses: VerseData): string {
+  return Object.entries(verses)
+    .map(([, text]) => text.trim())
+    .filter(Boolean)
+    .join(' ');
+}
 
 interface SelectedVerse {
   verseNumber: string;
@@ -177,6 +185,15 @@ export default function ChapterViewer({
 
       {!loading && !error && Object.keys(verses).length > 0 && (
         <>
+          <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-100 dark:border-border">
+            <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-muted-foreground">
+              {book} {chapter}
+            </p>
+            <SpeakButton
+              getText={() => buildChapterText(verses)}
+              label="Lees hoofdstuk voor"
+            />
+          </div>
           <div className="space-y-2 text-justify">
             {Object.entries(verses).map(([verseNumber, text]) => {
               const vNum = parseInt(verseNumber, 10);
@@ -208,13 +225,22 @@ export default function ChapterViewer({
                     {text}
                   </span>
                 </p>
-                <button
-                  onClick={() => handleVerseClick(verseNumber, text)}
-                  className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity bg-[#0D9488] hover:bg-[#0f766e] text-white p-1.5 shadow-[0_2px_4px_-1px_rgba(0,0,0,0.1)]"
-                  title="Add note to this verse"
-                >
-                  <Plus className="h-3 w-3" />
-                </button>
+                <div className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
+                  <SpeakButton
+                    compact
+                    showSettings={false}
+                    getText={() => text}
+                    label={`Vers ${verseNumber} voorlezen`}
+                    className="bg-white dark:bg-card shadow-[0_2px_4px_-1px_rgba(0,0,0,0.1)] border border-gray-200 dark:border-border"
+                  />
+                  <button
+                    onClick={() => handleVerseClick(verseNumber, text)}
+                    className="bg-[#0D9488] hover:bg-[#0f766e] text-white p-1.5 shadow-[0_2px_4px_-1px_rgba(0,0,0,0.1)]"
+                    title="Add note to this verse"
+                  >
+                    <Plus className="h-3 w-3" />
+                  </button>
+                </div>
               </div>
               );
             })}
