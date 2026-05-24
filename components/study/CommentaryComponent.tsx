@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Loader2, AlertCircle, ChevronDown, Lock } from 'lucide-react';
+import { Loader2, AlertCircle, ChevronDown, Lock, Sparkles } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
 import { useSession } from 'next-auth/react';
 import { Button } from '../ui/button';
@@ -338,12 +338,7 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
       return src.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
 
-  const isLocked = (source: string) => {
-    if (source === 'kingcomments' && !session?.user?.isSubscribed) {
-      return true;
-    }
-    return false;
-  };
+  const isLocked = (_source: string) => false;
 
   const languageNames: Record<string, string> = {
     en: 'English',
@@ -392,7 +387,7 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
                         <optgroup key={lang} label={languageNames[lang] || lang.toUpperCase()}>
                             {groupedSources[lang].map(src => (
                                 <option key={src.id} value={src.id}>
-                                  {src.name} {src.id === 'kingcomments' && !session?.user?.isSubscribed ? '🔒' : ''}
+                                  {src.name}
                                 </option>
                             ))}
                         </optgroup>
@@ -414,17 +409,17 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
             </div>
             <div className="max-w-md space-y-2">
               <h3 className="font-merriweather font-bold text-xl text-gray-900 dark:text-gray-100">
-                Premium Commentary
+                Pro-commentaar
               </h3>
               <p className="text-muted-foreground text-sm">
-                Unlock deep insights with King Comments and other premium study materials by subscribing to BijbelStudie Pro.
+                KingComments en andere premium commentaren zijn beschikbaar voor Pro-abonnees van BijbelStudie.
               </p>
             </div>
-            <Button 
-              onClick={() => router.push('/subscribe')}
+            <Button
+              onClick={() => router.push('/abonnement')}
               className="bg-[#0D9488] hover:bg-[#0f766e] text-white"
             >
-              Upgrade to Pro
+              Upgrade naar Pro
             </Button>
           </div>
         ) : loading ? (
@@ -452,35 +447,72 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
             <div className="py-12 text-center text-gray-500 dark:text-muted-foreground text-sm">
                 <p className="font-inter">Geen commentaar beschikbaar voor dit hoofdstuk.</p>
             </div>
-        ) : (
-            Object.entries(commentary).map(([key, text]) => {
-              const isHtml = /<[a-zA-Z][^>]*>/.test(text);
-              const label = key === 'intro' || key === '0'
-                ? 'Inleiding'
-                : `Vers ${key}`;
-              return (
-                <div key={key} className="border-b border-gray-100 dark:border-border pb-6 last:border-0 pr-2">
-                  {/* Verse label — compact chip for HTML commentaries, heading for plain text */}
-                  {isHtml ? (
-                    <div className="inline-flex items-center gap-1.5 mb-1">
-                      <span className="text-[11px] font-semibold tracking-wider uppercase text-[#0D9488] dark:text-teal-400 bg-[rgba(13,148,136,0.08)] dark:bg-[rgba(13,148,136,0.15)] px-2 py-0.5 rounded-full">
-                        {label}
-                      </span>
-                    </div>
-                  ) : (
-                    <h3 className="font-merriweather font-semibold text-gray-900 dark:text-foreground mb-2 mt-1">
-                      {label}
-                    </h3>
-                  )}
-                  <div
-                    className={`text-gray-700 dark:text-foreground max-w-none ${prefClasses}`}
-                    style={prefStyles}
-                    dangerouslySetInnerHTML={{ __html: formatCommentaryText(text) }}
-                  />
+        ) : (() => {
+            const isSubscribed = session?.user?.isSubscribed;
+            const allEntries = Object.entries(commentary);
+            // KingComments is always fully free for everyone - never paywall it (covers all variants like kingcomments_nl)
+            const isAlwaysFree = selectedSource.toLowerCase().startsWith('kingcomments');
+            // Total content length determines whether to clip. Skip paywall for very short commentaries.
+            const totalLength = allEntries.reduce((sum, [, text]) => sum + text.length, 0);
+            const showPaywall = !isSubscribed && !isAlwaysFree && totalLength > 1200;
+            return (
+              <>
+                <div
+                  style={showPaywall ? {
+                    maxHeight: 1100,
+                    overflow: 'hidden',
+                    WebkitMaskImage: 'linear-gradient(to bottom, black 82%, transparent 100%)',
+                    maskImage: 'linear-gradient(to bottom, black 82%, transparent 100%)',
+                  } : undefined}
+                >
+                  {allEntries.map(([key, text]) => {
+                    const isHtml = /<[a-zA-Z][^>]*>/.test(text);
+                    const label = key === 'intro' || key === '0'
+                      ? 'Inleiding'
+                      : `Vers ${key}`;
+                    return (
+                      <div key={key} className="border-b border-gray-100 dark:border-border pb-6 last:border-0 pr-2 mb-6 last:mb-0">
+                        {isHtml ? (
+                          <div className="inline-flex items-center gap-1.5 mb-1">
+                            <span className="text-[11px] font-semibold tracking-wider uppercase text-[#0D9488] dark:text-teal-400 bg-[rgba(13,148,136,0.08)] dark:bg-[rgba(13,148,136,0.15)] px-2 py-0.5 rounded-full">
+                              {label}
+                            </span>
+                          </div>
+                        ) : (
+                          <h3 className="font-merriweather font-semibold text-gray-900 dark:text-foreground mb-2 mt-1">
+                            {label}
+                          </h3>
+                        )}
+                        <div
+                          className={`text-gray-700 dark:text-foreground max-w-none ${prefClasses}`}
+                          style={prefStyles}
+                          dangerouslySetInnerHTML={{ __html: formatCommentaryText(text) }}
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
-              );
-            })
-        )}
+                {showPaywall && (
+                  <div className="mt-6 max-w-[340px] mx-auto rounded-xl border border-gray-200 dark:border-border bg-gradient-to-br from-gray-50 to-white dark:from-card dark:to-background p-5 text-center shadow-sm">
+                    <Sparkles className="h-5 w-5 mx-auto mb-2.5 text-[#0D9488]" />
+                    <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100 mb-1.5">
+                      Lees het volledige commentaar
+                    </h4>
+                    <p className="text-xs text-muted-foreground max-w-[260px] mx-auto leading-relaxed mb-4">
+                      Upgrade naar Pro voor toegang tot het volledige commentaar van dit hoofdstuk.
+                    </p>
+                    <Button
+                      onClick={() => router.push('/abonnement')}
+                      className="bg-[#0D9488] hover:bg-[#0f766e] text-white text-sm h-9 px-5"
+                    >
+                      Upgrade naar Pro
+                    </Button>
+                  </div>
+                )}
+              </>
+            );
+          })()
+        }
       </CardContent>
     </Card>
   );

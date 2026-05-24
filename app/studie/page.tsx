@@ -8,7 +8,7 @@ import { useReadingPreferences } from '../../hooks/useReadingPreferences';
 import BibleViewerSection from '../../components/study/BibleViewerSection';
 import StudyMaterialsSection from '../../components/study/StudyMaterialsSection';
 import StartupAnimation from '../../components/ui/startup-animation';
-import { CheckCircle, ChevronLeft, ChevronRight, X, Trophy } from 'lucide-react';
+import { BookOpen, CheckCircle, ChevronLeft, ChevronRight, X, Trophy } from 'lucide-react';
 
 const COMPLETED_KEY = 'bijbelstudie_completed_studies';
 
@@ -91,59 +91,87 @@ function MiniStudyBar({
   const total  = study.lessons.length;
   const isDone = study.completedLessons.includes(lessonIdx);
   const isLast = lessonIdx === total - 1;
+  const lesson = study.lessons[lessonIdx];
+  const progressPct = Math.round((study.completedLessons.length / total) * 100);
+
+  const handlePrimary = () => {
+    if (isLast) {
+      if (!isDone) onMarkDone(lessonIdx);
+      onFinish();
+    } else {
+      if (isDone) onGoto(lessonIdx + 1);
+      else onMarkDone(lessonIdx);
+    }
+  };
+
+  const primaryLabel = isLast
+    ? (isDone ? 'Afronden' : 'Markeer & afronden')
+    : (isDone ? 'Volgende les' : 'Markeer & verder');
 
   return (
-    <div className="flex-shrink-0 flex items-center gap-2 px-3 py-2 border-t border-teal-200 dark:border-teal-800 bg-teal-50 dark:bg-teal-950/50">
-      <button
-        onClick={() => onGoto(lessonIdx - 1)}
-        disabled={lessonIdx === 0}
-        className="flex items-center justify-center w-6 h-6 rounded disabled:opacity-30 text-teal-700 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900 transition-colors"
-        title="Vorige les"
-      >
-        <ChevronLeft size={14} />
-      </button>
-
-      <span className="text-xs font-semibold text-teal-700 dark:text-teal-300 tabular-nums">
-        {lessonIdx + 1}/{total}
-      </span>
-
-      <button
-        onClick={() => onMarkDone(lessonIdx)}
-        className={`flex items-center justify-center w-6 h-6 rounded transition-colors ${
-          isDone
-            ? 'text-teal-500 cursor-default'
-            : 'text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900'
-        }`}
-        title={isDone ? 'Gedaan' : 'Markeer als gedaan'}
-      >
-        <CheckCircle size={14} />
-      </button>
-
-      {!isLast ? (
+    <div className="flex-shrink-0 border-t-2 border-teal-300 dark:border-teal-700 bg-teal-50 dark:bg-teal-950/50">
+      {/* Row 1: meta + dismiss */}
+      <div className="flex items-center gap-1.5 px-3 pt-2 pb-1">
+        <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded"
+          style={{ backgroundColor: 'rgba(13,148,136,0.15)', color: '#0F766E' }}>
+          <BookOpen size={9} /> Studie
+        </span>
+        <span className="text-[11px] font-semibold text-teal-900 dark:text-teal-100 truncate" title={study.studyTitle}>
+          {study.studyTitle}
+        </span>
+        <span className="text-[10px] tabular-nums text-teal-700 dark:text-teal-300 ml-auto flex-shrink-0">
+          {lessonIdx + 1}<span className="opacity-50">/{total}</span>
+        </span>
         <button
-          onClick={() => onGoto(lessonIdx + 1)}
-          className="flex items-center justify-center w-6 h-6 rounded text-teal-700 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900 transition-colors"
-          title="Volgende les"
+          onClick={onDismiss}
+          className="flex items-center justify-center w-5 h-5 rounded text-teal-500 hover:text-teal-800 dark:hover:text-teal-200 hover:bg-teal-100 dark:hover:bg-teal-900 transition-colors flex-shrink-0"
+          title="Studiebalk verbergen"
+          aria-label="Studiebalk verbergen"
         >
-          <ChevronRight size={14} />
+          <X size={11} />
         </button>
-      ) : (
-        <button
-          onClick={onFinish}
-          className="flex items-center justify-center w-6 h-6 rounded text-teal-700 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900 transition-colors"
-          title="Studie afronden"
-        >
-          <Trophy size={13} />
-        </button>
-      )}
+      </div>
 
-      <button
-        onClick={onDismiss}
-        className="ml-auto flex items-center justify-center w-5 h-5 rounded text-teal-400 hover:text-teal-600 dark:hover:text-teal-300 transition-colors"
-        title="Studie verbergen"
-      >
-        <X size={11} />
-      </button>
+      {/* Row 2: current lesson line */}
+      <div className="px-3 pb-1.5">
+        <p className="text-[11px] leading-tight text-teal-800 dark:text-teal-200 truncate" title={lesson?.title || ''}>
+          <span className="font-medium">{lesson?.title}</span>
+          {lesson?.verseRange && (
+            <span className="text-teal-600 dark:text-teal-400 ml-1.5">· {lesson.book} {lesson.chapter}:{lesson.verseRange}</span>
+          )}
+        </p>
+        {/* Progress bar */}
+        <div className="mt-1 h-1 rounded-full bg-teal-200/70 dark:bg-teal-900 overflow-hidden" title={`${progressPct}% voltooid`}>
+          <div
+            className="h-full rounded-full transition-all"
+            style={{ width: `${progressPct}%`, backgroundColor: '#0D9488' }}
+          />
+        </div>
+      </div>
+
+      {/* Row 3: actions - prev (ghost) + primary (filled) */}
+      <div className="flex items-center justify-end gap-1.5 px-2 pb-2">
+        <button
+          onClick={() => onGoto(lessonIdx - 1)}
+          disabled={lessonIdx === 0}
+          className="flex items-center gap-0.5 px-2 h-7 rounded-md text-[10.5px] font-medium disabled:opacity-30 disabled:cursor-not-allowed text-teal-700 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900 transition-colors"
+          title="Vorige les"
+          aria-label="Vorige les"
+        >
+          <ChevronLeft size={12} /> Vorige
+        </button>
+
+        <button
+          onClick={handlePrimary}
+          className="inline-flex items-center gap-1 px-3 h-7 rounded-md text-[11px] font-semibold text-white hover:opacity-90 transition-opacity whitespace-nowrap"
+          style={{ backgroundColor: '#0D9488' }}
+          title={primaryLabel}
+        >
+          {isLast && isDone ? <Trophy size={12} /> : <CheckCircle size={12} />}
+          {primaryLabel}
+          {!isLast && <ChevronRight size={12} />}
+        </button>
+      </div>
     </div>
   );
 }
@@ -300,7 +328,10 @@ function StudyPageInner() {
       )}
 
       <div className="flex flex-col lg:flex-row h-full w-full overflow-hidden">
-        <div className="h-full w-full lg:w-1/2 lg:flex-none min-h-0 min-w-0 overflow-hidden border-r border-border">
+        <div
+          data-tour="bible-text"
+          className="h-full w-full lg:w-1/2 lg:flex-none min-h-0 min-w-0 overflow-hidden border-r border-border"
+        >
           <BibleViewerSection
             selectedBook={selectedBook}
             selectedChapter={selectedChapter}
@@ -325,7 +356,10 @@ function StudyPageInner() {
           />
         </div>
 
-        <div className="h-full w-full lg:w-1/2 lg:flex-none min-h-0 min-w-0 overflow-hidden">
+        <div
+          data-tour="commentary"
+          className="h-full w-full lg:w-1/2 lg:flex-none min-h-0 min-w-0 overflow-hidden"
+        >
           <StudyMaterialsSection
             selectedBook={selectedBook}
             selectedChapter={selectedChapter}

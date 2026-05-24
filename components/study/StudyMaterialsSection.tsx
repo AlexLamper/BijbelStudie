@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { MessageCircle, Users, Info } from 'lucide-react';
+import { MessageCircle, Users, Info, Languages } from 'lucide-react';
 import TabComponent from './TabComponent';
 
 import { ReadingPreferences } from '../../hooks/useReadingPreferences';
@@ -37,9 +37,10 @@ export default function StudyMaterialsSection({
   const [activeTab, setActiveTab] = useState('commentary');
 
   const tabs = [
-    { id: 'commentary', label: t('tabs.commentary'),   icon: MessageCircle },
-    { id: 'historical', label: t('tabs.general_info'), icon: Info },
-    { id: 'notes',      label: t('tabs.notes'),        icon: Users },
+    { id: 'commentary', label: t('tabs.commentary'),   icon: MessageCircle, isPro: false },
+    { id: 'original',   label: t('tabs.original'),     icon: Languages,     isPro: true },
+    { id: 'historical', label: t('tabs.general_info'), icon: Info,          isPro: false },
+    { id: 'notes',      label: t('tabs.notes'),        icon: Users,         isPro: false },
   ];
 
   return (
@@ -48,7 +49,7 @@ export default function StudyMaterialsSection({
       {/* Tab bar */}
       <div className="h-14 flex items-center px-3 flex-none border-b overflow-x-auto bg-gray-50 dark:bg-card border-gray-200 dark:border-border">
         <div className="flex gap-0.5">
-          {tabs.map(({ id, label, icon: Icon }) => {
+          {tabs.map(({ id, label, icon: Icon, isPro }) => {
             const active = activeTab === id;
             return (
               <button
@@ -63,6 +64,11 @@ export default function StudyMaterialsSection({
               >
                 <Icon size={14} />
                 <span className="hidden sm:inline">{label}</span>
+                {isPro && (
+                  <span className="hidden sm:inline text-[9px] font-semibold px-1.5 py-0.5 rounded-full leading-none bg-[rgba(13,148,136,0.10)] dark:bg-[rgba(13,148,136,0.18)] text-[#0D9488] dark:text-teal-400">
+                    Pro
+                  </span>
+                )}
                 {active && (
                   <span className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full bg-[#0D9488]" />
                 )}

@@ -36,95 +36,95 @@ function StudyCard({ study, completed }: { study: CuratedStudy; completed: boole
   const badge = BADGE_STYLES[study.type]
 
   return (
-    <div className={`bg-white dark:bg-card border rounded-2xl overflow-hidden flex flex-col transition-colors ${
+    <div className={`bg-white dark:bg-card border rounded-xl overflow-hidden flex flex-col transition-colors ${
       completed ? 'border-teal-300 dark:border-teal-700' : 'border-gray-200 dark:border-border'
     }`}>
       {/* Image */}
-      <div className="relative w-full" style={{ aspectRatio: '16/7' }}>
+      <div className="relative w-full" style={{ aspectRatio: '16/6' }}>
         <Image
           src={study.image}
           alt={study.title}
           fill
           className="object-cover"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
         <span
-          className="absolute top-3 left-3 px-2 py-0.5 rounded-full text-[10px] font-bold"
+          className="absolute top-2 left-2 px-1.5 py-0.5 rounded-full text-[9px] font-bold"
           style={{ backgroundColor: badge.bg, color: badge.color, backdropFilter: 'blur(4px)' }}
         >
           {study.type}
         </span>
         {completed && (
-          <span className="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-teal-500 text-white">
-            <CheckCircle size={10} /> Voltooid
+          <span className="absolute top-2 right-2 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-teal-500 text-white">
+            <CheckCircle size={9} /> Voltooid
           </span>
         )}
       </div>
 
       {/* Content */}
-      <div className="p-5 flex flex-col flex-1">
-        <h3 className="font-bold text-base text-gray-900 dark:text-foreground leading-snug mb-1">
+      <div className="p-3.5 flex flex-col flex-1">
+        <h3 className="font-bold text-sm text-gray-900 dark:text-foreground leading-snug mb-1 line-clamp-1">
           {study.title}
         </h3>
-        <p className="text-sm text-gray-500 dark:text-muted-foreground leading-relaxed mb-4 flex-1">
+        <p className="text-xs text-gray-500 dark:text-muted-foreground leading-relaxed mb-3 flex-1 line-clamp-2">
           {study.description}
         </p>
 
-        <div className="flex items-center justify-between mb-4">
-          <span className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-muted-foreground">
-            <Clock size={12} /> {study.durationLabel}
+        <div className="flex items-center justify-between mb-1 gap-2">
+          <span className="flex items-center gap-1 text-[11px] text-gray-400 dark:text-muted-foreground">
+            <Clock size={10} /> {study.durationLabel}
           </span>
           <button
             onClick={() => saveAndNavigate(study, 0, router)}
-            className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg text-white transition-opacity hover:opacity-90"
+            className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-md text-white transition-opacity hover:opacity-90"
             style={{ backgroundColor: '#0D9488' }}
           >
-            Begin studie <ArrowRight size={12} />
+            Begin studie <ArrowRight size={10} />
           </button>
         </div>
 
         {/* Lessons toggle */}
         <button
           onClick={() => setOpen(o => !o)}
-          className="flex items-center justify-between w-full text-xs font-semibold py-2.5 border-t border-gray-100 dark:border-border text-gray-600 dark:text-muted-foreground hover:text-gray-900 dark:hover:text-foreground transition-colors"
+          className="flex items-center justify-between w-full text-[11px] font-semibold py-2 mt-1 border-t border-gray-100 dark:border-border text-gray-500 dark:text-muted-foreground hover:text-gray-900 dark:hover:text-foreground transition-colors"
         >
-          <span>{study.lessons.length} lessen - wat ga je lezen?</span>
-          {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+          <span>{study.lessons.length} lessen</span>
+          {open ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
         </button>
 
         {/* Lesson list */}
         {open && (
-          <div className="mt-1 flex flex-col gap-1.5 pt-1">
+          <div className="flex flex-col gap-0.5 pt-1 pb-1">
             {study.lessons.map((lesson, index) => (
               <button
                 key={lesson.day}
                 onClick={() => saveAndNavigate(study, index, router)}
-                className="flex items-start gap-3 group rounded-lg px-2 py-2 hover:bg-gray-50 dark:hover:bg-secondary transition-colors text-left w-full"
+                className="flex items-start gap-2 group rounded-md px-1.5 py-1.5 hover:bg-gray-50 dark:hover:bg-secondary transition-colors text-left w-full"
               >
                 <span
-                  className="flex-shrink-0 h-5 w-5 rounded-full text-[10px] font-bold flex items-center justify-center mt-0.5"
+                  className="flex-shrink-0 h-4 w-4 rounded-full text-[9px] font-bold flex items-center justify-center mt-0.5"
                   style={{ backgroundColor: 'rgba(13,148,136,0.10)', color: '#0D9488' }}
                 >
                   {lesson.day}
                 </span>
 
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-baseline gap-2 flex-wrap">
-                    <span className="text-xs font-semibold text-gray-800 dark:text-foreground group-hover:text-teal-600 transition-colors leading-tight">
+                  <div className="flex items-baseline gap-1.5 flex-wrap">
+                    <span className="text-[11px] font-semibold text-gray-800 dark:text-foreground group-hover:text-teal-600 transition-colors leading-tight">
                       {lesson.title}
                     </span>
-                    <span className="text-[10px] font-medium px-1.5 py-0.5 rounded"
+                    <span className="text-[9px] font-medium px-1 py-0 rounded"
                       style={{ backgroundColor: 'rgba(13,148,136,0.07)', color: '#0D9488' }}>
                       {lesson.book} {lesson.chapter}{lesson.verseRange ? `:${lesson.verseRange}` : ''}
                     </span>
                   </div>
-                  <p className="text-[11px] text-gray-400 dark:text-muted-foreground mt-0.5 leading-relaxed text-left">
+                  <p className="text-[10px] text-gray-400 dark:text-muted-foreground mt-0.5 leading-snug line-clamp-1">
                     {lesson.focus}
                   </p>
                 </div>
 
-                <ArrowRight size={12} className="flex-shrink-0 mt-1 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: '#0D9488' }} />
+                <ArrowRight size={10} className="flex-shrink-0 mt-1 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: '#0D9488' }} />
               </button>
             ))}
           </div>
@@ -190,7 +190,7 @@ export default function StudiesPage() {
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
           {filtered.map(study => (
             <StudyCard key={study.id} study={study} completed={completedIds.includes(study.id)} />
           ))}

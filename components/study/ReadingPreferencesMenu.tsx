@@ -52,7 +52,6 @@ export function ReadingPreferencesMenu({ preferences, onUpdate }: ReadingPrefere
         fontFamily: 'sans',
         lineHeight: 'relaxed',
         letterSpacing: 'normal',
-        highContrast: false,
         showVerseNumbers: true,
       });
     }
@@ -199,14 +198,6 @@ export function ReadingPreferencesMenu({ preferences, onUpdate }: ReadingPrefere
               id="show-verse-numbers"
               checked={preferences.showVerseNumbers}
               onCheckedChange={(checked) => onUpdate({ showVerseNumbers: checked })}
-            />
-          </div>
-          <div className="flex items-center justify-between">
-            <Label htmlFor="high-contrast" className="text-sm">{t('high_contrast')}</Label>
-            <Switch
-              id="high-contrast"
-              checked={preferences.highContrast}
-              onCheckedChange={(checked) => onUpdate({ highContrast: checked })}
             />
           </div>
         </div>

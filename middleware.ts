@@ -70,7 +70,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
-  const protectedRoutes = ["/study", "/dashboard", "/admin", "/notes", "/plans", "/profile", "/settings", "/resources", "/groepen"];
+  const protectedRoutes = ["/study", "/dashboard", "/admin", "/notes", "/plans", "/profile", "/settings", "/resources", "/groepen", "/feedback"];
   if (!session && protectedRoutes.some(route => pathname.startsWith(route))) {
     return NextResponse.redirect(new URL("/", req.url));
   }

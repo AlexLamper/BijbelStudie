@@ -1,8 +1,8 @@
 ﻿"use client"
 
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { MapPin, ExternalLink, X } from 'lucide-react'
+import { MapPin, ExternalLink, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useTranslation } from '../../app/i18n/client'
 
 interface GeoImage {
@@ -32,7 +32,25 @@ function imgSrc(img: GeoImage): string {
 }
 
 /** Shared lightbox - rendered via createPortal in both strip and grid variants */
-function LightboxContent({ selected, onClose }: { selected: GeoImage; onClose: () => void }) {
+function LightboxContent({
+  images, index, onClose, onPrev, onNext, onSelect,
+}: {
+  images: GeoImage[]
+  index: number
+  onClose: () => void
+  onPrev: () => void
+  onNext: () => void
+  onSelect: (i: number) => void
+}) {
+  const selected = images[index]
+  const hasMultiple = images.length > 1
+  const navBtnStyle: React.CSSProperties = {
+    width: 38, height: 38, borderRadius: '50%',
+    border: 'none', cursor: 'pointer',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(6px)',
+    transition: 'background-color 0.15s, transform 0.15s',
+  }
   return (
     <div
       role="dialog"
@@ -50,6 +68,7 @@ function LightboxContent({ selected, onClose }: { selected: GeoImage; onClose: (
           backgroundColor: '#fff', borderRadius: 20,
           boxShadow: '0 32px 64px rgba(0,0,0,0.35)',
           width: '100%', maxWidth: 560, overflow: 'hidden',
+          position: 'relative',
         }}
         onClick={e => e.stopPropagation()}
       >
@@ -57,6 +76,7 @@ function LightboxContent({ selected, onClose }: { selected: GeoImage; onClose: (
         <div style={{ position: 'relative', aspectRatio: '16/9', backgroundColor: '#E5E7EB', overflow: 'hidden' }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
+            key={selected.id + '-' + index}
             src={imgSrc(selected)}
             alt={selected.placeName}
             loading="eager"
@@ -65,11 +85,52 @@ function LightboxContent({ selected, onClose }: { selected: GeoImage; onClose: (
           />
           <div style={{
             position: 'absolute', inset: 0,
-            background: 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 40%)',
+            background: 'linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, transparent 35%)',
             pointerEvents: 'none',
           }} />
+
+          {/* Prev / Next navigation */}
+          {hasMultiple && (
+            <>
+              <button
+                onClick={onPrev}
+                aria-label="Vorige afbeelding"
+                style={{
+                  ...navBtnStyle,
+                  position: 'absolute', top: '50%', left: 12, transform: 'translateY(-50%)',
+                }}
+                onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(0,0,0,0.7)'}
+                onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(0,0,0,0.5)'}
+              >
+                <ChevronLeft size={18} color="#fff" />
+              </button>
+              <button
+                onClick={onNext}
+                aria-label="Volgende afbeelding"
+                style={{
+                  ...navBtnStyle,
+                  position: 'absolute', top: '50%', right: 12, transform: 'translateY(-50%)',
+                }}
+                onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(0,0,0,0.7)'}
+                onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(0,0,0,0.5)'}
+              >
+                <ChevronRight size={18} color="#fff" />
+              </button>
+              {/* Counter */}
+              <div style={{
+                position: 'absolute', top: 12, left: 12,
+                padding: '4px 10px', borderRadius: 999,
+                backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(6px)',
+                color: '#fff', fontSize: 11, fontWeight: 600, letterSpacing: '0.04em',
+              }}>
+                {index + 1} / {images.length}
+              </div>
+            </>
+          )}
+
           <button
             onClick={onClose}
+            aria-label="Sluiten"
             style={{
               position: 'absolute', top: 12, right: 12,
               width: 34, height: 34, borderRadius: '50%',
@@ -144,6 +205,44 @@ function LightboxContent({ selected, onClose }: { selected: GeoImage; onClose: (
               </a>
             )}
           </div>
+
+          {/* Thumbnail strip for quick jumping */}
+          {hasMultiple && (
+            <div style={{
+              display: 'flex', gap: 6, overflowX: 'auto',
+              paddingTop: 14, marginTop: 16, borderTop: '1px solid #F3F4F6',
+            }}>
+              {images.map((img, i) => (
+                <button
+                  key={`${img.id}-${i}`}
+                  onClick={() => onSelect(i)}
+                  aria-label={`Toon ${img.placeName}`}
+                  style={{
+                    flexShrink: 0, width: 56, height: 42,
+                    borderRadius: 6, overflow: 'hidden', padding: 0,
+                    border: i === index ? '2px solid #0D9488' : '2px solid transparent',
+                    cursor: 'pointer', backgroundColor: '#F3F4F6',
+                    transition: 'transform 0.12s, border-color 0.12s',
+                  }}
+                  onMouseEnter={e => {
+                    if (i !== index) (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)';
+                  }}
+                  onMouseLeave={e => {
+                    (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
+                  }}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={imgSrc(img)}
+                    alt={img.placeName}
+                    loading="lazy"
+                    decoding="async"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -154,7 +253,7 @@ export default function GeoImages({ book, chapter, className, variant = 'grid' }
   const { t } = useTranslation('study');
   const [images, setImages]   = useState<GeoImage[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selected, setSelected] = useState<GeoImage | null>(null);
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [mounted, setMounted]   = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
@@ -171,13 +270,31 @@ export default function GeoImages({ book, chapter, className, variant = 'grid' }
       .finally(() => setLoading(false));
   }, [book, chapter]);
 
-  // Close on Escape key
+  const goPrev = useCallback(() => {
+    setActiveIndex(i => {
+      if (i === null || images.length === 0) return i;
+      return (i - 1 + images.length) % images.length;
+    });
+  }, [images.length]);
+
+  const goNext = useCallback(() => {
+    setActiveIndex(i => {
+      if (i === null || images.length === 0) return i;
+      return (i + 1) % images.length;
+    });
+  }, [images.length]);
+
+  // Keyboard handlers: Escape closes, arrows navigate
   useEffect(() => {
-    if (!selected) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setSelected(null); };
+    if (activeIndex === null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setActiveIndex(null);
+      else if (e.key === 'ArrowLeft') goPrev();
+      else if (e.key === 'ArrowRight') goNext();
+    };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [selected]);
+  }, [activeIndex, goPrev, goNext]);
 
   if (loading) {
     if (variant === 'strip') {
@@ -239,7 +356,7 @@ export default function GeoImages({ book, chapter, className, variant = 'grid' }
             {images.map((image, index) => (
               <button
                 key={`${image.id}-${index}`}
-                onClick={() => setSelected(image)}
+                onClick={() => setActiveIndex(index)}
                 className="border border-gray-200 dark:border-border bg-white dark:bg-secondary text-left"
                 style={{
                   width: 88, flexShrink: 0,
@@ -263,7 +380,9 @@ export default function GeoImages({ book, chapter, className, variant = 'grid' }
                     src={imgSrc(image)}
                     alt={image.placeName}
                     loading="lazy"
+                    decoding="async"
                     style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    onError={e => { (e.currentTarget as HTMLImageElement).src = image.thumbnailUrl; }}
                   />
                 </div>
                 <div style={{ padding: '4px 6px 5px' }}>
@@ -279,8 +398,15 @@ export default function GeoImages({ book, chapter, className, variant = 'grid' }
           </div>
         </div>
 
-        {selected && mounted && createPortal(
-          <LightboxContent selected={selected} onClose={() => setSelected(null)} />,
+        {activeIndex !== null && mounted && createPortal(
+          <LightboxContent
+            images={images}
+            index={activeIndex}
+            onClose={() => setActiveIndex(null)}
+            onPrev={goPrev}
+            onNext={goNext}
+            onSelect={setActiveIndex}
+          />,
           document.body
         )}
       </>
@@ -288,8 +414,18 @@ export default function GeoImages({ book, chapter, className, variant = 'grid' }
   }
 
   /* ── Grid variant (default) ────────────────────────────────── */
-  const lightbox = selected && mounted
-    ? createPortal(<LightboxContent selected={selected} onClose={() => setSelected(null)} />, document.body)
+  const lightbox = activeIndex !== null && mounted
+    ? createPortal(
+        <LightboxContent
+          images={images}
+          index={activeIndex}
+          onClose={() => setActiveIndex(null)}
+          onPrev={goPrev}
+          onNext={goNext}
+          onSelect={setActiveIndex}
+        />,
+        document.body,
+      )
     : null;
 
   return (
@@ -308,16 +444,16 @@ export default function GeoImages({ book, chapter, className, variant = 'grid' }
           {images.map((image, index) => (
             <button
               key={`${image.id}-${index}`}
-              onClick={() => setSelected(image)}
+              onClick={() => setActiveIndex(index)}
               className="group text-left rounded-xl overflow-hidden border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow focus:outline-none"
             >
-              {/* Thumbnail - thumbnailUrl is always a valid image URL */}
               <div style={{ height: 110, overflow: 'hidden', backgroundColor: '#F3F4F6' }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={imgSrc(image)}
                   alt={image.placeName}
-                  loading="eager"
+                  loading="lazy"
+                  decoding="async"
                   style={{
                     width: '100%',
                     height: '100%',

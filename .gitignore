@@ -68,3 +68,7 @@ scripts/*.cmt.mybible
 /public/data/commentaries/*
 !/public/data/commentaries/kingcomments_nl
 !/public/data/commentaries/kingcomments_nl/**
+
+# Original-language (Hebrew/Greek) text — built locally from STEPBible CC BY data
+# (see scripts/build-original-text.mjs)
+/public/data/original/

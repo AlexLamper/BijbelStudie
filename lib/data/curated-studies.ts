@@ -23,10 +23,10 @@ export interface CuratedStudy {
 }
 
 export const BADGE_STYLES: Record<StudyType, { bg: string; color: string }> = {
-  Gedeelte: { bg: 'rgba(13,148,136,0.10)',  color: '#0D9488' },
-  Persoon:  { bg: 'rgba(124,58,237,0.10)', color: '#7C3AED' },
-  Onderwerp:{ bg: 'rgba(234,88,12,0.10)',  color: '#EA580C' },
-  Boek:     { bg: 'rgba(37,99,235,0.10)',  color: '#2563EB' },
+  Gedeelte: { bg: 'rgba(13,148,136,0.88)', color: '#fff' },
+  Persoon:  { bg: 'rgba(13,148,136,0.88)', color: '#fff' },
+  Onderwerp:{ bg: 'rgba(13,148,136,0.88)', color: '#fff' },
+  Boek:     { bg: 'rgba(13,148,136,0.88)', color: '#fff' },
 }
 
 export const curatedStudies: CuratedStudy[] = [

@@ -19,7 +19,8 @@ const UserSchema = new mongoose.Schema(
     isAdmin: { type: Boolean, default: false },
     preferences: {
       language: { type: String },
-      translation: { type: String },
+      translation: { type: String, default: "statenvertaling" },
+      commentary: { type: String, default: "matthew_henry_nl" },
       intent: { type: String },
       onboardingCompleted: { type: Boolean, default: false },
       fontSize: { type: String, default: "base" },

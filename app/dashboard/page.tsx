@@ -7,7 +7,6 @@ import {
   BookOpen, Flame, ArrowRight, ChevronRight,
   StickyNote, CalendarCheck2, BarChart2, Lightbulb, Clock,
 } from "lucide-react"
-import Image from "next/image"
 import { curatedStudies, BADGE_STYLES } from "../../lib/data/curated-studies"
 import { CHAPTER_COUNTS } from "../../lib/data/bible-chapter-counts"
 
@@ -179,7 +178,7 @@ export default function DashboardPage() {
           <div className="flex flex-col gap-5 min-w-0">
 
             {/* Hero CTA - most prominent element */}
-            <div className="rounded-2xl p-6" style={{ background: "linear-gradient(135deg, #0D9488 0%, #0F766E 100%)" }}>
+            <div data-tour="dashboard-hero" className="rounded-2xl p-6" style={{ background: "linear-gradient(135deg, #0D9488 0%, #0F766E 100%)" }}>
               {loading ? (
                 <div className="flex items-center justify-between gap-6">
                   <div className="space-y-2 flex-1">
@@ -282,7 +281,7 @@ export default function DashboardPage() {
                 {hoveredBook ? (
                   <p className="text-xs text-gray-600 dark:text-muted-foreground">
                     <span className="font-semibold" style={{ color: "#0D9488" }}>{hoveredBook}</span>
-                    {" — "}
+                    {" - "}
                     {bookReadCount(hoveredBook)} van {CHAPTER_COUNTS[hoveredBook] ?? "?"} hoofdstukken gelezen
                   </p>
                 ) : (
@@ -354,47 +353,49 @@ export default function DashboardPage() {
             {/* Samengestelde studies */}
             <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-2xl p-5">
               <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2.5">
-                  <div className="h-7 w-7 rounded-lg flex items-center justify-center"
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="h-7 w-7 rounded-lg flex items-center justify-center flex-shrink-0"
                     style={{ backgroundColor: "rgba(13,148,136,0.08)" }}>
                     <Lightbulb size={14} style={{ color: "#0D9488" }} />
                   </div>
-                  <div>
-                    <p className="text-sm font-bold text-gray-900 dark:text-foreground">Samengestelde studies</p>
-                    <p className="text-xs text-gray-500 dark:text-muted-foreground">Kies een studie en begin vandaag</p>
-                  </div>
+                  <p className="text-sm font-bold text-gray-900 dark:text-foreground truncate">
+                    Aanbevolen studies
+                  </p>
                 </div>
-                <Link href="/studies" className="text-xs font-medium flex items-center gap-0.5 flex-shrink-0" style={{ color: "#0D9488" }}>
-                  Alle studies <ChevronRight size={12} />
+                <Link href="/studies" className="text-xs font-medium flex items-center gap-0.5 flex-shrink-0 no-underline" style={{ color: "#0D9488" }}>
+                  Bekijk alle <ChevronRight size={12} />
                 </Link>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {curatedStudies.slice(0, 4).map(study => {
+              <div className="flex flex-col">
+                {curatedStudies.slice(0, 5).map((study, idx) => {
                   const badge = BADGE_STYLES[study.type]
                   return (
                     <Link
                       key={study.id}
                       href={`/studie?book=${encodeURIComponent(study.startBook)}&chapter=${study.startChapter}&version=${encodeURIComponent(study.startVersion)}`}
-                      className="flex items-center rounded-xl overflow-hidden group transition-shadow hover:shadow-md border border-gray-100 dark:border-border"
-                      style={{ textDecoration: "none" }}
+                      className={[
+                        "flex items-center gap-3 py-2.5 group transition-colors no-underline -mx-1.5 px-1.5 rounded-lg hover:bg-gray-50/70 dark:hover:bg-secondary/40",
+                        idx === 0 ? "" : "border-t border-gray-100 dark:border-border/70",
+                      ].join(" ")}
                     >
-                      <div className="relative flex-shrink-0" style={{ width: 88, height: 66 }}>
-                        <Image src={study.image} alt={study.title} fill className="object-cover" sizes="88px" />
-                      </div>
-                      <div className="flex-1 min-w-0 px-3 py-2">
-                        <span className="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold mb-1"
-                          style={{ backgroundColor: badge.bg, color: badge.color }}>
-                          {study.type}
-                        </span>
-                        <p className="text-xs font-semibold leading-tight truncate text-gray-900 dark:text-foreground">{study.title}</p>
-                        <p className="text-xs mt-0.5 flex items-center gap-1 text-gray-400 dark:text-muted-foreground">
-                          <Clock size={10} /> {study.durationLabel}
+                      <span
+                        className="flex-shrink-0 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider"
+                        style={{ backgroundColor: badge.bg, color: badge.color }}
+                      >
+                        {study.type}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] font-semibold leading-tight truncate text-gray-900 dark:text-foreground">
+                          {study.title}
+                        </p>
+                        <p className="text-[11px] mt-0.5 flex items-center gap-1.5 text-gray-400 dark:text-muted-foreground">
+                          <span className="flex items-center gap-0.5"><Clock size={9} /> {study.durationLabel}</span>
+                          <span className="opacity-50">·</span>
+                          <span className="truncate">{study.startBook}</span>
                         </p>
                       </div>
-                      <div className="flex-shrink-0 pr-3">
-                        <ArrowRight size={14} className="opacity-30 group-hover:opacity-100 transition-opacity" style={{ color: "#0D9488" }} />
-                      </div>
+                      <ArrowRight size={12} className="flex-shrink-0 text-gray-300 dark:text-muted-foreground group-hover:translate-x-0.5 transition-all" style={{ color: "#0D9488" }} />
                     </Link>
                   )
                 })}

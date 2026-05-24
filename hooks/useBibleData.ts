@@ -5,9 +5,11 @@ import { bookNameMap, CANONICAL_NL, normalizeBookName, BIBLE_BOOKS_ORDER } from 
 
 /* ─── Static data - never changes ───────────────────────────── */
 const VERSIONS = [
-  { id: 'statenvertaling',      name: 'Statenvertaling',        language: 'nl' },
+  { id: 'statenvertaling',      name: 'Statenvertaling',         language: 'nl' },
+  { id: 'hsv',                  name: 'Herziene Statenvertaling', language: 'nl' },
   { id: 'heilige_schrift_1917', name: 'De Heilige Schrift 1917', language: 'nl' },
-  { id: 'canisiusbijbel',       name: 'Canisiusbijbel 1939',    language: 'nl' },
+  { id: 'canisiusbijbel',       name: 'Canisiusbijbel 1939',     language: 'nl' },
+  { id: 'basisbijbel',          name: 'BasisBijbel',             language: 'nl' },
 ] as const;
 
 // Flat-file translations: stored as a single JSON, no per-book directory.
@@ -140,7 +142,11 @@ export function useBibleData(lng: string, options: UseBibleDataOptions = {}): Us
   const [selectedBook, setSelectedBook] = useState<string>('');
   const [selectedChapter, setSelectedChapter] = useState<number>(1);
   const [selectedCommentary, setSelectedCommentary] = useState<string>(() => {
-    try { return localStorage.getItem('bijbelstudie_commentary') || 'matthew_henry_nl'; } catch { return 'matthew_henry_nl'; }
+    try {
+      const stored = localStorage.getItem('bijbelstudie_commentary');
+      if (stored) return stored;
+    } catch { /* noop */ }
+    return 'matthew_henry_nl';
   });
   const [maxChapter, setMaxChapter]     = useState<number>(1);
   const [loadingBooks, setLoadingBooks] = useState(true);
@@ -209,6 +215,11 @@ export function useBibleData(lng: string, options: UseBibleDataOptions = {}): Us
           v.name.toLowerCase().includes(pref)
         );
         if (match) version = match.id;
+      }
+
+      // Commentary: prefer last-read commentary, then preference, then existing local value.
+      if (!restoredCommentary && prefData?.preferences?.commentary) {
+        restoredCommentary = prefData.preferences.commentary;
       }
 
       setSelectedVersion(version);
@@ -350,6 +361,7 @@ export function useBibleData(lng: string, options: UseBibleDataOptions = {}): Us
         }),
       }).catch(() => {});
       fetch('/api/user/log-reading', { method: 'POST' }).catch(() => {});
+      fetch('/api/streak', { method: 'POST' }).catch(() => {});
     }, 1500);
 
     return () => clearTimeout(id);

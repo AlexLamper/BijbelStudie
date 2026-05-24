@@ -14,10 +14,11 @@ export async function POST(request: NextRequest) {
 
     await connectMongoDB();
     
-    const { 
-      language, 
-      translation, 
-      intent, 
+    const {
+      language,
+      translation,
+      commentary,
+      intent,
       onboardingCompleted,
       fontSize,
       fontFamily,
@@ -33,9 +34,10 @@ export async function POST(request: NextRequest) {
 
     if (language) updateData["preferences.language"] = language;
     if (translation) updateData["preferences.translation"] = translation;
+    if (commentary) updateData["preferences.commentary"] = commentary;
     if (intent) updateData["preferences.intent"] = intent;
     if (onboardingCompleted !== undefined) updateData["preferences.onboardingCompleted"] = onboardingCompleted;
-    
+
     // Reading preferences
     if (fontSize) updateData["preferences.fontSize"] = fontSize;
     if (fontFamily) updateData["preferences.fontFamily"] = fontFamily;

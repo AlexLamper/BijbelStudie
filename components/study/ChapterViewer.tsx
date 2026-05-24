@@ -177,10 +177,7 @@ export default function ChapterViewer({
 
       {!loading && !error && Object.keys(verses).length > 0 && (
         <>
-          <div className={cn(
-            "space-y-2 text-justify",
-            prefs.highContrast && "contrast-more:text-black dark:contrast-more:text-white"
-          )}>
+          <div className="space-y-2 text-justify">
             {Object.entries(verses).map(([verseNumber, text]) => {
               const vNum = parseInt(verseNumber, 10);
               const isHighlighted = highlightRange

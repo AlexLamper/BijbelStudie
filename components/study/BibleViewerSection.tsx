@@ -57,7 +57,7 @@ export default function BibleViewerSection({
     <section className="flex flex-col h-full bg-white dark:bg-background">
 
       {/* Toolbar */}
-      <div className="h-14 flex items-center justify-between px-3 flex-none gap-2 border-b bg-gray-50 dark:bg-card border-gray-200 dark:border-border">
+      <div data-tour="bible-selector" className="h-14 flex items-center justify-between px-3 flex-none gap-2 border-b bg-gray-50 dark:bg-card border-gray-200 dark:border-border">
         <ReadingPreferencesMenu preferences={preferences} onUpdate={onUpdatePreferences} />
 
         <div className="w-px h-5 mx-1 bg-gray-200 dark:bg-border" />

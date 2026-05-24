@@ -5,6 +5,7 @@ import { ThemeProvider } from "../components/providers/theme-provider";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../lib/authOptions";
 import { OnboardingWrapper } from "../components/onboarding/onboarding-wrapper";
+import { GuidedTourLauncher } from "../components/onboarding/guided-tour";
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { PrefetchProvider } from "../components/providers/prefetch-provider";
 
@@ -141,7 +142,14 @@ export default async function RootLayout({
               {children}
             </div>
             {session?.user && (
-              <OnboardingWrapper shouldShow={!session.user.onboardingCompleted} />
+              <>
+                <OnboardingWrapper shouldShow={!session.user.onboardingCompleted} />
+                {/* Numbered first-time tour: launches after a tiny delay if
+                    localStorage flag isn't set. Won't fight the OnboardingModal
+                    because the launcher's setTimeout starts immediately but
+                    the modal blocks interaction until dismissed. */}
+                <GuidedTourLauncher canShow={!!session.user.onboardingCompleted} isSubscribed={!!session.user.isSubscribed} />
+              </>
             )}
           </PrefetchProvider>
         </ThemeProvider>

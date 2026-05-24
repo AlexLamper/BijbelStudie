@@ -93,9 +93,9 @@ export async function POST(request: NextRequest) {
     // Check note limit for free users
     if (!user.subscribed) {
       const noteCount = await Note.countDocuments({ userId: user._id });
-      if (noteCount >= 25) {
+      if (noteCount >= 7) {
         return NextResponse.json(
-          { error: "Free limit reached. Upgrade to Pro to create unlimited notes.", code: "NOTE_LIMIT_REACHED" },
+          { error: "Je hebt het gratis limiet van 7 notities bereikt. Upgrade naar Pro voor onbeperkte notities.", code: "NOTE_LIMIT_REACHED" },
           { status: 403 }
         );
       }

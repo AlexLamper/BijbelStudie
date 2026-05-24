@@ -408,7 +408,7 @@ export default function DiscussieTab({
           </div>
           <p className="font-semibold text-gray-800 dark:text-foreground mb-1">Nog geen berichten</p>
           <p className="text-sm text-gray-500 dark:text-muted-foreground">
-            Start de discussie — deel je gedachten over een bijbelgedeelte!
+            Start de discussie - deel je gedachten over een bijbelgedeelte!
           </p>
         </div>
       ) : (

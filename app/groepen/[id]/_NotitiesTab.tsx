@@ -50,7 +50,7 @@ export default function NotitiesTab({ groupId }: { groupId: string }) {
         <div className="flex items-center gap-2.5">
           <BookOpen className="h-4 w-4 flex-shrink-0" style={{ color: "#0D9488" }} />
           <p className="text-sm text-gray-700 dark:text-foreground">
-            Deel een notitie via de bijbelstudie tool — selecteer een groep bij het opslaan.
+            Deel een notitie via de bijbelstudie tool - selecteer een groep bij het opslaan.
           </p>
         </div>
         <Link href="/studie"

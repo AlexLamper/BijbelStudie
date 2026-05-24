@@ -235,7 +235,7 @@ export default function SubscribePage() {
 
         {/* Trust line */}
         <p className="text-center text-xs text-gray-400">
-          🔒 Veilige betaling via Stripe &nbsp;·&nbsp; Altijd opzegbaar &nbsp;·&nbsp; Geen verborgen kosten
+          Veilige betaling via Stripe &nbsp;·&nbsp; Altijd opzegbaar &nbsp;·&nbsp; Geen verborgen kosten
         </p>
 
         {!session && (

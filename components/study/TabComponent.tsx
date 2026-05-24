@@ -5,6 +5,7 @@ import { ChapterNotes } from './ChapterNotes';
 import HistoricalContext from './HistoricalContext';
 import { useKeyboardShortcuts, KeyboardShortcut } from '../../hooks/useKeyboardShortcuts';
 import CommentaryComponent from './CommentaryComponent';
+import OriginalText from './OriginalText';
 import { ReadingPreferences } from '../../hooks/useReadingPreferences';
 
 interface TabComponentProps {
@@ -69,6 +70,13 @@ export default function TabComponent({
             onSourceChange={onCommentaryChange}
             height={height}
             preferences={preferences}
+          />
+        );
+      case 'original':
+        return (
+          <OriginalText
+            book={selectedBook || ''}
+            chapter={selectedChapter || 1}
           />
         );
       case 'historical':

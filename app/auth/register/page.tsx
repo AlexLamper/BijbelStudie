@@ -15,10 +15,10 @@ const BENEFITS = [
 ]
 
 const PANEL_FEATURES = [
-  { icon: BookOpen,   title: "Meerdere vertalingen",  desc: "Statenvertaling, HSV en meer" },
-  { icon: BookMarked, title: "Leesplannen",            desc: "Lees de Bijbel systematisch" },
-  { icon: StickyNote, title: "Notities & markering",   desc: "Aantekeningen bij verzen" },
-  { icon: Library,    title: "Studiemethoden",         desc: "Inductief, SOAP, SOLVAT" },
+  { icon: BookOpen,    title: "Bijbelvertalingen",    desc: "Lees de Statenvertaling en meer vertalingen" },
+  { icon: BookMarked,  title: "10 begeleide studies", desc: "Over personen, thema's en gebeurtenissen" },
+  { icon: StickyNote,  title: "Notities & markering", desc: "Sla inzichten op bij elk vers" },
+  { icon: Library,     title: "Studiemethoden",       desc: "Inductief, SOAP, SOLVAT en meer" },
 ]
 
 function FeaturePanel() {
