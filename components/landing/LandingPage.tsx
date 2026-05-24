@@ -850,8 +850,8 @@ function CommentaryMockup() {
         </p>
         <p className="text-sm leading-relaxed mb-3" style={{ color: T.text }}>
           In het Hebreeuws heet dit boek <em style={{ color: T.tealText, fontStyle: "italic" }}>Bereshith</em>, dat
-          betekent 'in het begin', naar de eerste woorden waarmee dit boek begint. In het Grieks heet het Genesis, dat
-          'geboorte', of 'ontstaan', of 'wording' betekent.
+          betekent &apos;in het begin&apos;, naar de eerste woorden waarmee dit boek begint. In het Grieks heet het Genesis, dat
+          &apos;geboorte&apos;, of &apos;ontstaan&apos;, of &apos;wording&apos; betekent.
         </p>
         <p className="text-sm leading-relaxed" style={{ color: T.text }}>
           Het is terecht het boek van het begin. We vinden er de oorsprong van alle dingen in. Dit boek vertelt ons onder

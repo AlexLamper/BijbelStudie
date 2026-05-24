@@ -338,7 +338,7 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
       return src.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
 
-  const isLocked = (_source: string) => false;
+  const isLocked = () => false;
 
   const languageNames: Record<string, string> = {
     en: 'English',

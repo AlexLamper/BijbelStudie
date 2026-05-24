@@ -194,12 +194,12 @@ export function GuidedTour({ open, onClose, startStep = 0, steps: stepsProp }: G
     }
     window.addEventListener("keydown", onKey)
     return () => window.removeEventListener("keydown", onKey)
-  }, [open, onClose])
+  }, [open, onClose, activeSteps.length])
 
   const next = useCallback(() => {
     if (isLast) onClose()
     else setStep((s) => Math.min(activeSteps.length - 1, s + 1))
-  }, [isLast, onClose])
+  }, [isLast, onClose, activeSteps.length])
 
   const prev = useCallback(() => setStep((s) => Math.max(0, s - 1)), [])
 
