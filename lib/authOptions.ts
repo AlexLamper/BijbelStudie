@@ -5,6 +5,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import connectMongoDB from "./mongodb";
 import User from "../models/User";
+import { isAdminEmail } from "./adminEmails";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -83,7 +84,7 @@ export const authOptions: NextAuthOptions = {
           const user = await User.findOne({ email: session.user.email });
           if (user) {
             session.user.id = user._id.toString();
-            session.user.isAdmin = user.isAdmin || false;
+            session.user.isAdmin = user.isAdmin || isAdminEmail(session.user.email) || false;
             session.user.isSubscribed = user.subscribed || false;
             session.user.onboardingCompleted = user.preferences?.onboardingCompleted || false;
           }

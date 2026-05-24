@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { authOptions } from "./authOptions";
 import connectMongoDB from "./mongodb";
 import User from "../models/User";
+import { isAdminEmail } from "./adminEmails";
 
 export async function requireAdmin() {
   const session = await getServerSession(authOptions);
@@ -16,7 +17,7 @@ export async function requireAdmin() {
   const user = await User.findOne({ email: session.user.email })
     .select("isAdmin")
     .lean<{ isAdmin?: boolean }>();
-  if (!user?.isAdmin) {
+  if (!user?.isAdmin && !isAdminEmail(session.user.email)) {
     return {
       ok: false as const,
       response: NextResponse.json({ error: "Geen toegang" }, { status: 403 }),

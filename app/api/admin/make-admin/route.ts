@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import connectMongoDB from "../../../../lib/mongodb"
 import User from "../../../../models/User"
 import { getServerSession } from "next-auth"
+import { isAdminEmail } from "../../../../lib/adminEmails"
 
 // This route is for making a user an admin (should only be accessible by existing admins)
 export async function POST(req: Request) {
@@ -18,7 +19,7 @@ export async function POST(req: Request) {
     // Check if the requester is an admin
     const requester = await User.findOne({ email: session.user.email })
 
-    if (!requester || !requester.isAdmin) {
+    if ((!requester || !requester.isAdmin) && !isAdminEmail(session.user.email)) {
       return NextResponse.json({ error: "Unauthorized. Admin access required." }, { status: 403 })
     }
 

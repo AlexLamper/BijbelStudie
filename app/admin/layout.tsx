@@ -11,6 +11,7 @@ import { generatePageMetadata } from "../../lib/pageMetadata";
 import { authOptions } from "../../lib/authOptions";
 import connectMongoDB from "../../lib/mongodb";
 import User from "../../models/User";
+import { isAdminEmail } from "../../lib/adminEmails";
 
 export async function generateMetadata(): Promise<Metadata> {
   const cookieStore = await cookies();
@@ -34,7 +35,7 @@ export default async function AdminLayout({
     .select("isAdmin")
     .lean<{ isAdmin?: boolean }>();
 
-  if (!dbUser?.isAdmin) {
+  if (!dbUser?.isAdmin && !isAdminEmail(session.user.email)) {
     redirect("/dashboard");
   }
 
