@@ -71,4 +71,4 @@ scripts/*.cmt.mybible
 
 # Original-language (Hebrew/Greek) text — built locally from STEPBible CC BY data
 # (see scripts/build-original-text.mjs)
-/public/data/original/
+# NOTE: keep generated /public/data/original files in source control for production deployments.
