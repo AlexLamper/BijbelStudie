@@ -402,7 +402,7 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
 
       {/* Content Area */}
       <CardContent className={`px-4 sm:px-6 pt-4 pb-24 space-y-6 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-secondary scrollbar-track-transparent ${height ? 'flex-1 min-h-0' : 'max-h-[600px] lg:max-h-[calc(100vh-300px)]'}`}>
-        {isLocked(selectedSource) ? (
+        {isLocked() ? (
           <div className="flex flex-col items-center justify-center py-12 text-center space-y-4">
             <div className="bg-amber-100 dark:bg-amber-900/20 p-4 rounded-full">
               <Lock className="h-8 w-8 text-amber-600 dark:text-amber-500" />
