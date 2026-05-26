@@ -7,6 +7,7 @@ declare module "next-auth" {
       isAdmin?: boolean;
       isSubscribed?: boolean;
       onboardingCompleted?: boolean;
+      tourCompleted?: boolean;
     } & DefaultSession["user"];
   }
 
@@ -14,6 +15,7 @@ declare module "next-auth" {
     isAdmin?: boolean;
     isSubscribed?: boolean;
     onboardingCompleted?: boolean;
+    tourCompleted?: boolean;
   }
 }
 
@@ -23,5 +25,6 @@ declare module "next-auth/jwt" {
     isAdmin?: boolean;
     isSubscribed?: boolean;
     onboardingCompleted?: boolean;
+    tourCompleted?: boolean;
   }
 }

@@ -8,7 +8,7 @@ import { useReadingPreferences } from '../../hooks/useReadingPreferences';
 import BibleViewerSection from '../../components/study/BibleViewerSection';
 import StudyMaterialsSection from '../../components/study/StudyMaterialsSection';
 import StartupAnimation from '../../components/ui/startup-animation';
-import { BookOpen, CheckCircle, ChevronLeft, ChevronRight, X, Trophy } from 'lucide-react';
+import { BookOpen, CheckCircle, ChevronLeft, ChevronRight, X, Trophy, MessageCircle } from 'lucide-react';
 
 const COMPLETED_KEY = 'bijbelstudie_completed_studies';
 
@@ -189,6 +189,7 @@ function StudyPageInner() {
   const [pendingChapter, setPendingChapter]         = useState<number | null>(null);
   const [studyCompleted, setStudyCompleted]         = useState(false);
   const [showCompletionOverlay, setShowCompletionOverlay] = useState(false);
+  const [mobileView, setMobileView]                 = useState<'bible' | 'materials'>('bible');
 
   useEffect(() => {
     const hasShown = sessionStorage.getItem('study-startup-shown');
@@ -327,10 +328,48 @@ function StudyPageInner() {
         <CompletionOverlay study={activeStudy} onClose={handleCloseOverlay} />
       )}
 
-      <div className="flex flex-col lg:flex-row h-full w-full overflow-hidden">
+      {/* Mobile pane switcher — only below lg; desktop/landscape keeps the split */}
+      <div className="lg:hidden flex-none flex items-stretch border-b border-gray-200 dark:border-border bg-gray-50 dark:bg-card">
+        <button
+          onClick={() => setMobileView('bible')}
+          aria-pressed={mobileView === 'bible'}
+          className={[
+            'flex-1 flex items-center justify-center gap-1.5 h-12 text-sm font-semibold relative transition-colors',
+            mobileView === 'bible'
+              ? 'text-[#0D9488] bg-[rgba(13,148,136,0.07)] dark:bg-[rgba(13,148,136,0.12)]'
+              : 'text-gray-500 dark:text-muted-foreground hover:text-gray-700 dark:hover:text-foreground',
+          ].join(' ')}
+        >
+          <BookOpen size={16} /> Bijbel
+          {mobileView === 'bible' && (
+            <span className="absolute bottom-0 left-4 right-4 h-0.5 rounded-full bg-[#0D9488]" />
+          )}
+        </button>
+        <button
+          onClick={() => setMobileView('materials')}
+          aria-pressed={mobileView === 'materials'}
+          className={[
+            'flex-1 flex items-center justify-center gap-1.5 h-12 text-sm font-semibold relative transition-colors',
+            mobileView === 'materials'
+              ? 'text-[#0D9488] bg-[rgba(13,148,136,0.07)] dark:bg-[rgba(13,148,136,0.12)]'
+              : 'text-gray-500 dark:text-muted-foreground hover:text-gray-700 dark:hover:text-foreground',
+          ].join(' ')}
+        >
+          <MessageCircle size={16} /> Studie
+          {mobileView === 'materials' && (
+            <span className="absolute bottom-0 left-4 right-4 h-0.5 rounded-full bg-[#0D9488]" />
+          )}
+        </button>
+      </div>
+
+      <div className="flex flex-col lg:flex-row flex-1 min-h-0 w-full overflow-hidden">
         <div
           data-tour="bible-text"
-          className="h-full w-full lg:w-1/2 lg:flex-none min-h-0 min-w-0 overflow-hidden border-r border-border"
+          className={[
+            'h-full w-full lg:w-1/2 lg:flex-none min-h-0 min-w-0 overflow-hidden border-r border-border',
+            mobileView === 'bible' ? 'block' : 'hidden',
+            'lg:block',
+          ].join(' ')}
         >
           <BibleViewerSection
             selectedBook={selectedBook}
@@ -358,7 +397,11 @@ function StudyPageInner() {
 
         <div
           data-tour="commentary"
-          className="h-full w-full lg:w-1/2 lg:flex-none min-h-0 min-w-0 overflow-hidden"
+          className={[
+            'h-full w-full lg:w-1/2 lg:flex-none min-h-0 min-w-0 overflow-hidden',
+            mobileView === 'materials' ? 'block' : 'hidden',
+            'lg:block',
+          ].join(' ')}
         >
           <StudyMaterialsSection
             selectedBook={selectedBook}

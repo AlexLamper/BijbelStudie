@@ -190,6 +190,8 @@ export default function ChapterViewer({
               {book} {chapter}
             </p>
             <SpeakButton
+              compact
+              showSettings={false}
               getText={() => buildChapterText(verses)}
               label="Lees hoofdstuk voor"
             />

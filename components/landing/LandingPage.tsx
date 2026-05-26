@@ -228,7 +228,7 @@ function BibleStudyIllustration() {
       </div>
 
       {/* ── Floating "Notitie opgeslagen" badge (top-left) ── */}
-      <div className="absolute -top-5 -left-4 bg-white rounded-full shadow-lg border px-3 py-1.5 flex items-center gap-2"
+      <div className="absolute -top-5 -left-4 bg-white rounded-full shadow-lg border px-3 py-1.5 hidden sm:flex items-center gap-2"
         style={{ borderColor: T.border }}>
         <div className="h-5 w-5 rounded-full flex items-center justify-center flex-shrink-0"
           style={{ backgroundColor: T.tealLight }}>
@@ -238,7 +238,7 @@ function BibleStudyIllustration() {
       </div>
 
       {/* ── Floating streak pill (bottom-right) ── */}
-      <div className="absolute -bottom-4 -right-4 bg-white rounded-full shadow-lg border px-3 py-1.5 flex items-center gap-1.5"
+      <div className="absolute -bottom-4 -right-4 bg-white rounded-full shadow-lg border px-3 py-1.5 hidden sm:flex items-center gap-1.5"
         style={{ borderColor: T.border }}>
         <Flame className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "#EA580C" }} />
         <span className="text-[11px] font-bold" style={{ color: T.text }}>12</span>
@@ -268,9 +268,9 @@ function Navbar() {
         boxShadow: scrolled ? "0 1px 16px rgba(0,0,0,0.07)" : "none",
       }}
     >
-      <div className="max-w-6xl 2xl:max-w-7xl mx-auto px-6 h-16 grid grid-cols-3 items-center">
+      <div className="max-w-6xl 2xl:max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3 md:grid md:grid-cols-3">
         {/* Logo - links uitgelijnd */}
-        <Link href="/" className="flex items-center gap-2 justify-self-start">
+        <Link href="/" className="flex items-center gap-2 flex-shrink-0 md:justify-self-start">
           <Image src="/images/favicon.ico" alt="" width={26} height={26} className="rounded-md" priority />
           <span className="font-bold text-base" style={{ color: T.text }}>BijbelStudie</span>
         </Link>
@@ -292,15 +292,15 @@ function Navbar() {
         </nav>
 
         {/* Knoppen - rechts uitgelijnd */}
-        <div className="flex items-center gap-3 justify-self-end">
+        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0 md:justify-self-end">
           <Link href="/auth/signin"
             className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors hidden sm:block">
             Inloggen
           </Link>
           <Link href="/auth/signin"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-white px-4 py-2 rounded-lg bg-teal-600 hover:bg-teal-700 transition-colors">
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-white px-3.5 sm:px-4 py-2 rounded-lg bg-teal-600 hover:bg-teal-700 transition-colors whitespace-nowrap">
             Gratis beginnen
-            <ArrowRight className="h-3.5 w-3.5" />
+            <ArrowRight className="h-3.5 w-3.5 flex-shrink-0" />
           </Link>
         </div>
       </div>
@@ -366,7 +366,7 @@ function Hero() {
             transition={{ duration: 0.5, delay: 0.3, ease }}
           >
             <motion.div
-              className="rounded-xl"
+              className="rounded-xl w-full sm:w-auto"
               animate={{
                 boxShadow: [
                   "0 0 0 0 rgba(13,148,136,0.45)",
@@ -377,20 +377,16 @@ function Hero() {
               transition={{ duration: 2.4, repeat: Infinity, ease: "easeOut", delay: 1 }}
             >
               <Link href="/auth/signin"
-                className="group inline-flex items-center justify-center gap-2 font-semibold text-white px-7 py-3.5 rounded-xl bg-teal-600 hover:bg-teal-700 transition-colors">
+                className="group w-full inline-flex items-center justify-center gap-2 font-semibold text-white px-7 py-3.5 rounded-xl bg-teal-600 hover:bg-teal-700 transition-colors">
                 Start gratis
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </Link>
             </motion.div>
             <Link href="#functies"
-              className="inline-flex items-center justify-center gap-2 font-semibold px-7 py-3.5 rounded-xl border border-gray-200 text-gray-900 bg-white hover:bg-gray-50 transition-colors">
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 font-semibold px-7 py-3.5 rounded-xl border border-gray-200 text-gray-900 bg-white hover:bg-gray-50 transition-colors">
               Bekijk functies
             </Link>
           </motion.div>
-          <p className="text-xs -mt-3" style={{ color: T.muted }}>
-            <Check className="inline h-3 w-3 mr-1 -mt-0.5" style={{ color: T.teal }} />
-            Geen creditcard vereist · In 30 seconden klaar
-          </p>
 
           <motion.div
             className="flex items-center gap-6 pt-2"
@@ -400,7 +396,7 @@ function Hero() {
           >
             {[
               { icon: BookMarked, label: "10 begeleide studies" },
-              { icon: Star,       label: "Gratis basisplan" },
+              { icon: Star,       label: "Gratis te gebruiken" },
               { icon: Shield,     label: "Privacy-first" },
             ].map(({ icon: Icon, label }) => (
               <div key={label} className="flex items-center gap-1.5 text-sm" style={{ color: T.muted }}>
@@ -413,7 +409,7 @@ function Hero() {
 
         {/* Illustration column - floats continuously */}
         <motion.div
-          className="relative"
+          className="relative w-full max-w-md mx-auto lg:max-w-none lg:mx-0"
           initial={{ opacity: 0, x: 40, y: 16 }}
           animate={{ opacity: 1, x: 0, y: 0 }}
           transition={{ duration: 0.75, delay: 0.2, ease }}
@@ -1230,7 +1226,7 @@ function CTA() {
         </FadeUp>
         <FadeUp delay={0.28}>
           <p className="text-xs" style={{ color: T.muted }}>
-            Geen creditcard vereist · Gratis basisplan · Altijd opzegbaar
+            Geen creditcard vereist · Gratis te gebruiken · Altijd opzegbaar
           </p>
         </FadeUp>
       </div>

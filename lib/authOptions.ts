@@ -84,9 +84,11 @@ export const authOptions: NextAuthOptions = {
           const user = await User.findOne({ email: session.user.email });
           if (user) {
             session.user.id = user._id.toString();
-            session.user.isAdmin = user.isAdmin || isAdminEmail(session.user.email) || false;
-            session.user.isSubscribed = user.subscribed || false;
+            const isAdmin = user.isAdmin || isAdminEmail(session.user.email) || false;
+            session.user.isAdmin = isAdmin;
+            session.user.isSubscribed = user.subscribed || isAdmin;
             session.user.onboardingCompleted = user.preferences?.onboardingCompleted || false;
+            session.user.tourCompleted = user.preferences?.tourCompleted || false;
           }
         } catch {
           // Non-critical - return session without extra fields

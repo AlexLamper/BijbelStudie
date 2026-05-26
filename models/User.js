@@ -23,6 +23,7 @@ const UserSchema = new mongoose.Schema(
       commentary: { type: String, default: "matthew_henry_nl" },
       intent: { type: String },
       onboardingCompleted: { type: Boolean, default: false },
+      tourCompleted: { type: Boolean, default: false },
       fontSize: { type: String, default: "base" },
       fontFamily: { type: String, default: "sans" },
       lineHeight: { type: String, default: "relaxed" },

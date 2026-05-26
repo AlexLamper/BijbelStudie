@@ -6,7 +6,6 @@ import { usePathname, useRouter } from "next/navigation"
 import { ArrowLeft, ArrowRight, Sparkles, X, Check } from "lucide-react"
 
 const TEAL = "#0D9488"
-const TOUR_STORAGE_KEY = "bijbelstudie_tour_completed_v1"
 
 interface TourStep {
   /** Anchor element selector via [data-tour="…"] */
@@ -446,42 +445,44 @@ export function GuidedTour({ open, onClose, startStep = 0, steps: stepsProp }: G
 }
 
 /**
- * Auto-launches the tour the first time the user is authenticated and
- * the localStorage flag isn't set. The tour itself handles cross-page
+ * Auto-launches the tour the first time the user is authenticated and has
+ * not yet completed it. Completion is stored on the user's account (not in
+ * browser storage), so the tour is tied to the account and never reappears
+ * on another device or browser. The tour itself handles cross-page
  * navigation via the Next router.
  */
-export function GuidedTourLauncher({ canShow, isSubscribed }: { canShow: boolean; isSubscribed?: boolean }) {
+export function GuidedTourLauncher({
+  canShow,
+  tourCompleted,
+  isSubscribed,
+}: {
+  canShow: boolean
+  tourCompleted?: boolean
+  isSubscribed?: boolean
+}) {
   const [open, setOpen] = useState(false)
   const [armed, setArmed] = useState(false)
 
-  // Mark "armed" once after mount so the launcher doesn't re-fire across
-  // route changes. Open state is then controlled by user actions.
+  // Arm once after mount so the launcher doesn't re-fire across route
+  // changes. Open state is then controlled by user actions.
   useEffect(() => {
-    if (!canShow || armed) return
-    try {
-      const done = localStorage.getItem(TOUR_STORAGE_KEY)
-      if (done) {
-        setArmed(true)
-        return
-      }
-    } catch {
-      setArmed(true)
-      return
-    }
+    if (!canShow || tourCompleted || armed) return
     const t = setTimeout(() => {
       setOpen(true)
       setArmed(true)
     }, 800)
     return () => clearTimeout(t)
-  }, [canShow, armed])
+  }, [canShow, tourCompleted, armed])
 
   const handleClose = useCallback(() => {
     setOpen(false)
-    try {
-      localStorage.setItem(TOUR_STORAGE_KEY, new Date().toISOString())
-    } catch {
-      // ignore
-    }
+    // Persist completion to the account so the tour never reappears on any
+    // device. Fire-and-forget: failure just means it may show once more.
+    fetch("/api/user/preferences", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tourCompleted: true }),
+    }).catch(() => {})
   }, [])
 
   const steps = isSubscribed ? STEPS.filter(s => s.target !== "pro-cta") : STEPS

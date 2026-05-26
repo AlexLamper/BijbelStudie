@@ -148,7 +148,7 @@ export default async function RootLayout({
                     localStorage flag isn't set. Won't fight the OnboardingModal
                     because the launcher's setTimeout starts immediately but
                     the modal blocks interaction until dismissed. */}
-                <GuidedTourLauncher canShow={!!session.user.onboardingCompleted} isSubscribed={!!session.user.isSubscribed} />
+                <GuidedTourLauncher canShow={!!session.user.onboardingCompleted} tourCompleted={!!session.user.tourCompleted} isSubscribed={!!session.user.isSubscribed} />
               </>
             )}
           </PrefetchProvider>

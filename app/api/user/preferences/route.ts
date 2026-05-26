@@ -20,6 +20,7 @@ export async function POST(request: NextRequest) {
       commentary,
       intent,
       onboardingCompleted,
+      tourCompleted,
       fontSize,
       fontFamily,
       lineHeight,
@@ -38,6 +39,7 @@ export async function POST(request: NextRequest) {
     if (commentary) updateData["preferences.commentary"] = commentary;
     if (intent) updateData["preferences.intent"] = intent;
     if (onboardingCompleted !== undefined) updateData["preferences.onboardingCompleted"] = onboardingCompleted;
+    if (tourCompleted !== undefined) updateData["preferences.tourCompleted"] = tourCompleted;
 
     // Reading preferences
     if (fontSize) updateData["preferences.fontSize"] = fontSize;

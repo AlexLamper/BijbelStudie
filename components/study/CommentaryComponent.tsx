@@ -400,6 +400,8 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
         <div className="flex items-center gap-2">
           {commentary && Object.keys(commentary).length > 0 && (
             <SpeakButton
+              compact
+              showSettings={false}
               getText={() => buildCommentaryText(commentary)}
               label="Lees commentaar voor"
             />
