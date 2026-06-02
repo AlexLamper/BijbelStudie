@@ -285,7 +285,7 @@ function Navbar() {
             { href: "#faq",         label: "FAQ" },
           ].map(({ href, label }) => (
             <Link key={href} href={href}
-              className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
+              className="text-sm text-gray-500 hover:text-gray-900 transition-colors whitespace-nowrap">
               {label}
             </Link>
           ))}
