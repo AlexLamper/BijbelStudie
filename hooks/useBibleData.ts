@@ -7,6 +7,7 @@ import { bookNameMap, normalizeBookName, BIBLE_BOOKS_ORDER } from '../lib/book-m
 const VERSIONS = [
   // Nederlands
   { id: 'statenvertaling',      name: 'Statenvertaling',          language: 'nl' },
+  { id: 'nbg51',                name: 'NBG-vertaling 1951',       language: 'nl' },
   { id: 'heilige_schrift_1917', name: 'De Heilige Schrift 1917',  language: 'nl' },
   { id: 'canisiusbijbel',       name: 'Canisiusbijbel 1939',      language: 'nl' },
   // English
@@ -20,7 +21,7 @@ const VERSIONS = [
 
 // Flat-file translations: stored as a single JSON, no per-book directory.
 // Chapters must be fetched via API instead of /data/bibles/{version}/{book}/chapters.json
-const FLAT_FILE_VERSIONS = new Set<string>();
+const FLAT_FILE_VERSIONS = new Set<string>(['nbg51']);
 
 // Flat-file translations that store book names in English internally (need Dutch→English mapping)
 const ENGLISH_INTERNAL_VERSIONS = new Set<string>();
