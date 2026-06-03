@@ -3,6 +3,7 @@ import { Loader2, AlertCircle, Plus } from 'lucide-react';
 import { CreateNoteModal } from './CreateNoteModal';
 import { ReadingPreferences } from '../../hooks/useReadingPreferences';
 import { cn } from '../../lib/utils';
+import { getBibleAttribution } from '../../lib/bible-attribution';
 import SpeakButton from './SpeakButton';
 
 type Props = {
@@ -247,6 +248,12 @@ export default function ChapterViewer({
               );
             })}
           </div>
+
+          {getBibleAttribution(version) && (
+            <p className="mt-4 pt-3 border-t border-gray-100 dark:border-border text-[11px] leading-snug text-gray-400 dark:text-muted-foreground">
+              {getBibleAttribution(version)}
+            </p>
+          )}
 
           {/* Note Creation Modal */}
           {selectedVerse && (

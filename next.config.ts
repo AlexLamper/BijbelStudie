@@ -19,6 +19,12 @@ const nextConfig: NextConfig = {
   },
   // Fixes "multiple lockfiles" workspace root warning
   outputFileTracingRoot: path.join(__dirname),
+  // Restricted Bible data lives in ./private (synced at build time, never in
+  // /public). Dynamic fs reads aren't auto-traced, so force-include it into the
+  // bible API serverless bundles or the files would be missing at runtime.
+  outputFileTracingIncludes: {
+    "/api/bible/**": ["./private/**/*"],
+  },
   images: {
     qualities: [50, 75, 85, 95],
     remotePatterns: [

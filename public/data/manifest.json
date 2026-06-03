@@ -451,6 +451,12 @@
       ]
     },
     {
+      "name": "nbg51.json",
+      "title": "NBG-vertaling 1951",
+      "language": "nl",
+      "type": "file"
+    },
+    {
       "name": "kjv",
       "title": "King James Version",
       "language": "en",

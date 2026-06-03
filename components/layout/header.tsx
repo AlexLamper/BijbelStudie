@@ -47,17 +47,23 @@ export function Header({ title }: HeaderProps) {
   const profileRef = useRef<HTMLDivElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
   const [userImage, setUserImage] = useState<string | null>(null)
+  const [isSubscribed, setIsSubscribed] = useState(false)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => { setMounted(true) }, [])
 
+  // Authoritative subscription/image state from /api/user (same source as the
+  // sidebar Pro CTA). Seeded below by the session flag for an instant first paint.
   useEffect(() => {
-    if (!mounted || !session?.user?.email || userImage) return
+    if (!mounted || !session?.user?.email) return
     fetch("/api/user")
       .then(r => r.ok ? r.json() : null)
-      .then(data => { if (data?.user?.image) setUserImage(data.user.image) })
+      .then(data => {
+        if (data?.user?.image) setUserImage(data.user.image)
+        if (typeof data?.user?.subscribed === "boolean") setIsSubscribed(data.user.subscribed)
+      })
       .catch(() => {})
-  }, [session?.user?.email, mounted, userImage])
+  }, [session?.user?.email, mounted])
 
   useEffect(() => {
     if (mounted && status === "unauthenticated") router.push("/api/auth/signin")
@@ -116,12 +122,13 @@ export function Header({ title }: HeaderProps) {
               </AvatarFallback>
             </Avatar>
             <div className="text-sm text-left hidden lg:block">
-              <div className="flex items-center gap-1">
-                <p className="font-medium text-foreground leading-none">{session.user?.name}</p>
-                <SubscriptionBadge isSubscribed={!!session.user?.isSubscribed} />
-              </div>
+              <p className="font-medium text-foreground leading-none">{session.user?.name}</p>
               <p className="text-muted-foreground text-xs mt-0.5 leading-none">{session.user?.email}</p>
             </div>
+            <SubscriptionBadge
+              isSubscribed={isSubscribed || !!session.user?.isSubscribed}
+              className="hidden lg:inline-flex ml-1"
+            />
           </Button>
 
           <AnimatePresence>

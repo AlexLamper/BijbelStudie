@@ -12,6 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
+import { getBibleAttribution } from '../../lib/bible-attribution';
 
 interface Translation {
   id: string;
@@ -238,6 +239,11 @@ export default function ComparisonView({
                       </div>
                     )}
                   </ScrollArea>
+                  {getBibleAttribution(translationId) && (
+                    <p className="mt-3 pt-2 border-t border-gray-100 dark:border-border text-[11px] leading-snug text-gray-400 dark:text-muted-foreground">
+                      {getBibleAttribution(translationId)}
+                    </p>
+                  )}
                 </CardContent>
               </Card>
             );

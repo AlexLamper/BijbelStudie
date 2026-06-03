@@ -1,17 +1,24 @@
 import { Crown } from "lucide-react"
-import { Badge } from "./ui/badge"
+import { cn } from "../lib/utils"
 
 interface SubscriptionBadgeProps {
   isSubscribed: boolean
+  className?: string
 }
 
-export function SubscriptionBadge({ isSubscribed }: SubscriptionBadgeProps) {
+export function SubscriptionBadge({ isSubscribed, className }: SubscriptionBadgeProps) {
   if (!isSubscribed) return null
 
   return (
-    <Badge className="bg-[#798777] text-white hover:bg-[#798777] flex items-center gap-1 ml-2">
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
+        "bg-[rgba(13,148,136,0.1)] text-[#0F766E] dark:bg-[rgba(13,148,136,0.18)] dark:text-[#2DD4BF]",
+        className,
+      )}
+    >
       <Crown className="h-3 w-3" />
-      <span>Pro</span>
-    </Badge>
+      Pro
+    </span>
   )
 }

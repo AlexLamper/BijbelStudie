@@ -47,12 +47,22 @@ async function fetchJson(relativePath: string) {
                 const path = pathModule.default || pathModule;
 
                 if (fs && fs.existsSync && path && path.join && process && process.cwd) {
-                    // Use filesystem directly since this runs on the server
-                    const publicDir = path.join(process.cwd(), 'public');
-                    // Remove leading slash if present to join correctly
+                    // Use filesystem directly since this runs on the server.
+                    // Remove leading slash if present to join correctly.
                     const cleanPath = relativePath.startsWith('/') ? relativePath.slice(1) : relativePath;
+
+                    // Licensed/restricted data (e.g. NBG-vertaling 1951) lives outside
+                    // /public so Next.js never serves it as a downloadable static asset.
+                    // It is only ever read here, server-side, and exposed per-chapter via
+                    // the /api/bible routes. The private copy takes precedence.
+                    const privatePath = path.join(process.cwd(), 'private', cleanPath);
+                    if (fs.existsSync(privatePath)) {
+                        const fileContent = await fs.promises.readFile(privatePath, 'utf-8');
+                        return JSON.parse(fileContent);
+                    }
+
+                    const publicDir = path.join(process.cwd(), 'public');
                     const filePath = path.join(publicDir, cleanPath);
-                    
                     if (fs.existsSync(filePath)) {
                         const fileContent = await fs.promises.readFile(filePath, 'utf-8');
                         return JSON.parse(fileContent);

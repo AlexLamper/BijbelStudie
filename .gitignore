@@ -54,6 +54,10 @@ todo.txt
 scripts/*.mybible
 scripts/*.cmt.mybible
 
+# Licensed/restricted Bible data served only via server-side API, never as a
+# static asset. Must NOT be published to GitHub (license: not freely downloadable).
+/private/
+
 # Bible translation data files - ignore everything except committed translations
 /public/data/bibles/*
 !/public/data/bibles/statenvertaling
