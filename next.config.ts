@@ -24,6 +24,8 @@ const nextConfig: NextConfig = {
   // bible API serverless bundles or the files would be missing at runtime.
   outputFileTracingIncludes: {
     "/api/bible/**": ["./private/**/*"],
+    // The AI chat route reads chapter text via getChapter() from ./private too.
+    "/api/ai/**": ["./private/**/*"],
   },
   images: {
     qualities: [50, 75, 85, 95],

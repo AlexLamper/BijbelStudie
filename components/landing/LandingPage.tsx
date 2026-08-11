@@ -9,7 +9,7 @@ import {
   ArrowRight, Check, ChevronDown, Users, Shield,
   Lightbulb, BarChart2,
   Star, MessageSquare, ChevronLeft, ChevronRight,
-  Flame, PenLine,
+  Flame, PenLine, Sparkles,
 } from "lucide-react"
 import { Footer } from "./footer"
 
@@ -356,7 +356,8 @@ function Hero() {
             transition={{ duration: 0.55, delay: 0.18, ease }}
           >
             BijbelStudie geeft u de tools om de Bijbel diep en persoonlijk te bestuderen.
-            Met bewezen methoden, meerdere vertalingen en persoonlijke notities.
+            Met een AI-assistent die uw vragen over de Schrift beantwoordt, bewezen methoden,
+            meerdere vertalingen en persoonlijke notities.
           </motion.p>
 
           <motion.div
@@ -395,6 +396,7 @@ function Hero() {
             transition={{ duration: 0.5, delay: 0.44, ease }}
           >
             {[
+              { icon: Sparkles,   label: "AI-assistent" },
               { icon: BookMarked, label: "10 begeleide studies" },
               { icon: Star,       label: "Gratis te gebruiken" },
               { icon: Shield,     label: "Privacy-first" },
@@ -487,9 +489,33 @@ function Features() {
           viewport={{ once: true, margin: "-60px" }}
           variants={{ visible: { transition: { staggerChildren: 0.08 } } }}
         >
-          {/* Featured: Begeleide studies (large, spans 2 columns on lg) */}
+          {/* Featured: AI-assistent (full width banner) */}
           <FeatureCard
             num="01"
+            icon={Sparkles}
+            title="AI-assistent voor al je bijbelvragen"
+            desc="Stel elke vraag over de Bijbel en krijg direct serieus, theologisch onderbouwd antwoord met verwijzingen naar de tekst. De assistent kent het hoofdstuk dat u leest en helpt u de Schrift beter begrijpen."
+            className="lg:col-span-3"
+          >
+            <div className="flex flex-wrap gap-1.5">
+              {[
+                "Wat is de kernboodschap van dit hoofdstuk?",
+                "Leg de historische achtergrond uit",
+                "Wie was Paulus?",
+                "Welke teksten sluiten hierop aan?",
+              ].map(q => (
+                <span key={q}
+                  className="text-[11px] font-medium px-2.5 py-1 rounded-full border"
+                  style={{ borderColor: T.border, color: T.text, backgroundColor: T.light }}>
+                  {q}
+                </span>
+              ))}
+            </div>
+          </FeatureCard>
+
+          {/* Featured: Begeleide studies (large, spans 2 columns on lg) */}
+          <FeatureCard
+            num="02"
             icon={Lightbulb}
             title="10 begeleide bijbelstudies"
             desc="Studies over personen, gebeurtenissen en thema's - met gerichte vragen per les, opgebouwd voor diepere reflectie."
@@ -508,7 +534,7 @@ function Features() {
 
           {/* Persoonlijke notities */}
           <FeatureCard
-            num="02"
+            num="03"
             icon={StickyNote}
             title="Persoonlijke notities"
             desc="Noteer gedachten bij verzen en bewaar alles op één plek - automatisch gesynchroniseerd."
@@ -516,21 +542,21 @@ function Features() {
 
           {/* Row 2: 3 equal cards */}
           <FeatureCard
-            num="03"
+            num="04"
             icon={BookOpen}
             title="Meerdere vertalingen"
             desc="Lees en vergelijk Nederlandse bijbelvertalingen direct naast elkaar."
           />
 
           <FeatureCard
-            num="04"
+            num="05"
             icon={Library}
             title="Bijbelcommentaren"
             desc="Lees klassieke en hedendaagse commentaren - Matthew Henry, King Comments en meer."
           />
 
           <FeatureCard
-            num="05"
+            num="06"
             icon={Users}
             title="Bijbelgroepen"
             desc="Studeer samen, deel notities en bespreek teksten in een privégroep."
@@ -1033,6 +1059,7 @@ function HowItWorks() {
 function Pricing() {
   const free = [
     "Bijbel lezen (meerdere vertalingen)",
+    "5 vragen per dag aan de AI-assistent",
     "Persoonlijke notities bij verzen",
     "Bijbelleesplannen volgen",
     "Studiemethoden gebruiken",
@@ -1040,6 +1067,7 @@ function Pricing() {
   ]
   const pro = [
     "Alles in het gratis plan",
+    "Onbeperkt vragen aan de AI-assistent",
     "Matthew Henry commentaar (NL)",
     "Karl August Dachsel commentaar",
     "Historische context per hoofdstuk",
@@ -1164,7 +1192,8 @@ function FAQItem({ q, a }: { q: string; a: string }) {
 
 function FAQ() {
   const faqs = [
-    { q: "Is BijbelStudie helemaal gratis?",           a: "Het gratis plan geeft volledige toegang tot bijbellezen, notities, leesplannen en studiemethoden. De Pro versie (€9,99/maand) voegt commentaren en geavanceerde functies toe." },
+    { q: "Is BijbelStudie helemaal gratis?",           a: "Het gratis plan geeft volledige toegang tot bijbellezen, notities, leesplannen en studiemethoden, plus 5 vragen per dag aan de AI-assistent. De Pro versie (€9,99/maand) voegt commentaren, onbeperkt gebruik van de AI-assistent en geavanceerde functies toe." },
+    { q: "Wat doet de AI-assistent?",                  a: "U kunt de AI-assistent elke vraag stellen over de Bijbel, bijbelse geschiedenis, theologie en het geloofsleven. De assistent weet welk hoofdstuk u leest, onderbouwt antwoorden met bijbelverzen en beantwoordt alleen vragen over de Schrift en het christelijk geloof. Gebruik de antwoorden als studiehulp en toets ze altijd aan de Bijbel zelf." },
     { q: "Welke bijbelvertalingen zijn beschikbaar?",  a: "In het Nederlands ondersteunen wij de Statenvertaling, Canisiusvertaling 1939 en De Heilige Schrift 1917. Daarnaast bieden wij zes Engelse vertalingen aan: King James Version, American Standard Version, NET Bible, World English Bible, Geneva Bible (1599) en Coverdale Bible (1535)." },
     { q: "Worden mijn notities opgeslagen?",           a: "Ja. Al uw notities en voortgang worden automatisch opgeslagen in uw persoonlijke account en zijn op elk apparaat beschikbaar." },
     { q: "Hoe werkt een leesplan?",                    a: "U schrijft zich in voor een leesplan en ontvangt dagelijkse leesporties. Uw voortgang wordt bijgehouden en u kunt op elk moment verdergaan waar u gebleven was." },

@@ -9,11 +9,14 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "setup-inductive-study": "node scripts/setup-inductive-study.js",
     "setup-code-only": "node scripts/setup-code-only.js"
   },
   "dependencies": {
     "@formatjs/intl-localematcher": "^0.6.1",
+    "@google/genai": "^2.16.0",
     "@radix-ui/react-accordion": "^1.2.2",
     "@radix-ui/react-avatar": "^1.1.2",
     "@radix-ui/react-dialog": "^1.1.5",
@@ -42,6 +45,7 @@
     "i18next": "^24.2.2",
     "i18next-browser-languagedetector": "^8.0.2",
     "i18next-resources-to-backend": "^1.2.1",
+    "jose": "^4.15.9",
     "lucide-react": "^0.473.0",
     "mongoose": "^8.9.5",
     "negotiator": "^1.0.0",
@@ -74,6 +78,7 @@
     "eslint-config-next": "15.1.6",
     "postcss": "^8.5.1",
     "tailwindcss": "^3.4.17",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.2.7"
   }
 }

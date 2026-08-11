@@ -15,13 +15,14 @@ const GOOGLE_SVG = (
   </svg>
 )
 
-import { BookMarked, StickyNote, Library } from "lucide-react"
+import { BookMarked, StickyNote, Library, Sparkles } from "lucide-react"
 
 const PANEL_FEATURES = [
   { icon: BookOpen,    title: "Bijbelvertalingen",      desc: "Lees de Statenvertaling en meer vertalingen" },
   { icon: BookMarked,  title: "10 begeleide studies",   desc: "Over personen, thema's en gebeurtenissen" },
   { icon: StickyNote,  title: "Notities & markering",   desc: "Sla inzichten op bij elk vers" },
   { icon: Library,     title: "Studiemethoden",         desc: "Inductief, SOAP, SOLVAT en meer" },
+  { icon: Sparkles,    title: "AI-assistent",           desc: "Stel je vragen over de Bijbel en krijg direct uitleg", span: true },
 ]
 
 function FeaturePanel() {
@@ -60,8 +61,8 @@ function FeaturePanel() {
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          {PANEL_FEATURES.map(({ icon: Icon, title, desc }) => (
-            <div key={title} className="rounded-xl p-4 border" style={{ backgroundColor: "rgba(255,255,255,0.05)", borderColor: "rgba(255,255,255,0.08)" }}>
+          {PANEL_FEATURES.map(({ icon: Icon, title, desc, span }) => (
+            <div key={title} className={`rounded-xl p-4 border${span ? " col-span-2" : ""}`} style={{ backgroundColor: "rgba(255,255,255,0.05)", borderColor: "rgba(255,255,255,0.08)" }}>
               <Icon className="h-4 w-4 mb-2" style={{ color: "#2DD4BF" }} />
               <p className="text-white text-xs font-semibold">{title}</p>
               <p className="text-xs mt-0.5" style={{ color: "#9CA3AF" }}>{desc}</p>

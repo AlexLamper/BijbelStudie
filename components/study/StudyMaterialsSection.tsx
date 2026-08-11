@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { MessageCircle, Users, Info, Languages } from 'lucide-react';
+import { MessageCircle, Users, Info, Languages, Sparkles } from 'lucide-react';
 import TabComponent from './TabComponent';
 
 import { ReadingPreferences } from '../../hooks/useReadingPreferences';
@@ -19,6 +19,11 @@ interface StudyMaterialsSectionProps {
   t: (key: string) => string;
   height?: number;
   preferences?: ReadingPreferences;
+  // Optional controlled tab (used by the studie page to jump to the AI tab)
+  activeTab?: string;
+  onActiveTabChange?: (id: string) => void;
+  aiQuestion?: string | null;
+  onAiQuestionConsumed?: () => void;
 }
 
 export default function StudyMaterialsSection({
@@ -33,14 +38,21 @@ export default function StudyMaterialsSection({
   onDownload,
   t,
   preferences,
+  activeTab: activeTabProp,
+  onActiveTabChange,
+  aiQuestion,
+  onAiQuestionConsumed,
 }: StudyMaterialsSectionProps) {
-  const [activeTab, setActiveTab] = useState('commentary');
+  const [internalTab, setInternalTab] = useState('commentary');
+  const activeTab = activeTabProp ?? internalTab;
+  const setActiveTab = onActiveTabChange ?? setInternalTab;
 
   const tabs = [
     { id: 'commentary', label: t('tabs.commentary'),   icon: MessageCircle, isPro: false },
     { id: 'original',   label: t('tabs.original'),     icon: Languages,     isPro: true },
     { id: 'historical', label: t('tabs.general_info'), icon: Info,          isPro: false },
     { id: 'notes',      label: t('tabs.notes'),        icon: Users,         isPro: false },
+    { id: 'ai',         label: 'AI-assistent',         icon: Sparkles,      isPro: false },
   ];
 
   return (
@@ -95,6 +107,8 @@ export default function StudyMaterialsSection({
           height={1}
           activeTab={activeTab}
           preferences={preferences}
+          aiQuestion={aiQuestion}
+          onAiQuestionConsumed={onAiQuestionConsumed}
         />
         <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none z-10
           bg-gradient-to-t from-white dark:from-background to-transparent" />

@@ -17,6 +17,16 @@ const UserSchema = new mongoose.Schema(
     stripeCustomerId: { type: String },
     stripeSubscriptionId: { type: String },
     isAdmin: { type: Boolean, default: false },
+    // --- Mobile (App Store / Play) additions. The website ignores all of
+    // these; `subscribed` remains the Stripe-only flag it always was, and
+    // effective Pro is the OR of the two (see lib/mobilePremium.ts).
+    storePremium: { type: Boolean, default: false },
+    storePremiumPlatform: { type: String, enum: ["apple", "google", null], default: null },
+    storePremiumExpiresAt: { type: Date, default: null },
+    // Apple's `sub` claim. Stable across sign-ins even when the user hides
+    // their email behind a private-relay address.
+    appleId: { type: String, index: true, sparse: true },
+    googleId: { type: String, index: true, sparse: true },
     preferences: {
       language: { type: String },
       translation: { type: String, default: "statenvertaling" },

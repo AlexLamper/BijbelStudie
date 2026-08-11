@@ -50,6 +50,10 @@ next-env.d.ts
 todo.txt
 /todo.txt
 
+# internal docs / tests not needed in repo
+/IOS_APP_BRIEF.md
+/tests/
+
 # Bible source files (proprietary/large binaries used only for conversion)
 scripts/*.mybible
 scripts/*.cmt.mybible

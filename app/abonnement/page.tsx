@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation"
 type BillingInterval = "monthly" | "annual"
 
 const FEATURES = [
+  "Onbeperkt vragen aan de AI-assistent",
   "Toegang tot bijbelcommentaren",
   "Onbeperkt notities & markeringen",
   "Onbeperkt bijbelleesplannen",

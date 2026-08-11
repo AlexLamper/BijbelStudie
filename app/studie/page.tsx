@@ -7,6 +7,7 @@ import { useBibleData } from '../../hooks/useBibleData';
 import { useReadingPreferences } from '../../hooks/useReadingPreferences';
 import BibleViewerSection from '../../components/study/BibleViewerSection';
 import StudyMaterialsSection from '../../components/study/StudyMaterialsSection';
+import AiAssistantWidget from '../../components/study/AiAssistantWidget';
 import StartupAnimation from '../../components/ui/startup-animation';
 import { BookOpen, CheckCircle, ChevronLeft, ChevronRight, X, Trophy, MessageCircle } from 'lucide-react';
 
@@ -190,6 +191,8 @@ function StudyPageInner() {
   const [studyCompleted, setStudyCompleted]         = useState(false);
   const [showCompletionOverlay, setShowCompletionOverlay] = useState(false);
   const [mobileView, setMobileView]                 = useState<'bible' | 'materials'>('bible');
+  const [materialsTab, setMaterialsTab]             = useState('commentary');
+  const [aiQuestion, setAiQuestion]                 = useState<string | null>(null);
 
   useEffect(() => {
     const hasShown = sessionStorage.getItem('study-startup-shown');
@@ -239,6 +242,15 @@ function StudyPageInner() {
   }, [loadingChapters, pendingChapter]);
 
   const handleDownload = useCallback(() => {}, []);
+
+  // Question typed in the floating popup: jump to the AI tab and hand it off.
+  const handleAiAsk = useCallback((question: string) => {
+    setAiQuestion(question);
+    setMaterialsTab('ai');
+    setMobileView('materials');
+  }, []);
+
+  const handleAiQuestionConsumed = useCallback(() => setAiQuestion(null), []);
 
   // No highlight range when study is completed
   const currentLesson  = activeStudy?.lessons[lessonIdx] ?? null;
@@ -415,9 +427,27 @@ function StudyPageInner() {
             onDownload={handleDownload}
             t={t}
             preferences={preferences}
+            activeTab={materialsTab}
+            onActiveTabChange={setMaterialsTab}
+            aiQuestion={aiQuestion}
+            onAiQuestionConsumed={handleAiQuestionConsumed}
           />
         </div>
       </div>
+
+      {/* Hide the floating widget whenever the AI tab itself is visible:
+          on lg+ the materials pane is always shown; below lg only when the
+          user is on the 'materials' pane. */}
+      <AiAssistantWidget
+        onAsk={handleAiAsk}
+        className={
+          materialsTab === 'ai'
+            ? mobileView === 'materials'
+              ? 'hidden'
+              : 'lg:hidden'
+            : ''
+        }
+      />
     </div>
   );
 }

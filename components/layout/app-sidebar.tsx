@@ -74,6 +74,7 @@ function ProCTA() {
 
   const perks = [
     "Alle bijbelcommentaren",
+    "Onbeperkte AI-assistent",
     "Historische context",
     "Prioriteit ondersteuning",
   ]

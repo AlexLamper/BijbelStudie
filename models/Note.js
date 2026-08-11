@@ -62,6 +62,13 @@ const NoteSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "StudyGroup",
       default: null
+    },
+    // UUID generated on the mobile device. Present only on notes created by
+    // the app; the website never sets it. It makes an offline create that is
+    // retried after a dropped connection idempotent.
+    clientId: {
+      type: String,
+      default: undefined
     }
   },
   { 
@@ -73,5 +80,9 @@ const NoteSchema = new mongoose.Schema(
 NoteSchema.index({ userId: 1, createdAt: -1 });
 NoteSchema.index({ book: 1, chapter: 1, verse: 1 });
 NoteSchema.index({ tags: 1 });
+// Sparse: website-created notes have no clientId, and a unique index over
+// many missing values would otherwise collide on null.
+NoteSchema.index({ userId: 1, clientId: 1 }, { unique: true, sparse: true });
+NoteSchema.index({ userId: 1, updatedAt: -1 });
 
 export default mongoose.models.Note || mongoose.model("Note", NoteSchema);

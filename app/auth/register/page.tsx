@@ -4,10 +4,11 @@ import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { Loader2, Eye, EyeOff, ArrowLeft, Check, BookOpen, BookMarked, StickyNote, Library } from "lucide-react"
+import { Loader2, Eye, EyeOff, ArrowLeft, Check, BookOpen, BookMarked, StickyNote, Library, Sparkles } from "lucide-react"
 
 const BENEFITS = [
   "Bijbel lezen in meerdere vertalingen",
+  "Vragen stellen aan de AI-assistent",
   "Persoonlijke notities bij verzen",
   "Bijbelleesplannen volgen",
   "Bewezen studiemethoden gebruiken",
@@ -19,6 +20,7 @@ const PANEL_FEATURES = [
   { icon: BookMarked,  title: "10 begeleide studies", desc: "Over personen, thema's en gebeurtenissen" },
   { icon: StickyNote,  title: "Notities & markering", desc: "Sla inzichten op bij elk vers" },
   { icon: Library,     title: "Studiemethoden",       desc: "Inductief, SOAP, SOLVAT en meer" },
+  { icon: Sparkles,    title: "AI-assistent",         desc: "Stel je vragen over de Bijbel en krijg direct uitleg", span: true },
 ]
 
 function FeaturePanel() {
@@ -58,8 +60,8 @@ function FeaturePanel() {
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          {PANEL_FEATURES.map(({ icon: Icon, title, desc }) => (
-            <div key={title} className="rounded-xl p-4 border"
+          {PANEL_FEATURES.map(({ icon: Icon, title, desc, span }) => (
+            <div key={title} className={`rounded-xl p-4 border${span ? " col-span-2" : ""}`}
               style={{ backgroundColor: "rgba(255,255,255,0.05)", borderColor: "rgba(255,255,255,0.08)" }}>
               <Icon className="h-4 w-4 mb-2" style={{ color: "#2DD4BF" }} />
               <p className="text-white text-xs font-semibold">{title}</p>

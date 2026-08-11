@@ -6,6 +6,7 @@ import HistoricalContext from './HistoricalContext';
 import { useKeyboardShortcuts, KeyboardShortcut } from '../../hooks/useKeyboardShortcuts';
 import CommentaryComponent from './CommentaryComponent';
 import OriginalText from './OriginalText';
+import AiAssistant from './AiAssistant';
 import { ReadingPreferences } from '../../hooks/useReadingPreferences';
 
 interface TabComponentProps {
@@ -22,11 +23,14 @@ interface TabComponentProps {
   onDownload: () => void;
   height?: number;
   preferences?: ReadingPreferences;
+  aiQuestion?: string | null;
+  onAiQuestionConsumed?: () => void;
 }
 
 export default function TabComponent({
   selectedBook,
   selectedChapter,
+  selectedVersion,
   selectedCommentary,
   t,
   onNextChapter,
@@ -36,6 +40,8 @@ export default function TabComponent({
   height,
   activeTab,
   preferences,
+  aiQuestion,
+  onAiQuestionConsumed,
 }: TabComponentProps & { activeTab: string }) {
   // Define keyboard shortcuts
   const shortcuts: KeyboardShortcut[] = [
@@ -86,6 +92,16 @@ export default function TabComponent({
             chapter={selectedChapter || 0}
             t={t}
             preferences={preferences}
+          />
+        );
+      case 'ai':
+        return (
+          <AiAssistant
+            book={selectedBook || ''}
+            chapter={selectedChapter || 1}
+            version={selectedVersion ?? null}
+            initialQuestion={aiQuestion}
+            onInitialQuestionConsumed={onAiQuestionConsumed}
           />
         );
       case 'notes':
