@@ -139,10 +139,25 @@ export default function StudiesPage() {
   const [completedIds, setCompletedIds] = useState<string[]>([])
 
   useEffect(() => {
+    // localStorage first so the badges paint immediately, then the server —
+    // which is the real record and knows about other devices.
     try {
       const stored = JSON.parse(localStorage.getItem(COMPLETED_KEY) || '[]')
       setCompletedIds(stored)
     } catch { /* noop */ }
+
+    let cancelled = false
+    void (async () => {
+      try {
+        const response = await fetch('/api/v1/study-progress')
+        if (!response.ok || cancelled) return
+        const data = await response.json()
+        const fromServer: string[] = data.completedStudies ?? []
+        setCompletedIds(current => [...new Set([...current, ...fromServer])])
+      } catch { /* offline: the local list stands */ }
+    })()
+
+    return () => { cancelled = true }
   }, [])
 
   const filtered = filter === 'Alle'

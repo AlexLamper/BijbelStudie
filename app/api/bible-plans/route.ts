@@ -1,161 +1,128 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireUser } from '../../../lib/apiAuth';
 import connectMongoDB from '../../../lib/mongodb';
 import BiblePlan from '../../../models/BiblePlan.js';
-import User from '../../../models/User.js';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '../../../lib/authOptions';
+import PlanEnrollment from '../../../models/PlanEnrollment.js';
+import { listPlans, getPlan } from '../../../lib/planService';
+import { planErrorResponse, withLegacyId } from '../../../lib/planLegacy';
+import { generateReadings, isPace } from '../../../lib/planGenerator';
 
-// GET - Fetch Bible plans
+/**
+ * The website's plan API. Every handler now delegates to `lib/planService`,
+ * the same module `/api/v1/plans/*` uses — the two surfaces previously
+ * disagreed about what `completedDays` even was (a count here, an array there)
+ * and only the mobile one enforced the free-tier cap.
+ */
+function fail(error: unknown) {
+  return planErrorResponse(error, 'api/bible-plans');
+}
+
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    await connectMongoDB();
-
-    const user = await User.findOne({ email: session.user.email });
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
-
+    const auth = await requireUser(request);
     const { searchParams } = new URL(request.url);
-    const category = searchParams.get('category');
-    const type = searchParams.get('type'); // 'public' or 'my'
 
-    let query: Record<string, unknown> = {};
-
-    if (type === 'public') {
-      query.isPublic = true;
-    } else if (type === 'my') {
-      query.createdBy = user._id;
-    } else {
-      // Default: show both public plans and user's own plans
-      query = {
-        $or: [
-          { isPublic: true },
-          { createdBy: user._id }
-        ]
-      };
-    }
-
-    if (category && category !== 'all') {
-      query.category = category;
-    }
-
-    const plans = await BiblePlan.find(query)
-      .populate('createdBy', 'name')
-      .sort({ createdAt: -1 })
-      .lean();
-
-    // Add enrollment status and progress for each plan
-    const plansWithStatus = plans.map(plan => {
-      const isEnrolled = plan.enrolledUsers.some((userId: string) => userId.toString() === user._id.toString());
-      const userProgress = plan.progress.find((p: { userId: string }) => p.userId.toString() === user._id.toString());
-      const completedDays = userProgress?.completedDays.length || 0;
-      const progressPercentage = plan.duration > 0 ? Math.round((completedDays / plan.duration) * 100) : 0;
-
-      return {
-        ...plan,
-        isEnrolled,
-        completedDays,
-        progressPercentage
-      };
+    const plans = await listPlans(auth.id, {
+      type: searchParams.get('type'),
+      category: searchParams.get('category'),
     });
 
-    return NextResponse.json({ plans: plansWithStatus });
-
+    return NextResponse.json({ plans: plans.map(withLegacyId) });
   } catch (error) {
-    console.error('Error fetching bible plans:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return fail(error);
   }
 }
 
-// POST - Create a new plan
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const auth = await requireUser(request);
+    const body = await request.json();
+    const { title, description, category, isPublic, autoEnrol } = body ?? {};
+
+    let readings = Array.isArray(body?.readings) ? body.readings : null;
+    let duration = Number(body?.duration ?? body?.durationDays);
+    let resolvedCategory = category;
+    const warnings: string[] = [];
+
+    if (!readings) {
+      const bookNames = body?.bookNames;
+      if (!Array.isArray(bookNames) || bookNames.length === 0 || !Number.isFinite(duration)) {
+        return NextResponse.json(
+          { error: 'Geef readings mee, of bookNames met durationDays.' },
+          { status: 400 },
+        );
+      }
+
+      const generated = generateReadings({ bookNames: bookNames.map(String), durationDays: duration });
+      if (generated.readings.length === 0) {
+        return NextResponse.json({ error: 'Geen van de opgegeven boeken werd herkend' }, { status: 400 });
+      }
+
+      readings = generated.readings;
+      duration = generated.duration;
+      resolvedCategory = category || generated.category;
+      warnings.push(...generated.warnings);
     }
 
-    const body = await request.json();
-    const { title, description, duration, category, readings, isPublic } = body;
-
-    if (!title || !description || !duration || !readings || readings.length === 0) {
+    if (!title || !description || !Number.isFinite(duration) || duration < 1) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
     await connectMongoDB();
 
-    const user = await User.findOne({ email: session.user.email });
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
-
-    // Only admins can create public plans
-    const canCreatePublic = user.isAdmin && isPublic;
-
-    const newPlan = new BiblePlan({
+    const plan = await BiblePlan.create({
       title,
       description,
       duration,
-      category: category || 'evangelie',
+      category: resolvedCategory || 'overig',
       readings,
-      isPublic: canCreatePublic || false, // Force false if not admin
-      createdBy: user._id
+      isPublic: Boolean(auth.isAdmin && isPublic),
+      createdBy: auth.id,
     });
 
-    await newPlan.save();
-    await newPlan.populate('createdBy', 'name');
+    if (autoEnrol !== false) {
+      const active = await PlanEnrollment.countDocuments({ userId: auth.id, status: 'active' });
+      if (auth.isPro || active === 0) {
+        await PlanEnrollment.create({
+          userId: auth.id,
+          planId: plan._id,
+          pace: isPace(body?.pace) ? body.pace : 'gestaag',
+          startedAt: new Date(),
+        });
+        await BiblePlan.updateOne({ _id: plan._id }, { $addToSet: { enrolledUsers: auth.id } });
+      } else {
+        warnings.push(
+          'Het plan is aangemaakt maar niet gestart: gratis accounts kunnen één actief leesplan hebben.',
+        );
+      }
+    }
 
-    return NextResponse.json({ plan: newPlan }, { status: 201 });
-
+    const dto = await getPlan(auth.id, String(plan._id));
+    return NextResponse.json({ plan: withLegacyId(dto), warnings }, { status: 201 });
   } catch (error) {
-    console.error('Error creating bible plan:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return fail(error);
   }
 }
 
-// DELETE - Delete a plan (only creator or admin)
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { searchParams } = new URL(request.url);
-    const planId = searchParams.get('id');
-
-    if (!planId) {
-      return NextResponse.json({ error: 'Plan ID required' }, { status: 400 });
-    }
+    const auth = await requireUser(request);
+    const planId = new URL(request.url).searchParams.get('id');
+    if (!planId) return NextResponse.json({ error: 'Plan ID required' }, { status: 400 });
 
     await connectMongoDB();
-
-    const user = await User.findOne({ email: session.user.email });
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
-
     const plan = await BiblePlan.findById(planId);
-    if (!plan) {
-      return NextResponse.json({ error: 'Plan not found' }, { status: 404 });
-    }
+    if (!plan) return NextResponse.json({ error: 'Plan not found' }, { status: 404 });
 
-    // Check if user can delete (creator or admin)
-    if (plan.createdBy.toString() !== user._id.toString() && !user.isAdmin) {
+    if (plan.createdBy.toString() !== auth.id && !auth.isAdmin) {
       return NextResponse.json({ error: 'Not authorized to delete this plan' }, { status: 403 });
     }
 
     await BiblePlan.findByIdAndDelete(planId);
+    await PlanEnrollment.deleteMany({ planId });
 
     return NextResponse.json({ message: 'Plan deleted successfully' });
-
   } catch (error) {
-    console.error('Error deleting bible plan:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return fail(error);
   }
 }

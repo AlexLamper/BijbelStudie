@@ -10,7 +10,7 @@ import {
   SidebarRail,
 } from "../ui/sidebar"
 import {
-  LayoutDashboard, BookOpen, BookMarked,
+  LayoutDashboard, BookOpen, BookMarked, CalendarCheck,
   StickyNote, Library, User, Settings, Sparkles, Users, ShieldCheck,
   ArrowRight, Check, MessageSquareText,
 } from "lucide-react"
@@ -23,6 +23,7 @@ const mainNav = [
   { title: "Dashboard",    url: "/dashboard",    icon: LayoutDashboard, tourId: "nav-dashboard"    },
   { title: "Bijbelstudie", url: "/studie",       icon: BookOpen,        tourId: "nav-studie"       },
   { title: "Studies",      url: "/studies",      icon: BookMarked,      tourId: "nav-studies"      },
+  { title: "Leesplannen",  url: "/plans",        icon: CalendarCheck,   tourId: "nav-plans"        },
   { title: "Groepen",      url: "/groepen",      icon: Users,           tourId: "nav-groepen"      },
   { title: "Notities",     url: "/notities",     icon: StickyNote,      tourId: "nav-notities"     },
   { title: "Hulpbronnen",  url: "/hulpbronnen",  icon: Library,         tourId: "nav-hulpbronnen"  },

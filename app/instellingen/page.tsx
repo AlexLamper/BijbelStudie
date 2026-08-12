@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { useTheme } from "next-themes"
 import {
   BookOpen, Sparkles, Type, Sliders, Sun, Moon, Monitor,
-  Check, Loader2, RotateCcw, Eye, Minus, Plus, Volume2,
+  Check, Loader2, RotateCcw, Eye, Minus, Plus, Volume2, Bell,
 } from "lucide-react"
 import { useGeneralSettings } from "../../hooks/useGeneralSettings"
 import { useReadingPreferences } from "../../hooks/useReadingPreferences"
@@ -69,8 +69,41 @@ export default function SettingsPage() {
   const [mounted, setMounted] = useState(false)
   const [previewVerse, setPreviewVerse] = useState<string>("")
   const [previewLoading, setPreviewLoading] = useState(false)
+  const [reminderEnabled, setReminderEnabled] = useState(false)
+  const [reminderMinutes, setReminderMinutes] = useState(480)
 
   useEffect(() => setMounted(true), [])
+
+  // The reminder lives on the server so the phone and the browser agree on it;
+  // the notification itself is still scheduled locally by the app.
+  useEffect(() => {
+    fetch("/api/v1/preferences")
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (!data?.preferences) return
+        setReminderEnabled(Boolean(data.preferences.reminderEnabled))
+        if (typeof data.preferences.reminderMinutes === "number") {
+          setReminderMinutes(data.preferences.reminderMinutes)
+        }
+      })
+      .catch(() => {})
+  }, [])
+
+  function saveReminder(next: { reminderEnabled?: boolean; reminderMinutes?: number }) {
+    if (next.reminderEnabled !== undefined) setReminderEnabled(next.reminderEnabled)
+    if (next.reminderMinutes !== undefined) setReminderMinutes(next.reminderMinutes)
+
+    void fetch("/api/v1/preferences", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...next,
+        reminderTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      }),
+    }).catch(() => {})
+  }
+
+  const reminderTime = `${String(Math.floor(reminderMinutes / 60)).padStart(2, "0")}:${String(reminderMinutes % 60).padStart(2, "0")}`
 
   useEffect(() => {
     fetch("/api/commentaries")
@@ -267,6 +300,45 @@ export default function SettingsPage() {
                   checked={preferences.showVerseNumbers}
                   onChange={(v) => updatePreferences({ showVerseNumbers: v })}
                 />
+              </div>
+            </SectionCard>
+
+            {/* Dagelijkse herinnering */}
+            <SectionCard
+              icon={Bell}
+              title="Dagelijkse herinnering"
+              subtitle="Een vast moment om te lezen en te studeren"
+            >
+              <div className="space-y-5">
+                <ToggleRow
+                  label="Herinnering aan"
+                  hint="De melding verschijnt op je telefoon in de BijbelStudie-app"
+                  checked={reminderEnabled}
+                  onChange={(v) => saveReminder({ reminderEnabled: v })}
+                />
+
+                <PreferenceRow label="Tijdstip" hint={reminderEnabled ? `Elke dag om ${reminderTime}` : "Zet de herinnering aan om een tijd te kiezen"}>
+                  <input
+                    type="time"
+                    value={reminderTime}
+                    disabled={!reminderEnabled}
+                    onChange={(e) => {
+                      const [h, m] = e.target.value.split(":").map(Number)
+                      if (Number.isInteger(h) && Number.isInteger(m)) {
+                        saveReminder({ reminderMinutes: h * 60 + m })
+                      }
+                    }}
+                    className="h-9 px-3 rounded-lg border border-border bg-white dark:bg-background text-sm text-foreground disabled:opacity-40 outline-none focus:border-teal-500"
+                  />
+                </PreferenceRow>
+
+                <div className="flex items-start gap-2 text-xs text-muted-foreground bg-gray-50 dark:bg-secondary/40 rounded-lg p-3">
+                  <Bell size={12} style={{ color: TEAL, marginTop: 2, flexShrink: 0 }} />
+                  <p>
+                    De herinnering wordt door de mobiele app op je toestel ingepland. Op de website
+                    verschijnt er geen melding — deze instelling bepaalt wél welk tijdstip de app gebruikt.
+                  </p>
+                </div>
               </div>
             </SectionCard>
 

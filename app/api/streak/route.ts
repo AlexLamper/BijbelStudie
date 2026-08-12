@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "../../../lib/authOptions"
 import connectMongoDB from "../../../lib/mongodb"
 import User from "../../../models/User"
+import { grantXp } from "../../../lib/gamification"
 
 function startOfDay(date: Date) {
   const d = new Date(date)
@@ -35,8 +36,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "User not found" }, { status: 404 })
   }
 
+  // `?test=true` skips every rule and just increments. It is a development
+  // aid, but as a production route it let any signed-in user inflate their own
+  // streak — and now their badges and XP with it — from the browser console.
   const url = new URL(request.url)
-  const test = url.searchParams.get("test") === "true"
+  const test = url.searchParams.get("test") === "true" && process.env.NODE_ENV !== "production"
 
   const today = startOfDay(new Date())
   const last = user.lastStreakDate ? startOfDay(user.lastStreakDate) : null
@@ -72,13 +76,7 @@ export async function POST(request: Request) {
     newFreezes += 1
   }
 
-  if (newStreak >= 90 && !newBadges.includes("streak90")) {
-    newBadges.push("streak90")
-  } else if (newStreak >= 60 && !newBadges.includes("streak60")) {
-    newBadges.push("streak60")
-  } else if (newStreak >= 30 && !newBadges.includes("streak30")) {
-    newBadges.push("streak30")
-  }
+  const advanced = String(newDate) !== String(user.lastStreakDate)
 
   const updated = await User.findOneAndUpdate(
     { _id: user._id },
@@ -86,13 +84,25 @@ export async function POST(request: Request) {
       streak: newStreak,
       freezeCount: newFreezes,
       lastStreakDate: newDate,
-      badges: newBadges,
     },
     { new: true }
   )
 
+  // Badges are no longer awarded here. `lib/gamification.ts` evaluates the
+  // whole set at once, which also fixes the old `else if` chain that could
+  // only ever grant one badge per call — a user crossing two thresholds
+  // together silently lost the lower one.
+  const xp = advanced
+    ? await grantXp(String(user._id), "streak_day", { isPro: Boolean(user.subscribed) })
+    : null
+
   return NextResponse.json(
-    { streak: updated.streak, freezes: updated.freezeCount },
+    {
+      streak: updated.streak,
+      freezes: updated.freezeCount,
+      badges: xp ? [...new Set([...newBadges, ...xp.newBadges])] : newBadges,
+      xp,
+    },
     { status: 200 }
   )
 }

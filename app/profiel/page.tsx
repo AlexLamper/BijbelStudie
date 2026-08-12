@@ -9,6 +9,7 @@ import {
   Camera, Loader2, Check, X, Mail, Flame,
 } from "lucide-react"
 import UserBadges from "../../components/profile/badges"
+import LevelCard from "../../components/profile/LevelCard"
 import { LoadingSpinner } from "../../components/ui/loading-spinner"
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
 
@@ -390,6 +391,9 @@ export default function ProfilePage() {
                 </FieldRow>
               </div>
             </div>
+
+            {/* Niveau */}
+            <LevelCard />
 
             {/* Badges */}
             <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-2xl overflow-hidden">

@@ -24,26 +24,30 @@ interface BadgeInfo {
   description: string
 }
 
+// Descriptions are Dutch like the rest of the app, and now describe what
+// actually awards each badge — see lib/gamification.ts `evaluateBadges`. The
+// `points*` ids date from a quiz that no longer exists; they are XP milestones
+// now, and the copy says so.
 const badges: BadgeInfo[] = [
-  { id: "streak30", icon: Flame, description: "30 day streak" },
-  { id: "streak60", icon: Flame, description: "60 day streak" },
-  { id: "streak90", icon: Flame, description: "90 day streak" },
-  { id: "streak120", icon: Flame, description: "120 day streak" },
-  { id: "verified", icon: BadgeCheck, description: "Verified user" },
-  { id: "contributor", icon: Star, description: "Course contributor" },
-  { id: "completed1", icon: BookOpen, description: "Complete 1 course" },
-  { id: "completed5", icon: BookOpen, description: "Complete 5 courses" },
-  { id: "completed10", icon: BookOpen, description: "Complete 10 courses" },
-  { id: "points100", icon: Trophy, description: "Earn 100 quiz points" },
-  { id: "points500", icon: Trophy, description: "Earn 500 quiz points" },
-  { id: "points1000", icon: Trophy, description: "Earn 1000 quiz points" },
-  { id: "premium", icon: Crown, description: "Premium subscriber" },
-  { id: "invite", icon: Users, description: "Invite a friend" },
-  { id: "commenter", icon: MessageCircle, description: "Post a comment" },
-  { id: "profilepic", icon: Camera, description: "Upload a profile picture" },
-  { id: "firstlesson", icon: CheckCircle, description: "Complete first lesson" },
-  { id: "tester", icon: FlaskConical, description: "Beta tester" },
-  { id: "anniversary", icon: Gift, description: "One year anniversary" },
+  { id: "streak30", icon: Flame, description: "30 dagen op rij" },
+  { id: "streak60", icon: Flame, description: "60 dagen op rij" },
+  { id: "streak90", icon: Flame, description: "90 dagen op rij" },
+  { id: "streak120", icon: Flame, description: "120 dagen op rij" },
+  { id: "verified", icon: BadgeCheck, description: "Geverifieerd account" },
+  { id: "contributor", icon: Star, description: "Bijdrage aan een studie" },
+  { id: "completed1", icon: BookOpen, description: "1 studie of leesplan voltooid" },
+  { id: "completed5", icon: BookOpen, description: "5 studies of leesplannen voltooid" },
+  { id: "completed10", icon: BookOpen, description: "10 studies of leesplannen voltooid" },
+  { id: "points100", icon: Trophy, description: "100 XP verdiend" },
+  { id: "points500", icon: Trophy, description: "500 XP verdiend" },
+  { id: "points1000", icon: Trophy, description: "1000 XP verdiend" },
+  { id: "premium", icon: Crown, description: "Pro-abonnement" },
+  { id: "invite", icon: Users, description: "Een vriend uitgenodigd" },
+  { id: "commenter", icon: MessageCircle, description: "Een bericht geplaatst" },
+  { id: "profilepic", icon: Camera, description: "Profielfoto ingesteld" },
+  { id: "firstlesson", icon: CheckCircle, description: "Eerste les bestudeerd" },
+  { id: "tester", icon: FlaskConical, description: "Bètatester" },
+  { id: "anniversary", icon: Gift, description: "Één jaar lid" },
 ]
 
 interface UserBadgesProps {

@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import connectMongoDB from "../../../../lib/mongodb"
 import User from "../../../../models/User"
 import { authOptions } from "../../../../lib/authOptions"
+import { grantXp } from "../../../../lib/gamification"
 
 // GET - Fetch user's last read chapter
 export async function GET() {
@@ -60,6 +61,12 @@ export async function POST(request: NextRequest) {
       updateData['lastReadChapter.commentary'] = commentary;
     }
 
+    // Read before the write, so a chapter only ever earns XP the first time.
+    const alreadyRead = await User.exists({
+      email: session.user.email,
+      [`readChapters.${book}`]: chapter,
+    })
+
     const user = await User.findOneAndUpdate(
       { email: session.user.email },
       {
@@ -73,9 +80,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "User not found" }, { status: 404 })
     }
 
-    return NextResponse.json({ 
+    const xp = alreadyRead
+      ? null
+      : await grantXp(String(user._id), "chapter_read", { isPro: Boolean(user.subscribed) })
+
+    return NextResponse.json({
       message: "Last read chapter updated successfully",
-      lastReadChapter: user.lastReadChapter
+      lastReadChapter: user.lastReadChapter,
+      xp
     }, { status: 200 })
   } catch (error) {
     console.error("Error updating last read chapter:", error)

@@ -13,6 +13,11 @@ const UserSchema = new mongoose.Schema(
     lastStreakDate: { type: Date },
     freezeCount: { type: Number, default: 0 },
     badges: { type: [String], default: [] },
+    // Experience and level. XP is awarded by lib/gamification.ts, which weights
+    // a studied passage far above a read one on purpose: the point of the app
+    // is understanding a small portion, not covering a large one.
+    xp: { type: Number, default: 0 },
+    level: { type: Number, default: 1 },
     subscribed: { type: Boolean, default: false },
     stripeCustomerId: { type: String },
     stripeSubscriptionId: { type: String },
@@ -41,6 +46,14 @@ const UserSchema = new mongoose.Schema(
       highContrast: { type: Boolean, default: false },
       showVerseNumbers: { type: Boolean, default: true },
       ttsVoice: { type: String, default: "bram" },
+      // Daily reading reminder. The notification itself is still scheduled
+      // locally by the Flutter app (no push certificates, no cron); storing the
+      // time here is what lets the website show and change it, and lets a new
+      // device pick up the user's existing choice instead of starting blank.
+      reminderEnabled: { type: Boolean, default: false },
+      // Minutes past local midnight, matching the app's `app.dailyReminderMinutes`.
+      reminderMinutes: { type: Number, default: 480 },
+      reminderTimezone: { type: String, default: "Europe/Amsterdam" },
       updatedAt: { type: Date },
     },
     lastReadChapter: {

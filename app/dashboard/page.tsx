@@ -5,7 +5,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import {
   BookOpen, Flame, ArrowRight, ChevronRight,
-  StickyNote, CalendarCheck2, BarChart2, Lightbulb, Clock,
+  StickyNote, CalendarCheck2, BarChart2, Lightbulb, Clock, Sparkles,
 } from "lucide-react"
 import { curatedStudies, BADGE_STYLES } from "../../lib/data/curated-studies"
 import { CHAPTER_COUNTS } from "../../lib/data/bible-chapter-counts"
@@ -33,7 +33,16 @@ const NT = [
 
 
 interface LastRead   { book: string; chapter: number; version: string }
-interface Plan       { _id: string; title: string; progressPercentage: number; completedDays: number; duration: number }
+interface Plan {
+  id: string
+  title: string
+  duration: number
+  completedDays: number
+  progressPercentage: number
+  currentDay: number | null
+  today: { book: string; chapter: number; title: string | null }[]
+}
+interface PlanSuggestion { key: string; title: string; reason: string; recommendedDays: number }
 interface DailyVerse { text: string; reference: string; book: string; chapter: number }
 interface WeekDay    { label: string; count: number; heightPct: number; isToday: boolean }
 
@@ -54,6 +63,8 @@ export default function DashboardPage() {
 
   const [lastRead, setLastRead]     = useState<LastRead | null>(null)
   const [activePlan, setActivePlan] = useState<Plan | null>(null)
+  const [planSuggestion, setPlanSuggestion] = useState<PlanSuggestion | null>(null)
+  const [level, setLevel] = useState<{ level: number; xp: number; progressPercentage: number } | null>(null)
   const [verse, setVerse]           = useState<DailyVerse | null>(null)
   const [streak, setStreak]         = useState(0)
   const [loading, setLoading]           = useState(true)
@@ -99,11 +110,14 @@ export default function DashboardPage() {
       fetch("/api/user"),
       fetch("/api/user/last-read"),
       fetch("/api/notes?limit=500"),
-      fetch("/api/bible-plans"),
+      // One call for the plan card: the server decides which plan is "active"
+      // (most recently worked on) and what to suggest when there is none.
+      fetch("/api/v1/plans/active"),
       fetch("/api/user/reading-progress"),
+      fetch("/api/v1/gamification"),
     ])
       .then(rs => Promise.all(rs.map(r => r.ok ? r.json() : null)))
-      .then(([ud, ld, nd, pd, rp]) => {
+      .then(([ud, ld, nd, pd, rp, gd]) => {
         setStreak(ud?.user?.streak ?? 0)
 
         const lr = ld?.book ? ld : ld?.lastReadChapter
@@ -117,12 +131,14 @@ export default function DashboardPage() {
           setRecentNotes(sorted.slice(0, 3))
         }
 
-        const enrolled = pd?.plans?.find(
-          (p: Plan) => p.progressPercentage != null && p.progressPercentage > 0
-        )
-        if (enrolled) setActivePlan(enrolled)
+        setActivePlan(pd?.activePlan ?? null)
+        setPlanSuggestion(pd?.suggestions?.[0] ?? null)
 
         if (rp?.readChapters) setReadChapters(rp.readChapters)
+
+        if (gd?.level) {
+          setLevel({ level: gd.level, xp: gd.xp, progressPercentage: gd.progressPercentage })
+        }
       })
       .catch(() => {})
       .finally(() => setLoading(false))
@@ -226,9 +242,9 @@ export default function DashboardPage() {
             </div>
 
             {/* Stats strip */}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {loading ? (
-                [1, 2, 3].map(i => (
+                [1, 2, 3, 4].map(i => (
                   <div key={i} className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-4">
                     <div className="h-3 w-1/2 rounded animate-pulse mb-2 bg-gray-100 dark:bg-secondary" />
                     <div className="h-6 w-1/3 rounded animate-pulse bg-gray-100 dark:bg-secondary" />
@@ -236,6 +252,8 @@ export default function DashboardPage() {
                 ))
               ) : [
                 { label: "Dagelijkse reeks", value: streak > 0 ? `${streak} dag${streak === 1 ? "" : "en"}` : "0 dagen", icon: Flame, color: streak > 0 ? "#EA580C" : "#9CA3AF" },
+                // Level rises from studying, not from volume — see lib/gamification.ts.
+                { label: level ? `${level.xp} XP` : "Niveau", value: `Niveau ${level?.level ?? 1}`, icon: Sparkles, color: "#0D9488" },
                 { label: "Bijbelboeken", value: `${booksWithProgress} / 66`, icon: BookOpen, color: "#0D9488" },
                 { label: "Notities geschreven", value: `${notesCount}`, icon: StickyNote, color: "#0D9488" },
               ].map(({ label, value, icon: Icon, color }) => (
@@ -488,36 +506,66 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Leesplan */}
-            {(loading || activePlan) && (
-              <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <p className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-muted-foreground">
-                    Leesplan
-                  </p>
-                  <CalendarCheck2 size={14} style={{ color: "#0D9488" }} />
-                </div>
-                {loading ? (
-                  <div className="h-10 rounded animate-pulse bg-gray-100 dark:bg-secondary" />
-                ) : activePlan ? (
-                  <>
-                    <p className="text-sm font-semibold mb-1 line-clamp-1 text-gray-900 dark:text-foreground">
-                      {activePlan.title}
-                    </p>
-                    <p className="text-xs mb-2.5 text-gray-500 dark:text-muted-foreground">
-                      Dag {activePlan.completedDays} van {activePlan.duration} · {activePlan.progressPercentage}%
-                    </p>
-                    <div className="h-1.5 rounded-full mb-3 bg-gray-100 dark:bg-secondary">
-                      <div className="h-1.5 rounded-full"
-                        style={{ width: `${activePlan.progressPercentage}%`, backgroundColor: "#0D9488" }} />
-                    </div>
-                    <Link href="/studies" className="text-xs font-semibold" style={{ color: "#0D9488" }}>
-                      Bekijk plan →
-                    </Link>
-                  </>
-                ) : null}
+            {/* Leesplan — always rendered: with no plan running its job is to
+                offer one, which the old card could not do because it hid
+                itself whenever activePlan was null. */}
+            <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-5">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-muted-foreground">
+                  Leesplan
+                </p>
+                <CalendarCheck2 size={14} style={{ color: "#0D9488" }} />
               </div>
-            )}
+              {loading ? (
+                <div className="h-10 rounded animate-pulse bg-gray-100 dark:bg-secondary" />
+              ) : activePlan ? (
+                <>
+                  <p className="text-sm font-semibold mb-1 line-clamp-1 text-gray-900 dark:text-foreground">
+                    {activePlan.title}
+                  </p>
+                  <p className="text-xs mb-2.5 text-gray-500 dark:text-muted-foreground">
+                    Dag {activePlan.completedDays} van {activePlan.duration} · {activePlan.progressPercentage}%
+                  </p>
+                  <div className="h-1.5 rounded-full mb-3 bg-gray-100 dark:bg-secondary">
+                    <div className="h-1.5 rounded-full"
+                      style={{ width: `${activePlan.progressPercentage}%`, backgroundColor: "#0D9488" }} />
+                  </div>
+                  {activePlan.today.length > 0 && (
+                    <Link
+                      href={`/studie?book=${encodeURIComponent(activePlan.today[0].book)}&chapter=${activePlan.today[0].chapter}&version=statenvertaling&plan=${activePlan.id}&day=${activePlan.currentDay}`}
+                      className="block mb-2.5 rounded-lg px-2.5 py-2 no-underline"
+                      style={{ backgroundColor: "rgba(13,148,136,0.06)" }}
+                    >
+                      <span className="block text-[10px] font-bold uppercase tracking-wider" style={{ color: "#0F766E" }}>
+                        Vandaag
+                      </span>
+                      <span className="block text-xs font-medium text-gray-900 dark:text-foreground">
+                        {activePlan.today[0].title ?? `${activePlan.today[0].book} ${activePlan.today[0].chapter}`}
+                      </span>
+                    </Link>
+                  )}
+                  <Link href={`/plans/${activePlan.id}`} className="text-xs font-semibold" style={{ color: "#0D9488" }}>
+                    Bekijk plan →
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <p className="text-xs mb-2.5 text-gray-500 dark:text-muted-foreground leading-relaxed">
+                    {planSuggestion
+                      ? planSuggestion.reason
+                      : "Een leesplan houdt je op koers, ook op de dagen dat het niet vanzelf gaat."}
+                  </p>
+                  {planSuggestion && (
+                    <p className="text-sm font-semibold mb-2.5 line-clamp-2 text-gray-900 dark:text-foreground">
+                      {planSuggestion.title}
+                    </p>
+                  )}
+                  <Link href="/plans" className="text-xs font-semibold" style={{ color: "#0D9488" }}>
+                    Start een leesplan →
+                  </Link>
+                </>
+              )}
+            </div>
 
             {/* Recente notities */}
             {(loading || recentNotes.length > 0) && (

@@ -15,8 +15,14 @@ const biblePlanSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    enum: ['evangelie', 'psalmen', 'proverbs', 'profeten', 'brieven', 'apocalyps'],
-    default: 'evangelie'
+    // The original six only covered the parts of the canon the seeded plans
+    // happened to use; a generated plan for Job or Genesis had nowhere to go
+    // and silently fell back to 'evangelie'. Old values stay valid.
+    enum: [
+      'evangelie', 'psalmen', 'proverbs', 'profeten', 'brieven', 'apocalyps',
+      'wet', 'geschiedenis', 'wijsheid', 'overig'
+    ],
+    default: 'overig'
   },
   readings: [{
     day: {

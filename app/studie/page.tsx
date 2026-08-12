@@ -10,6 +10,7 @@ import StudyMaterialsSection from '../../components/study/StudyMaterialsSection'
 import AiAssistantWidget from '../../components/study/AiAssistantWidget';
 import StartupAnimation from '../../components/ui/startup-animation';
 import { BookOpen, CheckCircle, ChevronLeft, ChevronRight, X, Trophy, MessageCircle } from 'lucide-react';
+import { toast } from '../../hooks/use-toast';
 
 const COMPLETED_KEY = 'bijbelstudie_completed_studies';
 
@@ -38,6 +39,45 @@ function parseVerseRange(vr?: string): { start: number; end: number } | undefine
   const end   = parseInt(parts[parts.length - 1], 10);
   if (isNaN(start) || isNaN(end)) return undefined;
   return { start, end };
+}
+
+/**
+ * Sends a finished lesson to the server.
+ *
+ * Lesson completion used to live only in sessionStorage, so closing the tab
+ * threw the study away and the database could not tell a worked-through study
+ * from a chapter someone scrolled past. The server ignores a lesson it already
+ * has, so retries are safe.
+ */
+async function recordLesson(studyId: string, studyTitle: string, lesson: Lesson) {
+  const range = parseVerseRange(lesson.verseRange);
+  try {
+    const response = await fetch('/api/v1/study-progress', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        source: 'curated',
+        studyId,
+        lessonDay: lesson.day,
+        book: lesson.book,
+        chapter: lesson.chapter,
+        verseStart: range?.start ?? null,
+        verseEnd: range?.end ?? null,
+      }),
+    });
+    if (!response.ok) return null;
+
+    const data = await response.json();
+    if (data.xp?.awarded) {
+      toast({
+        title: `+${data.xp.awarded} XP`,
+        description: data.xp.levelledUp ? `Niveau ${data.xp.level} bereikt!` : studyTitle,
+      });
+    }
+    return data;
+  } catch {
+    return null;
+  }
 }
 
 /* ── Completion overlay ──────────────────────────────────────── */
@@ -200,15 +240,44 @@ function StudyPageInner() {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+
     try {
       const stored = sessionStorage.getItem('activeStudy');
-      if (stored) {
-        const s: ActiveStudy = JSON.parse(stored);
-        if (!s.completedLessons) s.completedLessons = [];
-        setActiveStudy(s);
-        setLessonIdx(s.currentLessonIndex ?? 0);
-      }
+      if (!stored) return;
+
+      const s: ActiveStudy = JSON.parse(stored);
+      if (!s.completedLessons) s.completedLessons = [];
+      setActiveStudy(s);
+      setLessonIdx(s.currentLessonIndex ?? 0);
+
+      // sessionStorage only knows about this tab. Anything already recorded on
+      // the server — from another device, or before a refresh wiped the tab —
+      // is merged back in so a lesson is never asked for twice.
+      void (async () => {
+        try {
+          const response = await fetch(`/api/v1/study-progress?studyId=${encodeURIComponent(s.studyId)}`);
+          if (!response.ok || cancelled) return;
+
+          const data = await response.json();
+          const doneDays: number[] = data.lessonsByStudy?.[s.studyId] ?? [];
+          if (doneDays.length === 0) return;
+
+          const doneIndices = s.lessons
+            .map((lesson, index) => (doneDays.includes(lesson.day) ? index : -1))
+            .filter((index) => index >= 0);
+
+          setActiveStudy((current) => {
+            if (!current || current.studyId !== s.studyId) return current;
+            const merged = { ...current, completedLessons: [...new Set([...current.completedLessons, ...doneIndices])] };
+            sessionStorage.setItem('activeStudy', JSON.stringify(merged));
+            return merged;
+          });
+        } catch { /* offline is fine — sessionStorage still holds this session */ }
+      })();
     } catch { /* noop */ }
+
+    return () => { cancelled = true; };
   }, []);
 
   const handleAnimationComplete = () => {
@@ -283,6 +352,9 @@ function StudyPageInner() {
     const done = [...new Set([...activeStudy.completedLessons, idx])];
     const updated = { ...activeStudy, completedLessons: done };
     saveStudy(updated);
+    // Recorded server-side too, so the lesson survives the tab closing and
+    // counts as studying rather than reading.
+    void recordLesson(activeStudy.studyId, activeStudy.studyTitle, activeStudy.lessons[idx]);
     // Auto-advance if not last
     if (idx < activeStudy.lessons.length - 1) goToLesson(idx + 1);
   }, [activeStudy, saveStudy, goToLesson]);
@@ -296,6 +368,14 @@ function StudyPageInner() {
     saveStudy(updated);
     // Persist completion to localStorage for /studies page badge
     markStudyCompleted(activeStudy.studyId);
+    // …and to the server, which is what the badges, XP and the profile read.
+    // Sequential rather than parallel so the "study completed" bonus is
+    // evaluated once, after the final lesson has landed.
+    void (async () => {
+      for (const lesson of activeStudy.lessons) {
+        await recordLesson(activeStudy.studyId, activeStudy.studyTitle, lesson);
+      }
+    })();
     // Stop highlighting and hide the study bar
     setStudyCompleted(true);
     // Show the overlay
