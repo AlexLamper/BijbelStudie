@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { Loader2, AlertCircle, ExternalLink, Languages, Info, Sparkles } from 'lucide-react';
+import { AlertCircle, ExternalLink, Languages, Info, Sparkles } from 'lucide-react';
+import { SkeletonBlock } from '../ui/skeletons';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { bookNameMap } from '../../lib/book-mapping';
@@ -262,9 +263,16 @@ export default function OriginalText({ book, chapter, highlightVerses }: Origina
 
       {/* Loading */}
       {loading && (
-        <div className="flex flex-col items-center justify-center py-16 text-gray-500 dark:text-gray-400">
-          <Loader2 size={28} className="animate-spin text-teal-600 mb-3" />
-          <span className="text-sm">Grondtekst laden…</span>
+        <div className="py-8 space-y-5" role="status" aria-label="Grondtekst laden">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="flex gap-3">
+              <SkeletonBlock className="h-3.5 w-5 flex-shrink-0 mt-0.5" />
+              <div className="flex-1 space-y-2">
+                <SkeletonBlock className="h-4" />
+                <SkeletonBlock className={i % 2 === 0 ? "h-3 w-3/4" : "h-3 w-2/3"} />
+              </div>
+            </div>
+          ))}
         </div>
       )}
 

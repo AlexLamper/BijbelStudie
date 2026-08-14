@@ -5,6 +5,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { getProviders, signIn, ClientSafeProvider } from "next-auth/react"
 import { Loader2, Eye, EyeOff, BookOpen, ArrowLeft } from "lucide-react"
+import { SkeletonBlock } from "../../../components/ui/skeletons"
 
 const GOOGLE_SVG = (
   <svg width="18" height="18" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -249,8 +250,8 @@ export default function SignInPage() {
                 ))}
             </div>
           ) : (
-            <div className="flex justify-center py-3">
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            <div className="space-y-3" role="status" aria-label="Inlogopties laden">
+              <SkeletonBlock className="h-[42px] w-full rounded-lg" />
             </div>
           )}
 

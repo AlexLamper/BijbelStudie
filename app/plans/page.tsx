@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react';
 import { Loader2, Plus, Sparkles } from 'lucide-react';
 import PlanCard from '../../components/plans/PlanCard';
 import CreatePlanModal from '../../components/plans/CreatePlanModal';
-import { LoadingSpinner } from '../../components/ui/loading-spinner';
+import { SkeletonList, SkeletonPage } from '../../components/ui/skeletons';
 import { toast } from '../../hooks/use-toast';
 import type { PlanDTO } from '../../lib/planTypes';
 
@@ -94,7 +94,7 @@ export default function PlansPage() {
     }
   };
 
-  if (status === 'loading') return <LoadingSpinner fullHeight message="Laden…" />;
+  if (status === 'loading') return <SkeletonPage fullHeight />;
   if (status !== 'authenticated') {
     return (
       <div className="max-w-3xl mx-auto px-5 py-16 text-center">
@@ -183,7 +183,11 @@ export default function PlansPage() {
       </div>
 
       {loading ? (
-        <LoadingSpinner message="Leesplannen laden…" />
+        <SkeletonList
+          count={6}
+          className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 space-y-0"
+          itemClassName="p-5"
+        />
       ) : plans.length === 0 ? (
         <div className="border border-dashed border-gray-200 dark:border-border rounded-xl py-14 text-center">
           <p className="text-[13.5px] text-gray-500 dark:text-muted-foreground">

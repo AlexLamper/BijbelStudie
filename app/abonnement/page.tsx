@@ -1,6 +1,7 @@
 ﻿"use client"
 
 import { ArrowRight, CheckCircle, Loader2, Sparkles, Shield, BookOpen, Zap } from "lucide-react"
+import { SkeletonPage } from "../../components/ui/skeletons"
 import { useSession } from "next-auth/react"
 import { useState, useEffect } from "react"
 import { useToast } from "../../hooks/use-toast"
@@ -89,9 +90,7 @@ export default function SubscribePage() {
 
   if (checkingSubscription) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" style={{ color: "#0D9488" }} />
-      </div>
+      <SkeletonPage fullHeight />
     )
   }
 

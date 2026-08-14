@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger, DropdownMenuSeparator,
 } from "../../components/ui/dropdown-menu"
 import { EditNoteModal } from "../../components/study/EditNoteModal"
-import { LoadingSpinner } from "../../components/ui/loading-spinner"
+import { SkeletonList, SkeletonPage } from "../../components/ui/skeletons"
 
 interface Note {
   _id: string
@@ -109,7 +109,7 @@ export default function NotesPage() {
     setShowEditModal(false); setEditingNote(null)
   }
 
-  if (status === "loading" || !session) return <LoadingSpinner fullHeight message="Laden..." />
+  if (status === "loading" || !session) return <SkeletonPage fullHeight />
 
   return (
     <div className="w-full h-full overflow-y-auto">
@@ -202,7 +202,9 @@ export default function NotesPage() {
         )}
 
         {/* Loading */}
-        {loading && <LoadingSpinner />}
+        {loading && (
+          <SkeletonList count={6} className="grid gap-4 space-y-0 md:grid-cols-2 lg:grid-cols-3" itemClassName="p-5" />
+        )}
 
         {/* Notes grid */}
         {!loading && (

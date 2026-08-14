@@ -10,7 +10,7 @@ import {
 } from "lucide-react"
 import UserBadges from "../../components/profile/badges"
 import LevelCard from "../../components/profile/LevelCard"
-import { LoadingSpinner } from "../../components/ui/loading-spinner"
+import { SkeletonPage } from "../../components/ui/skeletons"
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
 
 const TEAL = "#0D9488"
@@ -198,7 +198,7 @@ export default function ProfilePage() {
     }
   }
 
-  if (!mounted || loading) return <LoadingSpinner fullHeight />
+  if (!mounted || loading) return <SkeletonPage fullHeight />
 
   if (error || !user) {
     return (

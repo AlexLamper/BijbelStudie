@@ -14,7 +14,7 @@ import {
   Sparkles,
   Trophy,
 } from 'lucide-react';
-import { LoadingSpinner } from '../../../components/ui/loading-spinner';
+import { SkeletonPage } from '../../../components/ui/skeletons';
 import { toast } from '../../../hooks/use-toast';
 import type { PlanDTO, PlanDayDTO } from '../../../lib/planTypes';
 
@@ -141,7 +141,7 @@ export default function PlanDetailPage({ params }: { params: Promise<{ id: strin
     router.push(`/studie?${query.toString()}`);
   };
 
-  if (status === 'loading' || loading) return <LoadingSpinner fullHeight message="Plan laden…" />;
+  if (status === 'loading' || loading) return <SkeletonPage fullHeight />;
   if (status !== 'authenticated') {
     return (
       <div className="max-w-3xl mx-auto px-5 py-16 text-center">

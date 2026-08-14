@@ -1,7 +1,8 @@
 ﻿'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Loader2, AlertCircle, ChevronDown, Lock, Sparkles } from 'lucide-react';
+import { AlertCircle, ChevronDown, Lock, Sparkles } from 'lucide-react';
+import { SkeletonBlock, SkeletonText } from '../ui/skeletons';
 import { Card, CardContent } from '../ui/card';
 import { useSession } from 'next-auth/react';
 import { Button } from '../ui/button';
@@ -460,13 +461,13 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
             </Button>
           </div>
         ) : loading ? (
-            <div className="flex items-center justify-center py-12">
-                <div className="text-center">
-                <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" style={{ color: '#0D9488' }} />
-                <p className="font-inter text-gray-700 dark:text-muted-foreground text-base font-medium">
-                    Commentaar laden...
-                </p>
-                </div>
+            <div className="py-6 space-y-8" role="status" aria-label="Commentaar laden">
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className="space-y-3">
+                    <SkeletonBlock className="h-4 w-32" />
+                    <SkeletonText lines={4} />
+                  </div>
+                ))}
             </div>
         ) : error ? (
             <div className="py-12 text-center">

@@ -1,4 +1,5 @@
 ﻿import { NextResponse } from "next/server"
+import { CANONICAL_NL } from "../../../../lib/book-mapping"
 
 export async function GET() {
   try {
@@ -12,11 +13,15 @@ export async function GET() {
 
     const data = await res.json()
 
+    // BijbelAPI returns English book names ("Ecclesiastes"); the app is Dutch-only,
+    // and the Statenvertaling data is keyed on the canonical Dutch names.
+    const book = CANONICAL_NL[data.book] ?? data.book
+
     return NextResponse.json({
       text:      data.text,
-      reference: `${data.book} ${data.chapter}:${data.verse}`,
+      reference: `${book} ${data.chapter}:${data.verse}`,
       version:   "Statenvertaling",
-      book:      data.book,
+      book,
       chapter:   Number(data.chapter),
       verse:     Number(data.verse),
     })

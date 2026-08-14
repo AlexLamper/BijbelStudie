@@ -6,7 +6,7 @@ import Link from "next/link"
 import { Button } from "../../components/ui/button"
 import { CheckCircle, BookOpen, Sparkles, Calendar } from "lucide-react"
 import { useSession } from "next-auth/react"
-import { LoadingSpinner } from "../../components/ui/loading-spinner"
+import { SkeletonBlock, SkeletonText } from "../../components/ui/skeletons"
 import { useTranslation } from "../i18n/client"
 
 export default function SuccessPage() {
@@ -54,7 +54,17 @@ export default function SuccessPage() {
       <div className="flex justify-center items-center min-h-screen bg-white dark:bg-black px-4">
         <div className="w-full max-w-2xl">
           {status === "loading" ? (
-            <LoadingSpinner fullHeight message={t("verifying")} />
+            <div className="shadow-lg border dark:shadow-gray-900/20 bg-white dark:bg-[#23263a]"
+              role="status" aria-label={t("verifying")}>
+              <div className="p-8 border-b border-border flex flex-col items-center gap-4">
+                <SkeletonBlock className="h-[72px] w-[72px] rounded-full" />
+                <SkeletonBlock className="h-6 w-56" />
+                <SkeletonBlock className="h-4 w-72" />
+              </div>
+              <div className="p-8">
+                <SkeletonText lines={4} />
+              </div>
+            </div>
           ) : (
             <div className="shadow-lg border dark:shadow-gray-900/20 bg-white dark:bg-[#23263a]">
               {/* Header */}

@@ -1,5 +1,6 @@
 ﻿import React, { useEffect, useState } from 'react';
-import { Loader2, AlertCircle, Plus } from 'lucide-react';
+import { AlertCircle, Plus } from 'lucide-react';
+import { SkeletonChapter } from '../ui/skeletons';
 import { CreateNoteModal } from './CreateNoteModal';
 import { ReadingPreferences } from '../../hooks/useReadingPreferences';
 import { cn } from '../../lib/utils';
@@ -166,11 +167,8 @@ export default function ChapterViewer({
   return (
     <div>
       {loading && (
-        <div className="flex items-center justify-center py-24">
-          <div className="text-center">
-            <Loader2 className="h-10 w-10 animate-spin mx-auto mb-6" style={{ color: '#0D9488' }} />
-            <p className="font-inter text-gray-700 dark:text-muted-foreground text-lg font-medium">Bijbeltekst laden...</p>
-          </div>
+        <div className="py-8">
+          <SkeletonChapter verses={10} />
         </div>
       )}
 

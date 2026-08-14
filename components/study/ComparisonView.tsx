@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { ScrollArea } from '../ui/scroll-area';
 import { Badge } from '../ui/badge';
-import { Loader2, Plus, X } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
+import { SkeletonBlock } from '../ui/skeletons';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -212,8 +213,16 @@ export default function ComparisonView({
                 <CardContent className="pt-0">
                   <ScrollArea className="h-96">
                     {data?.loading ? (
-                      <div className="flex items-center justify-center py-8">
-                        <Loader2 className="h-6 w-6 animate-spin" />
+                      <div className="space-y-3 py-2" role="status" aria-label="Laden">
+                        {Array.from({ length: 8 }).map((_, i) => (
+                          <div key={i} className="flex gap-2">
+                            <SkeletonBlock className="h-3 w-4 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1 space-y-1.5">
+                              <SkeletonBlock className="h-3" />
+                              <SkeletonBlock className={i % 2 === 0 ? "h-3 w-2/3" : "h-3 w-4/5"} />
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     ) : data?.error ? (
                       <div className="text-red-500 text-sm py-4">

@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AlertCircle, Loader2, Send, Sparkles } from 'lucide-react';
+import { SkeletonBlock } from '../ui/skeletons';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -270,9 +271,10 @@ export default function AiAssistant({
 
           {/* Loading */}
           {loading && (
-            <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 px-1 py-1">
-              <Loader2 size={16} className="animate-spin text-teal-600" />
-              <span className="text-xs">Antwoord genereren…</span>
+            <div className="px-1 py-1 space-y-2" role="status" aria-label="Antwoord genereren">
+              <SkeletonBlock className="h-3" />
+              <SkeletonBlock className="h-3 w-11/12" />
+              <SkeletonBlock className="h-3 w-2/3" />
             </div>
           )}
 

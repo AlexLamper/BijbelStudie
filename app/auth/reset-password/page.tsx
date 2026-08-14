@@ -7,6 +7,7 @@ import { Button } from "../../../components/ui/button";
 import Image from "next/image";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { ModeToggle } from "../../../components/dark-mode-toggle";
+import { SkeletonPage } from "../../../components/ui/skeletons";
 
 const translations = {
   en: {
@@ -312,7 +313,7 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<SkeletonPage fullHeight />}>
       <ResetPasswordForm />
     </Suspense>
   );

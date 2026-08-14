@@ -24,7 +24,12 @@ function audiences(raw: string | undefined, fallback: string[]): string[] {
 }
 
 export function appleAudiences(): string[] {
-  return audiences(process.env.APPLE_CLIENT_IDS, ['com.bijbelstudie.app']);
+  // Native Sign in with Apple mints `aud` = the bundle ID; the web fallback
+  // mints `aud` = the Services ID. Both are us, so both are accepted.
+  return audiences(process.env.APPLE_CLIENT_IDS, [
+    'com.bijbel-studie.app',
+    'com.bijbel-studie.app.signin',
+  ]);
 }
 
 export function googleAudiences(): string[] {

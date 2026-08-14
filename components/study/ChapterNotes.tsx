@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
-import { StickyNote, Calendar, Loader2, Plus } from "lucide-react";
+import { StickyNote, Calendar, Plus } from "lucide-react";
+import { SkeletonList } from "../ui/skeletons";
 import { Badge } from "../ui/badge";
 import { CreateNoteModal } from "./CreateNoteModal";
 
@@ -90,9 +91,7 @@ export function ChapterNotes({ book, chapter }: ChapterNotesProps) {
         <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 py-5 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
 
           {loading && (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-6 w-6 animate-spin" style={{ color: '#0D9488' }} />
-            </div>
+            <SkeletonList count={3} className="py-2" />
           )}
 
           {error && (
