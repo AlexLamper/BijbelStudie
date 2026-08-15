@@ -32,6 +32,10 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# ...except the template, which holds names and notes but no values. It is the
+# only record of which variables a deployment needs; ignoring it means a fresh
+# deploy silently comes up missing keys.
+!.env.example
 
 # vercel
 .vercel
