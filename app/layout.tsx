@@ -35,9 +35,14 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://www.bijbel-studie.com"),
   manifest: "/site.webmanifest",
   icons: {
-    icon: [{ url: "/images/favicon.ico", type: "image/x-icon" }],
+    icon: [
+      { url: "/images/favicon.ico", type: "image/x-icon" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/images/icon-192.png", type: "image/png", sizes: "192x192" },
+    ],
     shortcut: "/images/favicon.ico",
-    apple: "/images/favicon.ico",
+    // iOS ignores .ico for the home-screen icon and needs a PNG.
+    apple: [{ url: "/images/apple-touch-icon.png", sizes: "180x180" }],
   },
   alternates: {
     canonical: "/",
