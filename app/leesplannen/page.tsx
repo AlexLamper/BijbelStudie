@@ -29,7 +29,7 @@ const FILTERS = [
 ] as const;
 
 /**
- * The page every `/plans/:id` link in the app has been 404-ing into since the
+ * The page every `/leesplannen/:id` link in the app has been 404-ing into since the
  * links were written.
  */
 export default function PlansPage() {
@@ -86,7 +86,7 @@ export default function PlansPage() {
       }
 
       toast({ title: 'Plan gestart', description: data.plan.title });
-      router.push(`/plans/${data.plan.id}`);
+      router.push(`/leesplannen/${data.plan.id}`);
     } catch {
       toast({ title: 'Starten mislukt', description: 'Geen verbinding', variant: 'destructive' });
     } finally {
@@ -209,7 +209,7 @@ export default function PlansPage() {
         onClose={() => setBuilderOpen(false)}
         onCreated={(planId) => {
           setBuilderOpen(false);
-          router.push(`/plans/${planId}`);
+          router.push(`/leesplannen/${planId}`);
         }}
       />
     </div>

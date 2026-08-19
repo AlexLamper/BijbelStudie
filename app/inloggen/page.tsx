@@ -1,11 +1,13 @@
 ﻿"use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { getProviders, signIn, ClientSafeProvider } from "next-auth/react"
 import { Loader2, Eye, EyeOff, BookOpen, ArrowLeft } from "lucide-react"
-import { SkeletonBlock } from "../../../components/ui/skeletons"
+import { useSearchParams } from "next/navigation"
+import { SkeletonBlock } from "../../components/ui/skeletons"
+import { safeRedirect } from "../../lib/safeRedirect"
 
 const GOOGLE_SVG = (
   <svg width="18" height="18" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -75,7 +77,11 @@ function FeaturePanel() {
   )
 }
 
-export default function SignInPage() {
+function SignInPageInner() {
+  const searchParams = useSearchParams()
+  // Validated to a same-site path: an unchecked value here would be an
+  // open redirect on the page where the user types their password.
+  const nextTarget = safeRedirect(searchParams.get("next"))
   const [providers, setProviders] = useState<Record<string, ClientSafeProvider> | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null)
@@ -91,7 +97,7 @@ export default function SignInPage() {
   const handleOAuth = async (providerId: string) => {
     setIsLoading(true)
     setLoadingProvider(providerId)
-    await signIn(providerId, { callbackUrl: "/dashboard" })
+    await signIn(providerId, { callbackUrl: nextTarget })
     setTimeout(() => { setIsLoading(false); setLoadingProvider(null) }, 5000)
   }
 
@@ -112,7 +118,7 @@ export default function SignInPage() {
       if (result?.error) {
         setError("Onjuist e-mailadres of wachtwoord.")
       } else if (result?.ok) {
-        window.location.href = "/dashboard"
+        window.location.href = nextTarget
       }
     } catch {
       setError("Er is iets misgegaan. Probeer het opnieuw.")
@@ -145,7 +151,7 @@ export default function SignInPage() {
             </h1>
             <p className="text-muted-foreground text-sm mt-1.5">
               Nog geen account?{" "}
-              <Link href="/auth/register" className="text-teal-600 dark:text-teal-400 hover:underline font-medium">
+              <Link href="/registreren" className="text-teal-600 dark:text-teal-400 hover:underline font-medium">
                 Maak er gratis een aan
               </Link>
             </p>
@@ -182,7 +188,7 @@ export default function SignInPage() {
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Wachtwoord
                 </label>
-                <Link href="/auth/forgot-password" className="text-xs text-teal-600 dark:text-teal-400 hover:underline">
+                <Link href="/wachtwoord-vergeten" className="text-xs text-teal-600 dark:text-teal-400 hover:underline">
                   Vergeten?
                 </Link>
               </div>
@@ -257,9 +263,9 @@ export default function SignInPage() {
 
           <p className="text-xs text-center text-muted-foreground">
             Door in te loggen ga je akkoord met onze{" "}
-            <Link href="/terms-of-service" className="underline hover:text-foreground">servicevoorwaarden</Link>
+            <Link href="/algemene-voorwaarden" className="underline hover:text-foreground">servicevoorwaarden</Link>
             {" "}en{" "}
-            <Link href="/privacy-policy" className="underline hover:text-foreground">privacybeleid</Link>.
+            <Link href="/privacybeleid" className="underline hover:text-foreground">privacybeleid</Link>.
           </p>
         </div>
       </div>
@@ -270,3 +276,12 @@ export default function SignInPage() {
   )
 }
 
+
+export default function SignInPage() {
+  // useSearchParams requires a Suspense boundary in the app router.
+  return (
+    <Suspense fallback={null}>
+      <SignInPageInner />
+    </Suspense>
+  )
+}

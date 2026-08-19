@@ -60,7 +60,7 @@ export default function NotesPage() {
 
   useEffect(() => {
     if (status === "loading") return
-    if (!session) router.push("/auth/signin")
+    if (!session) router.push("/inloggen")
   }, [session, status, router])
 
   const fetchNotes = useCallback(async () => {

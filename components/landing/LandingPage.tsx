@@ -293,11 +293,11 @@ function Navbar() {
 
         {/* Knoppen - rechts uitgelijnd */}
         <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0 md:justify-self-end">
-          <Link href="/auth/signin"
+          <Link href="/inloggen"
             className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors hidden sm:block">
             Inloggen
           </Link>
-          <Link href="/auth/signin"
+          <Link href="/inloggen"
             className="inline-flex items-center gap-1.5 text-sm font-semibold text-white px-3.5 sm:px-4 py-2 rounded-lg bg-teal-600 hover:bg-teal-700 transition-colors whitespace-nowrap">
             Gratis beginnen
             <ArrowRight className="h-3.5 w-3.5 flex-shrink-0" />
@@ -377,7 +377,7 @@ function Hero() {
               }}
               transition={{ duration: 2.4, repeat: Infinity, ease: "easeOut", delay: 1 }}
             >
-              <Link href="/auth/signin"
+              <Link href="/inloggen"
                 className="group w-full inline-flex items-center justify-center gap-2 font-semibold text-white px-7 py-3.5 rounded-xl bg-teal-600 hover:bg-teal-700 transition-colors">
                 Start gratis
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
@@ -390,7 +390,7 @@ function Hero() {
           </motion.div>
 
           <motion.div
-            className="flex items-center gap-6 pt-2"
+            className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-2"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.44, ease }}
@@ -401,8 +401,8 @@ function Hero() {
               { icon: Star,       label: "Gratis te gebruiken" },
               { icon: Shield,     label: "Privacy-first" },
             ].map(({ icon: Icon, label }) => (
-              <div key={label} className="flex items-center gap-1.5 text-sm" style={{ color: T.muted }}>
-                <Icon className="h-4 w-4" style={{ color: T.teal }} />
+              <div key={label} className="flex items-center gap-1.5 text-xs whitespace-nowrap" style={{ color: T.muted }}>
+                <Icon className="h-3.5 w-3.5 shrink-0" style={{ color: T.teal }} />
                 {label}
               </div>
             ))}
@@ -1102,7 +1102,7 @@ function Pricing() {
                   </li>
                 ))}
               </ul>
-              <Link href="/auth/signin"
+              <Link href="/inloggen"
                 className="block text-center font-semibold py-3 rounded-xl border text-sm transition-colors hover:bg-gray-50"
                 style={{ borderColor: T.border, color: T.text }}>
                 Gratis beginnen
@@ -1241,7 +1241,7 @@ function CTA() {
         </FadeUp>
         <FadeUp delay={0.2}>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/auth/signin"
+            <Link href="/inloggen"
               className="inline-flex items-center justify-center gap-2 font-semibold text-white px-8 py-3.5 rounded-xl bg-teal-600 hover:bg-teal-700 transition-colors">
               Gratis beginnen
               <ArrowRight className="h-4 w-4" />

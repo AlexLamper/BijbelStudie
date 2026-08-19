@@ -178,7 +178,7 @@ export default function VoortgangTab({
         )}
       </div>
 
-      <Link href={`/plans/${plan._id}`}
+      <Link href={`/leesplannen/${plan._id}`}
         className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90"
         style={{ backgroundColor: "#0D9488" }}>
         <CalendarCheck2 size={15} />

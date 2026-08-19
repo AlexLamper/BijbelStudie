@@ -70,7 +70,14 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
-  const protectedRoutes = ["/study", "/dashboard", "/admin", "/notes", "/plans", "/profile", "/settings", "/resources", "/groepen", "/feedback"];
+  // Dutch route names. The old English entries (/study, /notes, /plans, ...) no
+  // longer prefix-matched anything after the rename, so those pages were open.
+  // /studies and /hulpbronnen stay public on purpose: they are the crawlable
+  // SEO surface (pro content inside /hulpbronnen/:slug is gated server-side).
+  const protectedRoutes = [
+    "/studie", "/lezen", "/dashboard", "/admin", "/notities",
+    "/leesplannen", "/profiel", "/instellingen", "/groepen", "/feedback",
+  ];
   if (!session && protectedRoutes.some(route => pathname.startsWith(route))) {
     return NextResponse.redirect(new URL("/", req.url));
   }

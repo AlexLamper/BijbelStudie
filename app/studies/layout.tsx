@@ -11,7 +11,7 @@ import { generatePageMetadata } from "../../lib/pageMetadata";
 export async function generateMetadata(): Promise<Metadata> {
   const cookieStore = await cookies();
   const lng = cookieStore.get(cookieName)?.value || fallbackLng;
-  return generatePageMetadata('plans', lng);
+  return generatePageMetadata('studies', lng);
 }
 
 

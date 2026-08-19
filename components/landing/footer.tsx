@@ -55,8 +55,8 @@ export function Footer() {
             </h3>
             <ul className="space-y-2.5">
               {[
-                { href: "/auth/signin",   label: t("signin") },
-                { href: "/auth/register", label: t("signup") },
+                { href: "/inloggen",   label: t("signin") },
+                { href: "/registreren", label: t("signup") },
                 { href: "/help",          label: t("help") },
                 { href: "/contact",       label: t("contact") },
               ].map(({ href, label }) => (
@@ -78,8 +78,8 @@ export function Footer() {
             </h3>
             <ul className="space-y-2.5">
               {[
-                { href: "/privacy-policy",   label: t("privacy_policy") },
-                { href: "/terms-of-service", label: t("terms_of_service") },
+                { href: "/privacybeleid",   label: t("privacy_policy") },
+                { href: "/algemene-voorwaarden", label: t("terms_of_service") },
               ].map(({ href, label }) => (
                 <li key={href}>
                   <Link href={href}

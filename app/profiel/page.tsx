@@ -59,7 +59,7 @@ export default function ProfilePage() {
       try {
         const session = await getSession()
         if (!session?.user) {
-          router.push("/auth/signin")
+          router.push("/inloggen")
           return
         }
         const res = await fetch("/api/user")

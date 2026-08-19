@@ -3,10 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Button } from "../../../components/ui/button";
+import { Button } from "../../components/ui/button";
 import Image from "next/image";
 import { Loader2 } from "lucide-react";
-import { ModeToggle } from "../../../components/dark-mode-toggle";
+import { ModeToggle } from "../../components/dark-mode-toggle";
 
 const translations = {
   en: {

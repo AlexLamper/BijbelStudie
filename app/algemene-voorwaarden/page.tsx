@@ -72,7 +72,7 @@ export default function TermsOfServicePage() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mt-10">
-              <Link href="/auth/register"
+              <Link href="/registreren"
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 font-semibold text-white px-7 py-3 rounded-xl bg-teal-600 hover:bg-teal-700 transition-colors">
                 {t("sign_up")}
               </Link>

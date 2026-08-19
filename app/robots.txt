@@ -1,22 +1,37 @@
 # Allow crawling of public pages and preserve crawl budget
 User-agent: *
 
-# Block private/app routes
+# Block private/app routes (all Dutch route names)
 Disallow: /api/
 Disallow: /admin/
-Disallow: /auth/
-Disallow: /study/
-Disallow: /community/
-Disallow: /resources/
-Disallow: /notes/
-Disallow: /profile/
-Disallow: /settings/
-Disallow: /subscribe/
-Disallow: /success/
-Disallow: /canceled/
+Disallow: /inloggen
+Disallow: /registreren
+Disallow: /wachtwoord-vergeten
+Disallow: /wachtwoord-herstellen
+Disallow: /dashboard
+# Anchored: a bare "/studie" would also block the public /studies page
+Disallow: /studie$
+Disallow: /studie?
+Disallow: /lezen
+Disallow: /leesplannen
+Disallow: /notities
+Disallow: /profiel
+Disallow: /instellingen
+Disallow: /groepen
+Disallow: /feedback
+Disallow: /succes
+Disallow: /geannuleerd
+Disallow: /preview/
 
-# Explicitly allow the public landing pages
-Allow: /
+# Explicitly allow the public landing and content pages
+Allow: /$
+Allow: /studies
+Allow: /hulpbronnen
+Allow: /abonnement
+Allow: /help
+Allow: /contact
+Allow: /privacybeleid
+Allow: /algemene-voorwaarden
 
 # Canonical sitemap location
 Sitemap: https://www.bijbel-studie.com/sitemap.xml

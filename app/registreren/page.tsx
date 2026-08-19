@@ -1,10 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
+import { signIn } from "next-auth/react"
 import { Loader2, Eye, EyeOff, ArrowLeft, Check, BookOpen, BookMarked, StickyNote, Library, Sparkles } from "lucide-react"
+import { safeRedirect } from "../../lib/safeRedirect"
 
 const BENEFITS = [
   "Bijbel lezen in meerdere vertalingen",
@@ -74,8 +76,12 @@ function FeaturePanel() {
   )
 }
 
-export default function RegisterPage() {
+function RegisterPageInner() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  // Validated: an unchecked `next` here would be an open redirect on the page
+  // where the user has just typed a password.
+  const nextTarget = safeRedirect(searchParams.get("next"))
   const [formData, setFormData] = useState({ name: "", email: "", password: "", confirmPassword: "" })
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
@@ -116,7 +122,20 @@ export default function RegisterPage() {
       })
       const data = await res.json()
       if (res.ok) {
-        router.push("/auth/signin?registered=true")
+        // Sign in straight away and continue to `next`, so a visitor who came
+        // here to buy lands back on checkout instead of being bounced through
+        // the login form and losing the thread.
+        const signInResult = await signIn("credentials", {
+          email: formData.email,
+          password: formData.password,
+          redirect: false,
+        })
+
+        if (signInResult?.ok) {
+          window.location.href = nextTarget
+        } else {
+          router.push(`/inloggen?registered=true&next=${encodeURIComponent(nextTarget)}`)
+        }
       } else {
         setError(data.error || "Registratie mislukt. Probeer het opnieuw.")
       }
@@ -150,7 +169,7 @@ export default function RegisterPage() {
             </h1>
             <p className="text-muted-foreground text-sm mt-1.5">
               Al een account?{" "}
-              <Link href="/auth/signin" className="text-teal-600 dark:text-teal-400 hover:underline font-medium">
+              <Link href="/inloggen" className="text-teal-600 dark:text-teal-400 hover:underline font-medium">
                 Log hier in
               </Link>
             </p>
@@ -229,9 +248,9 @@ export default function RegisterPage() {
 
           <p className="text-xs text-center text-muted-foreground">
             Door te registreren ga je akkoord met onze{" "}
-            <Link href="/terms-of-service" className="underline hover:text-foreground">servicevoorwaarden</Link>
+            <Link href="/algemene-voorwaarden" className="underline hover:text-foreground">servicevoorwaarden</Link>
             {" "}en{" "}
-            <Link href="/privacy-policy" className="underline hover:text-foreground">privacybeleid</Link>.
+            <Link href="/privacybeleid" className="underline hover:text-foreground">privacybeleid</Link>.
           </p>
         </div>
       </div>
@@ -239,5 +258,14 @@ export default function RegisterPage() {
       {/* Right: Feature panel */}
       <FeaturePanel />
     </div>
+  )
+}
+
+export default function RegisterPage() {
+  // useSearchParams requires a Suspense boundary in the app router.
+  return (
+    <Suspense fallback={null}>
+      <RegisterPageInner />
+    </Suspense>
   )
 }

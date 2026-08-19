@@ -49,7 +49,7 @@ export function Header() {
           <div className="flex items-center gap-2">
             <ModeToggle />
             <div className="hidden sm:block">
-              <Link href="/auth/signin">
+              <Link href="/inloggen">
                 <Button size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground px-5">
                   Inloggen
                 </Button>
@@ -81,7 +81,7 @@ export function Header() {
                 </Link>
               ))}
               <div className="pt-3 border-t border-border">
-                <Link href="/auth/signin">
+                <Link href="/inloggen">
                   <Button size="sm" className="bg-primary text-primary-foreground w-full">
                     Inloggen
                   </Button>

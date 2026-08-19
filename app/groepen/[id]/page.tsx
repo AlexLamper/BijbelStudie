@@ -363,7 +363,7 @@ export default function GroupDetailPage() {
                       <p className="text-sm font-semibold text-gray-900 dark:text-foreground truncate">
                         {(group.planId as unknown as Plan).title}
                       </p>
-                      <Link href={`/plans/${(group.planId as unknown as Plan)._id}`}
+                      <Link href={`/leesplannen/${(group.planId as unknown as Plan)._id}`}
                         className="text-xs" style={{ color: "#0D9488" }}>
                         Bekijk plan
                       </Link>

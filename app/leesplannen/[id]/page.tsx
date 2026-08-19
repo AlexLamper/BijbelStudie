@@ -49,7 +49,7 @@ export default function PlanDetailPage({ params }: { params: Promise<{ id: strin
           description: data.message || data.error,
           variant: 'destructive',
         });
-        router.push('/plans');
+        router.push('/leesplannen');
         return;
       }
       setPlan(data.plan);
@@ -159,7 +159,7 @@ export default function PlanDetailPage({ params }: { params: Promise<{ id: strin
   return (
     <div className="max-w-3xl mx-auto px-5 py-7">
       <Link
-        href="/plans"
+        href="/leesplannen"
         className="inline-flex items-center gap-1.5 text-[12.5px] text-gray-500 dark:text-muted-foreground no-underline hover:text-gray-900 dark:hover:text-foreground mb-4"
       >
         <ArrowLeft size={14} /> Alle leesplannen

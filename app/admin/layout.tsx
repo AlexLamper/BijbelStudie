@@ -27,7 +27,7 @@ export default async function AdminLayout({
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.email) {
-    redirect("/auth/signin");
+    redirect("/inloggen");
   }
 
   await connectMongoDB();

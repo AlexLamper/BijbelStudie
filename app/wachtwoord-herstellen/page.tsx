@@ -3,11 +3,11 @@
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams, useParams } from "next/navigation";
-import { Button } from "../../../components/ui/button";
+import { Button } from "../../components/ui/button";
 import Image from "next/image";
 import { Loader2, Eye, EyeOff } from "lucide-react";
-import { ModeToggle } from "../../../components/dark-mode-toggle";
-import { SkeletonPage } from "../../../components/ui/skeletons";
+import { ModeToggle } from "../../components/dark-mode-toggle";
+import { SkeletonPage } from "../../components/ui/skeletons";
 
 const translations = {
   en: {

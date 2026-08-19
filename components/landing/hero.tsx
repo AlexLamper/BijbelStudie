@@ -143,7 +143,7 @@ export function HeroSection() {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-3">
-              <Link href="/auth/signin">
+              <Link href="/inloggen">
                 <Button size="lg" className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-6 text-base font-semibold">
                   Gratis beginnen
                   <ArrowRight className="ml-2 h-5 w-5" />

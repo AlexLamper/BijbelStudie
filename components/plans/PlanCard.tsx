@@ -75,7 +75,7 @@ export default function PlanCard({
   const readToday = () => {
     const reading = today?.readings[0];
     if (!reading) {
-      router.push(`/plans/${plan.id}`);
+      router.push(`/leesplannen/${plan.id}`);
       return;
     }
     const params = new URLSearchParams({
@@ -92,7 +92,7 @@ export default function PlanCard({
     <div className="h-full bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl overflow-hidden flex flex-col hover:shadow-sm transition-shadow">
       <div className="p-5 flex-1 flex flex-col">
         <div className="flex items-start justify-between gap-3">
-          <Link href={`/plans/${plan.id}`} className="no-underline">
+          <Link href={`/leesplannen/${plan.id}`} className="no-underline">
             <h3 className="text-[15px] font-semibold text-gray-900 dark:text-foreground leading-snug">
               {plan.title}
             </h3>
@@ -175,7 +175,7 @@ export default function PlanCard({
                 Start dit plan
               </button>
               <Link
-                href={`/plans/${plan.id}`}
+                href={`/leesplannen/${plan.id}`}
                 className="h-9 px-3 rounded-lg text-[13px] border border-gray-200 dark:border-border text-gray-600 dark:text-muted-foreground hover:bg-gray-50 dark:hover:bg-secondary no-underline flex items-center"
               >
                 Bekijk
