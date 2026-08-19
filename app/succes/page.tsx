@@ -8,6 +8,7 @@ import { CheckCircle, BookOpen, Sparkles, Calendar } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { SkeletonBlock, SkeletonText } from "../../components/ui/skeletons"
 import { useTranslation } from "../i18n/client"
+import { trackNow } from "../../lib/analytics"
 
 export default function SuccessPage() {
   const { t } = useTranslation("success")
@@ -15,6 +16,9 @@ export default function SuccessPage() {
   const router = useRouter()
   const sessionId = searchParams.get("session_id")
   const [status, setStatus] = useState("loading")
+  // Drives the billing line. Assuming monthly here would tell an annual
+  // subscriber they are charged EUR 9,99 a month, which is simply untrue.
+  const [billingInterval, setBillingInterval] = useState<"monthly" | "annual" | null>(null)
   const { update } = useSession()
 
   useEffect(() => {
@@ -36,8 +40,16 @@ export default function SuccessPage() {
         })
 
         if (response.ok) {
+          const data = await response.json().catch(() => null)
+          const confirmed: "monthly" | "annual" =
+            data?.interval === "annual" || data?.interval === "monthly" ? data.interval : "monthly"
+          setBillingInterval(confirmed)
           await update()
           setStatus("success")
+          // The web conversion event. It was only ever fired by the iOS app, so
+          // until now the website half of the funnel had a start
+          // (checkout_started) and no end, making web conversion unmeasurable.
+          trackNow("checkout_completed", { interval: confirmed })
         } else {
           router.replace("/abonnement")
         }
@@ -116,10 +128,16 @@ export default function SuccessPage() {
                   <div className="p-6 border border-border bg-white dark:bg-[#1a1d2e] shadow-sm">
                     <div className="flex items-center mb-3">
                       <Calendar className="h-5 w-5 text-teal-600 mr-3" />
-                      <h3 className=" font-semibold text-foreground">{t("features.billing")}</h3>
+                      <h3 className=" font-semibold text-foreground">
+                        {t(billingInterval === "annual" ? "features.billing_annual" : "features.billing_monthly")}
+                      </h3>
                     </div>
                     <p className="text-sm text-muted-foreground ">
-                      {t("features.billing_desc")}
+                      {t(
+                        billingInterval === "annual"
+                          ? "features.billing_annual_desc"
+                          : "features.billing_monthly_desc"
+                      )}
                     </p>
                   </div>
                 </div>
@@ -132,12 +150,15 @@ export default function SuccessPage() {
 
                 {/* Actions */}
                 <div className="flex justify-center gap-4">
-                  <Link href={`/study`}>
+                  {/* Dutch routes. /study only resolved via a 308 and /courses
+                      resolved to nothing at all - a 404 on the page a customer
+                      lands on immediately after paying. */}
+                  <Link href={`/studie`}>
                     <Button className="bg-[#798777] hover:bg-[#6a7a68] text-white  rounded-lg">
                       {t("cta_study")}
                     </Button>
                   </Link>
-                  <Link href={`/courses`}>
+                  <Link href={`/studies`}>
                     <Button variant="outline" className="border-border text-foreground hover:bg-gray-50 dark:hover:bg-gray-800  rounded-lg">
                       {t("cta_courses")}
                     </Button>

@@ -21,6 +21,37 @@ const UserSchema = new mongoose.Schema(
     subscribed: { type: Boolean, default: false },
     stripeCustomerId: { type: String },
     stripeSubscriptionId: { type: String },
+    // --- Billing state, written by the Stripe webhook (app/api/webhooks/stripe).
+    // `subscribed` stays the single boolean the rest of the app gates on; these
+    // record *why* it has its current value, which is what the dashboard billing
+    // banner, the pause flow and the annual upsell all need.
+    // Mirrors Stripe's subscription.status verbatim so it can be compared without
+    // translation.
+    subscriptionStatus: {
+      type: String,
+      enum: ["active", "trialing", "past_due", "canceled", "unpaid", "paused", "incomplete", "incomplete_expired", null],
+      default: null,
+    },
+    subscriptionInterval: { type: String, enum: ["monthly", "annual", null], default: null },
+    stripePriceId: { type: String },
+    currentPeriodEnd: { type: Date, default: null },
+    cancelAtPeriodEnd: { type: Boolean, default: false },
+    // Set when an invoice first fails, cleared on the next successful payment.
+    // Involuntary churn is silent without this - the user never learns the card
+    // expired until access disappears.
+    billingIssueSince: { type: Date, default: null },
+    // Set while the subscription is paused via `pause_collection` instead of
+    // cancelled outright.
+    pausedUntil: { type: Date, default: null },
+    // When the current subscription first started, so the month-3 annual upsell
+    // can be timed without querying Stripe on every page load.
+    subscriptionStartedAt: { type: Date, default: null },
+    // Free-text reason captured on the cancellation screen. Without it every
+    // later retention decision is guesswork.
+    cancellationReason: { type: String },
+    cancellationFeedback: { type: String },
+    // Suppresses the in-app annual upsell once the user has said no.
+    annualUpsellDismissedAt: { type: Date, default: null },
     isAdmin: { type: Boolean, default: false },
     // --- Mobile (App Store / Play) additions. The website ignores all of
     // these; `subscribed` remains the Stripe-only flag it always was, and

@@ -8,8 +8,10 @@
     "full_access_desc": "Unlock all premium Bible courses and study materials",
     "advanced": "Advanced Features",
     "advanced_desc": "Enjoy note-taking, bookmarking, and personalized study plans",
-    "billing": "Monthly Billing",
-    "billing_desc": "Your subscription will renew automatically for €9.99/month"
+    "billing_monthly": "Monthly Billing",
+    "billing_annual": "Annual Billing",
+    "billing_monthly_desc": "Your subscription will renew automatically for €9.99/month",
+    "billing_annual_desc": "Your subscription will renew automatically for €89.99/year"
   },
   "reference": "Reference:",
   "cta_study": "Go to Study",

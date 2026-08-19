@@ -26,6 +26,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
+    let interval: "monthly" | "annual" | null = null
+
     // Update the user's Stripe customer ID if it's in the checkout session
     if (checkoutSession.customer) {
       user.stripeCustomerId = checkoutSession.customer as string
@@ -40,6 +42,17 @@ export async function POST(req: NextRequest) {
       // Update the user's subscription status
       user.subscribed = subscription.status === "active" || subscription.status === "trialing"
       user.stripeSubscriptionId = subscriptionId
+
+      // The webhook is the authority for these, but it can land after the
+      // browser gets here. Writing them now means /succes can state the real
+      // billing terms instead of assuming monthly, and the dashboard is correct
+      // on the very first render rather than a moment later.
+      interval = subscription.items.data[0]?.price.recurring?.interval === "year" ? "annual" : "monthly"
+      user.subscriptionInterval = interval
+      user.subscriptionStatus = subscription.status
+      if (!user.subscriptionStartedAt) {
+        user.subscriptionStartedAt = new Date(subscription.created * 1000)
+      }
     } else {
       // If the user has a Stripe customer ID, check for active subscriptions
       if (user.stripeCustomerId) {
@@ -52,6 +65,11 @@ export async function POST(req: NextRequest) {
         if (subscriptions.data.length > 0) {
           user.subscribed = true
           user.stripeSubscriptionId = subscriptions.data[0].id
+          interval =
+            subscriptions.data[0].items.data[0]?.price.recurring?.interval === "year"
+              ? "annual"
+              : "monthly"
+          user.subscriptionInterval = interval
         }
       }
     }
@@ -61,6 +79,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       subscribed: user.subscribed,
+      interval,
       stripeCustomerId: user.stripeCustomerId,
       stripeSubscriptionId: user.stripeSubscriptionId,
     })

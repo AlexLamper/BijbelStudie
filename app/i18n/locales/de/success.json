@@ -8,8 +8,10 @@
     "full_access_desc": "Entsperren Sie alle Premium-Bibelkurse und Studienmaterialien",
     "advanced": "Erweiterte Funktionen",
     "advanced_desc": "Genießen Sie Notizen, Lesezeichen und personalisierte Studienpläne",
-    "billing": "Monatliche Abrechnung",
-    "billing_desc": "Ihr Abonnement wird monatlich für €9,99 automatisch erneuert"
+    "billing_monthly": "Monatliche Abrechnung",
+    "billing_annual": "Jährliche Abrechnung",
+    "billing_monthly_desc": "Ihr Abonnement wird monatlich für €9,99 automatisch erneuert",
+    "billing_annual_desc": "Ihr Abonnement wird jährlich für €89,99 automatisch erneuert"
   },
   "reference": "Referenz:",
   "cta_study": "Zum Studium",

@@ -1,16 +1,15 @@
 ﻿'use client';
 
 import React, { useEffect, useState } from 'react';
-import { AlertCircle, ChevronDown, Lock, Sparkles } from 'lucide-react';
+import { AlertCircle, ChevronDown, Lock } from 'lucide-react';
 import { SkeletonBlock, SkeletonText } from '../ui/skeletons';
 import { Card, CardContent } from '../ui/card';
 import { useSession } from 'next-auth/react';
-import { Button } from '../ui/button';
-import { useRouter } from 'next/navigation';
 import { useTranslation } from '../../app/i18n/client';
 import { ReadingPreferences } from '../../hooks/useReadingPreferences';
 import { getPreferenceClasses, getPreferenceStyles } from '../../lib/preferenceClasses';
 import SpeakButton from './SpeakButton';
+import UpgradePrompt from "../pricing/UpgradePrompt";
 
 function stripHtml(html: string): string {
   return html
@@ -281,7 +280,6 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
   const [availableSources, setAvailableSources] = useState<CommentarySource[]>([]);
   const [selectedSource, setSelectedSource] = useState(initialSource);
   const { data: session } = useSession();
-  const router = useRouter();
   const { t } = useTranslation('study');
   const [notFound, setNotFound] = useState(false);
 
@@ -453,12 +451,13 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
                 KingComments en andere premium commentaren zijn beschikbaar voor Pro-abonnees van BijbelStudie.
               </p>
             </div>
-            <Button
-              onClick={() => router.push('/abonnement')}
-              className="bg-[#0D9488] hover:bg-[#0f766e] text-white"
-            >
-              Upgrade naar Pro
-            </Button>
+            <UpgradePrompt
+              surface="commentary"
+              title="Pro-commentaar"
+              body="KingComments en de andere premium commentaren zijn onderdeel van Pro."
+              cta="Commentaren ontgrendelen"
+              compact
+            />
           </div>
         ) : loading ? (
             <div className="py-6 space-y-8" role="status" aria-label="Commentaar laden">
@@ -531,20 +530,13 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
                   })}
                 </div>
                 {showPaywall && (
-                  <div className="mt-6 max-w-[340px] mx-auto rounded-xl border border-gray-200 dark:border-border bg-gradient-to-br from-gray-50 to-white dark:from-card dark:to-background p-5 text-center shadow-sm">
-                    <Sparkles className="h-5 w-5 mx-auto mb-2.5 text-[#0D9488]" />
-                    <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100 mb-1.5">
-                      Lees het volledige commentaar
-                    </h4>
-                    <p className="text-xs text-muted-foreground max-w-[260px] mx-auto leading-relaxed mb-4">
-                      Upgrade naar Pro voor toegang tot het volledige commentaar van dit hoofdstuk.
-                    </p>
-                    <Button
-                      onClick={() => router.push('/abonnement')}
-                      className="bg-[#0D9488] hover:bg-[#0f766e] text-white text-sm h-9 px-5"
-                    >
-                      Upgrade naar Pro
-                    </Button>
+                  <div className="mt-6">
+                    <UpgradePrompt
+                      surface="commentary"
+                      title="Lees het volledige commentaar"
+                      body="Je leest nu het begin. Met Pro lees je elk commentaar bij elk hoofdstuk volledig."
+                      cta="Verder lezen met Pro"
+                    />
                   </div>
                 )}
               </>

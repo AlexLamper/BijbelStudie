@@ -4,12 +4,13 @@ import { useEffect, useState } from "react"
 import { useTheme } from "next-themes"
 import {
   BookOpen, Sparkles, Type, Sliders, Sun, Moon, Monitor,
-  Check, Loader2, RotateCcw, Eye, Minus, Plus, Volume2, Bell,
+  Check, Loader2, RotateCcw, Eye, Minus, Plus, Volume2, Bell, CreditCard,
 } from "lucide-react"
 import { useGeneralSettings } from "../../hooks/useGeneralSettings"
 import { useReadingPreferences } from "../../hooks/useReadingPreferences"
 import { Switch } from "../../components/ui/switch"
 import { CLOUD_VOICES } from "../../lib/cloudVoices"
+import SubscriptionSection from "../../components/settings/SubscriptionSection"
 
 const TEAL = "#0D9488"
 
@@ -419,6 +420,15 @@ export default function SettingsPage() {
                   </div>
                 )}
               </PreferenceRow>
+            </SectionCard>
+
+            {/* Abonnement */}
+            <SectionCard
+              icon={CreditCard}
+              title="Abonnement"
+              subtitle="Je plan, facturen en opzeggen"
+            >
+              <SubscriptionSection />
             </SectionCard>
           </div>
 

@@ -23,7 +23,7 @@ const mainNav = [
   { title: "Dashboard",    url: "/dashboard",    icon: LayoutDashboard, tourId: "nav-dashboard"    },
   { title: "Bijbelstudie", url: "/studie",       icon: BookOpen,        tourId: "nav-studie"       },
   { title: "Studies",      url: "/studies",      icon: BookMarked,      tourId: "nav-studies"      },
-  { title: "Leesplannen",  url: "/plans",        icon: CalendarCheck,   tourId: "nav-plans"        },
+  { title: "Leesplannen",  url: "/leesplannen",        icon: CalendarCheck,   tourId: "nav-plans"        },
   { title: "Groepen",      url: "/groepen",      icon: Users,           tourId: "nav-groepen"      },
   { title: "Notities",     url: "/notities",     icon: StickyNote,      tourId: "nav-notities"     },
   { title: "Hulpbronnen",  url: "/hulpbronnen",  icon: Library,         tourId: "nav-hulpbronnen"  },
@@ -122,7 +122,7 @@ function ProCTA() {
           </ul>
 
           <button
-            onClick={() => router.push("/abonnement")}
+            onClick={() => router.push("/abonnement?source=sidebar_cta")}
             className="w-full flex items-center justify-center gap-1 h-8 rounded-lg text-[12px] font-semibold text-white hover:opacity-90 transition-opacity"
             style={{ backgroundColor: "#0D9488" }}
           >

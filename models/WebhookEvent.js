@@ -7,7 +7,7 @@ import mongoose from "mongoose";
  */
 const WebhookEventSchema = new mongoose.Schema(
   {
-    provider: { type: String, required: true, enum: ["revenuecat"] },
+    provider: { type: String, required: true, enum: ["revenuecat", "stripe"] },
     eventId: { type: String, required: true },
     payloadSummary: { type: String, default: "" },
   },

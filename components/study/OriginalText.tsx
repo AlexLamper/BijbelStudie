@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { AlertCircle, ExternalLink, Languages, Info, Sparkles } from 'lucide-react';
+import { AlertCircle, ExternalLink, Languages, Info } from 'lucide-react';
 import { SkeletonBlock } from '../ui/skeletons';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import { bookNameMap } from '../../lib/book-mapping';
+import UpgradePrompt from "../pricing/UpgradePrompt";
 
 interface OriginalWord {
   h: string; // Hebrew or Greek surface form
@@ -172,7 +172,6 @@ export default function OriginalText({ book, chapter, highlightVerses }: Origina
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { data: session } = useSession();
-  const router = useRouter();
   const isSubscribed = session?.user?.isSubscribed;
 
   useEffect(() => {
@@ -311,20 +310,13 @@ export default function OriginalText({ book, chapter, highlightVerses }: Origina
             </div>
 
             {showPaywall && (
-              <div className="mt-6 max-w-[340px] mx-auto rounded-xl border border-gray-200 dark:border-border bg-gradient-to-br from-gray-50 to-white dark:from-card dark:to-background p-5 text-center shadow-sm">
-                <Sparkles className="h-5 w-5 mx-auto mb-2.5 text-[#0D9488]" />
-                <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-100 mb-1.5">
-                  Bekijk de volledige grondtekst
-                </h3>
-                <p className="text-xs text-muted-foreground max-w-[260px] mx-auto leading-relaxed mb-4">
-                  Upgrade naar Pro voor toegang tot alle verzen in het {langLabel}, met transliteratie en Strong-nummers.
-                </p>
-                <button
-                  onClick={() => router.push('/abonnement')}
-                  className="px-5 h-9 rounded-md text-sm font-semibold text-white bg-[#0D9488] hover:bg-[#0f766e] transition-colors"
-                >
-                  Upgrade naar Pro
-                </button>
+              <div className="mt-6">
+                <UpgradePrompt
+                  surface="original_text"
+                  title="Bekijk de volledige grondtekst"
+                  body={`Lees alle verzen in het ${langLabel}, met transliteratie en Strong-nummers.`}
+                  cta="Grondtekst ontgrendelen"
+                />
               </div>
             )}
 

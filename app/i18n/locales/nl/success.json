@@ -8,8 +8,10 @@
     "full_access_desc": "Ontgrendel alle premium bijbelcursussen en studiematerialen",
     "advanced": "Geavanceerde functies",
     "advanced_desc": "Geniet van notities, bladwijzers en persoonlijke studieplannen",
-    "billing": "Maandelijkse facturering",
-    "billing_desc": "Uw abonnement wordt maandelijks automatisch vernieuwd voor €9,99"
+    "billing_monthly": "Maandelijkse facturering",
+    "billing_annual": "Jaarlijkse facturering",
+    "billing_monthly_desc": "Uw abonnement wordt maandelijks automatisch vernieuwd voor €9,99",
+    "billing_annual_desc": "Uw abonnement wordt jaarlijks automatisch vernieuwd voor €89,99"
   },
   "reference": "Referentie:",
   "cta_study": "Ga naar Studio",

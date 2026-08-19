@@ -9,6 +9,7 @@ import {
 } from "lucide-react"
 import { curatedStudies, BADGE_STYLES } from "../../lib/data/curated-studies"
 import { CHAPTER_COUNTS } from "../../lib/data/bible-chapter-counts"
+import BillingNotices from "../../components/pricing/BillingNotices"
 
 /* ── Dutch Bible book names (66) ─────────────────────────── */
 const OT = [
@@ -192,6 +193,10 @@ export default function DashboardPage() {
 
           {/* ── Left column ───────────────────────────── */}
           <div className="flex flex-col gap-5 min-w-0">
+
+            {/* Billing notices sit above everything: a failed payment is the one
+                message that costs money to leave unread. */}
+            <BillingNotices />
 
             {/* Hero CTA - most prominent element */}
             <div data-tour="dashboard-hero" className="rounded-2xl p-6" style={{ background: "linear-gradient(135deg, #0D9488 0%, #0F766E 100%)" }}>
@@ -544,7 +549,7 @@ export default function DashboardPage() {
                       </span>
                     </Link>
                   )}
-                  <Link href={`/plans/${activePlan.id}`} className="text-xs font-semibold" style={{ color: "#0D9488" }}>
+                  <Link href={`/leesplannen/${activePlan.id}`} className="text-xs font-semibold" style={{ color: "#0D9488" }}>
                     Bekijk plan →
                   </Link>
                 </>
@@ -560,7 +565,7 @@ export default function DashboardPage() {
                       {planSuggestion.title}
                     </p>
                   )}
-                  <Link href="/plans" className="text-xs font-semibold" style={{ color: "#0D9488" }}>
+                  <Link href="/leesplannen" className="text-xs font-semibold" style={{ color: "#0D9488" }}>
                     Start een leesplan →
                   </Link>
                 </>

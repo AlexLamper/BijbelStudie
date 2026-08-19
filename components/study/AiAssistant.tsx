@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { AlertCircle, Loader2, Send, Sparkles } from 'lucide-react';
 import { SkeletonBlock } from '../ui/skeletons';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import UpgradePrompt from "../pricing/UpgradePrompt";
 
 interface AiAssistantProps {
   book: string;
@@ -85,7 +85,6 @@ export default function AiAssistant({
   initialQuestion,
   onInitialQuestionConsumed,
 }: AiAssistantProps) {
-  const router = useRouter();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -292,22 +291,12 @@ export default function AiAssistant({
       {!notConfigured && (
         <div className="flex-none px-3 sm:px-4 pb-6 pt-1 relative z-20 bg-white dark:bg-background">
           {quotaHit && !quota?.unlimited ? (
-            <div className="max-w-[340px] mx-auto rounded-xl border border-gray-200 dark:border-border bg-gradient-to-br from-gray-50 to-white dark:from-card dark:to-background p-5 text-center shadow-sm">
-              <Sparkles className="h-5 w-5 mx-auto mb-2.5 text-[#0D9488]" />
-              <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-100 mb-1.5">
-                Dagelijkse limiet bereikt
-              </h3>
-              <p className="text-xs text-muted-foreground max-w-[260px] mx-auto leading-relaxed mb-4">
-                Je hebt je {quota?.cap ?? 5} gratis vragen voor vandaag gesteld. Morgen kun je
-                weer verder, of upgrade naar Pro voor onbeperkt gebruik van de AI-assistent.
-              </p>
-              <button
-                onClick={() => router.push('/abonnement')}
-                className="px-5 h-9 rounded-md text-sm font-semibold text-white bg-[#0D9488] hover:bg-[#0f766e] transition-colors"
-              >
-                Upgrade naar Pro
-              </button>
-            </div>
+            <UpgradePrompt
+              surface="ai_limit"
+              title="Dagelijkse limiet bereikt"
+              body={`Je hebt je ${quota?.cap ?? 5} gratis vragen voor vandaag gesteld. Morgen kun je weer verder, of ga onbeperkt verder met Pro.`}
+              cta="Onbeperkt vragen stellen"
+            />
           ) : (
             <>
               {quota && !quota.unlimited && (
