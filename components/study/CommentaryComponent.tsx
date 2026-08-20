@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react';
 import { AlertCircle, ChevronDown, Lock } from 'lucide-react';
 import { SkeletonBlock, SkeletonText } from '../ui/skeletons';
 import { Card, CardContent } from '../ui/card';
-import { useSession } from 'next-auth/react';
 import { useTranslation } from '../../app/i18n/client';
 import { ReadingPreferences } from '../../hooks/useReadingPreferences';
 import { getPreferenceClasses, getPreferenceStyles } from '../../lib/preferenceClasses';
@@ -283,7 +282,6 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [availableSources, setAvailableSources] = useState<CommentarySource[]>([]);
   const [selectedSource, setSelectedSource] = useState(initialSource);
-  const { data: session } = useSession();
   const { t } = useTranslation('study');
   const [notFound, setNotFound] = useState(false);
 
