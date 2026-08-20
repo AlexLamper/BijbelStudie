@@ -11,6 +11,12 @@ import {
   isRateLimitError,
   type AiTurn,
 } from '../../../../../lib/aiGemini';
+import {
+  isCacheable,
+  readCachedAnswer,
+  writeCachedAnswer,
+  type CacheContext,
+} from '../../../../../lib/aiAnswerCache';
 
 export const dynamic = 'force-dynamic';
 
@@ -145,6 +151,17 @@ export async function POST(req: Request) {
       );
     }
 
+    // A cache hit costs no Gemini quota, which is the scarce resource. The
+    // user's own daily count is still spent, so the advertised cap holds.
+    const cacheCtx: CacheContext = { question: message, book, chapter, version };
+    const cacheable = isCacheable(message, history.length);
+    if (cacheable) {
+      const cached = await readCachedAnswer(cacheCtx);
+      if (cached) {
+        return jsonV1({ reply: cached, used: newCount, cap: unlimited ? null : cap, cached: true });
+      }
+    }
+
     let chapterText: string | null = null;
     if (book && chapter && version) {
       try {
@@ -166,12 +183,15 @@ export async function POST(req: Request) {
     ];
 
     let reply: string | undefined;
+    let model: string | null = null;
     try {
-      reply = await generateChatReply({
+      const generated = await generateChatReply({
         apiKey,
         contents,
         systemInstruction: buildSystemInstruction(book, chapter, version, chapterText),
       });
+      reply = generated.text;
+      model = generated.model;
     } catch (err) {
       await refund();
       // A capacity blip that survived every retry reads the same to the app as
@@ -193,6 +213,8 @@ export async function POST(req: Request) {
       await refund();
       return jsonV1({ reply: BLOCKED_REPLY, used: newCount - 1, cap: unlimited ? null : cap });
     }
+
+    if (cacheable) await writeCachedAnswer(cacheCtx, reply, model);
 
     return jsonV1({ reply, used: newCount, cap: unlimited ? null : cap });
   } catch (error) {

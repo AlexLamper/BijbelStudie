@@ -1,6 +1,7 @@
 // System prompt for the AI assistant (Bible Q&A). Dutch, interconfessional,
 // restricted to Bible/faith topics. Rebuilt per request with the current
-// reading context appended (chat is ephemeral, so nothing is cached).
+// reading context appended. Answers to first-turn questions are cached by
+// lib/aiAnswerCache.ts - bump its PROMPT_VERSION when changing this prompt.
 
 export const MAX_CHAPTER_CONTEXT_CHARS = 8000;
 

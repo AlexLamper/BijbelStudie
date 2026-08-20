@@ -13,6 +13,12 @@ import {
   isRateLimitError,
   type AiTurn,
 } from "../../../../lib/aiGemini";
+import {
+  isCacheable,
+  readCachedAnswer,
+  writeCachedAnswer,
+  type CacheContext,
+} from "../../../../lib/aiAnswerCache";
 
 const FREE_DAILY_CAP = 5;
 const PREMIUM_DAILY_CAP = 200; // soft anti-abuse cap for Pro/admin
@@ -134,6 +140,23 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // ── Cache lookup ───────────────────────────────────────────────
+    // A hit costs no Gemini quota, which is the scarce resource. The user's own
+    // daily count is still spent, so the advertised cap keeps its meaning.
+    const cacheCtx: CacheContext = { question: message, book, chapter, version };
+    const cacheable = isCacheable(message, history.length);
+    if (cacheable) {
+      const cached = await readCachedAnswer(cacheCtx);
+      if (cached) {
+        return NextResponse.json({
+          reply: cached,
+          used: newCount,
+          cap: unlimited ? null : cap,
+          cached: true,
+        });
+      }
+    }
+
     // ── Chapter context (best-effort, never fails the request) ─────
     let chapterText: string | null = null;
     if (book && chapter && version) {
@@ -157,12 +180,15 @@ export async function POST(req: NextRequest) {
     ];
 
     let reply: string | undefined;
+    let model: string | null = null;
     try {
-      reply = await generateChatReply({
+      const generated = await generateChatReply({
         apiKey,
         contents,
         systemInstruction: buildSystemInstruction(book, chapter, version, chapterText),
       });
+      reply = generated.text;
+      model = generated.model;
     } catch (err) {
       await refund();
       // A capacity blip that survived every retry reads the same to the user
@@ -189,6 +215,8 @@ export async function POST(req: NextRequest) {
         cap: unlimited ? null : cap,
       });
     }
+
+    if (cacheable) await writeCachedAnswer(cacheCtx, reply, model);
 
     return NextResponse.json({
       reply,

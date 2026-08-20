@@ -5,14 +5,31 @@ import { GoogleGenAI } from "@google/genai";
 // (Gemini 3).
 export const AI_MODEL = "gemini-flash-latest";
 
-// The free tier's request quota is granted *per project per model*, so the lite
-// model has its own separate daily allowance. That makes it a genuine rescue
-// both when flash is out of quota (429) and when it is overloaded (503).
-export const AI_FALLBACK_MODEL = "gemini-flash-lite-latest";
+/**
+ * The free tier grants its daily request quota *per project per model*, so every
+ * distinct model is a separate bucket and the chain multiplies the number of
+ * questions the app can answer per day. Ordered best-quality first; each entry
+ * was verified against the exact config below (gemma-4-31b-it is deliberately
+ * absent - it rejects `thinkingConfig` with a 400).
+ *
+ * Aliases are not extra quota: `gemini-flash-latest` currently resolves to
+ * `gemini-3.7-flash`, and both share one bucket, so only one of them belongs
+ * here.
+ */
+export const AI_FALLBACK_MODELS = [
+  "gemini-3.6-flash",
+  "gemini-3.5-flash",
+  "gemini-flash-lite-latest",
+  "gemini-3.5-flash-lite",
+  "gemini-3.1-flash-lite",
+];
+
+export const AI_MODEL_CHAIN = [AI_MODEL, ...AI_FALLBACK_MODELS];
 
 // Google returns 503 UNAVAILABLE ("experiencing high demand") for a sizeable
-// share of free-tier calls. Those are transient, so we retry before giving up.
-const RETRY_DELAYS_MS = [400, 1200];
+// share of free-tier calls. Those are transient, so the primary model gets a
+// second attempt before we move down the chain.
+const RETRY_DELAY_MS = 600;
 
 export interface AiTurn {
   role: "user" | "model";
@@ -46,7 +63,7 @@ export function isTransientError(err: unknown): boolean {
   );
 }
 
-/** Thrown when every attempt (both models) came back transient. */
+/** Thrown when every model in the chain was out of quota or unavailable. */
 export class AiBusyError extends Error {
   constructor(readonly cause: unknown) {
     super("Gemini unavailable after retries");
@@ -62,22 +79,29 @@ interface GenerateOptions {
   systemInstruction: string;
 }
 
+export interface AiReply {
+  text: string | undefined;
+  /** Which model actually answered, for cache bookkeeping and logs. */
+  model: string;
+}
+
 /**
  * One chat completion, hardened against the two ways the free tier fails:
  *
- *  - 503 UNAVAILABLE ("high demand"): retried on the same model after a short
- *    backoff, since the spike is usually over in a second.
+ *  - 503 UNAVAILABLE ("high demand"): the primary model is retried once after a
+ *    short backoff, since the spike is usually over in a second.
  *  - 429 RESOURCE_EXHAUSTED (daily per-model quota): retrying the same model
- *    cannot help, so we skip straight to the fallback model's own quota.
+ *    cannot help, so we move straight down the chain to a model whose own daily
+ *    bucket is still intact.
  *
- * If the fallback is out too, an AiBusyError is thrown. Any other error is
+ * If every model is spent, an AiBusyError is thrown. Any other error is
  * rethrown untouched so the route can map it to its own status code.
  */
 export async function generateChatReply({
   apiKey,
   contents,
   systemInstruction,
-}: GenerateOptions): Promise<string | undefined> {
+}: GenerateOptions): Promise<AiReply> {
   const ai = new GoogleGenAI({ apiKey });
 
   const call = (model: string) =>
@@ -100,28 +124,24 @@ export async function generateChatReply({
       },
     } as Parameters<typeof ai.models.generateContent>[0]);
 
-  // Primary model twice, then the lite model on its own quota.
-  const attempts = [AI_MODEL, AI_MODEL, AI_FALLBACK_MODEL];
   let lastError: unknown;
 
-  for (let i = 0; i < attempts.length; i++) {
-    try {
-      const result = await call(attempts[i]);
-      return result.text;
-    } catch (err) {
-      lastError = err;
+  for (const model of AI_MODEL_CHAIN) {
+    // Only the primary is worth a second shot; further down the chain another
+    // model is a cheaper bet than waiting out the same one.
+    const tries = model === AI_MODEL ? 2 : 1;
 
-      if (isRateLimitError(err)) {
-        // Out of quota on this model: jump to the fallback immediately. If we
-        // are already there, no bucket is left to try.
-        if (attempts[i] === AI_FALLBACK_MODEL) break;
-        i = attempts.lastIndexOf(AI_MODEL);
-        continue;
+    for (let attempt = 0; attempt < tries; attempt++) {
+      try {
+        const result = await call(model);
+        return { text: result.text, model };
+      } catch (err) {
+        lastError = err;
+        // Out of quota for the day: no retry can help, move to the next bucket.
+        if (isRateLimitError(err)) break;
+        if (!isTransientError(err)) throw err;
+        if (attempt + 1 < tries) await sleep(RETRY_DELAY_MS);
       }
-
-      if (!isTransientError(err)) throw err;
-      const delay = RETRY_DELAYS_MS[i];
-      if (delay !== undefined) await sleep(delay);
     }
   }
 
