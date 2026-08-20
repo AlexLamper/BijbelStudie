@@ -1,4 +1,3 @@
-import { GoogleGenAI } from '@google/genai';
 import { requireUser } from '../../../../../lib/apiAuth';
 import { corsPreflight, errorV1, handleV1Error, jsonV1 } from '../../../../../lib/apiV1';
 import connectMongoDB from '../../../../../lib/mongodb';
@@ -6,6 +5,12 @@ import AiUsage from '../../../../../models/AiUsage';
 import { getChapter } from '../../../../../lib/local-data';
 import { buildSystemInstruction, formatChapterText } from '../../../../../lib/aiPrompt';
 import { assertMobileAllowed } from '../../../../../lib/mobileLicensing';
+import {
+  AiBusyError,
+  generateChatReply,
+  isRateLimitError,
+  type AiTurn,
+} from '../../../../../lib/aiGemini';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,7 +19,6 @@ export async function OPTIONS() {
 }
 
 // Mirrors `/api/ai/chat` on the website: same model, same caps, same prompt.
-const MODEL = 'gemini-flash-latest';
 const FREE_DAILY_CAP = 5;
 const PREMIUM_DAILY_CAP = 200;
 const MAX_MESSAGE_LENGTH = 2000;
@@ -50,13 +54,6 @@ function sanitizeHistory(raw: unknown): ChatTurn[] {
       role: m.role as 'user' | 'assistant',
       content: m.content.slice(0, MAX_HISTORY_ITEM_LENGTH),
     }));
-}
-
-function isRateLimitError(err: unknown): boolean {
-  const e = err as { status?: number; message?: string } | null;
-  if (e?.status === 429) return true;
-  const msg = String(e?.message ?? err ?? '');
-  return msg.includes('429') || msg.includes('RESOURCE_EXHAUSTED');
 }
 
 /** Remaining quota, so the composer can show "3 van 5 vragen over". */
@@ -160,8 +157,7 @@ export async function POST(req: Request) {
       }
     }
 
-    const ai = new GoogleGenAI({ apiKey });
-    const contents = [
+    const contents: AiTurn[] = [
       ...history.map((m) => ({
         role: m.role === 'assistant' ? ('model' as const) : ('user' as const),
         parts: [{ text: m.content }],
@@ -169,27 +165,18 @@ export async function POST(req: Request) {
       { role: 'user' as const, parts: [{ text: message }] },
     ];
 
-    let result;
+    let reply: string | undefined;
     try {
-      result = await ai.models.generateContent({
-        model: MODEL,
+      reply = await generateChatReply({
+        apiKey,
         contents,
-        config: {
-          systemInstruction: buildSystemInstruction(book, chapter, version, chapterText),
-          temperature: 0.6,
-          maxOutputTokens: 2500,
-          thinkingConfig: { thinkingLevel: 'LOW' },
-          safetySettings: [
-            { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-            { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-            { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-            { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-          ],
-        },
-      } as Parameters<typeof ai.models.generateContent>[0]);
+        systemInstruction: buildSystemInstruction(book, chapter, version, chapterText),
+      });
     } catch (err) {
       await refund();
-      if (isRateLimitError(err)) {
+      // A capacity blip that survived every retry reads the same to the app as
+      // a rate limit: come back in a minute.
+      if (err instanceof AiBusyError || isRateLimitError(err)) {
         return jsonV1(
           {
             error: 'AI_BUSY',
@@ -202,7 +189,6 @@ export async function POST(req: Request) {
       return errorV1('AI_CALL_FAILED', 502, 'AI-aanroep mislukt');
     }
 
-    const reply = result.text;
     if (!reply || reply.trim().length === 0) {
       await refund();
       return jsonV1({ reply: BLOCKED_REPLY, used: newCount - 1, cap: unlimited ? null : cap });

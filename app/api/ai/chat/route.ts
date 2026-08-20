@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { GoogleGenAI } from "@google/genai";
 import { authOptions } from "../../../../lib/authOptions";
 import connectMongoDB from "../../../../lib/mongodb";
 import User from "../../../../models/User";
@@ -8,10 +7,13 @@ import AiUsage from "../../../../models/AiUsage";
 import { isAdminEmail } from "../../../../lib/adminEmails";
 import { getChapter } from "../../../../lib/local-data";
 import { buildSystemInstruction, formatChapterText } from "../../../../lib/aiPrompt";
+import {
+  AiBusyError,
+  generateChatReply,
+  isRateLimitError,
+  type AiTurn,
+} from "../../../../lib/aiGemini";
 
-// "gemini-2.5-flash" is no longer available to new API projects; the -latest
-// alias currently resolves to the newest flash model (Gemini 3).
-const MODEL = "gemini-flash-latest";
 const FREE_DAILY_CAP = 5;
 const PREMIUM_DAILY_CAP = 200; // soft anti-abuse cap for Pro/admin
 const MAX_MESSAGE_LENGTH = 2000;
@@ -47,13 +49,6 @@ function sanitizeHistory(raw: unknown): ChatTurn[] {
       role: m.role as "user" | "assistant",
       content: m.content.slice(0, MAX_HISTORY_ITEM_LENGTH),
     }));
-}
-
-function isRateLimitError(err: unknown): boolean {
-  const e = err as { status?: number; message?: string } | null;
-  if (e?.status === 429) return true;
-  const msg = String(e?.message ?? err ?? "");
-  return msg.includes("429") || msg.includes("RESOURCE_EXHAUSTED");
 }
 
 export async function POST(req: NextRequest) {
@@ -153,8 +148,7 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Gemini call ────────────────────────────────────────────────
-    const ai = new GoogleGenAI({ apiKey });
-    const contents = [
+    const contents: AiTurn[] = [
       ...history.map((m) => ({
         role: m.role === "assistant" ? ("model" as const) : ("user" as const),
         parts: [{ text: m.content }],
@@ -162,29 +156,18 @@ export async function POST(req: NextRequest) {
       { role: "user" as const, parts: [{ text: message }] },
     ];
 
-    let result;
+    let reply: string | undefined;
     try {
-      result = await ai.models.generateContent({
-        model: MODEL,
+      reply = await generateChatReply({
+        apiKey,
         contents,
-        config: {
-          systemInstruction: buildSystemInstruction(book, chapter, version, chapterText),
-          temperature: 0.6,
-          // Gemini 3: maxOutputTokens includes thinking tokens; LOW keeps
-          // thinking small and fast (thinkingBudget: 0 is rejected here).
-          maxOutputTokens: 2500,
-          thinkingConfig: { thinkingLevel: "LOW" },
-          safetySettings: [
-            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
-            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
-            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
-            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
-          ],
-        },
-      } as Parameters<typeof ai.models.generateContent>[0]);
+        systemInstruction: buildSystemInstruction(book, chapter, version, chapterText),
+      });
     } catch (err) {
       await refund();
-      if (isRateLimitError(err)) {
+      // A capacity blip that survived every retry reads the same to the user
+      // as a rate limit: come back in a minute.
+      if (err instanceof AiBusyError || isRateLimitError(err)) {
         return NextResponse.json(
           {
             error: "Het is momenteel erg druk. Probeer het over een minuutje opnieuw.",
@@ -197,7 +180,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "AI-aanroep mislukt" }, { status: 502 });
     }
 
-    const reply = result.text;
     if (!reply || reply.trim().length === 0) {
       // Safety block or empty candidate - degrade gracefully and refund.
       await refund();
