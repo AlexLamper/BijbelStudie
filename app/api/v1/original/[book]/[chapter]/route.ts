@@ -6,6 +6,8 @@ import {
   handleV1Error,
 } from '../../../../../../lib/apiV1';
 import { getMobileOriginalChapter } from '../../../../../../lib/mobileContent';
+import { resolveUser } from '../../../../../../lib/apiAuth';
+import { gateOriginal } from '../../../../../../lib/proContent';
 
 export const runtime = 'nodejs';
 
@@ -33,7 +35,17 @@ export async function GET(
     const payload = await getMobileOriginalChapter(decodeURIComponent(book), chapterNumber);
     if (!payload) return errorV1('NOT_FOUND', 404, 'Grondtekst niet gevonden.');
 
-    return cachedJsonV1(req, payload);
+    // Pro content. `resolveUser` is deliberately the optional variant: an
+    // anonymous reader still gets the preview, which is the whole point of
+    // truncating rather than refusing.
+    const user = await resolveUser(req);
+    const gated = gateOriginal(payload.verses, { isPro: user?.isPro ?? false });
+
+    return cachedJsonV1(
+      req,
+      { ...payload, verses: gated.items, locked: gated.locked, totalVerses: payload.verses.length },
+      { private: true },
+    );
   } catch (error) {
     return handleV1Error(error);
   }

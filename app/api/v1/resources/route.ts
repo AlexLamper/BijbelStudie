@@ -31,7 +31,11 @@ export async function GET(req: Request) {
         description: item.description,
         category: item.category,
         source: item.source,
-        sourceUrl: item.sourceUrl,
+        // Withheld while locked. The list still shows the entry - the site does
+        // too - but shipping the link alongside the lock made the lock a label
+        // rather than a gate: the client was the only thing declining to open
+        // a URL it had been handed.
+        sourceUrl: Boolean(item.isPro) && !isPro ? null : item.sourceUrl,
         rightsNote: item.rightsNote,
         isPro: Boolean(item.isPro),
         locked: Boolean(item.isPro) && !isPro,

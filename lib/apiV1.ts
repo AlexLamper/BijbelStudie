@@ -77,24 +77,46 @@ export function contentEtag(payload: unknown): string {
  * Returns a 304 when the client's `If-None-Match` already matches, otherwise
  * a 200 carrying the ETag. Scripture text does not change, so a long
  * `Cache-Control` plus revalidation makes a re-read cost one empty round trip.
+ *
+ * **`private` is load-bearing on any entitlement-dependent response.** The
+ * default here is `public`, which lets Vercel's CDN keep one copy and hand it
+ * to everyone — correct while every caller got identical bytes, and a hole the
+ * moment a response depends on who is asking. The first Pro reader to fetch a
+ * chapter would populate the shared cache with the full text and every free
+ * reader behind it would be served the same entry. Callers that gate on
+ * `isPro` must pass `private: true`; it also sets `Vary: Authorization` so an
+ * intermediary that ignores `private` still keys the two variants apart.
+ *
+ * The long `max-age` is kept either way. `private` restricts *who* may store
+ * the response, not for how long, so the reader's own device still revalidates
+ * with one empty round trip.
  */
 export function cachedJsonV1(
   req: Request,
   payload: unknown,
-  options?: { maxAge?: number; immutable?: boolean },
+  options?: { maxAge?: number; immutable?: boolean; private?: boolean },
 ) {
   const etag = contentEtag(payload);
   const maxAge = options?.maxAge ?? 60 * 60 * 24 * 365;
-  const cacheControl = `public, max-age=${maxAge}${options?.immutable === false ? '' : ', immutable'}`;
+  const scope = options?.private ? 'private' : 'public';
+  // `immutable` promises the body will never change for this URL. That is true
+  // of scripture and false of anything gated, which changes the moment the
+  // reader subscribes.
+  const immutable = options?.immutable ?? !options?.private;
+  const cacheControl = `${scope}, max-age=${maxAge}${immutable ? ', immutable' : ', must-revalidate'}`;
+
+  const headers: Record<string, string> = {
+    ...V1_CORS_HEADERS,
+    ETag: etag,
+    'Cache-Control': cacheControl,
+  };
+  if (options?.private) headers.Vary = 'Authorization';
 
   if (req.headers.get('if-none-match') === etag) {
-    return new NextResponse(null, {
-      status: 304,
-      headers: { ...V1_CORS_HEADERS, ETag: etag, 'Cache-Control': cacheControl },
-    });
+    return new NextResponse(null, { status: 304, headers });
   }
 
-  return jsonV1(payload, { headers: { ETag: etag, 'Cache-Control': cacheControl } });
+  return jsonV1(payload, { headers });
 }
 
 export function requireParam(value: string | null | undefined, name: string): string {

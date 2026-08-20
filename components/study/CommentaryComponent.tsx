@@ -275,6 +275,10 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
   const prefClasses = getPreferenceClasses(preferences);
   const prefStyles  = getPreferenceStyles(preferences);
   const [commentary, setCommentary] = useState<CommentaryData | null>(null);
+  // Whether the server withheld part of this chapter. Decided there, not here:
+  // the client can no longer tell a short chapter from a truncated one, because
+  // the withheld text is not in the response to measure.
+  const [locked, setLocked] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [availableSources, setAvailableSources] = useState<CommentarySource[]>([]);
@@ -312,6 +316,7 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
       setLoading(true);
       setError(null);
       setCommentary(null);
+      setLocked(false);
       setNotFound(false);
 
       try {
@@ -339,13 +344,15 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
         }
 
         const data = await res.json();
+        const verses = data?.verses;
 
-        if (!data || Object.keys(data).length === 0) {
+        if (!verses || Object.keys(verses).length === 0) {
           setNotFound(true);
           return;
         }
 
-        setCommentary(data);
+        setCommentary(verses);
+        setLocked(Boolean(data.locked));
       } catch (err: unknown) {
         if (err instanceof Error) {
           setError(err.message);
@@ -485,13 +492,13 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
                 <p className="font-inter">Geen commentaar beschikbaar voor dit hoofdstuk.</p>
             </div>
         ) : (() => {
-            const isSubscribed = session?.user?.isSubscribed;
             const allEntries = Object.entries(commentary);
-            // KingComments is always fully free for everyone - never paywall it (covers all variants like kingcomments_nl)
-            const isAlwaysFree = selectedSource.toLowerCase().startsWith('kingcomments');
-            // Total content length determines whether to clip. Skip paywall for very short commentaries.
-            const totalLength = allEntries.reduce((sum, [, text]) => sum + text.length, 0);
-            const showPaywall = !isSubscribed && !isAlwaysFree && totalLength > 1200;
+            // The server decides. It applies the same rules this component used
+            // to apply itself - KingComments always free, short chapters never
+            // paywalled - but it applies them before sending the text rather
+            // than after, so the mask below is now cosmetic rather than the
+            // only thing standing between a visitor and the full chapter.
+            const showPaywall = locked;
             return (
               <>
                 <div

@@ -6,6 +6,8 @@ import {
   handleV1Error,
 } from '../../../../../../../lib/apiV1';
 import { getMobileCommentaryChapter } from '../../../../../../../lib/mobileContent';
+import { resolveUser } from '../../../../../../../lib/apiAuth';
+import { gateCommentary } from '../../../../../../../lib/proContent';
 
 export const runtime = 'nodejs';
 
@@ -29,7 +31,19 @@ export async function GET(
     const payload = await getMobileCommentaryChapter(commentaryId, decodedBook, chapterNumber);
     if (!payload) return errorV1('NOT_FOUND', 404, 'Commentaar niet gevonden.');
 
-    return cachedJsonV1(req, payload);
+    const user = await resolveUser(req);
+    const gated = gateCommentary(
+      payload.verses,
+      (v) => v.t,
+      (v, t) => ({ ...v, t }),
+      { commentaryId, isPro: user?.isPro ?? false },
+    );
+
+    return cachedJsonV1(
+      req,
+      { ...payload, verses: gated.items, locked: gated.locked, totalVerses: payload.verses.length },
+      { private: true },
+    );
   } catch (error) {
     return handleV1Error(error);
   }
