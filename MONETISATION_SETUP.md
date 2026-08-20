@@ -6,6 +6,35 @@ cannot be done from the codebase.
 
 Nothing here is optional if you want the new behaviour to work end to end.
 
+## Status — 2026-08-20
+
+Stripe account `acct_1QkiMOGkd9Br8GXY` ("Bijbel-studie").
+
+**Live mode is now done.**
+
+| Object | Live id |
+|---|---|
+| Monthly price €9,99 | `price_1R6ap2Gkd9Br8GXY20SfFyzw` (pre-existing, `tax_behavior: unspecified`) |
+| Annual price €89,99 | `price_1U6SmcGkd9Br8GXYiQJ0AnKI` (new, `unspecified` to match monthly) |
+| Product | `prod_S0c3528EdTZI6H` — "Scriptura Pro" → **BijbelStudie Pro** |
+| Webhook endpoint | `we_1U6Sn6Gkd9Br8GXYRksSZHxW` → `https://www.bijbel-studie.com/api/webhooks/stripe`, 8 events |
+| Billing Portal config | `bpc_1U6SnNGkd9Br8GXY1pGZje90` (default, cancellation off) |
+| Strays archived | `prod_Sj4gjhgI70JHuA` ("Pro" €29/mo), `prod_Sj4eBGluJmQ65Q` ("Basic" €9/mo) |
+
+Vercel **production** now carries `STRIPE_ANNUAL_PRICE_ID`,
+`NEXT_PUBLIC_STRIPE_ANNUAL_PRICE_ID`, `NEXT_PUBLIC_STRIPE_PRICE_ID`, a fresh
+`STRIPE_WEBHOOK_SECRET` for the new endpoint (the 513-day-old orphan was
+removed — including from Preview, which had no endpoint pointing at it), and
+`STRIPE_REQUIRE_TOS_CONSENT=true`.
+
+The ToS URL in Dashboard → Settings → Public details was already set: a live
+Checkout Session created with `consent_collection[terms_of_service]=required`
+was accepted rather than rejected, which is the only way to prove it from
+outside the Dashboard. That session was expired immediately.
+
+Only one live subscription has ever existed (`sub_1RQW5z…`, canceled, on the
+monthly price), so the rename and the archiving touched nothing billable.
+
 ## Status — 2026-08-19
 
 Stripe account `acct_1QkiMOGkd9Br8GXY` ("Bijbel-studie").
@@ -58,7 +87,7 @@ routes, the `billingIssueSince` banner (`BillingNotices` on `/dashboard`), the
 cancel-reason capture, the signup→checkout resume, and the iOS paywall's
 required elements. `tsc --noEmit` clean; 71/71 tests pass.
 
-**Live mode is NOT done.** It needs the two things below.
+**Live mode was NOT done at the time of writing.** Both items below were completed on 2026-08-20; kept for the record.
 
 1. The key `stripe login` issues is a *restricted* key and cannot write. Grant
    **Prices Write**, **Products Write**, **Features Write**, **Webhook Endpoints

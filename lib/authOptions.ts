@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs";
 import connectMongoDB from "./mongodb";
 import User from "../models/User";
 import { isAdminEmail } from "./adminEmails";
+import { resolveIsPro } from "./mobilePremium";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -86,7 +87,12 @@ export const authOptions: NextAuthOptions = {
             session.user.id = user._id.toString();
             const isAdmin = user.isAdmin || isAdminEmail(session.user.email) || false;
             session.user.isAdmin = isAdmin;
-            session.user.isSubscribed = user.subscribed || isAdmin;
+            // Store purchases count here too. `subscribed` alone is the Stripe
+            // flag, so someone who bought BijbelStudie Pro in the iOS app was
+            // Pro on their phone and paywalled on the website with the same
+            // account. `resolveIsPro` is the same helper /api/v1/me uses, so
+            // the two surfaces cannot disagree about who has paid.
+            session.user.isSubscribed = resolveIsPro(user, isAdmin);
             session.user.onboardingCompleted = user.preferences?.onboardingCompleted || false;
             session.user.tourCompleted = user.preferences?.tourCompleted || false;
           }
