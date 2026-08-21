@@ -1,12 +1,15 @@
 {
-  "name": "BijbelStudie",
+  "name": "BijbelStudie - Online bijbelstudie",
   "short_name": "BijbelStudie",
-  "description": "Read and study Scripture online with BijbelStudie.",
+  "description": "Lees en bestudeer de Bijbel online: meerdere vertalingen, bijbelcommentaren, grondtekst, leesplannen, notities en een AI-assistent.",
+  "lang": "nl-NL",
+  "dir": "ltr",
+  "categories": ["education", "books", "lifestyle"],
   "start_url": "https://www.bijbel-studie.com/",
   "scope": "https://www.bijbel-studie.com/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#262626",
+  "theme_color": "#0D9488",
   "icons": [
     {
       "src": "/icon.svg",

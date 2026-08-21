@@ -14,10 +14,9 @@ export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('studies', lng);
 }
 
-
-
-
-
+// The CollectionPage/ItemList/Course graph lives in page.tsx, not here. This
+// layout also wraps /studies/:id, and emitting the list page's nodes there
+// would describe /studies on a URL that is not /studies.
 
 export default async function PlansLayout({
   children,

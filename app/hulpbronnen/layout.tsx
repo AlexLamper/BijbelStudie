@@ -14,6 +14,10 @@ export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata("resources", lng);
 }
 
+// The CollectionPage/ItemList graph lives in page.tsx, not here. A layout also
+// wraps /hulpbronnen/:slug, and emitting the list page's nodes there would put
+// structured data describing /hulpbronnen on a URL that is not /hulpbronnen.
+
 export default async function ResourcesLayout({
   children,
 }: {

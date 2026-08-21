@@ -9,6 +9,16 @@ import connectMongoDB from "../../../lib/mongodb";
 import User from "../../../models/User";
 import { LIBRARY, getLibraryItem, getCategoryMeta } from "../library";
 import Reader from "./Reader";
+import { buildMetadata } from "../../../lib/pageMetadata";
+import { JsonLd } from "../../../components/seo/JsonLd";
+import { Breadcrumbs } from "../../../components/content/ContentShell";
+import { absoluteUrl } from "../../../lib/seo/constants";
+import {
+  graph,
+  webPageNode,
+  breadcrumbNode,
+  bookNode,
+} from "../../../lib/seo/structuredData";
 
 const TEAL = "#0D9488";
 
@@ -23,11 +33,34 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const item = getLibraryItem(slug);
-  if (!item) return { title: "Hulpbronnen" };
-  return {
-    title: `${item.title}${item.author ? ` — ${item.author}` : ""} | Bibliotheek`,
-    description: item.description,
-  };
+  if (!item) {
+    return buildMetadata({
+      title: "Werk niet gevonden",
+      description: "Dit werk staat niet in de bibliotheek.",
+      path: "/hulpbronnen",
+      indexable: false,
+    });
+  }
+
+  const byline = item.author ? ` — ${item.author}` : "";
+  return buildMetadata({
+    title: `${item.title}${byline}${item.year ? ` (${item.year})` : ""}`,
+    description: item.description.slice(0, 300),
+    path: `/hulpbronnen/${item.slug}`,
+    type: "book",
+    ogEyebrow: "Bibliotheek",
+    // Pro items show only a paywall to anonymous visitors, so there is nothing
+    // for Google to index. Sending it noindex is honest and keeps it out of
+    // "Gecrawld - momenteel niet geïndexeerd" in Search Console.
+    indexable: !item.isPro,
+    keywords: [
+      item.title.toLowerCase(),
+      ...(item.author ? [item.author.toLowerCase()] : []),
+      "publiek domein",
+      "gratis bijbelstudie",
+      "christelijke literatuur",
+    ],
+  });
 }
 
 export default async function LibraryReaderPage({ params }: PageProps) {
@@ -53,11 +86,39 @@ export default async function LibraryReaderPage({ params }: PageProps) {
 
   const cat = getCategoryMeta(item.category);
 
+  const path = `/hulpbronnen/${item.slug}`;
+  const url = absoluteUrl(path);
+  const crumbs = [
+    { name: "Home", path: "/" },
+    { name: "Hulpbronnen", path: "/hulpbronnen" },
+    { name: item.title, path },
+  ];
+  const pageGraph = graph(
+    webPageNode({
+      path,
+      name: item.title,
+      description: item.description,
+      breadcrumbId: `${url}#breadcrumb`,
+    }),
+    breadcrumbNode(crumbs, url),
+    bookNode({
+      title: item.title,
+      author: item.author,
+      year: item.year,
+      description: item.description,
+      path,
+      sourceUrl: item.sourceUrl,
+    })
+  );
+
   return (
     <div className="h-full overflow-y-auto">
+      <JsonLd data={pageGraph} />
+      <Breadcrumbs crumbs={crumbs} />
       <div className="px-6 xl:px-10 py-6 space-y-5 max-w-6xl mx-auto">
 
-        {/* Breadcrumb / back */}
+        {/* Back link. The crumb trail above is the machine-readable path; this
+            stays for the one-tap return to the list. */}
         <Link
           href="/hulpbronnen"
           className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-muted-foreground hover:text-[#0D9488] transition-colors no-underline"

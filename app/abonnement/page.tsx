@@ -262,7 +262,13 @@ function SubscribePageInner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, checking, isSubscribed, planParam])
 
-  if (status === "loading" || checking) {
+  // Only block on the session while there IS a session to resolve. `checking`
+  // starts true and `status` is "loading" during SSR, so gating on them
+  // unconditionally served this page to logged-out visitors - and to Googlebot
+  // - as a skeleton with no <h1>, no prices and no copy. The pricing content
+  // is identical for everyone who is not already Pro, so it can render
+  // immediately; only the "Je bent al Pro" branch below needs the session.
+  if (status === "authenticated" && checking) {
     return <SkeletonPage fullHeight />
   }
 

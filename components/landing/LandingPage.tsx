@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import {
   BookOpen, BookMarked, StickyNote, Library,
   ArrowRight, Check, ChevronDown, Users, Shield,
@@ -12,6 +12,8 @@ import {
   Flame, PenLine, Sparkles,
 } from "lucide-react"
 import { Footer } from "./footer"
+import { HOME_FAQS } from "../../lib/content/homeFaq"
+import { HOW_IT_WORKS_STEPS } from "../../lib/content/howItWorks"
 
 /* ─── Design tokens ──────────────────────────────────────────── */
 const T = {
@@ -275,14 +277,16 @@ function Navbar() {
           <span className="font-bold text-base" style={{ color: T.text }}>BijbelStudie</span>
         </Link>
 
-        {/* Navigatie - exact gecentreerd */}
-        <nav className="hidden md:flex items-center justify-center gap-8">
+        {/* Navigatie - exact gecentreerd. De twee content-hubs staan hier en
+            niet alleen in de footer: interne links vanuit de hoofdnavigatie
+            zijn wat een crawler als belangrijk leest. */}
+        <nav className="hidden md:flex items-center justify-center gap-6 lg:gap-7">
           {[
-            { href: "#functies",    label: "Functies" },
-            { href: "#in-actie",    label: "In actie" },
-            { href: "#bibliotheek", label: "Bibliotheek" },
-            { href: "#prijzen",     label: "Prijzen" },
-            { href: "#faq",         label: "FAQ" },
+            { href: "#functies",      label: "Functies" },
+            { href: "/bijbelstudie",  label: "Gids" },
+            { href: "/bijbelboeken",  label: "Bijbelboeken" },
+            { href: "#prijzen",       label: "Prijzen" },
+            { href: "#faq",           label: "FAQ" },
           ].map(({ href, label }) => (
             <Link key={href} href={href}
               className="text-sm text-gray-500 hover:text-gray-900 transition-colors whitespace-nowrap">
@@ -330,6 +334,9 @@ function Hero() {
       <div className="relative max-w-6xl 2xl:max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center">
         {/* Text column */}
         <div className="space-y-7">
+          {/* The h1 carries the head term verbatim ("online bijbelstudie") and
+              is the only h1 on the page. The animation must not gate the text:
+              `animate` runs on mount, so the copy is in the served HTML. */}
           <motion.h1
             className="text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight"
             style={{ color: T.text }}
@@ -337,14 +344,14 @@ function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.65, ease }}
           >
-            De #1 Nederlandse<br />
+            De Nederlandse tool voor{" "}
             <motion.span
               style={{ color: T.teal }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.3, ease }}
             >
-              Bijbelstudie tool
+              online bijbelstudie
             </motion.span>
           </motion.h1>
 
@@ -355,9 +362,11 @@ function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, delay: 0.18, ease }}
           >
-            BijbelStudie geeft u de tools om de Bijbel diep en persoonlijk te bestuderen.
-            Met een AI-assistent die uw vragen over de Schrift beantwoordt, bewezen methoden,
-            meerdere vertalingen en persoonlijke notities.
+            Bestudeer de Bijbel diep en persoonlijk: vier Nederlandse vertalingen,
+            bijbelcommentaren per vers, de Hebreeuwse en Griekse grondtekst,
+            leesplannen, notities en een AI-assistent die uw vragen over de Schrift
+            beantwoordt. <strong style={{ color: T.text, fontWeight: 600 }}>Gratis te beginnen</strong>,
+            zonder creditcard.
           </motion.p>
 
           <motion.div
@@ -1002,12 +1011,16 @@ function Showcase() {
 }
 
 /* ─── How it works ───────────────────────────────────────────── */
+const STEP_ICONS = {
+  account: Users,
+  book: BookOpen,
+  commentary: MessageSquare,
+} as const
+
 function HowItWorks() {
-  const steps = [
-    { num: "01", icon: Users,        title: "Maak een gratis account aan",      desc: "Registreer u met uw e-mailadres of log in met Google. Uw voortgang en notities worden automatisch opgeslagen." },
-    { num: "02", icon: BookOpen,     title: "Kies een bijbelboek of leesplan",  desc: "Begin direct met lezen of schrijf u in voor een leesplan. Kies uw favoriete bijbelvertaling." },
-    { num: "03", icon: MessageSquare, title: "Ontdek grondteksten en commentaren",    desc: "Verken de oorspronkelijke teksten met commentaren van erkende Bijbelgeleerden en verdiep je begrip." },
-  ]
+  // Copy lives in lib/content so the HowTo JSON-LD on app/page.tsx describes
+  // exactly these steps.
+  const steps = HOW_IT_WORKS_STEPS.map(s => ({ ...s, icon: STEP_ICONS[s.icon] }))
 
   return (
     <section className="py-20" style={{ backgroundColor: T.card }}>
@@ -1154,59 +1167,60 @@ function Pricing() {
 }
 
 /* ─── FAQ ────────────────────────────────────────────────────── */
-function FAQItem({ q, a }: { q: string; a: string }) {
+/**
+ * The answer is always mounted and collapsed with max-height rather than
+ * unmounted. Previously `{open && <p/>}` kept every answer out of the served
+ * HTML, so the whole FAQ was invisible to crawlers and the FAQPage structured
+ * data on app/page.tsx described text that was not on the page.
+ */
+function FAQItem({ q, a, id }: { q: string; a: string; id: string }) {
   const [open, setOpen] = useState(false)
   return (
     <div className="border-b" style={{ borderColor: T.border }}>
-      <button
-        className="w-full flex items-center justify-between gap-4 py-4 text-left font-semibold text-sm select-none"
-        style={{ color: T.text }}
-        onClick={() => setOpen(!open)}
-      >
-        <span>{q}</span>
-        <motion.span
-          animate={{ rotate: open ? 180 : 0 }}
-          transition={{ duration: 0.25, ease }}
-          className="flex-shrink-0"
+      <h3>
+        <button
+          className="w-full flex items-center justify-between gap-4 py-4 text-left font-semibold text-sm select-none"
+          style={{ color: T.text }}
+          onClick={() => setOpen(!open)}
+          aria-expanded={open}
+          aria-controls={`${id}-answer`}
+          id={`${id}-question`}
         >
-          <ChevronDown className="h-4 w-4" style={{ color: T.muted }} />
-        </motion.span>
-      </button>
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            key="answer"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.28, ease }}
-            style={{ overflow: "hidden" }}
+          <span>{q}</span>
+          <motion.span
+            animate={{ rotate: open ? 180 : 0 }}
+            transition={{ duration: 0.25, ease }}
+            className="flex-shrink-0"
           >
-            <p className="pb-5 text-sm leading-relaxed" style={{ color: T.muted }}>{a}</p>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <ChevronDown className="h-4 w-4" style={{ color: T.muted }} />
+          </motion.span>
+        </button>
+      </h3>
+      <motion.div
+        id={`${id}-answer`}
+        role="region"
+        aria-labelledby={`${id}-question`}
+        initial={false}
+        animate={{ height: open ? "auto" : 0, opacity: open ? 1 : 0 }}
+        transition={{ duration: 0.28, ease }}
+        style={{ overflow: "hidden" }}
+      >
+        <p className="pb-5 text-sm leading-relaxed" style={{ color: T.muted }}>{a}</p>
+      </motion.div>
     </div>
   )
 }
 
 function FAQ() {
-  const faqs = [
-    { q: "Is BijbelStudie helemaal gratis?",           a: "Het gratis plan geeft volledige toegang tot bijbellezen, notities, leesplannen en studiemethoden, plus 5 vragen per dag aan de AI-assistent. De Pro versie (€9,99/maand) voegt commentaren, onbeperkt gebruik van de AI-assistent en geavanceerde functies toe." },
-    { q: "Wat doet de AI-assistent?",                  a: "U kunt de AI-assistent elke vraag stellen over de Bijbel, bijbelse geschiedenis, theologie en het geloofsleven. De assistent weet welk hoofdstuk u leest, onderbouwt antwoorden met bijbelverzen en beantwoordt alleen vragen over de Schrift en het christelijk geloof. Gebruik de antwoorden als studiehulp en toets ze altijd aan de Bijbel zelf." },
-    { q: "Welke bijbelvertalingen zijn beschikbaar?",  a: "In het Nederlands ondersteunen wij de Statenvertaling, Canisiusvertaling 1939 en De Heilige Schrift 1917. Daarnaast bieden wij zes Engelse vertalingen aan: King James Version, American Standard Version, NET Bible, World English Bible, Geneva Bible (1599) en Coverdale Bible (1535)." },
-    { q: "Worden mijn notities opgeslagen?",           a: "Ja. Al uw notities en voortgang worden automatisch opgeslagen in uw persoonlijke account en zijn op elk apparaat beschikbaar." },
-    { q: "Hoe werkt een leesplan?",                    a: "U schrijft zich in voor een leesplan en ontvangt dagelijkse leesporties. Uw voortgang wordt bijgehouden en u kunt op elk moment verdergaan waar u gebleven was." },
-    { q: "Is mijn persoonlijke data veilig?",          a: "Ja. Wij gebruiken beveiligde verbindingen (HTTPS/TLS) en slaan uw gegevens versleuteld op. Uw data wordt nooit verkocht aan derden." },
-  ]
-
   return (
     <section id="faq" className="py-20" style={{ backgroundColor: T.card }}>
       <div className="max-w-3xl mx-auto px-6">
-        <SectionHeader label="FAQ" title="Veelgestelde vragen" />
+        <SectionHeader label="FAQ" title="Veelgestelde vragen over bijbelstudie" />
         <FadeUp>
           <div>
-            {faqs.map(item => <FAQItem key={item.q} {...item} />)}
+            {HOME_FAQS.map((item, i) => (
+              <FAQItem key={item.q} q={item.q} a={item.a} id={`faq-${i}`} />
+            ))}
           </div>
         </FadeUp>
       </div>

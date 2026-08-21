@@ -5,8 +5,63 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { ArrowRight, BookOpen, ChevronDown, ChevronUp, Clock, CheckCircle } from 'lucide-react'
 import { curatedStudies, BADGE_STYLES, type StudyType, type CuratedStudy } from '../../lib/data/curated-studies'
+import { JsonLd } from '../../components/seo/JsonLd'
+import { Breadcrumbs } from '../../components/content/ContentShell'
+import { absoluteUrl } from '../../lib/seo/constants'
+import {
+  graph,
+  webPageNode,
+  breadcrumbNode,
+  itemListNode,
+  courseNode,
+} from '../../lib/seo/structuredData'
 
 const COMPLETED_KEY = 'bijbelstudie_completed_studies'
+
+const CRUMBS = [
+  { name: 'Home', path: '/' },
+  { name: 'Begeleide studies', path: '/studies' },
+]
+
+/**
+ * Each curated study is a Course. They are opened from this page rather than
+ * from their own URL, so every Course node points back here - a Course whose
+ * `url` 404s is dropped from the rich results without a warning. The `anchor`
+ * keeps the @id values distinct; duplicates would collapse into one node.
+ */
+const STUDIES_GRAPH = (() => {
+  const url = absoluteUrl('/studies')
+  return graph(
+    webPageNode({
+      path: '/studies',
+      name: 'Begeleide bijbelstudies',
+      description:
+        'Begeleide bijbelstudies over personen, thema\'s, gebeurtenissen en bijbelboeken. Stap voor stap door de Schrift, gratis te volgen.',
+      type: 'CollectionPage',
+      breadcrumbId: `${url}#breadcrumb`,
+    }),
+    breadcrumbNode(CRUMBS, url),
+    itemListNode({
+      pageUrl: url,
+      name: 'Begeleide bijbelstudies',
+      items: curatedStudies.map(study => ({
+        name: study.title,
+        path: '/studies',
+        description: study.description,
+      })),
+    }),
+    ...curatedStudies.map(study =>
+      courseNode({
+        name: study.title,
+        description: study.description,
+        path: '/studies',
+        lessonCount: study.lessons.length,
+        image: study.image,
+        anchor: study.id,
+      })
+    )
+  )
+})()
 
 const FILTERS: { label: string; value: StudyType | 'Alle' }[] = [
   { label: 'Alle',      value: 'Alle'      },
@@ -166,18 +221,22 @@ export default function StudiesPage() {
 
   return (
     <div className="h-full overflow-y-auto">
+      <JsonLd data={STUDIES_GRAPH} />
+      <Breadcrumbs crumbs={CRUMBS} />
       <div className="px-6 xl:px-10 py-8">
 
-        {/* Header */}
+        {/* Header. The h1 carries the phrase people actually search for -
+            "Studies" alone told Google nothing about the page. */}
         <div className="mb-8">
           <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: '#0D9488' }}>
             Bijbelstudie
           </p>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-foreground mb-2">
-            Studies
+            Begeleide bijbelstudies
           </h1>
           <p className="text-gray-500 dark:text-muted-foreground text-sm max-w-2xl">
-            Elke studie leidt je stap voor stap door een thema, persoon of gedeelte uit de Bijbel. Je ziet per les precies welk hoofdstuk je leest en waarop je let.
+            {curatedStudies.length} gratis bijbelstudies over personen, thema&apos;s, gedeelten en bijbelboeken.
+            Elke studie leidt je stap voor stap door de Schrift: je ziet per les precies welk hoofdstuk je leest en waarop je let.
           </p>
         </div>
 

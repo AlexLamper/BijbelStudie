@@ -7,8 +7,54 @@ import {
   Library as LibraryIcon, ShieldCheck, Filter,
 } from "lucide-react"
 import { LIBRARY, CATEGORIES, getCategoryMeta, type LibraryItem, type LibraryCategory } from "./library"
+import { JsonLd } from "../../components/seo/JsonLd"
+import { Breadcrumbs } from "../../components/content/ContentShell"
+import { absoluteUrl } from "../../lib/seo/constants"
+import {
+  graph,
+  webPageNode,
+  breadcrumbNode,
+  itemListNode,
+} from "../../lib/seo/structuredData"
 
 const TEAL = "#0D9488"
+
+const CRUMBS = [
+  { name: "Home", path: "/" },
+  { name: "Hulpbronnen", path: "/hulpbronnen" },
+]
+
+/**
+ * Built here rather than in layout.tsx: that layout also wraps
+ * /hulpbronnen/:slug, and these nodes describe the list page specifically.
+ * The value is constant, so it is computed once at module scope instead of on
+ * every render.
+ */
+const RESOURCES_GRAPH = (() => {
+  const url = absoluteUrl("/hulpbronnen")
+  return graph(
+    webPageNode({
+      path: "/hulpbronnen",
+      name: "Hulpbronnen: gratis bijbelstudieboeken",
+      description:
+        "Een groeiende bibliotheek met gratis, publiek-domein bijbels, bijbelcommentaren, prekenbundels en dogmatische werken.",
+      type: "CollectionPage",
+      breadcrumbId: `${url}#breadcrumb`,
+    }),
+    breadcrumbNode(CRUMBS, url),
+    itemListNode({
+      pageUrl: url,
+      name: "Bibliotheek",
+      // Paywalled items are listed because they are visible in this list;
+      // only their own detail pages carry noindex.
+      items: LIBRARY.map(item => ({
+        name: item.title,
+        path: `/hulpbronnen/${item.slug}`,
+        description: item.description,
+      })),
+    })
+  )
+})()
 
 type AccessFilter = "all" | "free" | "pro"
 
@@ -41,6 +87,8 @@ export default function ResourcesPage() {
 
   return (
     <div className="h-full overflow-y-auto">
+      <JsonLd data={RESOURCES_GRAPH} />
+      <Breadcrumbs crumbs={CRUMBS} />
       <div className="px-6 xl:px-10 py-8 space-y-8">
 
         {/* Hero */}
@@ -49,11 +97,12 @@ export default function ResourcesPage() {
             Bibliotheek
           </p>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-foreground mb-2">
-            Hulpbronnen
+            Hulpbronnen voor bijbelstudie
           </h1>
           <p className="text-gray-500 dark:text-muted-foreground text-sm max-w-2xl">
-            Een groeiende collectie publiek-domein Bijbels, prekenbundels, commentaren en dogmatische werken.
-            Direct in de app leesbaar of openbaar te raadplegen bij de bron.
+            Een groeiende collectie van {LIBRARY.length} gratis, publiek-domein Bijbels, prekenbundels,
+            bijbelcommentaren en dogmatische werken. Direct in de app leesbaar of openbaar te
+            raadplegen bij de bron.
           </p>
         </div>
 

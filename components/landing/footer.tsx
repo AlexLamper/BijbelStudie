@@ -11,8 +11,10 @@ export function Footer() {
     <footer style={{ backgroundColor: "#1F2937", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
       <div className="max-w-6xl mx-auto px-6 lg:px-8 py-14 lg:py-16">
 
-        {/* Main grid */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 lg:gap-12">
+        {/* Main grid. The "Bijbelstudie" column exists for crawl discovery as
+            much as for visitors: it is the only site-wide link into the content
+            hub, and it appears on every public page. */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-12">
 
           {/* Brand column */}
           <div className="space-y-4">
@@ -36,6 +38,32 @@ export function Footer() {
                 { href: "/#features", label: t("features") },
                 { href: "/#pricing",  label: t("pricing") },
                 { href: "/#faq",      label: t("faq") },
+              ].map(({ href, label }) => (
+                <li key={href}>
+                  <Link href={href}
+                    className="text-sm transition-colors hover:text-white"
+                    style={{ color: "#9CA3AF" }}>
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Bijbelstudie content hub */}
+          <div className="space-y-4">
+            <h3 className="text-xs font-bold uppercase tracking-widest text-white">
+              Bijbelstudie
+            </h3>
+            <ul className="space-y-2.5">
+              {[
+                { href: "/bijbelstudie",           label: "Complete gids" },
+                { href: "/bijbelstudie/methoden",  label: "Studiemethoden" },
+                { href: "/bijbelstudie/beginnen",  label: "Voor beginners" },
+                { href: "/bijbelstudie/gratis",    label: "Gratis bijbelstudie" },
+                { href: "/bijbelboeken",           label: "De 66 bijbelboeken" },
+                { href: "/studies",                label: "Begeleide studies" },
+                { href: "/hulpbronnen",            label: "Bibliotheek" },
               ].map(({ href, label }) => (
                 <li key={href}>
                   <Link href={href}

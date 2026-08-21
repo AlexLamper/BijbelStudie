@@ -42,7 +42,7 @@ export default function NotFound() {
             style={{ color: "#6B7280" }}
           >
             De pagina die je zoekt bestaat niet of is verplaatst.
-            Ga terug naar het dashboard om verder te studeren.
+            Hieronder staan een paar plekken om verder te gaan.
           </p>
         </div>
 
@@ -63,25 +63,36 @@ export default function NotFound() {
             Ga terug
           </button>
 
+          {/* Home, not /dashboard: an anonymous visitor who lands on a 404 gets
+              bounced straight back by the middleware if we send them into a
+              protected route. */}
           <Link
-            href="/dashboard"
+            href="/"
             className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors"
             style={{ backgroundColor: "#0D9488" }}
             onMouseEnter={e => ((e.currentTarget as HTMLElement).style.backgroundColor = "#0F766E")}
             onMouseLeave={e => ((e.currentTarget as HTMLElement).style.backgroundColor = "#0D9488")}
           >
             <Home className="h-4 w-4" />
-            Naar dashboard
+            Naar de homepage
           </Link>
         </div>
 
-        {/* Footer hint */}
-        <p className="text-xs" style={{ color: "#9CA3AF" }}>
-          Of ga direct naar{" "}
-          <Link href="/studie" style={{ color: "#0D9488", fontWeight: 600 }}>
-            Bijbelstudie
-          </Link>
-        </p>
+        {/* Publicly reachable landing spots, so a 404 still has somewhere to
+            send both a visitor and a crawler. */}
+        <nav aria-label="Suggesties" className="flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs">
+          {[
+            { href: "/bijbelstudie", label: "Gids bijbelstudie" },
+            { href: "/bijbelboeken", label: "De 66 bijbelboeken" },
+            { href: "/studies", label: "Begeleide studies" },
+            { href: "/hulpbronnen", label: "Bibliotheek" },
+            { href: "/help", label: "Help" },
+          ].map(({ href, label }) => (
+            <Link key={href} href={href} style={{ color: "#0D9488", fontWeight: 600 }}>
+              {label}
+            </Link>
+          ))}
+        </nav>
       </div>
     </div>
   )

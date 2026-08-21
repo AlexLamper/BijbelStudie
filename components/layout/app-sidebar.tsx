@@ -12,7 +12,7 @@ import {
 import {
   LayoutDashboard, BookOpen, BookMarked, CalendarCheck,
   StickyNote, Library, User, Settings, Sparkles, Users, ShieldCheck,
-  ArrowRight, Check, MessageSquareText,
+  ArrowRight, Check, MessageSquareText, BookText, GraduationCap,
 } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
@@ -27,6 +27,11 @@ const mainNav = [
   { title: "Groepen",      url: "/groepen",      icon: Users,           tourId: "nav-groepen"      },
   { title: "Notities",     url: "/notities",     icon: StickyNote,      tourId: "nav-notities"     },
   { title: "Hulpbronnen",  url: "/hulpbronnen",  icon: Library,         tourId: "nav-hulpbronnen"  },
+  // Public reference pages. They sit in the sidebar so the crawlable content
+  // hub is reachable from /studies and /hulpbronnen, which anonymous visitors
+  // can see - without those links the hub is only linked from the homepage.
+  { title: "Bijbelboeken", url: "/bijbelboeken", icon: BookText,        tourId: "nav-bijbelboeken" },
+  { title: "Gids",         url: "/bijbelstudie", icon: GraduationCap,   tourId: "nav-gids"         },
 ]
 
 const bottomNav = [

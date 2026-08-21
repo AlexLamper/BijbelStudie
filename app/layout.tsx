@@ -8,6 +8,23 @@ import { OnboardingWrapper } from "../components/onboarding/onboarding-wrapper";
 import { GuidedTourLauncher } from "../components/onboarding/guided-tour";
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { PrefetchProvider } from "../components/providers/prefetch-provider";
+import { JsonLd } from "../components/seo/JsonLd";
+import {
+  BASE_URL,
+  SITE_NAME,
+  SITE_LOCALE,
+  TWITTER_HANDLE,
+  OG_IMAGE_WIDTH,
+  OG_IMAGE_HEIGHT,
+  ogImageUrl,
+} from "../lib/seo/constants";
+import {
+  graph,
+  organizationNode,
+  websiteNode,
+  softwareApplicationNode,
+} from "../lib/seo/structuredData";
+import { PLANS } from "../lib/pricing";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -31,14 +48,28 @@ const merriweather = Merriweather({
   preload: false,
 });
 
+const ROOT_OG_IMAGE = ogImageUrl({
+  title: "Bijbelstudie online",
+  subtitle:
+    "Lees en bestudeer de Bijbel met commentaren, grondtekst, leesplannen en een AI-assistent.",
+});
+
+/**
+ * Site-wide defaults. Individual routes override title/description/canonical
+ * through lib/pageMetadata.ts - a route that does NOT do so inherits the
+ * canonical below and competes with the homepage for the same URL, so every
+ * public route must supply its own.
+ */
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.bijbel-studie.com"),
+  metadataBase: new URL(BASE_URL),
   manifest: "/site.webmanifest",
+  applicationName: SITE_NAME,
   icons: {
     icon: [
       { url: "/images/favicon.ico", type: "image/x-icon" },
       { url: "/icon.svg", type: "image/svg+xml" },
       { url: "/images/icon-192.png", type: "image/png", sizes: "192x192" },
+      { url: "/images/icon-512.png", type: "image/png", sizes: "512x512" },
     ],
     shortcut: "/images/favicon.ico",
     // iOS ignores .ico for the home-screen icon and needs a PNG.
@@ -46,23 +77,40 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: "/",
+    languages: {
+      // Dutch-only site: a self-referencing nl-NL plus x-default tells Google
+      // there is no other language version to look for.
+      "nl-NL": `${BASE_URL}/`,
+      "x-default": `${BASE_URL}/`,
+    },
   },
   title: {
-    default: "BijbelStudie - Online Bijbelstudie & Digitale Bijbelcursussen",
+    default: "BijbelStudie - Online Bijbelstudie, Gratis Beginnen",
     template: "%s | BijbelStudie",
   },
-  description: "BijbelStudie - Bijbel studie online voor iedereen! Ontdek interactieve bijbelcursussen, gids bibelstudies, bijbelcommentaren en online bijbellessen. Start je gratis vandaag.",
-  keywords: [
-    "bijbelstudie", "bijbel studie", "bijbel studie online", "online bijbelstudie",
-    "bijbel lezen", "bijbel studie app", "online bijbelcursussen", "bijbelcursus online",
-    "bijbelcommentaren", "gids bijbelstudie", "leesplan bijbel", "bijbelboeken",
-    "christelijk onderwijs", "bijbelse educatie", "theologie online", "bijbelkennis",
-    "schriftstudie", "bijbelstudies", "bijbellessen", "bijbelcommunity",
-    "bible study course", "Christian education", "biblical knowledge", "spiritual growth"
-  ],
-  authors: [{ name: "BijbelStudie Team" }],
-  creator: "BijbelStudie",
-  publisher: "BijbelStudie",
+  description:
+    "Bijbelstudie online in het Nederlands. Lees de Bijbel in meerdere vertalingen, bekijk bijbelcommentaren en de grondtekst, volg leesplannen en stel je vragen aan een AI-assistent. Gratis te beginnen.",
+  authors: [{ name: "BijbelStudie", url: BASE_URL }],
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
+  category: "education",
+  referrer: "origin-when-cross-origin",
+  formatDetection: { telephone: false, address: false, email: false },
+  // Paste the token from Search Console -> Instellingen -> Eigendomsverificatie
+  // -> HTML-tag into GOOGLE_SITE_VERIFICATION. Left out entirely when unset so
+  // an empty content="" tag never ships.
+  ...(process.env.GOOGLE_SITE_VERIFICATION || process.env.BING_SITE_VERIFICATION
+    ? {
+        verification: {
+          ...(process.env.GOOGLE_SITE_VERIFICATION
+            ? { google: process.env.GOOGLE_SITE_VERIFICATION }
+            : {}),
+          ...(process.env.BING_SITE_VERIFICATION
+            ? { other: { "msvalidate.01": process.env.BING_SITE_VERIFICATION } }
+            : {}),
+        },
+      }
+    : {}),
   robots: {
     index: true,
     follow: true,
@@ -76,23 +124,28 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    locale: "nl_NL",
-    url: "https://www.bijbel-studie.com",
-    title: "BijbelStudie - Online Bijbelstudie & Bijbelcursussen",
-    description: "Bijbel studie online met interactieve cursussen, commentaren en studiematerialen.",
-    siteName: "BijbelStudie",
+    locale: SITE_LOCALE,
+    url: `${BASE_URL}/`,
+    title: "BijbelStudie - Online Bijbelstudie, Gratis Beginnen",
+    description:
+      "Lees en bestudeer de Bijbel online: meerdere vertalingen, bijbelcommentaren, grondtekst, leesplannen en een AI-assistent.",
+    siteName: SITE_NAME,
     images: [{
-      url: "https://www.bijbel-studie.com/og-image.svg",
-      width: 1200,
-      height: 630,
-      alt: "BijbelStudie",
+      url: ROOT_OG_IMAGE,
+      width: OG_IMAGE_WIDTH,
+      height: OG_IMAGE_HEIGHT,
+      alt: "BijbelStudie - online bijbelstudie",
+      type: "image/png",
     }],
   },
   twitter: {
     card: "summary_large_image",
+    site: TWITTER_HANDLE,
+    creator: TWITTER_HANDLE,
     title: "BijbelStudie - Online Bijbelstudie",
-    description: "Bijbel studie online - Interactieve cursussen, commentaren en studiematerialen.",
-    images: ["https://www.bijbel-studie.com/og-image.svg"],
+    description:
+      "Bijbelstudie online: vertalingen, commentaren, grondtekst, leesplannen en een AI-assistent.",
+    images: [ROOT_OG_IMAGE],
   },
 };
 
@@ -106,33 +159,31 @@ export default async function RootLayout({
   } catch {
     // non-critical - user will be treated as unauthenticated
   }
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "@id": "https://www.bijbel-studie.com/#organization",
-    url: "https://www.bijbel-studie.com",
-    logo: "https://www.bijbel-studie.com/images/favicon.ico",
-    name: "BijbelStudie",
-    alternateName: ["Bijbel Studie", "Bijbelstudie"],
-    description: "BijbelStudie - Online bijbelstudie platform met interactieve bijbelcursussen, commentaren en leesplannen.",
-    contactPoint: {
-      "@type": "ContactPoint",
-      contactType: "Klantenservice",
-      url: "https://www.bijbel-studie.com/contact",
-    },
-  };
+  // Site-wide entity graph. Declared once here and referenced by @id from every
+  // page-level graph, so Google resolves one Organization and one WebSite for
+  // the whole domain instead of a different copy per URL. The Organization
+  // logo must be a raster image - Google rejects the .ico this used to point at.
+  const siteGraph = graph(
+    organizationNode(),
+    websiteNode(),
+    softwareApplicationNode({
+      monthlyPrice: PLANS.monthly.amountCents / 100,
+      annualPrice: PLANS.annual.amountCents / 100,
+      currency: "EUR",
+    })
+  );
 
   return (
     <html lang="nl" suppressHydrationWarning>
       <head>
         <meta charSet="UTF-8" />
         <link rel="icon" href="/images/favicon.ico" sizes="any" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-        />
+        {/* No preconnect to fonts.googleapis.com / fonts.gstatic.com: the three
+            faces above come from next/font/google, which downloads them at
+            build time and serves them from this origin. Those hosts are never
+            contacted at runtime, so the hints only cost two DNS lookups and
+            TLS handshakes that go nowhere. */}
+        <JsonLd data={siteGraph} />
       </head>
       <body className={`antialiased bg-background ${inter.variable} ${lora.variable} ${merriweather.variable} font-sans`}>
         <ThemeProvider

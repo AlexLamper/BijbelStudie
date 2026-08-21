@@ -5,7 +5,10 @@ import { fallbackLng, cookieName } from "./app/i18n/settings";
 
 export const config = {
   matcher: [
-    "/((?!api|_next/static|_next/image|assets|favicon.ico|sw.js|site.webmanifest|data).*)",
+    // `og` and the crawler-facing files are excluded so a social crawler or
+    // Googlebot never pays for a getToken() round-trip just to fetch an image
+    // or robots.txt.
+    "/((?!api|og|_next/static|_next/image|assets|favicon.ico|icon.svg|robots.txt|sitemap.xml|sitemap|sw.js|site.webmanifest|data).*)",
   ],
 };
 
@@ -78,7 +81,14 @@ export async function middleware(req: NextRequest) {
     "/studie", "/lezen", "/dashboard", "/admin", "/notities",
     "/leesplannen", "/profiel", "/instellingen", "/groepen", "/feedback",
   ];
-  if (!session && protectedRoutes.some(route => pathname.startsWith(route))) {
+  // Match the route itself or a path segment under it - never a bare prefix.
+  // `"/studies".startsWith("/studie")` is true, so the plain prefix test sent
+  // every anonymous visitor (and Googlebot) on /studies back to "/", which is
+  // exactly what the comment above says must not happen.
+  const isProtected = protectedRoutes.some(
+    route => pathname === route || pathname.startsWith(`${route}/`)
+  );
+  if (!session && isProtected) {
     return NextResponse.redirect(new URL("/", req.url));
   }
 

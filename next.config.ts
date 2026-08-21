@@ -44,7 +44,46 @@ const nextConfig: NextConfig = {
     // The AI chat route reads chapter text via getChapter() from ./private too.
     "/api/ai/**": ["./private/**/*"],
   },
+  /**
+   * Headers that affect Core Web Vitals or crawling. Nothing decorative here -
+   * every entry either speeds up a repeat visit or tells a crawler something
+   * it cannot infer.
+   */
+  async headers() {
+    return [
+      {
+        // Fingerprinted build output never changes under the same URL.
+        source: "/_next/static/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
+      },
+      {
+        // OG cards are a pure function of their query string.
+        source: "/og",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
+      },
+      {
+        source: "/(.*)",
+        headers: [
+          // HSTS: without it the first request to http:// still costs a
+          // redirect hop, which shows up in field data as slower LCP.
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
+          },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+        ],
+      },
+    ];
+  },
   images: {
+    // AVIF first, WebP as fallback. Images are the largest LCP element on the
+    // landing page and the study cards.
+    formats: ["image/avif", "image/webp"],
     qualities: [50, 75, 85, 95],
     remotePatterns: [
       {
