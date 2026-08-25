@@ -357,11 +357,11 @@ export default function GroepenPage() {
       {loading ? (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-48 bg-muted animate-pulse rounded-xl" />
+            <div key={i} className="h-48 bg-muted skeleton-pulse rounded-xl" />
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="bg-white dark:bg-card border border-border rounded-xl p-16 text-center">
+        <div className="content-in bg-white dark:bg-card border border-border rounded-xl p-16 text-center">
           <div className="h-12 w-12 rounded-xl flex items-center justify-center mx-auto mb-4"
             style={{ backgroundColor: BG_TEAL }}>
             <Users size={22} style={{ color: IC }} />
@@ -375,13 +375,13 @@ export default function GroepenPage() {
               : "Probeer een andere zoekterm of maak zelf een groep aan."}
           </p>
           <button onClick={() => setShowCreate(true)}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
+            className="press inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
             style={{ backgroundColor: IC }}>
             <Plus size={15} /> Groep aanmaken
           </button>
         </div>
       ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="stagger-in grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filtered.map(group => (
             <GroupCard key={group._id} group={group}
               isMember={myGroupIds.has(group._id)}

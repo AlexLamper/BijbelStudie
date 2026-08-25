@@ -65,16 +65,16 @@ export default function NotitiesTab({ groupId }: { groupId: string }) {
           {[1,2,3].map(i => (
             <div key={i} className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-4 space-y-2">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-secondary animate-pulse" />
-                <div className="h-3 rounded bg-gray-100 dark:bg-secondary animate-pulse w-32" />
+                <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-secondary skeleton-pulse" />
+                <div className="h-3 rounded bg-gray-100 dark:bg-secondary skeleton-pulse w-32" />
               </div>
-              <div className="h-3 rounded bg-gray-100 dark:bg-secondary animate-pulse w-3/4" />
-              <div className="h-3 rounded bg-gray-100 dark:bg-secondary animate-pulse w-1/2" />
+              <div className="h-3 rounded bg-gray-100 dark:bg-secondary skeleton-pulse w-3/4" />
+              <div className="h-3 rounded bg-gray-100 dark:bg-secondary skeleton-pulse w-1/2" />
             </div>
           ))}
         </div>
       ) : notes.length === 0 ? (
-        <div className="flex flex-col items-center text-center py-16 px-4">
+        <div className="content-in flex flex-col items-center text-center py-16 px-4">
           <div className="w-14 h-14 rounded-full flex items-center justify-center mb-4"
             style={{ backgroundColor: "rgba(13,148,136,0.07)" }}>
             <StickyNote className="w-6 h-6" style={{ color: "#0D9488" }} />
@@ -85,7 +85,7 @@ export default function NotitiesTab({ groupId }: { groupId: string }) {
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="stagger-in space-y-3">
           {notes.map(note => (
             <div key={note._id}
               className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-4">

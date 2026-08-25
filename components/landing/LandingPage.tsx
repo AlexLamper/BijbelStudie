@@ -264,14 +264,12 @@ function Navbar() {
           <span className="font-bold text-base" style={{ color: T.text }}>BijbelStudie</span>
         </Link>
 
-        {/* Navigatie - exact gecentreerd. De twee content-hubs staan hier en
-            niet alleen in de footer: interne links vanuit de hoofdnavigatie
-            zijn wat een crawler als belangrijk leest. */}
+        {/* Navigatie - exact gecentreerd. Alleen het product zelf: de
+            content-hubs (/bijbelstudie, /bijbelboeken) blijven online en in de
+            sitemap, maar horen niet in de hoofdnavigatie van de app. */}
         <nav className="hidden md:flex items-center justify-center gap-6 lg:gap-7">
           {[
             { href: "#functies",      label: "Functies" },
-            { href: "/bijbelstudie",  label: "Gids" },
-            { href: "/bijbelboeken",  label: "Bijbelboeken" },
             { href: "#prijzen",       label: "Prijzen" },
             { href: "#faq",           label: "FAQ" },
           ].map(({ href, label }) => (

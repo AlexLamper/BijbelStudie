@@ -11,8 +11,8 @@ import {
 } from "../ui/sidebar"
 import {
   LayoutDashboard, BookOpen, BookMarked, CalendarCheck,
-  StickyNote, Library, User, Settings, Sparkles, Users, ShieldCheck,
-  ArrowRight, Check, MessageSquareText, BookText, GraduationCap,
+  StickyNote, User, Settings, Sparkles, Users, ShieldCheck,
+  ArrowRight, Check, MessageSquareText,
 } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
@@ -26,12 +26,9 @@ const mainNav = [
   { title: "Leesplannen",  url: "/leesplannen",        icon: CalendarCheck,   tourId: "nav-plans"        },
   { title: "Groepen",      url: "/groepen",      icon: Users,           tourId: "nav-groepen"      },
   { title: "Notities",     url: "/notities",     icon: StickyNote,      tourId: "nav-notities"     },
-  { title: "Hulpbronnen",  url: "/hulpbronnen",  icon: Library,         tourId: "nav-hulpbronnen"  },
-  // Public reference pages. They sit in the sidebar so the crawlable content
-  // hub is reachable from /studies and /hulpbronnen, which anonymous visitors
-  // can see - without those links the hub is only linked from the homepage.
-  { title: "Bijbelboeken", url: "/bijbelboeken", icon: BookText,        tourId: "nav-bijbelboeken" },
-  { title: "Gids",         url: "/bijbelstudie", icon: GraduationCap,   tourId: "nav-gids"         },
+  // /hulpbronnen, /bijbelboeken and /bijbelstudie are public reference pages,
+  // not things a signed-in user works in. They stay online and in the sitemap;
+  // they are simply not part of the app's own navigation.
 ]
 
 const bottomNav = [

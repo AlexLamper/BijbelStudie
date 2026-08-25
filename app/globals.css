@@ -174,3 +174,61 @@
     animation-range: 0 80px;
   }
 }
+
+/* ─── Arrival and micro-interaction vocabulary ──────────────────
+   Everything here is short (120-260ms), small (<=8px) and ease-out. The point
+   is to take the edge off a state change, not to be noticed.
+
+   `.content-in` belongs on content that replaces a loading state - it was
+   never in the served HTML, so unlike a scroll reveal it cannot hide anything
+   from a crawler or gate a paint on hydration. Never put it on server-rendered
+   markup. */
+@keyframes content-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .content-in {
+    animation: content-in 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  /* Lists arriving together read better with a slight cascade. Capped at six
+     steps and 150ms total: past that the last row feels late rather than
+     deliberate, and long lists would visibly trickle in. */
+  .stagger-in > * {
+    animation: content-in 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .stagger-in > *:nth-child(2) { animation-delay: 30ms; }
+  .stagger-in > *:nth-child(3) { animation-delay: 60ms; }
+  .stagger-in > *:nth-child(4) { animation-delay: 90ms; }
+  .stagger-in > *:nth-child(5) { animation-delay: 120ms; }
+  .stagger-in > *:nth-child(n+6) { animation-delay: 150ms; }
+}
+
+/* Press feedback. Kept on transform alone so it composites, and left out of
+   the reduced-motion branch entirely. */
+@media (prefers-reduced-motion: no-preference) {
+  .press { transition: transform 120ms ease-out; }
+  .press:active { transform: scale(0.975); }
+
+  .lift {
+    transition: transform 200ms ease-out, box-shadow 200ms ease-out;
+  }
+  .lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px -12px rgba(15, 23, 42, 0.25);
+  }
+}
+
+/* The skeleton pulse. Tailwind's `animate-pulse` swings to 50% opacity, which
+   flickers on the low-contrast grey these skeletons use; this is a calmer
+   range and a slower cycle. Applied by the shared skeleton components. */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.55; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .skeleton-pulse { animation: skeleton-pulse 1.6s ease-in-out infinite; }
+}

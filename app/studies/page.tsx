@@ -91,7 +91,7 @@ function StudyCard({ study, completed }: { study: CuratedStudy; completed: boole
   const badge = BADGE_STYLES[study.type]
 
   return (
-    <div className={`bg-white dark:bg-card border rounded-xl overflow-hidden flex flex-col transition-colors ${
+    <div className={`lift bg-white dark:bg-card border rounded-xl overflow-hidden flex flex-col transition-colors ${
       completed ? 'border-teal-300 dark:border-teal-700' : 'border-gray-200 dark:border-border'
     }`}>
       {/* Image */}
@@ -271,7 +271,7 @@ export default function StudiesPage() {
         </div>
 
         {filtered.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
+          <div className="content-in flex flex-col items-center justify-center py-20 text-center">
             <BookOpen size={32} className="mb-3 text-gray-300" />
             <p className="text-gray-500 dark:text-muted-foreground">Geen studies gevonden voor dit filter.</p>
           </div>

@@ -99,7 +99,7 @@ export function ChapterNotes({ book, chapter }: ChapterNotesProps) {
           )}
 
           {!loading && !error && notes.length === 0 && (
-            <div className="flex flex-col items-center text-center py-12 px-4">
+            <div className="content-in flex flex-col items-center text-center py-12 px-4">
               <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4"
                 style={{ backgroundColor: 'rgba(13,148,136,0.07)' }}>
                 <StickyNote className="w-5 h-5" style={{ color: '#0D9488' }} />
@@ -110,7 +110,7 @@ export function ChapterNotes({ book, chapter }: ChapterNotesProps) {
               </p>
               <button
                 onClick={() => setShowModal(true)}
-                className="flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-lg text-white transition-colors"
+                className="press flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-lg text-white transition-colors"
                 style={{ backgroundColor: '#0D9488' }}
                 onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = '#0f766e'}
                 onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = '#0D9488'}
@@ -122,7 +122,7 @@ export function ChapterNotes({ book, chapter }: ChapterNotesProps) {
           )}
 
           {!loading && !error && notes.length > 0 && (
-            <div className="space-y-3 pb-16">
+            <div className="stagger-in space-y-3 pb-16">
               {notes.map(note => (
                 <div key={note._id}
                   className="rounded-xl border border-gray-100 dark:border-border bg-white dark:bg-card p-4 shadow-sm">

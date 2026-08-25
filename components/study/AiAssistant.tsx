@@ -252,13 +252,13 @@ export default function AiAssistant({
         <div className="space-y-3">
           {messages.map((m, i) =>
             m.role === 'user' ? (
-              <div key={i} className="flex justify-end">
+              <div key={i} className="content-in flex justify-end">
                 <div className="bg-[#0D9488] text-white rounded-2xl rounded-br-sm px-3.5 py-2 text-sm max-w-[85%] whitespace-pre-wrap break-words">
                   {m.content}
                 </div>
               </div>
             ) : (
-              <div key={i} className="flex justify-start">
+              <div key={i} className="content-in flex justify-start">
                 <div className="bg-gray-100 dark:bg-secondary text-gray-900 dark:text-gray-100 rounded-2xl rounded-bl-sm px-3.5 py-2.5 text-sm max-w-[92%] break-words">
                   <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                     {m.content}

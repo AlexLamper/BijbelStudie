@@ -453,9 +453,9 @@ export default function SettingsPage() {
                 </div>
                 {previewLoading ? (
                   <div className="space-y-1.5">
-                    <div className="h-3.5 w-full rounded animate-pulse bg-gray-100 dark:bg-secondary" />
-                    <div className="h-3.5 w-5/6 rounded animate-pulse bg-gray-100 dark:bg-secondary" />
-                    <div className="h-3.5 w-4/5 rounded animate-pulse bg-gray-100 dark:bg-secondary" />
+                    <div className="h-3.5 w-full rounded skeleton-pulse bg-gray-100 dark:bg-secondary" />
+                    <div className="h-3.5 w-5/6 rounded skeleton-pulse bg-gray-100 dark:bg-secondary" />
+                    <div className="h-3.5 w-4/5 rounded skeleton-pulse bg-gray-100 dark:bg-secondary" />
                   </div>
                 ) : (
                   <p

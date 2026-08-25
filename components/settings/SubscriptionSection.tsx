@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Loader2, CreditCard, PauseCircle, ArrowRight } from "lucide-react"
+import { SkeletonBlock } from "../ui/skeletons"
 import { PLANS, effectivePerMonth, annualSaving } from "../../lib/pricing"
 import { track, trackNow } from "../../lib/analytics"
 
@@ -118,12 +119,26 @@ export function SubscriptionSection() {
   }
 
   if (loading) {
-    return <div className="flex justify-center py-4"><Loader2 size={16} className="animate-spin text-muted-foreground" /></div>
+    return (
+      <div className="space-y-5" role="status" aria-label="Abonnement laden">
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div className="space-y-2">
+            <SkeletonBlock className="h-3.5 w-52" />
+            <SkeletonBlock className="h-3 w-36" />
+            <SkeletonBlock className="h-3 w-44" />
+          </div>
+          <SkeletonBlock className="h-9 w-52 rounded-lg" />
+        </div>
+        <div className="pt-4 border-t border-gray-100 dark:border-border">
+          <SkeletonBlock className="h-3 w-40" />
+        </div>
+      </div>
+    )
   }
 
   if (!state?.subscribed) {
     return (
-      <div className="space-y-3">
+      <div className="content-in space-y-3">
         <p className="text-sm text-muted-foreground">
           Je hebt op dit moment geen actief abonnement.
         </p>
@@ -141,7 +156,7 @@ export function SubscriptionSection() {
   const plan = state.interval === "annual" ? PLANS.annual : PLANS.monthly
 
   return (
-    <div className="space-y-5">
+    <div className="content-in space-y-5">
       {/* Current plan */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
@@ -163,7 +178,7 @@ export function SubscriptionSection() {
         <button
           onClick={openPortal}
           disabled={busy}
-          className="inline-flex items-center gap-1.5 px-3.5 h-9 rounded-lg text-xs font-semibold border border-border text-foreground disabled:opacity-60"
+          className="press inline-flex items-center gap-1.5 px-3.5 h-9 rounded-lg text-xs font-semibold border border-border text-foreground disabled:opacity-60"
         >
           <CreditCard size={13} /> Facturen en betaalgegevens
         </button>
@@ -229,7 +244,7 @@ export function SubscriptionSection() {
                 <button
                   onClick={confirmCancel}
                   disabled={busy}
-                  className="inline-flex items-center gap-1.5 px-3.5 h-9 rounded-lg text-xs font-semibold text-white disabled:opacity-50"
+                  className="press inline-flex items-center gap-1.5 px-3.5 h-9 rounded-lg text-xs font-semibold text-white disabled:opacity-50"
                   style={{ backgroundColor: "#B91C1C" }}
                 >
                   {busy && <Loader2 size={12} className="animate-spin" />}

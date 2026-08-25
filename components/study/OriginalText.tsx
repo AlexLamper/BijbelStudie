@@ -288,7 +288,7 @@ export default function OriginalText({ book, chapter, highlightVerses }: Origina
         const displayVerses = isSubscribed ? verses : verses.slice(0, 1);
         const showPaywall = !isSubscribed && verses.length > 0;
         return (
-          <div className="space-y-0">
+          <div className="content-in space-y-0">
             <div
               style={showPaywall ? {
                 WebkitMaskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)',

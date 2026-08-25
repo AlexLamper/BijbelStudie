@@ -183,7 +183,7 @@ export default function ChapterViewer({
       )}
 
       {!loading && !error && Object.keys(verses).length > 0 && (
-        <>
+        <div className="content-in">
           <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-100 dark:border-border">
             <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-muted-foreground">
               {book} {chapter}
@@ -268,7 +268,7 @@ export default function ChapterViewer({
               availableVerses={Object.keys(verses).map(Number).sort((a, b) => a - b)}
             />
           )}
-        </>
+        </div>
       )}
 
       {!loading && !error && Object.keys(verses).length === 0 && (

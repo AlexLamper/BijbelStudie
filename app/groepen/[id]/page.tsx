@@ -214,9 +214,9 @@ export default function GroupDetailPage() {
   if (loading) {
     return (
       <div className="px-6 xl:px-10 py-8 space-y-4">
-        <div className="h-7 rounded bg-gray-100 dark:bg-secondary animate-pulse w-48" />
-        <div className="h-32 rounded-2xl bg-gray-100 dark:bg-secondary animate-pulse" />
-        <div className="h-10 rounded-xl bg-gray-100 dark:bg-secondary animate-pulse" />
+        <div className="h-7 rounded bg-gray-100 dark:bg-secondary skeleton-pulse w-48" />
+        <div className="h-32 rounded-2xl bg-gray-100 dark:bg-secondary skeleton-pulse" />
+        <div className="h-10 rounded-xl bg-gray-100 dark:bg-secondary skeleton-pulse" />
       </div>
     )
   }

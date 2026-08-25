@@ -203,14 +203,14 @@ export default function DashboardPage() {
               {loading ? (
                 <div className="flex items-center justify-between gap-6">
                   <div className="space-y-2 flex-1">
-                    <div className="h-3 w-1/4 rounded animate-pulse bg-white/20" />
-                    <div className="h-7 w-1/2 rounded animate-pulse bg-white/20" />
-                    <div className="h-3 w-1/3 rounded animate-pulse bg-white/20 mt-1" />
+                    <div className="h-3 w-1/4 rounded skeleton-pulse bg-white/20" />
+                    <div className="h-7 w-1/2 rounded skeleton-pulse bg-white/20" />
+                    <div className="h-3 w-1/3 rounded skeleton-pulse bg-white/20 mt-1" />
                   </div>
-                  <div className="h-10 w-32 rounded-xl animate-pulse bg-white/20 flex-shrink-0" />
+                  <div className="h-10 w-32 rounded-xl skeleton-pulse bg-white/20 flex-shrink-0" />
                 </div>
               ) : lastRead ? (
-                <div className="flex items-center justify-between gap-6 flex-wrap">
+                <div className="content-in flex items-center justify-between gap-6 flex-wrap">
                   <div>
                     <p className="text-white/70 text-xs font-semibold uppercase tracking-widest mb-1.5">
                       Ga verder waar je gebleven was
@@ -220,14 +220,14 @@ export default function DashboardPage() {
                   </div>
                   <Link
                     href={`/studie?book=${encodeURIComponent(lastRead.book)}&chapter=${lastRead.chapter}&version=${encodeURIComponent(lastRead.version)}`}
-                    className="flex-shrink-0 bg-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 hover:bg-white/90 transition-colors no-underline"
+                    className="press flex-shrink-0 bg-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 hover:bg-white/90 transition-colors no-underline"
                     style={{ color: "#0D9488" }}
                   >
                     Doorgaan <ArrowRight size={14} />
                   </Link>
                 </div>
               ) : (
-                <div className="flex items-center justify-between gap-6 flex-wrap">
+                <div className="content-in flex items-center justify-between gap-6 flex-wrap">
                   <div>
                     <p className="text-white/70 text-xs font-semibold uppercase tracking-widest mb-1.5">
                       Begin vandaag
@@ -237,7 +237,7 @@ export default function DashboardPage() {
                   </div>
                   <Link
                     href="/studie"
-                    className="flex-shrink-0 bg-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 hover:bg-white/90 transition-colors no-underline"
+                    className="press flex-shrink-0 bg-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 hover:bg-white/90 transition-colors no-underline"
                     style={{ color: "#0D9488" }}
                   >
                     Begin met lezen <ArrowRight size={14} />
@@ -247,12 +247,12 @@ export default function DashboardPage() {
             </div>
 
             {/* Stats strip */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className={`grid grid-cols-2 sm:grid-cols-4 gap-3${loading ? "" : " stagger-in"}`}>
               {loading ? (
                 [1, 2, 3, 4].map(i => (
                   <div key={i} className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-4">
-                    <div className="h-3 w-1/2 rounded animate-pulse mb-2 bg-gray-100 dark:bg-secondary" />
-                    <div className="h-6 w-1/3 rounded animate-pulse bg-gray-100 dark:bg-secondary" />
+                    <div className="h-3 w-1/2 rounded skeleton-pulse mb-2 bg-gray-100 dark:bg-secondary" />
+                    <div className="h-6 w-1/3 rounded skeleton-pulse bg-gray-100 dark:bg-secondary" />
                   </div>
                 ))
               ) : [
@@ -262,7 +262,7 @@ export default function DashboardPage() {
                 { label: "Bijbelboeken", value: `${booksWithProgress} / 66`, icon: BookOpen, color: "#0D9488" },
                 { label: "Notities geschreven", value: `${notesCount}`, icon: StickyNote, color: "#0D9488" },
               ].map(({ label, value, icon: Icon, color }) => (
-                <div key={label} className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-4">
+                <div key={label} className="lift bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-4">
                   <Icon size={14} className="mb-2" style={{ color }} />
                   <p className="text-xl font-bold text-gray-900 dark:text-foreground">{value}</p>
                   <p className="text-xs text-gray-400 dark:text-muted-foreground mt-0.5 leading-tight">{label}</p>
@@ -437,12 +437,12 @@ export default function DashboardPage() {
               </p>
               {verseLoading ? (
                 <div className="space-y-2.5 border-l-2 pl-4" style={{ borderColor: "#D1FAE5" }}>
-                  <div className="h-3.5 rounded animate-pulse bg-gray-100 dark:bg-secondary" />
-                  <div className="h-3.5 rounded animate-pulse w-4/5 bg-gray-100 dark:bg-secondary" />
-                  <div className="h-3.5 rounded animate-pulse w-3/5 bg-gray-100 dark:bg-secondary" />
+                  <div className="h-3.5 rounded skeleton-pulse bg-gray-100 dark:bg-secondary" />
+                  <div className="h-3.5 rounded skeleton-pulse w-4/5 bg-gray-100 dark:bg-secondary" />
+                  <div className="h-3.5 rounded skeleton-pulse w-3/5 bg-gray-100 dark:bg-secondary" />
                 </div>
               ) : verse ? (
-                <>
+                <div className="content-in">
                   <div className="border-l-2 pl-4 mb-4" style={{ borderColor: "#0D9488" }}>
                     <p className="text-gray-700 dark:text-foreground/80"
                       style={{ fontFamily: "Georgia, serif", fontSize: "0.95rem", fontStyle: "italic", lineHeight: 1.8, wordBreak: "break-word", overflowWrap: "break-word" }}>
@@ -463,7 +463,7 @@ export default function DashboardPage() {
                       Lees hoofdstuk →
                     </Link>
                   </div>
-                </>
+                </div>
               ) : null}
             </div>
 
@@ -483,11 +483,11 @@ export default function DashboardPage() {
               {statsLoading ? (
                 <div className="flex items-end gap-1.5 h-16">
                   {[40,65,30,80,55,70,45].map((h,i) => (
-                    <div key={i} className="flex-1 rounded-t-md animate-pulse bg-gray-100 dark:bg-secondary" style={{ height: `${h}%` }} />
+                    <div key={i} className="flex-1 rounded-t-md skeleton-pulse bg-gray-100 dark:bg-secondary" style={{ height: `${h}%` }} />
                   ))}
                 </div>
               ) : (
-                <div className="flex items-end gap-1.5 h-16">
+                <div className="content-in flex items-end gap-1.5 h-16">
                   {days.map((d, i) => (
                     <div key={i} className="flex-1 flex flex-col items-center h-full justify-end">
                       {d.count > 0 ? (
@@ -522,9 +522,9 @@ export default function DashboardPage() {
                 <CalendarCheck2 size={14} style={{ color: "#0D9488" }} />
               </div>
               {loading ? (
-                <div className="h-10 rounded animate-pulse bg-gray-100 dark:bg-secondary" />
+                <div className="h-10 rounded skeleton-pulse bg-gray-100 dark:bg-secondary" />
               ) : activePlan ? (
-                <>
+                <div className="content-in">
                   <p className="text-sm font-semibold mb-1 line-clamp-1 text-gray-900 dark:text-foreground">
                     {activePlan.title}
                   </p>
@@ -552,9 +552,9 @@ export default function DashboardPage() {
                   <Link href={`/leesplannen/${activePlan.id}`} className="text-xs font-semibold" style={{ color: "#0D9488" }}>
                     Bekijk plan →
                   </Link>
-                </>
+                </div>
               ) : (
-                <>
+                <div className="content-in">
                   <p className="text-xs mb-2.5 text-gray-500 dark:text-muted-foreground leading-relaxed">
                     {planSuggestion
                       ? planSuggestion.reason
@@ -568,7 +568,7 @@ export default function DashboardPage() {
                   <Link href="/leesplannen" className="text-xs font-semibold" style={{ color: "#0D9488" }}>
                     Start een leesplan →
                   </Link>
-                </>
+                </div>
               )}
             </div>
 
@@ -585,9 +585,9 @@ export default function DashboardPage() {
                   <div className="space-y-3">
                     {[1, 2].map(i => (
                       <div key={i} className="space-y-1.5">
-                        <div className="h-3 rounded animate-pulse w-2/5 bg-gray-100 dark:bg-secondary" />
-                        <div className="h-3 rounded animate-pulse w-full bg-gray-100 dark:bg-secondary" />
-                        <div className="h-3 rounded animate-pulse w-4/5 bg-gray-100 dark:bg-secondary" />
+                        <div className="h-3 rounded skeleton-pulse w-2/5 bg-gray-100 dark:bg-secondary" />
+                        <div className="h-3 rounded skeleton-pulse w-full bg-gray-100 dark:bg-secondary" />
+                        <div className="h-3 rounded skeleton-pulse w-4/5 bg-gray-100 dark:bg-secondary" />
                       </div>
                     ))}
                   </div>

@@ -79,11 +79,11 @@ export default function VoortgangTab({
   if (loading) {
     return (
       <div className="space-y-4">
-        <div className="h-4 bg-gray-100 dark:bg-secondary rounded animate-pulse w-1/3" />
-        <div className="h-2.5 bg-gray-100 dark:bg-secondary rounded-full animate-pulse" />
+        <div className="h-4 bg-gray-100 dark:bg-secondary rounded skeleton-pulse w-1/3" />
+        <div className="h-2.5 bg-gray-100 dark:bg-secondary rounded-full skeleton-pulse" />
         <div className="space-y-2 mt-4">
           {[1,2,3].map(i => (
-            <div key={i} className="h-8 bg-gray-100 dark:bg-secondary rounded animate-pulse" />
+            <div key={i} className="h-8 bg-gray-100 dark:bg-secondary rounded skeleton-pulse" />
           ))}
         </div>
       </div>

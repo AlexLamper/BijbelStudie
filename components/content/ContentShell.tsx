@@ -16,8 +16,8 @@ export interface Crumb {
  *
  * These are server components on purpose: the whole point of these routes is
  * that a crawler gets the full text in the initial HTML without executing any
- * JavaScript. Header and Footer are client components, which is fine - they
- * still render server-side and only hydrate for the mobile menu.
+ * JavaScript. The Footer is a server component too; the Header stays a client
+ * component for its mobile menu, and hydrates for that alone.
  */
 export function ContentShell({
   crumbs,

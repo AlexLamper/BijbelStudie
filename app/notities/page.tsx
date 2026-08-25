@@ -223,10 +223,10 @@ export default function NotesPage() {
                 </Button>
               </div>
             ) : (
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <div className="stagger-in grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {filtered.map(note => (
                   <div key={note._id}
-                    className="bg-white dark:bg-card border border-border rounded-xl overflow-hidden hover:shadow-sm transition-shadow">
+                    className="lift bg-white dark:bg-card border border-border rounded-xl overflow-hidden">
                     {/* Colored accent top strip for highlights */}
                     {note.type === "highlight" && (
                       <div className="h-1 bg-teal-500" />

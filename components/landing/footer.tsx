@@ -13,10 +13,11 @@ export function Footer() {
     <footer style={{ backgroundColor: "#1F2937", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
       <div className="max-w-6xl mx-auto px-6 lg:px-8 py-14 lg:py-16">
 
-        {/* Main grid. The "Bijbelstudie" column exists for crawl discovery as
-            much as for visitors: it is the only site-wide link into the content
-            hub, and it appears on every public page. */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-12">
+        {/* Main grid. The reference pages (/bijbelstudie, /bijbelboeken,
+            /hulpbronnen) are no longer advertised here - the footer sells the
+            product, not the reading material around it. One link into
+            /bijbelboeken survives on purpose: see the note beside it. */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12">
 
           {/* Brand column */}
           <div className="space-y-4">
@@ -40,32 +41,14 @@ export function Footer() {
                 { href: "/#features", label: "Functies" },
                 { href: "/#pricing",  label: "Prijzen" },
                 { href: "/#faq",      label: "FAQ" },
-              ].map(({ href, label }) => (
-                <li key={href}>
-                  <Link href={href}
-                    className="text-sm transition-colors hover:text-white"
-                    style={{ color: "#9CA3AF" }}>
-                    {label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Bijbelstudie content hub */}
-          <div className="space-y-4">
-            <h3 className="text-xs font-bold uppercase tracking-widest text-white">
-              Bijbelstudie
-            </h3>
-            <ul className="space-y-2.5">
-              {[
-                { href: "/bijbelstudie",           label: "Complete gids" },
-                { href: "/bijbelstudie/methoden",  label: "Studiemethoden" },
-                { href: "/bijbelstudie/beginnen",  label: "Voor beginners" },
-                { href: "/bijbelstudie/gratis",    label: "Gratis bijbelstudie" },
-                { href: "/bijbelboeken",           label: "De 66 bijbelboeken" },
-                { href: "/studies",                label: "Begeleide studies" },
-                { href: "/hulpbronnen",            label: "Bibliotheek" },
+                { href: "/studies",   label: "Begeleide studies" },
+                // The single internal link into the reference cluster. A sitemap
+                // entry only tells Google a URL exists; it passes no authority
+                // and no anchor text. Without one inbound link from a real page,
+                // /bijbelboeken and the 66 book pages hanging off it are orphans
+                // that slowly lose their rankings. This one line is what keeps
+                // that cluster connected to the rest of the site.
+                { href: "/bijbelboeken", label: "Bijbelboeken" },
               ].map(({ href, label }) => (
                 <li key={href}>
                   <Link href={href}

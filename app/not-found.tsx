@@ -82,11 +82,10 @@ export default function NotFound() {
             send both a visitor and a crawler. */}
         <nav aria-label="Suggesties" className="flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs">
           {[
-            { href: "/bijbelstudie", label: "Gids bijbelstudie" },
-            { href: "/bijbelboeken", label: "De 66 bijbelboeken" },
             { href: "/studies", label: "Begeleide studies" },
-            { href: "/hulpbronnen", label: "Bibliotheek" },
+            { href: "/abonnement", label: "Prijzen" },
             { href: "/help", label: "Help" },
+            { href: "/contact", label: "Contact" },
           ].map(({ href, label }) => (
             <Link key={href} href={href} style={{ color: "#0D9488", fontWeight: 600 }}>
               {label}

@@ -189,7 +189,7 @@ export default function PlansPage() {
           itemClassName="p-5"
         />
       ) : plans.length === 0 ? (
-        <div className="border border-dashed border-gray-200 dark:border-border rounded-xl py-14 text-center">
+        <div className="content-in border border-dashed border-gray-200 dark:border-border rounded-xl py-14 text-center">
           <p className="text-[13.5px] text-gray-500 dark:text-muted-foreground">
             {filter === 'enrolled'
               ? 'Je volgt nog geen leesplan. Kies een suggestie hierboven of stel er zelf een samen.'
@@ -197,7 +197,7 @@ export default function PlansPage() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="stagger-in grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {plans.map((plan) => (
             <PlanCard key={plan.id} plan={plan} onChange={load} />
           ))}

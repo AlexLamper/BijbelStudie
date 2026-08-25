@@ -498,7 +498,7 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
             // only thing standing between a visitor and the full chapter.
             const showPaywall = locked;
             return (
-              <>
+              <div className="content-in">
                 <div
                   style={showPaywall ? {
                     maxHeight: 1100,
@@ -544,7 +544,7 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
                     />
                   </div>
                 )}
-              </>
+              </div>
             );
           })()
         }

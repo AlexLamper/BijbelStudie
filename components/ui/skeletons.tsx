@@ -1,5 +1,3 @@
-"use client"
-
 import { cn } from "../../lib/utils"
 
 /**
@@ -18,7 +16,7 @@ export function SkeletonBlock({ className, ...props }: React.HTMLAttributes<HTML
   return (
     <div
       aria-hidden
-      className={cn("animate-pulse rounded-md bg-gray-100 dark:bg-secondary", className)}
+      className={cn("skeleton-pulse rounded-md bg-gray-100 dark:bg-secondary", className)}
       {...props}
     />
   )
@@ -133,6 +131,165 @@ export function SkeletonPage({
             <SkeletonBlock className="h-3.5" />
             <SkeletonBlock className="h-3.5 w-4/5" />
           </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/** A bordered card placeholder - the shape most panels in the app resolve to. */
+export function SkeletonCard({
+  lines = 3,
+  className,
+  children,
+}: {
+  lines?: number
+  className?: string
+  children?: React.ReactNode
+}) {
+  return (
+    <div
+      className={cn(
+        "rounded-2xl border border-gray-200 dark:border-border p-5 space-y-3",
+        className
+      )}
+    >
+      {children ?? (
+        <>
+          <SkeletonBlock className="h-4 w-1/3" />
+          <SkeletonText lines={lines} />
+        </>
+      )}
+    </div>
+  )
+}
+
+/**
+ * The dashboard's figure tiles: a small label over a large number. Sized to the
+ * real tile so the numbers do not shift into place when they land.
+ */
+export function SkeletonStats({ count = 4, className }: { count?: number; className?: string }) {
+  return (
+    <div
+      role="status"
+      aria-label="Statistieken laden"
+      className={cn("grid grid-cols-2 md:grid-cols-4 gap-5", className)}
+    >
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} className="space-y-2">
+          <SkeletonBlock className="h-3 w-20" />
+          <SkeletonBlock className="h-7 w-16" />
+          <SkeletonBlock className="h-3 w-24" />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/**
+ * Note rows as they appear in the dashboard card and the notes list: a short
+ * reference line above two lines of body text.
+ */
+export function SkeletonNotes({ count = 3, className }: { count?: number; className?: string }) {
+  return (
+    <div className={cn("space-y-4", className)} role="status" aria-label="Notities laden">
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} className="space-y-2">
+          <SkeletonBlock className="h-3 w-2/5" />
+          <SkeletonBlock className="h-3 w-full" />
+          <SkeletonBlock className="h-3 w-4/5" />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/**
+ * Media-card grid used by the studies and plans overviews: image band, title,
+ * two lines of description.
+ */
+export function SkeletonCardGrid({
+  count = 6,
+  className,
+  imageClassName = "h-36",
+}: {
+  count?: number
+  className?: string
+  imageClassName?: string
+}) {
+  return (
+    <div
+      role="status"
+      aria-label="Laden"
+      className={cn("grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5", className)}
+    >
+      {Array.from({ length: count }).map((_, i) => (
+        <div
+          key={i}
+          className="rounded-2xl border border-gray-200 dark:border-border overflow-hidden"
+        >
+          <SkeletonBlock className={cn("rounded-none", imageClassName)} />
+          <div className="p-5 space-y-2.5">
+            <SkeletonBlock className="h-3 w-16" />
+            <SkeletonBlock className="h-4 w-3/4" />
+            <SkeletonBlock className="h-3 w-full" />
+            <SkeletonBlock className="h-3 w-2/3" />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/**
+ * A settings or preference row: label and description on the left, control on
+ * the right. Matches the row height in /instellingen so the panel does not
+ * resize when the saved values arrive.
+ */
+export function SkeletonRows({ count = 4, className }: { count?: number; className?: string }) {
+  return (
+    <div className={cn("divide-y divide-gray-100 dark:divide-border", className)} role="status" aria-label="Laden">
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} className="flex items-center justify-between gap-6 py-4">
+          <div className="space-y-2 min-w-0 flex-1">
+            <SkeletonBlock className="h-3.5 w-1/3" />
+            <SkeletonBlock className="h-3 w-2/3" />
+          </div>
+          <SkeletonBlock className="h-9 w-28 flex-shrink-0 rounded-lg" />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/**
+ * Page-level placeholder for a route's `loading.tsx`: masthead, a stat strip
+ * and a content grid. This is what fills the gap between a navigation click
+ * and the client component's first fetch resolving.
+ */
+export function SkeletonRoute({
+  stats = true,
+  cards = 4,
+  className,
+}: {
+  stats?: boolean
+  cards?: number
+  className?: string
+}) {
+  return (
+    <div
+      role="status"
+      aria-label="Pagina laden"
+      className={cn("px-6 xl:px-10 pt-7 pb-10 space-y-8", className)}
+    >
+      <div className="space-y-2.5">
+        <SkeletonBlock className="h-6 w-64" />
+        <SkeletonBlock className="h-3.5 w-44" />
+      </div>
+      {stats && <SkeletonStats />}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        {Array.from({ length: cards }).map((_, i) => (
+          <SkeletonCard key={i} className={i === 0 ? "lg:col-span-2" : undefined} />
         ))}
       </div>
     </div>

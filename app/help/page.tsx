@@ -104,14 +104,9 @@ export default function HelpPage() {
           title="Meer lezen"
           links={[
             {
-              href: "/bijbelstudie",
-              label: "Bijbelstudie: de complete gids",
-              description: "Methoden, hulpmiddelen en een stappenplan.",
-            },
-            {
-              href: "/bijbelstudie/beginnen",
-              label: "Bijbelstudie voor beginners",
-              description: "Van je eerste hoofdstuk naar een vaste gewoonte.",
+              href: "/studies",
+              label: "Begeleide studies",
+              description: "Kant-en-klare studies om mee te beginnen.",
             },
             {
               href: "/abonnement",
