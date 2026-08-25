@@ -1,16 +1,12 @@
 import { redirect } from 'next/navigation';
 
 /**
- * The plan detail page used to live here, under the `/studies` segment, while
- * `/studies` itself lists curated studies — so nothing ever linked to it and
- * every real link pointed at `/leesplannen/:id`, which did not exist. The page is now
- * at `/leesplannen/:id`; this route stays only to keep old links and bookmarks alive.
+ * Legacy route. The plan detail page briefly lived here, then moved to
+ * `/leesplannen/:id`, and leesplannen has since been removed from the website
+ * altogether. Old links and bookmarks land on the studies overview rather than
+ * a 404 - and rather than the redirect loop this file pointed at once its
+ * target was deleted.
  */
-export default async function LegacyPlanDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
-  redirect(`/leesplannen/${id}`);
+export default async function LegacyStudyDetailPage() {
+  redirect('/studies');
 }

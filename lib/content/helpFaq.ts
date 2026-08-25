@@ -25,11 +25,11 @@ export const HELP_TOPICS: HelpTopic[] = [
       },
       {
         q: "Heb ik een account nodig om de Bijbel te lezen?",
-        a: "Voor bijbellezen, notities en leesplannen wel, omdat je voortgang aan je account wordt gekoppeld en op elk apparaat beschikbaar moet zijn. De bibliotheek met publiek-domein werken en de begeleide studies zijn zonder account te bekijken.",
+        a: "Voor bijbellezen, notities en voortgang wel, omdat je voortgang aan je account wordt gekoppeld en op elk apparaat beschikbaar moet zijn. De bibliotheek met publiek-domein werken en de begeleide studies zijn zonder account te bekijken.",
       },
       {
         q: "Waar begin ik het beste?",
-        a: "Open een bijbelboek dat je wilt bestuderen, of schrijf je in voor een leesplan zodat je elke dag een leesportie krijgt. Weet je niet waar te beginnen, kijk dan bij de begeleide studies - die nemen je stap voor stap door een gedeelte heen.",
+        a: "Open een bijbelboek dat je wilt bestuderen en lees op je eigen tempo. Weet je niet waar te beginnen, kijk dan bij de begeleide studies - die nemen je stap voor stap door een gedeelte heen.",
       },
       {
         q: "Werkt BijbelStudie op mijn telefoon?",
@@ -64,13 +64,9 @@ export const HELP_TOPICS: HelpTopic[] = [
     ],
   },
   {
-    id: "leesplannen",
-    title: "Leesplannen en voortgang",
+    id: "voortgang",
+    title: "Voortgang en streak",
     faqs: [
-      {
-        q: "Hoe werkt een bijbelleesplan?",
-        a: "Je schrijft je in voor een leesplan en krijgt dagelijkse leesporties. Je voortgang wordt bijgehouden en je kunt altijd verdergaan waar je gebleven was. Loop je een dag achter, dan schuift het plan mee in plaats van dat je opnieuw moet beginnen.",
-      },
       {
         q: "Wat is een streak?",
         a: "Het aantal dagen achter elkaar waarop je hebt gelezen of gestudeerd. De streak loopt door zolang je elke dag iets doet en is bedoeld als steuntje bij het volhouden, niet als eis.",
@@ -78,10 +74,6 @@ export const HELP_TOPICS: HelpTopic[] = [
       {
         q: "Wat is het verschil tussen 'gelezen' en 'bestudeerd'?",
         a: "Een hoofdstuk doorlezen telt anders dan een hoofdstuk bestuderen met notities en commentaar. Beide leveren voortgang op, maar studeren telt zwaarder mee, omdat het meer tijd en aandacht kost.",
-      },
-      {
-        q: "Kan ik een eigen leesplan maken?",
-        a: "Ja. Naast de kant-en-klare plannen kun je zelf een plan samenstellen: kies de bijbelboeken en de looptijd, en de dagelijkse porties worden voor je berekend.",
       },
     ],
   },
@@ -131,7 +123,7 @@ export const HELP_TOPICS: HelpTopic[] = [
     faqs: [
       {
         q: "Wat kost BijbelStudie Pro?",
-        a: "Pro kost €9,99 per maand, maandelijks gefactureerd, of €89,99 per jaar, in één keer gefactureerd. Zonder Pro blijft bijbellezen, notities, leesplannen, begeleide studies, de bibliotheek en vijf AI-vragen per dag gratis beschikbaar.",
+        a: "Pro kost €9,99 per maand, maandelijks gefactureerd, of €89,99 per jaar, in één keer gefactureerd. Zonder Pro blijft bijbellezen, notities, begeleide studies, de bibliotheek en vijf AI-vragen per dag gratis beschikbaar.",
       },
       {
         q: "Wat krijg ik met Pro?",

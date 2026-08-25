@@ -3,9 +3,10 @@
 import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import {
-  Users, Plus, Search, Lock, Globe, BookMarked,
-  ChevronRight, UserPlus, X,
+  Users, Plus, Search, Lock, Globe,
+  ChevronRight, UserPlus, MessageSquare, StickyNote, CalendarCheck2,
 } from "lucide-react"
+import { GroupDialog } from "./_GroupDialog"
 
 interface Member { _id: string; name: string; image?: string }
 interface Group {
@@ -13,14 +14,13 @@ interface Group {
   name: string
   description: string
   isPublic: boolean
-  inviteCode?: string
   createdBy: Member
   members: { userId: Member; role: string }[]
-  planId?: { title: string } | null
   createdAt: string
 }
 
-const IC = "#0D9488"  // teal-600
+const IC = "#0D9488"  // teal-600, fills only
+const TEAL_TEXT = "#0F766E"  // #0D9488 is 3.7:1 on white, short of AA for small text
 const BG_TEAL = "rgba(13,148,136,0.08)"
 
 /* ── Group card ─────────────────────────────────────────────── */
@@ -52,11 +52,6 @@ function GroupCard({ group, isMember, onJoin }: {
         )}
       </div>
 
-      {group.planId && (
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <BookMarked size={12} /> {group.planId.title}
-        </div>
-      )}
 
       <div className="flex items-center justify-between pt-1 border-t border-border">
         <div className="flex items-center gap-2">
@@ -115,19 +110,16 @@ function JoinModal({ group, onClose, onJoined }: {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white dark:bg-card border border-border rounded-2xl p-6 w-full max-w-sm shadow-2xl">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-bold text-foreground">Deelnemen aan groep</h2>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
-            <X size={18} />
-          </button>
-        </div>
-        <p className="text-sm text-muted-foreground mb-4">
-          {group.isPublic
-            ? `Wilt u deelnemen aan "${group.name}"?`
-            : `Voer de uitnodigingscode in voor "${group.name}".`}
-        </p>
+    <GroupDialog
+      open
+      onOpenChange={o => { if (!o) onClose() }}
+      title="Deelnemen aan groep"
+      description={group.isPublic
+        ? `Wilt u deelnemen aan "${group.name}"? U kunt daarna meelezen, meepraten en notities delen.`
+        : `Voer de uitnodigingscode in voor "${group.name}".`}
+      className="max-w-sm"
+    >
+      <div>
         {!group.isPublic && (
           <input
             value={code} onChange={e => setCode(e.target.value.toUpperCase())}
@@ -139,12 +131,12 @@ function JoinModal({ group, onClose, onJoined }: {
         )}
         {error && <p className="text-sm text-destructive mb-3">{error}</p>}
         <button onClick={handleJoin} disabled={loading || (!group.isPublic && code.length < 6)}
-          className="w-full py-2.5 rounded-lg text-sm font-semibold text-white transition-colors disabled:opacity-50"
+          className="press w-full py-2.5 rounded-lg text-sm font-semibold text-white transition-colors disabled:opacity-50"
           style={{ backgroundColor: IC }}>
           {loading ? "Bezig..." : "Deelnemen"}
         </button>
       </div>
-    </div>
+    </GroupDialog>
   )
 }
 
@@ -153,10 +145,13 @@ function CreateModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
   const [form, setForm]     = useState({ name: "", description: "", isPublic: true })
   const [loading, setLoading] = useState(false)
   const [error, setError]   = useState("")
+  // Creating a group is a Pro feature. Surfaced as an upgrade path rather than a
+  // bare error, since "Aanmaken mislukt" tells the user nothing they can act on.
+  const [needsPro, setNeedsPro] = useState(false)
 
   const handleCreate = async () => {
     if (!form.name.trim()) { setError("Naam is verplicht"); return }
-    setError(""); setLoading(true)
+    setError(""); setNeedsPro(false); setLoading(true)
     try {
       const res = await fetch("/api/groepen", {
         method: "POST",
@@ -164,19 +159,23 @@ function CreateModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
         body: JSON.stringify(form),
       })
       const data = await res.json()
-      if (!res.ok) { setError(data.error || "Aanmaken mislukt"); return }
+      if (!res.ok) {
+        if (data.code === "SUBSCRIPTION_REQUIRED") setNeedsPro(true)
+        else setError(data.error || "Aanmaken mislukt")
+        return
+      }
       onCreated()
     } finally { setLoading(false) }
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white dark:bg-card border border-border rounded-2xl p-6 w-full max-w-md shadow-2xl">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="font-bold text-foreground text-lg">Nieuwe groep aanmaken</h2>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground"><X size={18} /></button>
-        </div>
-
+    <GroupDialog
+      open
+      onOpenChange={o => { if (!o) onClose() }}
+      title="Nieuwe groep aanmaken"
+      description="Een studiegroep leest samen hetzelfde gedeelte: u zet een wekelijkse opdracht klaar, bespreekt de tekst en deelt notities met elkaar."
+    >
+      <div>
         <div className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">Naam *</label>
@@ -195,37 +194,65 @@ function CreateModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
               style={{ "--tw-ring-color": IC } as React.CSSProperties}
             />
           </div>
-          <div className="flex items-center gap-3">
+          <div className="grid grid-cols-2 gap-3">
             <button
+              type="button"
+              aria-pressed={form.isPublic}
               onClick={() => setForm(p => ({ ...p, isPublic: true }))}
-              className="flex-1 flex items-center gap-2 p-3 rounded-xl border text-sm font-medium transition-colors"
-              style={{ borderColor: form.isPublic ? IC : undefined, backgroundColor: form.isPublic ? BG_TEAL : undefined, color: form.isPublic ? IC : undefined }}>
-              <Globe size={14} /> Openbaar
+              className="press flex flex-col gap-1 p-3 rounded-xl border text-left transition-colors"
+              style={{ borderColor: form.isPublic ? IC : undefined, backgroundColor: form.isPublic ? BG_TEAL : undefined }}>
+              <span className="flex items-center gap-2 text-sm font-semibold whitespace-nowrap"
+                style={{ color: form.isPublic ? TEAL_TEXT : undefined }}>
+                <Globe size={14} className="shrink-0" /> Openbaar
+              </span>
+              <span className="text-xs leading-snug text-muted-foreground">
+                Iedereen kan de groep vinden en meedoen
+              </span>
             </button>
             <button
+              type="button"
+              aria-pressed={!form.isPublic}
               onClick={() => setForm(p => ({ ...p, isPublic: false }))}
-              className="flex-1 flex items-center gap-2 p-3 rounded-xl border text-sm font-medium transition-colors"
-              style={{ borderColor: !form.isPublic ? IC : undefined, backgroundColor: !form.isPublic ? BG_TEAL : undefined, color: !form.isPublic ? IC : undefined }}>
-              <Lock size={14} /> Privé (met uitnodigingscode)
+              className="press flex flex-col gap-1 p-3 rounded-xl border text-left transition-colors"
+              style={{ borderColor: !form.isPublic ? IC : undefined, backgroundColor: !form.isPublic ? BG_TEAL : undefined }}>
+              <span className="flex items-center gap-2 text-sm font-semibold whitespace-nowrap"
+                style={{ color: !form.isPublic ? TEAL_TEXT : undefined }}>
+                <Lock size={14} className="shrink-0" /> Privé
+              </span>
+              <span className="text-xs leading-snug text-muted-foreground">
+                Alleen met uitnodigingscode
+              </span>
             </button>
           </div>
         </div>
 
         {error && <p className="text-sm text-destructive mt-3">{error}</p>}
+        {needsPro && (
+          <div className="mt-3 rounded-xl border border-border p-3" style={{ backgroundColor: BG_TEAL }}>
+            <p className="text-sm text-foreground">
+              Een eigen groep aanmaken hoort bij Pro. Deelnemen aan bestaande groepen is gratis.
+            </p>
+            <Link href="/abonnement"
+              className="mt-2 inline-block text-sm font-semibold underline underline-offset-2"
+              style={{ color: TEAL_TEXT }}>
+              Bekijk Pro
+            </Link>
+          </div>
+        )}
 
         <div className="flex gap-3 mt-5">
           <button onClick={onClose}
-            className="flex-1 py-2.5 rounded-xl border border-border text-sm font-semibold text-foreground hover:bg-muted transition-colors">
+            className="press flex-1 py-2.5 rounded-xl border border-border text-sm font-semibold text-foreground hover:bg-muted transition-colors">
             Annuleren
           </button>
           <button onClick={handleCreate} disabled={loading}
-            className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-50 transition-colors"
+            className="press flex-1 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-50 transition-colors"
             style={{ backgroundColor: IC }}>
             {loading ? "Aanmaken..." : "Aanmaken"}
           </button>
         </div>
       </div>
-    </div>
+    </GroupDialog>
   )
 }
 
@@ -240,15 +267,9 @@ function InviteJoinBar({ onJoined }: { onJoined: () => void }) {
     if (code.trim().length < 6) return
     setError(""); setLoading(true)
     try {
-      // Find group by invite code first
-      const searchRes = await fetch(`/api/groepen?inviteCode=${code.trim().toUpperCase()}`)
-      const searchData = await searchRes.json()
-      const found = searchData.publicGroups?.find(
-        (g: Group) => g.inviteCode === code.trim().toUpperCase()
-      )
-      if (!found) { setError("Geen groep gevonden met deze code"); return }
-
-      const res = await fetch(`/api/groepen/${found._id}/join`, {
+      // The server resolves the code. Matching it client-side against the public
+      // list could never find a private group - the only kind that needs a code.
+      const res = await fetch("/api/groepen/join-by-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ inviteCode: code.trim().toUpperCase() }),
@@ -369,11 +390,36 @@ export default function GroepenPage() {
           <h3 className="font-semibold text-foreground mb-1">
             {tab === "mine" ? "U bent nog geen lid van een groep" : "Geen groepen gevonden"}
           </h3>
-          <p className="text-sm text-muted-foreground mb-5">
+          <p className="text-sm text-muted-foreground mb-6">
             {tab === "mine"
               ? "Maak een groep aan of neem deel via een uitnodigingscode."
               : "Probeer een andere zoekterm of maak zelf een groep aan."}
           </p>
+
+          <div className="mx-auto mb-6 max-w-xl border-t border-border pt-6 text-left">
+            <p className="mb-3 text-center text-sm font-semibold text-foreground">
+              Wat is een bijbelstudiegroep?
+            </p>
+            <p className="mb-4 text-center text-sm leading-relaxed text-muted-foreground">
+              Een kleine groep die hetzelfde bijbelgedeelte leest en er samen over doorpraat.
+              De groepsleider zet een wekelijkse opdracht klaar, iedereen leest die en deelt
+              wat opvalt.
+            </p>
+            <ul className="grid gap-3 sm:grid-cols-3">
+              {[
+                { icon: CalendarCheck2, title: "Wekelijkse opdracht", body: "Een hoofdstuk of gedeelte voor de hele groep" },
+                { icon: MessageSquare,  title: "Bespreking",          body: "Stel vragen en reageer op elkaar" },
+                { icon: StickyNote,     title: "Gedeelde notities",   body: "Deel wat u ontdekt met de groep" },
+              ].map(({ icon: Icon, title, body }) => (
+                <li key={title} className="flex flex-col gap-1">
+                  <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                    <Icon size={15} style={{ color: IC }} className="shrink-0" /> {title}
+                  </span>
+                  <span className="text-xs leading-snug text-muted-foreground">{body}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
           <button onClick={() => setShowCreate(true)}
             className="press inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
             style={{ backgroundColor: IC }}>

@@ -51,7 +51,7 @@ const merriweather = Merriweather({
 const ROOT_OG_IMAGE = ogImageUrl({
   title: "Bijbelstudie online",
   subtitle:
-    "Lees en bestudeer de Bijbel met commentaren, grondtekst, leesplannen en een AI-assistent.",
+    "Lees en bestudeer de Bijbel met commentaren, grondtekst, begeleide studies en een AI-assistent.",
 });
 
 /**
@@ -89,7 +89,7 @@ export const metadata: Metadata = {
     template: "%s | BijbelStudie",
   },
   description:
-    "Bijbelstudie online in het Nederlands. Lees de Bijbel in meerdere vertalingen, bekijk bijbelcommentaren en de grondtekst, volg leesplannen en stel je vragen aan een AI-assistent. Gratis te beginnen.",
+    "Bijbelstudie online in het Nederlands. Lees de Bijbel in meerdere vertalingen, bekijk bijbelcommentaren en de grondtekst, volg begeleide studies en stel je vragen aan een AI-assistent. Gratis te beginnen.",
   authors: [{ name: "BijbelStudie", url: BASE_URL }],
   creator: SITE_NAME,
   publisher: SITE_NAME,
@@ -128,7 +128,7 @@ export const metadata: Metadata = {
     url: `${BASE_URL}/`,
     title: "BijbelStudie - Online Bijbelstudie, Gratis Beginnen",
     description:
-      "Lees en bestudeer de Bijbel online: meerdere vertalingen, bijbelcommentaren, grondtekst, leesplannen en een AI-assistent.",
+      "Lees en bestudeer de Bijbel online: meerdere vertalingen, bijbelcommentaren, grondtekst, begeleide studies en een AI-assistent.",
     siteName: SITE_NAME,
     images: [{
       url: ROOT_OG_IMAGE,
@@ -144,7 +144,7 @@ export const metadata: Metadata = {
     creator: TWITTER_HANDLE,
     title: "BijbelStudie - Online Bijbelstudie",
     description:
-      "Bijbelstudie online: vertalingen, commentaren, grondtekst, leesplannen en een AI-assistent.",
+      "Bijbelstudie online: vertalingen, commentaren, grondtekst, begeleide studies en een AI-assistent.",
     images: [ROOT_OG_IMAGE],
   },
 };

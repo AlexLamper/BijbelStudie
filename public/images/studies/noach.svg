@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 120" width="320" height="120" preserveAspectRatio="xMidYMid slice">
+<defs><radialGradient id="g" cx="0.78" cy="0.1" r="0.95">
+<stop offset="0" stop-color="#0D9488" stop-opacity="0.34"/>
+<stop offset="1" stop-color="#0D9488" stop-opacity="0"/>
+</radialGradient></defs>
+<rect width="320" height="120" fill="#0F172A"/>
+<rect width="320" height="120" fill="url(#g)"/>
+<g fill="none" stroke-linecap="round">
+<path d="M78 116a82 82 0 0 1 164 0" stroke="#0D9488" stroke-width="4" opacity="0.9"/>
+<path d="M90 116a70 70 0 0 1 140 0" stroke="#2DD4BF" stroke-width="4" opacity="0.6"/>
+<path d="M102 116a58 58 0 0 1 116 0" stroke="#0D9488" stroke-width="4" opacity="0.35"/>
+</g>
+<g stroke="#334155" stroke-width="2" stroke-linecap="round">
+<line x1="42" y1="30" x2="38" y2="44"/>
+<line x1="74" y1="26" x2="70" y2="40"/>
+<line x1="106" y1="32" x2="102" y2="46"/>
+<line x1="214" y1="32" x2="210" y2="46"/>
+<line x1="246" y1="26" x2="242" y2="40"/>
+<line x1="278" y1="30" x2="274" y2="44"/>
+</g>
+<rect y="117" width="320" height="3" fill="#0D9488"/>
+</svg>

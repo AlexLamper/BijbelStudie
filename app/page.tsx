@@ -11,12 +11,12 @@ import { graph, webPageNode, faqNode, howToNode } from "../lib/seo/structuredDat
 
 const HOME_TITLE = "Bijbelstudie Online - Gratis de Bijbel Bestuderen | BijbelStudie"
 const HOME_DESCRIPTION =
-  "Online bijbelstudie in het Nederlands. Lees de Bijbel in vier Nederlandse vertalingen, bekijk bijbelcommentaren en de grondtekst, volg leesplannen en stel je vragen aan een AI-assistent. Gratis beginnen, geen creditcard nodig."
+  "Online bijbelstudie in het Nederlands. Lees de Bijbel in vier Nederlandse vertalingen, bekijk bijbelcommentaren en de grondtekst, volg begeleide studies en stel je vragen aan een AI-assistent. Gratis beginnen, geen creditcard nodig."
 
 const HOME_OG = ogImageUrl({
   title: "Bijbelstudie online",
   subtitle:
-    "Vertalingen, commentaren, grondtekst, leesplannen en een AI-assistent. Gratis beginnen.",
+    "Vertalingen, commentaren, grondtekst, begeleide studies en een AI-assistent. Gratis beginnen.",
 })
 
 export const metadata: Metadata = {

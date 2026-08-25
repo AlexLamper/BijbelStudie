@@ -22,8 +22,6 @@ export default function ReadPage() {
   const [loadingVersions, setLoadingVersions] = useState(false)
   const [loadingBooks, setLoadingBooks] = useState(false)
   const [loadingChapters, setLoadingChapters] = useState(false)
-  const [fromPlan, setFromPlan] = useState<string | null>(null)
-  const [planDay, setPlanDay] = useState<number | null>(null)
 
   const API_BASE_URL = '/api/bible';
 
@@ -47,16 +45,6 @@ export default function ReadPage() {
         // Check URL parameters for Bible reference
         const bookParam = searchParams.get('book');
         const chapterParam = searchParams.get('chapter');
-        const planParam = searchParams.get('plan');
-        const dayParam = searchParams.get('day');
-
-        if (planParam) {
-          setFromPlan(planParam);
-        }
-        if (dayParam) {
-          setPlanDay(parseInt(dayParam));
-        }
-
         // Fetch versions
         const resVersions = await fetch(`${API_BASE_URL}/versions`);
         if (!resVersions.ok) {
@@ -159,10 +147,9 @@ export default function ReadPage() {
     fetchChapters();
   }, [selectedBook, selectedVersion])
 
-  // Save last read chapter whenever user changes book, chapter, or version (except when from plan)
+  // Save last read chapter whenever user changes book, chapter, or version
   useEffect(() => {
-    // Don't save if reading from a plan or if we don't have valid data
-    if (fromPlan || !selectedBook || !selectedChapter || !selectedVersion) {
+    if (!selectedBook || !selectedChapter || !selectedVersion) {
       return;
     }
 
@@ -187,41 +174,7 @@ export default function ReadPage() {
     // Debounce the save to avoid too many requests
     const timeoutId = setTimeout(saveLastRead, 1000);
     return () => clearTimeout(timeoutId);
-  }, [selectedBook, selectedChapter, selectedVersion, fromPlan]);
-
-  const handleMarkComplete = async () => {
-    if (!fromPlan || !planDay) return;
-
-    try {
-      const response = await fetch('/api/bible-plans/progress', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          planId: fromPlan, 
-          day: planDay 
-        }),
-      });
-
-      if (response.ok) {
-        // Show success message and redirect back
-        alert(t('day_marked_complete', { 
-          defaultValue: `Day ${planDay} marked as complete!` 
-        }));
-        window.history.back();
-      } else {
-        alert(t('error_marking_complete', { 
-          defaultValue: 'Error marking day as complete' 
-        }));
-      }
-    } catch (error) {
-      console.error('Error marking day complete:', error);
-      alert(t('error_marking_complete', { 
-        defaultValue: 'Error marking day as complete' 
-      }));
-    }
-  };
+  }, [selectedBook, selectedChapter, selectedVersion]);
 
   return (
     <div className="min-h-screen dark:bg-gray-900">
@@ -229,33 +182,11 @@ export default function ReadPage() {
       <div className="mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-12">
         {/* Header Section */}
         <div className="mb-6 lg:mb-8">
-          {fromPlan && (
-            <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-blue-800 dark:text-blue-200">
-                    {t('reading_plan_context', { defaultValue: 'Reading from plan' })}
-                  </p>
-                  {planDay && (
-                    <p className="text-xs text-blue-600 dark:text-blue-300">
-                      {t('day', { defaultValue: 'Day' })} {planDay}
-                    </p>
-                  )}
-                </div>
-                <button
-                  onClick={() => window.history.back()}
-                  className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200"
-                >
-                  {t('back_to_plan', { defaultValue: 'Back to plan' })}
-                </button>
-              </div>
-            </div>
-          )}
           <h1 className="text-2xl lg:text-3xl font-bold text-foreground mb-2">
-            {fromPlan ? t('daily_reading', { defaultValue: 'Daily Reading' }) : t('read_scripture')}
+            {t('read_scripture')}
           </h1>
           <p className="text-muted-foreground text-sm lg:text-base">
-            {fromPlan ? t('follow_plan_reading', { defaultValue: 'Follow your reading plan' }) : t('explore_bible')}
+            {t('explore_bible')}
           </p>
         </div>
 
@@ -290,30 +221,6 @@ export default function ReadPage() {
             maxChapter={Math.max(...chapters)}
           />
           
-          {/* Plan Progress Controls */}
-          {fromPlan && planDay && (
-            <div className="p-4 border-t border-border">
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-muted-foreground">
-                  {t('reading_progress', { defaultValue: 'Reading Progress' })}
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleMarkComplete()}
-                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium"
-                  >
-                    {t('mark_complete', { defaultValue: 'Mark Complete' })}
-                  </button>
-                  <button
-                    onClick={() => window.history.back()}
-                    className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm font-medium"
-                  >
-                    {t('back_to_plan', { defaultValue: 'Back to Plan' })}
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Geo Images */}

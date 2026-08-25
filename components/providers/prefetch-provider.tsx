@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 
 /** Routes where the Bible reader is the likely next screen. */
-const READER_ROUTES = ['/dashboard', '/studie', '/lezen', '/leesplannen', '/studies'];
+const READER_ROUTES = ['/dashboard', '/studie', '/lezen', '/studies'];
 
 /**
  * Warms the Bible endpoints for people who are about to read.

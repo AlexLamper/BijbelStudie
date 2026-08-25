@@ -6,6 +6,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../../lib/authOptions';
+import { requireAdmin } from '../../../../lib/adminGuard';
 import connectMongoDB from '../../../../lib/mongodb';
 import StudyGroup from '../../../../models/StudyGroup.js';
 import User from '../../../../models/User.js';
@@ -13,6 +14,12 @@ import crypto from 'crypto';
 
 export async function POST() {
   try {
+    // Admin-only. This route creates a group without the subscription check the
+    // real POST /api/groepen enforces, so leaving it at "any signed-in user"
+    // was a way around the Pro gate.
+    const admin = await requireAdmin();
+    if (!admin.ok) return admin.response;
+
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

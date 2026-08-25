@@ -1,190 +1,168 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Link from "next/link"
-import { CalendarCheck2, ArrowRight, Settings } from "lucide-react"
+import { CalendarCheck2, Check, Target, Settings } from "lucide-react"
+import { SkeletonRows } from "../../../components/ui/skeletons"
 
-interface MemberProgress {
-  userId: string
+const TEAL = "#0D9488"
+const TEAL_TEXT = "#0F766E"
+
+interface MemberRow {
+  id: string
   name: string
-  image: string | null
-  completedDays: number[]
-  progressPct: number
+  assignmentDone: boolean
+  challengeCount: number
 }
 
-interface PlanReading {
-  day: number
-  book: string
-  chapter: number
-  title?: string
+interface Voortgang {
+  assignment: { book: string; chapter: number; title: string | null; dueDate: string | null } | null
+  challenge: { title: string; type: "chapters" | "notes"; target: number; endDate: string | null } | null
+  members: MemberRow[]
 }
 
-interface PlanProgressData {
-  plan: { _id: string; title: string; duration: number; readings: PlanReading[] }
-  members: MemberProgress[]
-  groupProgressPct: number
+function formatDate(value: string | null): string {
+  if (!value) return ""
+  return new Date(value).toLocaleDateString("nl-NL", { day: "numeric", month: "long" })
 }
 
-function Avatar({ name, size = 6 }: { name: string; size?: number }) {
-  const initials = name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
-  return (
-    <div
-      className={`w-${size} h-${size} rounded-full flex items-center justify-center text-white font-bold flex-shrink-0`}
-      style={{ backgroundColor: "#0D9488", fontSize: size <= 6 ? 9 : 11 }}
-    >
-      {initials}
-    </div>
-  )
-}
-
-export default function VoortgangTab({
-  groupId,
-  planId,
-}: {
-  groupId: string
-  planId: string | null
-}) {
-  const [data, setData] = useState<PlanProgressData | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [showAll, setShowAll] = useState(false)
+/**
+ * Group progress.
+ *
+ * The previous version scored members against a reading plan attached to the
+ * group, so it showed "geen leesplan gekoppeld" to almost everyone and stopped
+ * meaning anything once leesplannen was removed. A group's shared work is its
+ * weekly assignment and its challenge, so that is what this reports.
+ */
+export default function VoortgangTab({ groupId }: { groupId: string }) {
+  const [data, setData] = useState<Voortgang | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!planId) return
-    setLoading(true)
-    fetch(`/api/groepen/${groupId}/plan-progress`)
-      .then(r => r.ok ? r.json() : null)
-      .then(d => { if (d?.plan) setData(d) })
+    let cancelled = false
+    fetch(`/api/groepen/${groupId}/voortgang`)
+      .then(r => (r.ok ? r.json() : null))
+      .then(d => { if (d && !cancelled) setData(d) })
       .catch(() => {})
-      .finally(() => setLoading(false))
-  }, [groupId, planId])
-
-  if (!planId) {
-    return (
-      <div className="flex flex-col items-center text-center py-16 px-4">
-        <div className="w-14 h-14 rounded-full flex items-center justify-center mb-4"
-          style={{ backgroundColor: "rgba(13,148,136,0.07)" }}>
-          <CalendarCheck2 className="w-6 h-6" style={{ color: "#0D9488" }} />
-        </div>
-        <p className="font-semibold text-gray-800 dark:text-foreground mb-1">Geen leesplan gekoppeld</p>
-        <p className="text-sm text-gray-500 dark:text-muted-foreground max-w-xs mb-4">
-          Koppel een leesplan aan deze groep via de groepsinstellingen (Leden tab).
-        </p>
-        <div className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-muted-foreground">
-          <Settings size={12} /> Groepsinstellingen → Leesplan
-        </div>
-      </div>
-    )
-  }
+      .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true }
+  }, [groupId])
 
   if (loading) {
-    return (
-      <div className="space-y-4">
-        <div className="h-4 bg-gray-100 dark:bg-secondary rounded skeleton-pulse w-1/3" />
-        <div className="h-2.5 bg-gray-100 dark:bg-secondary rounded-full skeleton-pulse" />
-        <div className="space-y-2 mt-4">
-          {[1,2,3].map(i => (
-            <div key={i} className="h-8 bg-gray-100 dark:bg-secondary rounded skeleton-pulse" />
-          ))}
-        </div>
-      </div>
-    )
+    return <div className="p-4"><SkeletonRows count={4} /></div>
   }
 
   if (!data) {
-    return <p className="text-sm text-gray-500 dark:text-muted-foreground py-8 text-center">Kon voortgang niet laden.</p>
+    return (
+      <p className="text-sm text-gray-500 dark:text-muted-foreground py-10 text-center">
+        Voortgang kon niet worden geladen.
+      </p>
+    )
   }
 
-  const { plan, members, groupProgressPct } = data
+  const { assignment, challenge, members } = data
 
-  // Determine which days to show
-  const allDayNums = plan.readings.map(r => r.day)
-  const anyCompletedDays = new Set(members.flatMap(m => m.completedDays))
-  const maxCompleted = anyCompletedDays.size > 0 ? Math.max(...anyCompletedDays) : 0
-  const visibleDays = showAll
-    ? allDayNums
-    : allDayNums.filter(d => d <= maxCompleted + 3)
-  const hiddenCount = allDayNums.length - visibleDays.length
+  if (!assignment && !challenge) {
+    return (
+      <div className="flex flex-col items-center text-center py-16 px-4 content-in">
+        <div className="w-14 h-14 rounded-full flex items-center justify-center mb-4"
+          style={{ backgroundColor: "rgba(13,148,136,0.07)" }}>
+          <CalendarCheck2 className="w-6 h-6" style={{ color: TEAL }} />
+        </div>
+        <p className="font-semibold text-gray-800 dark:text-foreground mb-1">Nog niets om te volgen</p>
+        <p className="text-sm text-gray-500 dark:text-muted-foreground max-w-xs mb-4">
+          Zodra een groepsleider een weekopdracht of een challenge instelt, zie je hier
+          hoe ver iedereen is.
+        </p>
+        <div className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-muted-foreground">
+          <Settings size={12} /> Leden-tab → Weekopdracht
+        </div>
+      </div>
+    )
+  }
+
+  const doneCount = members.filter(m => m.assignmentDone).length
 
   return (
-    <div className="space-y-5">
-      {/* Plan title + group progress bar */}
-      <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-4">
-        <div className="flex items-center justify-between mb-1">
-          <p className="text-sm font-semibold text-gray-900 dark:text-foreground">{plan.title}</p>
-          <span className="text-xs font-semibold" style={{ color: "#0D9488" }}>{groupProgressPct}%</span>
-        </div>
-        <div className="h-2 bg-gray-100 dark:bg-secondary rounded-full overflow-hidden">
-          <div className="h-2 rounded-full transition-all"
-            style={{ width: `${groupProgressPct}%`, backgroundColor: "#0D9488" }} />
-        </div>
-        <p className="text-xs text-gray-400 dark:text-muted-foreground mt-1.5">
-          Gemiddelde groepsvoortgang · {plan.duration} dagen totaal
-        </p>
-      </div>
+    <div className="p-4 space-y-6 content-in">
+      {assignment && (
+        <section>
+          <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: TEAL_TEXT }}>
+                Weekopdracht
+              </p>
+              <p className="text-sm font-semibold text-gray-900 dark:text-foreground mt-0.5">
+                {assignment.title || `${assignment.book} ${assignment.chapter}`}
+              </p>
+              {assignment.dueDate && (
+                <p className="text-xs text-gray-500 dark:text-muted-foreground">
+                  Tot {formatDate(assignment.dueDate)}
+                </p>
+              )}
+            </div>
+            <p className="text-xs font-semibold text-gray-500 dark:text-muted-foreground tabular-nums">
+              {doneCount} van {members.length} klaar
+            </p>
+          </div>
 
-      {/* Progress grid */}
-      <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-4 overflow-x-auto">
-        <p className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-muted-foreground mb-3">
-          Voortgang per lid
-        </p>
-        <table className="text-xs border-separate" style={{ borderSpacing: "2px 2px" }}>
-          <thead>
-            <tr>
-              <th className="text-left font-medium text-gray-500 dark:text-muted-foreground pb-1 pr-4 w-28">Lid</th>
-              {visibleDays.map(d => (
-                <th key={d} className="text-center font-medium text-gray-400 dark:text-muted-foreground pb-1 w-7">
-                  {d}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
+          <ul className="space-y-1.5">
             {members.map(m => (
-              <tr key={m.userId}>
-                <td className="pr-4 py-0.5">
-                  <div className="flex items-center gap-1.5">
-                    <Avatar name={m.name} size={5} />
-                    <span className="truncate max-w-[80px] text-gray-700 dark:text-foreground">{m.name}</span>
-                  </div>
-                </td>
-                {visibleDays.map(d => (
-                  <td key={d} className="text-center py-0.5">
-                    {m.completedDays.includes(d) ? (
-                      <span className="text-sm font-bold" style={{ color: "#0D9488" }}>✓</span>
-                    ) : (
-                      <span className="text-sm text-gray-200 dark:text-gray-700">○</span>
-                    )}
-                  </td>
-                ))}
-              </tr>
+              <li key={m.id}
+                className="flex items-center justify-between rounded-lg px-3 py-2 bg-gray-50 dark:bg-secondary/40">
+                <span className="text-sm text-gray-800 dark:text-foreground truncate">{m.name}</span>
+                {m.assignmentDone ? (
+                  <span className="flex items-center gap-1 text-xs font-semibold" style={{ color: TEAL_TEXT }}>
+                    <Check size={13} /> Bestudeerd
+                  </span>
+                ) : (
+                  <span className="text-xs text-gray-400 dark:text-muted-foreground">Nog niet</span>
+                )}
+              </li>
             ))}
-          </tbody>
-        </table>
+          </ul>
+        </section>
+      )}
 
-        {hiddenCount > 0 && (
-          <button
-            onClick={() => setShowAll(true)}
-            className="mt-3 text-xs font-medium"
-            style={{ color: "#0D9488" }}>
-            + {hiddenCount} verborgen dagen tonen
-          </button>
-        )}
-        {showAll && allDayNums.length > 3 && (
-          <button
-            onClick={() => setShowAll(false)}
-            className="mt-3 text-xs font-medium text-gray-400 dark:text-muted-foreground">
-            Minder tonen
-          </button>
-        )}
-      </div>
+      {challenge && (
+        <section>
+          <div className="flex items-center gap-2 mb-3">
+            <Target size={14} style={{ color: TEAL }} />
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: TEAL_TEXT }}>
+                Challenge
+              </p>
+              <p className="text-sm font-semibold text-gray-900 dark:text-foreground mt-0.5">
+                {challenge.title || `${challenge.target} ${challenge.type === "chapters" ? "hoofdstukken" : "notities"}`}
+                {challenge.endDate && (
+                  <span className="font-normal text-gray-500 dark:text-muted-foreground">
+                    {" "}· tot {formatDate(challenge.endDate)}
+                  </span>
+                )}
+              </p>
+            </div>
+          </div>
 
-      <Link href={`/leesplannen/${plan._id}`}
-        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90"
-        style={{ backgroundColor: "#0D9488" }}>
-        <CalendarCheck2 size={15} />
-        Lees vandaag
-        <ArrowRight size={13} />
-      </Link>
+          <ul className="space-y-2.5">
+            {members.map(m => {
+              const pct = Math.min(100, Math.round((m.challengeCount / challenge.target) * 100))
+              return (
+                <li key={m.id}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm text-gray-800 dark:text-foreground truncate">{m.name}</span>
+                    <span className="text-xs font-semibold text-gray-500 dark:text-muted-foreground tabular-nums">
+                      {m.challengeCount} / {challenge.target}
+                    </span>
+                  </div>
+                  <div className="h-1.5 rounded-full bg-gray-100 dark:bg-secondary">
+                    <div className="h-1.5 rounded-full transition-all duration-500"
+                      style={{ width: `${pct}%`, backgroundColor: TEAL }} />
+                  </div>
+                </li>
+              )
+            })}
+          </ul>
+        </section>
+      )}
     </div>
   )
 }

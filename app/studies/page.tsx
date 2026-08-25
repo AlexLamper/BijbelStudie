@@ -6,22 +6,15 @@ import Image from 'next/image'
 import { ArrowRight, BookOpen, ChevronDown, ChevronUp, Clock, CheckCircle } from 'lucide-react'
 import { curatedStudies, BADGE_STYLES, type StudyType, type CuratedStudy } from '../../lib/data/curated-studies'
 import { JsonLd } from '../../components/seo/JsonLd'
-import { Breadcrumbs } from '../../components/content/ContentShell'
 import { absoluteUrl } from '../../lib/seo/constants'
 import {
   graph,
   webPageNode,
-  breadcrumbNode,
   itemListNode,
   courseNode,
 } from '../../lib/seo/structuredData'
 
 const COMPLETED_KEY = 'bijbelstudie_completed_studies'
-
-const CRUMBS = [
-  { name: 'Home', path: '/' },
-  { name: 'Begeleide studies', path: '/studies' },
-]
 
 /**
  * Each curated study is a Course. They are opened from this page rather than
@@ -38,9 +31,7 @@ const STUDIES_GRAPH = (() => {
       description:
         'Begeleide bijbelstudies over personen, thema\'s, gebeurtenissen en bijbelboeken. Stap voor stap door de Schrift, gratis te volgen.',
       type: 'CollectionPage',
-      breadcrumbId: `${url}#breadcrumb`,
     }),
-    breadcrumbNode(CRUMBS, url),
     itemListNode({
       pageUrl: url,
       name: 'Begeleide bijbelstudies',
@@ -56,7 +47,10 @@ const STUDIES_GRAPH = (() => {
         description: study.description,
         path: '/studies',
         lessonCount: study.lessons.length,
-        image: study.image,
+        // Not the card banner: that is a 320x120 decorative SVG, well under the
+        // size Google expects from a Course image. /og renders a real 1200x630
+        // PNG carrying this study's title.
+        image: `/og?${new URLSearchParams({ title: study.title, subtitle: study.description }).toString()}`,
         anchor: study.id,
       })
     )
@@ -98,12 +92,15 @@ function StudyCard({ study, completed }: { study: CuratedStudy; completed: boole
       <div className="relative w-full" style={{ aspectRatio: '16/6' }}>
         <Image
           src={study.image}
-          alt={study.title}
+          alt=""
           fill
           className="object-cover"
           sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+          // The optimiser refuses SVG unless dangerouslyAllowSVG is set globally,
+          // and there is nothing for it to do here: these are ~1 KB and scale to
+          // any density on their own.
+          unoptimized
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
         <span
           className="absolute top-2 left-2 px-1.5 py-0.5 rounded-full text-[9px] font-bold"
           style={{ backgroundColor: badge.bg, color: badge.color, backdropFilter: 'blur(4px)' }}
@@ -222,7 +219,6 @@ export default function StudiesPage() {
   return (
     <div className="h-full overflow-y-auto">
       <JsonLd data={STUDIES_GRAPH} />
-      <Breadcrumbs crumbs={CRUMBS} />
       <div className="px-6 xl:px-10 py-8">
 
         {/* Header. The h1 carries the phrase people actually search for -

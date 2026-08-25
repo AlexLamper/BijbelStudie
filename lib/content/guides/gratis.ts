@@ -7,7 +7,7 @@ export const GUIDE_FREE: Guide = {
   metadataKey: "guideFree",
   h1: "Gratis bijbelstudie: alles wat gratis kan",
   intro:
-    "Een eerlijk overzicht van wat je zonder te betalen kunt gebruiken voor bijbelstudie in het Nederlands: vertalingen, commentaren, de grondtekst, leesplannen en publiek-domein bibliotheken.",
+    "Een eerlijk overzicht van wat je zonder te betalen kunt gebruiken voor bijbelstudie in het Nederlands: vertalingen, commentaren, de grondtekst, begeleide studies en publiek-domein bibliotheken.",
   datePublished: "2026-08-21",
   dateModified: "2026-08-21",
   readingMinutes: 9,
@@ -93,8 +93,8 @@ export const GUIDE_FREE: Guide = {
           text: "Alle beschikbare Nederlandse, Engelse en Duitse vertalingen, met de mogelijkheid ze naast elkaar te vergelijken.",
         },
         {
-          title: "Gratis: leesplannen",
-          text: "Inschrijven op een leesplan, dagelijkse leesporties, voortgang en streak.",
+          title: "Gratis: begeleide studies",
+          text: "Tien begeleide studies, stap voor stap door een gedeelte, met voortgang en streak.",
         },
         {
           title: "Gratis: notities en markeringen",
@@ -149,7 +149,7 @@ export const GUIDE_FREE: Guide = {
   faqs: [
     {
       q: "Is bijbelstudie online echt gratis?",
-      a: "Voor een groot deel wel. Bijbel lezen in meerdere vertalingen, leesplannen volgen, notities maken, begeleide studies doorlopen en de publiek-domein bibliotheek raadplegen kan zonder te betalen. Op BijbelStudie is daarnaast elke dag vijf keer de AI-assistent te gebruiken. Alleen de bijbelcommentaren, de onbeperkte AI-assistent en de historische context zitten in het betaalde Pro-abonnement.",
+      a: "Voor een groot deel wel. Bijbel lezen in meerdere vertalingen, notities maken, begeleide studies doorlopen en de publiek-domein bibliotheek raadplegen kan zonder te betalen. Op BijbelStudie is daarnaast elke dag vijf keer de AI-assistent te gebruiken. Alleen de bijbelcommentaren, de onbeperkte AI-assistent en de historische context zitten in het betaalde Pro-abonnement.",
     },
     {
       q: "Welke bijbelvertalingen zijn gratis te gebruiken?",
@@ -161,7 +161,7 @@ export const GUIDE_FREE: Guide = {
     },
     {
       q: "Heb ik een account nodig om gratis te beginnen?",
-      a: "Voor bijbellezen, notities en leesplannen wel, omdat je voortgang aan je account gekoppeld wordt. Aanmelden kost minder dan een minuut en er is geen creditcard voor nodig. De bibliotheek en de begeleide studies zijn zonder account te bekijken.",
+      a: "Voor bijbellezen, notities en voortgang wel, omdat je voortgang aan je account gekoppeld wordt. Aanmelden kost minder dan een minuut en er is geen creditcard voor nodig. De bibliotheek en de begeleide studies zijn zonder account te bekijken.",
     },
   ],
   related: [

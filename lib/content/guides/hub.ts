@@ -28,7 +28,7 @@ export const GUIDE_HUB: Guide = {
       heading: "Bijbellezen of bijbelstudie: wat kies je?",
       body: [
         "Beide zijn nodig, en ze doen iets anders. Doorlezen geeft je overzicht: je ziet hoe de verhaallijn van Genesis naar Openbaring loopt en welke boeken op elkaar reageren. Studeren geeft je diepte: je ziet waarom een schrijver precies dit woord kiest en wat er in de context van drie hoofdstukken eerder al werd voorbereid.",
-        "Een werkbare verhouding voor de meeste mensen is een leesplan voor het overzicht en daarnaast één gedeelte per week waar je echt in graaft. Op die manier verlies je het geheel niet uit het oog terwijl je toch ergens de bodem raakt.",
+        "Een werkbare verhouding voor de meeste mensen is doorlezen voor het overzicht en daarnaast één gedeelte per week waar je echt in graaft. Op die manier verlies je het geheel niet uit het oog terwijl je toch ergens de bodem raakt.",
       ],
       list: [
         {
@@ -180,7 +180,7 @@ export const GUIDE_HUB: Guide = {
   faqs: [
     {
       q: "Wat is het verschil tussen bijbellezen en bijbelstudie?",
-      a: "Bijbellezen is doorlopen om het overzicht te krijgen; bijbelstudie is stilstaan bij een gedeelte om te begrijpen wat er staat, wat het betekende en wat het vandaag betekent. Beide vullen elkaar aan: een leesplan voor de grote lijn, en daarnaast één gedeelte per week waar je echt in graaft.",
+      a: "Bijbellezen is doorlopen om het overzicht te krijgen; bijbelstudie is stilstaan bij een gedeelte om te begrijpen wat er staat, wat het betekende en wat het vandaag betekent. Beide vullen elkaar aan: doorlezen voor de grote lijn, en daarnaast één gedeelte per week waar je echt in graaft.",
     },
     {
       q: "Heb ik theologische kennis nodig voor bijbelstudie?",

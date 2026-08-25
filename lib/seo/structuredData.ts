@@ -49,7 +49,7 @@ export function organizationNode(): Node {
     },
     image: { "@id": `${BASE_URL}/#logo` },
     description:
-      "BijbelStudie is een Nederlands online bijbelstudieplatform met bijbelcommentaren, leesplannen, begeleide studies, de grondtekst en een AI-studieassistent.",
+      "BijbelStudie is een Nederlands online bijbelstudieplatform met bijbelcommentaren, begeleide studies, de grondtekst en een AI-studieassistent.",
     email: CONTACT_EMAIL,
     foundingDate: "2025",
     knowsLanguage: ["nl-NL"],
@@ -77,7 +77,7 @@ export function websiteNode(): Node {
     name: SITE_NAME,
     alternateName: "Bijbel Studie",
     description:
-      "Online bijbelstudie in het Nederlands: bijbel lezen, commentaren, leesplannen, grondtekst en een AI-assistent.",
+      "Online bijbelstudie in het Nederlands: bijbel lezen, commentaren, grondtekst en een AI-assistent.",
     publisher: { "@id": ORG_ID },
     inLanguage: "nl-NL",
     // Sitelinks search box. Google only honours this on the homepage and only
@@ -115,12 +115,12 @@ export function softwareApplicationNode(opts: {
     publisher: { "@id": ORG_ID },
     isAccessibleForFree: true,
     description:
-      "Bestudeer de Bijbel online met meerdere vertalingen, bijbelcommentaren, de Hebreeuwse en Griekse grondtekst, leesplannen, notities en een AI-studieassistent.",
+      "Bestudeer de Bijbel online met meerdere vertalingen, bijbelcommentaren, de Hebreeuwse en Griekse grondtekst, notities en een AI-studieassistent.",
     featureList: [
       "Bijbel lezen in meerdere Nederlandse en Engelse vertalingen",
       "Bijbelcommentaren per vers",
       "Hebreeuwse en Griekse grondtekst met woordstudie",
-      "Bijbelleesplannen met voortgang en streak",
+      "Begeleide studies met voortgang en streak",
       "Persoonlijke notities en markeringen",
       "AI-assistent voor vragen over de Schrift",
       "Begeleide bijbelstudies over personen, themas en bijbelboeken",

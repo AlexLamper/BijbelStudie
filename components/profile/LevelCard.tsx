@@ -13,8 +13,6 @@ type Summary = {
   progressPercentage: number;
   lessonsCompleted: number;
   studiesCompleted: number;
-  plansCompleted: number;
-  plansActive: number;
   xpTable: { event: string; value: number; label: string }[];
 };
 
@@ -22,9 +20,7 @@ type Summary = {
  * Level and XP on the profile.
  *
  * The XP table is served rather than hardcoded so the "wat levert het op?"
- * list cannot drift from what the server actually awards — and so the
- * weighting (a studied plan day is worth six read chapters) is visible rather
- * than implied.
+ * list cannot drift from what the server actually awards.
  */
 export default function LevelCard() {
   const [summary, setSummary] = useState<Summary | null>(null);
@@ -46,8 +42,6 @@ export default function LevelCard() {
   const stats = [
     { label: 'Lessen bestudeerd', value: summary.lessonsCompleted },
     { label: 'Studies voltooid', value: summary.studiesCompleted },
-    { label: 'Leesplannen voltooid', value: summary.plansCompleted },
-    { label: 'Actieve leesplannen', value: summary.plansActive },
   ];
 
   return (

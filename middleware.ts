@@ -79,7 +79,7 @@ export async function middleware(req: NextRequest) {
   // SEO surface (pro content inside /hulpbronnen/:slug is gated server-side).
   const protectedRoutes = [
     "/studie", "/lezen", "/dashboard", "/admin", "/notities",
-    "/leesplannen", "/profiel", "/instellingen", "/groepen", "/feedback",
+    "/profiel", "/instellingen", "/groepen", "/feedback",
   ];
   // Match the route itself or a path segment under it - never a bare prefix.
   // `"/studies".startsWith("/studie")` is true, so the plain prefix test sent

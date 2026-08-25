@@ -333,7 +333,7 @@ function Hero() {
           <p className="text-lg leading-relaxed" style={{ color: T.muted }}>
             Bestudeer de Bijbel diep en persoonlijk: vier Nederlandse vertalingen,
             bijbelcommentaren per vers, de Hebreeuwse en Griekse grondtekst,
-            leesplannen, notities en een AI-assistent die uw vragen over de Schrift
+            notities en een AI-assistent die uw vragen over de Schrift
             beantwoordt. <strong style={{ color: T.text, fontWeight: 600 }}>Gratis te beginnen</strong>,
             zonder creditcard.
           </p>
@@ -973,20 +973,22 @@ function HowItWorks() {
 
 /* ─── Pricing ────────────────────────────────────────────────── */
 function Pricing() {
+  // Both columns are checked against the enforcement code, not against what
+  // would be nice to claim. Historical context moved from the Pro column to
+  // the free one because that is where the code puts it.
   const free = [
     "Bijbel lezen (meerdere vertalingen)",
     "5 vragen per dag aan de AI-assistent",
     "Persoonlijke notities bij verzen",
-    "Bijbelleesplannen volgen",
-    "Studiemethoden gebruiken",
+    "Historische context per hoofdstuk",
     "Voortgang bijhouden",
   ]
   const pro = [
     "Alles in het gratis plan",
-    "Onbeperkt vragen aan de AI-assistent",
+    "200 AI-vragen per dag, i.p.v. 5",
     "Matthew Henry commentaar (NL)",
     "Karl August Dachsel commentaar",
-    "Historische context per hoofdstuk",
+    "Grondtekst: Hebreeuws en Grieks",
     "Prioriteitsondersteuning",
   ]
 

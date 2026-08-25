@@ -30,7 +30,6 @@ export default function robots(): MetadataRoute.Robots {
     "/studie$",
     "/studie?",
     "/lezen",
-    "/leesplannen",
     "/notities",
     "/profiel",
     "/instellingen",

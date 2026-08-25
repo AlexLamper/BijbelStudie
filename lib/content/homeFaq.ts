@@ -15,7 +15,7 @@ export interface Faq {
 export const HOME_FAQS: Faq[] = [
   {
     q: "Is BijbelStudie helemaal gratis?",
-    a: "Het gratis plan geeft volledige toegang tot bijbellezen, notities, leesplannen en studiemethoden, plus 5 vragen per dag aan de AI-assistent. De Pro versie (€9,99 per maand of €89,99 per jaar) voegt bijbelcommentaren, onbeperkt gebruik van de AI-assistent en geavanceerde functies toe.",
+    a: "Het gratis plan geeft volledige toegang tot bijbellezen, notities, begeleide studies en studiemethoden, plus 5 vragen per dag aan de AI-assistent. De Pro versie (€9,99 per maand of €89,99 per jaar) voegt bijbelcommentaren, onbeperkt gebruik van de AI-assistent en geavanceerde functies toe.",
   },
   {
     q: "Wat doet de AI-assistent?",
@@ -34,12 +34,8 @@ export const HOME_FAQS: Faq[] = [
     a: "Ja. Al uw notities en voortgang worden automatisch opgeslagen in uw persoonlijke account en zijn op elk apparaat beschikbaar - in de browser en in de iOS-app.",
   },
   {
-    q: "Hoe werkt een bijbelleesplan?",
-    a: "U schrijft zich in voor een leesplan en ontvangt dagelijkse leesporties. Uw voortgang wordt bijgehouden, u bouwt een streak op en u kunt op elk moment verdergaan waar u gebleven was. Loopt u een dag achter, dan schuift het plan mee in plaats van dat u het opnieuw moet beginnen.",
-  },
-  {
     q: "Heb ik een account nodig om te beginnen?",
-    a: "Voor bijbellezen, notities en leesplannen is een gratis account nodig, zodat uw voortgang bewaard blijft. Aanmelden duurt minder dan een minuut en er is geen creditcard voor nodig. De bibliotheek met publiek-domein werken en de begeleide studies kunt u zonder account bekijken.",
+    a: "Voor bijbellezen, notities en voortgang is een gratis account nodig, zodat uw voortgang bewaard blijft. Aanmelden duurt minder dan een minuut en er is geen creditcard voor nodig. De bibliotheek met publiek-domein werken en de begeleide studies kunt u zonder account bekijken.",
   },
   {
     q: "Is mijn persoonlijke data veilig?",

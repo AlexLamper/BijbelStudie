@@ -59,6 +59,21 @@ export const authOptions: NextAuthOptions = {
   },
 
   callbacks: {
+    /**
+     * Applies a rename to the token itself when the client calls
+     * `update({ name })`. The session callback below already overrides the name
+     * it hands to the app, but `getToken()` reads the raw token - middleware and
+     * the mobile API routes go through it - so leaving the claim stale would let
+     * the two disagree about who the user is.
+     */
+    async jwt({ token, trigger, session: update }) {
+      if (trigger === "update") {
+        const next = (update as { name?: unknown } | undefined)?.name;
+        if (typeof next === "string" && next.trim()) token.name = next.trim();
+      }
+      return token;
+    },
+
     async signIn({ user, profile }) {
       try {
         await connectMongoDB();
@@ -83,12 +98,13 @@ export const authOptions: NextAuthOptions = {
         try {
           await connectMongoDB();
           // This runs on every session read - once per page render and once per
-          // API call - so it fetches the six fields it uses instead of hydrating
-          // the whole user document.
+          // API call - so it fetches only the fields it uses instead of
+          // hydrating the whole user document.
           const user = await User.findOne({ email: session.user.email })
-            .select("isAdmin subscribed storePremium preferences.onboardingCompleted preferences.tourCompleted")
+            .select("name isAdmin subscribed storePremium preferences.onboardingCompleted preferences.tourCompleted")
             .lean<{
               _id: unknown;
+              name?: string;
               isAdmin?: boolean;
               subscribed?: boolean;
               storePremium?: boolean;
@@ -96,6 +112,12 @@ export const authOptions: NextAuthOptions = {
             }>();
           if (user) {
             session.user.id = String(user._id);
+            // The display name is read from Mongo rather than taken from the
+            // JWT. Nothing refreshes a token's `name` claim, so after a rename
+            // on /profiel the navbar and the dashboard greeting went on showing
+            // whatever the name was at sign-in - until the user signed out and
+            // back in. This is one more field on a query that already runs.
+            if (user.name) session.user.name = user.name;
             const isAdmin = user.isAdmin || isAdminEmail(session.user.email) || false;
             session.user.isAdmin = isAdmin;
             // Store purchases count here too. `subscribed` alone is the Stripe

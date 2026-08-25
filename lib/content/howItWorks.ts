@@ -23,8 +23,8 @@ export const HOW_IT_WORKS_STEPS: HowItWorksStep[] = [
   {
     num: "02",
     icon: "book",
-    title: "Kies een bijbelboek of leesplan",
-    desc: "Begin direct met lezen of schrijf u in voor een leesplan. Kies uw favoriete bijbelvertaling.",
+    title: "Kies een bijbelboek of studie",
+    desc: "Begin direct met lezen of start een begeleide studie. Kies uw favoriete bijbelvertaling.",
   },
   {
     num: "03",

@@ -76,7 +76,7 @@ export const OT_LAW_HISTORY: BibleBook[] = [
     blurb:
       "Leviticus: offers, priesters, reinheid en de Grote Verzoendag. Uitleg van de hoofdlijn, met kernverzen en studievragen.",
     summary: [
-      "Leviticus is het boek dat de meeste leesplannen doet stranden, en dat is jammer, want het beantwoordt de vraag die Exodus openlaat. Als God nu midden in het kamp woont - hoe overleef je dat? Hoe kom je in de buurt van Iemand die volstrekt anders is dan jij?",
+      "Leviticus is het boek waar de meeste lezers stranden, en dat is jammer, want het beantwoordt de vraag die Exodus openlaat. Als God nu midden in het kamp woont - hoe overleef je dat? Hoe kom je in de buurt van Iemand die volstrekt anders is dan jij?",
       "Het antwoord komt in twee delen. De eerste helft gaat over de offers en het priesterschap: er is een geregelde manier om schuld weg te doen en gemeenschap te vieren. Het scharnier is hoofdstuk 16, de Grote Verzoendag, waarop het hele volk in één rite wordt gereinigd. De tweede helft, vaak de Heiligheidswet genoemd, trekt de lijn door naar het gewone leven: seksualiteit, eerlijkheid in de handel, de omgang met vreemdelingen, het sabbatsjaar en het jubeljaar.",
       "De sleutelzin staat in 19:2: 'Weest heilig, want Ik ben heilig.' Heiligheid is in Leviticus geen stemming maar een manier van leven die tot in de akkerranden en de weegschaal doorwerkt.",
     ],

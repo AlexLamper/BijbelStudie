@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 120" width="320" height="120" preserveAspectRatio="xMidYMid slice">
+<defs><radialGradient id="g" cx="0.78" cy="0.1" r="0.95">
+<stop offset="0" stop-color="#0D9488" stop-opacity="0.34"/>
+<stop offset="1" stop-color="#0D9488" stop-opacity="0"/>
+</radialGradient></defs>
+<rect width="320" height="120" fill="#0F172A"/>
+<rect width="320" height="120" fill="url(#g)"/>
+<g stroke="#334155" stroke-width="1.2">
+<line x1="24" y1="46" x2="296" y2="46"/>
+<line x1="24" y1="59" x2="296" y2="59"/>
+<line x1="24" y1="72" x2="296" y2="72"/>
+<line x1="24" y1="85" x2="296" y2="85"/>
+<line x1="24" y1="98" x2="296" y2="98"/>
+</g>
+<circle cx="58" cy="72" r="4.5" fill="#0D9488" opacity="0.9"/>
+<circle cx="96" cy="59" r="4.5" fill="#2DD4BF" opacity="0.85"/>
+<circle cx="134" cy="85" r="4.5" fill="#0D9488" opacity="0.9"/>
+<circle cx="172" cy="46" r="4.5" fill="#2DD4BF" opacity="0.85"/>
+<circle cx="210" cy="72" r="4.5" fill="#0D9488" opacity="0.9"/>
+<circle cx="248" cy="59" r="4.5" fill="#2DD4BF" opacity="0.85"/>
+<rect y="117" width="320" height="3" fill="#0D9488"/>
+</svg>

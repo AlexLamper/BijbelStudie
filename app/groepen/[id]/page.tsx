@@ -5,8 +5,8 @@ import { useParams, useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import Link from "next/link"
 import {
-  Users, Lock, Globe, BookMarked, Copy, Check,
-  ArrowLeft, LogOut, BookOpen, CalendarCheck2, Target,
+  Users, Lock, Globe, Copy, Check,
+  ArrowLeft, LogOut, BookOpen, Target,
 } from "lucide-react"
 import DiscussieTab  from "./_DiscussieTab"
 import NotitiesTab   from "./_NotitiesTab"
@@ -16,14 +16,12 @@ import LedenTab      from "./_LedenTab"
 /* ── Types ─────────────────────────────────────────────────────── */
 interface Member       { _id: string; name: string; image?: string }
 interface GroupMember  { userId: Member; role: string; joinedAt: string }
-interface Plan         { _id: string; title: string; duration: number }
 interface Assignment   { book: string; chapter: number; title: string; dueDate?: string; setBy?: Member; setAt: string }
 interface Challenge    { title: string; type: "chapters"|"notes"; target: number; startDate: string; endDate: string }
 interface Group {
   _id: string; name: string; description: string
   isPublic: boolean; inviteCode?: string
   createdBy: Member; members: GroupMember[]
-  planId?: Plan | null
   weeklyAssignment?: Assignment | null
   challenge?: Challenge | null
   createdAt: string
@@ -223,7 +221,6 @@ export default function GroupDetailPage() {
 
   if (!group) return null
 
-  const planId = (group.planId as unknown as Plan | null)?._id ?? null
 
   return (
     <div className="h-full overflow-y-auto">
@@ -265,11 +262,6 @@ export default function GroupDetailPage() {
                 <span className="flex items-center gap-1">
                   <Users size={11} /> {group.members.length} {group.members.length === 1 ? "lid" : "leden"}
                 </span>
-                {group.planId && (
-                  <span className="flex items-center gap-1">
-                    <BookMarked size={11} /> {(group.planId as unknown as Plan).title}
-                  </span>
-                )}
                 <span>Aangemaakt {formatDate(group.createdAt)}</span>
               </div>
             </div>
@@ -324,7 +316,7 @@ export default function GroupDetailPage() {
               <NotitiesTab groupId={params.id} />
             )}
             {activeTab === "voortgang" && (
-              <VoortgangTab groupId={params.id} planId={planId} />
+              <VoortgangTab groupId={params.id} />
             )}
             {activeTab === "leden" && (
               <LedenTab
@@ -352,24 +344,6 @@ export default function GroupDetailPage() {
                     <p className="text-sm font-semibold text-gray-900 dark:text-foreground truncate">{group.createdBy.name}</p>
                   </div>
                 </div>
-                {group.planId && (
-                  <div className="flex items-start gap-2">
-                    <div className="h-6 w-6 rounded-md flex items-center justify-center flex-shrink-0"
-                      style={{ backgroundColor: "rgba(13,148,136,0.08)" }}>
-                      <CalendarCheck2 size={12} style={{ color: "#0D9488" }} />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-xs text-gray-500 dark:text-muted-foreground">Groepsleesplan</p>
-                      <p className="text-sm font-semibold text-gray-900 dark:text-foreground truncate">
-                        {(group.planId as unknown as Plan).title}
-                      </p>
-                      <Link href={`/leesplannen/${(group.planId as unknown as Plan)._id}`}
-                        className="text-xs" style={{ color: "#0D9488" }}>
-                        Bekijk plan
-                      </Link>
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
 

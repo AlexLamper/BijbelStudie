@@ -37,6 +37,33 @@ const STARTER_QUESTIONS = [
 
 const MAX_MESSAGE_LENGTH = 2000;
 
+/**
+ * Escalating reassurance while an answer is generating, so a slow reply reads
+ * as "still working" instead of "broken" and the user stays on the page.
+ *
+ * The thresholds follow what the server actually does. A cached answer returns
+ * almost immediately and never reaches stage 1. A normal generation runs a few
+ * seconds. Past ~25s the request is almost certainly inside the retry path in
+ * lib/aiGemini.ts - the primary model retried after a 600ms backoff, then the
+ * five fallback models tried in turn - which is slow but still progressing.
+ *
+ * The copy deliberately never claims the answer is nearly ready, and never
+ * names a mechanism the client cannot observe: from here the only knowable
+ * fact is that the request is still open.
+ */
+const WAIT_STAGES = [
+  { afterMs: 0, text: 'Bezig met antwoorden…' },
+  { afterMs: 4_000, text: 'Het antwoord wordt opgesteld…' },
+  {
+    afterMs: 10_000,
+    text: 'Dit duurt wat langer dan gewoonlijk. Blijf gerust op deze pagina — het antwoord verschijnt vanzelf.',
+  },
+  {
+    afterMs: 25_000,
+    text: 'Het kan nu druk zijn bij de AI-dienst. Je vraag staat nog open; sluit dit venster niet.',
+  },
+] as const;
+
 const markdownComponents = {
   p: (props: React.HTMLAttributes<HTMLParagraphElement>) => (
     <p className="mb-2 last:mb-0 leading-relaxed" {...props} />
@@ -91,6 +118,7 @@ export default function AiAssistant({
   const [error, setError] = useState<string | null>(null);
   const [quota, setQuota] = useState<QuotaState | null>(null);
   const [quotaHit, setQuotaHit] = useState(false);
+  const [waitStage, setWaitStage] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const lastSentInitialRef = useRef<string | null>(null);
@@ -116,10 +144,24 @@ export default function AiAssistant({
     };
   }, []);
 
-  // Auto-scroll on new messages
+  // Advance the reassurance copy while a request is in flight. Resetting on
+  // every change of `loading` means the message disappears the instant the
+  // answer lands - nothing here delays anything.
+  useEffect(() => {
+    if (!loading) {
+      setWaitStage(0);
+      return;
+    }
+    const timers = WAIT_STAGES.slice(1).map((stage, i) =>
+      setTimeout(() => setWaitStage(i + 1), stage.afterMs),
+    );
+    return () => timers.forEach(clearTimeout);
+  }, [loading]);
+
+  // Auto-scroll on new messages, and when the waiting copy grows a line.
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
-  }, [messages, loading]);
+  }, [messages, loading, waitStage]);
 
   const sendMessage = useCallback(
     async (text: string) => {
@@ -270,10 +312,25 @@ export default function AiAssistant({
 
           {/* Loading */}
           {loading && (
-            <div className="px-1 py-1 space-y-2" role="status" aria-label="Antwoord genereren">
+            <div className="px-1 py-1 space-y-2">
               <SkeletonBlock className="h-3" />
               <SkeletonBlock className="h-3 w-11/12" />
               <SkeletonBlock className="h-3 w-2/3" />
+              {/* Keyed on the stage so each new line fades in rather than
+                  swapping under the reader's eyes. */}
+              <p
+                key={waitStage}
+                role="status"
+                aria-live="polite"
+                className="content-in flex items-start gap-1.5 pt-0.5 text-[11px] leading-relaxed text-gray-500 dark:text-gray-400"
+              >
+                <Loader2
+                  size={12}
+                  aria-hidden
+                  className="mt-0.5 flex-shrink-0 animate-spin text-[#0F766E] dark:text-teal-400"
+                />
+                <span>{WAIT_STAGES[waitStage].text}</span>
+              </p>
             </div>
           )}
 

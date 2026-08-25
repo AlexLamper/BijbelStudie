@@ -93,7 +93,7 @@ export const GUIDE_ONLINE: Guide = {
           text: "Bij voorkeur gekoppeld aan het hoofdstuk zelf, zodat je ze terugvindt zonder te zoeken.",
         },
         {
-          title: "Volg een leesplan voor de ruggengraat",
+          title: "Volg een begeleide studie voor de ruggengraat",
           text: "Zodat de vraag 'waar zal ik beginnen' nooit de reden is dat je niet begint.",
         },
         {
@@ -129,7 +129,7 @@ export const GUIDE_ONLINE: Guide = {
     },
     {
       q: "Wat heb ik nodig voor online bijbelstudie?",
-      a: "Een apparaat met internet en een plek om notities te bewaren. Meerdere vertalingen, bijbelcommentaren, de grondtekst en leesplannen zijn tegenwoordig online beschikbaar, waarvan een groot deel gratis.",
+      a: "Een apparaat met internet en een plek om notities te bewaren. Meerdere vertalingen, bijbelcommentaren, de grondtekst en begeleide studies zijn tegenwoordig online beschikbaar, waarvan een groot deel gratis.",
     },
     {
       q: "Kan ik de grondtekst gebruiken zonder Hebreeuws of Grieks te kennen?",

@@ -34,7 +34,10 @@ export async function GET(req: NextRequest) {
     })
   }
 
+  // `-inviteCode`: the discover list is readable by every signed-in user, and an
+  // invite code is a credential. Members get the code from the group page.
   const publicGroups = await StudyGroup.find({ isPublic: true })
+    .select("-inviteCode")
     .sort({ createdAt: -1 })
     .limit(50)
     .populate("createdBy", "name image")

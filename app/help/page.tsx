@@ -32,7 +32,7 @@ export default function HelpPage() {
       path: "/help",
       name: "Help en veelgestelde vragen",
       description:
-        "Antwoorden op de meestgestelde vragen over BijbelStudie: accounts, vertalingen, leesplannen, de AI-assistent, Pro en privacy.",
+        "Antwoorden op de meestgestelde vragen over BijbelStudie: accounts, vertalingen, begeleide studies, de AI-assistent, Pro en privacy.",
       type: "FAQPage",
       breadcrumbId: `${url}#breadcrumb`,
     }),
@@ -56,7 +56,7 @@ export default function HelpPage() {
           </h1>
           <p className="mt-4 text-lg leading-relaxed text-gray-600 dark:text-muted-foreground">
             Antwoord op {ALL_HELP_FAQS.length} vragen over accounts, vertalingen,
-            leesplannen, de AI-assistent, Pro en privacy. Staat je vraag er niet
+            begeleide studies, de AI-assistent, Pro en privacy. Staat je vraag er niet
             bij? Neem gerust{" "}
             <Link href="/contact" className="underline" style={{ color: TEAL_TEXT }}>
               contact

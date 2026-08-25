@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { getSession } from "next-auth/react"
@@ -32,6 +33,8 @@ interface UserData {
 type Status = "idle" | "saving" | "success" | "error"
 
 export default function ProfilePage() {
+  // Only the updater is needed here; the page reads the user from /api/user.
+  const { update: updateSession } = useSession()
   const router = useRouter()
   const [user, setUser] = useState<UserData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -118,6 +121,11 @@ export default function ProfilePage() {
       })
       if (!res.ok) throw new Error()
       setUser({ ...user, name: trimmed })
+      // Saving to Mongo is not enough on its own: the client caches the session
+      // until something asks it to refetch, so without this the navbar and the
+      // dashboard greeting kept the old name until a hard reload. `update()`
+      // refetches, which re-runs the session callback and reads the new name.
+      await updateSession({ name: trimmed })
       setNameStatus("success")
       setEditing(null)
     } catch {

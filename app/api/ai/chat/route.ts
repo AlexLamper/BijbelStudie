@@ -20,6 +20,15 @@ import {
   type CacheContext,
 } from "../../../../lib/aiAnswerCache";
 
+/**
+ * A slow answer is usually generateChatReply walking its fallback chain, which
+ * can outlast the platform default. Without an explicit ceiling the function is
+ * killed mid-flight and the browser sees a generic connection failure instead of
+ * the AI_BUSY state the client knows how to explain. 60s is the limit on every
+ * Vercel plan, so this is safe to raise only if the account allows it.
+ */
+export const maxDuration = 60;
+
 const FREE_DAILY_CAP = 5;
 const PREMIUM_DAILY_CAP = 200; // soft anti-abuse cap for Pro/admin
 const MAX_MESSAGE_LENGTH = 2000;

@@ -118,11 +118,16 @@ export function resolvePriceId(interval: BillingInterval): string | undefined {
     : process.env.NEXT_PUBLIC_STRIPE_PRICE_ID;
 }
 
+/**
+ * Every entry must name something the code actually withholds from a free
+ * account. Two claims were removed for failing that test: "Historische context
+ * en kaarten" (HistoricalContext and /api/geo/images are ungated - free for
+ * everyone) and the word "onbeperkt" on the AI, which app/api/ai/chat caps at
+ * PREMIUM_DAILY_CAP = 200 per day.
+ */
 export const PRO_FEATURES = [
   "Alle bijbelcommentaren, onbeperkt",
-  "Onbeperkte AI-assistent",
-  "Historische context en kaarten",
+  "200 AI-vragen per dag, i.p.v. 5",
   "Grondtekst: Hebreeuws en Grieks",
-  "Onbeperkte leesplannen",
   "Prioriteit bij ondersteuning",
 ];

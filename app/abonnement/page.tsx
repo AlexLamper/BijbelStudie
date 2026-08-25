@@ -311,7 +311,7 @@ function SubscribePageInner() {
             Alles wat je nodig hebt<br />voor serieuze bijbelstudie.
           </h1>
           <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto text-base">
-            Onbeperkte toegang tot commentaren, leesplannen, notities en de AI-assistent.
+            Onbeperkte toegang tot commentaren, de grondtekst, notities en de AI-assistent.
           </p>
         </div>
 

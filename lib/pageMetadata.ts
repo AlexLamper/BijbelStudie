@@ -35,13 +35,13 @@ interface PageMetadataConfig {
 const pageConfigs: Record<string, PageMetadataConfig> = {
   home: {
     title: 'Bijbelstudie online',
-    description: 'Studeer de Bijbel online met commentaren, leesplannen, begeleide studies en een AI-assistent. Gratis te beginnen.',
+    description: 'Studeer de Bijbel online met commentaren, de grondtekst, begeleide studies en een AI-assistent. Gratis te beginnen.',
     path: '/',
     type: 'website'
   },
   dashboard: {
     title: 'Dashboard',
-    description: 'Je persoonlijke dashboard: volg je voortgang, je leesplannen en je streak.',
+    description: 'Je persoonlijke dashboard: volg je voortgang, je notities en je streak.',
     path: '/dashboard',
     type: 'website',
     indexable: false
@@ -60,13 +60,6 @@ const pageConfigs: Record<string, PageMetadataConfig> = {
     title: 'Bijbel lezen',
     description: 'Lees de Bijbel online in meerdere vertalingen. Gebruik onze interactieve tools voor diepgaande bijbelstudie.',
     path: '/lezen',
-    type: 'website',
-    indexable: false
-  },
-  plans: {
-    title: 'Leesplannen',
-    description: 'Volg bijbelleesplannen op jouw tempo en houd je voortgang bij. Bijbelleesplannen voor serieuze bijbelstudenten.',
-    path: '/leesplannen',
     type: 'website',
     indexable: false
   },
@@ -128,7 +121,7 @@ const pageConfigs: Record<string, PageMetadataConfig> = {
   },
   help: {
     title: 'Help en veelgestelde vragen',
-    description: 'Antwoorden op de meestgestelde vragen over BijbelStudie: accounts, vertalingen, leesplannen, de AI-assistent, Pro en privacy.',
+    description: 'Antwoorden op de meestgestelde vragen over BijbelStudie: accounts, vertalingen, begeleide studies, de AI-assistent, Pro en privacy.',
     path: '/help',
     type: 'website'
   },
@@ -232,7 +225,7 @@ const pageConfigs: Record<string, PageMetadataConfig> = {
   },
   guideFree: {
     title: 'Gratis bijbelstudie: alles wat gratis kan',
-    description: 'Een compleet overzicht van gratis bijbelstudiemateriaal in het Nederlands: vertalingen, commentaren, leesplannen, begeleide studies en publiek-domein boeken.',
+    description: 'Een compleet overzicht van gratis bijbelstudiemateriaal in het Nederlands: vertalingen, commentaren, de grondtekst, begeleide studies en publiek-domein boeken.',
     path: '/bijbelstudie/gratis',
     type: 'article',
     ogEyebrow: 'Gids',

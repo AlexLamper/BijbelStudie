@@ -10,7 +10,7 @@ import {
   SidebarRail,
 } from "../ui/sidebar"
 import {
-  LayoutDashboard, BookOpen, BookMarked, CalendarCheck,
+  LayoutDashboard, BookOpen, BookMarked,
   StickyNote, User, Settings, Sparkles, Users, ShieldCheck,
   ArrowRight, Check, MessageSquareText,
 } from "lucide-react"
@@ -23,7 +23,6 @@ const mainNav = [
   { title: "Dashboard",    url: "/dashboard",    icon: LayoutDashboard, tourId: "nav-dashboard"    },
   { title: "Bijbelstudie", url: "/studie",       icon: BookOpen,        tourId: "nav-studie"       },
   { title: "Studies",      url: "/studies",      icon: BookMarked,      tourId: "nav-studies"      },
-  { title: "Leesplannen",  url: "/leesplannen",        icon: CalendarCheck,   tourId: "nav-plans"        },
   { title: "Groepen",      url: "/groepen",      icon: Users,           tourId: "nav-groepen"      },
   { title: "Notities",     url: "/notities",     icon: StickyNote,      tourId: "nav-notities"     },
   // /hulpbronnen, /bijbelboeken and /bijbelstudie are public reference pages,
@@ -75,10 +74,14 @@ function ProCTA() {
 
   if (!checked || isSubscribed) return null
 
+  // Every line here has to be something the paywall actually enforces:
+  // commentaries and grondtekst via lib/proContent.ts, the AI cap via
+  // app/api/ai/chat. "Historische context" used to sit in this list and was
+  // never gated at all - it is free for everyone.
   const perks = [
     "Alle bijbelcommentaren",
-    "Onbeperkte AI-assistent",
-    "Historische context",
+    "200 AI-vragen per dag",
+    "Grondtekst: Hebreeuws en Grieks",
     "Prioriteit ondersteuning",
   ]
 
