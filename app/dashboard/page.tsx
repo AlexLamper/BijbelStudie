@@ -110,7 +110,9 @@ export default function DashboardPage() {
     Promise.all([
       fetch("/api/user"),
       fetch("/api/user/last-read"),
-      fetch("/api/notes?limit=500"),
+      // Three notes are rendered and the total comes back in `pagination`, so
+      // there is no reason to transfer the other 497.
+      fetch("/api/notes?limit=3"),
       // One call for the plan card: the server decides which plan is "active"
       // (most recently worked on) and what to suggest when there is none.
       fetch("/api/v1/plans/active"),
@@ -125,11 +127,9 @@ export default function DashboardPage() {
         if (lr?.book) setLastRead(lr)
 
         if (Array.isArray(nd?.notes)) {
-          setNotesCount(nd.notes.length)
-          const sorted = [...nd.notes].sort(
-            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          )
-          setRecentNotes(sorted.slice(0, 3))
+          setNotesCount(nd.pagination?.totalCount ?? nd.notes.length)
+          // The endpoint already sorts by createdAt descending.
+          setRecentNotes(nd.notes.slice(0, 3))
         }
 
         setActivePlan(pd?.activePlan ?? null)

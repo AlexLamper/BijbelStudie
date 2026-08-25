@@ -21,6 +21,8 @@ import {
 import { track, trackNow } from "../../lib/analytics"
 
 const TEAL = "#0D9488"
+/** #0D9488 is 3.7:1 on white - fine as a fill, short of AA as type. */
+const TEAL_TEXT = "#0F766E"
 
 /**
  * The reasons apply to the product, not to a billing interval. The page used to
@@ -100,7 +102,7 @@ function PlanCard({
 
         {isAnnual ? (
           <>
-            <p className="text-xs font-semibold mt-1.5" style={{ color: TEAL }}>
+            <p className="text-xs font-semibold mt-1.5" style={{ color: TEAL_TEXT }}>
               Je bespaart {annualSaving()} per jaar
             </p>
             <p className="text-xs text-gray-400 mt-0.5">
@@ -125,7 +127,7 @@ function PlanCard({
             {/* Both plans contain the same product, so both get the same ticks.
                 The annual card used to render these grey, which read as
                 "not included". */}
-            <CheckCircle size={14} style={{ color: TEAL, flexShrink: 0, marginTop: 3 }} />
+            <CheckCircle size={14} style={{ color: TEAL_TEXT, flexShrink: 0, marginTop: 3 }} />
             {f}
           </li>
         ))}
@@ -277,7 +279,7 @@ function SubscribePageInner() {
       <div className="flex flex-col items-center justify-center min-h-[70vh] px-6 text-center">
         <div className="w-16 h-16 rounded-full flex items-center justify-center mb-5"
           style={{ backgroundColor: "rgba(13,148,136,0.08)" }}>
-          <CheckCircle className="h-8 w-8" style={{ color: TEAL }} />
+          <CheckCircle className="h-8 w-8" style={{ color: TEAL_TEXT }} />
         </div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Je bent al Pro</h1>
         <p className="text-gray-500 mb-6 max-w-sm">
@@ -301,7 +303,7 @@ function SubscribePageInner() {
         {/* Hero */}
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4"
-            style={{ backgroundColor: "rgba(13,148,136,0.08)", color: TEAL }}>
+            style={{ backgroundColor: "rgba(13,148,136,0.08)", color: TEAL_TEXT }}>
             <Sparkles size={12} />
             BijbelStudie Pro
           </div>
@@ -335,7 +337,7 @@ function SubscribePageInner() {
               <div key={title} className="rounded-xl p-4 bg-white dark:bg-card border" style={{ borderColor: "#E5E7EB" }}>
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center mb-3"
                   style={{ backgroundColor: "rgba(13,148,136,0.08)" }}>
-                  <Icon size={15} style={{ color: TEAL }} />
+                  <Icon size={15} style={{ color: TEAL_TEXT }} />
                 </div>
                 <p className="text-sm font-semibold text-gray-900 dark:text-white mb-1">{title}</p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{body}</p>
@@ -347,8 +349,17 @@ function SubscribePageInner() {
         <p className="text-center text-xs text-gray-400">
           Veilige betaling via Stripe &nbsp;·&nbsp; Altijd opzegbaar &nbsp;·&nbsp; Geen verborgen kosten
         </p>
+        {/* Pre-contract information. A subscriber is entitled to see the renewal
+            terms, how to stop, and the withdrawal right before paying, not only
+            in the terms page afterwards. */}
         <p className="text-center text-xs text-gray-400 mt-2">
-          Prijzen inclusief btw. Je abonnement verlengt automatisch en is daarna maandelijks opzegbaar.
+          Prijzen inclusief btw. Je abonnement verlengt automatisch en is daarna maandelijks opzegbaar
+          via Instellingen &rsaquo; Abonnement, zonder opgaaf van reden. Je hebt 14 dagen
+          herroepingsrecht; zie de{" "}
+          <a href="/algemene-voorwaarden" className="underline hover:text-gray-600 dark:hover:text-gray-300">
+            algemene voorwaarden
+          </a>
+          .
         </p>
 
       </div>

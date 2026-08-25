@@ -22,7 +22,8 @@ import {
 export const metadata: Metadata = generatePageMetadata("bibleBooks");
 export const dynamic = "force-static";
 
-const TEAL = "#0D9488";
+/** #0D9488 is 3.7:1 on white - fine as a fill, short of AA as type. */
+const TEAL_TEXT = "#0F766E";
 
 const CRUMBS = [
   { name: "Home", path: "/" },
@@ -82,7 +83,7 @@ export default function BijbelboekenPage() {
         <header className="mb-10">
           <p
             className="text-xs font-bold uppercase tracking-widest mb-3"
-            style={{ color: TEAL }}
+            style={{ color: TEAL_TEXT }}
           >
             Naslag
           </p>
@@ -167,7 +168,7 @@ function Stat({ label, value }: { label: string; value: string }) {
       className="rounded-xl border bg-white dark:bg-card p-4 text-center"
       style={{ borderColor: "#E5E7EB" }}
     >
-      <div className="text-2xl font-extrabold tabular-nums" style={{ color: TEAL }}>
+      <div className="text-2xl font-extrabold tabular-nums" style={{ color: TEAL_TEXT }}>
         {value}
       </div>
       <div className="text-xs mt-0.5 text-gray-500 dark:text-muted-foreground">
@@ -225,7 +226,7 @@ function GenreGroup({ genre, books }: { genre: BookGenre; books: BibleBook[] }) 
             >
               <span
                 className="text-[10px] font-bold tabular-nums shrink-0 w-5"
-                style={{ color: TEAL }}
+                style={{ color: TEAL_TEXT }}
                 aria-hidden
               >
                 {book.position}

@@ -140,7 +140,7 @@ function SignInPageInner() {
         <div className="max-w-sm mx-auto w-full space-y-8">
           {/* Logo */}
           <div className="flex items-center gap-2.5">
-            <Image src="/images/favicon.ico" alt="BijbelStudie" width={28} height={28} className="rounded-md" priority />
+            <Image src="/images/icon-192.png" alt="BijbelStudie" width={28} height={28} className="rounded-md" priority />
             <span className="font-bold text-lg text-foreground">BijbelStudie</span>
           </div>
 
@@ -217,7 +217,7 @@ function SignInPageInner() {
             <button
               type="submit"
               disabled={emailLoading}
-              className="w-full py-2.5 bg-teal-600 hover:bg-teal-700 disabled:bg-teal-400 text-white font-semibold rounded-lg text-sm transition-colors flex items-center justify-center gap-2 shadow-sm"
+              className="w-full py-2.5 bg-teal-700 hover:bg-teal-800 disabled:bg-teal-400 text-white font-semibold rounded-lg text-sm transition-colors flex items-center justify-center gap-2 shadow-sm"
             >
               {emailLoading ? (
                 <><Loader2 className="h-4 w-4 animate-spin" /> Inloggen...</>

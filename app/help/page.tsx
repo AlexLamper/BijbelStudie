@@ -16,7 +16,8 @@ import { graph, webPageNode, breadcrumbNode, faqNode } from "../../lib/seo/struc
 export const metadata: Metadata = generatePageMetadata("help");
 export const dynamic = "force-static";
 
-const TEAL = "#0D9488";
+/** #0D9488 is 3.7:1 on white - fine as a fill, short of AA as type. */
+const TEAL_TEXT = "#0F766E";
 
 const CRUMBS = [
   { name: "Home", path: "/" },
@@ -46,7 +47,7 @@ export default function HelpPage() {
         <header className="mb-10">
           <p
             className="text-xs font-bold uppercase tracking-widest mb-3"
-            style={{ color: TEAL }}
+            style={{ color: TEAL_TEXT }}
           >
             Helpcentrum
           </p>
@@ -57,7 +58,7 @@ export default function HelpPage() {
             Antwoord op {ALL_HELP_FAQS.length} vragen over accounts, vertalingen,
             leesplannen, de AI-assistent, Pro en privacy. Staat je vraag er niet
             bij? Neem gerust{" "}
-            <Link href="/contact" className="underline" style={{ color: TEAL }}>
+            <Link href="/contact" className="underline" style={{ color: TEAL_TEXT }}>
               contact
             </Link>{" "}
             op.

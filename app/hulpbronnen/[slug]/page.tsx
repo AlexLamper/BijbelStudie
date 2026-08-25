@@ -21,6 +21,8 @@ import {
 } from "../../../lib/seo/structuredData";
 
 const TEAL = "#0D9488";
+/** #0D9488 is 3.7:1 on white - fine as a fill, short of AA as type. */
+const TEAL_TEXT = "#0F766E";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -175,7 +177,7 @@ export default async function LibraryReaderPage({ params }: PageProps) {
         {/* Rights notice */}
         <div className="flex items-start gap-3 p-4 rounded-xl"
           style={{ backgroundColor: "rgba(13,148,136,0.04)", border: "1px solid rgba(13,148,136,0.15)" }}>
-          <ShieldCheck className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: TEAL }} />
+          <ShieldCheck className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: TEAL_TEXT }} />
           <p className="text-xs text-gray-700 dark:text-foreground/90 leading-relaxed">
             <strong className="font-semibold">Auteursrecht:</strong> {item.rightsNote}
           </p>

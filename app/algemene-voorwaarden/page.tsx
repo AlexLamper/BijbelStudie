@@ -12,6 +12,11 @@ export default function TermsOfServicePage() {
   const sections = [
     { title: t("acceptance_of_terms"),     body: t("acceptance_description") },
     { title: t("description_of_service"),  body: t("service_description") },
+    // Billing terms sit high on the page: they are the pre-contract information
+    // a subscriber is entitled to, not fine print to bury under conduct rules.
+    { title: t("subscriptions"),           body: t("subscriptions_description") },
+    { title: t("cancellation"),            body: t("cancellation_description") },
+    { title: t("withdrawal"),              body: t("withdrawal_description") },
     { title: t("user_accounts"),           body: t("user_accounts_description") },
     { title: t("user_conduct"),            body: t("conduct_description") },
     { title: t("intellectual_property"),   body: t("intellectual_property_description") },
@@ -26,7 +31,7 @@ export default function TermsOfServicePage() {
       <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/85 backdrop-blur-md">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
           <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-            <Image src="/images/favicon.ico" alt="" width={26} height={26} className="rounded-md" priority />
+            <Image src="/images/icon-192.png" alt="" width={26} height={26} className="rounded-md" priority />
             <span className="font-bold text-base text-gray-900">BijbelStudie</span>
           </Link>
           <Link href="/"
@@ -73,7 +78,7 @@ export default function TermsOfServicePage() {
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mt-10">
               <Link href="/registreren"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 font-semibold text-white px-7 py-3 rounded-xl bg-teal-600 hover:bg-teal-700 transition-colors">
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 font-semibold text-white px-7 py-3 rounded-xl bg-teal-700 hover:bg-teal-800 transition-colors">
                 {t("sign_up")}
               </Link>
               <Link href="/"

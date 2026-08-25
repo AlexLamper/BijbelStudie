@@ -5,6 +5,8 @@ import { ExternalLink, Maximize2, Minimize2 } from "lucide-react";
 import type { LibraryItem } from "../library";
 
 const TEAL = "#0D9488";
+/** #0D9488 is 3.7:1 on white - fine as a fill, short of AA as type. */
+const TEAL_TEXT = "#0F766E";
 
 export default function Reader({ item }: { item: LibraryItem }) {
   const [fullscreen, setFullscreen] = useState(false);
@@ -62,7 +64,7 @@ function NotEmbeddable({ item }: { item: LibraryItem }) {
     <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-2xl p-8 text-center">
       <div className="h-12 w-12 mx-auto rounded-full flex items-center justify-center mb-4"
         style={{ backgroundColor: "rgba(13,148,136,0.1)" }}>
-        <ExternalLink className="h-5 w-5" style={{ color: TEAL }} />
+        <ExternalLink className="h-5 w-5" style={{ color: TEAL_TEXT }} />
       </div>
       <h2 className="text-lg font-bold text-gray-900 dark:text-foreground mb-2">
         Lees dit werk bij {item.source}

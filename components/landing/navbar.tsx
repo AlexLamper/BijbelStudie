@@ -17,7 +17,7 @@ export function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5">
             <Image
-              src="/images/favicon.ico"
+              src="/images/icon-192.png"
               alt="BijbelStudie"
               width={28}
               height={28}

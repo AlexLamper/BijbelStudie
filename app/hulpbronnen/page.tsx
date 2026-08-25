@@ -18,6 +18,8 @@ import {
 } from "../../lib/seo/structuredData"
 
 const TEAL = "#0D9488"
+/** #0D9488 is 3.7:1 on white - fine as a fill, short of AA as type. */
+const TEAL_TEXT = "#0F766E"
 
 const CRUMBS = [
   { name: "Home", path: "/" },
@@ -93,7 +95,7 @@ export default function ResourcesPage() {
 
         {/* Hero */}
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: TEAL }}>
+          <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: TEAL_TEXT }}>
             Bibliotheek
           </p>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-foreground mb-2">
@@ -172,7 +174,7 @@ export default function ResourcesPage() {
         {/* Notice */}
         <div className="flex items-start gap-3 p-4 rounded-xl"
           style={{ backgroundColor: "rgba(13,148,136,0.04)", border: "1px solid rgba(13,148,136,0.15)" }}>
-          <ShieldCheck className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: TEAL }} />
+          <ShieldCheck className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: TEAL_TEXT }} />
           <p className="text-sm text-gray-700 dark:text-foreground/90 leading-relaxed">
             <strong className="font-semibold">Vrij beschikbaar.</strong> Alle werken in deze bibliotheek
             zijn publiek domein of vrij raadpleegbaar bij hun bron (DBNL, Project Gutenberg, universitaire repositories).

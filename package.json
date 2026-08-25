@@ -2,6 +2,13 @@
   "name": "bijbelstudie",
   "version": "0.1.0",
   "private": true,
+  "browserslist": [
+    "chrome >= 111",
+    "edge >= 111",
+    "firefox >= 111",
+    "safari >= 16.4",
+    "not dead"
+  ],
   "scripts": {
     "dev": "next dev",
     "sync-data": "node scripts/sync-data.mjs",

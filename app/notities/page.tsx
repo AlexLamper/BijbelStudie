@@ -123,7 +123,7 @@ export default function NotesPage() {
           </div>
           <Button
             onClick={() => router.push("/studie")}
-            className="bg-teal-600 hover:bg-teal-700 text-white gap-2 shrink-0">
+            className="bg-teal-700 hover:bg-teal-800 text-white gap-2 shrink-0">
             <Plus className="h-4 w-4" /> Notitie aanmaken
           </Button>
         </div>
@@ -218,7 +218,7 @@ export default function NotesPage() {
                 <p className="text-sm text-muted-foreground mb-6">
                   Begin met bestuderen om hier uw notities te zien.
                 </p>
-                <Button onClick={() => router.push("/studie")} className="bg-teal-600 hover:bg-teal-700 text-white gap-2">
+                <Button onClick={() => router.push("/studie")} className="bg-teal-700 hover:bg-teal-800 text-white gap-2">
                   <Plus className="h-4 w-4" /> Begin met bestuderen
                 </Button>
               </div>

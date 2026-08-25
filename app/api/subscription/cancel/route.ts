@@ -8,9 +8,12 @@ import stripe from "../../../../lib/stripe"
 import { tenureBucket } from "../../../../lib/analyticsSchema"
 
 /**
- * Cancels at period end and records why. The reason is the input every later
- * retention decision depends on, so it is captured here rather than in an
- * optional survey the user can skip.
+ * Cancels at period end and records why, if the user says why.
+ *
+ * The reason is deliberately optional. Dutch and EU consumer law requires
+ * cancelling to be no harder than subscribing, so nothing in this route may
+ * stand between the user and the cancellation - an unrecognised or absent
+ * reason is stored as "unspecified" instead of returning an error.
  *
  * Security: the subscription id comes from the authenticated user's own record.
  * The free-text field is length-capped and stored as data only - it is never
@@ -44,9 +47,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json().catch(() => ({}))
     const { reason, feedback } = body as { reason?: unknown; feedback?: unknown }
 
-    if (!isReason(reason)) {
-      return NextResponse.json({ error: "Geef een reden op" }, { status: 400 })
-    }
+    const cancelReason: Reason | undefined = isReason(reason) ? reason : undefined
 
     await connectMongoDB()
     const user = await User.findOne({ email: session.user.email })
@@ -63,7 +64,7 @@ export async function POST(req: NextRequest) {
       cancel_at_period_end: true,
       // Stripe's own cancellation analytics, so the reason is visible in the
       // Dashboard alongside the churn numbers rather than only in our database.
-      cancellation_details: { feedback: mapToStripeFeedback(reason) },
+      cancellation_details: { feedback: mapToStripeFeedback(cancelReason) },
     })
 
     const currentPeriodEnd = new Date(
@@ -71,7 +72,7 @@ export async function POST(req: NextRequest) {
     )
 
     user.cancelAtPeriodEnd = true
-    user.cancellationReason = reason
+    user.cancellationReason = cancelReason
     user.cancellationFeedback =
       typeof feedback === "string" ? feedback.slice(0, MAX_FEEDBACK_CHARS) : undefined
     await user.save()
@@ -86,7 +87,7 @@ export async function POST(req: NextRequest) {
     await AnalyticsEvent.create({
       name: "subscription_canceled",
       userId: user._id,
-      props: { reason, tenure: tenureBucket(tenureDays) },
+      props: { reason: cancelReason ?? "unspecified", tenure: tenureBucket(tenureDays) },
     }).catch(() => {})
 
     return NextResponse.json({
@@ -102,7 +103,7 @@ export async function POST(req: NextRequest) {
 
 /** Maps our reasons onto Stripe's fixed cancellation feedback vocabulary. */
 function mapToStripeFeedback(
-  reason: Reason
+  reason: Reason | undefined
 ): "too_expensive" | "unused" | "missing_features" | "other" {
   switch (reason) {
     case "too_expensive":

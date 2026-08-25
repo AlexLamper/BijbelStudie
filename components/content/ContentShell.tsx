@@ -3,7 +3,8 @@ import { ChevronRight } from "lucide-react";
 import { Header } from "../landing/navbar";
 import { Footer } from "../landing/footer";
 
-const TEAL = "#0D9488";
+/** #0D9488 is 3.7:1 on white - fine as a fill, short of AA as type. */
+const TEAL_TEXT = "#0F766E";
 
 export interface Crumb {
   name: string;
@@ -91,7 +92,7 @@ export function RelatedLinks({
           >
             <span
               className="font-semibold text-sm block group-hover:underline"
-              style={{ color: TEAL }}
+              style={{ color: TEAL_TEXT }}
             >
               {link.label}
             </span>

@@ -370,7 +370,7 @@ export function EditNoteModal({
           <Button
             onClick={handleSave}
             disabled={isSaving || !noteText.trim()}
-            className="gap-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg"
+            className="gap-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg"
           >
             {isSaving ? (
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />

@@ -72,6 +72,8 @@ export const EVENTS = {
   },
   subscription_canceled: {
     reason: [
+      // Giving a reason is optional, so most-common-case first: no answer.
+      "unspecified",
       "too_expensive",
       "not_using",
       "missing_features",

@@ -285,7 +285,7 @@ function ResetPasswordForm() {
             <Button
               type="submit"
               disabled={isLoading || !token}
-              className="w-full py-3 bg-teal-600 hover:bg-teal-600/90 dark:bg-[#e0e0e0] dark:hover:bg-[#d0d0d0] disabled:bg-gray-400 text-white dark:text-black  font-medium text-lg transition-colors rounded-lg"
+              className="w-full py-3 bg-teal-700 hover:bg-teal-700/90 dark:bg-[#e0e0e0] dark:hover:bg-[#d0d0d0] disabled:bg-gray-400 text-white dark:text-black  font-medium text-lg transition-colors rounded-lg"
             >
               {isLoading ? (
                 <span className="flex items-center justify-center">

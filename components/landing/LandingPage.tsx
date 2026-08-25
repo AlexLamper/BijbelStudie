@@ -1,9 +1,5 @@
-﻿"use client"
-
-import { useState, useEffect } from "react"
-import Link from "next/link"
+﻿import Link from "next/link"
 import Image from "next/image"
-import { motion } from "framer-motion"
 import {
   BookOpen, BookMarked, StickyNote, Library,
   ArrowRight, Check, ChevronDown, Users, Shield,
@@ -12,6 +8,7 @@ import {
   Flame, PenLine, Sparkles,
 } from "lucide-react"
 import { Footer } from "./footer"
+import { FAQItem } from "./FAQItem"
 import { HOME_FAQS } from "../../lib/content/homeFaq"
 import { HOW_IT_WORKS_STEPS } from "../../lib/content/howItWorks"
 
@@ -22,37 +19,35 @@ const T = {
   tealDark: "#0F766E",
   tealLight:"#CCFBF1",
   tealText: "#0F766E",
+  // For type on the teal-tinted pills: #0F766E only reaches 4.43:1 there.
+  tealDeep: "#115E59",
   bg:       "#F3F4F6",
   card:     "#FFFFFF",
   border:   "#E5E7EB",
   text:     "#111827",
-  muted:    "#6B7280",
+  // Passes 4.5:1 on white *and* on the #F3F4F6 section background; #6B7280
+  // reached only 4.39:1 on the latter.
+  muted:    "#4B5563",
   light:    "#F9FAFB",
 }
 
 /* ─── Reusable animation primitives ─────────────────────────── */
-const ease = [0.22, 1, 0.36, 1] as const
-
+/**
+ * Scroll reveal, driven by a CSS view-progress timeline rather than by
+ * JavaScript. The framer-motion version served `opacity: 0` in the HTML and
+ * waited for hydration to reveal it, which put the animation library on the
+ * critical path for the hero paint. Browsers without view timelines fall back
+ * to plain visible content - the right failure mode for text that has to be
+ * readable and crawlable.
+ */
 function FadeUp({
   children,
-  delay = 0,
   className,
 }: {
   children: React.ReactNode
-  delay?: number
   className?: string
 }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 28 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.6, delay, ease }}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  )
+  return <div className={className ? `reveal ${className}` : "reveal"}>{children}</div>
 }
 
 function SectionHeader({
@@ -67,17 +62,17 @@ function SectionHeader({
   return (
     <div className="text-center mb-14 max-w-2xl mx-auto">
       <FadeUp>
-        <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: T.teal }}>
+        <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: T.tealText }}>
           {label}
         </p>
       </FadeUp>
-      <FadeUp delay={0.08}>
+      <FadeUp>
         <h2 className="text-3xl lg:text-4xl font-extrabold tracking-tight" style={{ color: T.text }}>
           {title}
         </h2>
       </FadeUp>
       {subtitle && (
-        <FadeUp delay={0.16}>
+        <FadeUp>
           <p className="mt-4 text-base" style={{ color: T.muted }}>{subtitle}</p>
         </FadeUp>
       )}
@@ -136,12 +131,12 @@ function BibleStudyIllustration() {
             <span className="text-xs" style={{ color: T.muted }}>Statenvertaling</span>
           </div>
           <div className="flex items-center gap-1">
-            <button className="h-6 w-6 rounded flex items-center justify-center" style={{ backgroundColor: T.bg }}>
+            <span className="h-6 w-6 rounded flex items-center justify-center" style={{ backgroundColor: T.bg }}>
               <ChevronLeft size={11} color={T.muted} />
-            </button>
-            <button className="h-6 w-6 rounded flex items-center justify-center" style={{ backgroundColor: T.bg }}>
+            </span>
+            <span className="h-6 w-6 rounded flex items-center justify-center" style={{ backgroundColor: T.bg }}>
               <ChevronRight size={11} color={T.muted} />
-            </button>
+            </span>
           </div>
         </div>
 
@@ -151,13 +146,13 @@ function BibleStudyIllustration() {
           {/* Bible reading pane (3 cols) */}
           <div className="col-span-3 border-r" style={{ borderColor: T.border }}>
             <div className="px-5 pt-4 pb-3 text-center border-b" style={{ borderColor: T.border + "80" }}>
-              <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: T.teal }}>
+              <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: T.tealText }}>
                 Psalmen
               </p>
-              <h3 className="text-xl font-bold mt-0.5"
+              <p className="text-xl font-bold mt-0.5"
                 style={{ color: T.text, fontFamily: "Georgia, 'Times New Roman', serif" }}>
                 Psalm 23
-              </h3>
+              </p>
               <p className="text-[10px] mt-0.5" style={{ color: T.muted }}>Een psalm van David</p>
             </div>
 
@@ -170,7 +165,7 @@ function BibleStudyIllustration() {
                     borderLeft: v.highlight ? `2px solid ${T.teal}` : "2px solid transparent",
                   }}>
                   <span className="text-[10px] font-bold flex-shrink-0 mt-0.5 w-3 text-right"
-                    style={{ color: T.teal }}>
+                    style={{ color: T.tealText }}>
                     {v.num}
                   </span>
                   <p className="text-[11px] leading-relaxed"
@@ -188,7 +183,7 @@ function BibleStudyIllustration() {
             <div className="h-9 px-3 flex items-center gap-3 border-b text-[10px]"
               style={{ borderColor: T.border }}>
               <span className="font-bold pb-0.5 border-b-2"
-                style={{ color: T.teal, borderColor: T.teal }}>
+                style={{ color: T.tealText, borderColor: T.teal }}>
                 Commentaar
               </span>
               <span style={{ color: T.muted }}>Grondtekst</span>
@@ -216,12 +211,12 @@ function BibleStudyIllustration() {
               </div>
               <p className="text-[11px] leading-relaxed" style={{ color: T.text }}>
                 Deze psalm is de bekendste en meest geliefde van alle psalmen. In de{" "}
-                <span style={{ color: T.teal, fontStyle: "italic" }}>Ps 23:1-4</span>
+                <span style={{ color: T.tealText, fontStyle: "italic" }}>Ps 23:1-4</span>
                 {" "}geeft hij ons een volledig beeld van de volcontinu bezigheden van de herder, in wie
                 we zonder enige moeite het beeld van de Heer Jezus herkennen.
               </p>
               <p className="text-[11px] leading-relaxed" style={{ color: T.text }}>
-                In de <span style={{ color: T.teal, fontStyle: "italic" }}>Ps 23:5-6</span> wordt daaraan het beeld van een feestmaal toegevoegd. Deze psalm
+                In de <span style={{ color: T.tealText, fontStyle: "italic" }}>Ps 23:5-6</span> wordt daaraan het beeld van een feestmaal toegevoegd. Deze psalm
                 geeft ons een complete beschrijving van de herder-relatie met onze Heer.
               </p>
             </div>
@@ -253,27 +248,19 @@ function BibleStudyIllustration() {
 
 /* ─── Navbar ─────────────────────────────────────────────────── */
 function Navbar() {
-  const [scrolled, setScrolled] = useState(false)
-  useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 10)
-    window.addEventListener("scroll", fn, { passive: true })
-    return () => window.removeEventListener("scroll", fn)
-  }, [])
-
   return (
     <header
-      className="sticky top-0 z-50 border-b transition-shadow duration-300"
+      className="nav-shadow sticky top-0 z-50 border-b"
       style={{
         borderColor: T.border,
         backgroundColor: "rgba(255,255,255,0.85)",
         backdropFilter: "blur(12px)",
-        boxShadow: scrolled ? "0 1px 16px rgba(0,0,0,0.07)" : "none",
       }}
     >
       <div className="max-w-6xl 2xl:max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3 md:grid md:grid-cols-3">
         {/* Logo - links uitgelijnd */}
         <Link href="/" className="flex items-center gap-2 flex-shrink-0 md:justify-self-start">
-          <Image src="/images/favicon.ico" alt="" width={26} height={26} className="rounded-md" priority />
+          <Image src="/images/icon-192.png" alt="" width={26} height={26} className="rounded-md" priority />
           <span className="font-bold text-base" style={{ color: T.text }}>BijbelStudie</span>
         </Link>
 
@@ -302,7 +289,7 @@ function Navbar() {
             Inloggen
           </Link>
           <Link href="/inloggen"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-white px-3.5 sm:px-4 py-2 rounded-lg bg-teal-600 hover:bg-teal-700 transition-colors whitespace-nowrap">
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-white px-3.5 sm:px-4 py-2 rounded-lg bg-teal-700 hover:bg-teal-800 transition-colors whitespace-nowrap">
             Gratis beginnen
             <ArrowRight className="h-3.5 w-3.5 flex-shrink-0" />
           </Link>
@@ -337,73 +324,37 @@ function Hero() {
           {/* The h1 carries the head term verbatim ("online bijbelstudie") and
               is the only h1 on the page. The animation must not gate the text:
               `animate` runs on mount, so the copy is in the served HTML. */}
-          <motion.h1
+          <h1
             className="text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight"
             style={{ color: T.text }}
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.65, ease }}
           >
             De Nederlandse tool voor{" "}
-            <motion.span
-              style={{ color: T.teal }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.3, ease }}
-            >
-              online bijbelstudie
-            </motion.span>
-          </motion.h1>
+            <span style={{ color: T.tealText }}>online bijbelstudie</span>
+          </h1>
 
-          <motion.p
-            className="text-lg leading-relaxed"
-            style={{ color: T.muted }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55, delay: 0.18, ease }}
-          >
+          <p className="text-lg leading-relaxed" style={{ color: T.muted }}>
             Bestudeer de Bijbel diep en persoonlijk: vier Nederlandse vertalingen,
             bijbelcommentaren per vers, de Hebreeuwse en Griekse grondtekst,
             leesplannen, notities en een AI-assistent die uw vragen over de Schrift
             beantwoordt. <strong style={{ color: T.text, fontWeight: 600 }}>Gratis te beginnen</strong>,
             zonder creditcard.
-          </motion.p>
+          </p>
 
-          <motion.div
-            className="flex flex-col sm:flex-row gap-3 pt-1"
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3, ease }}
-          >
-            <motion.div
-              className="rounded-xl w-full sm:w-auto"
-              animate={{
-                boxShadow: [
-                  "0 0 0 0 rgba(13,148,136,0.45)",
-                  "0 0 0 10px rgba(13,148,136,0)",
-                  "0 0 0 0 rgba(13,148,136,0)",
-                ],
-              }}
-              transition={{ duration: 2.4, repeat: Infinity, ease: "easeOut", delay: 1 }}
-            >
+          <div className="flex flex-col sm:flex-row gap-3 pt-1">
+            <div className="cta-pulse rounded-xl w-full sm:w-auto">
               <Link href="/inloggen"
-                className="group w-full inline-flex items-center justify-center gap-2 font-semibold text-white px-7 py-3.5 rounded-xl bg-teal-600 hover:bg-teal-700 transition-colors">
+                className="group w-full inline-flex items-center justify-center gap-2 font-semibold text-white px-7 py-3.5 rounded-xl bg-teal-700 hover:bg-teal-800 transition-colors">
                 Start gratis
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </Link>
-            </motion.div>
+            </div>
             <Link href="#functies"
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 font-semibold px-7 py-3.5 rounded-xl border border-gray-200 text-gray-900 bg-white hover:bg-gray-50 transition-colors">
               Bekijk functies
             </Link>
-          </motion.div>
+          </div>
 
-          <motion.div
-            className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-2"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.44, ease }}
-          >
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-2">
             {[
               { icon: Sparkles,   label: "AI-assistent" },
               { icon: BookMarked, label: "10 begeleide studies" },
@@ -415,23 +366,15 @@ function Hero() {
                 {label}
               </div>
             ))}
-          </motion.div>
+          </div>
         </div>
 
         {/* Illustration column - floats continuously */}
-        <motion.div
-          className="relative w-full max-w-md mx-auto lg:max-w-none lg:mx-0"
-          initial={{ opacity: 0, x: 40, y: 16 }}
-          animate={{ opacity: 1, x: 0, y: 0 }}
-          transition={{ duration: 0.75, delay: 0.2, ease }}
-        >
-          <motion.div
-            animate={{ y: [0, -10, 0] }}
-            transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
-          >
+        <div className="relative w-full max-w-md mx-auto lg:max-w-none lg:mx-0">
+          <div className="float-slow">
             <BibleStudyIllustration />
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </div>
     </section>
   )
@@ -449,13 +392,8 @@ function FeatureCard({
   children?: React.ReactNode
 }) {
   return (
-    <motion.div
-      variants={{
-        hidden:  { opacity: 0, y: 24 },
-        visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease } },
-      }}
-      whileHover={{ y: -4, transition: { duration: 0.2 } }}
-      className={`group relative bg-white rounded-2xl border overflow-hidden cursor-default transition-shadow hover:shadow-lg flex flex-col ${className}`}
+    <div
+      className={`reveal group relative bg-white rounded-2xl border overflow-hidden cursor-default transition-all duration-200 hover:-translate-y-1 hover:shadow-lg flex flex-col ${className}`}
       style={{ borderColor: T.border, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}
     >
       <div className="p-6 lg:p-7 flex flex-col h-full">
@@ -477,7 +415,7 @@ function FeatureCard({
 
         {children && <div className="mt-5">{children}</div>}
       </div>
-    </motion.div>
+    </div>
   )
 }
 
@@ -491,13 +429,7 @@ function Features() {
           subtitle="Van bijbeltekst tot studiehulpmiddelen - alles samengebracht in één overzichtelijk platform."
         />
 
-        <motion.div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-60px" }}
-          variants={{ visible: { transition: { staggerChildren: 0.08 } } }}
-        >
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {/* Featured: AI-assistent (full width banner) */}
           <FeatureCard
             num="01"
@@ -572,13 +504,8 @@ function Features() {
           />
 
           {/* Row 3: Voortgang - wide */}
-          <motion.div
-            variants={{
-              hidden:  { opacity: 0, y: 24 },
-              visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease } },
-            }}
-            whileHover={{ y: -4, transition: { duration: 0.2 } }}
-            className="group lg:col-span-3 relative rounded-2xl border overflow-hidden cursor-default transition-shadow hover:shadow-lg"
+          <div
+            className="reveal group lg:col-span-3 relative rounded-2xl border overflow-hidden cursor-default transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
             style={{
               borderColor: T.border,
               backgroundColor: "white",
@@ -620,8 +547,8 @@ function Features() {
                 </div>
               </div>
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </div>
     </section>
   )
@@ -665,22 +592,11 @@ function BibleLibrary() {
             </p>
           </div>
         </FadeUp>
-        <motion.div
-          className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-16"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-60px" }}
-          variants={{ visible: { transition: { staggerChildren: 0.08 } } }}
-        >
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-16">
           {translations.map(({ name, year, note, badge }) => (
-            <motion.div
+            <div
               key={name}
-              variants={{
-                hidden:  { opacity: 0, y: 24 },
-                visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease } },
-              }}
-              whileHover={{ y: -4, transition: { duration: 0.2 } }}
-              className="group relative bg-white rounded-2xl border overflow-hidden cursor-default transition-shadow hover:shadow-lg"
+              className="reveal group relative bg-white rounded-2xl border overflow-hidden cursor-default transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
               style={{ borderColor: T.border, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}
             >
               {/* Teal accent bar */}
@@ -713,9 +629,9 @@ function BibleLibrary() {
 
                 <p className="text-sm leading-relaxed" style={{ color: T.muted }}>{note}</p>
               </div>
-            </motion.div>
+            </div>
           ))}
-        </motion.div>
+        </div>
 
         {/* Commentaries */}
         <FadeUp className="mb-5">
@@ -732,22 +648,11 @@ function BibleLibrary() {
             </p>
           </div>
         </FadeUp>
-        <motion.div
-          className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-60px" }}
-          variants={{ visible: { transition: { staggerChildren: 0.08 } } }}
-        >
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {commentaries.map(({ name, author, note }) => (
-            <motion.div
+            <div
               key={name}
-              variants={{
-                hidden:  { opacity: 0, y: 24 },
-                visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease } },
-              }}
-              whileHover={{ y: -4, transition: { duration: 0.2 } }}
-              className="group relative bg-white rounded-2xl border overflow-hidden cursor-default transition-shadow hover:shadow-lg"
+              className="reveal group relative bg-white rounded-2xl border overflow-hidden cursor-default transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
               style={{ borderColor: T.border, boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}
             >
               <div className="p-6">
@@ -769,11 +674,11 @@ function BibleLibrary() {
 
                 <p className="text-sm leading-relaxed" style={{ color: T.muted }}>{note}</p>
               </div>
-            </motion.div>
+            </div>
           ))}
-        </motion.div>
+        </div>
 
-        <FadeUp delay={0.1} className="text-center mt-10">
+        <FadeUp className="text-center mt-10">
           <p className="text-xs" style={{ color: T.muted }}>
             Alle vertalingen en commentaren direct beschikbaar in de webapp.
           </p>
@@ -928,7 +833,7 @@ function Showcase() {
               <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full mb-4"
                 style={{ backgroundColor: "rgba(13,148,136,0.10)" }}>
                 <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: T.teal }} />
-                <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: T.tealText }}>
+                <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: T.tealDeep }}>
                   Grondtekst
                 </p>
               </div>
@@ -954,7 +859,7 @@ function Showcase() {
             </div>
           </FadeUp>
 
-          <FadeUp delay={0.15}>
+          <FadeUp>
             <div className="relative">
               {/* Ambient glow */}
               <div className="absolute -inset-8 -z-10"
@@ -966,12 +871,12 @@ function Showcase() {
 
         {/* Block 2: Commentary — mockup left, text right */}
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          <FadeUp delay={0.15} className="lg:order-2">
+          <FadeUp className="lg:order-2">
             <div>
               <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full mb-4"
                 style={{ backgroundColor: "rgba(13,148,136,0.10)" }}>
                 <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: T.teal }} />
-                <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: T.tealText }}>
+                <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: T.tealDeep }}>
                   Commentaren
                 </p>
               </div>
@@ -997,7 +902,7 @@ function Showcase() {
             </div>
           </FadeUp>
 
-          <FadeUp delay={0.05} className="lg:order-1">
+          <FadeUp className="lg:order-1">
             <div className="relative">
               <div className="absolute -inset-8 -z-10"
                 style={{ background: "radial-gradient(ellipse 60% 70% at 50% 50%, rgba(13,148,136,0.10), transparent)" }} />
@@ -1040,8 +945,8 @@ function HowItWorks() {
           />
 
           <div className="grid lg:grid-cols-3 gap-8 lg:gap-12 relative">
-            {steps.map(({ num, icon: Icon, title, desc }, i) => (
-              <FadeUp key={num} delay={i * 0.12}>
+            {steps.map(({ num, icon: Icon, title, desc }) => (
+              <FadeUp key={num}>
                 <div className="relative z-10 text-center">
                   {/* Icon centered with white ring to cleanly mask the connecting line */}
                   <div
@@ -1053,7 +958,7 @@ function HowItWorks() {
                   >
                     <Icon className="h-6 w-6 text-white" />
                   </div>
-                  <p className="mt-5 text-[11px] font-black tracking-widest" style={{ color: T.teal }}>
+                  <p className="mt-5 text-[11px] font-black tracking-widest" style={{ color: T.tealText }}>
                     STAP {num}
                   </p>
                   <h3 className="font-bold text-base mt-2" style={{ color: T.text }}>{title}</h3>
@@ -1097,7 +1002,7 @@ function Pricing() {
         />
 
         <div className="grid md:grid-cols-2 gap-6">
-          <FadeUp delay={0.05}>
+          <FadeUp>
             <div className="bg-white rounded-2xl border p-8 h-full" style={{ borderColor: T.border }}>
               <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: T.muted }}>Gratis</p>
               <div className="flex items-baseline gap-1 mb-6">
@@ -1123,17 +1028,16 @@ function Pricing() {
             </div>
           </FadeUp>
 
-          <FadeUp delay={0.15}>
-            <motion.div
-              className="rounded-2xl p-8 relative overflow-hidden h-full"
+          <FadeUp>
+            <div
+              className="rounded-2xl p-8 relative overflow-hidden h-full transition-transform duration-250 hover:scale-[1.01]"
               style={{ backgroundColor: T.sidebar }}
-              whileHover={{ scale: 1.01, transition: { duration: 0.25 } }}
             >
               <div className="absolute top-0 right-0 w-40 h-40 rounded-full opacity-10"
                 style={{ background: `radial-gradient(circle, ${T.teal}, transparent)`, transform: "translate(30%, -30%)" }} />
               <div className="absolute -top-px left-8">
                 <span className="text-xs font-bold px-3 py-1 rounded-b-lg"
-                  style={{ backgroundColor: T.teal, color: "white" }}>
+                  style={{ backgroundColor: T.tealDark, color: "white" }}>
                   Meest populair
                 </span>
               </div>
@@ -1155,10 +1059,10 @@ function Pricing() {
               </ul>
               <Link href="/abonnement"
                 className="block text-center font-semibold py-3 rounded-xl text-sm transition-colors hover:opacity-90"
-                style={{ backgroundColor: T.teal, color: "white" }}>
+                style={{ backgroundColor: T.tealDark, color: "white" }}>
                 Pro proberen
               </Link>
-            </motion.div>
+            </div>
           </FadeUp>
         </div>
       </div>
@@ -1167,50 +1071,6 @@ function Pricing() {
 }
 
 /* ─── FAQ ────────────────────────────────────────────────────── */
-/**
- * The answer is always mounted and collapsed with max-height rather than
- * unmounted. Previously `{open && <p/>}` kept every answer out of the served
- * HTML, so the whole FAQ was invisible to crawlers and the FAQPage structured
- * data on app/page.tsx described text that was not on the page.
- */
-function FAQItem({ q, a, id }: { q: string; a: string; id: string }) {
-  const [open, setOpen] = useState(false)
-  return (
-    <div className="border-b" style={{ borderColor: T.border }}>
-      <h3>
-        <button
-          className="w-full flex items-center justify-between gap-4 py-4 text-left font-semibold text-sm select-none"
-          style={{ color: T.text }}
-          onClick={() => setOpen(!open)}
-          aria-expanded={open}
-          aria-controls={`${id}-answer`}
-          id={`${id}-question`}
-        >
-          <span>{q}</span>
-          <motion.span
-            animate={{ rotate: open ? 180 : 0 }}
-            transition={{ duration: 0.25, ease }}
-            className="flex-shrink-0"
-          >
-            <ChevronDown className="h-4 w-4" style={{ color: T.muted }} />
-          </motion.span>
-        </button>
-      </h3>
-      <motion.div
-        id={`${id}-answer`}
-        role="region"
-        aria-labelledby={`${id}-question`}
-        initial={false}
-        animate={{ height: open ? "auto" : 0, opacity: open ? 1 : 0 }}
-        transition={{ duration: 0.28, ease }}
-        style={{ overflow: "hidden" }}
-      >
-        <p className="pb-5 text-sm leading-relaxed" style={{ color: T.muted }}>{a}</p>
-      </motion.div>
-    </div>
-  )
-}
-
 function FAQ() {
   return (
     <section id="faq" className="py-20" style={{ backgroundColor: T.card }}>
@@ -1219,7 +1079,15 @@ function FAQ() {
         <FadeUp>
           <div>
             {HOME_FAQS.map((item, i) => (
-              <FAQItem key={item.q} q={item.q} a={item.a} id={`faq-${i}`} />
+              <FAQItem
+                key={item.q}
+                q={item.q}
+                a={item.a}
+                id={`faq-${i}`}
+                borderColor={T.border}
+                textColor={T.text}
+                mutedColor={T.muted}
+              />
             ))}
           </div>
         </FadeUp>
@@ -1243,20 +1111,20 @@ function CTA() {
             Begin vandaag nog
           </div>
         </FadeUp>
-        <FadeUp delay={0.08}>
+        <FadeUp>
           <h2 className="text-3xl lg:text-4xl font-extrabold leading-tight" style={{ color: T.text }}>
             Klaar om de Bijbel te bestuderen?
           </h2>
         </FadeUp>
-        <FadeUp delay={0.14}>
+        <FadeUp>
           <p className="text-base" style={{ color: T.muted }}>
             Maak in minder dan een minuut een gratis account aan en begin vandaag nog.
           </p>
         </FadeUp>
-        <FadeUp delay={0.2}>
+        <FadeUp>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link href="/inloggen"
-              className="inline-flex items-center justify-center gap-2 font-semibold text-white px-8 py-3.5 rounded-xl bg-teal-600 hover:bg-teal-700 transition-colors">
+              className="inline-flex items-center justify-center gap-2 font-semibold text-white px-8 py-3.5 rounded-xl bg-teal-700 hover:bg-teal-800 transition-colors">
               Gratis beginnen
               <ArrowRight className="h-4 w-4" />
             </Link>
@@ -1267,7 +1135,7 @@ function CTA() {
             </Link>
           </div>
         </FadeUp>
-        <FadeUp delay={0.28}>
+        <FadeUp>
           <p className="text-xs" style={{ color: T.muted }}>
             Geen creditcard vereist · Gratis te gebruiken · Altijd opzegbaar
           </p>

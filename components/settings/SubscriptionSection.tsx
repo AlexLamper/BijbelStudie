@@ -39,15 +39,18 @@ function formatDate(value: string | null): string {
  * called it, so the only way to stop paying was to contact support - which
  * reads as a dark pattern and generates chargebacks.
  *
- * The flow deliberately puts a pause offer in front of cancellation, then asks
- * for a reason. Both are real retention mechanisms, but cancelling stays two
- * clicks away and is never blocked.
+ * Cancelling is two clicks and nothing gates it: Dutch and EU consumer rules
+ * require ending a subscription to be no harder than starting one. The pause
+ * offer and the reason question sit next to the cancel button rather than in
+ * front of it - they are retention mechanisms, not steps in the flow - and the
+ * reason is explicitly optional. A paused subscriber can cancel too; hiding the
+ * button from them left the portal as their only exit.
  */
 export function SubscriptionSection() {
   const [state, setState] = useState<BillingState | null>(null)
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
-  const [stage, setStage] = useState<"idle" | "offer" | "reason" | "done">("idle")
+  const [stage, setStage] = useState<"idle" | "confirm" | "done">("idle")
   const [reason, setReason] = useState<string>("")
   const [feedback, setFeedback] = useState("")
   const [error, setError] = useState("")
@@ -96,7 +99,6 @@ export function SubscriptionSection() {
   }
 
   const confirmCancel = async () => {
-    if (!reason) { setError("Kies een reden"); return }
     setBusy(true)
     setError("")
     try {
@@ -169,78 +171,37 @@ export function SubscriptionSection() {
 
       {error && <p className="text-xs" style={{ color: "#B91C1C" }}>{error}</p>}
 
-      {/* Cancellation flow */}
-      {!state.cancelAtPeriodEnd && !state.isPaused && (
+      {/* Cancellation. Stays available while paused: a paused subscriber must
+          be able to end the subscription outright without going to Stripe. */}
+      {!state.cancelAtPeriodEnd && (
         <div className="pt-4 border-t border-gray-100 dark:border-border">
           {stage === "idle" && (
             <button
-              onClick={() => { setStage("offer"); track("cancel_flow_opened") }}
+              onClick={() => { setStage("confirm"); track("cancel_flow_opened") }}
               className="text-xs text-muted-foreground hover:text-foreground underline transition-colors"
             >
               Abonnement opzeggen
             </button>
           )}
 
-          {/* Save offer: pausing keeps a seasonal drop-off from becoming a
-              permanent loss. Cancelling stays one click away. */}
-          {stage === "offer" && (
-            <div className="space-y-3">
-              <div className="flex items-start gap-2.5">
-                <PauseCircle size={16} className="flex-shrink-0 mt-0.5" style={{ color: TEAL }} />
-                <div>
-                  <p className="text-sm font-semibold text-foreground">Even pauzeren in plaats van opzeggen?</p>
-                  <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                    Je betaalt tijdens de pauze niets en je gegevens, notities en voortgang
-                    blijven bewaard. Het abonnement hervat daarna vanzelf.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-2 flex-wrap">
-                {[1, 2, 3].map(m => (
-                  <button
-                    key={m}
-                    onClick={() => pause(m)}
-                    disabled={busy}
-                    className="px-3.5 h-9 rounded-lg text-xs font-semibold text-white disabled:opacity-60"
-                    style={{ backgroundColor: TEAL }}
-                  >
-                    {m} {m === 1 ? "maand" : "maanden"} pauzeren
-                  </button>
-                ))}
-              </div>
-
-              {state.interval === "monthly" && (
-                <p className="text-xs text-muted-foreground">
-                  Te duur? Op het jaarplan betaal je {effectivePerMonth(PLANS.annual)} per maand
-                  en bespaar je {annualSaving()} per jaar.
+          {stage === "confirm" && (
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm font-semibold text-foreground">Abonnement opzeggen</p>
+                <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                  De opzegging gaat in aan het einde van de huidige periode. Tot{" "}
+                  {formatDate(state.currentPeriodEnd)} houd je toegang tot Pro, daarna wordt er
+                  niets meer afgeschreven. Je notities en voortgang blijven bewaard.
                 </p>
-              )}
-
-              <div className="flex gap-3 pt-1">
-                <button
-                  onClick={() => setStage("reason")}
-                  className="text-xs text-muted-foreground hover:text-foreground underline"
-                >
-                  Nee, ik wil opzeggen
-                </button>
-                <button
-                  onClick={() => setStage("idle")}
-                  className="text-xs text-muted-foreground hover:text-foreground"
-                >
-                  Annuleren
-                </button>
               </div>
-            </div>
-          )}
 
-          {/* Reason capture. Required, because without it every later retention
-              decision is guesswork. */}
-          {stage === "reason" && (
-            <div className="space-y-3">
-              <p className="text-sm font-semibold text-foreground">Waarom zeg je op?</p>
-
+              {/* Optional, and labelled as such. Requiring feedback would make
+                  cancelling harder than subscribing, which is what the rules
+                  forbid; the answer rate matters less than the exit staying open. */}
               <div className="space-y-1.5">
+                <p className="text-xs font-medium text-muted-foreground">
+                  Wil je ons vertellen waarom? (optioneel)
+                </p>
                 {REASONS.map(r => (
                   <label key={r.value} className="flex items-center gap-2.5 text-sm text-foreground cursor-pointer">
                     <input
@@ -267,7 +228,7 @@ export function SubscriptionSection() {
               <div className="flex gap-2 items-center flex-wrap">
                 <button
                   onClick={confirmCancel}
-                  disabled={busy || !reason}
+                  disabled={busy}
                   className="inline-flex items-center gap-1.5 px-3.5 h-9 rounded-lg text-xs font-semibold text-white disabled:opacity-50"
                   style={{ backgroundColor: "#B91C1C" }}
                 >
@@ -281,16 +242,55 @@ export function SubscriptionSection() {
                   Toch niet
                 </button>
               </div>
+
+              {/* Save offer, beside the exit rather than in front of it, and
+                  deliberately styled quieter than the cancel button. */}
+              {!state.isPaused && (
+                <div className="pt-3.5 border-t border-gray-100 dark:border-border space-y-2.5">
+                  <div className="flex items-start gap-2.5">
+                    <PauseCircle size={16} className="flex-shrink-0 mt-0.5" style={{ color: TEAL }} />
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">Liever even pauzeren?</p>
+                      <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                        Je betaalt tijdens de pauze niets en je gegevens, notities en voortgang
+                        blijven bewaard. Het abonnement hervat daarna vanzelf.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 flex-wrap">
+                    {[1, 2, 3].map(m => (
+                      <button
+                        key={m}
+                        onClick={() => pause(m)}
+                        disabled={busy}
+                        className="px-3.5 h-9 rounded-lg text-xs font-semibold border border-border text-foreground disabled:opacity-60"
+                      >
+                        {m} {m === 1 ? "maand" : "maanden"} pauzeren
+                      </button>
+                    ))}
+                  </div>
+
+                  {state.interval === "monthly" && (
+                    <p className="text-xs text-muted-foreground">
+                      Te duur? Op het jaarplan betaal je {effectivePerMonth(PLANS.annual)} per maand
+                      en bespaar je {annualSaving()} per jaar.
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           )}
-
-          {stage === "done" && (
-            <p className="text-sm text-muted-foreground">
-              Je abonnement is opgezegd. Je houdt toegang tot{" "}
-              {formatDate(state.currentPeriodEnd)}.
-            </p>
-          )}
         </div>
+      )}
+
+      {/* Outside the block above on purpose: the reload after cancelling flips
+          cancelAtPeriodEnd, which used to unmount this confirmation unread. */}
+      {stage === "done" && (
+        <p className="text-sm text-muted-foreground">
+          Je abonnement is opgezegd. Je houdt toegang tot{" "}
+          {formatDate(state.currentPeriodEnd)}.
+        </p>
       )}
     </div>
   )

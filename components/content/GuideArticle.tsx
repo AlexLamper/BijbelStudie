@@ -4,6 +4,8 @@ import type { Guide } from "../../lib/content/guides";
 import { RelatedLinks } from "./ContentShell";
 
 const TEAL = "#0D9488";
+/** #0D9488 is 3.7:1 on white - fine as a fill, short of AA as type. */
+const TEAL_TEXT = "#0F766E";
 
 /**
  * Renders one guide from lib/content/guides.
@@ -19,7 +21,7 @@ export function GuideArticle({ guide }: { guide: Guide }) {
       <header className="mb-10">
         <p
           className="text-xs font-bold uppercase tracking-widest mb-3"
-          style={{ color: TEAL }}
+          style={{ color: TEAL_TEXT }}
         >
           Gids
         </p>
@@ -59,7 +61,7 @@ export function GuideArticle({ guide }: { guide: Guide }) {
                   href={`#${section.id}`}
                   className="text-sm hover:underline text-gray-700 dark:text-foreground"
                 >
-                  <span className="tabular-nums mr-2" style={{ color: TEAL }}>
+                  <span className="tabular-nums mr-2" style={{ color: TEAL_TEXT }}>
                     {String(i + 1).padStart(2, "0")}
                   </span>
                   {section.heading}

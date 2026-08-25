@@ -11,30 +11,22 @@ interface StartupAnimationProps {
 
 export default function StartupAnimation({ isReady, onComplete }: StartupAnimationProps) {
   const [isVisible, setIsVisible] = useState(true);
-  const [minTimeElapsed, setMinTimeElapsed] = useState(false);
 
   useEffect(() => {
-    // Ensure animation shows for at least 500ms (reduced from 1s)
-    const minTimer = setTimeout(() => {
-      setMinTimeElapsed(true);
-    }, 500);
-
     // Force completion after 2 seconds max to prevent hanging
     const maxTimer = setTimeout(() => {
       setIsVisible(false);
     }, 2000);
 
-    return () => {
-      clearTimeout(minTimer);
-      clearTimeout(maxTimer);
-    };
+    return () => clearTimeout(maxTimer);
   }, []);
 
+  // No minimum display time. This overlay covers the whole viewport, so a floor
+  // of 500ms was a floor on /studie's Largest Contentful Paint as well: the
+  // page could be ready to paint and still be held behind a splash screen.
   useEffect(() => {
-    if (isReady && minTimeElapsed) {
-      setIsVisible(false);
-    }
-  }, [isReady, minTimeElapsed]);
+    if (isReady) setIsVisible(false);
+  }, [isReady]);
 
   return (
     <AnimatePresence

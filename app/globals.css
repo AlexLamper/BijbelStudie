@@ -117,3 +117,60 @@
 ::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground) / 0.4); }
 
 :focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }
+
+/* ─── Scroll reveal, entirely on the compositor ─────────────────
+   These used to be framer-motion elements. That put the hero copy behind
+   hydration - the served HTML carried `opacity: 0` and nothing painted until
+   the animation library had loaded, which is what pushed mobile LCP past 2.5s.
+   A view-progress timeline needs no JavaScript at all, and browsers without
+   one simply render the content visible, which is the correct fallback. */
+@keyframes reveal-up {
+  from { transform: translateY(28px); }
+  to   { transform: none; }
+}
+
+/* Deliberately no opacity ramp: half-faded text fails contrast while it is
+   mid-animation, and it hides content from anything that samples the page
+   before the animation has run. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: reveal-up linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 22%;
+    }
+  }
+}
+
+/* Continuous motion on decorative elements only, never on text that LCP
+   is measured against. */
+@keyframes float-y {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-10px); }
+}
+@keyframes cta-pulse {
+  0%   { box-shadow: 0 0 0 0   rgba(13, 148, 136, 0.45); }
+  70%  { box-shadow: 0 0 0 10px rgba(13, 148, 136, 0); }
+  100% { box-shadow: 0 0 0 0   rgba(13, 148, 136, 0); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .float-slow { animation: float-y 5.5s ease-in-out infinite; }
+  .cta-pulse  { animation: cta-pulse 2.4s ease-out 1s infinite; }
+}
+
+/* Sticky-header shadow, driven by scroll position instead of a scroll listener
+   plus a React state update. Browsers without scroll timelines keep the flat
+   header, which is the same thing they saw at the top of the page anyway. */
+@keyframes nav-shadow {
+  from { box-shadow: 0 1px 16px rgba(0, 0, 0, 0); }
+  to   { box-shadow: 0 1px 16px rgba(0, 0, 0, 0.07); }
+}
+
+@supports (animation-timeline: scroll()) {
+  .nav-shadow {
+    animation: nav-shadow linear both;
+    animation-timeline: scroll();
+    animation-range: 0 80px;
+  }
+}

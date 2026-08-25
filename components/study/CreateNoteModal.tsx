@@ -280,7 +280,7 @@ export function CreateNoteModal({
                 variant={noteType === type ? "default" : "outline"}
                 size="sm"
                 onClick={() => setNoteType(type)}
-                className={noteType === type ? "bg-teal-600 hover:bg-teal-700 text-white" : ""}
+                className={noteType === type ? "bg-teal-700 hover:bg-teal-800 text-white" : ""}
               >
                 {type === "note" ? t("type_note") : type === "highlight" ? t("type_highlight") : t("type_both")}
               </Button>
@@ -425,7 +425,7 @@ export function CreateNoteModal({
           <Button
             onClick={handleSave}
             disabled={isSaving || !noteText.trim()}
-            className="gap-2 bg-teal-600 hover:bg-teal-700 text-white"
+            className="gap-2 bg-teal-700 hover:bg-teal-800 text-white"
           >
             {isSaving ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" /> : <Save className="h-4 w-4" />}
             {isSaving ? t("saving") : t("save_note")}

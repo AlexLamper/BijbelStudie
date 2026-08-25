@@ -77,7 +77,7 @@ export function OnboardingModal({ isOpen: initialIsOpen, onClose, onComplete }: 
         <div className="px-7 pt-7 pb-2">
           {/* Brand */}
           <div className="flex items-center gap-2 mb-6">
-            <Image src="/images/favicon.ico" alt="" width={22} height={22} className="rounded-md" />
+            <Image src="/images/icon-192.png" alt="" width={22} height={22} className="rounded-md" />
             <span className="font-bold text-sm text-gray-900 dark:text-foreground">BijbelStudie</span>
           </div>
 

@@ -82,9 +82,20 @@ export const authOptions: NextAuthOptions = {
       if (session.user?.email) {
         try {
           await connectMongoDB();
-          const user = await User.findOne({ email: session.user.email });
+          // This runs on every session read - once per page render and once per
+          // API call - so it fetches the six fields it uses instead of hydrating
+          // the whole user document.
+          const user = await User.findOne({ email: session.user.email })
+            .select("isAdmin subscribed storePremium preferences.onboardingCompleted preferences.tourCompleted")
+            .lean<{
+              _id: unknown;
+              isAdmin?: boolean;
+              subscribed?: boolean;
+              storePremium?: boolean;
+              preferences?: { onboardingCompleted?: boolean; tourCompleted?: boolean };
+            }>();
           if (user) {
-            session.user.id = user._id.toString();
+            session.user.id = String(user._id);
             const isAdmin = user.isAdmin || isAdminEmail(session.user.email) || false;
             session.user.isAdmin = isAdmin;
             // Store purchases count here too. `subscribed` alone is the Stripe

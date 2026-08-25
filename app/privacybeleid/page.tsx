@@ -44,7 +44,7 @@ const sections = [
   },
   {
     title: "Neem contact met ons op",
-    body: "Als u vragen heeft over dit privacybeleid, neem dan contact met ons op via privacy@bijbelstudie.com.",
+    body: "Als u vragen heeft over dit privacybeleid, neem dan contact met ons op via devlamper06@gmail.com.",
   },
 ];
 
@@ -55,7 +55,7 @@ export default function PrivacyPolicyPage() {
       <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/85 backdrop-blur-md">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
           <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-            <Image src="/images/favicon.ico" alt="" width={26} height={26} className="rounded-md" priority />
+            <Image src="/images/icon-192.png" alt="" width={26} height={26} className="rounded-md" priority />
             <span className="font-bold text-base text-gray-900">BijbelStudie</span>
           </Link>
           <Link href="/"
@@ -102,7 +102,7 @@ export default function PrivacyPolicyPage() {
 
             <div className="text-center mt-10">
               <Link href="/"
-                className="inline-flex items-center justify-center gap-2 font-semibold text-white px-7 py-3 rounded-xl bg-teal-600 hover:bg-teal-700 transition-colors">
+                className="inline-flex items-center justify-center gap-2 font-semibold text-white px-7 py-3 rounded-xl bg-teal-700 hover:bg-teal-800 transition-colors">
                 Terug naar home
               </Link>
             </div>

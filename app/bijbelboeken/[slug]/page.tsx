@@ -20,6 +20,8 @@ import {
 } from "../../../lib/seo/structuredData";
 
 const TEAL = "#0D9488";
+/** #0D9488 is 3.7:1 on white - fine as a fill, short of AA as type. */
+const TEAL_TEXT = "#0F766E";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -102,7 +104,7 @@ export default async function BijbelboekPage({ params }: PageProps) {
         <header className="mb-8">
           <p
             className="text-xs font-bold uppercase tracking-widest mb-3"
-            style={{ color: TEAL }}
+            style={{ color: TEAL_TEXT }}
           >
             {testamentLabel} · boek {book.position} van 66
           </p>
@@ -159,7 +161,7 @@ export default async function BijbelboekPage({ params }: PageProps) {
               >
                 <span
                   className="shrink-0 text-xs font-bold tabular-nums px-2 py-1 rounded-md h-fit"
-                  style={{ backgroundColor: "rgba(13,148,136,0.10)", color: TEAL }}
+                  style={{ backgroundColor: "rgba(13,148,136,0.10)", color: TEAL_TEXT }}
                 >
                   {section.range}
                 </span>
@@ -248,7 +250,7 @@ export default async function BijbelboekPage({ params }: PageProps) {
               className="flex items-center gap-2 rounded-xl border bg-white dark:bg-card px-4 py-3 text-sm no-underline hover:border-teal-500 transition-colors"
               style={{ borderColor: "#E5E7EB" }}
             >
-              <ArrowLeft className="h-4 w-4 shrink-0" style={{ color: TEAL }} aria-hidden />
+              <ArrowLeft className="h-4 w-4 shrink-0" style={{ color: TEAL_TEXT }} aria-hidden />
               <span className="text-gray-500 dark:text-muted-foreground">
                 Vorige:{" "}
                 <span className="font-semibold text-gray-900 dark:text-foreground">
@@ -271,7 +273,7 @@ export default async function BijbelboekPage({ params }: PageProps) {
                   {next.name}
                 </span>
               </span>
-              <ArrowRight className="h-4 w-4 shrink-0" style={{ color: TEAL }} aria-hidden />
+              <ArrowRight className="h-4 w-4 shrink-0" style={{ color: TEAL_TEXT }} aria-hidden />
             </Link>
           )}
         </nav>

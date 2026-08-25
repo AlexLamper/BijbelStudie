@@ -177,7 +177,7 @@ export function AppSidebar({ ...props }) {
           className="flex items-center gap-2.5 no-underline pl-3 h-full"
         >
           <Image
-            src="/images/favicon.ico"
+            src="/images/icon-192.png"
             alt=""
             width={26}
             height={26}
