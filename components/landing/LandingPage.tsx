@@ -326,8 +326,8 @@ function Hero() {
             className="text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight"
             style={{ color: T.text }}
           >
-            De Nederlandse tool voor{" "}
-            <span style={{ color: T.tealText }}>online bijbelstudie</span>
+            De Nederlandse tool voor online{" "}
+            <span style={{ color: T.tealText }}>bijbelstudie</span>
           </h1>
 
           <p className="text-lg leading-relaxed" style={{ color: T.muted }}>

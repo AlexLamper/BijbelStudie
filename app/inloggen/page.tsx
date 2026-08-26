@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { getProviders, signIn, ClientSafeProvider } from "next-auth/react"
-import { Loader2, Eye, EyeOff, BookOpen, ArrowLeft } from "lucide-react"
+import { Loader2, Eye, EyeOff, BookOpen, ArrowLeft, Check, Sparkles } from "lucide-react"
 import { useSearchParams } from "next/navigation"
 import { SkeletonBlock } from "../../components/ui/skeletons"
 import { safeRedirect } from "../../lib/safeRedirect"
@@ -18,14 +18,10 @@ const GOOGLE_SVG = (
   </svg>
 )
 
-import { BookMarked, StickyNote, Library, Sparkles } from "lucide-react"
-
-const PANEL_FEATURES = [
-  { icon: BookOpen,    title: "Bijbelvertalingen",      desc: "Lees de Statenvertaling en meer vertalingen" },
-  { icon: BookMarked,  title: "10 begeleide studies",   desc: "Over personen, thema's en gebeurtenissen" },
-  { icon: StickyNote,  title: "Notities & markering",   desc: "Sla inzichten op bij elk vers" },
-  { icon: Library,     title: "Studiemethoden",         desc: "Inductief, SOAP, SOLVAT en meer" },
-  { icon: Sparkles,    title: "AI-assistent",           desc: "Stel je vragen over de Bijbel en krijg direct uitleg", span: true },
+const PANEL_BENEFITS = [
+  { title: "Persoonlijke notities", desc: "Bewaar inzichten bij elk vers." },
+  { title: "Begeleide studies", desc: "Volg een duidelijke bijbelleesroute." },
+  { title: "AI-assistent", desc: "Krijg directe uitleg bij jouw vragen." },
 ]
 
 function FeaturePanel() {
@@ -37,14 +33,14 @@ function FeaturePanel() {
       <div className="absolute bottom-0 left-0 w-40 h-40 rounded-full opacity-10"
         style={{ background: "radial-gradient(circle, #0D9488, transparent)", transform: "translate(-30%, 30%)" }} />
 
-      <div className="relative z-10 space-y-8">
+      <div className="relative z-10 max-w-md space-y-7 text-white">
         <div>
           <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "#2DD4BF" }}>BijbelStudie Platform</p>
-          <h2 className="text-3xl xl:text-4xl font-extrabold text-white leading-tight">
-            Start vandaag met het dagelijks<br />bestuderen van de Bijbel
+          <h2 className="text-3xl xl:text-4xl font-extrabold leading-tight">
+            Log in en ga direct verder met je studie.
           </h2>
           <p className="mt-4 leading-relaxed text-sm" style={{ color: "#9CA3AF" }}>
-            Verdiep je geloof met commentaren, begeleide studies en persoonlijke notities - gratis te beginnen.
+            Behoud je notities, volg je leesplan en vraag de AI-assistent om uitleg bij elke passage.
           </p>
         </div>
 
@@ -59,18 +55,29 @@ function FeaturePanel() {
             </div>
           </div>
           <p className="text-sm leading-relaxed italic" style={{ color: "rgba(255,255,255,0.8)" }}>
-            &ldquo;Onderzoekt de Schriften; want gij meent in dezelve het eeuwige leven te hebben; en die zijn het, die van Mij getuigen.&rdquo;
+            “Onderzoekt de Schriften; want gij meent in dezelve het eeuwige leven te hebben.”
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          {PANEL_FEATURES.map(({ icon: Icon, title, desc, span }) => (
-            <div key={title} className={`rounded-xl p-4 border${span ? " col-span-2" : ""}`} style={{ backgroundColor: "rgba(255,255,255,0.05)", borderColor: "rgba(255,255,255,0.08)" }}>
-              <Icon className="h-4 w-4 mb-2" style={{ color: "#2DD4BF" }} />
-              <p className="text-white text-xs font-semibold">{title}</p>
-              <p className="text-xs mt-0.5" style={{ color: "#9CA3AF" }}>{desc}</p>
+        <div className="space-y-3">
+          {PANEL_BENEFITS.map(({ title, desc }) => (
+            <div key={title} className="flex items-start gap-3 rounded-xl border p-3"
+              style={{ backgroundColor: "rgba(255,255,255,0.05)", borderColor: "rgba(255,255,255,0.08)" }}>
+              <div className="mt-0.5 h-5 w-5 rounded-full flex items-center justify-center flex-shrink-0"
+                style={{ backgroundColor: "rgba(13,148,136,0.25)" }}>
+                <Check className="h-3 w-3" style={{ color: "#2DD4BF" }} />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-white">{title}</p>
+                <p className="text-xs mt-0.5" style={{ color: "#9CA3AF" }}>{desc}</p>
+              </div>
             </div>
           ))}
+        </div>
+
+        <div className="flex items-center gap-2 text-sm font-medium" style={{ color: "#2DD4BF" }}>
+          <Sparkles className="h-4 w-4" />
+          Gratis te beginnen
         </div>
       </div>
     </div>

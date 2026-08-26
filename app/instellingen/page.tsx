@@ -337,7 +337,7 @@ export default function SettingsPage() {
                   <Bell size={12} style={{ color: TEAL, marginTop: 2, flexShrink: 0 }} />
                   <p>
                     De herinnering wordt door de mobiele app op je toestel ingepland. Op de website
-                    verschijnt er geen melding — deze instelling bepaalt wél welk tijdstip de app gebruikt.
+                    verschijnt er geen melding - deze instelling bepaalt wél welk tijdstip de app gebruikt.
                   </p>
                 </div>
               </div>

@@ -56,7 +56,7 @@ const WAIT_STAGES = [
   { afterMs: 4_000, text: 'Het antwoord wordt opgesteld…' },
   {
     afterMs: 10_000,
-    text: 'Dit duurt wat langer dan gewoonlijk. Blijf gerust op deze pagina — het antwoord verschijnt vanzelf.',
+    text: 'Dit duurt wat langer dan gewoonlijk. Blijf gerust op deze pagina - het antwoord verschijnt vanzelf.',
   },
   {
     afterMs: 25_000,
