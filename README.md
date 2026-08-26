@@ -78,7 +78,7 @@ Benodigde configuratie:
 - `STRIPE_WEBHOOK_SECRET` voor Stripe webhook-validatie
 - `SUBSCRIPTION_RECONCILE_CRON_SECRET` (of `CRON_SECRET`) voor de interne reconcile-route
 
-Bij Vercel draait de cron via [vercel.json](vercel.json) elk uur op:
+Bij Vercel draait de cron via [vercel.json](vercel.json) dagelijks op:
 
 - `/api/internal/reconcile-subscriptions`
 

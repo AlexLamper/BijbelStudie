@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/internal/reconcile-subscriptions",
-      "schedule": "0 * * * *"
+      "schedule": "0 3 * * *"
     }
   ]
 }
