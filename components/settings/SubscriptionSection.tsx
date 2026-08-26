@@ -57,7 +57,10 @@ export function SubscriptionSection() {
   const [error, setError] = useState("")
 
   const load = () => {
-    fetch("/api/subscription/billing-state")
+    // Best-effort reconcile first, then read local billing snapshot.
+    fetch("/api/subscription/status")
+      .catch(() => null)
+      .then(() => fetch("/api/subscription/billing-state"))
       .then(r => (r.ok ? r.json() : null))
       .then(d => { if (d && !d.error) setState(d) })
       .catch(() => {})

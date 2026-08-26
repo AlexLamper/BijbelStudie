@@ -103,6 +103,26 @@ export async function POST(req: NextRequest) {
         }
         break;
       }
+      case "checkout.session.async_payment_succeeded":
+      case "checkout.session.async_payment_failed": {
+        // Async payment methods (for example SEPA) can finish after checkout.
+        // Re-read the linked subscription so entitlement follows the final state.
+        const session = event.data.object as Stripe.Checkout.Session;
+        if (session.mode === "subscription" && session.subscription) {
+          const subscriptionId =
+            typeof session.subscription === "string"
+              ? session.subscription
+              : session.subscription.id;
+          const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+          const result = await syncSubscription(subscription);
+          if (!result.matched) {
+            console.warn(
+              `[stripe-webhook] ${event.type}: no local user for ${result.customerId} (${result.reason})`
+            );
+          }
+        }
+        break;
+      }
 
       case "customer.subscription.created":
       case "customer.subscription.updated":

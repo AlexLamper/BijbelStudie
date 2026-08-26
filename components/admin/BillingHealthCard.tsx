@@ -59,6 +59,14 @@ interface Report {
     enabledEvents: string[]
     pointsAtThisApp: boolean
   }[]
+  webhookHealth: {
+    status: "ok" | "warn" | "fail"
+    message: string
+    requiredEvents: string[]
+    missingEvents: string[]
+    endpointCount: number
+    matchedEndpointIds: string[]
+  }
   webhookEndpointError?: string
   stripeSubscriptions: { total: number; entitled: number; unmatched: number }
   mismatches: Mismatch[]
@@ -134,7 +142,10 @@ export default function BillingHealthCard({
 
   const missed = billing?.possiblyMissedWebhooks ?? 0
   const problemCount = (report?.mismatches.length ?? 0) + (report?.documentProblems.length ?? 0)
-  const appWebhook = report?.webhookEndpoints.find(e => e.pointsAtThisApp)
+  const appWebhook =
+    report?.webhookEndpoints.find(e => e.pointsAtThisApp && e.status === "enabled") ??
+    report?.webhookEndpoints.find(e => e.pointsAtThisApp)
+  const webhookHealth = report?.webhookHealth
 
   return (
     <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-2xl p-5">
@@ -219,20 +230,50 @@ export default function BillingHealthCard({
               <p className="text-xs text-muted-foreground">
                 Kon endpoints niet uitlezen: {report.webhookEndpointError}
               </p>
-            ) : appWebhook ? (
-              <p className="text-xs text-foreground">
-                <span
-                  className="inline-block px-1.5 py-0.5 rounded font-bold text-[10px] mr-1.5"
+            ) : appWebhook && webhookHealth ? (
+              <div className="space-y-1.5">
+                <p className="text-xs text-foreground">
+                  <span
+                    className="inline-block px-1.5 py-0.5 rounded font-bold text-[10px] mr-1.5"
+                    style={{
+                      backgroundColor:
+                        webhookHealth.status === "ok"
+                          ? "rgba(13,148,136,0.1)"
+                          : webhookHealth.status === "warn"
+                            ? "rgba(217,119,6,0.1)"
+                            : "rgba(220,38,38,0.1)",
+                      color:
+                        webhookHealth.status === "ok"
+                          ? TEAL
+                          : webhookHealth.status === "warn"
+                            ? AMBER
+                            : RED,
+                    }}
+                  >
+                    {webhookHealth.status}
+                  </span>
+                  {appWebhook.url}
+                  <span className="text-muted-foreground"> · {appWebhook.enabledEvents.length} events</span>
+                </p>
+                <p
+                  className="text-xs"
                   style={{
-                    backgroundColor: appWebhook.status === "enabled" ? "rgba(13,148,136,0.1)" : "rgba(220,38,38,0.1)",
-                    color: appWebhook.status === "enabled" ? TEAL : RED,
+                    color:
+                      webhookHealth.status === "ok"
+                        ? TEAL
+                        : webhookHealth.status === "warn"
+                          ? AMBER
+                          : RED,
                   }}
                 >
-                  {appWebhook.status}
-                </span>
-                {appWebhook.url}
-                <span className="text-muted-foreground"> · {appWebhook.enabledEvents.length} events</span>
-              </p>
+                  {webhookHealth.message}
+                </p>
+                {webhookHealth.missingEvents.length > 0 && (
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    Ontbrekende events: {webhookHealth.missingEvents.join(", ")}
+                  </p>
+                )}
+              </div>
             ) : (
               <p className="text-xs" style={{ color: RED }}>
                 <AlertTriangle size={12} className="inline mr-1 -mt-0.5" />

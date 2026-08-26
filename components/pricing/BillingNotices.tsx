@@ -41,10 +41,16 @@ export function BillingNotices() {
     if (status !== "authenticated") return
     let cancelled = false
 
-    fetch("/api/subscription/billing-state")
-      .then(r => (r.ok ? r.json() : null))
-      .then(d => { if (!cancelled && d && !d.error) setState(d) })
-      .catch(() => {})
+    const load = async () => {
+      // Best-effort self-heal: refresh Stripe truth before reading local billing
+      // state so a missed webhook is corrected on this page load.
+      await fetch("/api/subscription/status").catch(() => null)
+      const data = await fetch("/api/subscription/billing-state")
+        .then(r => (r.ok ? r.json() : null))
+        .catch(() => null)
+      if (!cancelled && data && !data.error) setState(data)
+    }
+    load()
 
     return () => { cancelled = true }
   }, [status, session])

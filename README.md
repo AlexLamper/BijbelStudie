@@ -65,6 +65,23 @@
   <img src="https://img.shields.io/badge/Stripe-635BFF?style=for-the-badge&logo=stripe&logoColor=white" alt="Stripe" />
 </p>
 
+## Stripe betrouwbaarheid (beheer)
+
+Voor consistente Pro-toegang gebruikt de app drie lagen:
+
+- **Webhook (primair):** `/api/webhooks/stripe`
+- **Self-heal bij laden van billing-schermen:** `/api/subscription/status`
+- **Periodieke background reconcile:** `/api/internal/reconcile-subscriptions` (via cron)
+
+Benodigde configuratie:
+
+- `STRIPE_WEBHOOK_SECRET` voor Stripe webhook-validatie
+- `SUBSCRIPTION_RECONCILE_CRON_SECRET` (of `CRON_SECRET`) voor de interne reconcile-route
+
+Bij Vercel draait de cron via [vercel.json](vercel.json) elk uur op:
+
+- `/api/internal/reconcile-subscriptions`
+
 ## Roadmap
 
 - **v1.0.1** - Donkere en lichte modus geïntegreerd

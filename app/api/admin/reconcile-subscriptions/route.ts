@@ -51,6 +51,18 @@ export const dynamic = "force-dynamic";
 const STRIPE_MAX_SUBSCRIPTIONS = 1000;
 /** Cap on the Mongo-side scan, so a large user base cannot time the route out. */
 const SCAN_LIMIT = 5000;
+const REQUIRED_WEBHOOK_EVENTS = [
+  "checkout.session.completed",
+  "checkout.session.async_payment_succeeded",
+  "checkout.session.async_payment_failed",
+  "customer.subscription.created",
+  "customer.subscription.updated",
+  "customer.subscription.deleted",
+  "customer.subscription.paused",
+  "customer.subscription.resumed",
+  "invoice.payment_failed",
+  "invoice.payment_succeeded",
+] as const;
 
 interface Mismatch {
   userId: string | null;
@@ -146,6 +158,14 @@ interface Report {
     enabledEvents: string[];
     pointsAtThisApp: boolean;
   }[];
+  webhookHealth: {
+    status: "ok" | "warn" | "fail";
+    message: string;
+    requiredEvents: string[];
+    missingEvents: string[];
+    endpointCount: number;
+    matchedEndpointIds: string[];
+  };
   webhookEndpointError?: string;
   stripeSubscriptions: {
     total: number;
@@ -172,6 +192,14 @@ async function buildReport(): Promise<Report> {
     checkedAt: new Date().toISOString(),
     stripeMode: "unknown",
     webhookEndpoints: [],
+    webhookHealth: {
+      status: "warn",
+      message: "Webhook-endpoints nog niet gecontroleerd",
+      requiredEvents: [...REQUIRED_WEBHOOK_EVENTS],
+      missingEvents: [],
+      endpointCount: 0,
+      matchedEndpointIds: [],
+    },
     stripeSubscriptions: { total: 0, entitled: 0, unmatched: 0 },
     mismatches: [],
     documentProblems: [],
@@ -192,10 +220,45 @@ async function buildReport(): Promise<Report> {
       enabledEvents: endpoint.enabled_events,
       pointsAtThisApp: endpoint.url.includes(APP_WEBHOOK_PATH),
     }));
+
+    const appEndpoints = report.webhookEndpoints.filter((endpoint) => endpoint.pointsAtThisApp);
+    const enabledAppEndpoints = appEndpoints.filter((endpoint) => endpoint.status === "enabled");
+    const enabledEvents = new Set(
+      enabledAppEndpoints.flatMap((endpoint) => endpoint.enabledEvents)
+    );
+    const receivesAllEvents = enabledEvents.has("*");
+    const missingEvents = receivesAllEvents
+      ? []
+      : REQUIRED_WEBHOOK_EVENTS.filter((event) => !enabledEvents.has(event));
+
+    report.webhookHealth.endpointCount = appEndpoints.length;
+    report.webhookHealth.matchedEndpointIds = enabledAppEndpoints.map((endpoint) => endpoint.id);
+    report.webhookHealth.missingEvents = missingEvents;
+
+    if (appEndpoints.length === 0) {
+      report.webhookHealth.status = "fail";
+      report.webhookHealth.message =
+        "Geen Stripe webhook-endpoint gevonden dat naar /api/webhooks/stripe wijst.";
+    } else if (enabledAppEndpoints.length === 0) {
+      report.webhookHealth.status = "fail";
+      report.webhookHealth.message =
+        "Webhook-endpoint(s) gevonden voor deze app, maar geen enkele staat op enabled.";
+    } else if (missingEvents.length > 0) {
+      report.webhookHealth.status = "fail";
+      report.webhookHealth.message =
+        "Webhook-endpoint staat aan, maar mist vereiste events voor betrouwbare entitlement-sync.";
+    } else {
+      report.webhookHealth.status = "ok";
+      report.webhookHealth.message =
+        "Webhook-endpoint is enabled en bevat alle vereiste entitlement-events.";
+    }
   } catch (error) {
     // A restricted key without "Webhook Endpoints Read" lands here. That is a
     // gap in the report, not a reason to fail the whole check.
     report.webhookEndpointError = error instanceof Error ? error.message : String(error);
+    report.webhookHealth.status = "warn";
+    report.webhookHealth.message =
+      "Webhook-endpoints konden niet gelezen worden met de huidige Stripe key.";
   }
 
   // --- Stripe first: every subscription the account has, matched to an account.
