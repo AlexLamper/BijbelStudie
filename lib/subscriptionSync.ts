@@ -154,12 +154,14 @@ export interface LocalBilling {
   subscriptionStartedAt?: Date | null;
   billingIssueSince?: Date | null;
   stripeCustomerId?: string | null;
+  /** Store entitlement, so a comped account is not confused with an App Store one. */
+  storePremium?: boolean;
 }
 
 export const BILLING_SELECT =
   "email subscribed subscriptionStatus stripeSubscriptionId stripePriceId " +
   "subscriptionInterval cancelAtPeriodEnd currentPeriodEnd pausedUntil " +
-  "subscriptionStartedAt billingIssueSince stripeCustomerId";
+  "subscriptionStartedAt billingIssueSince stripeCustomerId storePremium";
 
 function sameDate(a: Date | null | undefined, b: Date | null | undefined): boolean {
   const ta = a ? new Date(a).getTime() : null;
@@ -187,6 +189,52 @@ function sameDate(a: Date | null | undefined, b: Date | null | undefined): boole
 export function stripeGrantedAccess(local: LocalBilling): boolean {
   return !!local.stripeSubscriptionId || !!local.subscriptionStatus;
 }
+
+/** Entitled and actually billed by Stripe - the accounts that produce revenue. */
+export function isPayingViaStripe(local: LocalBilling): boolean {
+  return !!local.subscribed && stripeGrantedAccess(local);
+}
+
+/**
+ * Entitled without anyone paying for it: the App Store review account and any
+ * account an admin switched to Pro by hand.
+ *
+ * These must not reach revenue figures. The review account carries
+ * `subscribed: true` with no interval, so the MRR fallback that prices an
+ * unknown interval as monthly invented EUR 9,99 a month of income that nobody is
+ * being charged - on an account that exists purely so Apple's reviewers can see
+ * the paid features.
+ */
+export function isCompedAccess(local: LocalBilling): boolean {
+  return !!local.subscribed && !stripeGrantedAccess(local) && !local.storePremium;
+}
+
+/**
+ * Mongo equivalents of the three predicates above, for counting without pulling
+ * every user into memory.
+ *
+ * `{ field: null }` matches both an explicit null and a missing field, which is
+ * what "Stripe never wrote this" looks like in practice - the review-account
+ * script sets `subscribed` and nothing else.
+ *
+ * These must keep agreeing with the predicates; tests/subscriptionSync.test.ts
+ * checks both against the same fixtures.
+ */
+export const STRIPE_GRANTED_FILTER = {
+  $or: [{ stripeSubscriptionId: { $ne: null } }, { subscriptionStatus: { $ne: null } }],
+};
+
+export const PAYING_STRIPE_FILTER = {
+  subscribed: true,
+  ...STRIPE_GRANTED_FILTER,
+};
+
+export const COMPED_ACCESS_FILTER = {
+  subscribed: true,
+  storePremium: { $ne: true },
+  stripeSubscriptionId: null,
+  subscriptionStatus: null,
+};
 
 /**
  * Builds the `$set` a snapshot implies for one account, and the list of fields

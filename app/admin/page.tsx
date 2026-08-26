@@ -12,8 +12,10 @@ interface Stats {
   users: {
     total: number
     premium: number
+    paying: number
     stripeSubscribers: number
     storeSubscribers: number
+    comped: number
     admins: number
     newLast24h: number
     newLast7d: number
@@ -160,9 +162,14 @@ export default function AdminDashboardPage() {
                 loading={loading}
               />
               <KpiCard
-                label="Pro abonnees"
-                value={formatNumber(stats?.users.premium)}
-                sub={stats ? `${stats.users.stripeSubscribers} Stripe · ${stats.users.storeSubscribers} store` : ""}
+                label="Betalende abonnees"
+                value={formatNumber(stats?.users.paying)}
+                sub={
+                  stats
+                    ? `${stats.users.stripeSubscribers} Stripe · ${stats.users.storeSubscribers} store` +
+                      (stats.users.comped > 0 ? ` · +${stats.users.comped} gratis` : "")
+                    : ""
+                }
                 icon={Sparkles}
                 tint="rgba(217,119,6,0.08)"
                 color="#D97706"

@@ -7,6 +7,10 @@ import StudyGroup from "../../../../models/StudyGroup";
 import BiblePlan from "../../../../models/BiblePlan";
 import { requireAdmin } from "../../../../lib/adminGuard";
 import { PLANS } from "../../../../lib/pricing";
+import {
+  COMPED_ACCESS_FILTER,
+  PAYING_STRIPE_FILTER,
+} from "../../../../lib/subscriptionSync";
 
 /**
  * Numbers for /admin.
@@ -21,6 +25,13 @@ import { PLANS } from "../../../../lib/pricing";
  *    entitlement, and the Stripe/store split is reported separately.
  *  - MRR was `premiumCount * 9.99`, which prices an annual subscriber as if they
  *    paid monthly. It is now derived per interval from lib/pricing.
+ *
+ * Revenue counts only accounts Stripe actually bills. Comped access - the App
+ * Store review account, and anything an admin switched to Pro by hand - carries
+ * `subscribed: true` with no interval, and the unknown-interval fallback priced
+ * that as monthly. So a review account created for Apple was reporting EUR 9,99
+ * of monthly income that nobody pays. It is now counted and shown separately, as
+ * `users.comped`.
  *
  * `possiblyMissedWebhooks` is new and is the number that would have caught the
  * original incident on the dashboard: accounts that have a Stripe customer id
@@ -66,6 +77,7 @@ export async function GET() {
     stripeSubscribers,
     storeSubscribers,
     effectiveProUsers,
+    compedUsers,
     adminUsers,
     usersLast24h,
     usersLast7d,
@@ -86,9 +98,10 @@ export async function GET() {
     statusCounts,
   ] = await Promise.all([
     User.countDocuments(),
-    User.countDocuments({ subscribed: true }),
+    User.countDocuments(PAYING_STRIPE_FILTER),
     User.countDocuments({ storePremium: true }),
     User.countDocuments(effectivePro),
+    User.countDocuments(COMPED_ACCESS_FILTER),
     User.countDocuments({ isAdmin: true }),
     User.countDocuments({ createdAt: { $gte: start24h } }),
     User.countDocuments({ createdAt: { $gte: start7d } }),
@@ -100,10 +113,10 @@ export async function GET() {
     StudyGroup.countDocuments(),
     BiblePlan.countDocuments(),
     User.countDocuments({ streak: { $gte: 1 }, lastStreakDate: { $gte: start7d } }),
-    User.countDocuments({ subscribed: true, subscriptionInterval: "monthly" }),
-    User.countDocuments({ subscribed: true, subscriptionInterval: "annual" }),
+    User.countDocuments({ ...PAYING_STRIPE_FILTER, subscriptionInterval: "monthly" }),
+    User.countDocuments({ ...PAYING_STRIPE_FILTER, subscriptionInterval: "annual" }),
     User.countDocuments({ billingIssueSince: { $ne: null } }),
-    User.countDocuments({ subscribed: true, cancelAtPeriodEnd: true }),
+    User.countDocuments({ ...PAYING_STRIPE_FILTER, cancelAtPeriodEnd: true }),
     User.countDocuments({ pausedUntil: { $gt: now } }),
     // A Stripe customer was created for this account (checkout was started) but
     // nothing ever wrote a subscription state back. Investigate every one.
@@ -118,8 +131,11 @@ export async function GET() {
     ]),
   ]);
 
-  // Subscribers whose interval was never recorded are still real revenue; count
-  // them at the monthly rate rather than dropping them from MRR entirely.
+  // A *paying* subscriber whose interval was never recorded is still real
+  // revenue, so it is priced at the monthly rate rather than dropped. Comped
+  // accounts never reach this line - they are excluded by PAYING_STRIPE_FILTER -
+  // so the fallback can no longer invent income from an unpaid grant. A non-zero
+  // value here is a data gap worth chasing, not a normal state.
   const unknownInterval = Math.max(0, stripeSubscribers - monthlySubscribers - annualSubscribers);
 
   const mrrCents =
@@ -136,18 +152,25 @@ export async function GET() {
   return NextResponse.json({
     users: {
       total: totalUsers,
-      // Kept as `premium` for the existing dashboard, but now the effective
-      // number rather than the Stripe-only one.
+      // Everyone who has access, however they got it.
       premium: effectiveProUsers,
+      // Everyone somebody actually pays for. This is the subscriber number.
+      paying: stripeSubscribers + storeSubscribers,
       stripeSubscribers,
       storeSubscribers,
+      // Access granted without payment: the App Store review account, admin
+      // grants. Reported so it is visible, never folded into revenue.
+      comped: compedUsers,
       admins: adminUsers,
       newLast24h: usersLast24h,
       newLast7d: usersLast7d,
       newLast30d: usersLast30d,
       activeStreak: activeStreakUsers,
+      // Conversion means paid conversion, so comped access is excluded.
       premiumPercent:
-        totalUsers > 0 ? Math.round((effectiveProUsers / totalUsers) * 1000) / 10 : 0,
+        totalUsers > 0
+          ? Math.round(((stripeSubscribers + storeSubscribers) / totalUsers) * 1000) / 10
+          : 0,
     },
     billing: {
       byStatus,

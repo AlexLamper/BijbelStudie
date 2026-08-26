@@ -23,6 +23,7 @@ export async function GET(req: Request) {
   const users = await User.find(filter)
     .select(
       "name email image isAdmin subscribed storePremium storePremiumPlatform subscriptionStatus " +
+        "stripeSubscriptionId " +
         "subscriptionInterval currentPeriodEnd cancelAtPeriodEnd billingIssueSince streak " +
         "createdAt lastStreakDate stripeCustomerId preferences.onboardingCompleted"
     )
@@ -49,6 +50,9 @@ export async function GET(req: Request) {
       // paying customer too, and the list showed them as free.
       isPro: !!(u.subscribed || u.storePremium || u.isAdmin),
       storePremium: !!u.storePremium,
+      // Pro without anyone paying: the App Store review account, or an admin
+      // grant. Shown so it is never mistaken for a subscriber.
+      isComped: !!u.subscribed && !u.storePremium && !u.stripeSubscriptionId && !u.subscriptionStatus,
       storePremiumPlatform: u.storePremiumPlatform ?? null,
       subscriptionStatus: u.subscriptionStatus ?? null,
       subscriptionInterval: u.subscriptionInterval ?? null,

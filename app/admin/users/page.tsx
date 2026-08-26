@@ -21,6 +21,8 @@ interface AdminUser {
   isAdmin: boolean
   subscribed: boolean
   isPro: boolean
+  /** Pro without payment - review account or admin grant. Not a subscriber. */
+  isComped: boolean
   storePremium: boolean
   storePremiumPlatform: "apple" | "google" | null
   subscriptionStatus: string | null
@@ -284,6 +286,13 @@ export default function AdminUsersPage() {
                                 </span>
                               ) : (
                                 <span className="inline-flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-gray-100 dark:bg-secondary text-muted-foreground">
+                                  GRATIS
+                                </span>
+                              )}
+                              {u.isComped && (
+                                <span
+                                  title="Pro zonder betaling - reviewaccount of handmatig toegekend. Telt niet mee in MRR."
+                                  className="inline-flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-gray-100 dark:bg-secondary text-muted-foreground">
                                   GRATIS
                                 </span>
                               )}
