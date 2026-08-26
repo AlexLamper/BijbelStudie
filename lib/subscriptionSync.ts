@@ -168,6 +168,27 @@ function sameDate(a: Date | null | undefined, b: Date | null | undefined): boole
 }
 
 /**
+ * Did Stripe ever grant this account's access?
+ *
+ * `subscribed` is not owned by Stripe alone. It is also the flag the admin Pro
+ * toggle sets and the one scripts/ensure-review-account.mjs writes for the App
+ * Store review account - deliberately, because that grant "survives every sync"
+ * and must not be able to lapse in the middle of a review cycle.
+ *
+ * So Stripe having no subscription for an account is only evidence of
+ * cancellation when Stripe is what granted access in the first place. Without
+ * this test, reconciliation reads "Stripe has never heard of you" as "you should
+ * lose access" and revokes every comped account in the database - which would
+ * have failed the next App Store submission outright.
+ *
+ * A Stripe subscription id or a recorded Stripe status is that evidence: both are
+ * written only by lib/subscriptionSync, from Stripe's own data.
+ */
+export function stripeGrantedAccess(local: LocalBilling): boolean {
+  return !!local.stripeSubscriptionId || !!local.subscriptionStatus;
+}
+
+/**
  * Builds the `$set` a snapshot implies for one account, and the list of fields
  * it moves. Split out from the write so a dry run can report exactly what a
  * repair would do without doing it.
@@ -186,7 +207,14 @@ export function diffSnapshot(
     changed.push(field);
   };
 
-  assign("subscribed", snapshot.subscribed, !!local.subscribed);
+  // Granting is always safe. Revoking is only Stripe's call when Stripe is what
+  // granted access - see `stripeGrantedAccess`. A comped or admin-granted account
+  // is left exactly as it is.
+  const revoking = !snapshot.subscribed && !!local.subscribed;
+  if (!revoking || stripeGrantedAccess(local)) {
+    assign("subscribed", snapshot.subscribed, !!local.subscribed);
+  }
+
   assign("subscriptionStatus", snapshot.subscriptionStatus, local.subscriptionStatus ?? null);
   assign("stripeSubscriptionId", snapshot.stripeSubscriptionId, local.stripeSubscriptionId ?? null);
   assign("cancelAtPeriodEnd", snapshot.cancelAtPeriodEnd, !!local.cancelAtPeriodEnd);
@@ -318,8 +346,10 @@ export async function reconcileUserFromStripe(userId: string): Promise<SyncResul
   if (!local) return { matched: false, customerId: null, changed: [], reason: "no_local_user" };
 
   if (!local.stripeCustomerId) {
-    // No customer means nothing was ever paid through Stripe. Only clears state
-    // that claims otherwise; an already-clean account is left untouched.
+    // No Stripe customer at all. Nothing was ever paid through Stripe, so Stripe
+    // has nothing to say about this account - including about a `subscribed`
+    // flag some other mechanism set. `diffSnapshot` enforces that; this only
+    // clears leftover Stripe fields that claim a subscription exists.
     const changed = await writeSnapshot(local, emptySnapshot());
     return { matched: true, userId, email: local.email, customerId: null, changed };
   }
