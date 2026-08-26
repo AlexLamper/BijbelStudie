@@ -23,15 +23,15 @@ export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const host = req.headers.get("host");
 
-  if (host === "bijbel-studie.com") {
+  if (host === "www.bijbelstudie.io") {
     const redirectUrl = req.nextUrl.clone();
-    redirectUrl.host = "www.bijbel-studie.com";
+    redirectUrl.host = "bijbelstudie.io";
     return NextResponse.redirect(redirectUrl, 308);
   }
 
   if (pathname.startsWith("/api/")) {
     const response = NextResponse.next();
-    response.headers.set("Access-Control-Allow-Origin", "https://www.bijbel-studie.com");
+    response.headers.set("Access-Control-Allow-Origin", "https://bijbelstudie.io");
     response.headers.set("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
     response.headers.set("Access-Control-Allow-Headers", "Content-Type");
     return response;

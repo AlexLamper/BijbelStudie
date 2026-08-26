@@ -6,6 +6,28 @@ cannot be done from the codebase.
 
 Nothing here is optional if you want the new behaviour to work end to end.
 
+## Status — 2026-08-26: domain moved to bijbelstudie.io
+
+The codebase now hard-codes `https://bijbelstudie.io` everywhere (checkout CORS
+origin, billing-portal `return_url`, the ToS-consent comment, sitemap/robots via
+`lib/seo/constants.ts`). The entries below this one are the historical record of
+the `www.bijbel-studie.com` rollout and are left as written — do not edit them.
+
+Two things in the **Stripe Dashboard** still need doing by hand, and nothing in
+this repository can do them:
+
+1. **Webhook endpoint.** The one below points at `www.bijbel-studie.com` and
+   will keep firing at a domain that no longer serves the app. Add a new
+   endpoint at `https://bijbelstudie.io/api/webhooks/stripe` with the same 8
+   events (see "2. Create the webhook endpoint" further down), copy its signing
+   secret into `STRIPE_WEBHOOK_SECRET` in Vercel, then delete the old endpoint
+   once the new one has a few successful deliveries.
+2. **Terms of Service URL**, Dashboard → Settings → Public details. It was set
+   to `https://www.bijbel-studie.com/algemene-voorwaarden`; update it to
+   `https://bijbelstudie.io/algemene-voorwaarden`. `STRIPE_REQUIRE_TOS_CONSENT`
+   stays `true` — if the URL is out of date before this is changed, Checkout
+   sessions still succeed, they just record consent against a stale link.
+
 ## Status — 2026-08-20
 
 Stripe account `acct_1QkiMOGkd9Br8GXY` ("Bijbel-studie").

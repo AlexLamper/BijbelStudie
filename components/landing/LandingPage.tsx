@@ -112,7 +112,7 @@ function BibleStudyIllustration() {
             <div className="text-[10px] font-medium px-3 py-0.5 rounded-md border bg-white inline-flex items-center gap-1.5"
               style={{ color: T.muted, borderColor: T.border }}>
               <Shield className="h-2.5 w-2.5" style={{ color: T.teal }} />
-              bijbel-studie.com/studie
+              bijbelstudie.io/studie
             </div>
           </div>
           <div className="w-12" />

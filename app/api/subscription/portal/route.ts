@@ -31,7 +31,7 @@ export async function POST() {
 
     const portal = await stripe.billingPortal.sessions.create({
       customer: user.stripeCustomerId,
-      return_url: "https://www.bijbel-studie.com/instellingen",
+      return_url: "https://bijbelstudie.io/instellingen",
     })
 
     return NextResponse.json({ url: portal.url })

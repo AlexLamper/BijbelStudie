@@ -7,8 +7,8 @@
  * index.
  */
 
-/** Canonical origin. www is canonical; middleware 308s the apex onto it. */
-export const BASE_URL = "https://www.bijbel-studie.com";
+/** Canonical origin. Apex is canonical; middleware 308s www onto it. */
+export const BASE_URL = "https://bijbelstudie.io";
 
 export const SITE_NAME = "BijbelStudie";
 
