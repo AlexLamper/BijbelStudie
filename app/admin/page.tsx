@@ -78,19 +78,34 @@ export default function AdminDashboardPage() {
   const [insights, setInsights] = useState<InsightsResponse | null>(null)
   const [recent, setRecent] = useState<RecentUser[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
 
   useEffect(() => {
+    const fetchJson = async (url: string) => {
+      try {
+        const response = await fetch(url, { cache: "no-store", credentials: "include" })
+        if (!response.ok) return null
+        return await response.json()
+      } catch {
+        return null
+      }
+    }
+
     Promise.all([
-      fetch("/api/admin/stats").then(r => r.ok ? r.json() : null),
-      fetch("/api/admin/insights?days=30").then(r => r.ok ? r.json() : null),
-      fetch("/api/admin/users?limit=8").then(r => r.ok ? r.json() : null),
+      fetchJson("/api/admin/stats"),
+      fetchJson("/api/admin/insights?days=30"),
+      fetchJson("/api/admin/users?limit=8"),
     ])
       .then(([s, i, u]) => {
-        if (s) setStats(s)
-        if (i) setInsights(i)
-        if (u?.users) setRecent(u.users.slice(0, 6))
+        if (s) setStats(s as Stats)
+        if (i) setInsights(i as InsightsResponse)
+        if (u && typeof u === "object" && "users" in u && Array.isArray((u as { users?: unknown[] }).users)) {
+          setRecent(((u as { users: RecentUser[] }).users).slice(0, 6))
+        }
+        if (!s) {
+          setLoadError("Kon statistieken niet laden. Vernieuw de pagina of controleer je admin-sessie.")
+        }
       })
-      .catch(() => {})
       .finally(() => setLoading(false))
   }, [])
 
@@ -149,6 +164,11 @@ export default function AdminDashboardPage() {
 
           {/* Left column */}
           <div className="flex flex-col gap-5 min-w-0">
+            {loadError && (
+              <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300">
+                {loadError}
+              </div>
+            )}
 
             {/* KPI cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
