@@ -20,6 +20,16 @@ import {
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * Same 60s ceiling as `/api/ai/chat` on the website, and for the same reason:
+ * a slow answer is `generateChatReply` walking its fallback chain, which
+ * outlasts the platform default. Without this the function was killed
+ * mid-flight and the app saw a dropped connection instead of the AI_BUSY state
+ * it knows how to explain - so the mobile assistant failed on exactly the calls
+ * the website handled fine. 60s is the limit on every Vercel plan.
+ */
+export const maxDuration = 60;
+
 export async function OPTIONS() {
   return corsPreflight();
 }
