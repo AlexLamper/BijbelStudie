@@ -4,6 +4,7 @@ import connectMongoDB from "../../../../lib/mongodb"
 import User from "../../../../models/User"
 import { authOptions } from "../../../../lib/authOptions"
 import { grantXp } from "../../../../lib/gamification"
+import { isSafeBookKey, isSafeChapter } from "../../../../lib/readingProgress"
 
 // GET - Fetch user's last read chapter
 export async function GET() {
@@ -48,9 +49,19 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
+    // `book` is interpolated into a Mongo update path below, so the caller picks
+    // the key it writes. See lib/readingProgress: an unchecked key here is what
+    // put a `$*` entry into readChapters, and that made every full save of the
+    // affected user document throw - Pro entitlement included.
+    if (!isSafeBookKey(book) || !isSafeChapter(chapter)) {
+      return NextResponse.json({ message: "Invalid book or chapter" }, { status: 400 })
+    }
+
     await connectMongoDB()
 
-    const updateData: Record<string, string | Date> = {
+    // `chapter` is a number, which this type used to exclude - it only compiled
+    // because the value came off an untyped `request.json()`. Matches the v1 route.
+    const updateData: Record<string, string | number | Date> = {
       'lastReadChapter.book': book,
       'lastReadChapter.chapter': chapter,
       'lastReadChapter.version': version,

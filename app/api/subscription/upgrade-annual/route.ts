@@ -33,6 +33,13 @@ export async function POST() {
 
     await connectMongoDB()
     const user = await User.findOne({ email: session.user.email })
+      .select("stripeSubscriptionId subscribed subscriptionInterval")
+      .lean<{
+        _id: unknown
+        stripeSubscriptionId?: string | null
+        subscribed?: boolean
+        subscriptionInterval?: string | null
+      }>()
 
     if (!user?.stripeSubscriptionId || !user.subscribed) {
       return NextResponse.json({ error: "Geen actief abonnement" }, { status: 400 })
@@ -57,8 +64,7 @@ export async function POST() {
     })
 
     // The webhook writes the authoritative interval; this avoids a stale UI.
-    user.subscriptionInterval = "annual"
-    await user.save()
+    await User.updateOne({ _id: user._id }, { $set: { subscriptionInterval: "annual" } })
 
     await AnalyticsEvent.create({
       name: "annual_upsell_accepted",
@@ -83,10 +89,11 @@ export async function DELETE() {
 
     await connectMongoDB()
     const user = await User.findOne({ email: session.user.email })
+      .select("_id")
+      .lean<{ _id: unknown }>()
     if (!user) return NextResponse.json({ error: "Niet gevonden" }, { status: 404 })
 
-    user.annualUpsellDismissedAt = new Date()
-    await user.save()
+    await User.updateOne({ _id: user._id }, { $set: { annualUpsellDismissedAt: new Date() } })
 
     return NextResponse.json({ success: true })
   } catch (error) {

@@ -5,6 +5,7 @@ import Link from "next/link"
 import {
   ArrowLeft, Search, ShieldCheck, Sparkles, MoreVertical,
   Trash2, ShieldOff, ShieldPlus, Crown, UserX, X, Users as UsersIcon,
+  AlertTriangle, RefreshCw, Apple, Smartphone,
 } from "lucide-react"
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
@@ -19,6 +20,16 @@ interface AdminUser {
   image?: string
   isAdmin: boolean
   subscribed: boolean
+  isPro: boolean
+  storePremium: boolean
+  storePremiumPlatform: "apple" | "google" | null
+  subscriptionStatus: string | null
+  subscriptionInterval: "monthly" | "annual" | null
+  currentPeriodEnd: string | null
+  cancelAtPeriodEnd: boolean
+  hasBillingIssue: boolean
+  /** Stripe customer exists but no subscription state was ever written back. */
+  needsReconcile: boolean
   streak: number
   createdAt: string
   lastStreakDate?: string
@@ -70,8 +81,8 @@ export default function AdminUsersPage() {
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase()
     return users.filter(u => {
-      if (filter === "pro" && !u.subscribed) return false
-      if (filter === "free" && u.subscribed) return false
+      if (filter === "pro" && !u.isPro) return false
+      if (filter === "free" && u.isPro) return false
       if (filter === "admin" && !u.isAdmin) return false
       if (!term) return true
       return u.name?.toLowerCase().includes(term) || u.email?.toLowerCase().includes(term)
@@ -100,6 +111,37 @@ export default function AdminUsersPage() {
     }
   }
 
+  /**
+   * Re-derives one account's billing state from Stripe. Preferred over the
+   * manual Pro toggle: the toggle sets a flag the next Stripe event overwrites,
+   * while this makes the database agree with what is actually being billed.
+   */
+  async function reconcileUser(u: AdminUser) {
+    setPendingId(u._id)
+    try {
+      const res = await fetch("/api/admin/reconcile-subscriptions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: u._id, repairDocuments: true }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setToast({ type: "err", msg: data?.details || data?.error || "Synchroniseren mislukt" })
+        return
+      }
+      const repaired = data.billingRepairs?.length ?? 0
+      setToast({
+        type: "ok",
+        msg: repaired > 0 ? `${u.email} bijgewerkt vanuit Stripe` : `${u.email} was al in sync`,
+      })
+      await fetchUsers()
+    } catch {
+      setToast({ type: "err", msg: "Netwerkfout" })
+    } finally {
+      setPendingId(null)
+    }
+  }
+
   async function deleteUser(u: AdminUser) {
     if (!confirm(`Weet je zeker dat je ${u.name || u.email} permanent wilt verwijderen? Notities worden ook gewist.`)) return
     setPendingId(u._id)
@@ -121,8 +163,8 @@ export default function AdminUsersPage() {
 
   const counts = useMemo(() => ({
     all: users.length,
-    pro: users.filter(u => u.subscribed).length,
-    free: users.filter(u => !u.subscribed).length,
+    pro: users.filter(u => u.isPro).length,
+    free: users.filter(u => !u.isPro).length,
     admin: users.filter(u => u.isAdmin).length,
   }), [users])
 
@@ -235,7 +277,7 @@ export default function AdminUsersPage() {
                           </td>
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-1.5 flex-wrap">
-                              {u.subscribed ? (
+                              {u.isPro ? (
                                 <span className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
                                   style={{ backgroundColor: "rgba(217,119,6,0.1)", color: "#D97706" }}>
                                   <Crown size={9} /> PRO
@@ -243,6 +285,33 @@ export default function AdminUsersPage() {
                               ) : (
                                 <span className="inline-flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-gray-100 dark:bg-secondary text-muted-foreground">
                                   GRATIS
+                                </span>
+                              )}
+                              {u.storePremium && (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-gray-100 dark:bg-secondary text-muted-foreground">
+                                  {u.storePremiumPlatform === "apple" ? <Apple size={9} /> : <Smartphone size={9} />}
+                                  {u.storePremiumPlatform === "apple" ? "APPLE" : "GOOGLE"}
+                                </span>
+                              )}
+                              {u.subscriptionStatus && u.subscriptionStatus !== "active" && (
+                                <span className="inline-flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                                  style={{ backgroundColor: "rgba(217,119,6,0.1)", color: "#D97706" }}>
+                                  {u.subscriptionStatus.toUpperCase()}
+                                </span>
+                              )}
+                              {u.cancelAtPeriodEnd && (
+                                <span className="inline-flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-gray-100 dark:bg-secondary text-muted-foreground">
+                                  ZEGT OP
+                                </span>
+                              )}
+                              {/* The signal that would have caught the missed webhook:
+                                  money changed hands, nothing granted access. */}
+                              {u.needsReconcile && (
+                                <span
+                                  title="Stripe-klant zonder abonnementsstatus - controleer of deze gebruiker betaalt"
+                                  className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                                  style={{ backgroundColor: "rgba(220,38,38,0.1)", color: "#DC2626" }}>
+                                  <AlertTriangle size={9} /> CONTROLEER
                                 </span>
                               )}
                               {u.isAdmin && (
@@ -276,13 +345,18 @@ export default function AdminUsersPage() {
                                     <ShieldPlus className="h-4 w-4 mr-2" /> Tot admin maken
                                   </DropdownMenuItem>
                                 )}
+                                {u.hasStripe && (
+                                  <DropdownMenuItem onClick={() => reconcileUser(u)}>
+                                    <RefreshCw className="h-4 w-4 mr-2" /> Synchroniseren met Stripe
+                                  </DropdownMenuItem>
+                                )}
                                 {u.subscribed ? (
                                   <DropdownMenuItem onClick={() => patchUser(u._id, { subscribed: false })}>
-                                    <UserX className="h-4 w-4 mr-2" /> Pro deactiveren
+                                    <UserX className="h-4 w-4 mr-2" /> Pro handmatig deactiveren
                                   </DropdownMenuItem>
                                 ) : (
                                   <DropdownMenuItem onClick={() => patchUser(u._id, { subscribed: true })}>
-                                    <Sparkles className="h-4 w-4 mr-2" /> Pro activeren
+                                    <Sparkles className="h-4 w-4 mr-2" /> Pro handmatig activeren
                                   </DropdownMenuItem>
                                 )}
                                 <DropdownMenuSeparator />

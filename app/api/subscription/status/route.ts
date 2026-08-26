@@ -1,133 +1,85 @@
-import { type NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "../../../../lib/authOptions"
 import connectMongoDB from "../../../../lib/mongodb"
 import User from "../../../../models/User"
-import stripe from "../../../../lib/stripe"
+import { reconcileUserFromStripe } from "../../../../lib/subscriptionSync"
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function GET(req: NextRequest) {
+/**
+ * The caller's own subscription state, re-derived from Stripe.
+ *
+ * This is the self-heal path: if a webhook delivery was ever missed, dropped or
+ * rejected, the next time the user loads a billing surface their state is pulled
+ * from Stripe and written back. It shares lib/subscriptionSync with the webhook,
+ * so the two cannot disagree about what "subscribed" means - and it writes with
+ * `updateOne` rather than `save()`, so an unrelated corrupt field on the user
+ * document cannot make it throw.
+ *
+ * No Stripe identifiers are returned to the browser. They are account-linking
+ * material and the client has no use for them.
+ */
+
+async function currentUserId(): Promise<string | null> {
+  const session = await getServerSession(authOptions)
+  if (!session?.user?.email) return null
+
+  await connectMongoDB()
+  const user = await User.findOne({ email: session.user.email })
+    .select("_id")
+    .lean<{ _id: unknown }>()
+  return user ? String(user._id) : null
+}
+
+export async function GET() {
   try {
-    // Get the current user from the session
-    const session = await getServerSession(authOptions)
-
-    if (!session?.user?.email) {
+    const userId = await currentUserId()
+    if (!userId) {
       return NextResponse.json({ error: "User not authenticated" }, { status: 401 })
     }
 
-    // Connect to MongoDB
-    await connectMongoDB()
-
-    // Find the user
-    const user = await User.findOne({ email: session.user.email })
-
-    if (!user) {
+    const result = await reconcileUserFromStripe(userId)
+    if (!result.matched) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
-    // If user has a stripeCustomerId, check their subscription status directly with Stripe
-    if (user.stripeCustomerId) {
-
-      // Get all subscriptions for this customer
-      const subscriptions = await stripe.subscriptions.list({
-        customer: user.stripeCustomerId,
-        status: "active",
-        limit: 1,
-      })
-
-      const hasActiveSubscription = subscriptions.data.length > 0
-
-      // If subscription status doesn't match what's in our database, update it
-      if (hasActiveSubscription !== user.subscribed) {
-
-        let stripeSubscriptionId = user.stripeSubscriptionId
-        if (hasActiveSubscription && subscriptions.data[0]) {
-          stripeSubscriptionId = subscriptions.data[0].id
-        }
-
-        user.subscribed = hasActiveSubscription
-        user.stripeSubscriptionId = stripeSubscriptionId
-        await user.save()
-      }
-
-      return NextResponse.json({
-        subscribed: user.subscribed,
-        stripeCustomerId: user.stripeCustomerId,
-        stripeSubscriptionId: user.stripeSubscriptionId,
-      })
-    }
-
-    // If no stripeCustomerId, they're not subscribed
     return NextResponse.json({
-      subscribed: false,
-      stripeCustomerId: null,
-      stripeSubscriptionId: null,
+      subscribed: result.snapshot?.subscribed ?? false,
+      status: result.snapshot?.subscriptionStatus ?? null,
+      interval: result.snapshot?.subscriptionInterval ?? null,
+      currentPeriodEnd: result.snapshot?.currentPeriodEnd ?? null,
+      cancelAtPeriodEnd: result.snapshot?.cancelAtPeriodEnd ?? false,
+      // Present so the caller can tell "we corrected something" from "already
+      // correct" without exposing the values themselves.
+      repaired: result.changed.length > 0,
     })
   } catch (error) {
-    return NextResponse.json(
-      {
-        error: "Error checking subscription status",
-        details: error instanceof Error ? error.message : String(error),
-      },
-      { status: 500 },
-    )
+    console.error("[subscription/status] Failed:", error)
+    return NextResponse.json({ error: "Error checking subscription status" }, { status: 500 })
   }
 }
 
-// POST endpoint to manually sync subscription status
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function POST(req: NextRequest) {
+/** Manual re-sync. Same work as GET; kept because the settings screen posts to it. */
+export async function POST() {
   try {
-    // Get the current user from the session
-    const session = await getServerSession(authOptions)
-
-    if (!session?.user?.email) {
+    const userId = await currentUserId()
+    if (!userId) {
       return NextResponse.json({ error: "User not authenticated" }, { status: 401 })
     }
-    await connectMongoDB()
-    const user = await User.findOne({ email: session.user.email })
 
-    if (!user) {
+    const result = await reconcileUserFromStripe(userId)
+    if (!result.matched) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
-    // If user has no stripeCustomerId, they can't subscribed
-    if (!user.stripeCustomerId) {
-      return NextResponse.json({
-        message: "User has no Stripe customer ID",
-        subscribed: false,
-      })
-    }
-
-    // Get all subscriptions for this customer
-    const subscriptions = await stripe.subscriptions.list({
-      customer: user.stripeCustomerId,
-      limit: 100,
-    })
-
-    // Check if there's any active subscription
-    const activeSubscription = subscriptions.data.find((sub) => sub.status === "active")
-
-    // Update user subscription status
-    user.subscribed = !!activeSubscription
-    if (activeSubscription) {
-      user.stripeSubscriptionId = activeSubscription.id
-    }
-
-    await user.save()
-
     return NextResponse.json({
       message: "Subscription status synced successfully",
-      subscribed: user.subscribed,
-      stripeSubscriptionId: user.stripeSubscriptionId,
+      subscribed: result.snapshot?.subscribed ?? false,
+      status: result.snapshot?.subscriptionStatus ?? null,
+      interval: result.snapshot?.subscriptionInterval ?? null,
+      repaired: result.changed.length > 0,
     })
   } catch (error) {
-    return NextResponse.json(
-      {
-        error: "Error syncing subscription status",
-        details: error instanceof Error ? error.message : String(error),
-      },
-      { status: 500 },
-    )
+    console.error("[subscription/status] Sync failed:", error)
+    return NextResponse.json({ error: "Error syncing subscription status" }, { status: 500 })
   }
 }

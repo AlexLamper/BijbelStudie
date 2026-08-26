@@ -5,6 +5,21 @@ import Note from "../../../../models/Note";
 import ReadingSession from "../../../../models/ReadingSession";
 import { requireAdmin } from "../../../../lib/adminGuard";
 
+/**
+ * Daily series for /admin/insights.
+ *
+ * The subscriber series used to bucket on `updatedAt` filtered by
+ * `subscribed: true`. That is not a conversion date: `updatedAt` moves every
+ * time a subscriber changes a preference or reads a chapter, so the chart
+ * counted activity, not signups - and it went to zero the moment the
+ * `subscribed` flag itself was wrong, which is exactly when you most need it.
+ * It now buckets on `subscriptionStartedAt`, which is written from Stripe's own
+ * `start_date` and never moves.
+ *
+ * `cancellations` is new: a conversion chart with no churn line beside it tells
+ * you half the story.
+ */
+
 interface BucketDoc {
   _id: string;
   count: number;
@@ -42,28 +57,41 @@ export async function GET(req: Request) {
   startDate.setHours(0, 0, 0, 0);
   startDate.setDate(startDate.getDate() - (range - 1));
 
-  const dateGroup = {
-    $dateToString: { format: "%Y-%m-%d", date: "$createdAt" },
-  };
+  const bucketOn = (field: string) => ({
+    $dateToString: { format: "%Y-%m-%d", date: `$${field}` },
+  });
 
-  const [signupBuckets, noteBuckets, sessionBuckets, subscriberBuckets] = await Promise.all([
-    User.aggregate<BucketDoc>([
-      { $match: { createdAt: { $gte: startDate } } },
-      { $group: { _id: dateGroup, count: { $sum: 1 } } },
-    ]),
-    Note.aggregate<BucketDoc>([
-      { $match: { createdAt: { $gte: startDate } } },
-      { $group: { _id: dateGroup, count: { $sum: 1 } } },
-    ]),
-    ReadingSession.aggregate<BucketDoc>([
-      { $match: { createdAt: { $gte: startDate } } },
-      { $group: { _id: dateGroup, count: { $sum: 1 } } },
-    ]),
-    User.aggregate<BucketDoc>([
-      { $match: { subscribed: true, updatedAt: { $gte: startDate } } },
-      { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$updatedAt" } }, count: { $sum: 1 } } },
-    ]),
-  ]);
+  const [signupBuckets, noteBuckets, sessionBuckets, subscriberBuckets, cancellationBuckets] =
+    await Promise.all([
+      User.aggregate<BucketDoc>([
+        { $match: { createdAt: { $gte: startDate } } },
+        { $group: { _id: bucketOn("createdAt"), count: { $sum: 1 } } },
+      ]),
+      Note.aggregate<BucketDoc>([
+        { $match: { createdAt: { $gte: startDate } } },
+        { $group: { _id: bucketOn("createdAt"), count: { $sum: 1 } } },
+      ]),
+      ReadingSession.aggregate<BucketDoc>([
+        { $match: { createdAt: { $gte: startDate } } },
+        { $group: { _id: bucketOn("createdAt"), count: { $sum: 1 } } },
+      ]),
+      // Every account that started a subscription in the window, whatever its
+      // status is now. A subscription that started and was cancelled inside the
+      // range still happened, and hiding it makes conversion look worse than it was.
+      User.aggregate<BucketDoc>([
+        { $match: { subscriptionStartedAt: { $gte: startDate, $ne: null } } },
+        { $group: { _id: bucketOn("subscriptionStartedAt"), count: { $sum: 1 } } },
+      ]),
+      User.aggregate<BucketDoc>([
+        {
+          $match: {
+            subscriptionStatus: { $in: ["canceled", "unpaid"] },
+            updatedAt: { $gte: startDate },
+          },
+        },
+        { $group: { _id: bucketOn("updatedAt"), count: { $sum: 1 } } },
+      ]),
+    ]);
 
   const base = emptyDays(range);
 
@@ -73,5 +101,6 @@ export async function GET(req: Request) {
     notes: mergeBuckets(base, noteBuckets),
     readingSessions: mergeBuckets(base, sessionBuckets),
     newSubscribers: mergeBuckets(base, subscriberBuckets),
+    cancellations: mergeBuckets(base, cancellationBuckets),
   });
 }

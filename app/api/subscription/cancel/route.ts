@@ -6,6 +6,7 @@ import User from "../../../../models/User"
 import AnalyticsEvent from "../../../../models/AnalyticsEvent"
 import stripe from "../../../../lib/stripe"
 import { tenureBucket } from "../../../../lib/analyticsSchema"
+import { periodEndOf } from "../../../../lib/subscriptionSync"
 
 /**
  * Cancels at period end and records why, if the user says why.
@@ -50,7 +51,18 @@ export async function POST(req: NextRequest) {
     const cancelReason: Reason | undefined = isReason(reason) ? reason : undefined
 
     await connectMongoDB()
+    // Narrow projection + `.lean()`: this route must not hydrate or validate the
+    // whole user document. One corrupt unrelated field would otherwise make
+    // cancelling impossible, which is exactly what the law here forbids.
     const user = await User.findOne({ email: session.user.email })
+      .select("subscribed stripeSubscriptionId subscriptionStartedAt createdAt")
+      .lean<{
+        _id: unknown
+        subscribed?: boolean
+        stripeSubscriptionId?: string | null
+        subscriptionStartedAt?: Date | null
+        createdAt?: Date
+      }>()
 
     if (!user) {
       return NextResponse.json({ error: "Gebruiker niet gevonden" }, { status: 404 })
@@ -67,15 +79,22 @@ export async function POST(req: NextRequest) {
       cancellation_details: { feedback: mapToStripeFeedback(cancelReason) },
     })
 
-    const currentPeriodEnd = new Date(
-      (subscription as unknown as { current_period_end: number }).current_period_end * 1000
-    )
+    // Read through the shared helper: `current_period_end` moved from the
+    // subscription onto its items in a later Stripe API version, and reading only
+    // the old location produced `new Date(NaN)` as the cancellation date.
+    const currentPeriodEnd = periodEndOf(subscription)
 
-    user.cancelAtPeriodEnd = true
-    user.cancellationReason = cancelReason
-    user.cancellationFeedback =
-      typeof feedback === "string" ? feedback.slice(0, MAX_FEEDBACK_CHARS) : undefined
-    await user.save()
+    await User.updateOne(
+      { _id: user._id },
+      {
+        $set: {
+          cancelAtPeriodEnd: true,
+          cancellationReason: cancelReason ?? null,
+          cancellationFeedback:
+            typeof feedback === "string" ? feedback.slice(0, MAX_FEEDBACK_CHARS) : null,
+        },
+      }
+    )
 
     // Recorded server-side so it cannot be lost to a closed tab or an ad blocker.
     const startedAt = user.subscriptionStartedAt ?? user.createdAt ?? new Date()

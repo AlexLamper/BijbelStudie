@@ -1,4 +1,5 @@
 import { requireUser } from '../../../../lib/apiAuth';
+import { isSafeBookKey, isSafeChapter } from '../../../../lib/readingProgress';
 import { corsPreflight, errorV1, handleV1Error, jsonV1 } from '../../../../lib/apiV1';
 import connectMongoDB from '../../../../lib/mongodb';
 import User from '../../../../models/User';
@@ -47,6 +48,13 @@ export async function POST(req: Request) {
 
     if (!book || !chapter || !version) {
       return errorV1('MISSING_FIELDS', 400, 'book, chapter and version are required');
+    }
+
+    // Same guard as the web route: `book` becomes part of a Mongo update path,
+    // so an unchecked value writes an arbitrary key into readChapters and can
+    // break every subsequent save of that user document. See lib/readingProgress.
+    if (!isSafeBookKey(book) || !isSafeChapter(chapter)) {
+      return errorV1('INVALID_FIELDS', 400, 'book or chapter is not valid');
     }
 
     await connectMongoDB();

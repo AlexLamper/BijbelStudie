@@ -32,7 +32,11 @@ export async function POST(req: NextRequest) {
     }
 
     await connectMongoDB()
+    // Narrow projection + `.lean()` so pausing cannot be blocked by an unrelated
+    // invalid field elsewhere on the user document.
     const user = await User.findOne({ email: session.user.email })
+      .select("stripeSubscriptionId")
+      .lean<{ _id: unknown; stripeSubscriptionId?: string | null }>()
 
     if (!user?.stripeSubscriptionId) {
       return NextResponse.json({ error: "Geen actief abonnement" }, { status: 400 })
@@ -53,8 +57,7 @@ export async function POST(req: NextRequest) {
 
     // The webhook writes the authoritative state; this keeps the UI correct in
     // the interim.
-    user.pausedUntil = resumesAt
-    await user.save()
+    await User.updateOne({ _id: user._id }, { $set: { pausedUntil: resumesAt } })
 
     return NextResponse.json({ success: true, resumesAt })
   } catch (error) {
@@ -73,6 +76,8 @@ export async function DELETE() {
 
     await connectMongoDB()
     const user = await User.findOne({ email: session.user.email })
+      .select("stripeSubscriptionId")
+      .lean<{ _id: unknown; stripeSubscriptionId?: string | null }>()
 
     if (!user?.stripeSubscriptionId) {
       return NextResponse.json({ error: "Geen abonnement" }, { status: 400 })
@@ -82,8 +87,7 @@ export async function DELETE() {
       pause_collection: null,
     })
 
-    user.pausedUntil = null
-    await user.save()
+    await User.updateOne({ _id: user._id }, { $set: { pausedUntil: null } })
 
     return NextResponse.json({ success: true })
   } catch (error) {

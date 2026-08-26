@@ -6,11 +6,14 @@ import {
   Users, ShieldCheck, Sparkles, StickyNote, BookOpen, BarChart3,
   TrendingUp, ArrowRight, Flame, Euro, Settings2,
 } from "lucide-react"
+import BillingHealthCard, { type BillingStats } from "../../components/admin/BillingHealthCard"
 
 interface Stats {
   users: {
     total: number
     premium: number
+    stripeSubscribers: number
+    storeSubscribers: number
     admins: number
     newLast24h: number
     newLast7d: number
@@ -18,7 +21,8 @@ interface Stats {
     activeStreak: number
     premiumPercent: number
   }
-  revenue: { mrrEur: number; priceEur: number }
+  billing: BillingStats
+  revenue: { mrrEur: number; arrEur: number; priceEur: number; annualPriceEur: number }
   content: {
     notes: number
     notesLast7d: number
@@ -158,7 +162,7 @@ export default function AdminDashboardPage() {
               <KpiCard
                 label="Pro abonnees"
                 value={formatNumber(stats?.users.premium)}
-                sub={stats ? `${stats.users.premiumPercent}% conversie` : ""}
+                sub={stats ? `${stats.users.stripeSubscribers} Stripe · ${stats.users.storeSubscribers} store` : ""}
                 icon={Sparkles}
                 tint="rgba(217,119,6,0.08)"
                 color="#D97706"
@@ -167,7 +171,7 @@ export default function AdminDashboardPage() {
               <KpiCard
                 label="MRR (geschat)"
                 value={stats ? `€ ${stats.revenue.mrrEur.toLocaleString("nl-NL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "-"}
-                sub={stats ? `${stats.users.premium} × € ${stats.revenue.priceEur.toFixed(2)}` : ""}
+                sub={stats ? `${stats.billing.monthlySubscribers} p/m · ${stats.billing.annualSubscribers} p/j` : ""}
                 icon={Euro}
                 tint="rgba(34,197,94,0.08)"
                 color="#16A34A"
@@ -183,6 +187,11 @@ export default function AdminDashboardPage() {
                 loading={loading}
               />
             </div>
+
+            {/* Stripe <-> database health. Placed directly under the KPIs because
+                a paying customer without access is the most expensive thing on
+                this page to not notice. */}
+            <BillingHealthCard billing={stats?.billing} loading={loading} />
 
             {/* Signups chart */}
             <ChartCard

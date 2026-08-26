@@ -2,8 +2,12 @@ import { type NextRequest, NextResponse } from "next/server";
 import type Stripe from "stripe";
 import stripe from "../../../../lib/stripe";
 import connectMongoDB from "../../../../lib/mongodb";
-import User from "../../../../models/User";
 import WebhookEvent from "../../../../models/WebhookEvent";
+import {
+  clearBillingIssue,
+  markBillingIssue,
+  syncSubscription,
+} from "../../../../lib/subscriptionSync";
 
 /**
  * Stripe webhook. Until this existed, a user's Pro access was granted only if
@@ -23,130 +27,18 @@ import WebhookEvent from "../../../../models/WebhookEvent";
  *    cannot double-apply anything.
  *  - Handler errors return 500 so Stripe retries, but a *verification* failure
  *    returns 400 so it does not.
+ *
+ * The state writing itself lives in lib/subscriptionSync so this route, the
+ * /succes redirect and admin reconciliation cannot drift apart - and so that a
+ * billing write is an `updateOne` on named fields rather than a full-document
+ * `save()`, which one corrupt unrelated field was able to fail. See the comment
+ * at the top of that file.
  */
 
 // The signature is computed over the exact bytes Stripe sent, so this route must
 // never run through a body parser that could re-serialise them.
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-type SubscriptionWithPeriod = Stripe.Subscription & {
-  current_period_end: number;
-  current_period_start: number;
-};
-
-/** Stripe statuses that should grant access. */
-const ENTITLED = new Set(["active", "trialing"]);
-
-function intervalOf(subscription: Stripe.Subscription): "monthly" | "annual" | null {
-  const recurring = subscription.items.data[0]?.price?.recurring;
-  if (!recurring) return null;
-  if (recurring.interval === "year") return "annual";
-  if (recurring.interval === "month") return "monthly";
-  return null;
-}
-
-/**
- * Writes the full billing state for whichever user owns this Stripe customer.
- * Matching is by stripeCustomerId first and email only as a fallback, because
- * the customer id is the identifier Stripe itself considers authoritative.
- */
-async function applySubscription(subscription: Stripe.Subscription): Promise<void> {
-  const sub = subscription as SubscriptionWithPeriod;
-  const customerId = typeof sub.customer === "string" ? sub.customer : sub.customer?.id;
-  if (!customerId) return;
-
-  await connectMongoDB();
-
-  let user = await User.findOne({ stripeCustomerId: customerId });
-
-  if (!user) {
-    // First subscription for this account: the customer was created during
-    // checkout and the local record may not carry the id yet. `metadata.userId`
-    // is set by our own checkout route, so it is trustworthy here - it arrived
-    // inside a signature-verified event, not from a browser.
-    const metadataUserId = sub.metadata?.userId;
-    if (metadataUserId) {
-      user = await User.findById(metadataUserId);
-    }
-    if (!user) {
-      const customer = await stripe.customers.retrieve(customerId);
-      // `retrieve` widens to Customer | DeletedCustomer; only the live one has
-      // an email.
-      const email = customer.deleted ? null : (customer as Stripe.Customer).email;
-      if (email) user = await User.findOne({ email });
-    }
-    if (user) user.stripeCustomerId = customerId;
-  }
-
-  if (!user) {
-    console.warn(`[stripe-webhook] No local user for customer ${customerId}`);
-    return;
-  }
-
-  const entitled = ENTITLED.has(sub.status);
-
-  user.subscribed = entitled;
-  user.subscriptionStatus = sub.status;
-  user.stripeSubscriptionId = sub.id;
-  user.stripePriceId = sub.items.data[0]?.price?.id ?? user.stripePriceId;
-  user.subscriptionInterval = intervalOf(sub) ?? user.subscriptionInterval;
-  user.cancelAtPeriodEnd = !!sub.cancel_at_period_end;
-  user.currentPeriodEnd = sub.current_period_end
-    ? new Date(sub.current_period_end * 1000)
-    : null;
-
-  if (!user.subscriptionStartedAt && sub.start_date) {
-    user.subscriptionStartedAt = new Date(sub.start_date * 1000);
-  }
-
-  // `pause_collection.resumes_at` is null for an indefinite pause.
-  user.pausedUntil = sub.pause_collection
-    ? sub.pause_collection.resumes_at
-      ? new Date(sub.pause_collection.resumes_at * 1000)
-      : new Date(8640000000000000)
-    : null;
-
-  // A healthy status clears any outstanding billing problem.
-  if (entitled && sub.status !== "past_due") {
-    user.billingIssueSince = null;
-  }
-
-  await user.save();
-}
-
-async function applyPaymentFailure(invoice: Stripe.Invoice): Promise<void> {
-  const customerId =
-    typeof invoice.customer === "string" ? invoice.customer : invoice.customer?.id;
-  if (!customerId) return;
-
-  await connectMongoDB();
-  const user = await User.findOne({ stripeCustomerId: customerId });
-  if (!user) return;
-
-  // Access is deliberately NOT revoked here. Stripe keeps retrying for days and
-  // most failures are an expired card, not an intent to leave - pulling access
-  // immediately converts a recoverable payment into a cancellation. The
-  // subscription status change (past_due -> canceled/unpaid) is what eventually
-  // revokes it, via applySubscription above.
-  if (!user.billingIssueSince) {
-    user.billingIssueSince = new Date();
-    await user.save();
-  }
-}
-
-async function applyPaymentSuccess(invoice: Stripe.Invoice): Promise<void> {
-  const customerId =
-    typeof invoice.customer === "string" ? invoice.customer : invoice.customer?.id;
-  if (!customerId) return;
-
-  await connectMongoDB();
-  const user = await User.findOne({ stripeCustomerId: customerId });
-  if (!user || !user.billingIssueSince) return;
-
-  user.billingIssueSince = null;
-  await user.save();
-}
 
 export async function POST(req: NextRequest) {
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -202,7 +94,12 @@ export async function POST(req: NextRequest) {
               ? session.subscription
               : session.subscription.id;
           const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-          await applySubscription(subscription);
+          const result = await syncSubscription(subscription);
+          if (!result.matched) {
+            console.warn(
+              `[stripe-webhook] ${event.type}: no local user for ${result.customerId} (${result.reason})`
+            );
+          }
         }
         break;
       }
@@ -212,17 +109,22 @@ export async function POST(req: NextRequest) {
       case "customer.subscription.deleted":
       case "customer.subscription.paused":
       case "customer.subscription.resumed": {
-        await applySubscription(event.data.object as Stripe.Subscription);
+        const result = await syncSubscription(event.data.object as Stripe.Subscription);
+        if (!result.matched) {
+          console.warn(
+            `[stripe-webhook] ${event.type}: no local user for ${result.customerId} (${result.reason})`
+          );
+        }
         break;
       }
 
       case "invoice.payment_failed": {
-        await applyPaymentFailure(event.data.object as Stripe.Invoice);
+        await markBillingIssue(event.data.object as Stripe.Invoice);
         break;
       }
 
       case "invoice.payment_succeeded": {
-        await applyPaymentSuccess(event.data.object as Stripe.Invoice);
+        await clearBillingIssue(event.data.object as Stripe.Invoice);
         break;
       }
 

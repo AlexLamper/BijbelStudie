@@ -21,7 +21,11 @@ export async function GET(req: Request) {
   }
 
   const users = await User.find(filter)
-    .select("name email image isAdmin subscribed streak createdAt lastStreakDate stripeCustomerId preferences.onboardingCompleted")
+    .select(
+      "name email image isAdmin subscribed storePremium storePremiumPlatform subscriptionStatus " +
+        "subscriptionInterval currentPeriodEnd cancelAtPeriodEnd billingIssueSince streak " +
+        "createdAt lastStreakDate stripeCustomerId preferences.onboardingCompleted"
+    )
     .sort({ createdAt: -1 })
     .limit(limit)
     .lean();
@@ -41,6 +45,19 @@ export async function GET(req: Request) {
       image: u.image,
       isAdmin: !!u.isAdmin,
       subscribed: !!u.subscribed,
+      // Effective Pro, matching lib/mobilePremium: an App Store subscriber is a
+      // paying customer too, and the list showed them as free.
+      isPro: !!(u.subscribed || u.storePremium || u.isAdmin),
+      storePremium: !!u.storePremium,
+      storePremiumPlatform: u.storePremiumPlatform ?? null,
+      subscriptionStatus: u.subscriptionStatus ?? null,
+      subscriptionInterval: u.subscriptionInterval ?? null,
+      currentPeriodEnd: u.currentPeriodEnd ?? null,
+      cancelAtPeriodEnd: !!u.cancelAtPeriodEnd,
+      hasBillingIssue: !!u.billingIssueSince,
+      // A Stripe customer with no subscription state is a checkout whose result
+      // was never written back. Surfaced so it is visible per account.
+      needsReconcile: !!u.stripeCustomerId && !u.subscribed && !u.subscriptionStatus,
       streak: u.streak || 0,
       createdAt: u.createdAt,
       lastStreakDate: u.lastStreakDate,
