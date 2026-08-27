@@ -1,7 +1,18 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getServerSession } from 'next-auth';
-import { BookOpen, CheckCircle2, Clock, ListChecks, Target } from 'lucide-react';
+import {
+  ArrowLeft,
+  BookOpen,
+  CheckCircle2,
+  Clock,
+  Compass,
+  Layers,
+  ListChecks,
+  PenLine,
+  Target,
+  Trophy,
+} from 'lucide-react';
 
 import { authOptions } from '../../../lib/authOptions';
 import connectMongoDB from '../../../lib/mongodb';
@@ -11,7 +22,8 @@ import { buildMetadata } from '../../../lib/pageMetadata';
 import { getVersions } from '../../../lib/local-data';
 import { estimateStudyMinutes } from '../../../lib/studyFlow';
 import { findStudy, getEnrollment } from '../../../lib/studyEnrollmentService';
-import StudyOnboardingForm from './StudyOnboardingForm';
+import StudyStartPanel from './StudyOnboardingForm';
+import LessonList from './LessonList';
 
 const TEAL = '#0D9488';
 
@@ -53,6 +65,21 @@ export async function generateMetadata({ params }: PageProps) {
   });
 }
 
+const STEP_EXPLAINER = [
+  { icon: Compass, label: 'Intro', text: 'De context voordat je leest' },
+  { icon: BookOpen, label: 'Het Woord', text: 'Alleen het gedeelte van deze les' },
+  { icon: Layers, label: 'Verdieping', text: 'Uitleg, kaarten en grondtekst' },
+  { icon: PenLine, label: 'Reflectie', text: 'Jouw antwoord, bewaard als notitie' },
+  { icon: Trophy, label: 'Toetsing', text: 'Korte quiz over het gedeelte' },
+];
+
+const TYPE_LABEL: Record<string, string> = {
+  Boek: 'Bijbelboek',
+  Persoon: 'Persoon',
+  Gedeelte: 'Gedeelte',
+  Onderwerp: 'Onderwerp',
+};
+
 /**
  * Study detail and onboarding.
  *
@@ -60,6 +87,12 @@ export async function generateMetadata({ params }: PageProps) {
  * them, so it must be reachable without an account and crawlable. Only the
  * settings form needs a session, and it sends anonymous visitors to sign in at
  * the moment they press start.
+ *
+ * The page fills the viewport and does not scroll as a whole. Two panes scroll
+ * independently instead - the description on the left, the lesson list on the
+ * right - so the title, the progress and the start button stay put no matter
+ * how many lessons a study has. A twelve-lesson book study pushed all of that
+ * off-screen in the previous single-column layout.
  */
 export default async function StudyDetailPage({ params }: PageProps) {
   const { id } = await params;
@@ -72,6 +105,7 @@ export default async function StudyDetailPage({ params }: PageProps) {
   let resumeDay = study.lessons[0]?.day ?? 1;
   let resumeStep: string | null = null;
   let completedDays: number[] = [];
+  let settings: { rhythm?: string; depth?: string; translation?: string | null } = {};
 
   if (session?.user?.email) {
     await connectMongoDB();
@@ -86,6 +120,11 @@ export default async function StudyDetailPage({ params }: PageProps) {
         enrolled = true;
         resumeDay = enrollment.currentLessonDay;
         resumeStep = enrollment.currentStep === 'done' ? null : enrollment.currentStep;
+        settings = {
+          rhythm: enrollment.rhythm,
+          depth: enrollment.depth,
+          translation: enrollment.translation ?? null,
+        };
       }
       const done = (await StudyProgress.distinct('lessonDay', {
         userId,
@@ -98,54 +137,66 @@ export default async function StudyDetailPage({ params }: PageProps) {
   const versions = await getVersions().catch(() => [] as { id: string; name: string }[]);
   const minutes = estimateStudyMinutes(study);
   const resumeHref = `/studie/${study.id}/${resumeDay}${resumeStep ? `?stap=${resumeStep}` : ''}`;
+  const books = [...new Set(study.lessons.map((lesson) => lesson.book))];
 
   return (
-    <div className="min-h-full">
-      <div className="px-5 sm:px-8 xl:px-10 py-8 max-w-5xl mx-auto">
-        <Link
-          href="/studies"
-          className="text-xs text-muted-foreground hover:text-foreground no-underline"
-        >
-          &larr; Alle studies
-        </Link>
-
-        <header className="mt-3 mb-7">
-          <span
-            className="inline-block px-2 py-0.5 rounded-full text-[11px] font-bold text-white mb-2.5"
-            style={{ backgroundColor: TEAL }}
+    <div className="h-full flex flex-col lg:overflow-hidden">
+      {/* Header. Stays put; everything below it scrolls in its own pane. */}
+      <header className="flex-none border-b border-gray-200 dark:border-border bg-white dark:bg-card">
+        <div className="px-5 sm:px-8 py-4 sm:py-5">
+          <Link
+            href="/studies"
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground no-underline mb-2.5"
           >
-            {study.type}
-          </span>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground leading-tight">
-            {study.title}
-          </h1>
-          <p className="mt-2 text-[15px] text-gray-600 dark:text-muted-foreground max-w-2xl leading-relaxed">
-            {study.description}
-          </p>
+            <ArrowLeft size={13} /> Alle studies
+          </Link>
 
-          <div className="mt-4 flex flex-wrap gap-4 text-sm text-gray-500 dark:text-muted-foreground">
-            <span className="inline-flex items-center gap-1.5">
-              <ListChecks size={15} /> {study.lessons.length} lessen
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Clock size={15} /> ongeveer {minutes} min totaal
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <BookOpen size={15} /> start bij {study.startBook} {study.startChapter}
-            </span>
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-3">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 mb-1.5">
+                <span
+                  className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold text-white"
+                  style={{ backgroundColor: TEAL }}
+                >
+                  {TYPE_LABEL[study.type] ?? study.type}
+                </span>
+                <span className="text-[11px] font-medium text-gray-500 dark:text-muted-foreground truncate">
+                  {books.join(' · ')}
+                </span>
+              </div>
+              <h1 className="text-xl sm:text-2xl font-bold text-foreground leading-tight">
+                {study.title}
+              </h1>
+              <p className="mt-1 text-sm text-gray-500 dark:text-muted-foreground max-w-2xl leading-relaxed line-clamp-2">
+                {study.description}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-gray-500 dark:text-muted-foreground flex-none">
+              <span className="inline-flex items-center gap-1.5">
+                <ListChecks size={14} /> {study.lessons.length} lessen
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <Clock size={14} /> ± {minutes} min totaal
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <BookOpen size={14} /> start bij {study.startBook} {study.startChapter}
+              </span>
+            </div>
           </div>
-        </header>
+        </div>
+      </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-7 items-start">
-          <div className="space-y-7 min-w-0">
+      <div className="flex-1 min-h-0 flex flex-col lg:flex-row">
+        {/* Left: what the study is and how it works. Scrolls on its own. */}
+        <div className="flex-1 min-w-0 lg:overflow-y-auto">
+          <div className="px-5 sm:px-8 py-6 space-y-7 max-w-3xl">
             {study.about && study.about.length > 0 && (
               <section>
-                <h2 className="text-base font-bold text-foreground mb-2.5">
-                  Waar gaat deze studie over?
-                </h2>
+                <h2 className="text-sm font-bold text-foreground mb-2.5">Waar gaat deze studie over?</h2>
                 <div className="space-y-3">
                   {study.about.map((paragraph, index) => (
-                    <p key={index} className="text-[15px] leading-relaxed text-foreground/90">
+                    <p key={index} className="text-[14.5px] leading-relaxed text-foreground/85">
                       {paragraph}
                     </p>
                   ))}
@@ -155,13 +206,13 @@ export default async function StudyDetailPage({ params }: PageProps) {
 
             {study.outcomes && study.outcomes.length > 0 && (
               <section>
-                <h2 className="flex items-center gap-2 text-base font-bold text-foreground mb-2.5">
-                  <Target size={16} style={{ color: TEAL }} /> Wat ga je leren?
+                <h2 className="flex items-center gap-2 text-sm font-bold text-foreground mb-2.5">
+                  <Target size={15} style={{ color: TEAL }} /> Wat ga je leren?
                 </h2>
-                <ul className="space-y-2">
+                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
                   {study.outcomes.map((outcome, index) => (
-                    <li key={index} className="flex gap-2.5 text-[15px] text-foreground/90 leading-relaxed">
-                      <CheckCircle2 size={16} className="mt-0.5 flex-none" style={{ color: TEAL }} />
+                    <li key={index} className="flex gap-2 text-[14px] text-foreground/85 leading-relaxed">
+                      <CheckCircle2 size={15} className="mt-0.5 flex-none" style={{ color: TEAL }} />
                       {outcome}
                     </li>
                   ))}
@@ -170,48 +221,75 @@ export default async function StudyDetailPage({ params }: PageProps) {
             )}
 
             <section>
-              <h2 className="text-base font-bold text-foreground mb-3">De lessen</h2>
-              <ol className="rounded-xl border border-gray-200 dark:border-border divide-y divide-gray-200 dark:divide-border overflow-hidden">
-                {study.lessons.map((lesson) => {
-                  const done = completedDays.includes(lesson.day);
+              <h2 className="text-sm font-bold text-foreground mb-2.5">Hoe een les werkt</h2>
+              <ol className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-2.5">
+                {STEP_EXPLAINER.map((step, index) => {
+                  const Icon = step.icon;
                   return (
-                    <li key={lesson.day} className="flex items-start gap-3 p-4">
-                      <span
-                        className="h-6 w-6 rounded-full flex-none flex items-center justify-center text-[11px] font-bold"
-                        style={
-                          done
-                            ? { backgroundColor: 'rgba(13,148,136,0.12)', color: TEAL }
-                            : { backgroundColor: 'rgba(0,0,0,0.05)' }
-                        }
-                      >
-                        {done ? <CheckCircle2 size={13} /> : lesson.day}
-                      </span>
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold text-foreground">{lesson.title}</p>
-                        <p className="text-xs text-gray-500 dark:text-muted-foreground mt-0.5">
-                          {lesson.book} {lesson.chapter}
-                          {lesson.verseRange ? `:${lesson.verseRange}` : ''}
-                        </p>
+                    <li
+                      key={step.label}
+                      className="rounded-xl border border-gray-200 dark:border-border p-3 bg-white dark:bg-card"
+                    >
+                      <div className="flex items-center gap-1.5 mb-1.5">
+                        <span
+                          className="h-6 w-6 rounded-lg flex items-center justify-center flex-none"
+                          style={{ backgroundColor: 'rgba(13,148,136,0.10)' }}
+                        >
+                          <Icon size={13} style={{ color: TEAL }} />
+                        </span>
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-muted-foreground">
+                          Stap {index + 1}
+                        </span>
                       </div>
+                      <p className="text-[13px] font-semibold text-foreground leading-tight">{step.label}</p>
+                      <p className="text-[11.5px] text-gray-500 dark:text-muted-foreground leading-snug mt-0.5">
+                        {step.text}
+                      </p>
                     </li>
                   );
                 })}
               </ol>
+              <p className="mt-2.5 text-[12px] text-gray-400 dark:text-muted-foreground">
+                Een les zonder geschreven intro begint direct bij het bijbelgedeelte. De AI-assistent
+                is in elke stap beschikbaar.
+              </p>
             </section>
           </div>
+        </div>
 
-          <div className="lg:sticky lg:top-6">
-            <StudyOnboardingForm
+        {/* Right: start, settings and the lessons. */}
+        <aside className="w-full lg:w-[400px] flex-none flex flex-col min-h-0 border-t lg:border-t-0 lg:border-l border-gray-200 dark:border-border bg-gray-50/60 dark:bg-card/40">
+          <div className="flex-none p-4 sm:p-5 border-b border-gray-200 dark:border-border">
+            <StudyStartPanel
               studyId={study.id}
               translations={versions.map((version) => ({ id: version.id, name: version.name }))}
-              defaultTranslation={study.startVersion}
-              suggestedRhythm={study.suggestedRhythm ?? 'dagelijks'}
-              suggestedDepth={study.suggestedDepth ?? 'kort'}
+              defaultTranslation={settings.translation ?? study.startVersion}
+              suggestedRhythm={(settings.rhythm as never) ?? study.suggestedRhythm ?? 'dagelijks'}
+              suggestedDepth={(settings.depth as never) ?? study.suggestedDepth ?? 'kort'}
               enrolled={enrolled}
               resumeHref={resumeHref}
+              resumeDay={resumeDay}
+              lessonsTotal={study.lessons.length}
+              lessonsCompleted={completedDays.length}
             />
           </div>
-        </div>
+
+          <LessonList
+            studyId={study.id}
+            lessons={study.lessons.map((lesson) => ({
+              day: lesson.day,
+              title: lesson.title,
+              book: lesson.book,
+              chapter: lesson.chapter,
+              verseRange: lesson.verseRange ?? null,
+              focus: lesson.focus,
+              minutes: lesson.estimatedMinutes ?? 12,
+            }))}
+            completedDays={completedDays}
+            currentDay={enrolled ? resumeDay : null}
+            enrolled={enrolled}
+          />
+        </aside>
       </div>
     </div>
   );

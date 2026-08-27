@@ -5,8 +5,8 @@ import { authOptions } from '../../../../lib/authOptions';
 import connectMongoDB from '../../../../lib/mongodb';
 import User from '../../../../models/User';
 import StudyLessonState from '../../../../models/StudyLessonState.js';
+import StudyProgress from '../../../../models/StudyProgress.js';
 import { getLessonContent } from '../../../../lib/data/study-lessons';
-import { CHAPTER_COUNTS } from '../../../../lib/data/bible-chapter-counts';
 import {
   findLesson,
   isStepKey,
@@ -72,6 +72,14 @@ export default async function StudyLessonPage({ params, searchParams }: PageProp
   const steps = resolveSteps(lesson, content);
   const passage = resolvePassage(lesson, content);
 
+  // Which lessons are already done, for the navigator in the flow header. The
+  // reader could previously only see that list by leaving the lesson.
+  const completedDays = new Set(
+    ((await StudyProgress.distinct('lessonDay', { userId, studyId })) as (number | null)[]).filter(
+      (day): day is number => day != null,
+    ),
+  );
+
   const state = await StudyLessonState.findOne({ userId, studyId, lessonDay }).lean<{
     stepsCompleted?: string[];
     currentStep?: string;
@@ -119,6 +127,12 @@ export default async function StudyLessonPage({ params, searchParams }: PageProp
       },
     },
     nextLessonDay: nextLessonDay(study, lessonDay),
+    outline: study.lessons.map((entry) => ({
+      day: entry.day,
+      title: entry.title,
+      reference: `${entry.book} ${entry.chapter}${entry.verseRange ? `:${entry.verseRange}` : ''}`,
+      completed: completedDays.has(entry.day),
+    })),
   };
 
   const initialState: LessonStatePayload = {
@@ -138,11 +152,6 @@ export default async function StudyLessonPage({ params, searchParams }: PageProp
   };
 
   return (
-    <StudyFlowShell
-      lesson={payload}
-      initialState={initialState}
-      initialStep={initialStep}
-      maxChapter={CHAPTER_COUNTS[passage.book] ?? passage.chapter}
-    />
+    <StudyFlowShell lesson={payload} initialState={initialState} initialStep={initialStep} />
   );
 }

@@ -23,12 +23,45 @@ interface GeoImagesProps {
   book: string;
   chapter: number;
   className?: string;
-  variant?: 'grid' | 'strip';
+  variant?: 'grid' | 'strip' | 'panel';
+  /**
+   * Ask the API for the whole book when this chapter has no places of its own.
+   * The guided study flow sets this: an empty media panel next to the
+   * commentary reads as broken rather than as "no locations here".
+   */
+  fallbackToBook?: boolean;
 }
 
-/** Best available image URL: fileUrl is a direct upload.wikimedia.org path that always loads */
+/** Full-resolution original. Lightbox only - see thumbSrc for everything else. */
 function imgSrc(img: GeoImage): string {
   return img.fileUrl || img.thumbnailUrl;
+}
+
+/**
+ * A small, already-resized URL for a thumbnail, via this app's image optimizer.
+ *
+ * Every grid, strip and panel used to render `imgSrc`, which is the ORIGINAL
+ * upload.wikimedia.org file - routinely 4-10 MB of 5000px photograph decoded
+ * into an 88px box. Half a dozen of those on one step is what made the
+ * verdieping step crawl: the cost is not the download, it is the browser
+ * decoding and rescaling several enormous bitmaps on the main thread.
+ *
+ * The obvious fix - rewriting the width in Wikimedia's own thumbnail URL -
+ * does NOT work: upload.wikimedia.org answers arbitrary widths with
+ * "400 Use thumbnail sizes listed on https://w.wiki/GHai", which is exactly why
+ * the original code reached for the full-size file in the first place. So the
+ * resize happens here instead. `/_next/image` fetches the source once, caches
+ * the result, and serves AVIF/WebP at the size actually drawn.
+ *
+ * `width` must be one of Next's configured sizes (imageSizes + deviceSizes) and
+ * `q` one of `images.qualities` in next.config.ts, or the optimizer 400s. Every
+ * caller keeps an `onError` back to the untouched original, so a failure here
+ * degrades to the old behaviour rather than a broken image.
+ */
+function thumbSrc(img: GeoImage, width: number): string {
+  const source = img.fileUrl || img.thumbnailUrl;
+  if (!source) return '';
+  return `/_next/image?url=${encodeURIComponent(source)}&w=${width}&q=75`;
 }
 
 /** Shared lightbox - rendered via createPortal in both strip and grid variants */
@@ -77,11 +110,14 @@ function LightboxContent({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             key={selected.id + '-' + index}
-            src={imgSrc(selected)}
+            /* 1080px into a 560px modal: sharp on a retina screen, without
+               decoding the 5000px original the way this used to. */
+            src={thumbSrc(selected, 1080)}
             alt={selected.placeName}
             loading="eager"
+            decoding="async"
             style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover' }}
-            onError={e => { (e.currentTarget as HTMLImageElement).src = selected.thumbnailUrl; }}
+            onError={e => { (e.currentTarget as HTMLImageElement).src = imgSrc(selected); }}
           />
           <div style={{
             position: 'absolute', inset: 0,
@@ -233,11 +269,14 @@ function LightboxContent({
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={imgSrc(img)}
+                    src={thumbSrc(img, 128)}
                     alt={img.placeName}
+                    width={56}
+                    height={42}
                     loading="lazy"
                     decoding="async"
                     style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    onError={e => { (e.currentTarget as HTMLImageElement).src = imgSrc(img); }}
                   />
                 </button>
               ))}
@@ -249,9 +288,10 @@ function LightboxContent({
   );
 }
 
-export default function GeoImages({ book, chapter, className, variant = 'grid' }: GeoImagesProps) {
+export default function GeoImages({ book, chapter, className, variant = 'grid', fallbackToBook = false }: GeoImagesProps) {
   const { t } = useTranslation('study');
   const [images, setImages]   = useState<GeoImage[]>([]);
+  const [scope, setScope]     = useState<'chapter' | 'book'>('chapter');
   const [loading, setLoading] = useState(false);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [mounted, setMounted]   = useState(false);
@@ -263,12 +303,15 @@ export default function GeoImages({ book, chapter, className, variant = 'grid' }
     setLoading(true);
     setImages([]);
 
-    fetch(`/api/geo/images?book=${encodeURIComponent(book)}&chapter=${chapter}`)
+    fetch(`/api/geo/images?book=${encodeURIComponent(book)}&chapter=${chapter}${fallbackToBook ? '&fallback=book' : ''}`)
       .then(r => r.ok ? r.json() : { images: [] })
-      .then(data => setImages(data.images || []))
+      .then(data => {
+        setImages(data.images || []);
+        setScope(data.scope === 'book' ? 'book' : 'chapter');
+      })
       .catch(() => setImages([]))
       .finally(() => setLoading(false));
-  }, [book, chapter]);
+  }, [book, chapter, fallbackToBook]);
 
   const goPrev = useCallback(() => {
     setActiveIndex(i => {
@@ -297,6 +340,20 @@ export default function GeoImages({ book, chapter, className, variant = 'grid' }
   }, [activeIndex, goPrev, goNext]);
 
   if (loading) {
+    if (variant === 'panel') {
+      return (
+        <div className="grid grid-cols-2 gap-2">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="rounded-lg border border-gray-100 dark:border-border overflow-hidden">
+              <div className="animate-pulse bg-gray-100 dark:bg-secondary" style={{ height: 78 }} />
+              <div className="p-2">
+                <div className="h-2 rounded animate-pulse bg-gray-100 dark:bg-secondary w-3/4" />
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
     if (variant === 'strip') {
       return (
         <div className="border-b border-gray-100 dark:border-border bg-gray-50 dark:bg-card flex-none">
@@ -335,6 +392,13 @@ export default function GeoImages({ book, chapter, className, variant = 'grid' }
   }
 
   if (images.length === 0 && !loading) {
+    if (variant === 'panel') {
+      return (
+        <p className="text-[12px] text-gray-400 dark:text-muted-foreground italic">
+          Geen locatieafbeeldingen bij {book}.
+        </p>
+      );
+    }
     if (variant === 'strip') {
       return (
         <div className="border-b border-gray-100 dark:border-border bg-gray-50 dark:bg-card flex-none">
@@ -345,6 +409,61 @@ export default function GeoImages({ book, chapter, className, variant = 'grid' }
       );
     }
     return null;
+  }
+
+  /* ── Panel variant - the study flow's right column ─────────── */
+  if (variant === 'panel') {
+    return (
+      <>
+        <p className="text-[11px] text-gray-400 dark:text-muted-foreground mb-2">
+          {scope === 'book'
+            ? `Geen locaties in dit hoofdstuk - dit zijn de plaatsen uit ${book}.`
+            : `Plaatsen die in ${book} ${chapter} voorkomen.`}
+        </p>
+        <div className="grid grid-cols-2 gap-2">
+          {images.map((image, index) => (
+            <button
+              key={`${image.id}-${index}`}
+              onClick={() => setActiveIndex(index)}
+              className="group text-left rounded-lg overflow-hidden border border-gray-200 dark:border-border bg-white dark:bg-card hover:border-teal-300 dark:hover:border-teal-700 transition-colors"
+            >
+              <div className="bg-gray-100 dark:bg-secondary/60 overflow-hidden" style={{ height: 78 }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={thumbSrc(image, 384)}
+                  alt={image.placeName}
+                  width={320}
+                  height={156}
+                  loading="lazy"
+                  decoding="async"
+                  className="group-hover:scale-105"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform 0.3s' }}
+                  onError={e => { (e.currentTarget as HTMLImageElement).src = imgSrc(image); }}
+                />
+              </div>
+              <div className="px-2 py-1.5">
+                <p className="text-[11px] font-semibold text-foreground truncate">{image.placeName}</p>
+                {image.verses?.[0] && (
+                  <p className="text-[10px] text-gray-400 dark:text-muted-foreground truncate">{image.verses[0]}</p>
+                )}
+              </div>
+            </button>
+          ))}
+        </div>
+
+        {activeIndex !== null && mounted && createPortal(
+          <LightboxContent
+            images={images}
+            index={activeIndex}
+            onClose={() => setActiveIndex(null)}
+            onPrev={goPrev}
+            onNext={goNext}
+            onSelect={setActiveIndex}
+          />,
+          document.body
+        )}
+      </>
+    );
   }
 
   /* ── Strip variant ─────────────────────────────────────────── */
@@ -377,12 +496,14 @@ export default function GeoImages({ book, chapter, className, variant = 'grid' }
                 <div className="bg-gray-100 dark:bg-secondary/60" style={{ height: 60, overflow: 'hidden' }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={imgSrc(image)}
+                    src={thumbSrc(image, 256)}
                     alt={image.placeName}
+                    width={88}
+                    height={60}
                     loading="lazy"
                     decoding="async"
                     style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                    onError={e => { (e.currentTarget as HTMLImageElement).src = image.thumbnailUrl; }}
+                    onError={e => { (e.currentTarget as HTMLImageElement).src = imgSrc(image); }}
                   />
                 </div>
                 <div style={{ padding: '4px 6px 5px' }}>
@@ -450,8 +571,10 @@ export default function GeoImages({ book, chapter, className, variant = 'grid' }
               <div style={{ height: 110, overflow: 'hidden', backgroundColor: '#F3F4F6' }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={imgSrc(image)}
+                  src={thumbSrc(image, 384)}
                   alt={image.placeName}
+                  width={480}
+                  height={220}
                   loading="lazy"
                   decoding="async"
                   style={{
@@ -462,7 +585,7 @@ export default function GeoImages({ book, chapter, className, variant = 'grid' }
                     transition: 'transform 0.3s',
                   }}
                   className="group-hover:scale-105"
-                  onError={e => { (e.currentTarget as HTMLImageElement).src = image.thumbnailUrl; }}
+                  onError={e => { (e.currentTarget as HTMLImageElement).src = imgSrc(image); }}
                 />
               </div>
               {/* Caption */}

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 120" width="320" height="120" preserveAspectRatio="xMidYMid slice">
+<defs><radialGradient id="g" cx="0.78" cy="0.1" r="0.95">
+<stop offset="0" stop-color="#0D9488" stop-opacity="0.34"/>
+<stop offset="1" stop-color="#0D9488" stop-opacity="0"/>
+</radialGradient></defs>
+<rect width="320" height="120" fill="#0F172A"/>
+<rect width="320" height="120" fill="url(#g)"/>
+<g stroke="#0D9488" stroke-width="3" stroke-linecap="round" fill="none">
+<path d="M118 98V44a14 14 0 0 1 28 0v54"/>
+<path d="M118 62h28"/>
+<path d="M132 30v-8"/>
+</g>
+<g stroke="#2DD4BF" stroke-width="1.6" opacity="0.5">
+<line x1="176" y1="98" x2="176" y2="40"/>
+<line x1="192" y1="98" x2="192" y2="52"/>
+<line x1="208" y1="98" x2="208" y2="34"/>
+<line x1="224" y1="98" x2="224" y2="58"/>
+<line x1="240" y1="98" x2="240" y2="46"/>
+</g>
+<circle cx="208" cy="28" r="5" fill="#2DD4BF" opacity="0.85"/>
+<line x1="86" y1="98" x2="258" y2="98" stroke="#0D9488" stroke-width="3" stroke-linecap="round"/>
+<g fill="#0D9488" opacity="0.85">
+<circle cx="70" cy="52" r="3.5"/>
+<circle cx="70" cy="70" r="3.5"/>
+<circle cx="70" cy="88" r="3.5"/>
+</g>
+<rect y="117" width="320" height="3" fill="#0D9488"/>
+</svg>

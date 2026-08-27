@@ -1,3 +1,4 @@
+import { BIBLE_ATTRIBUTIONS } from './bible-attribution';
 import { STEPBIBLE_ATTRIBUTION } from './mobileLicensing';
 
 /**
@@ -11,11 +12,14 @@ import { STEPBIBLE_ATTRIBUTION } from './mobileLicensing';
  */
 const MOBILE_BIBLE_ATTRIBUTION: Record<string, string> = {
   statenvertaling: 'Statenvertaling (1637) - publiek domein',
+  // Contractually fixed by the Nederlands-Vlaams Bijbelgenootschap and shared
+  // with the website so the two can never drift: reproduce EXACTLY, no dash
+  // normalisation, no added year, no reworded licence note.
+  nbg51: BIBLE_ATTRIBUTIONS.nbg51,
   heilige_schrift_1917: 'De Heilige Schrift 1917 - publiek domein',
   canisiusbijbel:
     'Canisiusbijbel 1939 - publiek domein (bron: ebible.org, nld1939)',
   elberfelder_1905: 'Elberfelder 1905 - publiek domein',
-  luther_1912: 'Lutherbibel 1912 - publiek domein',
   kjv: 'King James Version (1611) - publiek domein',
   asv: 'American Standard Version (1901) - publiek domein',
   web: 'World English Bible - publiek domein',

@@ -15,7 +15,8 @@ function highlightRefs(text: string): string {
   );
 }
 
-function formatSummaryText(raw: string): string {
+/** Also used by the study flow's "context van dit boek" dialog. */
+export function formatSummaryText(raw: string): string {
   if (!raw) return '';
 
   let paragraphs: string[];

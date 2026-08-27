@@ -25,7 +25,8 @@ export default function StepIntro({
   lessonTitle: string;
 }) {
   return (
-    <article className="max-w-2xl mx-auto px-5 sm:px-8 py-8">
+    <div className="h-full overflow-y-auto">
+    <article className="max-w-2xl mx-auto px-6 sm:px-10 py-8 sm:py-10">
       <div className="flex items-center gap-2 mb-2">
         <Compass size={14} style={{ color: TEAL }} />
         <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: TEAL }}>
@@ -64,5 +65,6 @@ export default function StepIntro({
         </aside>
       )}
     </article>
+    </div>
   );
 }

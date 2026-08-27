@@ -11,6 +11,11 @@
  * gedeelte" rather than break someone's devotional halfway through.
  */
 
+import {
+  fetchQuestionsFromPublicCatalogue,
+  gradeWithPublicCatalogue,
+} from './quizBankPublic';
+
 const REQUEST_TIMEOUT_MS = 5000;
 
 export interface QuizQuestion {
@@ -61,10 +66,26 @@ function serviceHeaders(): Record<string, string> | null {
   };
 }
 
-/** True when the integration is configured at all. */
+/**
+ * True when questions can be reached at all.
+ *
+ * The service key is NOT required: without it the public-catalogue fallback
+ * below still answers, and gating on the key would turn a missing env var into
+ * "this lesson has no quiz" - the one failure mode this module exists to avoid.
+ */
 export function isQuizBankConfigured(): boolean {
-  return baseUrl() !== null && serviceHeaders() !== null;
+  return baseUrl() !== null;
 }
+
+/**
+ * Whether the service route is known to be missing on the other deploy.
+ *
+ * A 404 means the route was never shipped, not that this passage has no
+ * questions. Remembering it skips one dead round trip per lesson step; it is
+ * reset per process, so deploying the route there fixes this one without a
+ * deploy here.
+ */
+let serviceRouteMissing = false;
 
 /**
  * One attempt plus one retry.
@@ -76,8 +97,8 @@ export function isQuizBankConfigured(): boolean {
 async function call(path: string, init: RequestInit): Promise<Response | null> {
   const base = baseUrl();
   const headers = serviceHeaders();
-  if (!base || !headers) {
-    console.warn('[quizBank] BIJBELQUIZ_API_BASE or BIJBELQUIZ_SERVICE_KEY is not set');
+  if (!base || !headers || serviceRouteMissing) {
+    if (!headers) console.warn('[quizBank] BIJBELQUIZ_SERVICE_KEY is not set');
     return null;
   }
 
@@ -90,6 +111,11 @@ async function call(path: string, init: RequestInit): Promise<Response | null> {
         cache: 'no-store',
       });
 
+      // A 404 is the route not existing on that deploy, not a bad request.
+      if (response.status === 404) {
+        serviceRouteMissing = true;
+        return null;
+      }
       // A 4xx is a real answer - retrying a bad request just wastes the timeout.
       if (response.ok || (response.status >= 400 && response.status < 500)) return response;
     } catch (error) {
@@ -125,19 +151,28 @@ export async function fetchQuestions(options: {
   const response = await call(`/api/service/study-questions?${params.toString()}`, {
     method: 'GET',
   });
-  if (!response) return null;
 
-  if (!response.ok) {
+  if (response?.ok) {
+    try {
+      const data = (await response.json()) as QuizQuestionsResult;
+      return {
+        questions: data.questions ?? [],
+        total: data.total ?? 0,
+        matchedBy: data.matchedBy ?? 'none',
+      };
+    } catch {
+      return null;
+    }
+  }
+  if (response) {
     console.warn(`[quizBank] Questions request returned ${response.status}`);
     return null;
   }
 
-  try {
-    const data = (await response.json()) as QuizQuestionsResult;
-    return { questions: data.questions ?? [], total: data.total ?? 0, matchedBy: data.matchedBy ?? 'none' };
-  } catch {
-    return null;
-  }
+  // No service route on the other deploy: read the public catalogue instead.
+  const base = baseUrl();
+  if (!base) return null;
+  return fetchQuestionsFromPublicCatalogue(base, options);
 }
 
 /**
@@ -155,11 +190,17 @@ export async function gradeAnswers(
     method: 'POST',
     body: JSON.stringify({ answers }),
   });
-  if (!response || !response.ok) return null;
 
-  try {
-    return (await response.json()) as GradeResult;
-  } catch {
-    return null;
+  if (response?.ok) {
+    try {
+      return (await response.json()) as GradeResult;
+    } catch {
+      return null;
+    }
   }
+  if (response) return null;
+
+  const base = baseUrl();
+  if (!base) return null;
+  return gradeWithPublicCatalogue(base, answers);
 }

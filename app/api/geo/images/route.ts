@@ -34,9 +34,17 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const images = geoDataService.getImagesForChapter(book, chapter);
+    const chapterImages = geoDataService.getImagesForChapter(book, chapter);
+
+    // `fallback=book` is what the guided study flow asks for: a chapter with no
+    // places of its own (a prayer, a vision) would otherwise leave an empty
+    // panel beside the commentary, which reads as broken rather than as empty.
+    const useBookFallback =
+      chapterImages.length === 0 && searchParams.get('fallback') === 'book';
+    const images = useBookFallback ? geoDataService.getImagesForBook(book) : chapterImages;
+
     return NextResponse.json(
-      { images },
+      { images, scope: useBookFallback ? 'book' : 'chapter' },
       {
         headers: {
           'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate=604800',

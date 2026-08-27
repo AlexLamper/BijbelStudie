@@ -31,7 +31,12 @@ export default async function StudyLayout({
           <AppSidebar />
           <div className="flex flex-col flex-1 min-h-0 w-full">
             <Header />
-            <div className="flex-1 min-h-0 overflow-y-auto">
+            {/* overflow-hidden, not overflow-y-auto: the guided flow is a fixed
+                frame - step rail on top, Vorige/Volgende at the bottom, one
+                scrolling body between them. With a scrollable wrapper the whole
+                frame scrolled instead, so a wheel over the footer dragged the
+                buttons off screen. */}
+            <div className="flex-1 min-h-0 overflow-hidden">
               {children}
             </div>
           </div>

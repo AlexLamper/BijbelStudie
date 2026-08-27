@@ -7,15 +7,6 @@ import type { StepKey } from '../../../lib/studyFlow';
 
 const TEAL = '#0D9488';
 
-/** The pill label follows the step, so the offer is about what is on screen. */
-const PILL_LABEL: Record<StepKey, string> = {
-  intro: 'Vraag over deze studie',
-  word: 'Vraag over dit vers',
-  depth: 'Vraag over deze uitleg',
-  reflection: 'Help me met deze vraag',
-  quiz: 'Vraag over deze vragen',
-};
-
 /** Step-specific starters, replacing the assistant's generic ones. */
 const STARTERS: Record<StepKey, string[]> = {
   intro: [
@@ -47,14 +38,17 @@ const STARTERS: Record<StepKey, string[]> = {
 /**
  * The assistant, always one click away and never in the way.
  *
- * Mounted ONCE by the flow shell, outside the step body. That placement is the
- * whole point: the conversation survives moving between steps, where the old
- * design made you type into a popup, teleported you to a tab, and lost the
- * thread. The passage and step travel with it as context.
+ * Mounted ONCE by the flow shell, outside the step body, so the conversation
+ * survives moving between steps. The passage and step travel with it as context.
+ *
+ * It has NO floating trigger of its own. It used to render a pill at
+ * `bottom-6 right-5`, which is exactly where the flow's "Volgende" button sits -
+ * on the quiz step the pill covered it and the lesson could not be finished. The
+ * trigger now lives in the flow header, where nothing else is.
  *
  * On large screens it opens as a side drawer and the step body SHRINKS rather
- * than being covered, so you can read and ask at the same time. Below that it
- * is a bottom sheet, because there is no room to do both.
+ * than being covered, so you can read and ask at the same time. Below that it is
+ * a bottom sheet, because there is no room to do both.
  */
 export default function AiDock({
   open,
@@ -65,6 +59,8 @@ export default function AiDock({
   step,
   draft,
   onDraftConsumed,
+  question,
+  onQuestionConsumed,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -74,6 +70,9 @@ export default function AiDock({
   step: StepKey;
   draft?: string | null;
   onDraftConsumed?: () => void;
+  /** Sent immediately on arrival, unlike `draft` which only fills the input. */
+  question?: string | null;
+  onQuestionConsumed?: () => void;
 }) {
   const [mounted, setMounted] = useState(false);
 
@@ -92,20 +91,7 @@ export default function AiDock({
     return () => window.removeEventListener('keydown', onKey);
   }, [open, onOpenChange]);
 
-  if (!open) {
-    return (
-      <button
-        type="button"
-        onClick={() => onOpenChange(true)}
-        className="fixed bottom-20 right-5 sm:bottom-24 lg:bottom-6 z-40 inline-flex items-center gap-2 pl-3 pr-4 py-2.5 rounded-full shadow-lg text-white text-sm font-semibold transition-transform hover:scale-105"
-        style={{ backgroundColor: TEAL }}
-      >
-        <Sparkles size={15} />
-        <span className="hidden sm:inline">{PILL_LABEL[step]}</span>
-        <span className="sm:hidden">AI</span>
-      </button>
-    );
-  }
+  if (!open) return null;
 
   return (
     <>
@@ -154,6 +140,8 @@ export default function AiDock({
               starterQuestions={STARTERS[step]}
               draft={draft}
               onDraftConsumed={onDraftConsumed}
+              initialQuestion={question}
+              onInitialQuestionConsumed={onQuestionConsumed}
             />
           )}
         </div>

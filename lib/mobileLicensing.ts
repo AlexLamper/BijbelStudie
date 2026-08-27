@@ -7,10 +7,6 @@
  *
  * Blocked, and why (see IOS_APP_BRIEF.md §1.5 for the full dossier):
  *
- *   nbg51            NBG-vertaling 1951. Contract is scoped to
- *                    www.bijbel-studie.com only, valid to 2029-12-31. An iOS
- *                    app is a different distribution channel and is not
- *                    covered.
  *   net              NET Bible, (c) Biblical Studies Press. Whole-text
  *                    electronic distribution needs written permission and
  *                    "cannot be bundled with anything sold". We sell Pro.
@@ -33,10 +29,14 @@
  */
 export const MOBILE_ALLOWED_BIBLES: ReadonlySet<string> = new Set([
   'statenvertaling', // Public domain
+  // NBG-vertaling 1951. Licensed, not public domain: the mobile app is covered
+  // by the licence held for this product. The text itself is served from
+  // /private (never a static asset) and only ever per chapter, exactly as on
+  // the website — see `fetchJson` in lib/local-data.ts.
+  'nbg51',
   'heilige_schrift_1917', // Public domain
   'canisiusbijbel', // ebible.org cleared with KBS; treated as public domain
   'elberfelder_1905', // Public domain
-  'luther_1912', // Public domain
   'kjv', // Public domain
   'asv', // Public domain
   'web', // Public domain

@@ -112,18 +112,18 @@ export default function StepQuiz({
 
   if (questions === null) {
     return (
-      <div className="max-w-2xl mx-auto px-5 sm:px-8 py-10 space-y-3" role="status" aria-label="Quiz laden">
+      <div className="h-full overflow-y-auto"><div className="max-w-2xl mx-auto px-6 sm:px-10 py-10 space-y-3" role="status" aria-label="Quiz laden">
         {[0, 1, 2].map((i) => (
           <div key={i} className="h-20 rounded-xl animate-pulse bg-gray-100 dark:bg-secondary" />
         ))}
-      </div>
+      </div></div>
     );
   }
 
   // No questions for this passage. A complete, calm ending - not an error.
   if (questions.length === 0) {
     return (
-      <div className="max-w-2xl mx-auto px-5 sm:px-8 py-12 text-center">
+      <div className="h-full overflow-y-auto"><div className="max-w-2xl mx-auto px-6 sm:px-10 py-12 text-center">
         <div
           className="mx-auto mb-4 h-12 w-12 rounded-full flex items-center justify-center"
           style={{ backgroundColor: 'rgba(13,148,136,0.1)' }}
@@ -136,7 +136,7 @@ export default function StepQuiz({
             ? 'De quizvragen zijn nu even niet op te halen. Je kunt de les gewoon afronden.'
             : 'Voor dit bijbelgedeelte zijn nog geen vragen beschikbaar. Rond de les af om verder te gaan.'}
         </p>
-      </div>
+      </div></div>
     );
   }
 
@@ -144,7 +144,7 @@ export default function StepQuiz({
   const allAnswered = questions.every((question) => chosen[question.id]);
 
   return (
-    <div className="max-w-2xl mx-auto px-5 sm:px-8 py-8">
+    <div className="h-full overflow-y-auto"><div className="max-w-2xl mx-auto px-6 sm:px-10 py-8 sm:py-10">
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
           <Trophy size={14} style={{ color: TEAL }} />
@@ -260,6 +260,6 @@ export default function StepQuiz({
           Je mag de les afronden, ook als niet alles goed was.
         </p>
       )}
-    </div>
+    </div></div>
   );
 }

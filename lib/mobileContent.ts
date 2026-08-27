@@ -1,5 +1,6 @@
 import { readFile } from 'fs/promises';
 import path from 'path';
+import { normalizeBookName } from './book-mapping';
 import {
   getBooks,
   getChapter,
@@ -165,9 +166,31 @@ export type OriginalEnvelope = {
 };
 
 /**
+ * Book names `bookNameMap` does not carry, kept here rather than added there:
+ * `englishToDutchMap` and `getBookNameVariants` are both derived from that map
+ * by last-key-wins, so a German key for `1 Chronicles` would quietly rename the
+ * website's English → Dutch answer to "1 Chronik".
+ */
+const ORIGINAL_BOOK_ALIASES: Record<string, string> = {
+  '1 Chronik': '1 Chronicles',
+  '2 Chronik': '2 Chronicles',
+  '1 Koenige': '1 Kings',
+  '2 Koenige': '2 Kings',
+};
+
+/**
  * STEPBible originals live at /public/data/original/<Book_Slug>/<chapter>.json
  * with spaces replaced by underscores. Read directly rather than through
  * local-data, whose parsers assume a verse-string shape this data does not have.
+ *
+ * The slug is ENGLISH — `Judges`, `1_Samuel`, `Song_of_Solomon` — while the app
+ * addresses chapters by the book name of the translation it is reading, which
+ * for every Dutch version is Dutch. Slugifying that name directly (what this
+ * did before) only ever hit the handful of books whose Dutch name happens to be
+ * spelled the same, and the diacritic ones ("1 Samuël", "Mattheüs") failed the
+ * character check outright, so the Grondtekst tab was empty for most of the
+ * canon. `normalizeBookName` is the same Dutch → English map the website's
+ * `OriginalText.tsx` uses, so both surfaces now resolve identically.
  */
 export async function getMobileOriginalChapter(
   book: string,
@@ -175,7 +198,9 @@ export async function getMobileOriginalChapter(
 ): Promise<OriginalEnvelope | null> {
   assertMobileAllowed('original', 'stepbible');
 
-  const slug = book.trim().replace(/\s+/g, '_');
+  const name = book.trim();
+  const english = ORIGINAL_BOOK_ALIASES[name] ?? normalizeBookName(name);
+  const slug = english.replace(/\s+/g, '_');
   // Reject traversal before it reaches the filesystem: the book name comes
   // straight off the URL.
   if (!/^[A-Za-z0-9_]+$/.test(slug)) return null;

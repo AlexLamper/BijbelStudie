@@ -160,22 +160,44 @@ export class GeoDataService {
   }
 
   public getImagesForChapter(bookName: string, chapter: number): GeoImage[] {
+    return this.collect(bookName, osisBook => {
+      const chapterPrefix = `${osisBook}.${chapter}.`;
+      const chapterExact  = `${osisBook}.${chapter}`;
+      return osis => osis.startsWith(chapterPrefix) || osis === chapterExact;
+    });
+  }
+
+  /**
+   * Every image tied to any chapter of a book.
+   *
+   * The guided study flow falls back to this when a chapter has no places of
+   * its own - Daniel 9 is a prayer with no geography in it, and an empty panel
+   * beside the commentary reads as broken rather than as "nothing here".
+   */
+  public getImagesForBook(bookName: string): GeoImage[] {
+    return this.collect(bookName, osisBook => {
+      const bookPrefix = `${osisBook}.`;
+      return osis => osis.startsWith(bookPrefix);
+    });
+  }
+
+  private collect(
+    bookName: string,
+    matcher: (osisBook: string) => (osis: string) => boolean,
+  ): GeoImage[] {
     this.loadData();
 
     const englishName = bookNameMap[bookName] || bookName;
     const osisBook = OSIS_CODES[englishName] || englishName;
-    const chapterPrefix = `${osisBook}.${chapter}.`;
-    const chapterExact  = `${osisBook}.${chapter}`;
 
     if (!osisBook || osisBook === englishName && !OSIS_CODES[englishName]) return [];
 
+    const matches = matcher(osisBook);
     const results: GeoImage[] = [];
     const seenImageIds = new Set<string>();
 
     for (const place of this.ancientData || []) {
-      const relevantVerses = place.verses?.filter(v =>
-        v.osis.startsWith(chapterPrefix) || v.osis === chapterExact
-      );
+      const relevantVerses = place.verses?.filter(v => matches(v.osis));
       if (!relevantVerses || relevantVerses.length === 0) continue;
 
       if (place.identifications) {

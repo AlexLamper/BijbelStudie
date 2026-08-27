@@ -135,7 +135,8 @@ export default function StepReflection({
   }, [persist]);
 
   return (
-    <div className="max-w-2xl mx-auto px-5 sm:px-8 py-8">
+    <div className="h-full overflow-y-auto">
+    <div className="max-w-2xl mx-auto px-6 sm:px-10 py-8 sm:py-10">
       <div className="flex items-center gap-2 mb-3">
         <PenLine size={14} style={{ color: TEAL }} />
         <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: TEAL }}>
@@ -233,6 +234,7 @@ export default function StepReflection({
       <p className="mt-3 text-xs text-gray-400 dark:text-muted-foreground">
         Als je de les afrondt wordt dit bewaard als notitie, terug te vinden bij Notities.
       </p>
+    </div>
     </div>
   );
 }

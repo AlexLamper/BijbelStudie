@@ -1,5 +1,6 @@
 import type { LessonContent, LessonContentRegistry } from './types';
 import { opstandingLessons } from './opstanding';
+import { danielLessons } from './daniel';
 
 export type { LessonContent, LessonContentRegistry } from './types';
 
@@ -15,6 +16,7 @@ export type { LessonContent, LessonContentRegistry } from './types';
  */
 export const lessonContent: LessonContentRegistry = {
   opstanding: opstandingLessons,
+  daniel: danielLessons,
 };
 
 /** The authored content for one lesson, or undefined when nothing is written yet. */
