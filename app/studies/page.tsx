@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
 import { ArrowRight, BookOpen, ChevronDown, ChevronUp, Clock, CheckCircle } from 'lucide-react'
 import { curatedStudies, BADGE_STYLES, type StudyType, type CuratedStudy } from '../../lib/data/curated-studies'
 import { JsonLd } from '../../components/seo/JsonLd'
@@ -76,48 +75,38 @@ function StudyCard({ study, completed }: { study: CuratedStudy; completed: boole
     <div className={`lift bg-white dark:bg-card border rounded-xl overflow-hidden flex flex-col transition-colors ${
       completed ? 'border-teal-300 dark:border-teal-700' : 'border-gray-200 dark:border-border'
     }`}>
-      {/* Image */}
-      <div className="relative w-full" style={{ aspectRatio: '16/6' }}>
-        <Image
-          src={study.image}
-          alt=""
-          fill
-          className="object-cover"
-          sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-          // The optimiser refuses SVG unless dangerouslyAllowSVG is set globally,
-          // and there is nothing for it to do here: these are ~1 KB and scale to
-          // any density on their own.
-          unoptimized
-        />
-        <span
-          className="absolute top-2 left-2 px-1.5 py-0.5 rounded-full text-[9px] font-bold"
-          style={{ backgroundColor: badge.bg, color: badge.color, backdropFilter: 'blur(4px)' }}
-        >
-          {study.type}
-        </span>
-        {completed && (
-          <span className="absolute top-2 right-2 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-teal-500 text-white">
-            <CheckCircle size={9} /> Voltooid
+      <div className="p-4 flex flex-col flex-1">
+        <div className="flex items-center gap-2 mb-2">
+          <span
+            className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold"
+            style={{ backgroundColor: badge.bg, color: badge.color }}
+          >
+            {study.type}
           </span>
-        )}
-      </div>
+          <span className="inline-flex items-center gap-1 text-[11px] text-gray-500 dark:text-muted-foreground">
+            <Clock size={11} /> {study.durationLabel}
+          </span>
+          {completed && (
+            <span className="inline-flex items-center gap-1 ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300">
+              <CheckCircle size={10} /> Voltooid
+            </span>
+          )}
+        </div>
 
-      {/* Content */}
-      <div className="p-3.5 flex flex-col flex-1">
-        <h3 className="font-bold text-sm text-gray-900 dark:text-foreground leading-snug mb-1 line-clamp-1">
+        <h3 className="font-bold text-base text-gray-900 dark:text-foreground leading-snug mb-1.5">
           {study.title}
         </h3>
-        <p className="text-xs text-gray-500 dark:text-muted-foreground leading-relaxed mb-3 flex-1 line-clamp-2">
+        <p className="text-sm text-gray-500 dark:text-muted-foreground leading-relaxed mb-3 flex-1">
           {study.description}
         </p>
 
         <div className="flex items-center justify-between mb-1 gap-2">
-          <span className="flex items-center gap-1 text-[11px] text-gray-400 dark:text-muted-foreground">
-            <Clock size={10} /> {study.durationLabel}
+          <span className="text-xs text-gray-500 dark:text-muted-foreground">
+            {study.lessons.length} lessen
           </span>
           <button
             onClick={() => router.push(`/studies/${study.id}`)}
-            className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-md text-white transition-opacity hover:opacity-90"
+            className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-md text-white transition-opacity hover:opacity-90"
             style={{ backgroundColor: '#0D9488' }}
           >
             {completed ? 'Bekijk studie' : 'Begin studie'} <ArrowRight size={10} />
@@ -135,12 +124,12 @@ function StudyCard({ study, completed }: { study: CuratedStudy; completed: boole
 
         {/* Lesson list */}
         {open && (
-          <div className="flex flex-col gap-0.5 pt-1 pb-1">
+          <div className="flex flex-col gap-1 pt-1 pb-1">
             {study.lessons.map((lesson) => (
               <button
                 key={lesson.day}
                 onClick={() => router.push(`/studies/${study.id}`)}
-                className="flex items-start gap-2 group rounded-md px-1.5 py-1.5 hover:bg-gray-50 dark:hover:bg-secondary transition-colors text-left w-full"
+                className="flex items-start gap-2 group rounded-md px-2 py-1.5 hover:bg-gray-50 dark:hover:bg-secondary transition-colors text-left w-full"
               >
                 <span
                   className="flex-shrink-0 h-4 w-4 rounded-full text-[9px] font-bold flex items-center justify-center mt-0.5"

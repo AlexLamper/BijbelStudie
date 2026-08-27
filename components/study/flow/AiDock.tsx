@@ -97,7 +97,7 @@ export default function AiDock({
       <button
         type="button"
         onClick={() => onOpenChange(true)}
-        className="fixed bottom-5 right-5 z-40 inline-flex items-center gap-2 pl-3 pr-4 py-2.5 rounded-full shadow-lg text-white text-sm font-semibold transition-transform hover:scale-105"
+        className="fixed bottom-20 right-5 sm:bottom-24 lg:bottom-6 z-40 inline-flex items-center gap-2 pl-3 pr-4 py-2.5 rounded-full shadow-lg text-white text-sm font-semibold transition-transform hover:scale-105"
         style={{ backgroundColor: TEAL }}
       >
         <Sparkles size={15} />

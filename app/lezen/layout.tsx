@@ -1,5 +1,6 @@
 ﻿import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
+import { authOptions } from "../../lib/authOptions";
 import SessionProvider from "../../components/providers/SessionProvider";
 import { Header } from "../../components/layout/header";
 import { AppSidebar } from "../../components/layout/app-sidebar";
@@ -24,16 +25,16 @@ export default async function ReadLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await getServerSession();
+  const session = await getServerSession(authOptions);
 
   return (
-    <div className="antialiased bg-background">
+    <div className="antialiased bg-background h-screen flex flex-col overflow-hidden">
       <SessionProvider session={session}>
         <SidebarProvider>
           <AppSidebar />
-          <div className="min-h-screen mx-auto w-full">
+          <div className="flex flex-col flex-1 min-h-0 w-full">
             <Header />
-            <div className="lg:px-4 lg:pb-4 lg:pt-2 px-1 pb-1 pt-1">
+            <div className="flex-1 min-h-0 overflow-hidden">
               {children}
             </div>
           </div>
@@ -42,5 +43,4 @@ export default async function ReadLayout({
     </div>
   );
 }
-
 

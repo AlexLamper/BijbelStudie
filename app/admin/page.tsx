@@ -81,29 +81,50 @@ export default function AdminDashboardPage() {
   const [loadError, setLoadError] = useState<string | null>(null)
 
   useEffect(() => {
-    const fetchJson = async (url: string) => {
+    const fetchJson = async (url: string): Promise<{ data: unknown; error?: string }> => {
       try {
         const response = await fetch(url, { cache: "no-store", credentials: "include" })
-        if (!response.ok) return null
-        return await response.json()
+        const body = await response.json().catch(() => null)
+        if (!response.ok) {
+          return {
+            data: null,
+            error: typeof body?.error === "string" ? body.error : `Request failed (${response.status})`,
+          }
+        }
+        return { data: body }
       } catch {
-        return null
+        return { data: null, error: "Netwerkfout" }
       }
     }
 
+    const fetchStatsWithRetry = async (attempt = 0): Promise<{ data: unknown; error?: string }> => {
+      const result = await fetchJson("/api/admin/stats")
+      if (result.data || attempt >= 1) return result
+      await new Promise((resolve) => setTimeout(resolve, 400))
+      return fetchStatsWithRetry(attempt + 1)
+    }
+
     Promise.all([
-      fetchJson("/api/admin/stats"),
+      fetchStatsWithRetry(),
       fetchJson("/api/admin/insights?days=30"),
       fetchJson("/api/admin/users?limit=8"),
     ])
-      .then(([s, i, u]) => {
+      .then(([statsRes, insightsRes, usersRes]) => {
+        const s = statsRes.data
+        const i = insightsRes.data
+        const u = usersRes.data
+
         if (s) setStats(s as Stats)
         if (i) setInsights(i as InsightsResponse)
         if (u && typeof u === "object" && "users" in u && Array.isArray((u as { users?: unknown[] }).users)) {
           setRecent(((u as { users: RecentUser[] }).users).slice(0, 6))
         }
         if (!s) {
-          setLoadError("Kon statistieken niet laden. Vernieuw de pagina of controleer je admin-sessie.")
+          setLoadError(
+            `Kon statistieken niet laden. ${
+              statsRes.error ? `Details: ${statsRes.error}. ` : ""
+            }Vernieuw de pagina of controleer je admin-sessie.`
+          )
         }
       })
       .finally(() => setLoading(false))
