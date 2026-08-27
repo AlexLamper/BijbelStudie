@@ -1,10 +1,10 @@
 import type { NextRequest } from 'next/server';
 import bcrypt from 'bcryptjs';
 import connectMongoDB from '../../../../../lib/mongodb';
-import User from '../../../../../models/User';
 import { corsPreflight, errorV1, handleV1Error, jsonV1 } from '../../../../../lib/apiV1';
 import { checkRateLimit, clientIp } from '../../../../../lib/mobileRateLimit';
 import { issueSession } from '../../../../../lib/mobileAuthFlow';
+import { findUserByEmail } from '../../../../../lib/userLookup';
 
 export const runtime = 'nodejs';
 
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     }
 
     await connectMongoDB();
-    const user = await User.findOne({ email });
+    const user = await findUserByEmail(email);
 
     // One message for "no such user" and "wrong password": distinguishing them
     // turns this endpoint into an account-existence oracle.

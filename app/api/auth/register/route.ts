@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import connectMongoDB from "../../../../lib/mongodb";
 import User from "../../../../models/User";
+import { findUserByEmail, normaliseEmail } from "../../../../lib/userLookup";
 
 export async function POST(request: NextRequest) {
   try {
@@ -34,8 +35,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    // Check if user already exists (case-insensitive, so this can't be
+    // bypassed by re-registering the same address with different casing)
+    const existingUser = await findUserByEmail(email);
     if (existingUser) {
       return NextResponse.json(
         { error: "User with this email already exists" },
@@ -49,7 +51,7 @@ export async function POST(request: NextRequest) {
     // Create new user
     const newUser = new User({
       name,
-      email,
+      email: normaliseEmail(email),
       password: hashedPassword,
       provider: "credentials",
       emailVerified: false,

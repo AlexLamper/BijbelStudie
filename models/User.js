@@ -3,7 +3,9 @@ import mongoose from "mongoose"
 const UserSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
+    // Normalised so mongoose can't reintroduce the mixed-case duplicates the
+    // app-side lookups already guard against - see lib/userLookup.ts.
+    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     password: { type: String }, // Optional for OAuth users
     resetToken: { type: String },
     resetTokenExpires: { type: Date },

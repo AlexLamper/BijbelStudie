@@ -5,6 +5,7 @@ import User from '../../../../../models/User';
 import { corsPreflight, errorV1, handleV1Error, jsonV1 } from '../../../../../lib/apiV1';
 import { checkRateLimit, clientIp } from '../../../../../lib/mobileRateLimit';
 import { isValidEmail, issueSession } from '../../../../../lib/mobileAuthFlow';
+import { findUserByEmail, normaliseEmail } from '../../../../../lib/userLookup';
 
 export const runtime = 'nodejs';
 
@@ -33,7 +34,9 @@ export async function POST(req: NextRequest) {
 
     await connectMongoDB();
 
-    const existing = await User.findOne({ email });
+    // Case-insensitive so `Bob@x.com` can't be registered twice as two
+    // accounts that differ only in how the mail client capitalised them.
+    const existing = await findUserByEmail(email);
     if (existing) {
       return errorV1('EMAIL_TAKEN', 409, 'Er bestaat al een account met dit e-mailadres.');
     }
@@ -43,7 +46,7 @@ export async function POST(req: NextRequest) {
     const hashedPassword = await bcrypt.hash(password, 12);
     let user;
     try {
-      user = await User.create({ name, email, password: hashedPassword, bio: '' });
+      user = await User.create({ name, email: normaliseEmail(email), password: hashedPassword, bio: '' });
     } catch (createError) {
       // The findOne check above is not atomic with this insert: two requests
       // for the same email racing each other both pass it, and the loser hits

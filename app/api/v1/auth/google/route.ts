@@ -5,6 +5,7 @@ import { corsPreflight, errorV1, handleV1Error, jsonV1 } from '../../../../../li
 import { checkRateLimit, clientIp } from '../../../../../lib/mobileRateLimit';
 import { issueSession } from '../../../../../lib/mobileAuthFlow';
 import { verifyGoogleIdToken } from '../../../../../lib/oauthVerify';
+import { findUserByEmail, normaliseEmail } from '../../../../../lib/userLookup';
 
 export const runtime = 'nodejs';
 
@@ -36,7 +37,10 @@ export async function POST(req: NextRequest) {
 
     let user = await User.findOne({ googleId: identity.sub });
     if (!user) {
-      user = await User.findOne({ email: identity.email });
+      // Case-insensitive: a website account registered as `Bob@x.com` must
+      // still be recognised as the same person signing in with Google as
+      // `bob@x.com`, or this creates a second, Google-only account for them.
+      user = await findUserByEmail(identity.email);
       if (user) {
         // Existing website account (created by the NextAuth signIn callback).
         // Linking by verified email is safe here because Google asserts it.
@@ -46,7 +50,7 @@ export async function POST(req: NextRequest) {
       } else {
         user = await User.create({
           name: identity.name || identity.email.split('@')[0],
-          email: identity.email,
+          email: normaliseEmail(identity.email),
           image: identity.picture ?? '',
           googleId: identity.sub,
           bio: '',

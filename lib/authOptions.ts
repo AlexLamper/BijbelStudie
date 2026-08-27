@@ -7,6 +7,7 @@ import connectMongoDB from "./mongodb";
 import User from "../models/User";
 import { isAdminEmail } from "./adminEmails";
 import { resolveIsPro } from "./mobilePremium";
+import { findUserByEmail, normaliseEmail } from "./userLookup";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -24,7 +25,7 @@ export const authOptions: NextAuthOptions = {
         if (!credentials?.email || !credentials?.password) return null;
         try {
           await connectMongoDB();
-          const user = await User.findOne({ email: credentials.email });
+          const user = await findUserByEmail(credentials.email);
           if (!user || !user.password) return null;
           const valid = await bcrypt.compare(credentials.password, user.password);
           if (!valid) return null;
@@ -76,12 +77,16 @@ export const authOptions: NextAuthOptions = {
 
     async signIn({ user, profile }) {
       try {
+        if (!user.email) return false;
         await connectMongoDB();
-        const existingUser = await User.findOne({ email: user.email });
+        // Case-insensitive: a Google sign-in must find the account created by
+        // a credentials registration with different casing, not shadow-create
+        // a second one.
+        const existingUser = await findUserByEmail(user.email);
         if (!existingUser) {
           await User.create({
             name: user.name || profile?.name || "Gebruiker",
-            email: user.email,
+            email: normaliseEmail(user.email),
             image: user.image || "",
             bio: "",
           });

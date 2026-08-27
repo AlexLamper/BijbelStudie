@@ -5,6 +5,7 @@ import { corsPreflight, errorV1, handleV1Error, jsonV1 } from '../../../../../li
 import { checkRateLimit, clientIp } from '../../../../../lib/mobileRateLimit';
 import { issueSession } from '../../../../../lib/mobileAuthFlow';
 import { verifyAppleIdentityToken } from '../../../../../lib/oauthVerify';
+import { findUserByEmail, normaliseEmail } from '../../../../../lib/userLookup';
 
 export const runtime = 'nodejs';
 
@@ -52,7 +53,9 @@ export async function POST(req: NextRequest) {
     let user = await User.findOne({ appleId: identity.sub });
 
     if (!user && resolvedEmail) {
-      user = await User.findOne({ email: resolvedEmail });
+      // Case-insensitive for the same reason as the Google route: this must
+      // link to an existing account rather than create a second one.
+      user = await findUserByEmail(resolvedEmail);
       if (user) {
         user.appleId = identity.sub;
         await user.save();
@@ -73,7 +76,7 @@ export async function POST(req: NextRequest) {
 
       user = await User.create({
         name: displayName,
-        email: resolvedEmail,
+        email: normaliseEmail(resolvedEmail),
         appleId: identity.sub,
         bio: '',
       });
