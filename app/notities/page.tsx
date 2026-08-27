@@ -73,9 +73,12 @@ export default function NotesPage() {
       params.append("page",  currentPage.toString())
       params.append("limit", "20")
       const res  = await fetch(`/api/notes?${params}`)
-      const data = await res.json()
+      const data = await res.json().catch(() => null)
+      if (!res.ok || !data || !Array.isArray(data.notes)) {
+        throw new Error(typeof data?.error === "string" ? data.error : "Notities konden niet worden geladen.")
+      }
       setNotes(data.notes)
-      setTotalPages(data.pagination.totalPages)
+      setTotalPages(typeof data.pagination?.totalPages === "number" ? data.pagination.totalPages : 1)
       setError(null)
     } catch {
       setError("Notities konden niet worden geladen.")

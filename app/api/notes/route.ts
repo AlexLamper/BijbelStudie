@@ -4,6 +4,7 @@ import { authOptions } from "../../../lib/authOptions";
 import connectMongoDB from "../../../lib/mongodb";
 import Note from "../../../models/Note";
 import User from "../../../models/User";
+import { randomUUID } from "crypto";
 
 interface NotesQuery {
   userId: string;
@@ -116,6 +117,7 @@ export async function POST(request: NextRequest) {
       type,
       language,
       groupId,
+      clientId,
     } = body;
 
     // Validate required fields
@@ -141,6 +143,10 @@ export async function POST(request: NextRequest) {
       type: type || "note",
       language: language || "en",
       groupId: groupId || null,
+      // Backward-compatibility guard: some databases still carry the old unique
+      // index on { userId, clientId } that indexed null for web notes. A stable
+      // generated id avoids duplicate-key crashes while keeping mobile idempotency.
+      clientId: typeof clientId === "string" && clientId.trim() ? clientId.trim() : `web-${randomUUID()}`,
     });
 
     const savedNote = await newNote.save();
@@ -149,6 +155,12 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error("Error creating note:", error);
+    if ((error as { code?: number }).code === 11000) {
+      return NextResponse.json(
+        { error: "Notitie kon niet worden opgeslagen door een database-conflict. Probeer het opnieuw." },
+        { status: 409 }
+      );
+    }
     return NextResponse.json(
       { error: "Failed to create note" },
       { status: 500 }

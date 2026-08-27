@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowRight, X } from 'lucide-react';
@@ -86,6 +86,7 @@ export default function StudyFlowShell({
 
   const [aiOpen, setAiOpen] = useState(false);
   const [aiDraft, setAiDraft] = useState<string | null>(null);
+  const loggedActivityKeyRef = useRef<string | null>(null);
 
   const { steps } = lesson;
   const position = stepPosition(steps, step);
@@ -118,6 +119,16 @@ export default function StudyFlowShell({
       window.history.replaceState(null, '', url.toString());
     }
   }, [step]);
+
+  // The dashboard's weekly strip is backed by ReadingSession documents. The old
+  // /lezen page logs these through useBibleData, but the new guided /studie flow
+  // bypasses that hook; without this, studying a lesson shows as "Geen activiteit".
+  useEffect(() => {
+    const key = `${lesson.study.id}:${lesson.lesson.day}:${lesson.passage.book}:${lesson.passage.chapter}`;
+    if (loggedActivityKeyRef.current === key) return;
+    loggedActivityKeyRef.current = key;
+    fetch('/api/user/log-reading', { method: 'POST' }).catch(() => {});
+  }, [lesson]);
 
   const goTo = useCallback(
     (next: StepKey) => {
