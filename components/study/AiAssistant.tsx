@@ -14,6 +14,15 @@ interface AiAssistantProps {
   // Question handed off from the floating popup; auto-sent once on mount.
   initialQuestion?: string | null;
   onInitialQuestionConsumed?: () => void;
+  /**
+   * Replaces the generic starters with prompts that fit the current step of a
+   * guided lesson. Kept as a prop rather than putting step logic in here: this
+   * component is also mounted outside the study flow.
+   */
+  starterQuestions?: string[];
+  /** Prefills the composer without sending, e.g. after selecting a verse. */
+  draft?: string | null;
+  onDraftConsumed?: () => void;
 }
 
 interface ChatMessage {
@@ -110,6 +119,9 @@ export default function AiAssistant({
   chapter,
   version,
   initialQuestion,
+  starterQuestions,
+  draft,
+  onDraftConsumed,
   onInitialQuestionConsumed,
 }: AiAssistantProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -214,6 +226,18 @@ export default function AiAssistant({
     [messages, loading, book, chapter, version],
   );
 
+  /**
+   * Prefills the composer from a verse selection, without sending.
+   *
+   * Deliberately not auto-sent, unlike `initialQuestion`: picking a verse means
+   * "I want to ask something about this", and the user still has to say what.
+   */
+  useEffect(() => {
+    if (!draft) return;
+    setInput(draft);
+    onDraftConsumed?.();
+  }, [draft, onDraftConsumed]);
+
   // Auto-send the question handed off from the floating popup (once per hand-off).
   useEffect(() => {
     if (!initialQuestion) {
@@ -277,7 +301,10 @@ export default function AiAssistant({
         {/* Starter questions (empty state) */}
         {!notConfigured && messages.length === 0 && !quotaHit && (
           <div className="flex flex-col gap-2 mt-2">
-            {STARTER_QUESTIONS.map((q) => (
+            {(starterQuestions && starterQuestions.length > 0
+              ? starterQuestions
+              : STARTER_QUESTIONS
+            ).map((q) => (
               <button
                 key={q}
                 onClick={() => sendMessage(q)}

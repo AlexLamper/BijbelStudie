@@ -58,7 +58,7 @@ export interface BibleBook {
   /** Questions that push a reader into the text rather than around it. */
   studyQuestions: string[];
   /**
-   * Book key used by the reader at /studie?book=... - see the naming rule
+   * Book key used by the reader at /lezen?book=... - see the naming rule
    * above. Defaults to `name` when omitted.
    */
   appBook?: string;

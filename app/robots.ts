@@ -29,6 +29,10 @@ export default function robots(): MetadataRoute.Robots {
     // that does not simply matches nothing here, which fails safe.
     "/studie$",
     "/studie?",
+    // The guided flow: /studie/<studyId>/<day>. Neither anchor above matches a
+    // sub-path, so without this the lesson pages are crawlable but redirect to
+    // sign-in, which Search Console reports as "Pagina met omleiding".
+    "/studie/",
     "/lezen",
     "/notities",
     "/profiel",

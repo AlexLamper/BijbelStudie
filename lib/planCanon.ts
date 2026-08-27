@@ -7,7 +7,7 @@ import { BIBLE_BOOKS_ORDER, CANONICAL_NL, bookNameMap } from './book-mapping';
  * The repo carries four disagreeing book lists. `CHAPTER_COUNTS` is the only
  * chapter-count source but spells three books differently from `CANONICAL_NL`,
  * which is the spelling the Statenvertaling data folders and every
- * `/studie?book=` link actually use. Looking a chapter count up by the display
+ * `/lezen?book=` link actually use. Looking a chapter count up by the display
  * name therefore returns `undefined` for those three, which is why the
  * dashboard heatmap shows "?" for 1 Corinthiërs.
  *

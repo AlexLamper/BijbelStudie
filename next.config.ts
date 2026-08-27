@@ -2,6 +2,11 @@ import type { NextConfig } from "next";
 import path from "path";
 
 const nextConfig: NextConfig = {
+  // Lets a build run against its own output directory
+  // (`NEXT_DIST_DIR=.next-verify next build`) so a verification build cannot
+  // overwrite the chunks a running `next dev` is serving - which corrupts both
+  // and shows up as "Cannot find module './1234.js'".
+  distDir: process.env.NEXT_DIST_DIR || ".next",
   // Every route is Dutch. These 308s keep old English URLs (and anything already
   // indexed or bookmarked) alive and pass their link equity to the new path.
   // A permanent redirect must never shadow a real route - /plans used to point at
@@ -12,8 +17,13 @@ const nextConfig: NextConfig = {
       { source: "/study/:path*",          destination: "/studie/:path*",           permanent: true },
       { source: "/read",                  destination: "/lezen",                   permanent: true },
       { source: "/read/:path*",           destination: "/lezen/:path*",            permanent: true },
-      { source: "/plans",                 destination: "/leesplannen",             permanent: true },
-      { source: "/plans/:path*",          destination: "/leesplannen/:path*",      permanent: true },
+      // /leesplannen was removed with the reading-plans feature, so these two
+      // permanent redirects pointed at a 404 - exactly the failure the note
+      // above warns about. Guided studies are what replaced them.
+      { source: "/plans",                 destination: "/studies",                 permanent: true },
+      { source: "/plans/:path*",          destination: "/studies",                 permanent: true },
+      { source: "/leesplannen",           destination: "/studies",                 permanent: true },
+      { source: "/leesplannen/:path*",    destination: "/studies",                 permanent: true },
       { source: "/notes",                 destination: "/notities",                permanent: true },
       { source: "/notes/:path*",          destination: "/notities/:path*",         permanent: true },
       { source: "/resources",             destination: "/hulpbronnen",             permanent: true },

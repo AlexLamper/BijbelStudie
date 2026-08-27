@@ -33,7 +33,7 @@ export function readerBookName(book: BibleBook): string {
 
 /** Deep link into the reader at chapter 1 of this book. */
 export function readerHref(book: BibleBook, chapter = 1): string {
-  return `/studie?book=${encodeURIComponent(readerBookName(book))}&chapter=${chapter}&version=statenvertaling`;
+  return `/lezen?book=${encodeURIComponent(readerBookName(book))}&chapter=${chapter}&version=statenvertaling`;
 }
 
 /** Previous/next in canonical order, for prev/next navigation links. */

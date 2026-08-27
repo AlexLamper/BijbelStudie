@@ -201,7 +201,7 @@ export default function DashboardPage() {
                     <p className="text-white/70 text-sm mt-0.5">Hoofdstuk {lastRead.chapter} · {lastRead.version}</p>
                   </div>
                   <Link
-                    href={`/studie?book=${encodeURIComponent(lastRead.book)}&chapter=${lastRead.chapter}&version=${encodeURIComponent(lastRead.version)}`}
+                    href={`/lezen?book=${encodeURIComponent(lastRead.book)}&chapter=${lastRead.chapter}&version=${encodeURIComponent(lastRead.version)}`}
                     className="press flex-shrink-0 bg-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 hover:bg-white/90 transition-colors no-underline"
                     style={{ color: "#0D9488" }}
                   >
@@ -307,7 +307,7 @@ export default function DashboardPage() {
                     return (
                       <Link
                         key={book}
-                        href={`/studie?book=${encodeURIComponent(book)}&chapter=1&version=statenvertaling`}
+                        href={`/lezen?book=${encodeURIComponent(book)}&chapter=1&version=statenvertaling`}
                         onMouseEnter={() => setHoveredBook(book)}
                         onMouseLeave={() => setHoveredBook(null)}
                         className={`block rounded-sm transition-all duration-100 hover:scale-110 hover:z-10 relative flex-shrink-0 ${isEmpty ? "bg-gray-200 dark:bg-gray-700" : ""}`}
@@ -336,7 +336,7 @@ export default function DashboardPage() {
                     return (
                       <Link
                         key={book}
-                        href={`/studie?book=${encodeURIComponent(book)}&chapter=1&version=statenvertaling`}
+                        href={`/lezen?book=${encodeURIComponent(book)}&chapter=1&version=statenvertaling`}
                         onMouseEnter={() => setHoveredBook(book)}
                         onMouseLeave={() => setHoveredBook(null)}
                         className={`block rounded-sm transition-all duration-100 hover:scale-110 hover:z-10 relative flex-shrink-0 ${isEmpty ? "bg-gray-200 dark:bg-gray-700" : ""}`}
@@ -378,7 +378,7 @@ export default function DashboardPage() {
                   return (
                     <Link
                       key={study.id}
-                      href={`/studie?book=${encodeURIComponent(study.startBook)}&chapter=${study.startChapter}&version=${encodeURIComponent(study.startVersion)}`}
+                      href={`/studies/${study.id}`}
                       className={[
                         "flex items-center gap-3 py-2.5 group transition-colors no-underline -mx-1.5 px-1.5 rounded-lg hover:bg-gray-50/70 dark:hover:bg-secondary/40",
                         idx === 0 ? "" : "border-t border-gray-100 dark:border-border/70",
@@ -440,7 +440,7 @@ export default function DashboardPage() {
                       </a>
                     </div>
                     <Link
-                      href={`/studie?book=${encodeURIComponent(verse.book)}&chapter=${verse.chapter}&version=statenvertaling`}
+                      href={`/lezen?book=${encodeURIComponent(verse.book)}&chapter=${verse.chapter}&version=statenvertaling`}
                       className="text-xs font-medium whitespace-nowrap text-gray-500 dark:text-muted-foreground">
                       Lees hoofdstuk →
                     </Link>
@@ -517,7 +517,7 @@ export default function DashboardPage() {
                     {recentNotes.map(note => (
                       <Link
                         key={note._id}
-                        href={`/studie?book=${encodeURIComponent(note.book)}&chapter=${note.chapter}&version=statenvertaling`}
+                        href={`/lezen?book=${encodeURIComponent(note.book)}&chapter=${note.chapter}&version=statenvertaling`}
                         className="group block"
                         style={{ textDecoration: "none" }}
                       >

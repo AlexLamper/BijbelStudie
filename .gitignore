@@ -15,6 +15,9 @@
 
 # next.js
 /.next/
+# Output of a verification build (NEXT_DIST_DIR), kept separate so it cannot
+# clobber the chunks a running `next dev` is serving.
+/.next-verify/
 /out/
 
 # production

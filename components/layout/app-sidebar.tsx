@@ -21,7 +21,10 @@ import React, { useEffect, useState } from "react"
 
 const mainNav = [
   { title: "Dashboard",    url: "/dashboard",    icon: LayoutDashboard, tourId: "nav-dashboard"    },
-  { title: "Bijbelstudie", url: "/studie",       icon: BookOpen,        tourId: "nav-studie"       },
+  // "Lezen" is free browsing plus the reference panels; "Studies" is the guided
+  // step-by-step flow. /studie is no longer a page of its own - it resumes
+  // whichever study you were last working on.
+  { title: "Lezen",        url: "/lezen",        icon: BookOpen,        tourId: "nav-studie"       },
   { title: "Studies",      url: "/studies",      icon: BookMarked,      tourId: "nav-studies"      },
   { title: "Groepen",      url: "/groepen",      icon: Users,           tourId: "nav-groepen"      },
   { title: "Notities",     url: "/notities",     icon: StickyNote,      tourId: "nav-notities"     },

@@ -3,6 +3,7 @@ import { BASE_URL } from "../lib/seo/constants";
 import { LIBRARY } from "./hulpbronnen/library";
 import { GUIDES } from "../lib/content/guides";
 import { BIBLE_BOOKS } from "../lib/content/bibleBooks";
+import { curatedStudies } from "../lib/data/curated-studies";
 
 /**
  * Only publicly reachable, indexable Dutch routes belong here. Anything behind
@@ -65,9 +66,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.5,
     }));
 
+  // Each curated study has its own public detail page with hand-authored
+  // description, outcomes and lesson list. They were previously unreachable
+  // (the route was a redirect stub), so they were correctly absent here.
+  const studyRoutes: MetadataRoute.Sitemap = curatedStudies.map(study => ({
+    url: `${BASE_URL}/studies/${study.id}`,
+    lastModified: SITE_CONTENT_DATE,
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+  }));
+
   return [
     ...staticRoutes,
     ...guideRoutes,
+    ...studyRoutes,
     ...bibleBookRoutes,
     ...libraryRoutes,
   ];

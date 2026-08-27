@@ -1,12 +1,35 @@
 ﻿export type StudyType = 'Gedeelte' | 'Persoon' | 'Onderwerp' | 'Boek'
 
+/** Which commentary the "type uitleg" setting resolves to. */
+export type StudyDepth = 'kort' | 'diep'
+
+/** Cadence the enrollment schedules reminders on. */
+export type StudyRhythm =
+  | 'dagelijks'
+  | 'drie-per-week'
+  | 'wekelijks'
+  /** Specific weekdays, listed in StudyEnrollment.reminderDays. */
+  | 'eigen'
+  /** No rhythm and no reminders. */
+  | 'vrij'
+
 export interface Lesson {
   day: number
   title: string
   book: string
   chapter: number
   verseRange?: string
+  /**
+   * The lesson's open question.
+   *
+   * LEGACY and PERMANENT. `/api/v1/studies` returns `curatedStudies` verbatim
+   * and the shipped Flutter binary renders this field, so it can never be
+   * renamed or removed - only added to. The study flow uses it as the fallback
+   * reflection question when no authored one exists.
+   */
   focus: string
+  /** Shown as "±12 min" on the detail page. Defaults to 12. */
+  estimatedMinutes?: number
 }
 
 export interface CuratedStudy {
@@ -25,6 +48,16 @@ export interface CuratedStudy {
    */
   image: string
   lessons: Lesson[]
+
+  // --- Study detail / onboarding page. All optional, so the ten studies that
+  // were authored before the guided flow existed stay valid unchanged.
+  /** "Waar gaat deze studie over?" - one paragraph per entry. */
+  about?: string[]
+  /** "Wat ga je leren?" - 3 to 5 bullets. */
+  outcomes?: string[]
+  /** Preselected on the onboarding form; the user can still change it. */
+  suggestedRhythm?: StudyRhythm
+  suggestedDepth?: StudyDepth
 }
 
 export const BADGE_STYLES: Record<StudyType, { bg: string; color: string }> = {

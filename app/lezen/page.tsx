@@ -1,24 +1,41 @@
-﻿"use client"
+"use client"
 
 import { useEffect, useState } from 'react'
 import React from 'react'
 import { useSearchParams } from 'next/navigation'
 import BibleSelector from '../../components/study/BibleSelector'
 import ChapterViewer from '../../components/study/ChapterViewer'
-import GeoImages from '../../components/study/GeoImages'
+import StudyMaterialsSection from '../../components/study/StudyMaterialsSection'
+import { ReadingPreferencesMenu } from '../../components/study/ReadingPreferencesMenu'
+import { useReadingPreferences } from '../../hooks/useReadingPreferences'
 import { useTranslation } from '../i18n/client'
 
+/**
+ * Free reading and reference.
+ *
+ * This page is now the home of the five resource panels - commentary,
+ * grondtekst, historical context, notes and the AI assistant - which used to sit
+ * beside the text on /studie. They were moved rather than removed: the problem
+ * was never the panels, it was having all of them open during a guided lesson,
+ * which made a step-by-step study read like a reference work. Looking things up
+ * is a real task; it just needs its own screen.
+ *
+ * /studie now redirects `?book=&chapter=` here, so every reading link in the app
+ * and all 66 public book pages land on this page.
+ */
 export default function ReadPage() {
   const { t, i18n } = useTranslation('study');
   const lng = i18n.resolvedLanguage;
   const searchParams = useSearchParams();
-  
+  const { preferences, updatePreferences } = useReadingPreferences();
+
   const [versions, setVersions] = useState<{id: string, name: string, language?: string}[]>([])
   const [books, setBooks] = useState<string[]>([])
   const [chapters, setChapters] = useState<number[]>([])
   const [selectedVersion, setSelectedVersion] = useState<string | null>(null)
   const [selectedBook, setSelectedBook] = useState('Genesis')
   const [selectedChapter, setSelectedChapter] = useState(1)
+  const [selectedCommentary, setSelectedCommentary] = useState('matthew_henry_nl')
   const [loadingVersions, setLoadingVersions] = useState(false)
   const [loadingBooks, setLoadingBooks] = useState(false)
   const [loadingChapters, setLoadingChapters] = useState(false)
@@ -35,6 +52,16 @@ export default function ReadPage() {
       return versionList[0]?.id || null;
     }
   };
+
+  // Remember the commentary choice the same way the rest of the app does.
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('bijbelstudie_commentary');
+      if (stored) setSelectedCommentary(stored);
+    } catch {
+      /* private mode */
+    }
+  }, []);
 
   // Fetch versions and books on load
   useEffect(() => {
@@ -176,22 +203,49 @@ export default function ReadPage() {
     return () => clearTimeout(timeoutId);
   }, [selectedBook, selectedChapter, selectedVersion]);
 
+  const maxChapter = chapters.length > 0 ? Math.max(...chapters) : 1;
+
+  const changeChapter = (delta: number) => {
+    setSelectedChapter((current) => {
+      const next = current + delta;
+      if (next < 1 || next > maxChapter) return current;
+      return next;
+    });
+  };
+
+  const handleCommentaryChange = (commentary: string) => {
+    setSelectedCommentary(commentary);
+    try {
+      localStorage.setItem('bijbelstudie_commentary', commentary);
+    } catch {
+      /* private mode */
+    }
+  };
+
   return (
     <div className="min-h-screen dark:bg-gray-900">
-      {/* Main Content */}
-      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-12">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-10">
         {/* Header Section */}
-        <div className="mb-6 lg:mb-8">
-          <h1 className="text-2xl lg:text-3xl font-bold text-foreground mb-2">
-            {t('read_scripture')}
-          </h1>
-          <p className="text-muted-foreground text-sm lg:text-base">
-            {t('explore_bible')}
-          </p>
+        <div className="mb-5 lg:mb-6 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-bold text-foreground mb-1.5">
+              {t('read_scripture')}
+            </h1>
+            <p className="text-muted-foreground text-sm lg:text-base">
+              {t('explore_bible')}
+            </p>
+          </div>
+          <ReadingPreferencesMenu
+            preferences={preferences}
+            onUpdate={updatePreferences}
+          />
         </div>
 
         {/* Bible Selector */}
-        <div className="mb-6 lg:mb-8 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-border p-4 lg:p-6">
+        <div
+          data-tour="bible-selector"
+          className="mb-5 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-border p-4 lg:p-5"
+        >
           <BibleSelector
             versions={versions}
             books={books}
@@ -212,21 +266,45 @@ export default function ReadPage() {
           />
         </div>
 
-        {/* Chapter Viewer */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-border">
-          <ChapterViewer
-            version={selectedVersion}
-            book={selectedBook}
-            chapter={selectedChapter}
-            maxChapter={Math.max(...chapters)}
-          />
-          
-        </div>
+        {/*
+          Text and resources side by side from xl up, stacked below it. Unlike
+          the old /studie layout this is a reference screen, so having both open
+          is the point rather than the problem.
+        */}
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-5 items-start">
+          <div
+            data-tour="bible-text"
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-border overflow-hidden xl:h-[calc(100vh-16rem)]"
+          >
+            <ChapterViewer
+              version={selectedVersion}
+              book={selectedBook}
+              chapter={selectedChapter}
+              maxChapter={maxChapter}
+              preferences={preferences}
+            />
+          </div>
 
-        {/* Geo Images */}
-        <GeoImages book={selectedBook} chapter={selectedChapter} />
+          <div
+            data-tour="commentary"
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-border overflow-hidden h-[70vh] xl:h-[calc(100vh-16rem)]"
+          >
+            <StudyMaterialsSection
+              selectedBook={selectedBook}
+              selectedChapter={selectedChapter}
+              selectedVersion={selectedVersion}
+              selectedCommentary={selectedCommentary}
+              versions={versions}
+              onNextChapter={() => changeChapter(1)}
+              onPrevChapter={() => changeChapter(-1)}
+              onCommentaryChange={handleCommentaryChange}
+              onDownload={() => {}}
+              t={t}
+              preferences={preferences}
+            />
+          </div>
+        </div>
       </div>
     </div>
   )
 }
-

@@ -2,8 +2,8 @@ import { requireUser } from '../../../../lib/apiAuth';
 import { corsPreflight, errorV1, handleV1Error, jsonV1 } from '../../../../lib/apiV1';
 import connectMongoDB from '../../../../lib/mongodb';
 import StudyProgress from '../../../../models/StudyProgress.js';
-import { grantXp } from '../../../../lib/gamification';
 import { curatedStudies } from '../../../../lib/data/curated-studies';
+import { recordLessonCompletion } from '../../../../lib/studyCompletion';
 
 export const dynamic = 'force-dynamic';
 
@@ -98,17 +98,9 @@ export async function POST(req: Request) {
     const studyId = typeof body.studyId === 'string' ? body.studyId : null;
     const lessonDay = Number.isInteger(Number(body.lessonDay)) ? Number(body.lessonDay) : null;
 
-    await connectMongoDB();
-
-    if (studyId && lessonDay != null) {
-      const existing = await StudyProgress.findOne({ userId: auth.id, studyId, lessonDay });
-      if (existing) {
-        return jsonV1({ recorded: false, reason: 'ALREADY_RECORDED', xp: null });
-      }
-    }
-
-    await StudyProgress.create({
+    const result = await recordLessonCompletion({
       userId: auth.id,
+      isPro: auth.isPro,
       source,
       studyId,
       lessonDay,
@@ -118,28 +110,14 @@ export async function POST(req: Request) {
       verseEnd: Number.isInteger(Number(body.verseEnd)) ? Number(body.verseEnd) : null,
     });
 
-    const xp = await grantXp(auth.id, 'study_lesson', { isPro: auth.isPro });
-
-    // Finishing the last lesson of a curated study is its own milestone.
-    let studyCompleted = false;
-    if (studyId) {
-      const study = curatedStudies.find((s) => s.id === studyId);
-      if (study) {
-        const done = await StudyProgress.distinct('lessonDay', { userId: auth.id, studyId });
-        const doneSet = new Set((done as number[]).filter((d) => d != null));
-        studyCompleted = study.lessons.every((lesson) => doneSet.has(lesson.day));
-        if (studyCompleted) {
-          const bonus = await grantXp(auth.id, 'study_completed', { isPro: auth.isPro });
-          xp.awarded += bonus.awarded;
-          xp.xp = bonus.xp;
-          xp.level = bonus.level;
-          xp.levelledUp = xp.levelledUp || bonus.levelledUp;
-          xp.newBadges = [...xp.newBadges, ...bonus.newBadges];
-        }
-      }
+    if (!result.recorded) {
+      return jsonV1({ recorded: false, reason: result.reason, xp: null });
     }
 
-    return jsonV1({ recorded: true, studyCompleted, xp }, { status: 201 });
+    return jsonV1(
+      { recorded: true, studyCompleted: result.studyCompleted, xp: result.xp },
+      { status: 201 },
+    );
   } catch (error) {
     return handleV1Error(error);
   }

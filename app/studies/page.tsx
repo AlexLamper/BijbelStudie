@@ -65,19 +65,7 @@ const FILTERS: { label: string; value: StudyType | 'Alle' }[] = [
   { label: 'Boek',      value: 'Boek'      },
 ]
 
-function saveAndNavigate(study: CuratedStudy, lessonIndex: number, router: ReturnType<typeof useRouter>) {
-  const lesson = study.lessons[lessonIndex]
-  sessionStorage.setItem('activeStudy', JSON.stringify({
-    studyId: study.id,
-    studyTitle: study.title,
-    lessons: study.lessons,
-    currentLessonIndex: lessonIndex,
-    completedLessons: [],
-  }))
-  router.push(
-    `/studie?book=${encodeURIComponent(lesson.book)}&chapter=${lesson.chapter}&version=statenvertaling`
-  )
-}
+
 
 function StudyCard({ study, completed }: { study: CuratedStudy; completed: boolean }) {
   const [open, setOpen] = useState(false)
@@ -128,11 +116,11 @@ function StudyCard({ study, completed }: { study: CuratedStudy; completed: boole
             <Clock size={10} /> {study.durationLabel}
           </span>
           <button
-            onClick={() => saveAndNavigate(study, 0, router)}
+            onClick={() => router.push(`/studies/${study.id}`)}
             className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-md text-white transition-opacity hover:opacity-90"
             style={{ backgroundColor: '#0D9488' }}
           >
-            Begin studie <ArrowRight size={10} />
+            {completed ? 'Bekijk studie' : 'Begin studie'} <ArrowRight size={10} />
           </button>
         </div>
 
@@ -148,10 +136,10 @@ function StudyCard({ study, completed }: { study: CuratedStudy; completed: boole
         {/* Lesson list */}
         {open && (
           <div className="flex flex-col gap-0.5 pt-1 pb-1">
-            {study.lessons.map((lesson, index) => (
+            {study.lessons.map((lesson) => (
               <button
                 key={lesson.day}
-                onClick={() => saveAndNavigate(study, index, router)}
+                onClick={() => router.push(`/studies/${study.id}`)}
                 className="flex items-start gap-2 group rounded-md px-1.5 py-1.5 hover:bg-gray-50 dark:hover:bg-secondary transition-colors text-left w-full"
               >
                 <span
