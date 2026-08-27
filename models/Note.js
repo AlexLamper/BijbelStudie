@@ -80,9 +80,18 @@ const NoteSchema = new mongoose.Schema(
 NoteSchema.index({ userId: 1, createdAt: -1 });
 NoteSchema.index({ book: 1, chapter: 1, verse: 1 });
 NoteSchema.index({ tags: 1 });
-// Sparse: website-created notes have no clientId, and a unique index over
-// many missing values would otherwise collide on null.
-NoteSchema.index({ userId: 1, clientId: 1 }, { unique: true, sparse: true });
+// Partial index: a plain `sparse` compound index only skips a document when
+// ALL of its fields are missing, and `userId` is always present, so `sparse`
+// alone still indexed every website note with clientId: null - the second
+// note (or highlight) any web user created collided on that null and every
+// create after the first failed with a duplicate key error. A partial filter
+// that requires clientId to actually exist excludes those documents from the
+// index entirely, so only mobile-created notes (which always set clientId)
+// are subject to the uniqueness constraint.
+NoteSchema.index(
+  { userId: 1, clientId: 1 },
+  { unique: true, partialFilterExpression: { clientId: { $exists: true } } }
+);
 NoteSchema.index({ userId: 1, updatedAt: -1 });
 
 export default mongoose.models.Note || mongoose.model("Note", NoteSchema);

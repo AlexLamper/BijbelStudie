@@ -22,7 +22,10 @@ export function serialiseUser(user: AuthUser) {
     image: user.image,
     isPro: user.isPro,
     proSource: user.proSource,
-    proExpiresAt: user.proExpiresAt ? user.proExpiresAt.toISOString() : null,
+    // `proExpiresAt` should always be a Date (schema-typed), but a legacy row
+    // written before that was enforced can still hold a raw string — guard so
+    // one bad row doesn't 500 every login for that account.
+    proExpiresAt: user.proExpiresAt ? new Date(user.proExpiresAt).toISOString() : null,
     isAdmin: user.isAdmin,
   };
 }

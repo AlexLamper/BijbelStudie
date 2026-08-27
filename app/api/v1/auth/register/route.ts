@@ -41,7 +41,21 @@ export async function POST(req: NextRequest) {
     // Same cost factor as app/api/auth/register/route.ts, so a user created on
     // mobile can log in on the website and vice versa.
     const hashedPassword = await bcrypt.hash(password, 12);
-    const user = await User.create({ name, email, password: hashedPassword, bio: '' });
+    let user;
+    try {
+      user = await User.create({ name, email, password: hashedPassword, bio: '' });
+    } catch (createError) {
+      // The findOne check above is not atomic with this insert: two requests
+      // for the same email racing each other both pass it, and the loser hits
+      // the unique index instead. That is EMAIL_TAKEN, not a server failure.
+      if (
+        createError instanceof Error &&
+        (createError as { code?: number }).code === 11000
+      ) {
+        return errorV1('EMAIL_TAKEN', 409, 'Er bestaat al een account met dit e-mailadres.');
+      }
+      throw createError;
+    }
 
     return jsonV1(await issueSession(user, { platform, deviceName }), { status: 201 });
   } catch (error) {
