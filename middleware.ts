@@ -29,6 +29,22 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(redirectUrl, 308);
   }
 
+  // The domain moved from bijbel-studie.com to bijbelstudie.io. Both old hosts
+  // still resolve (Hostinger DNS + Vercel keep serving this same deployment
+  // under them) and must 301/308 straight to the new domain - not just to
+  // themselves - because that single-hop redirect is what Search Console's
+  // Change of Address tool requires before it will transfer ranking signals,
+  // and what carries an existing visitor's or search result's link equity
+  // across. 301 rather than 308: the redirect target's method may as well
+  // always be GET, and 301 is what Google's migration tooling explicitly checks
+  // for.
+  if (host === "bijbel-studie.com" || host === "www.bijbel-studie.com") {
+    const redirectUrl = req.nextUrl.clone();
+    redirectUrl.protocol = "https";
+    redirectUrl.host = "bijbelstudie.io";
+    return NextResponse.redirect(redirectUrl, 301);
+  }
+
   if (pathname.startsWith("/api/")) {
     const response = NextResponse.next();
     response.headers.set("Access-Control-Allow-Origin", "https://bijbelstudie.io");
