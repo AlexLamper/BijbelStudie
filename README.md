@@ -17,7 +17,7 @@
 
 ![BijbelStudie Banner Screenshot](public/images/dashboard.png)
 <p>
-  <a href="https://bijbelstudie.io">
+  <a href="https://www.bijbelstudie.io">
     <img src="https://img.shields.io/badge/Live_Demo-▶️-blue?style=for-the-badge" alt="Bezoek BijbelStudie" />
   </a>
   <a href="#aan-de-slag">

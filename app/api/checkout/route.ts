@@ -21,7 +21,7 @@ import User from "../../../models/User"
  *    returned session. The customer is now derived from the session user alone.
  */
 
-const ALLOWED_ORIGIN = "https://bijbelstudie.io"
+const ALLOWED_ORIGIN = "https://www.bijbelstudie.io"
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": ALLOWED_ORIGIN,
@@ -150,7 +150,7 @@ export async function POST(req: NextRequest) {
       //
       // Opt-in via env because Stripe rejects the whole session unless a Terms
       // of Service URL is set in Dashboard -> Settings -> Public details. Set
-      // that URL to https://bijbelstudie.io/algemene-voorwaarden, then set
+      // that URL to https://www.bijbelstudie.io/algemene-voorwaarden, then set
       // STRIPE_REQUIRE_TOS_CONSENT=true. Enabling it before the URL exists would
       // break live checkout.
       ...(process.env.STRIPE_REQUIRE_TOS_CONSENT === "true"

@@ -23,9 +23,16 @@ export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const host = req.headers.get("host");
 
-  if (host === "www.bijbelstudie.io") {
+  // www is canonical - see the comment on BASE_URL in lib/seo/constants.ts for
+  // why this is the opposite of the apex->www pattern you'd expect. This must
+  // stay consistent with Vercel's own domain-level redirect (Settings ->
+  // Domains), which is not visible or changeable from this codebase: Vercel
+  // already redirects the apex to www at the edge, before this middleware ever
+  // runs, so redirecting www back to the apex here created an infinite loop
+  // ("redirected you too many times") rather than a real host mismatch.
+  if (host === "bijbelstudie.io") {
     const redirectUrl = req.nextUrl.clone();
-    redirectUrl.host = "bijbelstudie.io";
+    redirectUrl.host = "www.bijbelstudie.io";
     return NextResponse.redirect(redirectUrl, 308);
   }
 
@@ -35,19 +42,21 @@ export async function middleware(req: NextRequest) {
   // themselves - because that single-hop redirect is what Search Console's
   // Change of Address tool requires before it will transfer ranking signals,
   // and what carries an existing visitor's or search result's link equity
-  // across. 301 rather than 308: the redirect target's method may as well
-  // always be GET, and 301 is what Google's migration tooling explicitly checks
-  // for.
+  // across. Redirects straight to www (the canonical host, see above) rather
+  // than the apex, so this never has to bounce through Vercel's apex->www
+  // redirect as a second hop. 301 rather than 308: the redirect target's
+  // method may as well always be GET, and 301 is what Google's migration
+  // tooling explicitly checks for.
   if (host === "bijbel-studie.com" || host === "www.bijbel-studie.com") {
     const redirectUrl = req.nextUrl.clone();
     redirectUrl.protocol = "https";
-    redirectUrl.host = "bijbelstudie.io";
+    redirectUrl.host = "www.bijbelstudie.io";
     return NextResponse.redirect(redirectUrl, 301);
   }
 
   if (pathname.startsWith("/api/")) {
     const response = NextResponse.next();
-    response.headers.set("Access-Control-Allow-Origin", "https://bijbelstudie.io");
+    response.headers.set("Access-Control-Allow-Origin", "https://www.bijbelstudie.io");
     response.headers.set("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
     response.headers.set("Access-Control-Allow-Headers", "Content-Type");
     return response;

@@ -6,26 +6,34 @@ cannot be done from the codebase.
 
 Nothing here is optional if you want the new behaviour to work end to end.
 
-## Status — 2026-08-26: domain moved to bijbelstudie.io
+## Status — 2026-08-27: domain moved to www.bijbelstudie.io
 
-The codebase now hard-codes `https://bijbelstudie.io` everywhere (checkout CORS
+The codebase hard-codes `https://www.bijbelstudie.io` everywhere (checkout CORS
 origin, billing-portal `return_url`, the ToS-consent comment, sitemap/robots via
-`lib/seo/constants.ts`). The entries below this one are the historical record of
-the `www.bijbel-studie.com` rollout and are left as written — do not edit them.
+`lib/seo/constants.ts`) - **with the `www.`**. That was not the original plan;
+see `DOMAIN_MIGRATION.md`'s "Wat er misging" section for why: Vercel's own
+edge-level domain redirect sends the apex to `www`, outside anything this
+repository controls, and code that assumed the opposite direction produced an
+infinite redirect loop. `www.bijbelstudie.io` is now canonical everywhere,
+matching what Vercel already does.
+
+The entries below this one are the historical record of the
+`www.bijbel-studie.com` rollout and are left as written — do not edit them.
 
 Two things in the **Stripe Dashboard** still need doing by hand, and nothing in
-this repository can do them:
+this repository can do them - see `DOMAIN_MIGRATION.md` §4 for the full
+checklist:
 
-1. **Webhook endpoint.** The one below points at `www.bijbel-studie.com` and
-   will keep firing at a domain that no longer serves the app. Add a new
-   endpoint at `https://bijbelstudie.io/api/webhooks/stripe` with the same 8
-   events (see "2. Create the webhook endpoint" further down), copy its signing
-   secret into `STRIPE_WEBHOOK_SECRET` in Vercel, then delete the old endpoint
-   once the new one has a few successful deliveries.
-2. **Terms of Service URL**, Dashboard → Settings → Public details. It was set
-   to `https://www.bijbel-studie.com/algemene-voorwaarden`; update it to
-   `https://bijbelstudie.io/algemene-voorwaarden`. `STRIPE_REQUIRE_TOS_CONSENT`
-   stays `true` — if the URL is out of date before this is changed, Checkout
+1. **Webhook endpoint.** The `www.bijbel-studie.com` one keeps firing at a
+   domain that now 301s away from the app - Stripe does not follow a redirect
+   on a webhook POST, so every delivery to it fails, permanently, from now on.
+   Turn it off. Confirm the replacement endpoint is
+   `https://www.bijbelstudie.io/api/webhooks/stripe` **with the `www.`** - a
+   bare-apex endpoint would fail exactly the same way, since the apex also
+   redirects.
+2. **Terms of Service URL**, Dashboard → Settings → Public details. Set it to
+   `https://www.bijbelstudie.io/algemene-voorwaarden`. `STRIPE_REQUIRE_TOS_CONSENT`
+   stays `true` - if the URL is out of date before this is changed, Checkout
    sessions still succeed, they just record consent against a stale link.
 
 ## Status — 2026-08-20

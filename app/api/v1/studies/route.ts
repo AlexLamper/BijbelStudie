@@ -5,7 +5,7 @@ export async function OPTIONS() {
   return corsPreflight();
 }
 
-const SITE_ORIGIN = 'https://bijbelstudie.io';
+const SITE_ORIGIN = 'https://www.bijbelstudie.io';
 
 /**
  * The guided studies shown on `/studies`.

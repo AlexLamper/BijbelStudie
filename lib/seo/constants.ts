@@ -7,8 +7,18 @@
  * index.
  */
 
-/** Canonical origin. Apex is canonical; middleware 308s www onto it. */
-export const BASE_URL = "https://bijbelstudie.io";
+/**
+ * Canonical origin. www is canonical; middleware 308s the apex onto it.
+ *
+ * This is the opposite of what you'd guess from how the domain is usually
+ * written. Vercel's own edge-level domain redirect (Settings -> Domains, not
+ * anything in this codebase) redirects the apex to www, and there is no way to
+ * change that from the Vercel CLI - only the dashboard. Making www canonical
+ * here matches what Vercel already does; the alternative was two redirects
+ * pointing at each other, which is an infinite loop and exactly the
+ * "redirected you too many times" error this fixed.
+ */
+export const BASE_URL = "https://www.bijbelstudie.io";
 
 export const SITE_NAME = "BijbelStudie";
 

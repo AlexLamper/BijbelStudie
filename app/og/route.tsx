@@ -123,7 +123,7 @@ export async function GET(req: NextRequest) {
           }}
         >
           <span style={{ fontSize: 26, fontWeight: 600, color: TEAL }}>
-            bijbelstudie.io
+            www.bijbelstudie.io
           </span>
           <span style={{ fontSize: 24, color: MUTED }}>
             Gratis beginnen · Nederlandstalig
