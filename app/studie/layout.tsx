@@ -1,9 +1,7 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import SessionProvider from "../../components/providers/SessionProvider";
-import { Header } from "../../components/layout/header";
-import { AppSidebar } from "../../components/layout/app-sidebar";
-import { SidebarProvider } from "../../components/ui/sidebar";
+import { StudyRail } from "../../components/layout/app-sidebar";
 import { generatePageMetadata } from "../../lib/pageMetadata";
 
 import { cookies } from "next/headers";
@@ -19,31 +17,45 @@ export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata('study', lng);
 }
 
+/**
+ * The study flow is the one screen that is deliberately NOT the app shell.
+ *
+ * No app header. The global navbar carried a sidebar toggle, the page title, a
+ * theme switch and an avatar menu - four exits from a lesson someone is halfway
+ * through, above content that is already headed by the lesson's own bar. The
+ * flow's header owns the top of the screen instead, and the way out is its close
+ * button.
+ *
+ * The sidebar is a 56px icon rail that widens on hover (see StudyRail) rather
+ * than a permanent 12rem column, and it floats over the lesson instead of
+ * pushing it, so opening it reflows nothing.
+ *
+ * The lesson itself sits in an inset, rounded, shadowed frame on a darker
+ * ground: a window you are working inside rather than a page you are scrolling.
+ * Below md the frame goes edge to edge - a 12px margin on a phone is lost space,
+ * not atmosphere.
+ */
 export default async function StudyLayout({
   children,
 }: StudyLayoutProps) {
   const session = await getServerSession();
 
   return (
-    <div className="antialiased bg-background h-screen flex flex-col overflow-hidden">
+    <div className="antialiased h-[100dvh] flex overflow-hidden bg-secondary dark:bg-black">
       <SessionProvider session={session}>
-        <SidebarProvider>
-          <AppSidebar />
-          <div className="flex flex-col flex-1 min-h-0 w-full">
-            <Header />
-            {/* overflow-hidden, not overflow-y-auto: the guided flow is a fixed
-                frame - step rail on top, Vorige/Volgende at the bottom, one
-                scrolling body between them. With a scrollable wrapper the whole
-                frame scrolled instead, so a wheel over the footer dragged the
-                buttons off screen. */}
-            <div className="flex-1 min-h-0 overflow-hidden">
-              {children}
-            </div>
+        <StudyRail />
+
+        <main className="flex-1 min-w-0 min-h-0 p-0 md:p-3">
+          {/* overflow-hidden, not overflow-y-auto: the guided flow is a fixed
+              frame - step rail on top, Vorige/Volgende at the bottom, one
+              scrolling body between them. With a scrollable wrapper the whole
+              frame scrolled instead, so a wheel over the footer dragged the
+              buttons off screen. */}
+          <div className="h-full w-full overflow-hidden bg-background border-0 md:border border-border md:rounded-2xl shadow-none md:shadow-[0_24px_60px_-28px_rgba(15,23,42,0.45)]">
+            {children}
           </div>
-        </SidebarProvider>
+        </main>
       </SessionProvider>
     </div>
   );
 }
-
-

@@ -64,14 +64,26 @@ export default function StudyStepRail({
               reachable ? 'cursor-pointer' : 'cursor-default',
             ].join(' ')}
           >
+            {/* The track is always drawn; the teal sits on top of it. Only the
+                segment you have just arrived at sweeps in - React keeps the
+                other filled spans mounted, so they never replay the animation
+                and the bar does not ripple on every step. */}
             <span
               className={[
-                'block w-full h-[3px] rounded-full transition-colors',
-                filled ? '' : 'bg-gray-200 dark:bg-border',
+                'relative block w-full h-[3px] rounded-full overflow-hidden bg-gray-200 dark:bg-border transition-colors',
                 reachable && !filled ? 'group-hover:bg-gray-300 dark:group-hover:bg-muted' : '',
               ].join(' ')}
-              style={filled ? { backgroundColor: TEAL } : undefined}
-            />
+            >
+              {filled && (
+                <span
+                  className={[
+                    'absolute inset-0 rounded-full origin-left',
+                    isCurrent ? 'motion-safe:animate-rail-fill' : '',
+                  ].join(' ')}
+                  style={{ backgroundColor: TEAL }}
+                />
+              )}
+            </span>
           </button>
         );
       })}

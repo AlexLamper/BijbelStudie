@@ -183,52 +183,66 @@ export default async function StudyDetailPage({ params }: PageProps) {
 
   return (
     <div className="h-full flex flex-col lg:overflow-hidden">
-      {/* Header. Stays put; everything below it scrolls in its own pane. */}
-      <header className="flex-none border-b border-gray-200 dark:border-border bg-white dark:bg-card">
-        {/* Deliberately shallow. This bar is fixed while the panes below it
-            scroll, so every pixel it takes is a pixel the lesson list never gets
-            back - it used to stand ~165px tall and read as a slab. */}
-        <div className="px-5 sm:px-8 py-2.5 sm:py-3">
+      {/* Header. Stays put; everything below it scrolls in its own pane.
+          Exactly h-14, the same height as the app navbar directly above it, so
+          the two bars read as one continuous chrome band rather than a slab
+          stacked on a slab. Everything lives on a single row: the back control,
+          a two-line identity block, and the facts pushed to the right edge. */}
+      <header className="flex-none h-14 border-b border-gray-200 dark:border-border bg-white dark:bg-card">
+        <div className="h-full px-3 sm:px-5 flex items-center gap-3">
+          {/* A control, not a breadcrumb. It used to be a bare text link on its
+              own line above the title, which both cost a full line of height and
+              read as a stray caption. Now it is a bordered pill sitting on the
+              baseline of everything else, with the arrow nudging left on hover. */}
           <Link
             href="/studies"
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground no-underline mb-1.5"
+            title="Terug naar alle studies"
+            aria-label="Terug naar alle studies"
+            className="group press flex-none inline-flex items-center gap-1.5 h-9 pl-2 pr-2.5 rounded-lg border border-gray-200 dark:border-border bg-white dark:bg-card text-[12.5px] font-medium text-gray-500 dark:text-muted-foreground no-underline transition-colors hover:text-foreground hover:bg-gray-50 dark:hover:bg-secondary hover:border-gray-300 dark:hover:border-muted-foreground/40"
           >
-            <ArrowLeft size={13} /> Alle studies
+            <ArrowLeft
+              size={14}
+              className="flex-none transition-transform duration-200 group-hover:-translate-x-0.5"
+            />
+            <span className="hidden sm:inline">Alle studies</span>
           </Link>
 
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2">
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <span
-                  className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold text-white"
-                  style={{ backgroundColor: TEAL }}
-                >
-                  {TYPE_LABEL[study.type] ?? study.type}
-                </span>
-                <span className="text-[11px] font-medium text-gray-500 dark:text-muted-foreground truncate">
-                  {books.join(' · ')}
-                </span>
-              </div>
-              <h1 className="text-lg sm:text-xl font-bold text-foreground leading-tight truncate">
+          <span aria-hidden className="hidden sm:block flex-none h-6 w-px bg-gray-200 dark:bg-border" />
+
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 min-w-0">
+              <h1 className="text-[15px] sm:text-base font-bold text-foreground leading-tight truncate">
                 {study.title}
               </h1>
-              {/* No description here. It was a two-line clamp of the exact text
-                  the "Waar gaat deze studie over?" section prints in full a few
-                  pixels lower - two lines of duplicate copy were a third of this
-                  bar's height. */}
+              <span
+                className="hidden sm:inline-flex flex-none items-center px-1.5 py-0.5 rounded-full text-[9.5px] font-bold uppercase tracking-wider text-white"
+                style={{ backgroundColor: TEAL }}
+              >
+                {TYPE_LABEL[study.type] ?? study.type}
+              </span>
             </div>
+            {/* Second line, 11px: the books, plus the facts the right-hand strip
+                drops below lg. No description - it is printed in full a few
+                pixels lower under "Waar gaat deze studie over?". */}
+            <p className="mt-0.5 text-[11px] leading-tight text-gray-500 dark:text-muted-foreground truncate">
+              {books.join(' · ')}
+              <span className="lg:hidden">
+                {' · '}
+                {study.lessons.length} lessen · ± {minutes} min
+              </span>
+            </p>
+          </div>
 
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-gray-500 dark:text-muted-foreground flex-none">
-              <span className="inline-flex items-center gap-1.5">
-                <ListChecks size={14} /> {study.lessons.length} lessen
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <Clock size={14} /> ± {minutes} min totaal
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <BookOpen size={14} /> start bij {study.startBook} {study.startChapter}
-              </span>
-            </div>
+          <div className="hidden lg:flex flex-none items-center gap-x-4 text-[11.5px] text-gray-500 dark:text-muted-foreground">
+            <span className="inline-flex items-center gap-1.5">
+              <ListChecks size={13} /> {study.lessons.length} lessen
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Clock size={13} /> ± {minutes} min totaal
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <BookOpen size={13} /> start bij {study.startBook} {study.startChapter}
+            </span>
           </div>
         </div>
       </header>

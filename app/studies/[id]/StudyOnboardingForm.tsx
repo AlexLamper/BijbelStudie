@@ -235,13 +235,13 @@ export default function StudyStartPanel({
           The card is a <div> and the action is the only <button>: making the
           whole card clickable would have meant no visible control, which is the
           problem being fixed. */}
-      <div className="mt-3 rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card overflow-hidden">
+      <div className="mt-2.5 rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card overflow-hidden">
         <div
-          className="flex items-center gap-2 px-3.5 py-2.5 border-b border-gray-200 dark:border-border"
+          className="flex items-center gap-1.5 px-3 py-1.5 border-b border-gray-200 dark:border-border"
           style={{ backgroundColor: 'rgba(13,148,136,0.07)' }}
         >
-          <Settings2 size={16} className="flex-none" style={{ color: TEAL }} />
-          <p className="text-[12px] font-bold uppercase tracking-wider" style={{ color: TEAL }}>
+          <Settings2 size={13} className="flex-none" style={{ color: TEAL }} />
+          <p className="text-[10.5px] font-bold uppercase tracking-wider" style={{ color: TEAL }}>
             Jouw instellingen
           </p>
         </div>
@@ -252,27 +252,27 @@ export default function StudyStartPanel({
             { icon: Layers, label: 'Uitleg', value: depthLabel },
             { icon: BookOpen, label: 'Vertaling', value: translationName },
           ].map(({ icon: Icon, label, value }) => (
-            <div key={label} className="flex items-center justify-between gap-3 px-3.5 py-2.5">
-              <dt className="flex items-center gap-2 text-[13px] text-gray-500 dark:text-muted-foreground flex-none">
-                <Icon size={15} className="flex-none text-gray-400 dark:text-muted-foreground" />
+            <div key={label} className="flex items-center justify-between gap-3 px-3 py-[7px]">
+              <dt className="flex items-center gap-1.5 text-[11.5px] text-gray-500 dark:text-muted-foreground flex-none">
+                <Icon size={13} className="flex-none text-gray-400 dark:text-muted-foreground" />
                 {label}
               </dt>
-              <dd className="min-w-0 text-[14px] font-semibold text-foreground text-right leading-snug">
+              <dd className="min-w-0 text-[12.5px] font-semibold text-foreground text-right leading-snug">
                 {value}
               </dd>
             </div>
           ))}
         </dl>
 
-        <div className="p-2.5 pt-0">
+        <div className="p-2 pt-0">
           <button
             type="button"
             onClick={() => setOpen(true)}
             data-track="study_settings_open"
-            className="w-full inline-flex items-center justify-center gap-1.5 h-10 rounded-lg border text-[13.5px] font-bold transition-colors hover:bg-[rgba(13,148,136,0.07)]"
+            className="press w-full inline-flex items-center justify-center gap-1 h-8 rounded-lg border text-[12px] font-bold transition-colors hover:bg-[rgba(13,148,136,0.07)]"
             style={{ color: TEAL, borderColor: 'rgba(13,148,136,0.45)' }}
           >
-            Instellingen wijzigen <ChevronRight size={15} />
+            Instellingen wijzigen <ChevronRight size={13} />
           </button>
         </div>
       </div>

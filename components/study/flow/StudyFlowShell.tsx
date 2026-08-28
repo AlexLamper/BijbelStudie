@@ -3,7 +3,18 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, ArrowRight, Check, ListChecks, Lock, Sparkles, X } from 'lucide-react';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  ListChecks,
+  Lock,
+  Maximize2,
+  Minimize2,
+  Sparkles,
+  X,
+} from 'lucide-react';
 
 import StudyStepRail, { STEP_LABELS } from './StudyStepRail';
 import StepIntro from './StepIntro';
@@ -24,6 +35,42 @@ import {
 } from '../../../lib/studyFlow';
 
 const TEAL = '#0D9488';
+
+/** localStorage key for the one-time "go full screen" offer. */
+const FULLSCREEN_HINT_KEY = 'study:fullscreen-hint';
+
+/**
+ * How a step arrives and leaves: it swipes in from the side it came from and
+ * floats slightly as it settles.
+ *
+ * `custom` carries the direction - +1 moving forward through the lesson, -1
+ * going back - so "Vorige" is not a forward transition played in reverse but its
+ * own movement. The vertical drift and the 1.5% scale are what make it read as a
+ * card lifting into place rather than a slide projector advancing.
+ */
+const STEP_OFFSET = 56;
+const stepVariants = {
+  enter: (direction: number) => ({
+    opacity: 0,
+    x: direction * STEP_OFFSET,
+    y: 10,
+    scale: 0.985,
+  }),
+  center: { opacity: 1, x: 0, y: 0, scale: 1 },
+  exit: (direction: number) => ({
+    opacity: 0,
+    x: direction * -STEP_OFFSET,
+    y: -10,
+    scale: 0.985,
+  }),
+};
+
+/** Reduced motion keeps the crossfade and drops every transform. */
+const calmVariants = {
+  enter: { opacity: 0 },
+  center: { opacity: 1 },
+  exit: { opacity: 0 },
+};
 
 export interface LessonPayload {
   study: { id: string; title: string; lessonsTotal: number };
@@ -81,8 +128,11 @@ export default function StudyFlowShell({
 }) {
   const router = useRouter();
   const { preferences, updatePreferences } = useReadingPreferences();
+  const reduceMotion = useReducedMotion();
 
   const [step, setStep] = useState<StepKey>(initialStep);
+  /** +1 forward, -1 back. Drives which way a step swipes in and out. */
+  const [direction, setDirection] = useState(1);
   const [completed, setCompleted] = useState<string[]>(initialState.stepsCompleted);
   const [quizScore, setQuizScore] = useState<number | null>(initialState.quiz.score);
   const [quizTotal, setQuizTotal] = useState<number | null>(initialState.quiz.total);
@@ -93,6 +143,10 @@ export default function StudyFlowShell({
   const [aiDraft, setAiDraft] = useState<string | null>(null);
   const [aiQuestion, setAiQuestion] = useState<string | null>(null);
   const [outlineOpen, setOutlineOpen] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
+  const [fullscreenHint, setFullscreenHint] = useState(false);
+  /** Drag-to-advance is for fingers only; a mouse drag would eat text selection. */
+  const [coarsePointer, setCoarsePointer] = useState(false);
   const loggedActivityKeyRef = useRef<string | null>(null);
 
   const { steps } = lesson;
@@ -140,15 +194,65 @@ export default function StudyFlowShell({
     fetch('/api/user/log-reading', { method: 'POST' }).catch(() => {});
   }, [lesson]);
 
+  // Full screen is offered rather than imposed: the whole point of the flow is
+  // one lesson and nothing else on the glass, and the browser will only grant it
+  // from a real gesture anyway.
+  useEffect(() => {
+    const sync = () => setFullscreen(!!document.fullscreenElement);
+    sync();
+    document.addEventListener('fullscreenchange', sync);
+    return () => document.removeEventListener('fullscreenchange', sync);
+  }, []);
+
+  const toggleFullscreen = useCallback(() => {
+    if (document.fullscreenElement) {
+      void document.exitFullscreen().catch(() => {});
+      return;
+    }
+    void document.documentElement.requestFullscreen?.().catch(() => {});
+  }, []);
+
+  const dismissFullscreenHint = useCallback(() => {
+    setFullscreenHint(false);
+    try {
+      localStorage.setItem(FULLSCREEN_HINT_KEY, 'seen');
+    } catch {
+      /* private mode; the offer simply returns next time */
+    }
+  }, []);
+
+  // Offered once, on the first lesson someone opens, a beat after the step has
+  // settled - not as a modal in front of the thing they came to read.
+  useEffect(() => {
+    if (!document.documentElement.requestFullscreen) return;
+    try {
+      if (localStorage.getItem(FULLSCREEN_HINT_KEY) === 'seen') return;
+    } catch {
+      return;
+    }
+    const show = setTimeout(() => setFullscreenHint(true), 1200);
+    const hide = setTimeout(() => setFullscreenHint(false), 13000);
+    return () => {
+      clearTimeout(show);
+      clearTimeout(hide);
+    };
+  }, []);
+
+  useEffect(() => {
+    setCoarsePointer(window.matchMedia?.('(pointer: coarse)').matches ?? false);
+  }, []);
+
   const goTo = useCallback(
     (next: StepKey) => {
+      setDirection(steps.indexOf(next) >= steps.indexOf(step) ? 1 : -1);
       setStep(next);
       void patch({ currentStep: next });
     },
-    [patch],
+    [patch, steps, step],
   );
 
   const onNext = useCallback(async () => {
+    setDirection(1);
     setCompleted((current) => (current.includes(step) ? current : [...current, step]));
 
     const next = advance(steps, step);
@@ -177,6 +281,31 @@ export default function StudyFlowShell({
     const previous = goBack(steps, step);
     if (previous) goTo(previous);
   }, [steps, step, goTo]);
+
+  // Arrow keys move through the lesson like pages. Deliberately NOT wired to the
+  // last step: finishing a lesson writes XP and a note, and that should take a
+  // deliberate click rather than one more tap on a key you were already holding.
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+      const target = event.target as HTMLElement | null;
+      if (
+        target &&
+        (target.isContentEditable || /^(input|textarea|select)$/i.test(target.tagName))
+      ) {
+        return;
+      }
+      if (event.key === 'ArrowRight' && stepPosition(steps, step) < steps.length) {
+        event.preventDefault();
+        void onNext();
+      } else if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        onPrevious();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [steps, step, onNext, onPrevious]);
 
   const saveReflection = useCallback(
     async (text: string) => {
@@ -276,6 +405,14 @@ export default function StudyFlowShell({
         : null;
 
     return (
+      // The reward screen rises rather than replaces: the last thing the reader
+      // did was press a button, and a hard cut makes that feel like a page load.
+      <motion.div
+        initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 18, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: reduceMotion ? 0.15 : 0.4, ease: [0.16, 1, 0.3, 1] }}
+        className="h-full"
+      >
       <LessonCompleteCard
         studyId={lesson.study.id}
         studyTitle={lesson.study.title}
@@ -298,6 +435,7 @@ export default function StudyFlowShell({
           }
         }}
       />
+      </motion.div>
     );
   }
 
@@ -305,12 +443,14 @@ export default function StudyFlowShell({
   const canGoBack = position > 1;
 
   return (
-    <div className="h-full flex flex-col">
+    // `relative` so the full-screen offer can sit against this frame rather than
+    // the viewport - in the windowed layout those are not the same box.
+    <div className="relative h-full flex flex-col">
       {/* Asks before an in-app link, a refresh or the Back button pulls the
           reader out of a lesson they are partway through. */}
       <StudyExitGuard enabled={!finishing} />
 
-      <header className="flex-none border-b border-border bg-background">
+      <header className="flex-none border-b border-border bg-background/85 backdrop-blur-sm z-20">
         <div className="px-3 sm:px-5 h-14 flex items-center justify-between gap-2">
           <Link
             href={`/studies/${lesson.study.id}`}
@@ -407,23 +547,40 @@ export default function StudyFlowShell({
             )}
           </div>
 
-          <button
-            type="button"
-            onClick={() => setAiOpen((open) => !open)}
-            aria-pressed={aiOpen}
-            data-track="ai_open"
-            title="AI-assistent"
-            className={[
-              'flex-none inline-flex items-center gap-1.5 h-8 pl-2.5 pr-3 rounded-lg text-[12px] font-semibold transition-colors border',
-              aiOpen
-                ? 'text-white border-transparent'
-                : 'border-gray-200 dark:border-border text-foreground hover:bg-gray-50 dark:hover:bg-secondary',
-            ].join(' ')}
-            style={aiOpen ? { backgroundColor: TEAL } : undefined}
-          >
-            <Sparkles size={14} style={aiOpen ? undefined : { color: TEAL }} />
-            <span className="hidden sm:inline">AI</span>
-          </button>
+          <div className="flex-none flex items-center gap-1.5">
+            {/* Nothing but the lesson on the glass. Hidden below sm: phone
+                browsers either ignore element fullscreen or hand back a
+                chrome-less view the reader cannot leave. */}
+            <button
+              type="button"
+              onClick={toggleFullscreen}
+              aria-pressed={fullscreen}
+              data-track="study_fullscreen"
+              title={fullscreen ? 'Volledig scherm sluiten' : 'Volledig scherm'}
+              aria-label={fullscreen ? 'Volledig scherm sluiten' : 'Volledig scherm'}
+              className="press hidden sm:inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-gray-100 hover:text-foreground dark:hover:bg-secondary"
+            >
+              {fullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setAiOpen((open) => !open)}
+              aria-pressed={aiOpen}
+              data-track="ai_open"
+              title="AI-assistent"
+              className={[
+                'press flex-none inline-flex items-center gap-1.5 h-8 pl-2.5 pr-3 rounded-lg text-[12px] font-semibold transition-colors border',
+                aiOpen
+                  ? 'text-white border-transparent'
+                  : 'border-gray-200 dark:border-border text-foreground hover:bg-gray-50 dark:hover:bg-secondary',
+              ].join(' ')}
+              style={aiOpen ? { backgroundColor: TEAL } : undefined}
+            >
+              <Sparkles size={14} style={aiOpen ? undefined : { color: TEAL }} />
+              <span className="hidden sm:inline">AI</span>
+            </button>
+          </div>
         </div>
 
         {/* Not centred any more - the rail is a full-width progress bar now, so
@@ -442,7 +599,42 @@ export default function StudyFlowShell({
           Notities) occupy, so the passage on the left never moves.
           `overflow-hidden` also clips the panel's slide-up. */}
       <div className="relative flex-1 min-h-0 overflow-hidden">
-        {body}
+        {/* `mode="wait"` so the outgoing step has left before the next arrives:
+            two full-bleed steps crossfading on top of each other is a smear, not
+            a transition. `initial={false}` keeps the first paint still - the
+            lesson should be there when the page is, not slide in once. */}
+        <AnimatePresence mode="wait" initial={false} custom={direction}>
+          <motion.div
+            key={step}
+            custom={direction}
+            variants={reduceMotion ? calmVariants : stepVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: reduceMotion ? 0.14 : 0.34, ease: [0.16, 1, 0.3, 1] }}
+            // Touch only. On a phone the lesson reads like a stack of cards you
+            // push aside; on a desktop the same binding would hijack every
+            // attempt to select a verse.
+            drag={coarsePointer && !reduceMotion ? 'x' : false}
+            dragDirectionLock
+            dragElastic={0.12}
+            dragConstraints={{ left: 0, right: 0 }}
+            onDragEnd={(_event, info) => {
+              const far = Math.abs(info.offset.x) > 90;
+              const fast = Math.abs(info.velocity.x) > 500;
+              if (!far && !fast) return;
+              if (info.offset.x < 0 && !isLast) void onNext();
+              else if (info.offset.x > 0 && canGoBack) onPrevious();
+            }}
+            // No standing `will-change`: it would make this box the containing
+            // block for every `fixed` descendant (the reading-preferences menu,
+            // note popovers) even when nothing is moving. Framer sets and clears
+            // it for the duration of the transition on its own.
+            className="h-full"
+          >
+            {body}
+          </motion.div>
+        </AnimatePresence>
 
         {/* Sibling of `body`, and stays at this position in the tree across
             steps, so the conversation survives moving between them. */}
@@ -493,6 +685,47 @@ export default function StudyFlowShell({
         </button>
       </footer>
 
+      {/* The full-screen offer, once ever. It sits above the footer instead of
+          in front of the lesson, and it is dismissed by either answer - a
+          suggestion that has to be refused twice is a modal wearing a costume. */}
+      <AnimatePresence>
+        {fullscreenHint && !fullscreen && (
+          <motion.div
+            initial={{ opacity: 0, y: 14, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 14, scale: 0.97 }}
+            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+            className="pointer-events-none absolute inset-x-0 bottom-20 z-40 hidden sm:flex justify-center px-4"
+          >
+            <div className="pointer-events-auto flex items-center gap-3 rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card px-3.5 py-2.5 shadow-[0_18px_40px_-20px_rgba(15,23,42,0.5)]">
+              <Maximize2 size={15} className="flex-none" style={{ color: TEAL }} />
+              <p className="text-[12.5px] text-foreground">
+                Studeer in volledig scherm, zonder afleiding?
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  toggleFullscreen();
+                  dismissFullscreenHint();
+                }}
+                data-track="study_fullscreen_hint_accept"
+                className="press h-7 px-2.5 rounded-lg text-[12px] font-semibold text-white"
+                style={{ backgroundColor: TEAL }}
+              >
+                Ja, graag
+              </button>
+              <button
+                type="button"
+                onClick={dismissFullscreenHint}
+                aria-label="Sluiten"
+                className="press h-7 w-7 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:bg-gray-100 dark:hover:bg-secondary"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

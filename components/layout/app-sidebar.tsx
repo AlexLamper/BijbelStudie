@@ -67,6 +67,122 @@ function NavLink({ url, title, icon: Icon, tourId }: { url: string; title: strin
   )
 }
 
+/**
+ * One row of the study-mode rail: icon always, label only while the rail is
+ * hovered open.
+ *
+ * The label is faded and nudged rather than `hidden`, so the text slides in with
+ * the widening rail instead of appearing mid-animation in a box that is still
+ * 56px wide. `whitespace-nowrap` plus the rail's `overflow-hidden` is what keeps
+ * it from wrapping onto a second line while the width is in flight.
+ */
+function RailLink({ url, title, icon: Icon, tourId }: { url: string; title: string; icon: React.ElementType; tourId?: string }) {
+  const pathname = usePathname()
+  const active = pathname === url || (url !== "/dashboard" && pathname?.startsWith(url + "/"))
+
+  return (
+    <li
+      className="list-none"
+      data-tour={tourId}
+      data-track={tourId ? tourId.replace(/^nav-/, "sidebar_") : undefined}
+    >
+      <Link
+        href={url}
+        title={title}
+        className={[
+          "flex items-center gap-3 h-9 px-[11px] rounded-lg no-underline transition-colors",
+          active
+            ? "font-semibold bg-[rgba(13,148,136,0.08)] text-[#0D9488] dark:bg-[rgba(13,148,136,0.12)] dark:text-[#2DD4BF]"
+            : "font-normal text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-secondary hover:text-gray-900 dark:hover:text-foreground",
+        ].join(" ")}
+      >
+        <Icon size={18} className="flex-shrink-0" />
+        <span className="text-[13.5px] whitespace-nowrap opacity-0 -translate-x-1 transition-[opacity,transform] duration-200 group-hover/rail:opacity-100 group-hover/rail:translate-x-0">
+          {title}
+        </span>
+      </Link>
+    </li>
+  )
+}
+
+function RailAdminLink() {
+  const { data: session, status } = useSession()
+  const [isAdmin, setIsAdmin] = useState<boolean>(!!session?.user?.isAdmin)
+
+  useEffect(() => {
+    if (status !== "authenticated") return
+    if (session?.user?.isAdmin) { setIsAdmin(true); return }
+    fetch("/api/user")
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d?.user?.isAdmin) setIsAdmin(true) })
+      .catch(() => {})
+  }, [session, status])
+
+  if (!isAdmin) return null
+  return <RailLink url="/admin" title="Beheer" icon={ShieldCheck} />
+}
+
+/**
+ * Navigation for the guided study flow: a 56px icon rail that widens to the
+ * full sidebar on hover.
+ *
+ * A lesson is meant to be read, not navigated away from, so the permanent 12rem
+ * column of links, the Pro card and the page chrome around it were all competing
+ * with the passage. What is left is a strip of icons at the same width as the
+ * navbar is tall; the whole sidebar is still one hover away and floats OVER the
+ * lesson rather than pushing it sideways, so nothing reflows when it opens.
+ *
+ * The Pro card is deliberately not here. It is an advert, and this is the one
+ * screen where the reader is doing the thing they came for.
+ *
+ * Desktop only. On a phone there is no hover and no room to spare; the flow's
+ * own close button is the way out.
+ */
+export function StudyRail() {
+  return (
+    <div className="hidden md:block flex-none w-14">
+      <nav
+        aria-label="Hoofdnavigatie"
+        className="group/rail fixed inset-y-0 left-0 z-40 w-14 hover:w-52 overflow-hidden flex flex-col
+                   bg-white dark:bg-card border-r border-border
+                   transition-[width,box-shadow] duration-300 ease-out
+                   hover:shadow-[0_0_60px_-16px_rgba(15,23,42,0.45)]"
+      >
+        <Link
+          href="/dashboard"
+          title="Dashboard"
+          className="flex-none flex items-center gap-2.5 h-14 pl-[15px] border-b border-border no-underline"
+        >
+          <Image
+            src="/images/icon-192.png"
+            alt=""
+            width={26}
+            height={26}
+            className="rounded-md flex-shrink-0"
+            priority
+          />
+          <span className="text-[15px] font-bold tracking-tight text-gray-900 dark:text-foreground whitespace-nowrap opacity-0 -translate-x-1 transition-[opacity,transform] duration-200 group-hover/rail:opacity-100 group-hover/rail:translate-x-0">
+            BijbelStudie
+          </span>
+        </Link>
+
+        <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-2">
+          <ul className="m-0 p-0 flex flex-col gap-0.5">
+            {mainNav.map(item => <RailLink key={item.url} {...item} />)}
+            <RailAdminLink />
+          </ul>
+        </div>
+
+        <div className="flex-none border-t border-border p-2">
+          <ul className="m-0 p-0 flex flex-col gap-0.5">
+            {bottomNav.map(item => <RailLink key={item.url} {...item} />)}
+          </ul>
+        </div>
+      </nav>
+    </div>
+  )
+}
+
 function ProCTA() {
   const { data: session } = useSession()
   const router = useRouter()

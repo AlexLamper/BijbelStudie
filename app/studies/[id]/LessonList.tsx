@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Check, ChevronRight, Clock, Lock, Play } from 'lucide-react';
 
 const TEAL = '#0D9488';
@@ -137,28 +138,42 @@ export default function LessonList({
                   />
                 </button>
 
-                {isOpen && (
-                  <div className="px-2.5 pb-2.5 pl-[46px]">
-                    <p className="text-[12px] text-gray-500 dark:text-muted-foreground leading-relaxed mb-2">
-                      {lesson.focus}
-                    </p>
-                    {enrolled ? (
-                      <button
-                        type="button"
-                        onClick={() => router.push(`/studie/${studyId}/${lesson.day}`)}
-                        data-track="study_lesson_open"
-                        className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-[12px] font-semibold text-white"
-                        style={{ backgroundColor: TEAL }}
-                      >
-                        <Play size={11} /> {isDone ? 'Opnieuw doen' : 'Open deze les'}
-                      </button>
-                    ) : (
-                      <span className="inline-flex items-center gap-1.5 text-[12px] text-gray-400 dark:text-muted-foreground">
-                        <Lock size={11} /> Start de studie om deze les te openen
-                      </span>
-                    )}
-                  </div>
-                )}
+                {/* Height-animated rather than toggled: rows below this one used
+                    to jump by ~60px the instant a lesson was opened, which on a
+                    twelve-lesson list looks like the page glitched. */}
+                <AnimatePresence initial={false}>
+                  {isOpen && (
+                    <motion.div
+                      key="detail"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
+                      className="overflow-hidden"
+                    >
+                      <div className="px-2.5 pb-2.5 pl-[46px]">
+                        <p className="text-[12px] text-gray-500 dark:text-muted-foreground leading-relaxed mb-2">
+                          {lesson.focus}
+                        </p>
+                        {enrolled ? (
+                          <button
+                            type="button"
+                            onClick={() => router.push(`/studie/${studyId}/${lesson.day}`)}
+                            data-track="study_lesson_open"
+                            className="press inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-[12px] font-semibold text-white transition-opacity hover:opacity-90"
+                            style={{ backgroundColor: TEAL }}
+                          >
+                            <Play size={11} /> {isDone ? 'Opnieuw doen' : 'Open deze les'}
+                          </button>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 text-[12px] text-gray-400 dark:text-muted-foreground">
+                            <Lock size={11} /> Start de studie om deze les te openen
+                          </span>
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </li>
           );

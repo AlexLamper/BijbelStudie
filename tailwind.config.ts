@@ -85,6 +85,9 @@ export default {
         // A whole panel rising into place, as opposed to `slide-up`'s 6px
         // settle. Used by the study flow's AI dock.
         "panel-up": "panelUp 0.22s cubic-bezier(0.32, 0.72, 0, 1)",
+        // The study flow's progress rail: the segment you just reached sweeps
+        // in from its left edge instead of snapping to teal.
+        "rail-fill": "railFill 0.42s cubic-bezier(0.16, 1, 0.3, 1) both",
       },
       keyframes: {
         fadeIn: {
@@ -98,6 +101,10 @@ export default {
         panelUp: {
           "0%": { transform: "translateY(100%)" },
           "100%": { transform: "translateY(0)" },
+        },
+        railFill: {
+          "0%": { transform: "scaleX(0)" },
+          "100%": { transform: "scaleX(1)" },
         },
       },
     }
