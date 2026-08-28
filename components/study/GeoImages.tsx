@@ -306,12 +306,16 @@ export default function GeoImages({ book, chapter, className, variant = 'grid', 
     fetch(`/api/geo/images?book=${encodeURIComponent(book)}&chapter=${chapter}${fallbackToBook ? '&fallback=book' : ''}`)
       .then(r => r.ok ? r.json() : { images: [] })
       .then(data => {
-        setImages(data.images || []);
+        const list: GeoImage[] = data.images || [];
+        // The panel (study flow, step 3) caps at 5. More than that and the
+        // grid of thumbnails plus their lightbox makes the whole page lag;
+        // 5 is scannable and stays smooth.
+        setImages(variant === 'panel' ? list.slice(0, 5) : list);
         setScope(data.scope === 'book' ? 'book' : 'chapter');
       })
       .catch(() => setImages([]))
       .finally(() => setLoading(false));
-  }, [book, chapter, fallbackToBook]);
+  }, [book, chapter, fallbackToBook, variant]);
 
   const goPrev = useCallback(() => {
     setActiveIndex(i => {

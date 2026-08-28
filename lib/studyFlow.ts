@@ -1,4 +1,4 @@
-import type { CuratedStudy, Lesson, StudyDepth } from './data/curated-studies';
+import type { CuratedStudy, Lesson } from './data/curated-studies';
 import type { LessonContent } from './data/study-lessons/types';
 
 /**
@@ -104,29 +104,25 @@ export function resolvePassage(lesson: Lesson, content?: LessonContent): Passage
 }
 
 /**
- * Commentary preference per explanation depth, best first.
+ * The commentary shown when nothing else is chosen.
  *
- * These are the real ids from public/data/manifest.json. Matthew Henry is
- * devotional and applies the text; Dachsel is a 19th-century exegetical
- * commentary and is the closest thing in the corpus to "diepgaand historisch".
- * King Comments is the always-free fallback (see lib/proContent.ts), so a free
- * reader is never left with an empty panel.
+ * Matthew Henry is devotional, in Dutch, and present for effectively every
+ * passage in the corpus - so it is a safe floor. Dachsel is deliberately NOT a
+ * default: it is a 19th-century exegetical commentary that is missing for many
+ * chapters, and defaulting to it strands the reader with an empty panel.
  */
-const DEPTH_COMMENTARY: Record<StudyDepth, string[]> = {
-  kort: ['matthew_henry_nl', 'kingcomments_nl', 'dachsel'],
-  diep: ['dachsel', 'matthew_henry_nl', 'kingcomments_nl'],
-};
+const DEFAULT_COMMENTARY = 'matthew_henry_nl';
 
 /**
  * Which commentary step 3 shows.
  *
- * An explicit per-study choice wins; otherwise the depth setting picks one. The
- * user's global preference is the last resort rather than the first, because
- * inside a study the study's own setting is the more specific intent.
+ * Order: an explicit per-study choice, then the reader's own setting from
+ * reading preferences, then Matthew Henry. A commentary is never auto-picked
+ * from the study's depth setting - only a choice the reader actually made
+ * counts, otherwise the fallback applies.
  */
 export function resolveCommentaryId(options: {
   enrollmentCommentary?: string | null;
-  depth?: StudyDepth | null;
   userPreference?: string | null;
   available?: string[];
 }): string {
@@ -136,13 +132,10 @@ export function resolveCommentaryId(options: {
   if (options.enrollmentCommentary && isAvailable(options.enrollmentCommentary)) {
     return options.enrollmentCommentary;
   }
-  for (const id of DEPTH_COMMENTARY[options.depth ?? 'kort']) {
-    if (isAvailable(id)) return id;
-  }
   if (options.userPreference && isAvailable(options.userPreference)) {
     return options.userPreference;
   }
-  return DEPTH_COMMENTARY.kort[0];
+  return DEFAULT_COMMENTARY;
 }
 
 /** The reflection question, falling back to the lesson's legacy `focus` field. */

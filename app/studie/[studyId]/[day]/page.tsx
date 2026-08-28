@@ -109,7 +109,6 @@ export default async function StudyLessonPage({ params, searchParams }: PageProp
     translation: enrollment.translation ?? study.startVersion,
     commentaryId: resolveCommentaryId({
       enrollmentCommentary: enrollment.commentary,
-      depth: enrollment.depth,
       userPreference: user.preferences?.commentary ?? null,
     }),
     content: {

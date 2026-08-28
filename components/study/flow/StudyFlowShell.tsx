@@ -13,6 +13,7 @@ import StepReflection from './StepReflection';
 import StepQuiz from './StepQuiz';
 import LessonCompleteCard, { type CompletionSummary } from './LessonCompleteCard';
 import AiDock from './AiDock';
+import StudyExitGuard from './StudyExitGuard';
 import { useReadingPreferences } from '../../../hooks/useReadingPreferences';
 import {
   isStepKey,
@@ -305,6 +306,10 @@ export default function StudyFlowShell({
 
   return (
     <div className="h-full flex flex-col">
+      {/* Asks before an in-app link, a refresh or the Back button pulls the
+          reader out of a lesson they are partway through. */}
+      <StudyExitGuard enabled={!finishing} />
+
       <header className="flex-none border-b border-border bg-background">
         <div className="px-3 sm:px-5 h-14 flex items-center justify-between gap-2">
           <Link

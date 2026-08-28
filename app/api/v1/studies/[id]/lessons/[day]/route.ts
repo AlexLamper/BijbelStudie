@@ -65,7 +65,6 @@ export async function GET(req: Request, { params }: RouteContext) {
       translation: enrollment?.translation ?? study.startVersion,
       commentaryId: resolveCommentaryId({
         enrollmentCommentary: enrollment?.commentary,
-        depth: enrollment?.depth,
       }),
       content: {
         intro: content?.intro ?? null,

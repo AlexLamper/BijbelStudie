@@ -30,8 +30,9 @@ type PanelKey = 'notes-authored' | 'media' | 'original' | 'notes';
  *
  * The authored framing and term list are not gone, they are a panel on the
  * right, next to the imagery, grondtekst and notes rather than in front of the
- * commentary. The commentary source is decided server-side from the study's
- * "type uitleg" setting (see lib/studyFlow resolveCommentaryId).
+ * commentary. The commentary source is resolved server-side: an explicit study
+ * choice, then the reader's own reading-preference, then Matthew Henry (see
+ * lib/studyFlow resolveCommentaryId).
  */
 export default function StepDepth({
   book,
@@ -179,9 +180,7 @@ export default function StepDepth({
             ))}
 
           {panel === 'original' && (
-            <div className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card overflow-hidden h-full min-h-[280px]">
-              <OriginalText book={book} chapter={chapter} />
-            </div>
+            <OriginalText book={book} chapter={chapter} embedded />
           )}
 
           {panel === 'notes' && (

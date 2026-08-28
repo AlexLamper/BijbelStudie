@@ -20,6 +20,12 @@ interface OriginalTextProps {
   book: string;          // Dutch book name from selector
   chapter: number;
   highlightVerses?: { start: number; end: number };
+  /**
+   * Rendered inside a panel that already supplies the card, padding and scroll
+   * (the study flow's step 3). Drops this component's own outer chrome so it
+   * sits flush like the neighbouring panels instead of a nested, tinted box.
+   */
+  embedded?: boolean;
 }
 
 // Per-book metadata: which testament/language
@@ -165,7 +171,7 @@ function VerseRow({ verseNum, words, isHebrew, highlighted }: VerseRowProps) {
   );
 }
 
-export default function OriginalText({ book, chapter, highlightVerses }: OriginalTextProps) {
+export default function OriginalText({ book, chapter, highlightVerses, embedded = false }: OriginalTextProps) {
   const englishBook = bookNameMap[book] || book;
   const [data, setData] = useState<ChapterData | null>(null);
   const [meta, setMeta] = useState<IndexEntry | null>(null);
@@ -236,29 +242,47 @@ export default function OriginalText({ book, chapter, highlightVerses }: Origina
   }, [data]);
 
   return (
-    <div className="h-full overflow-y-auto px-4 py-4 pb-20">
-      {/* Intro panel */}
-      <div className="mb-4 rounded-lg border border-teal-200/70 dark:border-teal-900/50 bg-gradient-to-br from-teal-50/70 to-white dark:from-teal-950/30 dark:to-background p-3">
-        <div className="flex items-start gap-2.5">
-          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-teal-100 dark:bg-teal-900 flex items-center justify-center">
-            <Languages size={16} className="text-teal-700 dark:text-teal-300" />
+    <div className={embedded ? '' : 'h-full overflow-y-auto px-4 py-4 pb-20'}>
+      {/* Intro panel. Embedded: a plain heading, no tinted card, so it matches
+          the other step-3 panels instead of announcing itself. */}
+      {embedded ? (
+        <div className="mb-3">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="text-[13px] font-semibold text-foreground">
+              Grondtekst - {langLabel}
+            </h3>
+            <span className="text-[10px] uppercase tracking-wider font-semibold px-1.5 py-0.5 rounded bg-gray-100 dark:bg-secondary text-gray-500 dark:text-muted-foreground">
+              {testamentLabel}
+            </span>
           </div>
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                Grondtekst - {langLabel}
-              </h3>
-              <span className="text-[10px] uppercase tracking-wider font-semibold px-1.5 py-0.5 rounded bg-teal-100 dark:bg-teal-900 text-teal-800 dark:text-teal-200">
-                {testamentLabel}
-              </span>
+          <p className="text-[11px] text-gray-500 dark:text-muted-foreground mt-1 leading-relaxed">
+            De originele woorden van {book} {chapter} in het {langLabel}, met transliteratie,
+            betekenis en Strong-nummer.
+          </p>
+        </div>
+      ) : (
+        <div className="mb-4 rounded-lg border border-teal-200/70 dark:border-teal-900/50 bg-gradient-to-br from-teal-50/70 to-white dark:from-teal-950/30 dark:to-background p-3">
+          <div className="flex items-start gap-2.5">
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-teal-100 dark:bg-teal-900 flex items-center justify-center">
+              <Languages size={16} className="text-teal-700 dark:text-teal-300" />
             </div>
-            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 leading-relaxed">
-              De originele woorden van {book} {chapter} in het {langLabel}, met transliteratie, betekenis
-              en Strong-nummer. Klik op een Strong-nummer voor uitgebreide lexicale informatie.
-            </p>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                  Grondtekst - {langLabel}
+                </h3>
+                <span className="text-[10px] uppercase tracking-wider font-semibold px-1.5 py-0.5 rounded bg-teal-100 dark:bg-teal-900 text-teal-800 dark:text-teal-200">
+                  {testamentLabel}
+                </span>
+              </div>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 leading-relaxed">
+                De originele woorden van {book} {chapter} in het {langLabel}, met transliteratie, betekenis
+                en Strong-nummer. Klik op een Strong-nummer voor uitgebreide lexicale informatie.
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Loading */}
       {loading && (

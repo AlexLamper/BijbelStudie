@@ -67,6 +67,23 @@ export async function GET(req: Request) {
   const guard = await requireAdmin();
   if (!guard.ok) return guard.response;
 
+  // Every failure past this point used to be an unhandled throw, which reaches
+  // the browser as an HTML error page. The page's `fetch(...).then(r => r.json())`
+  // then dies on the first line, `data` stays null, and every card silently
+  // renders "0" / "Geen data" - a broken page that looks like an empty one.
+  // A JSON 500 lets the page show a real error and a retry instead.
+  try {
+    return await buildInsights(req);
+  } catch (err) {
+    console.error("[admin/insights] query failed", err);
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : "Kon inzichten niet berekenen" },
+      { status: 500 },
+    );
+  }
+}
+
+async function buildInsights(req: Request) {
   await connectMongoDB();
 
   const url = new URL(req.url);

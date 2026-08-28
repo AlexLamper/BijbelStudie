@@ -124,14 +124,41 @@ export default function AdminInsightsPage() {
   const [range, setRange] = useState<7 | 30 | 90>(30)
   const [data, setData] = useState<InsightsResponse | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [reloadKey, setReloadKey] = useState(0)
 
   useEffect(() => {
+    let cancelled = false
     setLoading(true)
-    fetch(`/api/admin/insights?days=${range}`)
-      .then(r => (r.ok ? r.json() : null))
-      .then(d => { if (d) setData(d) })
-      .finally(() => setLoading(false))
-  }, [range])
+    setError(null)
+
+    // One retry: the route fires ~17 aggregations at once and the first hit
+    // after an idle period also pays for the Mongo connect, so a cold call can
+    // time out where the next one succeeds.
+    const load = async (attempt = 0): Promise<void> => {
+      try {
+        const res = await fetch(`/api/admin/insights?days=${range}`)
+        const body = await res.json().catch(() => null)
+        if (cancelled) return
+        if (!res.ok) {
+          if (attempt < 1) return load(attempt + 1)
+          setError(
+            (body && typeof body.error === 'string' && body.error) ||
+              `Verzoek mislukt (${res.status}). Controleer je admin-sessie of vernieuw de pagina.`,
+          )
+          return
+        }
+        setData(body)
+      } catch {
+        if (cancelled) return
+        if (attempt < 1) return load(attempt + 1)
+        setError('Netwerkfout bij het laden van de inzichten.')
+      }
+    }
+
+    load().finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true }
+  }, [range, reloadKey])
 
   const sums = useMemo(() => {
     const sum = (s?: Series[]) => (s ?? []).reduce((a, b) => a + b.count, 0)
@@ -188,6 +215,20 @@ export default function AdminInsightsPage() {
       {/* Main */}
       <div className="flex-1 overflow-y-auto">
         <div className="px-6 xl:px-10 py-6 space-y-8">
+
+          {error && (
+            <div className="flex items-start justify-between gap-4 rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/20 px-4 py-3">
+              <p className="text-sm text-red-800 dark:text-red-200">
+                Inzichten konden niet worden geladen. {error}
+              </p>
+              <button
+                onClick={() => setReloadKey(k => k + 1)}
+                className="flex-none text-sm font-semibold text-red-800 dark:text-red-200 underline underline-offset-2 hover:no-underline"
+              >
+                Opnieuw proberen
+              </button>
+            </div>
+          )}
 
           {/* ---- Bereik ---- */}
           <section>
