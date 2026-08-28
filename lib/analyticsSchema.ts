@@ -1,3 +1,5 @@
+import { CLICK_TARGETS, ROUTE_KEYS } from "./analyticsRoutes";
+
 /**
  * The complete set of events the funnel accepts, with the exact properties each
  * one may carry. The API route validates against this and drops anything else.
@@ -17,6 +19,23 @@
 const PLATFORM = ["web", "ios", "android"] as const;
 
 export const EVENTS = {
+  /**
+   * A page was opened. `path` is a ROUTE KEY, not a pathname - the client sends
+   * `location.pathname` and `/api/analytics` normalises it through
+   * `toRouteKey` before it gets here, so no client-chosen text and no unbounded
+   * cardinality ever reaches the database.
+   */
+  page_view: {
+    path: ROUTE_KEYS,
+    logged_in: ["yes", "no"],
+    platform: PLATFORM,
+  },
+  /** A registered interactive surface was clicked. See CLICK_TARGETS. */
+  ui_click: {
+    target: CLICK_TARGETS,
+    path: ROUTE_KEYS,
+    platform: PLATFORM,
+  },
   pricing_viewed: {
     source: [
       "sidebar_cta", "paywall_commentary", "paywall_ai", "paywall_plan",

@@ -7,7 +7,9 @@ import { authOptions } from "../lib/authOptions";
 import { OnboardingWrapper } from "../components/onboarding/onboarding-wrapper";
 import { GuidedTourLauncher } from "../components/onboarding/guided-tour";
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import { Suspense } from "react";
 import { PrefetchProvider } from "../components/providers/prefetch-provider";
+import AnalyticsTracker from "../components/providers/AnalyticsTracker";
 import { JsonLd } from "../components/seo/JsonLd";
 import {
   BASE_URL,
@@ -194,6 +196,11 @@ export default async function RootLayout({
           storageKey="bijbelstudie-theme-v2"
         >
           <PrefetchProvider>
+            {/* Page views and clicks for /admin/insights. Renders nothing and
+                never blocks - see components/providers/AnalyticsTracker.tsx. */}
+            <Suspense fallback={null}>
+              <AnalyticsTracker />
+            </Suspense>
             <div id="main-content" className="min-h-screen mx-auto w-full">
               {children}
             </div>

@@ -5,6 +5,7 @@ import connectMongoDB from "../../../lib/mongodb";
 import User from "../../../models/User";
 import AnalyticsEvent from "../../../models/AnalyticsEvent";
 import { isEventName, sanitizeProps } from "../../../lib/analyticsSchema";
+import { toRouteKey } from "../../../lib/analyticsRoutes";
 
 /**
  * Funnel event sink. Necessarily reachable while logged out, because the
@@ -108,6 +109,11 @@ export async function POST(req: NextRequest) {
       const { name, props, anonId } = item as Record<string, unknown>;
       if (!isEventName(name)) continue;
 
+      const rawPath =
+        typeof props === "object" && props !== null && !Array.isArray(props)
+          ? (props as Record<string, unknown>).path
+          : undefined;
+
       docs.push({
         name,
         userId,
@@ -120,6 +126,11 @@ export async function POST(req: NextRequest) {
         // again for the events that do not declare a platform property.
         props: sanitizeProps(name, {
           ...(typeof props === "object" && props !== null && !Array.isArray(props) ? props : {}),
+          // The client sends a raw pathname; only the normalised route key is
+          // allowed to reach the database. Doing it here rather than in the
+          // browser means a hand-rolled POST cannot bypass it either.
+          ...(rawPath !== undefined ? { path: toRouteKey(rawPath) } : {}),
+          logged_in: userId ? "yes" : "no",
           platform: "web",
         }),
         occurredAt: now,

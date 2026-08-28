@@ -84,6 +84,21 @@ const TEAL = "#0D9488"
 /** #0D9488 is 3.7:1 on white - a fill colour, not a text colour. */
 const TEAL_TEXT = "#0F766E"
 
+/**
+ * The order the translations are offered in.
+ *
+ * The manifest orders by whatever the sync script wrote last, which put the
+ * translation almost nobody picks first. This is the order someone choosing
+ * their default would expect: the two in widest use, then the rest. Anything not
+ * listed keeps its manifest position, after these.
+ */
+const TRANSLATION_ORDER = [
+  "statenvertaling",
+  "nbg51",
+  "canisiusbijbel",
+  "heilige_schrift_1917",
+]
+
 /** Dutch-only product: anything else in the manifest is not offered here. */
 function toDutchChoices(
   entries: unknown,
@@ -93,12 +108,22 @@ function toDutchChoices(
   if (!Array.isArray(entries)) return null
   const dutch = (entries as ApiEntry[]).filter(e => e?.language === "nl" && e?.id)
   if (dutch.length === 0) return null
-  return dutch.map(e => ({
-    code: e.id,
-    label: e.name || e.id,
-    desc: notes[e.id],
-    attribution: withAttribution ? getBibleAttribution(e.id) : null,
-  }))
+
+  const rank = (id: string) => {
+    const index = TRANSLATION_ORDER.indexOf(id)
+    return index === -1 ? TRANSLATION_ORDER.length : index
+  }
+
+  return dutch
+    .map((e, index) => ({ e, index }))
+    // Stable: equal ranks keep the manifest's own order.
+    .sort((a, b) => rank(a.e.id) - rank(b.e.id) || a.index - b.index)
+    .map(({ e }) => ({
+      code: e.id,
+      label: e.name || e.id,
+      desc: notes[e.id],
+      attribution: withAttribution ? getBibleAttribution(e.id) : null,
+    }))
 }
 
 interface OnboardingModalProps {

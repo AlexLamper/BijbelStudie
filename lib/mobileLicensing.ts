@@ -7,6 +7,8 @@
  *
  * Blocked, and why (see IOS_APP_BRIEF.md §1.5 for the full dossier):
  *
+ *   luther_1912      Public domain, but the app ships Dutch and English only.
+ *   elberfelder_1905 Public domain, same reason. Both stay on the website.
  *   net              NET Bible, (c) Biblical Studies Press. Whole-text
  *                    electronic distribution needs written permission and
  *                    "cannot be bundled with anything sold". We sell Pro.
@@ -36,7 +38,6 @@ export const MOBILE_ALLOWED_BIBLES: ReadonlySet<string> = new Set([
   'nbg51',
   'heilige_schrift_1917', // Public domain
   'canisiusbijbel', // ebible.org cleared with KBS; treated as public domain
-  'elberfelder_1905', // Public domain
   'kjv', // Public domain
   'asv', // Public domain
   'web', // Public domain

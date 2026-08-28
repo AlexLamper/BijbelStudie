@@ -16,7 +16,18 @@ export const STEP_LABELS: Record<StepKey, string> = {
 };
 
 /**
- * The "stap 3 van 5" indicator.
+ * The "stap 3 van 5" indicator: one beam per step, spanning the full width.
+ *
+ * It used to be numbered circles joined by hairlines, centred in the header.
+ * Five 28px circles carry almost no information about how far along the lesson
+ * is - the eye has to count them - and centring left the progress sitting in a
+ * small island with empty header either side of it. Beams read as a progress
+ * bar, which is what this is, and stretching them edge to edge means the filled
+ * proportion IS the answer to "how far am I".
+ *
+ * Every beam is equal width rather than weighted by step length: the steps are
+ * roughly comparable in size, and an unequal bar would imply a precision about
+ * remaining effort that the flow does not have.
  *
  * A completed step stays clickable so someone can look back at the passage
  * while answering the reflection question - the flow is meant to be focused,
@@ -37,62 +48,57 @@ export default function StudyStepRail({
   const currentIndex = steps.indexOf(current);
 
   return (
-    <nav aria-label="Stappen" className="flex items-center gap-1.5 sm:gap-2">
+    <nav aria-label="Stappen" className="w-full flex items-stretch gap-1.5 sm:gap-2">
       {steps.map((step, index) => {
         const isDone = completed.includes(step);
         const isCurrent = step === current;
         // Anything already visited stays reachable; nothing beyond does.
         const reachable = isDone || index <= currentIndex;
+        const filled = isDone || index <= currentIndex;
 
         return (
-          <React.Fragment key={step}>
-            {index > 0 && (
-              <span
-                aria-hidden
-                className="h-px w-3 sm:w-6 flex-none"
-                style={{ backgroundColor: index <= currentIndex ? TEAL : 'currentColor', opacity: index <= currentIndex ? 1 : 0.2 }}
-              />
-            )}
-            <button
-              type="button"
-              disabled={!reachable}
-              onClick={() => reachable && onSelect(step)}
-              aria-current={isCurrent ? 'step' : undefined}
-              title={STEP_LABELS[step]}
+          <button
+            key={step}
+            type="button"
+            disabled={!reachable}
+            onClick={() => reachable && onSelect(step)}
+            aria-current={isCurrent ? 'step' : undefined}
+            title={STEP_LABELS[step]}
+            className={[
+              'group flex-1 min-w-0 flex flex-col gap-1.5 text-left',
+              reachable ? 'cursor-pointer' : 'cursor-default',
+            ].join(' ')}
+          >
+            {/* Every beam is the same height. The current step is marked by a
+                halo and a bolder label instead of extra height, because a taller
+                beam would push its own label out of line with the others. */}
+            <span
               className={[
-                'group flex items-center gap-1.5 rounded-full transition-colors',
-                reachable ? 'cursor-pointer' : 'cursor-default',
+                'block w-full h-2 rounded-full transition-all',
+                filled ? '' : 'bg-gray-200 dark:bg-border',
+                reachable && !isCurrent ? 'group-hover:opacity-75' : '',
+              ].join(' ')}
+              style={{
+                ...(filled ? { backgroundColor: TEAL } : null),
+                ...(isCurrent ? { boxShadow: '0 0 0 3px rgba(13,148,136,0.20)' } : null),
+              }}
+            />
+            <span
+              className={[
+                'flex items-center gap-1 text-[10.5px] sm:text-[11.5px] leading-none',
+                isCurrent
+                  ? 'font-bold text-foreground'
+                  : filled
+                    ? 'font-medium text-gray-600 dark:text-muted-foreground'
+                    : 'font-medium text-gray-400 dark:text-muted-foreground',
               ].join(' ')}
             >
-              <span
-                className={[
-                  'h-6 w-6 sm:h-7 sm:w-7 rounded-full flex items-center justify-center text-[11px] font-bold flex-none border transition-colors',
-                  isCurrent
-                    ? 'text-white border-transparent'
-                    : isDone
-                      ? 'border-transparent'
-                      : 'text-gray-400 dark:text-muted-foreground border-gray-200 dark:border-border',
-                ].join(' ')}
-                style={
-                  isCurrent
-                    ? { backgroundColor: TEAL }
-                    : isDone
-                      ? { backgroundColor: 'rgba(13,148,136,0.12)', color: TEAL }
-                      : undefined
-                }
-              >
-                {isDone && !isCurrent ? <Check size={13} /> : index + 1}
-              </span>
-              <span
-                className={[
-                  'hidden md:inline text-xs font-medium pr-1',
-                  isCurrent ? 'text-foreground' : 'text-gray-500 dark:text-muted-foreground',
-                ].join(' ')}
-              >
-                {STEP_LABELS[step]}
-              </span>
-            </button>
-          </React.Fragment>
+              {isDone && !isCurrent && (
+                <Check size={11} className="flex-none" style={{ color: TEAL }} />
+              )}
+              <span className="truncate">{STEP_LABELS[step]}</span>
+            </span>
+          </button>
         );
       })}
     </nav>

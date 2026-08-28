@@ -3,9 +3,11 @@ import { AlertCircle, Plus } from 'lucide-react';
 import { SkeletonChapter } from '../ui/skeletons';
 import { CreateNoteModal } from './CreateNoteModal';
 import { ReadingPreferences } from '../../hooks/useReadingPreferences';
+import { HIGHLIGHT_TINTS, useVerseAnnotations } from '../../hooks/useVerseAnnotations';
 import { cn } from '../../lib/utils';
 import { getBibleAttribution } from '../../lib/bible-attribution';
 import SpeakButton from './SpeakButton';
+import VerseMarkers from './VerseMarkers';
 
 type Props = {
   version: string | null;
@@ -43,6 +45,7 @@ export default function ChapterViewer({
   const [error, setError] = useState<string | null>(null);
   const [selectedVerse, setSelectedVerse] = useState<SelectedVerse | null>(null);
   const [showCreateNoteModal, setShowCreateNoteModal] = useState(false);
+  const { annotations, reload: reloadAnnotations } = useVerseAnnotations(book, chapter);
 
   const API_BASE_URL = '/api/bible';
 
@@ -157,6 +160,9 @@ export default function ChapterViewer({
   const handleNoteSaved = () => {
     setShowCreateNoteModal(false);
     setSelectedVerse(null);
+    // The marker has to appear straight away, or saving a note looks like it
+    // did nothing until the next chapter change.
+    void reloadAnnotations();
   };
 
   const handleCancelNote = () => {
@@ -201,11 +207,24 @@ export default function ChapterViewer({
               const isHighlighted = highlightRange
                 ? vNum >= highlightRange.start && vNum <= highlightRange.end
                 : false;
+              const marks = annotations.get(vNum);
+              // The reader's own highlight wins over the lesson's range tint:
+              // one is something they chose, the other is context.
+              const tint = marks?.highlight ? HIGHLIGHT_TINTS[marks.highlight] : null;
               return (
-              <div key={verseNumber} id={`verse-${verseNumber}`} className={cn(
-                "group relative rounded-sm -mx-1 px-1",
-                isHighlighted && "bg-teal-50 dark:bg-teal-950/30 border-l-2 border-teal-500 pl-2"
-              )}>
+              <div
+                key={verseNumber}
+                id={`verse-${verseNumber}`}
+                className={cn(
+                  "group relative rounded-sm -mx-1 px-1",
+                  isHighlighted && !tint && "bg-teal-50 dark:bg-teal-950/30 border-l-2 border-teal-500 pl-2"
+                )}
+                style={
+                  tint
+                    ? { backgroundColor: tint.bg, boxShadow: `inset 2px 0 0 0 ${tint.border}` }
+                    : undefined
+                }
+              >
                 <p className={cn(
                   "dark:text-foreground text-gray-900",
                   fontSizeClass,
@@ -225,6 +244,7 @@ export default function ChapterViewer({
                         onClick={() => handleVerseClick(verseNumber, text)}>
                     {text}
                   </span>
+                  <VerseMarkers annotation={marks} />
                 </p>
                 <div className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
                   <SpeakButton

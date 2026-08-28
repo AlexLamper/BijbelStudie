@@ -5,12 +5,13 @@ import {
   ArrowRight, Check, ChevronDown, Users, Shield,
   Lightbulb, BarChart2,
   Star, MessageSquare, ChevronLeft, ChevronRight,
-  Flame, PenLine, Sparkles,
+  Flame, PenLine, Sparkles, Smartphone,
 } from "lucide-react"
 import { Footer } from "./footer"
 import { FAQItem } from "./FAQItem"
 import { HOME_FAQS } from "../../lib/content/homeFaq"
 import { HOW_IT_WORKS_STEPS } from "../../lib/content/howItWorks"
+import { curatedStudies } from "../../lib/data/curated-studies"
 
 /* ─── Design tokens ──────────────────────────────────────────── */
 const T = {
@@ -297,6 +298,18 @@ function Navbar() {
   )
 }
 
+/** Live on the App Store since August 2026. */
+const APP_STORE_URL = "https://apps.apple.com/us/app/bijbelstudie-lees-leer/id6800668187"
+
+/** Apple's mark. Inlined rather than an <img>: it is one path and must stay crisp. */
+function AppleLogo({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 384 512" aria-hidden focusable="false" className={className} fill="currentColor">
+      <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z" />
+    </svg>
+  )
+}
+
 /* ─── Hero ───────────────────────────────────────────────────── */
 function Hero() {
   return (
@@ -316,21 +329,24 @@ function Hero() {
         }}
       />
 
-      <div className="relative max-w-6xl 2xl:max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-16 items-center">
-        {/* Text column */}
-        <div className="space-y-7">
+      <div className="relative max-w-6xl 2xl:max-w-7xl mx-auto px-6 grid lg:grid-cols-12 gap-12 lg:gap-14 items-center">
+        {/* Text column. Seven of twelve columns rather than half the grid: at an
+            even split the column is ~520px, which is narrower than the headline,
+            the paragraph and the CTA row all need - every one of them broke onto
+            an extra line. The illustration loses nothing by taking five. */}
+        <div className="space-y-7 lg:col-span-7">
           {/* The h1 carries the head term verbatim ("online bijbelstudie") and
               is the only h1 on the page. The animation must not gate the text:
               `animate` runs on mount, so the copy is in the served HTML. */}
           <h1
-            className="text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight"
+            className="text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight text-balance"
             style={{ color: T.text }}
           >
             De Nederlandse tool voor online{" "}
             <span style={{ color: T.tealText }}>bijbelstudie</span>
           </h1>
 
-          <p className="text-lg leading-relaxed" style={{ color: T.muted }}>
+          <p className="text-lg leading-relaxed max-w-xl text-pretty" style={{ color: T.muted }}>
             Bestudeer de Bijbel diep en persoonlijk: vier Nederlandse vertalingen,
             bijbelcommentaren per vers, de Hebreeuwse en Griekse grondtekst,
             notities en een AI-assistent die uw vragen over de Schrift
@@ -338,25 +354,49 @@ function Hero() {
             zonder creditcard.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-3 pt-1">
+          {/* Two CTAs, not three. A "Bekijk functies" outline button used to sit
+              at the end of this row: it pushed the row wider than the column,
+              wrapped, and split attention across three equally-weighted choices.
+              The header nav already links to #functies, so nothing is lost.
+              Both survivors are h-14 with padding on the x-axis only - the teal
+              button and Apple's pill were previously sized by different vertical
+              padding around different content, so they never matched height. */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-1">
             <div className="cta-pulse rounded-xl w-full sm:w-auto">
               <Link href="/inloggen"
-                className="group w-full inline-flex items-center justify-center gap-2 font-semibold text-white px-7 py-3.5 rounded-xl bg-teal-700 hover:bg-teal-800 transition-colors">
+                data-track="hero_cta_signup"
+                className="group h-14 w-full inline-flex items-center justify-center gap-2 font-semibold text-white px-7 rounded-xl bg-teal-700 hover:bg-teal-800 transition-colors">
                 Start gratis
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </Link>
             </div>
-            <Link href="#functies"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 font-semibold px-7 py-3.5 rounded-xl border border-gray-200 text-gray-900 bg-white hover:bg-gray-50 transition-colors">
-              Bekijk functies
-            </Link>
+            {/* Apple's own black pill rather than another outline button: this
+                is the shape people recognise as "this app is really in the
+                store", and the app went live in August 2026. */}
+            <a
+              href={APP_STORE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Download BijbelStudie in de App Store"
+              data-track="hero_cta_appstore"
+              className="h-14 w-full sm:w-auto inline-flex items-center justify-center gap-3 rounded-xl bg-black px-6 text-white no-underline transition-transform hover:scale-[1.02]"
+            >
+              <AppleLogo className="h-7 w-7 shrink-0" />
+              <span className="text-left leading-none">
+                <span className="block text-[10px] font-medium opacity-80">Download in de</span>
+                <span className="block text-lg font-semibold tracking-tight">App Store</span>
+              </span>
+            </a>
           </div>
 
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-2">
             {[
               { icon: Sparkles,   label: "AI-assistent" },
-              { icon: BookMarked, label: "10 begeleide studies" },
+              // Counted from lib/data/curated-studies.ts rather than hardcoded:
+              // the number was stale within a week of being written.
+              { icon: BookMarked, label: `${curatedStudies.length} begeleide studies` },
               { icon: Star,       label: "Gratis te gebruiken" },
+              { icon: Smartphone, label: "Ook als iOS-app" },
               { icon: Shield,     label: "Privacy-first" },
             ].map(({ icon: Icon, label }) => (
               <div key={label} className="flex items-center gap-1.5 text-xs whitespace-nowrap" style={{ color: T.muted }}>
@@ -368,7 +408,7 @@ function Hero() {
         </div>
 
         {/* Illustration column - floats continuously */}
-        <div className="relative w-full max-w-md mx-auto lg:max-w-none lg:mx-0">
+        <div className="relative w-full max-w-md mx-auto lg:col-span-5 lg:max-w-none lg:mx-0">
           <div className="float-slow">
             <BibleStudyIllustration />
           </div>

@@ -82,6 +82,9 @@ export default {
       animation: {
         "fade-in": "fadeIn 0.3s ease-in-out",
         "slide-up": "slideUp 0.25s ease-out",
+        // A whole panel rising into place, as opposed to `slide-up`'s 6px
+        // settle. Used by the study flow's AI dock.
+        "panel-up": "panelUp 0.22s cubic-bezier(0.32, 0.72, 0, 1)",
       },
       keyframes: {
         fadeIn: {
@@ -91,6 +94,10 @@ export default {
         slideUp: {
           "0%": { opacity: "0", transform: "translateY(6px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        panelUp: {
+          "0%": { transform: "translateY(100%)" },
+          "100%": { transform: "translateY(0)" },
         },
       },
     }

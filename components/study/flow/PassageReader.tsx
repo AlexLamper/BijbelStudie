@@ -6,8 +6,10 @@ import { AlertCircle, Plus } from 'lucide-react';
 import { SkeletonChapter } from '../../ui/skeletons';
 import { CreateNoteModal } from '../CreateNoteModal';
 import SpeakButton from '../SpeakButton';
+import VerseMarkers from '../VerseMarkers';
 import { getBibleAttribution } from '../../../lib/bible-attribution';
 import { cn } from '../../../lib/utils';
+import { HIGHLIGHT_TINTS, useVerseAnnotations } from '../../../hooks/useVerseAnnotations';
 import type { ReadingPreferences } from '../../../hooks/useReadingPreferences';
 
 type VerseMap = Record<string, string>;
@@ -45,6 +47,7 @@ export default function PassageReader({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<{ verseNumber: string; text: string } | null>(null);
+  const { annotations, reload: reloadAnnotations } = useVerseAnnotations(book, chapter);
 
   const prefs = preferences ?? {
     fontSize: 'base',
@@ -142,8 +145,21 @@ export default function PassageReader({
   return (
     <div className="content-in">
       <div className="space-y-4">
-        {inRange.map(([number, text]) => (
-          <div key={number} id={`verse-${number}`} className="group relative rounded-md -mx-2 px-2">
+        {inRange.map(([number, text]) => {
+          const marks = annotations.get(number);
+          const tint = marks?.highlight ? HIGHLIGHT_TINTS[marks.highlight] : null;
+
+          return (
+          <div
+            key={number}
+            id={`verse-${number}`}
+            className="group relative rounded-md -mx-2 px-2"
+            style={
+              tint
+                ? { backgroundColor: tint.bg, boxShadow: `inset 2px 0 0 0 ${tint.border}` }
+                : undefined
+            }
+          >
             <p className={cn('text-gray-900 dark:text-foreground', typography)}>
               {prefs.showVerseNumbers && (
                 <sup className="font-semibold mr-2 text-[0.62em] text-gray-400 dark:text-muted-foreground select-none">
@@ -156,6 +172,7 @@ export default function PassageReader({
               >
                 {text}
               </span>
+              <VerseMarkers annotation={marks} />
             </p>
 
             <div className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
@@ -175,7 +192,8 @@ export default function PassageReader({
               </button>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {attribution && (
@@ -194,7 +212,10 @@ export default function PassageReader({
           verse={parseInt(selected.verseNumber, 10)}
           verseText={selected.text}
           translation={version || 'statenvertaling'}
-          onSave={() => setSelected(null)}
+          onSave={() => {
+            setSelected(null);
+            void reloadAnnotations();
+          }}
           availableVerses={inRange.map(([number]) => number)}
         />
       )}

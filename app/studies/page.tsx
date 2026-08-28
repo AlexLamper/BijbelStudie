@@ -110,6 +110,16 @@ function scopeLine(study: CuratedStudy): string {
   return `${books[0]}, ${books[1]} en ${books.length - 2} meer`
 }
 
+/**
+ * One study in the catalogue.
+ *
+ * No cover image. The banners were 320x120 decorative SVGs that carried no
+ * information about the study, differed from each other only in which abstract
+ * shape they used, and took the top third of every card - so the eye landed on
+ * artwork instead of on the title it is scanning for. What is left is what
+ * someone actually chooses on: what kind of study it is, what it is called,
+ * which books it walks through, and how long it takes.
+ */
 function StudyCard({ study, status }: { study: CuratedStudy; status: Status }) {
   const minutes = estimateStudyMinutes(study)
   const pct = status.total > 0 ? Math.round((status.done / status.total) * 100) : 0
@@ -118,79 +128,80 @@ function StudyCard({ study, status }: { study: CuratedStudy; status: Status }) {
   return (
     <Link
       href={`/studies/${study.id}`}
-      className="lift group no-underline flex flex-col rounded-2xl border bg-white dark:bg-card overflow-hidden transition-colors border-gray-200 dark:border-border hover:border-teal-300 dark:hover:border-teal-700"
+      data-track="study_card"
+      className="lift group no-underline flex flex-col rounded-xl border bg-white dark:bg-card p-5 transition-colors border-gray-200 dark:border-border hover:border-teal-400 dark:hover:border-teal-700"
     >
-      {/* Cover */}
-      <div className="relative h-24 flex-none overflow-hidden bg-slate-900">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={study.image}
-          alt=""
-          aria-hidden
-          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
-        />
+      {/* Type and state. The one row that is the same on every card, so the
+          eye can compare them without reading. */}
+      <div className="flex items-center gap-2 mb-3">
         <span
-          className="absolute top-2.5 left-2.5 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold text-white backdrop-blur-sm"
-          style={{ backgroundColor: 'rgba(13,148,136,0.92)' }}
+          className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
+          style={{ backgroundColor: 'rgba(13,148,136,0.10)', color: '#0F766E' }}
         >
           {TYPE_LABEL[study.type]}
         </span>
-        {status.completed && (
-          <span className="absolute top-2.5 right-2.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/95 text-teal-700">
-            <CheckCircle2 size={10} /> Voltooid
+        {status.completed ? (
+          <span className="inline-flex items-center gap-1 text-[11px] font-semibold" style={{ color: TEAL }}>
+            <CheckCircle2 size={12} /> Voltooid
           </span>
-        )}
+        ) : started ? (
+          <span className="inline-flex items-center gap-1 text-[11px] font-semibold" style={{ color: TEAL }}>
+            <Play size={10} /> Bezig
+          </span>
+        ) : null}
       </div>
 
-      <div className="flex flex-col flex-1 p-4">
-        <h3 className="font-bold text-[15px] text-gray-900 dark:text-foreground leading-snug mb-1 group-hover:text-teal-600 transition-colors">
-          {study.title}
-        </h3>
-        <p className="text-[11px] font-medium mb-2" style={{ color: TEAL }}>
-          {scopeLine(study)}
-        </p>
-        <p className="text-[13px] text-gray-500 dark:text-muted-foreground leading-relaxed line-clamp-2 flex-1">
-          {study.description}
-        </p>
+      <h3 className="font-bold text-base text-gray-900 dark:text-foreground leading-snug mb-1.5 group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors">
+        {study.title}
+      </h3>
+      <p className="text-[13px] text-gray-500 dark:text-muted-foreground leading-relaxed line-clamp-2 flex-1">
+        {study.description}
+      </p>
 
-        <div className="mt-3 flex items-center gap-3 text-[11px] text-gray-500 dark:text-muted-foreground">
-          <span className="inline-flex items-center gap-1">
-            <ListChecks size={12} /> {study.lessons.length} lessen
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <Clock size={12} /> ± {minutes} min
-          </span>
+      {/* Facts, one per line so they read as a spec rather than as a sentence. */}
+      <dl className="mt-4 space-y-1.5 text-[12px]">
+        <div className="flex items-center gap-2">
+          <dt className="flex items-center gap-1.5 w-[86px] flex-none text-gray-400 dark:text-muted-foreground">
+            <BookOpen size={12} /> Boeken
+          </dt>
+          <dd className="min-w-0 truncate font-medium text-foreground">{scopeLine(study)}</dd>
         </div>
+        <div className="flex items-center gap-2">
+          <dt className="flex items-center gap-1.5 w-[86px] flex-none text-gray-400 dark:text-muted-foreground">
+            <ListChecks size={12} /> Lessen
+          </dt>
+          <dd className="font-medium text-foreground">{study.lessons.length}</dd>
+        </div>
+        <div className="flex items-center gap-2">
+          <dt className="flex items-center gap-1.5 w-[86px] flex-none text-gray-400 dark:text-muted-foreground">
+            <Clock size={12} /> Duur
+          </dt>
+          <dd className="font-medium text-foreground">± {minutes} min totaal</dd>
+        </div>
+      </dl>
 
-        {/* Progress only once there is progress: an empty bar on every card
-            makes a catalogue look like a to-do list. */}
-        {started && !status.completed && (
-          <div className="mt-3">
-            <div className="flex items-center justify-between text-[11px] mb-1">
-              <span className="font-semibold" style={{ color: TEAL }}>
-                Les {status.resumeDay ?? status.done + 1} van {status.total}
-              </span>
-              <span className="text-gray-400 dark:text-muted-foreground">{pct}%</span>
-            </div>
-            <div className="h-1.5 rounded-full bg-gray-100 dark:bg-secondary overflow-hidden">
-              <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: TEAL }} />
-            </div>
+      {/* Progress only once there is progress: an empty bar on every card
+          makes a catalogue look like a to-do list. */}
+      {started && !status.completed && (
+        <div className="mt-4">
+          <div className="flex items-center justify-between text-[11px] mb-1">
+            <span className="font-semibold text-foreground">
+              Les {status.resumeDay ?? status.done + 1} van {status.total}
+            </span>
+            <span className="text-gray-400 dark:text-muted-foreground tabular-nums">{pct}%</span>
           </div>
-        )}
+          <div className="h-1.5 rounded-full bg-gray-100 dark:bg-secondary overflow-hidden">
+            <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: TEAL }} />
+          </div>
+        </div>
+      )}
 
-        <span
-          className="mt-3.5 inline-flex items-center justify-center gap-1.5 h-9 rounded-lg text-[13px] font-semibold text-white transition-opacity group-hover:opacity-90"
-          style={{ backgroundColor: TEAL }}
-        >
-          {status.completed ? (
-            <>Opnieuw bekijken <ArrowRight size={13} /></>
-          ) : started ? (
-            <><Play size={12} /> Verder gaan</>
-          ) : (
-            <>Bekijk studie <ArrowRight size={13} /></>
-          )}
-        </span>
-      </div>
+      {/* teal-600 is #0D9488 exactly, so the hover fill matches the brand colour
+          used inline everywhere else without needing an arbitrary value. */}
+      <span className="mt-4 inline-flex items-center justify-center gap-1.5 h-9 rounded-lg text-[13px] font-semibold border border-teal-600 text-teal-700 dark:text-teal-400 transition-colors group-hover:bg-teal-600 group-hover:text-white group-hover:border-teal-600">
+        {status.completed ? 'Opnieuw bekijken' : started ? 'Verder gaan' : 'Bekijk studie'}
+        <ArrowRight size={13} />
+      </span>
     </Link>
   )
 }

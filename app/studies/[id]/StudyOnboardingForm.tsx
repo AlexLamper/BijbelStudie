@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import {
   BookOpen,
   CalendarDays,
+  ChevronRight,
   Layers,
   Loader2,
   Play,
@@ -97,7 +98,7 @@ export default function StudyStartPanel({
   lessonsCompleted,
 }: {
   studyId: string;
-  translations: { id: string; name: string }[];
+  translations: { id: string; name: string; language?: string }[];
   defaultTranslation: string;
   suggestedRhythm: StudyRhythm;
   suggestedDepth: StudyDepth;
@@ -127,6 +128,10 @@ export default function StudyStartPanel({
 
   const translationName =
     translations.find((option) => option.id === translation)?.name ?? defaultTranslation;
+  // A version with no `language` counts as "overig" rather than Dutch: guessing
+  // wrong the other way would put an English text under the Dutch heading.
+  const dutchTranslations = translations.filter((option) => option.language === 'nl');
+  const otherTranslations = translations.filter((option) => option.language !== 'nl');
   const rhythmLabel = RHYTHMS.find((option) => option.value === rhythm)?.label ?? '';
   const depthLabel = DEPTHS.find((option) => option.value === depth)?.label ?? '';
   const pct = lessonsTotal > 0 ? Math.round((lessonsCompleted / lessonsTotal) * 100) : 0;
@@ -198,6 +203,7 @@ export default function StudyStartPanel({
       {enrolled ? (
         <a
           href={resumeHref}
+          data-track="study_resume"
           className="w-full inline-flex items-center justify-center gap-2 h-11 rounded-xl text-sm font-semibold text-white no-underline transition-opacity hover:opacity-90"
           style={{ backgroundColor: TEAL }}
         >
@@ -208,6 +214,7 @@ export default function StudyStartPanel({
           type="button"
           onClick={() => void submit('start')}
           disabled={busy}
+          data-track="study_start"
           className="w-full inline-flex items-center justify-center gap-2 h-11 rounded-xl text-sm font-semibold text-white disabled:opacity-60 transition-opacity hover:opacity-90"
           style={{ backgroundColor: TEAL }}
         >
@@ -216,21 +223,59 @@ export default function StudyStartPanel({
         </button>
       )}
 
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="mt-2 w-full inline-flex items-center justify-between gap-2 h-10 px-3 rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card text-left hover:bg-gray-50 dark:hover:bg-secondary transition-colors"
-      >
-        <span className="min-w-0 flex items-center gap-2">
-          <Settings2 size={14} className="flex-none text-gray-400 dark:text-muted-foreground" />
-          <span className="text-[12px] text-gray-600 dark:text-muted-foreground truncate">
-            {rhythmLabel} &middot; {depthLabel} &middot; {translationName}
-          </span>
-        </span>
-        <span className="text-[12px] font-semibold flex-none" style={{ color: TEAL }}>
-          Wijzig
-        </span>
-      </button>
+      {/* The settings, as a card rather than a caption.
+          This was one 12px grey line - "Elke dag · Kort & praktisch ·
+          Statenvertaling" with a small "Wijzig" - sitting directly under a solid
+          teal button. It read as a footnote on that button, and the three values
+          truncated inside a 400px rail, so people did not see that the study had
+          settings at all. A titled card on white against the rail's grey, with
+          each value on its own row and a full-width action, is the version that
+          actually gets looked at.
+
+          The card is a <div> and the action is the only <button>: making the
+          whole card clickable would have meant no visible control, which is the
+          problem being fixed. */}
+      <div className="mt-3 rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card overflow-hidden">
+        <div
+          className="flex items-center gap-2 px-3.5 py-2.5 border-b border-gray-200 dark:border-border"
+          style={{ backgroundColor: 'rgba(13,148,136,0.07)' }}
+        >
+          <Settings2 size={16} className="flex-none" style={{ color: TEAL }} />
+          <p className="text-[12px] font-bold uppercase tracking-wider" style={{ color: TEAL }}>
+            Jouw instellingen
+          </p>
+        </div>
+
+        <dl className="divide-y divide-gray-100 dark:divide-border">
+          {[
+            { icon: CalendarDays, label: 'Ritme', value: rhythmLabel },
+            { icon: Layers, label: 'Uitleg', value: depthLabel },
+            { icon: BookOpen, label: 'Vertaling', value: translationName },
+          ].map(({ icon: Icon, label, value }) => (
+            <div key={label} className="flex items-center justify-between gap-3 px-3.5 py-2.5">
+              <dt className="flex items-center gap-2 text-[13px] text-gray-500 dark:text-muted-foreground flex-none">
+                <Icon size={15} className="flex-none text-gray-400 dark:text-muted-foreground" />
+                {label}
+              </dt>
+              <dd className="min-w-0 text-[14px] font-semibold text-foreground text-right leading-snug">
+                {value}
+              </dd>
+            </div>
+          ))}
+        </dl>
+
+        <div className="p-2.5 pt-0">
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            data-track="study_settings_open"
+            className="w-full inline-flex items-center justify-center gap-1.5 h-10 rounded-lg border text-[13.5px] font-bold transition-colors hover:bg-[rgba(13,148,136,0.07)]"
+            style={{ color: TEAL, borderColor: 'rgba(13,148,136,0.45)' }}
+          >
+            Instellingen wijzigen <ChevronRight size={15} />
+          </button>
+        </div>
+      </div>
 
       {error && !open && <p className="mt-2 text-xs text-destructive">{error}</p>}
 
@@ -340,11 +385,30 @@ export default function StudyStartPanel({
                   onChange={(event) => setTranslation(event.target.value)}
                   className="w-full rounded-lg border border-gray-200 dark:border-border bg-white dark:bg-background px-3 py-2.5 text-sm text-foreground"
                 >
-                  {translations.map((option) => (
-                    <option key={option.id} value={option.id}>
-                      {option.name}
-                    </option>
-                  ))}
+                  {/* Two groups, not one flat list. `optgroup` is used rather
+                      than a fake disabled `<option>` separator because it is the
+                      native construct for this: screen readers announce the
+                      group, and the label cannot be selected by accident. The
+                      groups are only rendered when non-empty - an empty
+                      `optgroup` still draws its label in most browsers. */}
+                  {dutchTranslations.length > 0 && (
+                    <optgroup label="Nederlandse vertalingen">
+                      {dutchTranslations.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
+                  {otherTranslations.length > 0 && (
+                    <optgroup label="Overige vertalingen">
+                      {otherTranslations.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
                 </select>
               </div>
 

@@ -44,7 +44,13 @@ function NavLink({ url, title, icon: Icon, tourId }: { url: string; title: strin
   const active = pathname === url || (url !== "/dashboard" && pathname?.startsWith(url + "/"))
 
   return (
-    <li className="list-none" data-tour={tourId}>
+    // `data-track` reuses the tour's own ids, prefixed: one naming scheme, two
+    // consumers, and a nav item can never be instrumented under two names.
+    <li
+      className="list-none"
+      data-tour={tourId}
+      data-track={tourId ? tourId.replace(/^nav-/, "sidebar_") : undefined}
+    >
       <Link
         href={url}
         className={[

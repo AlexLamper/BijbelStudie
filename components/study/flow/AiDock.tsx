@@ -46,9 +46,17 @@ const STARTERS: Record<StepKey, string[]> = {
  * on the quiz step the pill covered it and the lesson could not be finished. The
  * trigger now lives in the flow header, where nothing else is.
  *
- * On large screens it opens as a side drawer and the step body SHRINKS rather
- * than being covered, so you can read and ask at the same time. Below that it is
- * a bottom sheet, because there is no room to do both.
+ * WHERE IT OPENS. From lg it rises into the right half of the step body - the
+ * space the supporting panels (Toelichting / Beeld / Grondtekst / Notities) use.
+ * That half is already the "things that help you read this" column, which is
+ * what the assistant is, and the passage on the left keeps its width and its
+ * scroll position. The previous version was a 420px viewport-height drawer that
+ * shrank the header, body and footer to make room, so asking a question reflowed
+ * the whole lesson around the reader.
+ *
+ * It is positioned against the step body, so the shell must give that container
+ * `relative`. Below lg it stays a viewport bottom sheet with a backdrop: half a
+ * phone screen is not enough to read and ask at once.
  */
 export default function AiDock({
   open,
@@ -106,11 +114,13 @@ export default function AiDock({
         role="dialog"
         aria-label="AI-assistent"
         className={[
-          'fixed z-50 bg-white dark:bg-card border-gray-200 dark:border-border flex flex-col',
-          // Bottom sheet on small screens.
-          'inset-x-0 bottom-0 h-[75vh] rounded-t-2xl border-t',
-          // Side drawer from lg up.
-          'lg:inset-y-0 lg:left-auto lg:right-0 lg:h-full lg:w-[420px] lg:rounded-none lg:border-t-0 lg:border-l',
+          'bg-white dark:bg-card border-gray-200 dark:border-border flex flex-col animate-panel-up',
+          // Bottom sheet on small screens: fixed to the viewport, over the backdrop.
+          'fixed z-50 inset-x-0 bottom-0 h-[75vh] rounded-t-2xl border-t',
+          // From lg: the right half of the step body, floor to ceiling. `left-1/2`
+          // lands on the divider the supporting panels already sit behind, so the
+          // panel replaces that column exactly instead of overlapping the passage.
+          'lg:absolute lg:z-30 lg:inset-y-0 lg:left-1/2 lg:right-0 lg:h-auto lg:w-auto lg:rounded-none lg:border-t-0 lg:border-l',
         ].join(' ')}
       >
         <header className="flex-none flex items-center justify-between px-4 h-14 border-b border-gray-200 dark:border-border">

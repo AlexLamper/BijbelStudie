@@ -134,26 +134,71 @@ export default async function StudyDetailPage({ params }: PageProps) {
     }
   }
 
-  const versions = await getVersions().catch(() => [] as { id: string; name: string }[]);
+  const versions = await getVersions().catch(
+    () => [] as { id: string; name: string; language: string }[],
+  );
+
+  // `language` is carried into the picker so it can group the Dutch translations
+  // ahead of the rest: the manifest interleaves nl, en and de, and this is a
+  // Dutch-language site where the nl ones are the answer nearly every time.
+  const translations = versions.map((version) => ({
+    id: version.id,
+    name: version.name,
+    language: version.language,
+  }));
   const minutes = estimateStudyMinutes(study);
   const resumeHref = `/studie/${study.id}/${resumeDay}${resumeStep ? `?stap=${resumeStep}` : ''}`;
   const books = [...new Set(study.lessons.map((lesson) => lesson.book))];
+
+  /**
+   * "Wat ga je leren?", with a fallback.
+   *
+   * Only two of the eleven studies have authored `outcomes`, and the section
+   * simply disappeared for the other nine - which on a three-lesson study left
+   * the left column with nothing in it but the step explainer. Every lesson has
+   * a `focus` question by contract, and those questions are exactly what the
+   * study answers, so they stand in until outcomes are written.
+   */
+  const learningPoints =
+    study.outcomes && study.outcomes.length > 0
+      ? study.outcomes
+      : study.lessons.map((lesson) => lesson.focus.split('?')[0].trim() + '?');
+
+  /** Books in lesson order, each with the chapters this study visits. */
+  const readingPlan = books.map((book) => {
+    const chapters = [
+      ...new Set(study.lessons.filter((l) => l.book === book).map((l) => l.chapter)),
+    ].sort((a, b) => a - b);
+    return {
+      book,
+      chapters:
+        chapters.length === 1
+          ? String(chapters[0])
+          : // A contiguous run reads as a range; anything else stays a list.
+            chapters[chapters.length - 1] - chapters[0] + 1 === chapters.length
+            ? `${chapters[0]}-${chapters[chapters.length - 1]}`
+            : chapters.join(', '),
+    };
+  });
 
   return (
     <div className="h-full flex flex-col lg:overflow-hidden">
       {/* Header. Stays put; everything below it scrolls in its own pane. */}
       <header className="flex-none border-b border-gray-200 dark:border-border bg-white dark:bg-card">
-        <div className="px-5 sm:px-8 py-4 sm:py-5">
+        {/* Deliberately shallow. This bar is fixed while the panes below it
+            scroll, so every pixel it takes is a pixel the lesson list never gets
+            back - it used to stand ~165px tall and read as a slab. */}
+        <div className="px-5 sm:px-8 py-2.5 sm:py-3">
           <Link
             href="/studies"
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground no-underline mb-2.5"
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground no-underline mb-1.5"
           >
             <ArrowLeft size={13} /> Alle studies
           </Link>
 
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-3">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2">
             <div className="min-w-0">
-              <div className="flex items-center gap-2 mb-1.5">
+              <div className="flex items-center gap-2 mb-1">
                 <span
                   className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold text-white"
                   style={{ backgroundColor: TEAL }}
@@ -164,12 +209,13 @@ export default async function StudyDetailPage({ params }: PageProps) {
                   {books.join(' · ')}
                 </span>
               </div>
-              <h1 className="text-xl sm:text-2xl font-bold text-foreground leading-tight">
+              <h1 className="text-lg sm:text-xl font-bold text-foreground leading-tight truncate">
                 {study.title}
               </h1>
-              <p className="mt-1 text-sm text-gray-500 dark:text-muted-foreground max-w-2xl leading-relaxed line-clamp-2">
-                {study.description}
-              </p>
+              {/* No description here. It was a two-line clamp of the exact text
+                  the "Waar gaat deze studie over?" section prints in full a few
+                  pixels lower - two lines of duplicate copy were a third of this
+                  bar's height. */}
             </div>
 
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-gray-500 dark:text-muted-foreground flex-none">
@@ -188,63 +234,95 @@ export default async function StudyDetailPage({ params }: PageProps) {
       </header>
 
       <div className="flex-1 min-h-0 flex flex-col lg:flex-row">
-        {/* Left: what the study is and how it works. Scrolls on its own. */}
+        {/* Left: what the study is and how it works. Scrolls on its own.
+            Capped rather than free-growing: on a wide monitor an uncapped column
+            put a 400px rail against a metre of empty white, which is most of why
+            this page read as broken on the shorter studies.
+
+            The row is NOT centred. Centring it offset both panes by half the
+            leftover width, so this column's px-8 no longer lined up with the
+            header's - the header is full-bleed, and the body text visibly
+            stepped in from the title above it. Same padding, same left edge.
+
+            The cap therefore sits on the INNER block, not on the pane: the pane
+            takes every pixel left over so the rail stays flush against the right
+            edge and its divider runs the full height, while the prose still
+            stops at a readable 760px measured from the left. Capping the pane
+            instead left a band of dead background between the two. */}
         <div className="flex-1 min-w-0 lg:overflow-y-auto">
-          <div className="px-5 sm:px-8 py-6 space-y-7 max-w-3xl">
-            {study.about && study.about.length > 0 && (
-              <section>
-                <h2 className="text-sm font-bold text-foreground mb-2.5">Waar gaat deze studie over?</h2>
-                <div className="space-y-3">
-                  {study.about.map((paragraph, index) => (
-                    <p key={index} className="text-[14.5px] leading-relaxed text-foreground/85">
+          <div className="px-5 sm:px-8 py-6 space-y-8 lg:max-w-[760px]">
+            <section>
+              <h2 className="text-sm font-bold text-foreground mb-2.5">Waar gaat deze studie over?</h2>
+              <div className="space-y-3">
+                {(study.about && study.about.length > 0 ? study.about : [study.description]).map(
+                  (paragraph, index) => (
+                    <p key={index} className="text-[15px] leading-relaxed text-foreground/85">
                       {paragraph}
                     </p>
-                  ))}
-                </div>
-              </section>
-            )}
+                  ),
+                )}
+              </div>
+            </section>
 
-            {study.outcomes && study.outcomes.length > 0 && (
-              <section>
-                <h2 className="flex items-center gap-2 text-sm font-bold text-foreground mb-2.5">
-                  <Target size={15} style={{ color: TEAL }} /> Wat ga je leren?
-                </h2>
-                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
-                  {study.outcomes.map((outcome, index) => (
-                    <li key={index} className="flex gap-2 text-[14px] text-foreground/85 leading-relaxed">
-                      <CheckCircle2 size={15} className="mt-0.5 flex-none" style={{ color: TEAL }} />
-                      {outcome}
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
+            {/* Always populated. `outcomes` is authored per study and most of them
+                do not have it yet; every lesson DOES have a `focus` question, and
+                those are the questions the study answers - so an unwritten study
+                still says what you get out of it instead of showing nothing. */}
+            <section>
+              <h2 className="flex items-center gap-2 text-sm font-bold text-foreground mb-3">
+                <Target size={15} style={{ color: TEAL }} /> Wat ga je leren?
+              </h2>
+              <ul className="space-y-2">
+                {learningPoints.map((point, index) => (
+                  <li key={index} className="flex gap-2.5 text-[14px] text-foreground/85 leading-relaxed">
+                    <CheckCircle2 size={15} className="mt-0.5 flex-none" style={{ color: TEAL }} />
+                    {point}
+                  </li>
+                ))}
+              </ul>
+            </section>
 
             <section>
-              <h2 className="text-sm font-bold text-foreground mb-2.5">Hoe een les werkt</h2>
-              <ol className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-2.5">
+              <h2 className="flex items-center gap-2 text-sm font-bold text-foreground mb-3">
+                <BookOpen size={15} style={{ color: TEAL }} /> Wat je gaat lezen
+              </h2>
+              <ul className="flex flex-wrap gap-1.5">
+                {readingPlan.map((entry) => (
+                  <li
+                    key={entry.book}
+                    className="inline-flex items-baseline gap-1.5 rounded-lg border border-gray-200 dark:border-border bg-white dark:bg-card px-2.5 py-1.5"
+                  >
+                    <span className="text-[12.5px] font-semibold text-foreground">{entry.book}</span>
+                    <span className="text-[11.5px] text-gray-500 dark:text-muted-foreground">
+                      {entry.chapters}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+
+            <section>
+              <h2 className="text-sm font-bold text-foreground mb-3">Hoe een les werkt</h2>
+              <ol className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card divide-y divide-gray-200 dark:divide-border overflow-hidden">
                 {STEP_EXPLAINER.map((step, index) => {
                   const Icon = step.icon;
                   return (
-                    <li
-                      key={step.label}
-                      className="rounded-xl border border-gray-200 dark:border-border p-3 bg-white dark:bg-card"
-                    >
-                      <div className="flex items-center gap-1.5 mb-1.5">
-                        <span
-                          className="h-6 w-6 rounded-lg flex items-center justify-center flex-none"
-                          style={{ backgroundColor: 'rgba(13,148,136,0.10)' }}
-                        >
-                          <Icon size={13} style={{ color: TEAL }} />
-                        </span>
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-muted-foreground">
-                          Stap {index + 1}
-                        </span>
-                      </div>
-                      <p className="text-[13px] font-semibold text-foreground leading-tight">{step.label}</p>
-                      <p className="text-[11.5px] text-gray-500 dark:text-muted-foreground leading-snug mt-0.5">
+                    <li key={step.label} className="flex items-center gap-3 px-3.5 py-2.5">
+                      <span
+                        className="h-7 w-7 rounded-lg flex items-center justify-center flex-none"
+                        style={{ backgroundColor: 'rgba(13,148,136,0.10)' }}
+                      >
+                        <Icon size={13} style={{ color: TEAL }} />
+                      </span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-muted-foreground w-11 flex-none">
+                        Stap {index + 1}
+                      </span>
+                      <span className="text-[13px] font-semibold text-foreground w-[92px] flex-none">
+                        {step.label}
+                      </span>
+                      <span className="text-[12.5px] text-gray-500 dark:text-muted-foreground leading-snug min-w-0">
                         {step.text}
-                      </p>
+                      </span>
                     </li>
                   );
                 })}
@@ -262,7 +340,7 @@ export default async function StudyDetailPage({ params }: PageProps) {
           <div className="flex-none p-4 sm:p-5 border-b border-gray-200 dark:border-border">
             <StudyStartPanel
               studyId={study.id}
-              translations={versions.map((version) => ({ id: version.id, name: version.name }))}
+              translations={translations}
               defaultTranslation={settings.translation ?? study.startVersion}
               suggestedRhythm={(settings.rhythm as never) ?? study.suggestedRhythm ?? 'dagelijks'}
               suggestedDepth={(settings.depth as never) ?? study.suggestedDepth ?? 'kort'}

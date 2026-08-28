@@ -27,23 +27,26 @@ const STEPS: TourStep[] = [
     side: "bottom",
   },
   {
+    // `nav-studie` is the sidebar's "Lezen" item. The id is from when /studie
+    // was the reading page; the guided studies moved to /studies and get their
+    // own step further down, so this one must describe reading, not studying.
     target: "nav-studie",
-    title: "Bijbelstudie",
-    description: "Dit is het hart van de app: begeleide studies die je stap voor stap door een bijbelgedeelte leiden.",
+    title: "Lezen",
+    description: "Hier lees je de Bijbel: de tekst links, commentaar en achtergrond rechts. Je begint waar je gebleven was.",
     page: "/dashboard",
     side: "right",
   },
   {
     target: "bible-text",
     title: "De bijbeltekst",
-    description: "Op de leespagina lees je de bijbeltekst. Je kunt verzen markeren en notities maken door erop te klikken.",
+    description: "Klik op een vers om er een notitie bij te maken of het te markeren. Gemarkeerde verzen krijgen een kleur, verzen met een notitie een klein icoon - ook in de studies.",
     page: "/lezen",
     side: "right",
   },
   {
     target: "bible-selector",
     title: "Kies vertaling, boek en hoofdstuk",
-    description: "Met deze balk wissel je snel van vertaling, boek of hoofdstuk. Vijf Nederlandse vertalingen zijn beschikbaar.",
+    description: "Met deze balk wissel je snel van vertaling, boek of hoofdstuk. Alle beschikbare Nederlandse vertalingen staan in de lijst.",
     page: "/lezen",
     side: "bottom",
   },

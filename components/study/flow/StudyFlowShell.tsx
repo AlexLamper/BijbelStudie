@@ -302,11 +302,10 @@ export default function StudyFlowShell({
 
   const isLast = position === steps.length;
   const canGoBack = position > 1;
-  const shift = aiOpen ? 'lg:mr-[420px]' : '';
 
   return (
     <div className="h-full flex flex-col">
-      <header className={['flex-none border-b border-border bg-background transition-all', shift].join(' ')}>
+      <header className="flex-none border-b border-border bg-background">
         <div className="px-3 sm:px-5 h-14 flex items-center justify-between gap-2">
           <Link
             href={`/studies/${lesson.study.id}`}
@@ -407,6 +406,7 @@ export default function StudyFlowShell({
             type="button"
             onClick={() => setAiOpen((open) => !open)}
             aria-pressed={aiOpen}
+            data-track="ai_open"
             title="AI-assistent"
             className={[
               'flex-none inline-flex items-center gap-1.5 h-8 pl-2.5 pr-3 rounded-lg text-[12px] font-semibold transition-colors border',
@@ -421,28 +421,48 @@ export default function StudyFlowShell({
           </button>
         </div>
 
-        <div className="px-4 sm:px-6 pb-3 flex justify-center">
+        {/* Not centred any more - the rail is a full-width progress bar now, so
+            it spans the header rather than sitting as an island in the middle. */}
+        <div className="px-4 sm:px-6 pb-3">
           <StudyStepRail steps={steps} current={step} completed={completed} onSelect={goTo} />
         </div>
       </header>
 
-      {/* The dock shrinks this column on lg rather than covering it. */}
-      <div className={['flex-1 min-h-0 overflow-hidden transition-all', shift].join(' ')}>
+      {/* `relative` so the AI dock can take the right half of THIS box.
+          The dock is a child of the step body, not a sibling of the whole
+          screen: it used to be a viewport-height drawer at `right-0` that
+          pushed the header, body and footer left by 420px, which reflowed the
+          entire lesson every time the assistant was toggled. It now rises into
+          the space the supporting panels (Toelichting / Beeld / Grondtekst /
+          Notities) occupy, so the passage on the left never moves.
+          `overflow-hidden` also clips the panel's slide-up. */}
+      <div className="relative flex-1 min-h-0 overflow-hidden">
         {body}
+
+        {/* Sibling of `body`, and stays at this position in the tree across
+            steps, so the conversation survives moving between them. */}
+        <AiDock
+          open={aiOpen}
+          onOpenChange={setAiOpen}
+          book={lesson.passage.book}
+          chapter={lesson.passage.chapter}
+          version={lesson.translation}
+          step={isStepKey(step) ? step : 'word'}
+          draft={aiDraft}
+          onDraftConsumed={() => setAiDraft(null)}
+          question={aiQuestion}
+          onQuestionConsumed={() => setAiQuestion(null)}
+        />
       </div>
 
-      <footer
-        className={[
-          'flex-none border-t border-border bg-background px-4 sm:px-6 py-3 flex items-center justify-between gap-3 transition-all',
-          shift,
-        ].join(' ')}
-      >
+      <footer className="flex-none border-t border-border bg-background px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
         {/* White rather than transparent: on the previous grey-on-grey button the
             only thing separating "Vorige" from the footer was a hairline. */}
         <button
           type="button"
           onClick={onPrevious}
           disabled={!canGoBack}
+          data-track="study_step_previous"
           className={[
             'inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium border transition-colors',
             canGoBack
@@ -459,6 +479,7 @@ export default function StudyFlowShell({
           type="button"
           onClick={() => void onNext()}
           disabled={finishing}
+          data-track={isLast ? "study_lesson_complete" : "study_step_next"}
           className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold text-white disabled:opacity-60"
           style={{ backgroundColor: TEAL }}
         >
@@ -467,18 +488,6 @@ export default function StudyFlowShell({
         </button>
       </footer>
 
-      <AiDock
-        open={aiOpen}
-        onOpenChange={setAiOpen}
-        book={lesson.passage.book}
-        chapter={lesson.passage.chapter}
-        version={lesson.translation}
-        step={isStepKey(step) ? step : 'word'}
-        draft={aiDraft}
-        onDraftConsumed={() => setAiDraft(null)}
-        question={aiQuestion}
-        onQuestionConsumed={() => setAiQuestion(null)}
-      />
     </div>
   );
 }

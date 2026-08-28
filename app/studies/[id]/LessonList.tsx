@@ -146,6 +146,7 @@ export default function LessonList({
                       <button
                         type="button"
                         onClick={() => router.push(`/studie/${studyId}/${lesson.day}`)}
+                        data-track="study_lesson_open"
                         className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-[12px] font-semibold text-white"
                         style={{ backgroundColor: TEAL }}
                       >

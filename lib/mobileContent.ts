@@ -65,22 +65,15 @@ function versesToList(verses: Record<string, string> | null | undefined): Verse[
     .sort((a, b) => a.n - b.n);
 }
 
-/**
- * manifest.json omits `language` for a few entries and local-data then
- * defaults them to 'en'. Elberfelder 1905 is German, not English, and the app
- * groups the version picker by language — so correct it here rather than
- * editing the manifest, which the website also reads.
- */
-const LANGUAGE_OVERRIDES: Record<string, string> = {
-  elberfelder_1905: 'de',
-};
-
 export async function listMobileBibles(): Promise<SourceSummary[]> {
   const versions = await getVersions();
   return filterAllowedForMobile('bible', versions).map((v) => ({
     id: v.id,
     name: v.name,
-    language: LANGUAGE_OVERRIDES[v.id] ?? v.language ?? 'nl',
+    // manifest.json omits `language` for a few entries and local-data then
+    // defaults them to 'en'. Every entry the mobile allowlist admits does
+    // declare one, so no per-id correction is needed here.
+    language: v.language ?? 'nl',
     attribution: mobileBibleAttribution(v.id),
   }));
 }
@@ -166,19 +159,6 @@ export type OriginalEnvelope = {
 };
 
 /**
- * Book names `bookNameMap` does not carry, kept here rather than added there:
- * `englishToDutchMap` and `getBookNameVariants` are both derived from that map
- * by last-key-wins, so a German key for `1 Chronicles` would quietly rename the
- * website's English → Dutch answer to "1 Chronik".
- */
-const ORIGINAL_BOOK_ALIASES: Record<string, string> = {
-  '1 Chronik': '1 Chronicles',
-  '2 Chronik': '2 Chronicles',
-  '1 Koenige': '1 Kings',
-  '2 Koenige': '2 Kings',
-};
-
-/**
  * STEPBible originals live at /public/data/original/<Book_Slug>/<chapter>.json
  * with spaces replaced by underscores. Read directly rather than through
  * local-data, whose parsers assume a verse-string shape this data does not have.
@@ -198,9 +178,7 @@ export async function getMobileOriginalChapter(
 ): Promise<OriginalEnvelope | null> {
   assertMobileAllowed('original', 'stepbible');
 
-  const name = book.trim();
-  const english = ORIGINAL_BOOK_ALIASES[name] ?? normalizeBookName(name);
-  const slug = english.replace(/\s+/g, '_');
+  const slug = normalizeBookName(book.trim()).replace(/\s+/g, '_');
   // Reject traversal before it reaches the filesystem: the book name comes
   // straight off the URL.
   if (!/^[A-Za-z0-9_]+$/.test(slug)) return null;

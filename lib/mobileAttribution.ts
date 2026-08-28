@@ -19,7 +19,6 @@ const MOBILE_BIBLE_ATTRIBUTION: Record<string, string> = {
   heilige_schrift_1917: 'De Heilige Schrift 1917 - publiek domein',
   canisiusbijbel:
     'Canisiusbijbel 1939 - publiek domein (bron: ebible.org, nld1939)',
-  elberfelder_1905: 'Elberfelder 1905 - publiek domein',
   kjv: 'King James Version (1611) - publiek domein',
   asv: 'American Standard Version (1901) - publiek domein',
   web: 'World English Bible - publiek domein',

@@ -68,6 +68,7 @@ export default function StudyMaterialsSection({
                 key={id}
                 onClick={() => setActiveTab(id)}
                 title={label}
+                data-track={`reading_tab_${id === "historical" ? "historical" : id}`}
                 className={[
                   'relative flex-1 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 px-1 py-1.5 text-[9px] sm:text-xs font-medium rounded-lg transition-colors min-w-0',
                   active
