@@ -210,31 +210,21 @@ export function isCompedAccess(local: LocalBilling): boolean {
 }
 
 /**
- * Mongo equivalents of the three predicates above, for counting without pulling
- * every user into memory.
+ * The Mongo equivalents of the three predicates above, for counting without
+ * pulling every user into memory, live in lib/billingFilters.
  *
- * `{ field: null }` matches both an explicit null and a missing field, which is
- * what "Stripe never wrote this" looks like in practice - the review-account
- * script sets `subscribed` and nothing else.
- *
- * These must keep agreeing with the predicates; tests/subscriptionSync.test.ts
- * checks both against the same fixtures.
+ * They are re-exported here so this file stays the one place to look for the
+ * billing-state rules, but they are *defined* in a module that imports nothing:
+ * a caller that only counts states must not have to import this file, because
+ * this file imports lib/stripe, which throws at module scope without a Stripe
+ * key. That is exactly how counting comped accounts on /admin turned into a 500
+ * on the whole dashboard. See the comment in lib/billingFilters.ts.
  */
-export const STRIPE_GRANTED_FILTER = {
-  $or: [{ stripeSubscriptionId: { $ne: null } }, { subscriptionStatus: { $ne: null } }],
-};
-
-export const PAYING_STRIPE_FILTER = {
-  subscribed: true,
-  ...STRIPE_GRANTED_FILTER,
-};
-
-export const COMPED_ACCESS_FILTER = {
-  subscribed: true,
-  storePremium: { $ne: true },
-  stripeSubscriptionId: null,
-  subscriptionStatus: null,
-};
+export {
+  STRIPE_GRANTED_FILTER,
+  PAYING_STRIPE_FILTER,
+  COMPED_ACCESS_FILTER,
+} from "./billingFilters";
 
 /**
  * Builds the `$set` a snapshot implies for one account, and the list of fields

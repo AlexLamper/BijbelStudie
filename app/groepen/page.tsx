@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import {
-  Users, Plus, Search, Lock, Globe,
+  Users, Plus, Search, Lock, Globe, RefreshCw, AlertCircle,
   ChevronRight, UserPlus, MessageSquare, StickyNote, CalendarCheck2,
 } from "lucide-react"
 import { GroupDialog } from "./_GroupDialog"
@@ -312,6 +312,7 @@ export default function GroepenPage() {
   const [tab, setTab]                   = useState<"discover"|"mine">("discover")
   const [joinTarget, setJoinTarget]     = useState<Group | null>(null)
   const [showCreate, setShowCreate]     = useState(false)
+  const [loadFailed, setLoadFailed]     = useState(false)
 
   const myGroupIds = new Set(myGroups.map(g => g._id))
 
@@ -319,18 +320,49 @@ export default function GroepenPage() {
     setLoading(true)
     try {
       const res  = await fetch("/api/groepen")
+      // A failed request used to fall through to `data.publicGroups || []`, so a
+      // 401, a 404 ("Gebruiker niet gevonden") or a 500 rendered as the ordinary
+      // "geen groepen gevonden" empty state. Those are different claims - "there
+      // are none" versus "we could not look" - and the second one is the more
+      // likely explanation for a discover list that is empty on a live site.
+      if (!res.ok) throw new Error(`GET /api/groepen ${res.status}`)
       const data = await res.json()
       setPublicGroups(data.publicGroups || [])
       setMyGroups(data.myGroups || [])
+      setLoadFailed(false)
+    } catch {
+      setLoadFailed(true)
+      setPublicGroups([])
+      setMyGroups([])
     } finally { setLoading(false) }
   }, [])
 
   useEffect(() => { loadGroups() }, [loadGroups])
 
+  const query    = search.trim()
   const filtered = (tab === "discover" ? publicGroups : myGroups).filter(g =>
     g.name.toLowerCase().includes(search.toLowerCase()) ||
     g.description?.toLowerCase().includes(search.toLowerCase())
   )
+
+  // Three different situations shared one message before. "Probeer een andere
+  // zoekterm" is meaningless while the search box is empty, and on the discover
+  // tab it blamed the user's search for what is really "nobody has made a
+  // public group yet" - which also hid the free way in: an invite code.
+  const empty = query
+    ? {
+        title: "Geen groepen gevonden",
+        body: `Geen groep met "${query}" in de naam of beschrijving. Probeer een andere zoekterm.`,
+      }
+    : tab === "mine"
+      ? {
+          title: "U bent nog geen lid van een groep",
+          body: "Neem deel aan een openbare groep via het tabblad Ontdekken, of gebruik een uitnodigingscode. Deelnemen is gratis.",
+        }
+      : {
+          title: "Er zijn nog geen openbare groepen",
+          body: "Zodra iemand een openbare groep aanmaakt, verschijnt die hier. Heeft u een uitnodigingscode gekregen? Vul die hierboven in - deelnemen is gratis.",
+        }
 
   return (
     <div className="px-6 xl:px-10 py-8 space-y-6">
@@ -381,50 +413,68 @@ export default function GroepenPage() {
             <div key={i} className="h-48 bg-muted skeleton-pulse rounded-xl" />
           ))}
         </div>
+      ) : loadFailed ? (
+        <div className="content-in bg-white dark:bg-card border border-border rounded-xl p-16 text-center">
+          <div className="h-12 w-12 rounded-xl flex items-center justify-center mx-auto mb-4"
+            style={{ backgroundColor: BG_TEAL }}>
+            <AlertCircle size={22} style={{ color: IC }} />
+          </div>
+          <h3 className="font-semibold text-foreground mb-1">Groepen konden niet worden geladen</h3>
+          <p className="text-sm text-muted-foreground mb-6">
+            Er ging iets mis bij het ophalen van de groepen. Dit betekent niet dat er geen
+            groepen zijn - probeer het opnieuw.
+          </p>
+          <button onClick={loadGroups}
+            className="press inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
+            style={{ backgroundColor: IC }}>
+            <RefreshCw size={15} /> Opnieuw proberen
+          </button>
+        </div>
       ) : filtered.length === 0 ? (
         <div className="content-in bg-white dark:bg-card border border-border rounded-xl p-16 text-center">
           <div className="h-12 w-12 rounded-xl flex items-center justify-center mx-auto mb-4"
             style={{ backgroundColor: BG_TEAL }}>
             <Users size={22} style={{ color: IC }} />
           </div>
-          <h3 className="font-semibold text-foreground mb-1">
-            {tab === "mine" ? "U bent nog geen lid van een groep" : "Geen groepen gevonden"}
-          </h3>
-          <p className="text-sm text-muted-foreground mb-6">
-            {tab === "mine"
-              ? "Maak een groep aan of neem deel via een uitnodigingscode."
-              : "Probeer een andere zoekterm of maak zelf een groep aan."}
-          </p>
+          <h3 className="font-semibold text-foreground mb-1">{empty.title}</h3>
+          <p className="text-sm text-muted-foreground mb-6">{empty.body}</p>
 
-          <div className="mx-auto mb-6 max-w-xl border-t border-border pt-6 text-left">
-            <p className="mb-3 text-center text-sm font-semibold text-foreground">
-              Wat is een bijbelstudiegroep?
-            </p>
-            <p className="mb-4 text-center text-sm leading-relaxed text-muted-foreground">
-              Een kleine groep die hetzelfde bijbelgedeelte leest en er samen over doorpraat.
-              De groepsleider zet een wekelijkse opdracht klaar, iedereen leest die en deelt
-              wat opvalt.
-            </p>
-            <ul className="grid gap-3 sm:grid-cols-3">
-              {[
-                { icon: CalendarCheck2, title: "Wekelijkse opdracht", body: "Een hoofdstuk of gedeelte voor de hele groep" },
-                { icon: MessageSquare,  title: "Bespreking",          body: "Stel vragen en reageer op elkaar" },
-                { icon: StickyNote,     title: "Gedeelde notities",   body: "Deel wat u ontdekt met de groep" },
-              ].map(({ icon: Icon, title, body }) => (
-                <li key={title} className="flex flex-col gap-1">
-                  <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                    <Icon size={15} style={{ color: IC }} className="shrink-0" /> {title}
-                  </span>
-                  <span className="text-xs leading-snug text-muted-foreground">{body}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <button onClick={() => setShowCreate(true)}
-            className="press inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
-            style={{ backgroundColor: IC }}>
-            <Plus size={15} /> Groep aanmaken
-          </button>
+          {/* The explainer and the aanmaak-CTA are onboarding, not search results:
+              showing them under "geen treffers voor <zoekterm>" buries the one
+              thing that helps there, namely zoeken op iets anders. */}
+          {!query && (
+            <>
+              <div className="mx-auto mb-6 max-w-xl border-t border-border pt-6 text-left">
+                <p className="mb-3 text-center text-sm font-semibold text-foreground">
+                  Wat is een bijbelstudiegroep?
+                </p>
+                <p className="mb-4 text-center text-sm leading-relaxed text-muted-foreground">
+                  Een kleine groep die hetzelfde bijbelgedeelte leest en er samen over doorpraat.
+                  De groepsleider zet een wekelijkse opdracht klaar, iedereen leest die en deelt
+                  wat opvalt.
+                </p>
+                <ul className="grid gap-3 sm:grid-cols-3">
+                  {[
+                    { icon: CalendarCheck2, title: "Wekelijkse opdracht", body: "Een hoofdstuk of gedeelte voor de hele groep" },
+                    { icon: MessageSquare,  title: "Bespreking",          body: "Stel vragen en reageer op elkaar" },
+                    { icon: StickyNote,     title: "Gedeelde notities",   body: "Deel wat u ontdekt met de groep" },
+                  ].map(({ icon: Icon, title, body }) => (
+                    <li key={title} className="flex flex-col gap-1">
+                      <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                        <Icon size={15} style={{ color: IC }} className="shrink-0" /> {title}
+                      </span>
+                      <span className="text-xs leading-snug text-muted-foreground">{body}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <button onClick={() => setShowCreate(true)}
+                className="press inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
+                style={{ backgroundColor: IC }}>
+                <Plus size={15} /> Groep aanmaken
+              </button>
+            </>
+          )}
         </div>
       ) : (
         <div className="stagger-in grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">

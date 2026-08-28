@@ -588,7 +588,6 @@ export default function StudyFlowShell({
         lessonsCompleted={lessonsCompleted}
         passageReference={passageReference}
         minutes={lesson.lesson.estimatedMinutes}
-        steps={steps}
         summary={summary}
         quizScore={quizScore}
         quizTotal={quizTotal}
@@ -736,11 +735,24 @@ export default function StudyFlowShell({
               <motion.div
                 role="dialog"
                 aria-label="Lessen in deze studie"
-                initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -8, scale: 0.97 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -8, scale: 0.97 }}
+                // The half-width offset is a MOTION value, not a Tailwind class.
+                // `-translate-x-1/2` and framer's animated `y`/`scale` both write
+                // `transform`, and framer's inline style wins - which silently
+                // dropped the centring and left the panel hanging half its own
+                // width to the right of the middle.
+                initial={
+                  reduceMotion
+                    ? { opacity: 0, x: '-50%' }
+                    : { opacity: 0, x: '-50%', y: -8, scale: 0.97 }
+                }
+                animate={{ opacity: 1, x: '-50%', y: 0, scale: 1 }}
+                exit={
+                  reduceMotion
+                    ? { opacity: 0, x: '-50%' }
+                    : { opacity: 0, x: '-50%', y: -8, scale: 0.97 }
+                }
                 transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                className="absolute z-50 top-full mt-1.5 left-1/2 -translate-x-1/2 w-[min(92vw,360px)] max-h-[min(60vh,420px)] overflow-y-auto rounded-2xl border border-gray-200 dark:border-border bg-white dark:bg-card shadow-[0_28px_70px_-24px_rgba(2,6,23,0.55)] p-1.5"
+                className="absolute z-50 top-full mt-1.5 left-1/2 w-[min(92vw,360px)] max-h-[min(60vh,420px)] overflow-y-auto rounded-2xl border border-gray-200 dark:border-border bg-white dark:bg-card shadow-[0_28px_70px_-24px_rgba(2,6,23,0.55)] p-1.5"
               >
                 <p className="px-2 py-1.5 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-muted-foreground">
                   {lesson.study.title}
@@ -804,15 +816,18 @@ export default function StudyFlowShell({
         </AnimatePresence>
       </header>
 
-      {/* `relative` so the AI dock can take the right half of THIS box.
-          The dock is a child of the step body, not a sibling of the whole
-          screen: it used to be a viewport-height drawer at `right-0` that
-          pushed the header, body and footer left by 420px, which reflowed the
-          entire lesson every time the assistant was toggled. It now rises into
-          the space the supporting panels (Toelichting / Beeld / Grondtekst /
-          Notities) occupy, so the passage on the left never moves.
-          `overflow-hidden` also clips the panel's slide-up. */}
-      <div className="relative flex-1 min-h-0 overflow-hidden">
+      {/* A row: the step, and the assistant beside it.
+          `relative` because the Verdieping step's `half` dock pins itself to the
+          right half of THIS box. Everywhere else the dock is a real column in
+          this row, so opening it narrows the step instead of covering it - the
+          passage re-centres in the space that is left rather than being read
+          through a panel.
+
+          The dock is scoped to the lesson body rather than the screen: an
+          earlier version was a viewport-height drawer that pushed the header and
+          footer too, so asking a question reflowed the whole frame. */}
+      <div className="relative flex-1 min-h-0 overflow-hidden flex">
+        <div className="relative flex-1 min-w-0 h-full">
         {/* No `mode`, deliberately: both steps are mounted for the length of the
             transition so one can slide over the other. `initial={false}` keeps
             the first paint still - the lesson should be there when the page is,
@@ -864,9 +879,11 @@ export default function StudyFlowShell({
             {body}
           </motion.div>
         </AnimatePresence>
+        </div>
 
-        {/* Sibling of `body`, and stays at this position in the tree across
-            steps, so the conversation survives moving between them. */}
+        {/* One instance, at a stable position in the tree across every step, so
+            the conversation survives both moving between steps and closing the
+            panel. `layout` is what changes, not the element. */}
         <AiDock
           open={aiOpen}
           onOpenChange={setAiOpen}
@@ -878,7 +895,7 @@ export default function StudyFlowShell({
           // is already a column of prose the assistant is talking about. On every
           // other step it swallowed a centred passage, a textarea or a quiz card,
           // so there it is a drawer against the right edge instead.
-          layout={step === 'depth' ? 'half' : 'drawer'}
+          layout={step === 'depth' ? 'half' : 'push'}
           draft={aiDraft}
           onDraftConsumed={() => setAiDraft(null)}
           question={aiQuestion}

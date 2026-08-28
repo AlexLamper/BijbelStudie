@@ -245,11 +245,11 @@ export default function StepDepth({
             </div>
           )}
 
-          {panel === 'notes' && (
-            <div className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card p-3">
-              <ChapterNotes book={book} chapter={chapter} />
-            </div>
-          )}
+          {/* `bare`: this column already has a heading, a description line and
+              padding. The standard notes panel brings its own header bar and
+              wraps every note in a card, so nesting it here drew three borders
+              around two lines of text. */}
+          {panel === 'notes' && <ChapterNotes book={book} chapter={chapter} bare />}
         </div>
 
         {/* The one step where a question is likely enough to earn its own box.

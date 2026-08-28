@@ -10,7 +10,6 @@ import {
   ListChecks,
   Play,
   Search,
-  Target,
   Users,
 } from 'lucide-react'
 import { curatedStudies, type StudyType, type CuratedStudy } from '../../lib/data/curated-studies'
@@ -112,44 +111,30 @@ function scopeLine(study: CuratedStudy): string {
 }
 
 /**
- * "Wat je leert", per card.
- *
- * Uses the authored `outcomes` when a study has them; only one study did at the
- * time of writing, so the fallback is the lesson arc itself - the titles are
- * written as a sequence ("Het lege graf" -> "Mijn Heer en mijn God" -> ...) and
- * reading the first few tells you exactly what the study covers.
- */
-function learningPreview(study: CuratedStudy): { label: string; items: string[]; total: number } {
-  if (study.outcomes && study.outcomes.length > 0) {
-    return { label: 'Wat je leert', items: study.outcomes, total: study.outcomes.length }
-  }
-  return {
-    label: 'Lessen in het kort',
-    items: study.lessons.map(lesson => lesson.title),
-    total: study.lessons.length,
-  }
-}
-
-/**
  * One study in the catalogue.
  *
- * No cover image. The banners were decorative SVGs that carried no information
- * about the study and took the top third of every card. What is left is what
- * someone actually chooses on: what kind of study it is, what it is called, what
- * you will learn, which books it walks through, and how long it takes.
+ * No cover image, and no "Wat je leert" list either.
+ *
+ * The banners were decorative SVGs that carried no information. The learning
+ * list was the opposite problem - four bulleted lesson titles inside a tinted
+ * box inside the card, on every one of eleven cards at once. It was real
+ * information, but a grid of forty-four bullets is not something anyone reads;
+ * it is texture, and it buried the four facts a choice is actually made on. Those
+ * lessons are one click away on the study's own page, listed in full.
+ *
+ * What is left is what someone chooses on: what kind of study it is, what it is
+ * called, what it is about, which books it walks through, and how long it takes.
  */
 function StudyCard({ study, status }: { study: CuratedStudy; status: Status }) {
   const minutes = estimateStudyMinutes(study)
   const pct = status.total > 0 ? Math.round((status.done / status.total) * 100) : 0
   const started = status.done > 0 || status.resumeDay != null
-  const learn = learningPreview(study)
-  const shown = learn.items.slice(0, 4)
 
   return (
     <Link
       href={`/studies/${study.id}`}
       data-track="study_card"
-      className="lift group no-underline flex flex-col rounded-2xl border bg-white dark:bg-card p-5 transition-colors border-gray-200 dark:border-border hover:border-teal-400 dark:hover:border-teal-700"
+      className="lift group no-underline flex flex-col rounded-2xl border bg-white dark:bg-card p-4 transition-colors border-gray-200 dark:border-border hover:border-teal-400 dark:hover:border-teal-700"
     >
       {/* Type and state. The one row that is the same on every card, so the
           eye can compare them without reading. */}
@@ -177,31 +162,6 @@ function StudyCard({ study, status }: { study: CuratedStudy; status: Status }) {
       <p className="text-[13px] text-gray-500 dark:text-muted-foreground leading-relaxed line-clamp-2">
         {study.description}
       </p>
-
-      {/* What you'll learn - the reason this redesign exists. Either the
-          authored outcomes, or the lesson arc as a stand-in. */}
-      <div className="mt-4 rounded-xl border border-gray-100 dark:border-border/60 bg-gray-50/70 dark:bg-secondary/30 p-3">
-        <p className="flex items-center gap-1.5 text-[10.5px] font-bold uppercase tracking-wider text-gray-400 dark:text-muted-foreground mb-2">
-          {learn.label === 'Wat je leert' ? <Target size={12} /> : <ListChecks size={12} />}
-          {learn.label}
-        </p>
-        <ul className="space-y-1.5">
-          {shown.map((item, index) => (
-            <li key={index} className="flex gap-2 text-[12.5px] leading-snug text-foreground/80">
-              <span
-                className="mt-1.5 h-1 w-1 flex-none rounded-full"
-                style={{ backgroundColor: TEAL }}
-              />
-              <span className="min-w-0 line-clamp-1">{item}</span>
-            </li>
-          ))}
-        </ul>
-        {learn.total > shown.length && (
-          <p className="mt-1.5 text-[11px] text-gray-400 dark:text-muted-foreground">
-            + {learn.total - shown.length} meer
-          </p>
-        )}
-      </div>
 
       {/* Everything below is pinned to the bottom so the CTA lines up across
           the grid however tall the text above turned out. */}
@@ -329,8 +289,6 @@ export default function StudiesPage() {
     })
   }, [filter, query])
 
-  const activeHint = FILTERS.find(entry => entry.value === filter)?.hint ?? ''
-
   return (
     <div className="h-full overflow-y-auto">
       <JsonLd data={STUDIES_GRAPH} />
@@ -369,39 +327,12 @@ export default function StudiesPage() {
           </div>
         </header>
 
-        {/* The pointer to studying together.
-
-            The "1 - Kies een studie / 2 - Volg korte lessen / 3 - Houd je
-            voortgang bij" explainer that used to sit above this is gone. It
-            described the page the reader was already looking at, in three cards
-            that pushed the studies themselves below the fold. */}
-        <section className="mt-6">
-          <Link
-            href="/groepen"
-            data-track="sidebar_groepen"
-            className="no-underline mt-3 flex items-center gap-3 rounded-2xl border border-gray-200 dark:border-border bg-white dark:bg-card p-4 transition-colors hover:border-teal-300 dark:hover:border-teal-700"
-          >
-            <span
-              className="h-9 w-9 flex-none rounded-lg flex items-center justify-center"
-              style={{ backgroundColor: 'rgba(13,148,136,0.10)' }}
-            >
-              <Users size={16} style={{ color: TEAL }} />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-[13px] font-bold text-foreground">Samen studeren?</span>
-              <span className="block text-[12.5px] text-gray-500 dark:text-muted-foreground">
-                Maak een studiegroep aan en lees hetzelfde gedeelte met je groep, met een wekelijkse
-                opdracht en gedeelde notities.
-              </span>
-            </span>
-            <ArrowRight size={15} className="flex-none opacity-40" style={{ color: TEAL }} />
-          </Link>
-        </section>
-
-        {/* Resume strip. Only rendered when there is something to resume, so it
-            never occupies space with an empty state. */}
+        {/* Resume strip, directly under the search box: a returning reader is
+            here to carry on, not to browse. Only rendered when there is
+            something to resume, so it never occupies space with an empty
+            state. */}
         {inProgress.length > 0 && (
-          <section className="mt-8">
+          <section className="mt-6">
             <h2 className="text-sm font-bold text-foreground mb-2.5">Verder waar je was</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
               {inProgress.map(study => {
@@ -469,12 +400,12 @@ export default function StudiesPage() {
             })}
           </div>
 
-          <div className="mt-2.5 flex items-center justify-between gap-3 text-xs text-gray-400 dark:text-muted-foreground">
-            <p>{activeHint}</p>
-            <p className="flex-none tabular-nums">
-              {filtered.length} {filtered.length === 1 ? 'studie' : 'studies'}
-            </p>
-          </div>
+          {/* The per-filter explanation that used to sit here is gone. The
+              buttons are one word each and the cards below say the rest; a
+              caption explaining a caption is the definition of too much. */}
+          <p className="mt-2 text-xs text-gray-400 dark:text-muted-foreground tabular-nums">
+            {filtered.length} {filtered.length === 1 ? 'studie' : 'studies'}
+          </p>
         </section>
 
         {/* Grid */}
@@ -483,6 +414,30 @@ export default function StudiesPage() {
             <StudyCard key={study.id} study={study} status={statusFor(study)} />
           ))}
         </div>
+
+        {/* Studying together, at the bottom and on one line.
+
+            It was a full card between the hero and the studies, so the first
+            thing on a page about choosing a study was an advert for a different
+            feature. It is a side road, and it now reads like one. The
+            "1 - Kies een studie / 2 - Volg korte lessen / 3 - Houd je voortgang
+            bij" explainer that sat beside it is gone entirely: it described the
+            page the reader was already looking at. */}
+        <Link
+          href="/groepen"
+          data-track="sidebar_groepen"
+          className="no-underline mt-8 flex items-center gap-2.5 rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card px-4 py-3 transition-colors hover:border-teal-300 dark:hover:border-teal-700"
+        >
+          <Users size={15} className="flex-none" style={{ color: TEAL }} />
+          <span className="text-[13px] text-foreground">
+            <span className="font-semibold">Samen studeren?</span>
+            <span className="text-gray-500 dark:text-muted-foreground">
+              {' '}
+              Lees hetzelfde gedeelte met een studiegroep.
+            </span>
+          </span>
+          <ArrowRight size={14} className="flex-none ml-auto opacity-40" style={{ color: TEAL }} />
+        </Link>
 
         {filtered.length === 0 && (
           <div className="content-in flex flex-col items-center justify-center py-20 text-center">

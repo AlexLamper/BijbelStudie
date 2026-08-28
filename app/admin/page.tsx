@@ -8,31 +8,44 @@ import {
 } from "lucide-react"
 import BillingHealthCard, { type BillingStats } from "../../components/admin/BillingHealthCard"
 
+/**
+ * Every figure is nullable because /api/admin/stats degrades per query: one
+ * collection it cannot read leaves that one number null and names it in
+ * `degraded`, instead of failing the whole response. Null means "unknown" and
+ * must render as a dash - never as 0, which reads as a real measurement.
+ */
 interface Stats {
   users: {
-    total: number
-    premium: number
-    paying: number
-    stripeSubscribers: number
-    storeSubscribers: number
-    comped: number
-    admins: number
-    newLast24h: number
-    newLast7d: number
-    newLast30d: number
-    activeStreak: number
-    premiumPercent: number
+    total: number | null
+    premium: number | null
+    paying: number | null
+    stripeSubscribers: number | null
+    storeSubscribers: number | null
+    comped: number | null
+    admins: number | null
+    newLast24h: number | null
+    newLast7d: number | null
+    newLast30d: number | null
+    activeStreak: number | null
+    premiumPercent: number | null
   }
   billing: BillingStats
-  revenue: { mrrEur: number; arrEur: number; priceEur: number; annualPriceEur: number }
-  content: {
-    notes: number
-    notesLast7d: number
-    readingSessions: number
-    sessionsLast7d: number
-    groups: number
-    plans: number
+  revenue: {
+    mrrEur: number | null
+    arrEur: number | null
+    priceEur: number
+    annualPriceEur: number
   }
+  content: {
+    notes: number | null
+    notesLast7d: number | null
+    readingSessions: number | null
+    sessionsLast7d: number | null
+    groups: number | null
+    plans: number | null
+  }
+  /** Dutch labels of the figures that could not be read. Empty when healthy. */
+  degraded?: string[]
 }
 
 interface InsightsResponse {
@@ -52,7 +65,7 @@ interface RecentUser {
 
 const TEAL = "#0D9488"
 
-function formatNumber(n: number | undefined): string {
+function formatNumber(n: number | null | undefined): string {
   if (n == null) return "-"
   return n.toLocaleString("nl-NL")
 }
@@ -73,6 +86,42 @@ function relativeTime(iso: string): string {
   return new Date(iso).toLocaleDateString("nl-NL", { day: "numeric", month: "short", year: "numeric" })
 }
 
+interface FetchResult {
+  data: unknown
+  /** HTTP status, or null when the request never reached the server at all. */
+  status: number | null
+  /** The server's own `error` field, when it sent one. */
+  detail?: string
+}
+
+/**
+ * The old wording ended every failure with "controleer je admin-sessie", which
+ * for a 500 sent the reader after the one thing that is certainly fine: a 500 is
+ * the server failing to answer a request it already accepted and authorised, so
+ * signing in again cannot help and refreshing reproduces it. The status now
+ * decides the wording, and the server's own message is shown when it sent one -
+ * on this page the reader is the person who can act on it.
+ */
+function describeStatsFailure({ status, detail }: FetchResult): string {
+  const details = detail ? ` Details: ${detail}` : ""
+  if (status === null) {
+    return "Kon statistieken niet laden: de server was niet bereikbaar. Controleer je internetverbinding en probeer het opnieuw."
+  }
+  if (status === 401) {
+    return "Kon statistieken niet laden: je bent niet (meer) ingelogd. Log opnieuw in."
+  }
+  if (status === 403) {
+    return "Kon statistieken niet laden: dit account heeft geen beheerdersrechten."
+  }
+  if (status === 503) {
+    return `Kon statistieken niet laden: de database is nu niet bereikbaar. Dit ligt niet aan je verbinding of je admin-sessie.${details}`
+  }
+  if (status >= 500) {
+    return `Kon statistieken niet laden: serverfout ${status}. Dit ligt niet aan je verbinding of je admin-sessie; de oorzaak staat in de serverlogs.${details}`
+  }
+  return `Kon statistieken niet laden (${status}).${details}`
+}
+
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<Stats | null>(null)
   const [insights, setInsights] = useState<InsightsResponse | null>(null)
@@ -81,25 +130,31 @@ export default function AdminDashboardPage() {
   const [loadError, setLoadError] = useState<string | null>(null)
 
   useEffect(() => {
-    const fetchJson = async (url: string): Promise<{ data: unknown; error?: string }> => {
+    const fetchJson = async (url: string): Promise<FetchResult> => {
       try {
         const response = await fetch(url, { cache: "no-store", credentials: "include" })
         const body = await response.json().catch(() => null)
         if (!response.ok) {
           return {
             data: null,
-            error: typeof body?.error === "string" ? body.error : `Request failed (${response.status})`,
+            status: response.status,
+            detail: typeof body?.error === "string" ? body.error : undefined,
           }
         }
-        return { data: body }
+        return { data: body, status: response.status }
       } catch {
-        return { data: null, error: "Netwerkfout" }
+        // fetch itself rejected: DNS, offline, request never dispatched.
+        return { data: null, status: null }
       }
     }
 
-    const fetchStatsWithRetry = async (attempt = 0): Promise<{ data: unknown; error?: string }> => {
+    const fetchStatsWithRetry = async (attempt = 0): Promise<FetchResult> => {
       const result = await fetchJson("/api/admin/stats")
-      if (result.data || attempt >= 1) return result
+      // Only retry what a second attempt could plausibly fix. A 401 or 403 is a
+      // decision, not a hiccup, and asking again 400ms later gets the same
+      // answer while making the page feel slower than it is.
+      const worthRetrying = result.status === null || result.status >= 500
+      if (result.data || attempt >= 1 || !worthRetrying) return result
       await new Promise((resolve) => setTimeout(resolve, 400))
       return fetchStatsWithRetry(attempt + 1)
     }
@@ -119,16 +174,12 @@ export default function AdminDashboardPage() {
         if (u && typeof u === "object" && "users" in u && Array.isArray((u as { users?: unknown[] }).users)) {
           setRecent(((u as { users: RecentUser[] }).users).slice(0, 6))
         }
-        if (!s) {
-          setLoadError(
-            `Kon statistieken niet laden. ${
-              statsRes.error ? `Details: ${statsRes.error}. ` : ""
-            }Vernieuw de pagina of controleer je admin-sessie.`
-          )
-        }
+        if (!s) setLoadError(describeStatsFailure(statsRes))
       })
       .finally(() => setLoading(false))
   }, [])
+
+  const degraded = stats?.degraded ?? []
 
   const signupChart = useMemo(() => {
     const data = insights?.signups ?? []
@@ -191,12 +242,22 @@ export default function AdminDashboardPage() {
               </div>
             )}
 
+            {/* Partial answer: the response came through, but the server could
+                not read some of the figures. Naming them is the difference
+                between a dash that means "nul" and a dash that means "kapot". */}
+            {degraded.length > 0 && (
+              <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-300">
+                Sommige cijfers konden niet worden opgehaald en staan hieronder als &ldquo;-&rdquo;:{" "}
+                {degraded.join(", ")}. De rest van de pagina klopt wel.
+              </div>
+            )}
+
             {/* KPI cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
               <KpiCard
                 label="Totaal gebruikers"
                 value={formatNumber(stats?.users.total)}
-                sub={stats ? `+${stats.users.newLast7d} deze week` : ""}
+                sub={stats ? `+${formatNumber(stats.users.newLast7d)} deze week` : ""}
                 icon={Users}
                 tint="rgba(13,148,136,0.08)"
                 color={TEAL}
@@ -207,8 +268,8 @@ export default function AdminDashboardPage() {
                 value={formatNumber(stats?.users.paying)}
                 sub={
                   stats
-                    ? `${stats.users.stripeSubscribers} Stripe · ${stats.users.storeSubscribers} store` +
-                      (stats.users.comped > 0 ? ` · +${stats.users.comped} gratis` : "")
+                    ? `${formatNumber(stats.users.stripeSubscribers)} Stripe · ${formatNumber(stats.users.storeSubscribers)} store` +
+                      ((stats.users.comped ?? 0) > 0 ? ` · +${stats.users.comped} gratis` : "")
                     : ""
                 }
                 icon={Sparkles}
@@ -218,8 +279,12 @@ export default function AdminDashboardPage() {
               />
               <KpiCard
                 label="MRR (geschat)"
-                value={stats ? `€ ${stats.revenue.mrrEur.toLocaleString("nl-NL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "-"}
-                sub={stats ? `${stats.billing.monthlySubscribers} p/m · ${stats.billing.annualSubscribers} p/j` : ""}
+                value={
+                  stats?.revenue.mrrEur != null
+                    ? `€ ${stats.revenue.mrrEur.toLocaleString("nl-NL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                    : "-"
+                }
+                sub={stats ? `${formatNumber(stats.billing.monthlySubscribers)} p/m · ${formatNumber(stats.billing.annualSubscribers)} p/j` : ""}
                 icon={Euro}
                 tint="rgba(34,197,94,0.08)"
                 color="#16A34A"

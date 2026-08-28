@@ -19,9 +19,19 @@ interface ChapterNotesProps {
   book: string;
   chapter: number;
   className?: string;
+  /**
+   * Drop the panel chrome: no header bar, no card frame around each note, no
+   * padding of its own.
+   *
+   * The study flow's Verdieping step already labels this column ("Notities", and
+   * a line saying what it shows) and already provides the padding, so the
+   * standard panel repeated all of it inside a second border - a box in a box in
+   * a box for two lines of text.
+   */
+  bare?: boolean;
 }
 
-export function ChapterNotes({ book, chapter }: ChapterNotesProps) {
+export function ChapterNotes({ book, chapter, bare = false }: ChapterNotesProps) {
   const { data: session } = useSession();
 
   const [notes, setNotes]         = useState<Note[]>([]);
@@ -57,6 +67,79 @@ export function ChapterNotes({ book, chapter }: ChapterNotesProps) {
     text.length <= max ? text : text.slice(0, max).trim() + '…';
 
   if (!session) return null;
+
+  if (bare) {
+    return (
+      <>
+        {loading && <SkeletonList count={2} />}
+
+        {error && <p className="text-[13px] text-destructive">{error}</p>}
+
+        {!loading && !error && notes.length === 0 && (
+          <div className="content-in">
+            <p className="text-[13px] text-gray-500 dark:text-muted-foreground mb-3">
+              Je hebt nog geen notities bij {book} {chapter}.
+            </p>
+            <button
+              onClick={() => setShowModal(true)}
+              className="press inline-flex items-center gap-1.5 h-9 px-3 rounded-lg text-[13px] font-semibold text-white transition-opacity hover:opacity-90"
+              style={{ backgroundColor: '#0D9488' }}
+            >
+              <Plus className="w-4 h-4" />
+              Notitie maken
+            </button>
+          </div>
+        )}
+
+        {!loading && !error && notes.length > 0 && (
+          <div className="stagger-in">
+            {/* Divided, not carded. A rule between entries is enough to separate
+                two short paragraphs; a rounded border and a shadow around each
+                turns a list of thoughts into a stack of receipts. */}
+            <ul className="m-0 p-0 list-none divide-y divide-gray-200 dark:divide-border">
+              {notes.map((note) => (
+                <li key={note._id} className="py-3 first:pt-0">
+                  <div className="flex items-baseline gap-2 mb-1">
+                    {note.verseReference && (
+                      <span className="text-[11.5px] font-semibold" style={{ color: '#0D9488' }}>
+                        {note.verseReference}
+                      </span>
+                    )}
+                    <span className="text-[11px] text-gray-400 dark:text-muted-foreground ml-auto flex-none">
+                      {formatDate(note.createdAt)}
+                    </span>
+                  </div>
+                  <p className="text-[13.5px] text-gray-700 dark:text-foreground leading-relaxed">
+                    {truncate(note.noteText)}
+                  </p>
+                </li>
+              ))}
+            </ul>
+
+            <button
+              onClick={() => setShowModal(true)}
+              className="press mt-3 inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-[12.5px] font-semibold transition-colors hover:bg-[rgba(13,148,136,0.08)]"
+              style={{ color: '#0D9488' }}
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Notitie toevoegen
+            </button>
+          </div>
+        )}
+
+        <CreateNoteModal
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+          verseReference={`${book} ${chapter}`}
+          book={book}
+          chapter={chapter}
+          verseText=""
+          defaultScope="hoofdstuk"
+          onSave={() => { setShowModal(false); fetchNotes(); }}
+        />
+      </>
+    );
+  }
 
   return (
     <>

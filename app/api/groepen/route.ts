@@ -4,6 +4,8 @@ import { authOptions } from "../../../lib/authOptions"
 import connectMongoDB from "../../../lib/mongodb"
 import StudyGroup from "../../../models/StudyGroup"
 import User from "../../../models/User"
+import { isAdminEmail } from "../../../lib/adminEmails"
+import { resolveIsPro, type PremiumUserFields } from "../../../lib/mobilePremium"
 
 function generateCode(length = 6) {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
@@ -60,9 +62,17 @@ export async function POST(req: NextRequest) {
   const user = await User.findOne({ email: session.user.email }).lean()
   if (!user) return NextResponse.json({ error: "Gebruiker niet gevonden" }, { status: 404 })
 
-  const userId = (user as { _id: unknown; subscribed?: boolean })._id
+  const proUser = user as PremiumUserFields & { _id: unknown }
+  const userId = proUser._id
 
-  if (!(user as { subscribed?: boolean }).subscribed) {
+  // `subscribed` is the Stripe-only flag, so gating on it alone sent two kinds
+  // of entitled users to the paywall for something they already have: App Store
+  // subscribers (storePremium) and admins. Both /api/user - the source the
+  // header and the sidebar Pro CTA read - and the NextAuth session callback
+  // already resolve Pro through `resolveIsPro`, so this route was the odd one
+  // out: the header showed a Pro badge while the create call answered
+  // SUBSCRIPTION_REQUIRED. Same helper here means the two cannot disagree.
+  if (!resolveIsPro(proUser, isAdminEmail(session.user.email))) {
     return NextResponse.json(
       { error: "Upgrade naar Premium om een studiegroep aan te maken.", code: "SUBSCRIPTION_REQUIRED" },
       { status: 403 }
