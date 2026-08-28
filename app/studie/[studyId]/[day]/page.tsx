@@ -7,6 +7,7 @@ import User from '../../../../models/User';
 import StudyLessonState from '../../../../models/StudyLessonState.js';
 import StudyProgress from '../../../../models/StudyProgress.js';
 import { getLessonContent } from '../../../../lib/data/study-lessons';
+import { getVersions } from '../../../../lib/local-data';
 import {
   findLesson,
   isStepKey,
@@ -68,6 +69,13 @@ export default async function StudyLessonPage({ params, searchParams }: PageProp
   const enrollment = await getEnrollment(userId, studyId);
   if (!enrollment) redirect(`/studies/${studyId}`);
 
+  // Every translation the reader may switch to on the passage step. Resolved
+  // here rather than fetched from the client: the list is static, and a select
+  // that populates a second after the passage does reads as broken.
+  const versions = await getVersions().catch(
+    () => [] as { id: string; name: string; language: string }[],
+  );
+
   const content = getLessonContent(studyId, lessonDay);
   const steps = resolveSteps(lesson, content);
   const passage = resolvePassage(lesson, content);
@@ -83,6 +91,8 @@ export default async function StudyLessonPage({ params, searchParams }: PageProp
   const state = await StudyLessonState.findOne({ userId, studyId, lessonDay }).lean<{
     stepsCompleted?: string[];
     currentStep?: string;
+    viewTranslation?: string | null;
+    depthPanel?: string | null;
     reflection?: { text?: string; updatedAt?: Date | null; noteId?: unknown };
     quiz?: { score?: number | null; total?: number | null; attempts?: number };
     completedAt?: Date | null;
@@ -107,6 +117,11 @@ export default async function StudyLessonPage({ params, searchParams }: PageProp
     steps,
     passage,
     translation: enrollment.translation ?? study.startVersion,
+    translations: versions.map((version) => ({
+      id: version.id,
+      name: version.name,
+      language: version.language,
+    })),
     commentaryId: resolveCommentaryId({
       enrollmentCommentary: enrollment.commentary,
       userPreference: user.preferences?.commentary ?? null,
@@ -137,6 +152,8 @@ export default async function StudyLessonPage({ params, searchParams }: PageProp
   const initialState: LessonStatePayload = {
     stepsCompleted: state?.stepsCompleted ?? [],
     currentStep: state?.currentStep ?? steps[0],
+    viewTranslation: state?.viewTranslation ?? null,
+    depthPanel: state?.depthPanel ?? null,
     reflection: {
       text: state?.reflection?.text ?? '',
       updatedAt: state?.reflection?.updatedAt ? state.reflection.updatedAt.toISOString() : null,

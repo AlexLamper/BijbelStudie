@@ -47,22 +47,17 @@ export default function LessonList({
 
   const done = useMemo(() => new Set(completedDays), [completedDays]);
   const doneCount = lessons.filter((lesson) => done.has(lesson.day)).length;
-  const pct = lessons.length > 0 ? Math.round((doneCount / lessons.length) * 100) : 0;
 
   return (
     <section className="flex-1 min-h-0 flex flex-col">
-      <header className="flex-none px-4 sm:px-5 pt-4 pb-3 border-b border-gray-200 dark:border-border">
-        <div className="flex items-baseline justify-between mb-2">
+      {/* No progress bar here any more. The rail's bottom block owns progress -
+          two bars for the same number, a hand apart, is one bar too many. */}
+      <header className="flex-none px-4 sm:px-5 py-2.5 border-b border-gray-200 dark:border-border">
+        <div className="flex items-baseline justify-between">
           <h2 className="text-sm font-bold text-foreground">De lessen</h2>
           <span className="text-[11px] font-semibold text-gray-500 dark:text-muted-foreground tabular-nums">
             {doneCount} van {lessons.length} afgerond
           </span>
-        </div>
-        <div className="h-1.5 rounded-full bg-gray-200 dark:bg-secondary overflow-hidden">
-          <div
-            className="h-full rounded-full transition-all"
-            style={{ width: `${pct}%`, backgroundColor: TEAL }}
-          />
         </div>
       </header>
 

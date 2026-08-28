@@ -130,7 +130,13 @@ export default function StepReflection({
     document.addEventListener('visibilitychange', flush);
     return () => {
       document.removeEventListener('visibilitychange', flush);
-      if (timer.current) clearTimeout(timer.current);
+      // Flush, do not merely cancel. This component unmounts on every step
+      // change, and a touch swipe to the next step never blurs the textarea -
+      // so cancelling the pending timer here threw away up to 1.5s of typing.
+      if (timer.current) {
+        clearTimeout(timer.current);
+        void persist(latest.current);
+      }
     };
   }, [persist]);
 

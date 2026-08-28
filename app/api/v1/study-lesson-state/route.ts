@@ -32,10 +32,13 @@ interface LessonStateDoc {
   _id: unknown;
   stepsCompleted: string[];
   currentStep: string;
+  viewTranslation: string | null;
+  depthPanel: string | null;
   reflection: { text: string; updatedAt: Date | null; noteId: unknown };
   quiz: {
     quizIds: string[];
     questionIds: string[];
+    answers: { questionId: string; answerId: string }[];
     score: number | null;
     total: number | null;
     attempts: number;
@@ -51,12 +54,18 @@ function serialise(studyId: string, lessonDay: number, doc: LessonStateDoc | nul
     lessonDay,
     stepsCompleted: doc?.stepsCompleted ?? [],
     currentStep: doc?.currentStep ?? 'intro',
+    viewTranslation: doc?.viewTranslation ?? null,
+    depthPanel: doc?.depthPanel ?? null,
     reflection: {
       text: doc?.reflection?.text ?? '',
       updatedAt: doc?.reflection?.updatedAt ?? null,
       noteId: doc?.reflection?.noteId ? String(doc.reflection.noteId) : null,
     },
     quiz: {
+      answers: (doc?.quiz?.answers ?? []).map((entry) => ({
+        questionId: entry.questionId,
+        answerId: entry.answerId,
+      })),
       score: doc?.quiz?.score ?? null,
       total: doc?.quiz?.total ?? null,
       attempts: doc?.quiz?.attempts ?? 0,
@@ -134,6 +143,25 @@ export async function PATCH(req: Request) {
         return errorV1('INVALID_FIELDS', 400, 'Onbekende stap');
       }
       addToSet.stepsCompleted = body.completeStep;
+    }
+
+    // View state, not study settings. Both are bounded strings written straight
+    // to the document; neither feeds a query, a mail or the XP ledger, so the
+    // only thing worth validating is that they cannot grow unbounded.
+    if (body.viewTranslation !== undefined) {
+      if (body.viewTranslation !== null && typeof body.viewTranslation !== 'string') {
+        return errorV1('INVALID_FIELDS', 400, 'viewTranslation moet tekst zijn');
+      }
+      set.viewTranslation = body.viewTranslation
+        ? String(body.viewTranslation).slice(0, 80)
+        : null;
+    }
+
+    if (body.depthPanel !== undefined) {
+      if (body.depthPanel !== null && typeof body.depthPanel !== 'string') {
+        return errorV1('INVALID_FIELDS', 400, 'depthPanel moet tekst zijn');
+      }
+      set.depthPanel = body.depthPanel ? String(body.depthPanel).slice(0, 40) : null;
     }
 
     if (body.reflectionText !== undefined) {
@@ -216,6 +244,17 @@ export async function PATCH(req: Request) {
       await syncEnrollmentAfterLesson(auth.id, studyId, nextLessonDay(study, lessonDay));
     } else if (set.currentStep !== undefined) {
       await moveCursor(auth.id, studyId, lessonDay, set.currentStep as never);
+    } else if (set['reflection.text'] !== undefined) {
+      // Writing counts as studying. Without this a reader who spends fifteen
+      // minutes on the reflection question leaves `lastActivityAt` at whenever
+      // they last changed step, and the reminder cron nudges someone who is
+      // mid-sentence. The cursor itself does not move - they are still here.
+      const current = await StudyLessonState.findOne({ userId: auth.id, studyId, lessonDay })
+        .select('currentStep')
+        .lean<{ currentStep?: string }>();
+      if (isCursorStep(current?.currentStep)) {
+        await moveCursor(auth.id, studyId, lessonDay, current!.currentStep as never);
+      }
     }
 
     const doc = await StudyLessonState.findOne({

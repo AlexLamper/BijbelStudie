@@ -10,7 +10,6 @@ import {
   Loader2,
   Play,
   Settings2,
-  Sparkles,
   X,
 } from 'lucide-react';
 import type { StudyDepth, StudyRhythm } from '../../../lib/data/curated-studies';
@@ -62,7 +61,7 @@ function Choice({
           ? 'border-transparent'
           : 'border-gray-200 dark:border-border hover:bg-gray-50 dark:hover:bg-secondary',
       ].join(' ')}
-      style={active ? { backgroundColor: 'rgba(13,148,136,0.08)', borderColor: TEAL } : undefined}
+      style={active ? { backgroundColor: 'rgba(13,148,136,0.08)', borderColor: TEAL }: undefined}
     >
       <span className="block text-sm font-semibold text-foreground">{label}</span>
       <span className="block text-xs text-gray-500 dark:text-muted-foreground mt-0.5">{hint}</span>
@@ -71,13 +70,25 @@ function Choice({
 }
 
 /**
- * Start button, progress and settings for one study.
+ * The whole right rail of a study: settings on top, the lessons in the middle,
+ * and the one action at the bottom.
+ *
+ * The rail is a top-to-bottom argument. What the study is set to is a fact you
+ * check once and then stop looking at, so it sits at the top out of the way. The
+ * lessons are what the rail is FOR, so they get every pixel left over. And the
+ * button that starts or resumes the study is the last thing in reading order and
+ * pinned to the bottom edge, where a primary action belongs and where it stays
+ * put no matter how far the lesson list is scrolled.
+ *
+ * That is why this component owns the layout and takes the lesson list as
+ * `children` rather than being one block the page stacks: the settings, the
+ * progress and the button all read from the same state, so they cannot be three
+ * separate components, but they do not render next to each other.
  *
  * The settings live in a dialog rather than in the rail. They are a one-time
  * decision that someone changes rarely, and a permanently open form of five
- * radio groups competed with the only control that matters on this page - the
- * button that starts the study. What stays visible is a one-line summary of
- * what those settings currently are.
+ * radio groups competed with the only control that matters here. What stays
+ * visible is a summary of what those settings currently are.
  *
  * The browser's own timezone is sent along on purpose. `preferences.reminderTimezone`
  * defaults to Europe/Amsterdam and is only ever written when a client supplies
@@ -96,6 +107,7 @@ export default function StudyStartPanel({
   resumeDay,
   lessonsTotal,
   lessonsCompleted,
+  children,
 }: {
   studyId: string;
   translations: { id: string; name: string; language?: string }[];
@@ -107,6 +119,8 @@ export default function StudyStartPanel({
   resumeDay: number;
   lessonsTotal: number;
   lessonsCompleted: number;
+  /** The lesson list. Fills whatever height the two fixed blocks leave. */
+  children: React.ReactNode;
 }) {
   const router = useRouter();
   const [rhythm, setRhythm] = useState<StudyRhythm>(suggestedRhythm);
@@ -180,104 +194,104 @@ export default function StudyStartPanel({
   }
 
   return (
-    <>
-      {enrolled && (
-        <div className="mb-3 flex items-center gap-2.5">
-          <span
-            className="h-9 w-9 flex-none rounded-lg flex items-center justify-center"
-            style={{ backgroundColor: 'rgba(13,148,136,0.10)' }}
+    <div className="flex-1 min-h-0 flex flex-col">
+      {/* ── Top: what this study is set to ────────────────────────────── */}
+      <div className="flex-none p-3 sm:p-4 border-b border-gray-200 dark:border-border">
+        <div className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card overflow-hidden">
+          <div
+            className="flex items-center gap-1.5 px-3 py-1.5 border-b border-gray-200 dark:border-border"
+            style={{ backgroundColor: 'rgba(13,148,136,0.07)' }}
           >
-            <Sparkles size={15} style={{ color: TEAL }} />
-          </span>
-          <div className="min-w-0">
-            <p className="text-[13px] font-semibold text-foreground leading-tight">
-              Je bent bezig met deze studie
-            </p>
-            <p className="text-[11px] text-gray-500 dark:text-muted-foreground">
-              {lessonsCompleted} van {lessonsTotal} lessen afgerond &middot; {pct}%
+            <Settings2 size={13} className="flex-none" style={{ color: TEAL }} />
+            <p className="text-[10.5px] font-bold uppercase tracking-wider" style={{ color: TEAL }}>
+              Jouw instellingen
             </p>
           </div>
-        </div>
-      )}
 
-      {enrolled ? (
-        <a
-          href={resumeHref}
-          data-track="study_resume"
-          className="w-full inline-flex items-center justify-center gap-2 h-11 rounded-xl text-sm font-semibold text-white no-underline transition-opacity hover:opacity-90"
-          style={{ backgroundColor: TEAL }}
-        >
-          <Play size={15} /> Verder met les {resumeDay}
-        </a>
-      ) : (
-        <button
-          type="button"
-          onClick={() => void submit('start')}
-          disabled={busy}
-          data-track="study_start"
-          className="w-full inline-flex items-center justify-center gap-2 h-11 rounded-xl text-sm font-semibold text-white disabled:opacity-60 transition-opacity hover:opacity-90"
-          style={{ backgroundColor: TEAL }}
-        >
-          {busy ? <Loader2 size={15} className="animate-spin" /> : <Play size={15} />}
-          Start deze studie
-        </button>
-      )}
+          <dl className="divide-y divide-gray-100 dark:divide-border">
+            {[
+              { icon: CalendarDays, label: 'Ritme', value: rhythmLabel },
+              { icon: Layers, label: 'Uitleg', value: depthLabel },
+              { icon: BookOpen, label: 'Vertaling', value: translationName },
+            ].map(({ icon: Icon, label, value }) => (
+              <div key={label} className="flex items-center justify-between gap-3 px-3 py-[7px]">
+                <dt className="flex items-center gap-1.5 text-[11.5px] text-gray-500 dark:text-muted-foreground flex-none">
+                  <Icon size={13} className="flex-none text-gray-400 dark:text-muted-foreground" />
+                  {label}
+                </dt>
+                <dd className="min-w-0 text-[12.5px] font-semibold text-foreground text-right leading-snug">
+                  {value}
+                </dd>
+              </div>
+            ))}
+          </dl>
 
-      {/* The settings, as a card rather than a caption.
-          This was one 12px grey line - "Elke dag · Kort & praktisch ·
-          Statenvertaling" with a small "Wijzig" - sitting directly under a solid
-          teal button. It read as a footnote on that button, and the three values
-          truncated inside a 400px rail, so people did not see that the study had
-          settings at all. A titled card on white against the rail's grey, with
-          each value on its own row and a full-width action, is the version that
-          actually gets looked at.
-
-          The card is a <div> and the action is the only <button>: making the
-          whole card clickable would have meant no visible control, which is the
-          problem being fixed. */}
-      <div className="mt-2.5 rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card overflow-hidden">
-        <div
-          className="flex items-center gap-1.5 px-3 py-1.5 border-b border-gray-200 dark:border-border"
-          style={{ backgroundColor: 'rgba(13,148,136,0.07)' }}
-        >
-          <Settings2 size={13} className="flex-none" style={{ color: TEAL }} />
-          <p className="text-[10.5px] font-bold uppercase tracking-wider" style={{ color: TEAL }}>
-            Jouw instellingen
-          </p>
-        </div>
-
-        <dl className="divide-y divide-gray-100 dark:divide-border">
-          {[
-            { icon: CalendarDays, label: 'Ritme', value: rhythmLabel },
-            { icon: Layers, label: 'Uitleg', value: depthLabel },
-            { icon: BookOpen, label: 'Vertaling', value: translationName },
-          ].map(({ icon: Icon, label, value }) => (
-            <div key={label} className="flex items-center justify-between gap-3 px-3 py-[7px]">
-              <dt className="flex items-center gap-1.5 text-[11.5px] text-gray-500 dark:text-muted-foreground flex-none">
-                <Icon size={13} className="flex-none text-gray-400 dark:text-muted-foreground" />
-                {label}
-              </dt>
-              <dd className="min-w-0 text-[12.5px] font-semibold text-foreground text-right leading-snug">
-                {value}
-              </dd>
-            </div>
-          ))}
-        </dl>
-
-        <div className="p-2 pt-0">
-          <button
-            type="button"
-            onClick={() => setOpen(true)}
-            data-track="study_settings_open"
-            className="press w-full inline-flex items-center justify-center gap-1 h-8 rounded-lg border text-[12px] font-bold transition-colors hover:bg-[rgba(13,148,136,0.07)]"
-            style={{ color: TEAL, borderColor: 'rgba(13,148,136,0.45)' }}
-          >
-            Instellingen wijzigen <ChevronRight size={13} />
-          </button>
+          <div className="p-2 pt-0">
+            <button
+              type="button"
+              onClick={() => setOpen(true)}
+              data-track="study_settings_open"
+              className="press w-full inline-flex items-center justify-center gap-1 h-8 rounded-lg border text-[12px] font-bold transition-colors hover:bg-[rgba(13,148,136,0.07)]"
+              style={{ color: TEAL, borderColor: 'rgba(13,148,136,0.45)' }}
+            >
+              Instellingen wijzigen <ChevronRight size={13} />
+            </button>
+          </div>
         </div>
       </div>
 
-      {error && !open && <p className="mt-2 text-xs text-destructive">{error}</p>}
+      {/* ── Middle: the lessons, taking everything that is left ────────── */}
+      <div className="flex-1 min-h-0 flex flex-col">{children}</div>
+
+      {/* ── Bottom: progress, and the single action ────────────────────── */}
+      <div className="flex-none border-t border-gray-200 dark:border-border bg-white dark:bg-card p-3 sm:p-4">
+        {enrolled && (
+          <div className="mb-2.5">
+            <div className="flex items-baseline justify-between gap-2 mb-1">
+              <p className="text-[12.5px] font-semibold text-foreground">
+                Je bent bezig met deze studie
+              </p>
+              <span className="text-[11px] font-bold tabular-nums flex-none" style={{ color: TEAL }}>
+                {pct}%
+              </span>
+            </div>
+            <p className="text-[11px] text-gray-500 dark:text-muted-foreground mb-1.5">
+              {lessonsCompleted} van {lessonsTotal} lessen afgerond
+            </p>
+            <div className="h-1.5 rounded-full bg-gray-200 dark:bg-secondary overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all duration-500"
+                style={{ width: `${pct}%`, backgroundColor: TEAL }}
+              />
+            </div>
+          </div>
+        )}
+
+        {enrolled ? (
+          <a
+            href={resumeHref}
+            data-track="study_resume"
+            className="press w-full inline-flex items-center justify-center gap-2 h-11 rounded-xl text-sm font-semibold text-white no-underline transition-opacity hover:opacity-90"
+            style={{ backgroundColor: TEAL }}
+          >
+            <Play size={15} /> Verder met les {resumeDay}
+          </a>
+        ) : (
+          <button
+            type="button"
+            onClick={() => void submit('start')}
+            disabled={busy}
+            data-track="study_start"
+            className="press w-full inline-flex items-center justify-center gap-2 h-11 rounded-xl text-sm font-semibold text-white disabled:opacity-60 transition-opacity hover:opacity-90"
+            style={{ backgroundColor: TEAL }}
+          >
+            {busy ? <Loader2 size={15} className="animate-spin" /> : <Play size={15} />}
+            Start deze studie
+          </button>
+        )}
+
+        {error && !open && <p className="mt-2 text-xs text-destructive">{error}</p>}
+      </div>
 
       {open && (
         <div
@@ -437,6 +451,6 @@ export default function StudyStartPanel({
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

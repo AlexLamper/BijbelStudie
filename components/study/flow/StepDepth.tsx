@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { BookText, Images, Info, Languages, Send, Sparkles, StickyNote } from 'lucide-react';
+import { ChevronRight, Images, Landmark, Languages, Send, StickyNote } from 'lucide-react';
 
 import CommentaryComponent from '../CommentaryComponent';
 import GeoImages from '../GeoImages';
@@ -18,7 +18,36 @@ export interface DepthContentProps {
   showMedia?: boolean;
 }
 
-type PanelKey = 'notes-authored' | 'media' | 'original' | 'notes';
+type PanelKey = 'media' | 'original' | 'notes';
+
+/**
+ * The supporting panels, each with a line saying what it actually is.
+ *
+ * The previous version was three unlabelled pills - "Beeld", "Grondtekst",
+ * "Notities" - and nothing on screen explained what any of them would show, so
+ * the right half read as a widget tray. The one-line description under the tab
+ * bar is doing the real work here.
+ */
+const PANELS: { key: PanelKey; label: string; icon: typeof Images; blurb: string }[] = [
+  {
+    key: 'media',
+    label: 'Beeld',
+    icon: Images,
+    blurb: 'Kaarten en foto van de plaatsen in dit gedeelte',
+  },
+  {
+    key: 'original',
+    label: 'Grondtekst',
+    icon: Languages,
+    blurb: 'Het Hebreeuws of Grieks, woord voor woord',
+  },
+  {
+    key: 'notes',
+    label: 'Notities',
+    icon: StickyNote,
+    blurb: 'Wat jij eerder bij dit hoofdstuk hebt opgeschreven',
+  },
+];
 
 /**
  * Step 3. Commentary on the left, everything that supports it on the right.
@@ -28,11 +57,18 @@ type PanelKey = 'notes-authored' | 'media' | 'original' | 'notes';
  * below the fold and turned one column into three scrolling boxes; the step rail
  * at the top of the screen already says which step this is.
  *
- * The authored framing and term list are not gone, they are a panel on the
- * right, next to the imagery, grondtekst and notes rather than in front of the
- * commentary. The commentary source is resolved server-side: an explicit study
- * choice, then the reader's own reading-preference, then Matthew Henry (see
- * lib/studyFlow resolveCommentaryId).
+ * The right half USED to open on a "Toelichting" panel of authored prose. It was
+ * a second commentary next to the commentary, saying less, and it was the first
+ * thing the reader landed on. It is gone. What is left are the three things the
+ * commentary cannot give you - the place, the original language, and your own
+ * notes - each labelled with what it is rather than with a one-word noun.
+ *
+ * The authored `terms` survive as "Kernwoorden" at the head of the grondtekst
+ * panel, which is where a word-meaning list belongs.
+ *
+ * The commentary source is resolved server-side: an explicit study choice, then
+ * the reader's own reading-preference, then Matthew Henry (see lib/studyFlow
+ * resolveCommentaryId).
  */
 export default function StepDepth({
   book,
@@ -40,6 +76,8 @@ export default function StepDepth({
   commentaryId,
   depth,
   preferences,
+  panel: panelProp,
+  onPanelChange,
   onAskAi,
 }: {
   book: string;
@@ -47,24 +85,29 @@ export default function StepDepth({
   commentaryId: string;
   depth?: DepthContentProps | null;
   preferences?: ReadingPreferences;
+  /**
+   * Which panel is open, owned by the flow shell and persisted with the lesson.
+   *
+   * This step remounts on every navigation away and back, so keeping it in local
+   * state meant a reader who opened the grondtekst and stepped back to the
+   * passage returned to the photos.
+   */
+  panel?: string | null;
+  onPanelChange?: (panel: string) => void;
   onAskAi?: (question: string) => void;
 }) {
-  const hasAuthored =
-    (depth?.body?.length ?? 0) > 0 || (depth?.terms?.length ?? 0) > 0;
   const showMedia = depth?.showMedia !== false;
+  const terms = depth?.terms ?? [];
 
-  const panels: { key: PanelKey; label: string; icon: typeof Images }[] = [
-    ...(hasAuthored
-      ? [{ key: 'notes-authored' as PanelKey, label: 'Toelichting', icon: BookText }]
-      : []),
-    { key: 'media', label: 'Beeld', icon: Images },
-    { key: 'original', label: 'Grondtekst', icon: Languages },
-    { key: 'notes', label: 'Notities', icon: StickyNote },
-  ];
+  const panel: PanelKey = PANELS.some((entry) => entry.key === panelProp)
+    ? (panelProp as PanelKey)
+    : 'media';
+  const setPanel = (next: PanelKey) => onPanelChange?.(next);
 
-  const [panel, setPanel] = useState<PanelKey>(panels[0].key);
   const [contextOpen, setContextOpen] = useState(false);
   const [question, setQuestion] = useState('');
+
+  const active = PANELS.find((entry) => entry.key === panel) ?? PANELS[0];
 
   function ask() {
     const trimmed = question.trim();
@@ -98,89 +141,108 @@ export default function StepDepth({
 
       {/* Right: everything that supports the reading. */}
       <aside className="lg:w-1/2 lg:flex-none min-w-0 lg:min-h-0 flex flex-col bg-gray-50/60 dark:bg-card/40">
-        <div className="flex-none px-4 sm:px-5 pt-4 pb-3 space-y-2.5">
-          <button
-            type="button"
-            onClick={() => setContextOpen(true)}
-            className="w-full inline-flex items-center justify-between gap-2 h-10 px-3 rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card hover:bg-gray-50 dark:hover:bg-secondary transition-colors"
+        {/* The book's background, as a row rather than a button that looked like
+            a form field. It answers "who wrote this, when, and why", so it says
+            that instead of "Algemene info". */}
+        <button
+          type="button"
+          onClick={() => setContextOpen(true)}
+          data-track="study_book_context"
+          className="group flex-none flex items-center gap-3 px-4 sm:px-5 py-3 text-left border-b border-gray-200 dark:border-border bg-white dark:bg-card transition-colors hover:bg-gray-50 dark:hover:bg-secondary"
+        >
+          <span
+            className="h-8 w-8 flex-none rounded-lg flex items-center justify-center"
+            style={{ backgroundColor: 'rgba(13,148,136,0.10)' }}
           >
-            <span className="inline-flex items-center gap-2 min-w-0">
-              <Info size={14} className="flex-none" style={{ color: TEAL }} />
-              <span className="text-[13px] font-semibold text-foreground truncate">
-                Context van {book}
-              </span>
+            <Landmark size={15} style={{ color: TEAL }} />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[13px] font-semibold text-foreground truncate">
+              Achtergrond bij {book}
             </span>
-            <span className="text-[11px] text-gray-400 dark:text-muted-foreground flex-none">
-              Algemene info
+            <span className="block text-[11.5px] text-gray-500 dark:text-muted-foreground truncate">
+              Wie het schreef, wanneer en waarom
             </span>
-          </button>
+          </span>
+          <ChevronRight
+            size={15}
+            className="flex-none text-gray-400 transition-transform duration-200 group-hover:translate-x-0.5"
+          />
+        </button>
 
-          <div className="flex gap-1 p-1 rounded-xl bg-gray-100 dark:bg-secondary">
-            {panels.map(({ key, label, icon: Icon }) => {
-              const active = panel === key;
+        {/* Underlined tabs, not pills in a tray. The active one carries the
+            brand colour and the bar; the row below spells out what it shows. */}
+        <div className="flex-none border-b border-gray-200 dark:border-border bg-white dark:bg-card">
+          <div className="flex px-2 sm:px-3">
+            {PANELS.map(({ key, label, icon: Icon }) => {
+              const isActive = panel === key;
               return (
                 <button
                   key={key}
                   type="button"
                   onClick={() => setPanel(key)}
-                  aria-pressed={active}
+                  aria-pressed={isActive}
                   className={[
-                    'flex-1 inline-flex items-center justify-center gap-1.5 h-8 rounded-lg text-[12px] font-semibold transition-colors min-w-0',
-                    active
-                      ? 'bg-white dark:bg-card shadow-sm'
-                      : 'text-gray-500 dark:text-muted-foreground hover:text-foreground',
+                    'relative inline-flex items-center justify-center gap-1.5 px-3 sm:px-4 h-11 text-[12.5px] font-semibold transition-colors min-w-0',
+                    isActive ? '' : 'text-gray-500 dark:text-muted-foreground hover:text-foreground',
                   ].join(' ')}
-                  style={active ? { color: TEAL } : undefined}
+                  style={isActive ? { color: TEAL } : undefined}
                 >
-                  <Icon size={13} className="flex-none" />
+                  <Icon size={14} className="flex-none" />
                   <span className="truncate">{label}</span>
+                  <span
+                    aria-hidden
+                    className="absolute inset-x-1.5 -bottom-px h-[2px] rounded-full transition-opacity"
+                    style={{ backgroundColor: TEAL, opacity: isActive ? 1 : 0 }}
+                  />
                 </button>
               );
             })}
           </div>
         </div>
 
-        <div className="lg:flex-1 lg:min-h-0 lg:overflow-y-auto px-4 sm:px-5 pb-4">
-          {panel === 'notes-authored' && (
-            <div className="space-y-4">
-              {depth?.body && depth.body.length > 0 && (
-                <div className="space-y-3">
-                  {depth.body.map((paragraph, index) => (
-                    <p key={index} className="text-[14px] leading-relaxed text-foreground/90">
-                      {paragraph}
-                    </p>
-                  ))}
-                </div>
-              )}
+        <p className="flex-none px-4 sm:px-5 py-2 text-[11.5px] text-gray-500 dark:text-muted-foreground border-b border-gray-200 dark:border-border">
+          {active.blurb}
+        </p>
 
-              {depth?.terms && depth.terms.length > 0 && (
-                <dl className="rounded-xl border border-gray-200 dark:border-border divide-y divide-gray-200 dark:divide-border overflow-hidden bg-white dark:bg-card">
-                  {depth.terms.map((entry) => (
-                    <div key={entry.term} className="p-3.5">
-                      <dt className="text-[13px] font-semibold text-foreground mb-0.5">
-                        {entry.term}
-                      </dt>
-                      <dd className="text-[13px] text-gray-600 dark:text-muted-foreground leading-relaxed">
-                        {entry.meaning}
-                      </dd>
-                    </div>
-                  ))}
-                </dl>
-              )}
-            </div>
-          )}
-
+        <div className="lg:flex-1 lg:min-h-0 lg:overflow-y-auto px-4 sm:px-5 py-4">
           {panel === 'media' &&
             (showMedia ? (
               <GeoImages book={book} chapter={chapter} variant="panel" fallbackToBook />
             ) : (
-              <p className="text-[12px] text-gray-400 dark:text-muted-foreground italic">
-                Deze les toont geen afbeeldingen.
+              <p className="text-[12.5px] text-gray-500 dark:text-muted-foreground">
+                Bij dit gedeelte hoort geen plaats of kaart.
               </p>
             ))}
 
           {panel === 'original' && (
-            <OriginalText book={book} chapter={chapter} embedded />
+            <div className="space-y-4">
+              {/* Authored word meanings, where a word list belongs. */}
+              {terms.length > 0 && (
+                <section className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card overflow-hidden">
+                  <h3
+                    className="px-3.5 py-2 text-[11px] font-bold uppercase tracking-wider border-b border-gray-200 dark:border-border"
+                    style={{ color: TEAL }}
+                  >
+                    Kernwoorden in dit gedeelte
+                  </h3>
+                  <dl className="divide-y divide-gray-100 dark:divide-border">
+                    {terms.map((entry) => (
+                      <div key={entry.term} className="px-3.5 py-2.5">
+                        <dt className="text-[13px] font-semibold text-foreground mb-0.5">
+                          {entry.term}
+                        </dt>
+                        <dd className="text-[12.5px] text-gray-600 dark:text-muted-foreground leading-relaxed">
+                          {entry.meaning}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                </section>
+              )}
+
+              <OriginalText book={book} chapter={chapter} embedded />
+            </div>
           )}
 
           {panel === 'notes' && (
@@ -194,14 +256,7 @@ export default function StepDepth({
             It hands off to the same assistant the header opens, so the answer
             lands in the conversation that travels with the lesson. */}
         {onAskAi && (
-          <div className="flex-none border-t border-gray-200 dark:border-border p-3 sm:p-4 bg-white dark:bg-card">
-            <label
-              htmlFor="depth-ai"
-              className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider mb-1.5"
-              style={{ color: TEAL }}
-            >
-              <Sparkles size={12} /> Vraag het de AI-assistent
-            </label>
+          <div className="flex-none border-t border-gray-200 dark:border-border p-3 bg-white dark:bg-card">
             <div className="flex gap-2">
               <input
                 id="depth-ai"
@@ -213,7 +268,8 @@ export default function StepDepth({
                     ask();
                   }
                 }}
-                placeholder={`Wat betekent dit in ${book} ${chapter}?`}
+                aria-label="Vraag het de AI-assistent"
+                placeholder={`Vraag iets over ${book} ${chapter}...`}
                 className="flex-1 min-w-0 h-10 px-3 rounded-lg border border-gray-200 dark:border-border bg-white dark:bg-background text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:ring-2"
                 style={{ ['--tw-ring-color' as string]: 'rgba(13,148,136,0.35)' }}
               />
@@ -222,7 +278,7 @@ export default function StepDepth({
                 onClick={ask}
                 disabled={!question.trim()}
                 aria-label="Vraag versturen"
-                className="h-10 w-10 flex-none inline-flex items-center justify-center rounded-lg text-white disabled:opacity-40"
+                className="press h-10 w-10 flex-none inline-flex items-center justify-center rounded-lg text-white disabled:opacity-40"
                 style={{ backgroundColor: TEAL }}
               >
                 <Send size={15} />

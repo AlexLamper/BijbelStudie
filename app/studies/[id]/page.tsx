@@ -349,38 +349,39 @@ export default async function StudyDetailPage({ params }: PageProps) {
           </div>
         </div>
 
-        {/* Right: start, settings and the lessons. */}
+        {/* Right: settings on top, the lessons in the middle, the action pinned
+            to the bottom. StudyStartPanel owns that stacking - the three blocks
+            share one piece of state but are not adjacent, so the page hands it
+            the lesson list rather than laying the rail out itself. */}
         <aside className="w-full lg:w-[400px] flex-none flex flex-col min-h-0 border-t lg:border-t-0 lg:border-l border-gray-200 dark:border-border bg-gray-50/60 dark:bg-card/40">
-          <div className="flex-none p-4 sm:p-5 border-b border-gray-200 dark:border-border">
-            <StudyStartPanel
-              studyId={study.id}
-              translations={translations}
-              defaultTranslation={settings.translation ?? study.startVersion}
-              suggestedRhythm={(settings.rhythm as never) ?? study.suggestedRhythm ?? 'dagelijks'}
-              suggestedDepth={(settings.depth as never) ?? study.suggestedDepth ?? 'kort'}
-              enrolled={enrolled}
-              resumeHref={resumeHref}
-              resumeDay={resumeDay}
-              lessonsTotal={study.lessons.length}
-              lessonsCompleted={completedDays.length}
-            />
-          </div>
-
-          <LessonList
+          <StudyStartPanel
             studyId={study.id}
-            lessons={study.lessons.map((lesson) => ({
-              day: lesson.day,
-              title: lesson.title,
-              book: lesson.book,
-              chapter: lesson.chapter,
-              verseRange: lesson.verseRange ?? null,
-              focus: lesson.focus,
-              minutes: lesson.estimatedMinutes ?? 12,
-            }))}
-            completedDays={completedDays}
-            currentDay={enrolled ? resumeDay : null}
+            translations={translations}
+            defaultTranslation={settings.translation ?? study.startVersion}
+            suggestedRhythm={(settings.rhythm as never) ?? study.suggestedRhythm ?? 'dagelijks'}
+            suggestedDepth={(settings.depth as never) ?? study.suggestedDepth ?? 'kort'}
             enrolled={enrolled}
-          />
+            resumeHref={resumeHref}
+            resumeDay={resumeDay}
+            lessonsTotal={study.lessons.length}
+            lessonsCompleted={completedDays.length}
+          >
+            <LessonList
+              studyId={study.id}
+              lessons={study.lessons.map((lesson) => ({
+                day: lesson.day,
+                title: lesson.title,
+                book: lesson.book,
+                chapter: lesson.chapter,
+                verseRange: lesson.verseRange ?? null,
+                focus: lesson.focus,
+                minutes: lesson.estimatedMinutes ?? 12,
+              }))}
+              completedDays={completedDays}
+              currentDay={enrolled ? resumeDay : null}
+              enrolled={enrolled}
+            />
+          </StudyStartPanel>
         </aside>
       </div>
     </div>

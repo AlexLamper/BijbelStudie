@@ -41,7 +41,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
     }
 
-    const { book, chapter, version, commentary } = await request.json()
+    const body = await request.json()
+    const { book, chapter, version, commentary } = body
 
     if (!book || !chapter || !version) {
       return NextResponse.json({ 
@@ -91,9 +92,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "User not found" }, { status: 404 })
     }
 
-    const xp = alreadyRead
-      ? null
-      : await grantXp(String(user._id), "chapter_read", { isPro: Boolean(user.subscribed) })
+    // `awardXp: false` is for callers that already pay for the same reading.
+    // The guided study flow grants `study_lesson` on completion; letting it also
+    // collect `chapter_read` would pay twice for one passage, and replaying a
+    // lesson would farm the difference.
+    const xp =
+      alreadyRead || body?.awardXp === false
+        ? null
+        : await grantXp(String(user._id), "chapter_read", { isPro: Boolean(user.subscribed) })
 
     return NextResponse.json({
       message: "Last read chapter updated successfully",

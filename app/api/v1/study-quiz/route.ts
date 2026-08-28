@@ -74,6 +74,20 @@ export async function GET(req: Request) {
     // Remember which questions were served, so the grade call can be checked
     // against them rather than trusting whatever ids the client sends back.
     await connectMongoDB();
+
+    // Read BEFORE the write: what this reader already picked, and what they
+    // already scored. `pickQuestions` is seeded per user and lesson, so the set
+    // coming back is the same one those answers belong to.
+    const previous = await StudyLessonState.findOne({ userId: auth.id, studyId, lessonDay })
+      .select('quiz.answers quiz.score quiz.total')
+      .lean<{
+        quiz?: {
+          answers?: { questionId: string; answerId: string }[];
+          score?: number | null;
+          total?: number | null;
+        };
+      }>();
+
     await StudyLessonState.updateOne(
       { userId: auth.id, studyId, lessonDay },
       {
@@ -89,6 +103,12 @@ export async function GET(req: Request) {
     return jsonV1({
       available: true,
       matchedBy: result.matchedBy,
+      savedAnswers: (previous?.quiz?.answers ?? []).map((entry) => ({
+        questionId: entry.questionId,
+        answerId: entry.answerId,
+      })),
+      savedScore: previous?.quiz?.score ?? null,
+      savedTotal: previous?.quiz?.total ?? null,
       questions: result.questions.map((question) => ({
         id: question.id,
         text: question.text,
@@ -96,6 +116,57 @@ export async function GET(req: Request) {
         bibleReference: question.bibleReference,
       })),
     });
+  } catch (error) {
+    return handleV1Error(error);
+  }
+}
+
+/**
+ * `PUT { studyId, lessonDay, answers: [{ id, answerId }] }`
+ *
+ * The picks so far, with no grading. Called as the reader answers, so stepping
+ * back to the passage and returning does not empty the quiz - the previous
+ * version held every pick in component state and the step remounts on every
+ * navigation.
+ *
+ * Deliberately not the POST: this must never touch `attempts`, `score` or the
+ * upstream grader.
+ */
+export async function PUT(req: Request) {
+  try {
+    const auth = await requireUser(req);
+    const body = (await req.json().catch(() => ({}))) ?? {};
+
+    const studyId = typeof body.studyId === 'string' ? body.studyId.trim() : '';
+    const lessonDay = Number(body.lessonDay);
+    const submitted = Array.isArray(body.answers) ? body.answers : null;
+
+    if (!studyId || !Number.isInteger(lessonDay) || !submitted) {
+      return errorV1('MISSING_FIELDS', 400, 'studyId, lessonDay en answers zijn verplicht');
+    }
+
+    await connectMongoDB();
+    const state = await StudyLessonState.findOne({ userId: auth.id, studyId, lessonDay }).lean<{
+      quiz?: { questionIds?: string[] };
+    }>();
+    const served = new Set(state?.quiz?.questionIds ?? []);
+
+    const answers = submitted
+      .map((entry: { id?: unknown; answerId?: unknown }) => ({
+        questionId: typeof entry.id === 'string' ? entry.id : '',
+        answerId: typeof entry.answerId === 'string' ? entry.answerId : '',
+      }))
+      .filter(
+        (entry: { questionId: string; answerId: string }) =>
+          entry.questionId && entry.answerId && served.has(entry.questionId),
+      );
+
+    await StudyLessonState.updateOne(
+      { userId: auth.id, studyId, lessonDay },
+      { $set: { 'quiz.answers': answers } },
+    );
+
+    return jsonV1({ saved: answers.length });
   } catch (error) {
     return handleV1Error(error);
   }
@@ -151,6 +222,16 @@ export async function POST(req: Request) {
       { userId: auth.id, studyId, lessonDay },
       {
         $set: {
+          // Stored so a graded lesson reopens on its result rather than on an
+          // empty form. Without this a refresh puts the reader back at question
+          // one, and answering again increments `attempts` for a quiz they had
+          // already finished.
+          'quiz.answers': answers
+            .filter((entry: { answerId: string | null }) => entry.answerId)
+            .map((entry: { id: string; answerId: string | null }) => ({
+              questionId: entry.id,
+              answerId: entry.answerId as string,
+            })),
           'quiz.score': graded.score,
           'quiz.total': graded.total,
           'quiz.lastAttemptAt': new Date(),

@@ -7,12 +7,9 @@ import {
   BookOpen,
   CheckCircle2,
   Clock,
-  Compass,
-  GraduationCap,
   ListChecks,
   Play,
   Search,
-  Sparkles,
   Target,
   Users,
 } from 'lucide-react'
@@ -90,25 +87,6 @@ const TYPE_LABEL: Record<StudyType, string> = {
   Gedeelte: 'Gedeelte',
   Onderwerp: 'Onderwerp',
 }
-
-/** The three steps every guided study follows, shown once at the top. */
-const HOW_IT_WORKS: { icon: typeof Compass; title: string; body: string }[] = [
-  {
-    icon: Compass,
-    title: '1 · Kies een studie',
-    body: 'Filter op bijbelboek, persoon, gedeelte of thema, of zoek op een trefwoord. Elke kaart laat zien wat je gaat leren en hoe lang het duurt.',
-  },
-  {
-    icon: GraduationCap,
-    title: '2 · Volg korte lessen',
-    body: 'Elke les leidt je in vijf stappen door het gedeelte: lezen, verdiepen met uitleg en grondtekst, reflecteren en een korte toets.',
-  },
-  {
-    icon: Target,
-    title: '3 · Houd je voortgang bij',
-    body: 'Je plek wordt automatisch bewaard. Ga verder waar je was, op elk apparaat, in je eigen tempo.',
-  },
-]
 
 interface Enrollment {
   studyId: string
@@ -363,8 +341,10 @@ export default function StudiesPage() {
             lives inside it because "how do I find a study" is the first
             question someone has on this page. */}
         <header className="rounded-2xl border border-teal-200/60 dark:border-teal-900/40 bg-gradient-to-br from-teal-50/80 via-white to-white dark:from-teal-950/25 dark:via-card dark:to-card p-6 sm:p-8">
-          <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest mb-2" style={{ color: TEAL }}>
-            <Sparkles size={13} /> Bijbelstudie
+          {/* No decorative icon. A sparkle next to the product name is ornament
+              on a page whose job is to be trusted with someone's bible study. */}
+          <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: TEAL }}>
+            Bijbelstudie
           </p>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-foreground mb-2">
             Begeleide bijbelstudies
@@ -389,28 +369,13 @@ export default function StudiesPage() {
           </div>
         </header>
 
-        {/* How guided studies work + the pointer to studying together. */}
-        <section className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            {HOW_IT_WORKS.map(({ icon: Icon, title, body }) => (
-              <div
-                key={title}
-                className="rounded-2xl border border-gray-200 dark:border-border bg-white dark:bg-card p-4"
-              >
-                <span
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg mb-2.5"
-                  style={{ backgroundColor: 'rgba(13,148,136,0.10)' }}
-                >
-                  <Icon size={15} style={{ color: TEAL }} />
-                </span>
-                <p className="text-[13px] font-bold text-foreground mb-1">{title}</p>
-                <p className="text-[12.5px] leading-relaxed text-gray-500 dark:text-muted-foreground">
-                  {body}
-                </p>
-              </div>
-            ))}
-          </div>
+        {/* The pointer to studying together.
 
+            The "1 - Kies een studie / 2 - Volg korte lessen / 3 - Houd je
+            voortgang bij" explainer that used to sit above this is gone. It
+            described the page the reader was already looking at, in three cards
+            that pushed the studies themselves below the fold. */}
+        <section className="mt-6">
           <Link
             href="/groepen"
             data-track="sidebar_groepen"

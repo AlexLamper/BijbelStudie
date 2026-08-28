@@ -46,17 +46,23 @@ const STARTERS: Record<StepKey, string[]> = {
  * on the quiz step the pill covered it and the lesson could not be finished. The
  * trigger now lives in the flow header, where nothing else is.
  *
- * WHERE IT OPENS. From lg it rises into the right half of the step body - the
- * space the supporting panels (Toelichting / Beeld / Grondtekst / Notities) use.
- * That half is already the "things that help you read this" column, which is
- * what the assistant is, and the passage on the left keeps its width and its
- * scroll position. The previous version was a 420px viewport-height drawer that
- * shrank the header, body and footer to make room, so asking a question reflowed
- * the whole lesson around the reader.
+ * WHERE IT OPENS depends on the step, because the steps are not shaped alike.
+ *
+ *  - `half` is for the Verdieping step, which is already a 50/50 split. The dock
+ *    lands exactly on the divider and replaces the supporting-panel column, so
+ *    the commentary on the left keeps its width and its scroll position.
+ *  - `drawer` is for every other step. Their content is a single centred column
+ *    - a passage, a textarea, a quiz card - and taking half the screen from
+ *    those left the reading squeezed into a gutter with a wall of white beside
+ *    it. Here the assistant is a fixed-width panel floating against the right
+ *    edge, over the content rather than carved out of it.
+ *
+ * Neither variant resizes the lesson. An earlier version was a 420px drawer in
+ * the layout flow that shrank the header, body and footer to make room, so
+ * asking a question reflowed the whole lesson around the reader.
  *
  * It is positioned against the step body, so the shell must give that container
- * `relative`. Below lg it stays a viewport bottom sheet with a backdrop: half a
- * phone screen is not enough to read and ask at once.
+ * `relative`.
  */
 export default function AiDock({
   open,
@@ -65,6 +71,7 @@ export default function AiDock({
   chapter,
   version,
   step,
+  layout = 'drawer',
   draft,
   onDraftConsumed,
   question,
@@ -76,6 +83,8 @@ export default function AiDock({
   chapter: number;
   version: string | null;
   step: StepKey;
+  /** `half` on the split Verdieping step, `drawer` everywhere else. */
+  layout?: 'half' | 'drawer';
   draft?: string | null;
   onDraftConsumed?: () => void;
   /** Sent immediately on arrival, unlike `draft` which only fills the input. */
@@ -99,10 +108,14 @@ export default function AiDock({
     return () => window.removeEventListener('keydown', onKey);
   }, [open, onOpenChange]);
 
-  if (!open) return null;
+  // Never unmounted once opened. `return null` here defeated the `mounted` flag
+  // three lines up: closing the drawer destroyed AiAssistant and every message
+  // in it, so reopening it started a new conversation about the same passage.
+  // Hidden instead - the tree stays, the state stays, nothing is focusable.
+  if (!open && !mounted) return null;
 
   return (
-    <>
+    <div className={open ? undefined : 'hidden'} aria-hidden={!open}>
       {/* Backdrop for the sheet only. The lg drawer sits beside the content. */}
       <div
         className="fixed inset-0 z-40 bg-black/30 lg:hidden"
@@ -115,12 +128,17 @@ export default function AiDock({
         aria-label="AI-assistent"
         className={[
           'bg-white dark:bg-card border-gray-200 dark:border-border flex flex-col animate-panel-up',
-          // Bottom sheet on small screens: fixed to the viewport, over the backdrop.
+          // Bottom sheet on small screens: fixed to the viewport, over the
+          // backdrop. Half a phone screen is not enough to read and ask at once.
           'fixed z-50 inset-x-0 bottom-0 h-[75vh] rounded-t-2xl border-t',
-          // From lg: the right half of the step body, floor to ceiling. `left-1/2`
-          // lands on the divider the supporting panels already sit behind, so the
-          // panel replaces that column exactly instead of overlapping the passage.
-          'lg:absolute lg:z-30 lg:inset-y-0 lg:left-1/2 lg:right-0 lg:h-auto lg:w-auto lg:rounded-none lg:border-t-0 lg:border-l',
+          'lg:absolute lg:z-30 lg:inset-y-0 lg:right-0 lg:h-auto lg:border-t-0 lg:border-l',
+          layout === 'half'
+            ? // Lands on the divider the supporting panels already sit behind,
+              // so it replaces that column exactly.
+              'lg:left-1/2 lg:w-auto lg:rounded-none'
+            : // A panel floating over the step, wide enough to hold a
+              // conversation and narrow enough to leave the reading readable.
+              'lg:left-auto lg:w-[min(420px,38vw)] lg:rounded-l-2xl lg:shadow-[0_24px_70px_-28px_rgba(2,6,23,0.6)]',
         ].join(' ')}
       >
         <header className="flex-none flex items-center justify-between px-4 h-14 border-b border-gray-200 dark:border-border">
@@ -156,6 +174,6 @@ export default function AiDock({
           )}
         </div>
       </aside>
-    </>
+    </div>
   );
 }

@@ -13,6 +13,8 @@ import {
   Maximize2,
   Minimize2,
   Sparkles,
+  Volume2,
+  VolumeX,
   X,
 } from 'lucide-react';
 
@@ -26,6 +28,7 @@ import LessonCompleteCard, { type CompletionSummary } from './LessonCompleteCard
 import AiDock from './AiDock';
 import StudyExitGuard from './StudyExitGuard';
 import { useReadingPreferences } from '../../../hooks/useReadingPreferences';
+import { playComplete, playSwipe } from '../../../lib/studySound';
 import {
   isStepKey,
   nextStep as advance,
@@ -38,38 +41,47 @@ const TEAL = '#0D9488';
 
 /** localStorage key for the one-time "go full screen" offer. */
 const FULLSCREEN_HINT_KEY = 'study:fullscreen-hint';
+/** localStorage key for the sound toggle. Absent means on. */
+const SOUND_KEY = 'study:sound';
 
 /**
- * How a step arrives and leaves: it swipes in from the side it came from and
- * floats slightly as it settles.
+ * The step transition: one page sliding over another, both moving at once.
  *
- * `custom` carries the direction - +1 moving forward through the lesson, -1
- * going back - so "Vorige" is not a forward transition played in reverse but its
- * own movement. The vertical drift and the 1.5% scale are what make it read as a
- * card lifting into place rather than a slide projector advancing.
+ * The earlier version nudged the outgoing step 56px and faded it, with
+ * `mode="wait"` holding the incoming one back until it had gone. That is a
+ * crossfade with a lean, and it left a blank frame in the middle. This is the
+ * real thing: the arriving step comes in from a full screen width away and the
+ * leaving one parallaxes out at a third of that speed while dimming, so the new
+ * page reads as sliding ON TOP of the old one rather than replacing it.
+ *
+ * The 3:1 speed difference is what sells it. Two layers moving at the same rate
+ * look like a filmstrip; a slower back layer looks like depth.
+ *
+ * `custom` carries the direction - +1 forward through the lesson, -1 back - so
+ * "Vorige" is its own movement rather than the forward one played in reverse,
+ * and `zIndex` keeps the arriving page above the departing one either way.
  */
-const STEP_OFFSET = 56;
 const stepVariants = {
   enter: (direction: number) => ({
-    opacity: 0,
-    x: direction * STEP_OFFSET,
-    y: 10,
-    scale: 0.985,
+    x: `${direction * 100}%`,
+    opacity: 1,
+    scale: 1,
+    zIndex: 2,
   }),
-  center: { opacity: 1, x: 0, y: 0, scale: 1 },
+  center: { x: '0%', opacity: 1, scale: 1, zIndex: 2 },
   exit: (direction: number) => ({
+    x: `${direction * -32}%`,
     opacity: 0,
-    x: direction * -STEP_OFFSET,
-    y: -10,
-    scale: 0.985,
+    scale: 0.97,
+    zIndex: 1,
   }),
 };
 
 /** Reduced motion keeps the crossfade and drops every transform. */
 const calmVariants = {
-  enter: { opacity: 0 },
-  center: { opacity: 1 },
-  exit: { opacity: 0 },
+  enter: { opacity: 0, zIndex: 2 },
+  center: { opacity: 1, zIndex: 2 },
+  exit: { opacity: 0, zIndex: 1 },
 };
 
 export interface LessonPayload {
@@ -84,6 +96,8 @@ export interface LessonPayload {
     verseEnd: number | null;
   };
   translation: string;
+  /** Everything the reader may switch the passage to on the Woord step. */
+  translations: { id: string; name: string; language?: string }[];
   commentaryId: string;
   content: {
     intro: { headline: string; body: string[]; watchFor?: string[] } | null;
@@ -100,6 +114,10 @@ export interface LessonPayload {
 export interface LessonStatePayload {
   stepsCompleted: string[];
   currentStep: string;
+  /** The translation last shown in this lesson; null means "use the study's". */
+  viewTranslation: string | null;
+  /** The Verdieping step's last open panel. */
+  depthPanel: string | null;
   reflection: { text: string; updatedAt: string | null; noteId: string | null };
   quiz: { score: number | null; total: number | null; attempts: number };
   completedAt: string | null;
@@ -143,8 +161,40 @@ export default function StudyFlowShell({
   const [aiDraft, setAiDraft] = useState<string | null>(null);
   const [aiQuestion, setAiQuestion] = useState<string | null>(null);
   const [outlineOpen, setOutlineOpen] = useState(false);
+  /**
+   * The translation actually on screen.
+   *
+   * Seeded from what this lesson was last read in, falling back to the
+   * enrollment. Switching it writes `StudyLessonState.viewTranslation` and
+   * deliberately NOT `StudyEnrollment.translation`: wanting to check a verse in
+   * the NBG is not the same as deciding this study is an NBG study, and the
+   * setting drives every future lesson plus the reminder mail.
+   *
+   * It lives here rather than in StepWord so the choice survives stepping away
+   * to the commentary and back, and so the assistant quotes the text being read.
+   */
+  const [version, setVersion] = useState(initialState.viewTranslation ?? lesson.translation);
+  /** The Verdieping step's right-hand panel, hoisted for the same reason. */
+  const [depthPanel, setDepthPanel] = useState(initialState.depthPanel ?? 'media');
+  /**
+   * The reflection, mirrored out of the step.
+   *
+   * StepReflection is seeded once and remounts on every step change, so holding
+   * the text only in there meant Reflectie -> Toetsing -> Reflectie came back to
+   * an EMPTY box: the page-load snapshot was stale and the localStorage crash
+   * buffer had already been cleared by the successful autosave. The text was
+   * safe in Mongo, but a reader who retyped would overwrite it.
+   */
+  const [reflectionText, setReflectionText] = useState(initialState.reflection.text);
   const [fullscreen, setFullscreen] = useState(false);
   const [fullscreenHint, setFullscreenHint] = useState(false);
+  /**
+   * Sound on the step transition. On by default, and a ref alongside the state
+   * so the navigation callbacks can read it without every one of them taking a
+   * dependency on it and being rebuilt when it flips.
+   */
+  const [soundOn, setSoundOn] = useState(true);
+  const soundOnRef = useRef(true);
   /** Drag-to-advance is for fingers only; a mouse drag would eat text selection. */
   const [coarsePointer, setCoarsePointer] = useState(false);
   const loggedActivityKeyRef = useRef<string | null>(null);
@@ -184,6 +234,20 @@ export default function StudyFlowShell({
     }
   }, [step]);
 
+  // Opening a lesson is what "where was I" means, so it has to be written the
+  // moment the lesson opens - not on the first step transition. Jumping to
+  // lesson 5 from the navigator and closing the tab used to leave the resume
+  // cursor on lesson 3, and /studie sent the reader back there.
+  //
+  // Keyed on the lesson, so it fires once per lesson rather than once per step.
+  const cursorWrittenRef = useRef<string | null>(null);
+  useEffect(() => {
+    const key = `${lesson.study.id}:${lesson.lesson.day}`;
+    if (cursorWrittenRef.current === key) return;
+    cursorWrittenRef.current = key;
+    void patch({ currentStep: initialStep });
+  }, [patch, lesson.study.id, lesson.lesson.day, initialStep]);
+
   // The dashboard's weekly strip is backed by ReadingSession documents. The old
   // /lezen page logs these through useBibleData, but the new guided /studie flow
   // bypasses that hook; without this, studying a lesson shows as "Geen activiteit".
@@ -192,6 +256,23 @@ export default function StudyFlowShell({
     if (loggedActivityKeyRef.current === key) return;
     loggedActivityKeyRef.current = key;
     fetch('/api/user/log-reading', { method: 'POST' }).catch(() => {});
+
+    // Reading a passage in a lesson is reading it. Without this the dashboard's
+    // "Verder lezen" card and the bible-completion percentages ignored every
+    // chapter someone met through a guided study.
+    //
+    // `awardXp: false` because the lesson already grants `study_lesson` on
+    // completion - the chapter must not be paid for twice.
+    fetch('/api/user/last-read', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        book: lesson.passage.book,
+        chapter: lesson.passage.chapter,
+        version: lesson.translation,
+        awardXp: false,
+      }),
+    }).catch(() => {});
   }, [lesson]);
 
   // Full screen is offered rather than imposed: the whole point of the flow is
@@ -242,17 +323,82 @@ export default function StudyFlowShell({
     setCoarsePointer(window.matchMedia?.('(pointer: coarse)').matches ?? false);
   }, []);
 
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(SOUND_KEY) === 'off') {
+        setSoundOn(false);
+        soundOnRef.current = false;
+      }
+    } catch {
+      /* private mode: sound stays on */
+    }
+  }, []);
+
+  const toggleSound = useCallback(() => {
+    setSoundOn((on) => {
+      const next = !on;
+      soundOnRef.current = next;
+      try {
+        localStorage.setItem(SOUND_KEY, next ? 'on' : 'off');
+      } catch {
+        /* not worth failing over */
+      }
+      // Play on the way ON only, so the toggle demonstrates what it just enabled
+      // instead of making noise on the way to silence.
+      if (next) playSwipe(1);
+      return next;
+    });
+  }, []);
+
+  /** The page-turn, muted by the toggle and by a reduced-motion preference. */
+  const swipeSound = useCallback(
+    (towards: 1 | -1) => {
+      if (!soundOnRef.current || reduceMotion) return;
+      playSwipe(towards);
+    },
+    [reduceMotion],
+  );
+
+  // Escape closes the navigator, like every other overlay in the app.
+  useEffect(() => {
+    if (!outlineOpen) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOutlineOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [outlineOpen]);
+
+  const changeVersion = useCallback(
+    (next: string) => {
+      setVersion(next);
+      void patch({ viewTranslation: next });
+    },
+    [patch],
+  );
+
+  const changeDepthPanel = useCallback(
+    (next: string) => {
+      setDepthPanel(next);
+      void patch({ depthPanel: next });
+    },
+    [patch],
+  );
+
   const goTo = useCallback(
     (next: StepKey) => {
-      setDirection(steps.indexOf(next) >= steps.indexOf(step) ? 1 : -1);
+      const towards: 1 | -1 = steps.indexOf(next) >= steps.indexOf(step) ? 1 : -1;
+      setDirection(towards);
+      swipeSound(towards);
       setStep(next);
       void patch({ currentStep: next });
     },
-    [patch, steps, step],
+    [patch, steps, step, swipeSound],
   );
 
   const onNext = useCallback(async () => {
     setDirection(1);
+    swipeSound(1);
     setCompleted((current) => (current.includes(step) ? current : [...current, step]));
 
     const next = advance(steps, step);
@@ -264,7 +410,14 @@ export default function StudyFlowShell({
 
     setFinishing(true);
     const data = await patch({ completeStep: step, complete: true });
+    // The streak lives on User and is advanced by /api/streak, which until now
+    // was only ever called from the old /lezen page - so someone who studied
+    // exclusively in the guided flow kept a streak of zero while the badge rules
+    // in lib/gamification handed out streak30/60/90 off that same zero.
+    // Fire-and-forget: a lesson must never fail to complete because of a badge.
+    void fetch('/api/streak', { method: 'POST' }).catch(() => {});
     setFinishing(false);
+    if (soundOnRef.current && !reduceMotion) playComplete();
 
     const completion = data?.completion;
     setSummary({
@@ -275,7 +428,7 @@ export default function StudyFlowShell({
       noteId: completion?.noteId ?? null,
       nextLessonDay: completion?.nextLessonDay ?? lesson.nextLessonDay,
     });
-  }, [steps, step, patch, lesson.nextLessonDay]);
+  }, [steps, step, patch, lesson.nextLessonDay, swipeSound, reduceMotion]);
 
   const onPrevious = useCallback(() => {
     const previous = goBack(steps, step);
@@ -295,6 +448,7 @@ export default function StudyFlowShell({
       ) {
         return;
       }
+      if (outlineOpen) return;
       if (event.key === 'ArrowRight' && stepPosition(steps, step) < steps.length) {
         event.preventDefault();
         void onNext();
@@ -305,10 +459,13 @@ export default function StudyFlowShell({
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [steps, step, onNext, onPrevious]);
+  }, [steps, step, onNext, onPrevious, outlineOpen]);
 
   const saveReflection = useCallback(
     async (text: string) => {
+      // Mirrored here BEFORE the request, so a step change during the round trip
+      // still remounts the textarea with what the reader typed.
+      setReflectionText(text);
       const data = await patch({ reflectionText: text });
       return data !== null;
     },
@@ -331,7 +488,9 @@ export default function StudyFlowShell({
           <StepWord
             book={lesson.passage.book}
             chapter={lesson.passage.chapter}
-            version={lesson.translation}
+            version={version}
+            versions={lesson.translations}
+            onVersionChange={changeVersion}
             verseStart={lesson.passage.verseStart}
             verseEnd={lesson.passage.verseEnd}
             readingCue={lesson.content.readingCue}
@@ -347,6 +506,8 @@ export default function StudyFlowShell({
             commentaryId={lesson.commentaryId}
             depth={lesson.content.depth}
             preferences={preferences}
+            panel={depthPanel}
+            onPanelChange={changeDepthPanel}
             onAskAi={askAi}
           />
         );
@@ -356,7 +517,7 @@ export default function StudyFlowShell({
             studyId={lesson.study.id}
             lessonDay={lesson.lesson.day}
             reflection={lesson.content.reflection}
-            initialText={initialState.reflection.text}
+            initialText={reflectionText}
             serverUpdatedAt={initialState.reflection.updatedAt}
             onSave={saveReflection}
           />
@@ -380,6 +541,11 @@ export default function StudyFlowShell({
   }, [
     step,
     lesson,
+    version,
+    changeVersion,
+    depthPanel,
+    changeDepthPanel,
+    reflectionText,
     preferences,
     updatePreferences,
     initialState,
@@ -450,7 +616,18 @@ export default function StudyFlowShell({
           reader out of a lesson they are partway through. */}
       <StudyExitGuard enabled={!finishing} />
 
-      <header className="flex-none border-b border-border bg-background/85 backdrop-blur-sm z-20">
+      {/* `relative` is the navigator panel's anchor - centred on the header, which
+          is the window, rather than on the flexible middle column between two
+          button groups of different widths. That off-by-half-a-button was why it
+          never looked centred.
+
+          No `backdrop-filter` here. It makes the header a containing block for
+          every `fixed` descendant, which quietly shrank the navigator's
+          click-anywhere-to-dismiss layer to the height of the header itself.
+
+          z-50 puts the header - and therefore that dismiss layer - above the
+          study rail, so a click on the sidebar closes the panel too. */}
+      <header className="relative z-50 flex-none border-b border-border bg-background">
         <div className="px-3 sm:px-5 h-14 flex items-center justify-between gap-2">
           <Link
             href={`/studies/${lesson.study.id}`}
@@ -463,7 +640,7 @@ export default function StudyFlowShell({
 
           {/* Lesson navigator. What lessons there are and which are done was
               previously only visible on the detail page, one navigation away. */}
-          <div className="relative min-w-0 flex-1">
+          <div className="min-w-0 flex-1">
             <button
               type="button"
               onClick={() => setOutlineOpen((open) => !open)}
@@ -482,69 +659,6 @@ export default function StudyFlowShell({
               </span>
             </button>
 
-            {outlineOpen && (
-              <>
-                <div className="fixed inset-0 z-30" onClick={() => setOutlineOpen(false)} aria-hidden />
-                <div className="absolute z-40 top-full mt-1 left-1/2 -translate-x-1/2 w-[min(92vw,340px)] max-h-[60vh] overflow-y-auto rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card shadow-xl p-1.5">
-                  <p className="px-2 py-1.5 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-muted-foreground">
-                    {lesson.study.title}
-                  </p>
-                  {lesson.outline.map((entry) => {
-                    const isCurrent = entry.day === lesson.lesson.day;
-                    // Only what you have done, and the lesson you are on. Jumping
-                    // ahead to lesson 9 of a book study skips its build-up.
-                    const reachable = entry.completed || entry.day <= lesson.lesson.day;
-                    return (
-                      <button
-                        key={entry.day}
-                        type="button"
-                        disabled={!reachable}
-                        onClick={() => {
-                          setOutlineOpen(false);
-                          if (!isCurrent) router.push(`/studie/${lesson.study.id}/${entry.day}`);
-                        }}
-                        className={[
-                          'w-full flex items-center gap-2.5 rounded-lg px-2 py-2 text-left transition-colors',
-                          reachable
-                            ? 'hover:bg-gray-50 dark:hover:bg-secondary'
-                            : 'opacity-50 cursor-default',
-                        ].join(' ')}
-                        style={isCurrent ? { backgroundColor: 'rgba(13,148,136,0.08)' } : undefined}
-                      >
-                        <span
-                          className={[
-                            'h-5 w-5 flex-none rounded-full flex items-center justify-center text-[10px] font-bold border',
-                            entry.completed
-                              ? 'border-transparent text-white'
-                              : isCurrent
-                                ? 'border-transparent'
-                                : 'border-gray-200 dark:border-border text-gray-400 dark:text-muted-foreground',
-                          ].join(' ')}
-                          style={
-                            entry.completed
-                              ? { backgroundColor: TEAL }
-                              : isCurrent
-                                ? { backgroundColor: 'rgba(13,148,136,0.15)', color: TEAL }
-                                : undefined
-                          }
-                        >
-                          {entry.completed ? <Check size={11} /> : entry.day}
-                        </span>
-                        <span className="min-w-0 flex-1">
-                          <span className="block text-[12.5px] font-medium text-foreground truncate">
-                            {entry.title}
-                          </span>
-                          <span className="block text-[11px] text-gray-400 dark:text-muted-foreground truncate">
-                            {entry.reference}
-                          </span>
-                        </span>
-                        {!reachable && <Lock size={11} className="flex-none text-gray-400" />}
-                      </button>
-                    );
-                  })}
-                </div>
-              </>
-            )}
           </div>
 
           <div className="flex-none flex items-center gap-1.5">
@@ -561,6 +675,18 @@ export default function StudyFlowShell({
               className="press hidden sm:inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-gray-100 hover:text-foreground dark:hover:bg-secondary"
             >
               {fullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+            </button>
+
+            <button
+              type="button"
+              onClick={toggleSound}
+              aria-pressed={soundOn}
+              data-track="study_sound"
+              title={soundOn ? 'Geluid uit' : 'Geluid aan'}
+              aria-label={soundOn ? 'Geluid uit' : 'Geluid aan'}
+              className="press hidden sm:inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-gray-100 hover:text-foreground dark:hover:bg-secondary"
+            >
+              {soundOn ? <Volume2 size={15} /> : <VolumeX size={15} />}
             </button>
 
             <button
@@ -588,6 +714,94 @@ export default function StudyFlowShell({
         <div className="px-4 sm:px-6 pb-3">
           <StudyStepRail steps={steps} current={step} completed={completed} onSelect={goTo} />
         </div>
+
+        {/* The lesson navigator, hung off the header rather than off its trigger.
+            Two things follow from that: it is centred on the window, and its
+            dismiss layer is a real full-viewport surface - a click anywhere at
+            all closes it, not only a second click on the title. */}
+        <AnimatePresence>
+          {outlineOpen && (
+            <>
+              <motion.div
+                className="fixed inset-0 z-40"
+                onClick={() => setOutlineOpen(false)}
+                onWheel={() => setOutlineOpen(false)}
+                aria-hidden
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
+                style={{ backgroundColor: 'rgba(2,6,23,0.18)' }}
+              />
+              <motion.div
+                role="dialog"
+                aria-label="Lessen in deze studie"
+                initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -8, scale: 0.97 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -8, scale: 0.97 }}
+                transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                className="absolute z-50 top-full mt-1.5 left-1/2 -translate-x-1/2 w-[min(92vw,360px)] max-h-[min(60vh,420px)] overflow-y-auto rounded-2xl border border-gray-200 dark:border-border bg-white dark:bg-card shadow-[0_28px_70px_-24px_rgba(2,6,23,0.55)] p-1.5"
+              >
+                <p className="px-2 py-1.5 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-muted-foreground">
+                  {lesson.study.title}
+                </p>
+                {lesson.outline.map((entry) => {
+                  const isCurrent = entry.day === lesson.lesson.day;
+                  // Only what you have done, and the lesson you are on. Jumping
+                  // ahead to lesson 9 of a book study skips its build-up.
+                  const reachable = entry.completed || entry.day <= lesson.lesson.day;
+                  return (
+                    <button
+                      key={entry.day}
+                      type="button"
+                      disabled={!reachable}
+                      onClick={() => {
+                        setOutlineOpen(false);
+                        if (!isCurrent) router.push(`/studie/${lesson.study.id}/${entry.day}`);
+                      }}
+                      className={[
+                        'w-full flex items-center gap-2.5 rounded-lg px-2 py-2 text-left transition-colors',
+                        reachable
+                          ? 'hover:bg-gray-50 dark:hover:bg-secondary'
+                          : 'opacity-50 cursor-default',
+                      ].join(' ')}
+                      style={isCurrent ? { backgroundColor: 'rgba(13,148,136,0.08)' } : undefined}
+                    >
+                      <span
+                        className={[
+                          'h-5 w-5 flex-none rounded-full flex items-center justify-center text-[10px] font-bold border',
+                          entry.completed
+                            ? 'border-transparent text-white'
+                            : isCurrent
+                              ? 'border-transparent'
+                              : 'border-gray-200 dark:border-border text-gray-400 dark:text-muted-foreground',
+                        ].join(' ')}
+                        style={
+                          entry.completed
+                            ? { backgroundColor: TEAL }
+                            : isCurrent
+                              ? { backgroundColor: 'rgba(13,148,136,0.15)', color: TEAL }
+                              : undefined
+                        }
+                      >
+                        {entry.completed ? <Check size={11} /> : entry.day}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-[12.5px] font-medium text-foreground truncate">
+                          {entry.title}
+                        </span>
+                        <span className="block text-[11px] text-gray-400 dark:text-muted-foreground truncate">
+                          {entry.reference}
+                        </span>
+                      </span>
+                      {!reachable && <Lock size={11} className="flex-none text-gray-400" />}
+                    </button>
+                  );
+                })}
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
       </header>
 
       {/* `relative` so the AI dock can take the right half of THIS box.
@@ -599,11 +813,14 @@ export default function StudyFlowShell({
           Notities) occupy, so the passage on the left never moves.
           `overflow-hidden` also clips the panel's slide-up. */}
       <div className="relative flex-1 min-h-0 overflow-hidden">
-        {/* `mode="wait"` so the outgoing step has left before the next arrives:
-            two full-bleed steps crossfading on top of each other is a smear, not
-            a transition. `initial={false}` keeps the first paint still - the
-            lesson should be there when the page is, not slide in once. */}
-        <AnimatePresence mode="wait" initial={false} custom={direction}>
+        {/* No `mode`, deliberately: both steps are mounted for the length of the
+            transition so one can slide over the other. `initial={false}` keeps
+            the first paint still - the lesson should be there when the page is,
+            not slide in once.
+
+            The spring, not a duration, is what makes it feel like a thing with
+            weight being pushed rather than a timed animation being played. */}
+        <AnimatePresence initial={false} custom={direction}>
           <motion.div
             key={step}
             custom={direction}
@@ -611,7 +828,15 @@ export default function StudyFlowShell({
             initial="enter"
             animate="center"
             exit="exit"
-            transition={{ duration: reduceMotion ? 0.14 : 0.34, ease: [0.16, 1, 0.3, 1] }}
+            transition={
+              reduceMotion
+                ? { duration: 0.14 }
+                : {
+                    x: { type: 'spring', stiffness: 340, damping: 36, mass: 0.9 },
+                    opacity: { duration: 0.28 },
+                    scale: { duration: 0.36, ease: [0.16, 1, 0.3, 1] },
+                  }
+            }
             // Touch only. On a phone the lesson reads like a stack of cards you
             // push aside; on a desktop the same binding would hijack every
             // attempt to select a verse.
@@ -626,11 +851,15 @@ export default function StudyFlowShell({
               if (info.offset.x < 0 && !isLast) void onNext();
               else if (info.offset.x > 0 && canGoBack) onPrevious();
             }}
+            // Absolute and opaque: the two pages overlap during the swipe, so
+            // the arriving one has to cover the departing one instead of letting
+            // it show through.
+            //
             // No standing `will-change`: it would make this box the containing
             // block for every `fixed` descendant (the reading-preferences menu,
             // note popovers) even when nothing is moving. Framer sets and clears
             // it for the duration of the transition on its own.
-            className="h-full"
+            className="absolute inset-0 bg-background"
           >
             {body}
           </motion.div>
@@ -643,8 +872,13 @@ export default function StudyFlowShell({
           onOpenChange={setAiOpen}
           book={lesson.passage.book}
           chapter={lesson.passage.chapter}
-          version={lesson.translation}
+          version={version}
           step={isStepKey(step) ? step : 'word'}
+          // Half the screen is right on the commentary step, where the left half
+          // is already a column of prose the assistant is talking about. On every
+          // other step it swallowed a centred passage, a textarea or a quiz card,
+          // so there it is a drawer against the right edge instead.
+          layout={step === 'depth' ? 'half' : 'drawer'}
           draft={aiDraft}
           onDraftConsumed={() => setAiDraft(null)}
           question={aiQuestion}
