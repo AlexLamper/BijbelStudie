@@ -26,8 +26,6 @@ const FLAT_FILE_VERSIONS = new Set<string>(['nbg51']);
 // Flat-file translations that store book names in English internally (need Dutch→English mapping)
 const ENGLISH_INTERNAL_VERSIONS = new Set<string>();
 
-type VersionId = typeof VERSIONS[number]['id'];
-
 /* ─── Module-level caches (survive component re-mounts) ─────── */
 let _booksIndex: Record<string, string[]> | null = null;
 let _booksIndexPromise: Promise<Record<string, string[]> | null> | null = null;
