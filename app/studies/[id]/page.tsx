@@ -1,18 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getServerSession } from 'next-auth';
-import {
-  ArrowLeft,
-  BookOpen,
-  CheckCircle2,
-  Clock,
-  Compass,
-  Layers,
-  ListChecks,
-  PenLine,
-  Target,
-  Trophy,
-} from 'lucide-react';
+import { ArrowLeft, BookOpen, Clock, ListChecks } from 'lucide-react';
 
 import { authOptions } from '../../../lib/authOptions';
 import connectMongoDB from '../../../lib/mongodb';
@@ -22,7 +11,7 @@ import { buildMetadata } from '../../../lib/pageMetadata';
 import { getVersions } from '../../../lib/local-data';
 import { estimateStudyMinutes } from '../../../lib/studyFlow';
 import { findStudy, getEnrollment } from '../../../lib/studyEnrollmentService';
-import StudyStartPanel from './StudyOnboardingForm';
+import StudySetupProvider, { StudyActionBar, StudySettingsButton } from './StudyOnboardingForm';
 import LessonList from './LessonList';
 
 const TEAL = '#0D9488';
@@ -40,7 +29,7 @@ interface PageProps {
  * served that anonymous HTML, permanently missing their own progress.
  *
  * SEO is unaffected: a crawler still receives fully server-rendered HTML with
- * the description, outcomes and lesson list. Ten pages do not need caching.
+ * the description and the lesson list. Ten pages do not need caching.
  */
 export const dynamic = 'force-dynamic';
 
@@ -65,14 +54,6 @@ export async function generateMetadata({ params }: PageProps) {
   });
 }
 
-const STEP_EXPLAINER = [
-  { icon: Compass, label: 'Intro', text: 'De context voordat je leest' },
-  { icon: BookOpen, label: 'Het Woord', text: 'Alleen het gedeelte van deze les' },
-  { icon: Layers, label: 'Verdieping', text: 'Uitleg, kaarten en grondtekst' },
-  { icon: PenLine, label: 'Reflectie', text: 'Jouw antwoord, bewaard als notitie' },
-  { icon: Trophy, label: 'Toetsing', text: 'Korte quiz over het gedeelte' },
-];
-
 const TYPE_LABEL: Record<string, string> = {
   Boek: 'Bijbelboek',
   Persoon: 'Persoon',
@@ -88,11 +69,17 @@ const TYPE_LABEL: Record<string, string> = {
  * settings form needs a session, and it sends anonymous visitors to sign in at
  * the moment they press start.
  *
- * The page fills the viewport and does not scroll as a whole. Two panes scroll
- * independently instead - the description on the left, the lesson list on the
- * right - so the title, the progress and the start button stay put no matter
- * how many lessons a study has. A twelve-lesson book study pushed all of that
- * off-screen in the previous single-column layout.
+ * Three bands, and the page itself never scrolls. A fixed h-14 header, a fixed
+ * bar of the same height at the foot, and between them two panes that scroll
+ * independently - the pitch on the left, the lessons on the right. Both bars
+ * span the full width, so the settings summary and the start/resume button hold
+ * opposite corners of the page instead of stacking inside a 400px rail. A
+ * twelve-lesson book study pushed all of that off-screen in the original
+ * single-column layout.
+ *
+ * The state behind those two bars is one object, held by StudySetupProvider
+ * above the whole page: the settings the header summarises are the settings the
+ * footer's start button posts.
  */
 export default async function StudyDetailPage({ params }: PageProps) {
   const { id } = await params;
@@ -151,18 +138,16 @@ export default async function StudyDetailPage({ params }: PageProps) {
   const books = [...new Set(study.lessons.map((lesson) => lesson.book))];
 
   /**
-   * "Wat ga je leren?", with a fallback.
+   * The description, at most two paragraphs.
    *
-   * Only two of the eleven studies have authored `outcomes`, and the section
-   * simply disappeared for the other nine - which on a three-lesson study left
-   * the left column with nothing in it but the step explainer. Every lesson has
-   * a `focus` question by contract, and those questions are exactly what the
-   * study answers, so they stand in until outcomes are written.
+   * `about` is authored hook first, shape of the book second, and mechanics
+   * third ("je leest het hoofdstuk voor hoofdstuk, in volgorde") - and the
+   * mechanics are already answered by the lesson list sitting next to it. Two
+   * paragraphs is what someone reads before deciding; the third they skim.
    */
-  const learningPoints =
-    study.outcomes && study.outcomes.length > 0
-      ? study.outcomes
-      : study.lessons.map((lesson) => lesson.focus.split('?')[0].trim() + '?');
+  const description = (
+    study.about && study.about.length > 0 ? study.about : [study.description]
+  ).slice(0, 2);
 
   /** Books in lesson order, each with the chapters this study visits. */
   const readingPlan = books.map((book) => {
@@ -182,35 +167,57 @@ export default async function StudyDetailPage({ params }: PageProps) {
   });
 
   return (
-    <div className="h-full flex flex-col lg:overflow-hidden">
-      {/* Header. Stays put; everything below it scrolls in its own pane.
-          Exactly h-14, the same height as the app navbar directly above it, so
-          the two bars read as one continuous chrome band rather than a slab
-          stacked on a slab. Everything lives on a single row: the back control,
-          a two-line identity block, and the facts pushed to the right edge. */}
-      <header className="flex-none h-14 border-b border-gray-200 dark:border-border bg-white dark:bg-card">
-        <div className="h-full px-3 sm:px-5 flex items-center gap-3">
-          {/* A control, not a breadcrumb. It used to be a bare text link on its
-              own line above the title, which both cost a full line of height and
-              read as a stray caption. Now it is a bordered pill sitting on the
-              baseline of everything else, with the arrow nudging left on hover. */}
-          <Link
-            href="/studies"
-            title="Terug naar alle studies"
-            aria-label="Terug naar alle studies"
-            className="group press flex-none inline-flex items-center gap-1.5 h-9 pl-2 pr-2.5 rounded-lg border border-gray-200 dark:border-border bg-white dark:bg-card text-[12.5px] font-medium text-gray-500 dark:text-muted-foreground no-underline transition-colors hover:text-foreground hover:bg-gray-50 dark:hover:bg-secondary hover:border-gray-300 dark:hover:border-muted-foreground/40"
-          >
-            <ArrowLeft
-              size={14}
-              className="flex-none transition-transform duration-200 group-hover:-translate-x-0.5"
-            />
-            <span className="hidden sm:inline">Alle studies</span>
-          </Link>
+    /* The provider wraps the page rather than sitting in it: the settings
+       summary in the header and the start button in the footer read and write
+       one piece of state, and nothing else can contain both. It renders a
+       fragment plus its dialog, so the layout below is unaffected - and this
+       markup stays server-rendered, which is what keeps the page crawlable. */
+    <StudySetupProvider
+      studyId={study.id}
+      translations={translations}
+      defaultTranslation={settings.translation ?? study.startVersion}
+      suggestedRhythm={(settings.rhythm as never) ?? study.suggestedRhythm ?? 'dagelijks'}
+      suggestedDepth={(settings.depth as never) ?? study.suggestedDepth ?? 'kort'}
+      enrolled={enrolled}
+      resumeHref={resumeHref}
+      resumeDay={resumeDay}
+      lessonsTotal={study.lessons.length}
+      lessonsCompleted={completedDays.length}
+    >
+      <div className="h-full flex flex-col overflow-hidden">
+        {/* Header. Stays put; everything below it scrolls in its own pane.
+            Exactly h-14, the same height as the app navbar directly above it and
+            as the action bar at the foot, so the three read as one chrome
+            system rather than slabs stacked on slabs. One row: the back
+            control, the identity block, and the settings pushed to the right
+            edge.
 
-          <span aria-hidden className="hidden sm:block flex-none h-6 w-px bg-gray-200 dark:bg-border" />
+            The identity block is a single line now. It carried a second, 11px
+            line repeating the book names and the lesson count, which said what
+            the reading facts in the left pane and the lesson list already say -
+            and cost the header a line of height to do it. */}
+        <header className="flex-none h-14 border-b border-gray-200 dark:border-border bg-white dark:bg-card">
+          <div className="h-full px-3 sm:px-5 flex items-center gap-3">
+            {/* A control, not a breadcrumb. It used to be a bare text link on its
+                own line above the title, which both cost a full line of height and
+                read as a stray caption. Now it is a bordered pill sitting on the
+                baseline of everything else, with the arrow nudging left on hover. */}
+            <Link
+              href="/studies"
+              title="Terug naar alle studies"
+              aria-label="Terug naar alle studies"
+              className="group press flex-none inline-flex items-center gap-1.5 h-9 pl-2 pr-2.5 rounded-lg border border-gray-200 dark:border-border bg-white dark:bg-card text-[12.5px] font-medium text-gray-500 dark:text-muted-foreground no-underline transition-colors hover:text-foreground hover:bg-gray-50 dark:hover:bg-secondary hover:border-gray-300 dark:hover:border-muted-foreground/40"
+            >
+              <ArrowLeft
+                size={14}
+                className="flex-none transition-transform duration-200 group-hover:-translate-x-0.5"
+              />
+              <span className="hidden sm:inline">Alle studies</span>
+            </Link>
 
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 min-w-0">
+            <span aria-hidden className="hidden sm:block flex-none h-6 w-px bg-gray-200 dark:bg-border" />
+
+            <div className="min-w-0 flex-1 flex items-center gap-2">
               <h1 className="text-[15px] sm:text-base font-bold text-foreground leading-tight truncate">
                 {study.title}
               </h1>
@@ -221,151 +228,73 @@ export default async function StudyDetailPage({ params }: PageProps) {
                 {TYPE_LABEL[study.type] ?? study.type}
               </span>
             </div>
-            {/* Second line, 11px: the books, plus the facts the right-hand strip
-                drops below lg. No description - it is printed in full a few
-                pixels lower under "Waar gaat deze studie over?". */}
-            <p className="mt-0.5 text-[11px] leading-tight text-gray-500 dark:text-muted-foreground truncate">
-              {books.join(' · ')}
-              <span className="lg:hidden">
-                {' · '}
-                {study.lessons.length} lessen · ± {minutes} min
-              </span>
-            </p>
+
+            {/* Where the lesson count, the total minutes and the starting
+                chapter used to sit. Three numbers that never change and that
+                you cannot act on do not earn the most reachable corner of the
+                page; they moved down into the pitch, and the corner went to the
+                settings, which are yours and adjustable. */}
+            <StudySettingsButton />
           </div>
+        </header>
 
-          <div className="hidden lg:flex flex-none items-center gap-x-4 text-[11.5px] text-gray-500 dark:text-muted-foreground">
-            <span className="inline-flex items-center gap-1.5">
-              <ListChecks size={13} /> {study.lessons.length} lessen
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Clock size={13} /> ± {minutes} min totaal
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <BookOpen size={13} /> start bij {study.startBook} {study.startChapter}
-            </span>
-          </div>
-        </div>
-      </header>
+        {/* Below lg the two panes stack and this wrapper is the single scroller,
+            because a 400px rail beside a paragraph is not a phone layout. From
+            lg it becomes the row and hands scrolling to each pane. */}
+        <div className="flex-1 min-h-0 overflow-y-auto lg:overflow-hidden lg:flex lg:flex-row">
+          {/* Left: why this study. Deliberately short - it is a decision aid,
+              not the study itself.
 
-      <div className="flex-1 min-h-0 flex flex-col lg:flex-row">
-        {/* Left: what the study is and how it works. Scrolls on its own.
-            Capped rather than free-growing: on a wide monitor an uncapped column
-            put a 400px rail against a metre of empty white, which is most of why
-            this page read as broken on the shorter studies.
+              Cut from here, and why: "Wat ga je leren?" (five authored bullets,
+              or one per lesson when a study has none - twelve on Daniël, each a
+              restatement of a lesson focus the rail already shows on tap), and
+              "Hoe een les werkt", a five-row walkthrough of intro / lezen /
+              verdieping / reflectie / toetsing plus a trailing note about the AI
+              assistant. The flow explains itself the moment you are in it, and
+              nobody decides to start a study because the steps were described
+              to them first. What is left is the description and the three facts
+              you actually weigh: how many lessons, how long, what you read.
 
-            The row is NOT centred. Centring it offset both panes by half the
-            leftover width, so this column's px-8 no longer lined up with the
-            header's - the header is full-bleed, and the body text visibly
-            stepped in from the title above it. Same padding, same left edge.
-
-            The cap therefore sits on the INNER block, not on the pane: the pane
-            takes every pixel left over so the rail stays flush against the right
-            edge and its divider runs the full height, while the prose still
-            stops at a readable 760px measured from the left. Capping the pane
-            instead left a band of dead background between the two. */}
-        <div className="flex-1 min-w-0 lg:overflow-y-auto">
-          <div className="px-5 sm:px-8 py-6 space-y-8 lg:max-w-[760px]">
-            <section>
+              The measure is capped on this inner block rather than on the pane:
+              the pane takes every pixel left over so the rail stays flush right
+              and its divider runs the full height, while the prose stops at a
+              readable width measured from the left. Capping the pane instead
+              left a band of dead background between the two. */}
+          <div className="lg:flex-1 lg:min-w-0 lg:overflow-y-auto">
+            <div className="px-5 sm:px-8 py-6 lg:max-w-[680px]">
               <h2 className="text-sm font-bold text-foreground mb-2.5">Waar gaat deze studie over?</h2>
               <div className="space-y-3">
-                {(study.about && study.about.length > 0 ? study.about : [study.description]).map(
-                  (paragraph, index) => (
-                    <p key={index} className="text-[15px] leading-relaxed text-foreground/85">
-                      {paragraph}
-                    </p>
-                  ),
-                )}
+                {description.map((paragraph, index) => (
+                  <p key={index} className="text-[15px] leading-relaxed text-foreground/85">
+                    {paragraph}
+                  </p>
+                ))}
               </div>
-            </section>
 
-            {/* Always populated. `outcomes` is authored per study and most of them
-                do not have it yet; every lesson DOES have a `focus` question, and
-                those are the questions the study answers - so an unwritten study
-                still says what you get out of it instead of showing nothing. */}
-            <section>
-              <h2 className="flex items-center gap-2 text-sm font-bold text-foreground mb-3">
-                <Target size={15} style={{ color: TEAL }} /> Wat ga je leren?
-              </h2>
-              <ul className="space-y-2">
-                {learningPoints.map((point, index) => (
-                  <li key={index} className="flex gap-2.5 text-[14px] text-foreground/85 leading-relaxed">
-                    <CheckCircle2 size={15} className="mt-0.5 flex-none" style={{ color: TEAL }} />
-                    {point}
-                  </li>
-                ))}
-              </ul>
-            </section>
-
-            <section>
-              <h2 className="flex items-center gap-2 text-sm font-bold text-foreground mb-3">
-                <BookOpen size={15} style={{ color: TEAL }} /> Wat je gaat lezen
-              </h2>
-              <ul className="flex flex-wrap gap-1.5">
+              <ul className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[12px] text-gray-500 dark:text-muted-foreground">
+                <li className="inline-flex items-center gap-1.5">
+                  <ListChecks size={13} className="flex-none" style={{ color: TEAL }} />
+                  {study.lessons.length} lessen
+                </li>
+                <li className="inline-flex items-center gap-1.5">
+                  <Clock size={13} className="flex-none" style={{ color: TEAL }} />
+                  ± {minutes} min totaal
+                </li>
                 {readingPlan.map((entry) => (
-                  <li
-                    key={entry.book}
-                    className="inline-flex items-baseline gap-1.5 rounded-lg border border-gray-200 dark:border-border bg-white dark:bg-card px-2.5 py-1.5"
-                  >
-                    <span className="text-[12.5px] font-semibold text-foreground">{entry.book}</span>
-                    <span className="text-[11.5px] text-gray-500 dark:text-muted-foreground">
-                      {entry.chapters}
-                    </span>
+                  <li key={entry.book} className="inline-flex items-center gap-1.5">
+                    <BookOpen size={13} className="flex-none" style={{ color: TEAL }} />
+                    {entry.book} {entry.chapters}
                   </li>
                 ))}
               </ul>
-            </section>
-
-            <section>
-              <h2 className="text-sm font-bold text-foreground mb-3">Hoe een les werkt</h2>
-              <ol className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card divide-y divide-gray-200 dark:divide-border overflow-hidden">
-                {STEP_EXPLAINER.map((step, index) => {
-                  const Icon = step.icon;
-                  return (
-                    <li key={step.label} className="flex items-center gap-3 px-3.5 py-2.5">
-                      <span
-                        className="h-7 w-7 rounded-lg flex items-center justify-center flex-none"
-                        style={{ backgroundColor: 'rgba(13,148,136,0.10)' }}
-                      >
-                        <Icon size={13} style={{ color: TEAL }} />
-                      </span>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-muted-foreground w-11 flex-none">
-                        Stap {index + 1}
-                      </span>
-                      <span className="text-[13px] font-semibold text-foreground w-[92px] flex-none">
-                        {step.label}
-                      </span>
-                      <span className="text-[12.5px] text-gray-500 dark:text-muted-foreground leading-snug min-w-0">
-                        {step.text}
-                      </span>
-                    </li>
-                  );
-                })}
-              </ol>
-              <p className="mt-2.5 text-[12px] text-gray-400 dark:text-muted-foreground">
-                Een les zonder geschreven intro begint direct bij het bijbelgedeelte. De AI-assistent
-                is in elke stap beschikbaar.
-              </p>
-            </section>
+            </div>
           </div>
-        </div>
 
-        {/* Right: settings on top, the lessons in the middle, the action pinned
-            to the bottom. StudyStartPanel owns that stacking - the three blocks
-            share one piece of state but are not adjacent, so the page hands it
-            the lesson list rather than laying the rail out itself. */}
-        <aside className="w-full lg:w-[400px] flex-none flex flex-col min-h-0 border-t lg:border-t-0 lg:border-l border-gray-200 dark:border-border bg-gray-50/60 dark:bg-card/40">
-          <StudyStartPanel
-            studyId={study.id}
-            translations={translations}
-            defaultTranslation={settings.translation ?? study.startVersion}
-            suggestedRhythm={(settings.rhythm as never) ?? study.suggestedRhythm ?? 'dagelijks'}
-            suggestedDepth={(settings.depth as never) ?? study.suggestedDepth ?? 'kort'}
-            enrolled={enrolled}
-            resumeHref={resumeHref}
-            resumeDay={resumeDay}
-            lessonsTotal={study.lessons.length}
-            lessonsCompleted={completedDays.length}
-          >
+          {/* Right: the lessons, and nothing else. The rail used to open with a
+              settings card and close with the progress block; both have their
+              own bar now, and the list gets the whole rail - which is what the
+              rail is for. */}
+          <aside className="w-full lg:w-[400px] lg:flex-none flex flex-col min-h-0 border-t lg:border-t-0 lg:border-l border-gray-200 dark:border-border bg-gray-50/60 dark:bg-card/40">
             <LessonList
               studyId={study.id}
               lessons={study.lessons.map((lesson) => ({
@@ -381,9 +310,12 @@ export default async function StudyDetailPage({ params }: PageProps) {
               currentDay={enrolled ? resumeDay : null}
               enrolled={enrolled}
             />
-          </StudyStartPanel>
-        </aside>
+          </aside>
+        </div>
+
+        {/* Foot: progress and the one action, across both panes. */}
+        <StudyActionBar />
       </div>
-    </div>
+    </StudySetupProvider>
   );
 }

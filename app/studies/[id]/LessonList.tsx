@@ -50,8 +50,9 @@ export default function LessonList({
 
   return (
     <section className="flex-1 min-h-0 flex flex-col">
-      {/* No progress bar here any more. The rail's bottom block owns progress -
-          two bars for the same number, a hand apart, is one bar too many. */}
+      {/* No progress bar here any more. The action bar at the foot of the page
+          owns progress - two bars for the same number, a hand apart, is one bar
+          too many. The count stays: it is the header of this list. */}
       <header className="flex-none px-4 sm:px-5 py-2.5 border-b border-gray-200 dark:border-border">
         <div className="flex items-baseline justify-between">
           <h2 className="text-sm font-bold text-foreground">De lessen</h2>

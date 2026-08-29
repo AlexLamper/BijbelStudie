@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { AlertCircle, Info, X } from 'lucide-react';
 
 import { formatSummaryText } from '../HistoricalContext';
@@ -18,6 +19,15 @@ const TEAL = '#0D9488';
  *
  * The summary is fetched only after the dialog is first opened, so a lesson that
  * never opens it costs nothing.
+ *
+ * It renders through a PORTAL, into document.body. Rendered in place it sat
+ * inside the step body, which is a sibling of the flow header - and the header
+ * carries `z-50` and therefore its own stacking context. No z-index on a
+ * descendant of a z-auto sibling can climb over that, so the dim covered the
+ * lesson and stopped dead at the top bar: the beam stayed lit while everything
+ * from the dialog down went grey, which looked like a rendering fault rather
+ * than a modal. Out at the document root the backdrop covers the header and the
+ * sidebar rail too, which is what "modal" means.
  */
 export default function BookContextDialog({
   book,
@@ -70,11 +80,16 @@ export default function BookContextDialog({
     return () => window.removeEventListener('keydown', onKey);
   }, [open, onClose]);
 
-  if (!open) return null;
+  // `mounted` guards the portal: document.body does not exist during the server
+  // render, and reaching for it there throws.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
-  return (
+  if (!open || !mounted) return null;
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-6"
+      className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-6"
       style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}
       onClick={onClose}
     >
@@ -129,6 +144,7 @@ export default function BookContextDialog({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

@@ -63,8 +63,9 @@ const PANELS: { key: PanelKey; label: string; icon: typeof Images; blurb: string
  * commentary cannot give you - the place, the original language, and your own
  * notes - each labelled with what it is rather than with a one-word noun.
  *
- * The authored `terms` survive as "Kernwoorden" at the head of the grondtekst
- * panel, which is where a word-meaning list belongs.
+ * The authored `terms` are not rendered either. As a "Kernwoorden" list at the
+ * head of the grondtekst panel they sat in front of the very thing that explains
+ * those words properly, one word at a time, with the Hebrew or Greek attached.
  *
  * The commentary source is resolved server-side: an explicit study choice, then
  * the reader's own reading-preference, then Matthew Henry (see lib/studyFlow
@@ -97,7 +98,6 @@ export default function StepDepth({
   onAskAi?: (question: string) => void;
 }) {
   const showMedia = depth?.showMedia !== false;
-  const terms = depth?.terms ?? [];
 
   const panel: PanelKey = PANELS.some((entry) => entry.key === panelProp)
     ? (panelProp as PanelKey)
@@ -215,40 +215,11 @@ export default function StepDepth({
               </p>
             ))}
 
-          {panel === 'original' && (
-            <div className="space-y-4">
-              {/* Authored word meanings, where a word list belongs. */}
-              {terms.length > 0 && (
-                <section className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card overflow-hidden">
-                  <h3
-                    className="px-3.5 py-2 text-[11px] font-bold uppercase tracking-wider border-b border-gray-200 dark:border-border"
-                    style={{ color: TEAL }}
-                  >
-                    Kernwoorden in dit gedeelte
-                  </h3>
-                  <dl className="divide-y divide-gray-100 dark:divide-border">
-                    {terms.map((entry) => (
-                      <div key={entry.term} className="px-3.5 py-2.5">
-                        <dt className="text-[13px] font-semibold text-foreground mb-0.5">
-                          {entry.term}
-                        </dt>
-                        <dd className="text-[12.5px] text-gray-600 dark:text-muted-foreground leading-relaxed">
-                          {entry.meaning}
-                        </dd>
-                      </div>
-                    ))}
-                  </dl>
-                </section>
-              )}
+          {/* No "Kernwoorden" block above this any more. It repeated, in Dutch
+              prose, what the grondtekst below already shows word by word - a
+              glossary in front of the dictionary it was glossing. */}
+          {panel === 'original' && <OriginalText book={book} chapter={chapter} embedded />}
 
-              <OriginalText book={book} chapter={chapter} embedded />
-            </div>
-          )}
-
-          {/* `bare`: this column already has a heading, a description line and
-              padding. The standard notes panel brings its own header bar and
-              wraps every note in a card, so nesting it here drew three borders
-              around two lines of text. */}
           {panel === 'notes' && <ChapterNotes book={book} chapter={chapter} bare />}
         </div>
 

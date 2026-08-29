@@ -14,6 +14,21 @@ export type SessionPayload = {
   user: ReturnType<typeof serialiseUser>;
 };
 
+/**
+ * `proExpiresAt` should always be a Date (schema-typed), but a legacy row — or
+ * one written by a script that bypassed mongoose — can still hold a raw
+ * string. A truthy-but-unparseable value is the dangerous case: it survives a
+ * `user.proExpiresAt ? …` check and then throws `RangeError: Invalid time
+ * value` out of `toISOString()`, which `handleV1Error` turns into a 500. That
+ * is one bad field 500-ing *every* login for that account while registration,
+ * which never has the field set, keeps working.
+ */
+function isoOrNull(value: Date | string | null | undefined): string | null {
+  if (!value) return null;
+  const date = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
+}
+
 export function serialiseUser(user: AuthUser) {
   return {
     id: user.id,
@@ -22,10 +37,7 @@ export function serialiseUser(user: AuthUser) {
     image: user.image,
     isPro: user.isPro,
     proSource: user.proSource,
-    // `proExpiresAt` should always be a Date (schema-typed), but a legacy row
-    // written before that was enforced can still hold a raw string — guard so
-    // one bad row doesn't 500 every login for that account.
-    proExpiresAt: user.proExpiresAt ? new Date(user.proExpiresAt).toISOString() : null,
+    proExpiresAt: isoOrNull(user.proExpiresAt),
     isAdmin: user.isAdmin,
   };
 }

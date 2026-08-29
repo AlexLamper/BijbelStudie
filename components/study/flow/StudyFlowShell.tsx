@@ -12,6 +12,7 @@ import {
   Lock,
   Maximize2,
   Minimize2,
+  Settings2,
   Sparkles,
   Volume2,
   VolumeX,
@@ -27,6 +28,7 @@ import StepQuiz from './StepQuiz';
 import LessonCompleteCard, { type CompletionSummary } from './LessonCompleteCard';
 import AiDock from './AiDock';
 import StudyExitGuard from './StudyExitGuard';
+import StudySettingsMenu from './StudySettingsMenu';
 import { useReadingPreferences } from '../../../hooks/useReadingPreferences';
 import { playComplete, playSwipe } from '../../../lib/studySound';
 import {
@@ -161,6 +163,7 @@ export default function StudyFlowShell({
   const [aiDraft, setAiDraft] = useState<string | null>(null);
   const [aiQuestion, setAiQuestion] = useState<string | null>(null);
   const [outlineOpen, setOutlineOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   /**
    * The translation actually on screen.
    *
@@ -627,7 +630,15 @@ export default function StudyFlowShell({
           z-50 puts the header - and therefore that dismiss layer - above the
           study rail, so a click on the sidebar closes the panel too. */}
       <header className="relative z-50 flex-none border-b border-border bg-background">
-        <div className="px-3 sm:px-5 h-14 flex items-center justify-between gap-2">
+        {/* Three tracks, and the outer two share whatever is left over.
+            `justify-between` with a `flex-1` middle looked centred and was not:
+            the close button is 32px and the control cluster on the right is
+            three times that, so the middle column started 60-odd pixels left of
+            the window centre and took the lesson title with it. Equal `flex-1`
+            gutters put the title on the actual midline whatever the right-hand
+            cluster grows to. */}
+        <div className="px-3 sm:px-5 h-14 flex items-center gap-2">
+          <div className="flex-1 flex items-center justify-start min-w-0">
           <Link
             href={`/studies/${lesson.study.id}`}
             aria-label="Terug naar de studie"
@@ -636,13 +647,17 @@ export default function StudyFlowShell({
           >
             <X size={17} />
           </Link>
+          </div>
 
           {/* Lesson navigator. What lessons there are and which are done was
               previously only visible on the detail page, one navigation away. */}
-          <div className="min-w-0 flex-1">
+          <div className="min-w-0 flex-none max-w-[56%]">
             <button
               type="button"
-              onClick={() => setOutlineOpen((open) => !open)}
+              onClick={() => {
+                setSettingsOpen(false);
+                setOutlineOpen((open) => !open);
+              }}
               aria-expanded={outlineOpen}
               className="w-full min-w-0 flex flex-col items-center rounded-md px-2 py-1 hover:bg-gray-100 dark:hover:bg-secondary transition-colors"
             >
@@ -660,7 +675,7 @@ export default function StudyFlowShell({
 
           </div>
 
-          <div className="flex-none flex items-center gap-1.5">
+          <div className="flex-1 flex items-center justify-end gap-1.5">
             {/* Nothing but the lesson on the glass. Hidden below sm: phone
                 browsers either ignore element fullscreen or hand back a
                 chrome-less view the reader cannot leave. */}
@@ -688,6 +703,29 @@ export default function StudyFlowShell({
               {soundOn ? <Volume2 size={15} /> : <VolumeX size={15} />}
             </button>
 
+            {/* Everything about how this session is presented - translation,
+                type, sound, full screen - behind one control, because the two
+                bare icons beside it never said what family they belonged to. */}
+            <button
+              type="button"
+              onClick={() => {
+                setOutlineOpen(false);
+                setSettingsOpen((value) => !value);
+              }}
+              aria-expanded={settingsOpen}
+              data-track="study_session_settings"
+              title="Instellingen voor deze sessie"
+              aria-label="Instellingen voor deze sessie"
+              className={[
+                'press inline-flex h-8 w-8 items-center justify-center rounded-lg transition-colors',
+                settingsOpen
+                  ? 'bg-gray-100 text-foreground dark:bg-secondary'
+                  : 'text-muted-foreground hover:bg-gray-100 hover:text-foreground dark:hover:bg-secondary',
+              ].join(' ')}
+            >
+              <Settings2 size={15} />
+            </button>
+
             <button
               type="button"
               onClick={() => setAiOpen((open) => !open)}
@@ -713,6 +751,21 @@ export default function StudyFlowShell({
         <div className="px-4 sm:px-6 pb-3">
           <StudyStepRail steps={steps} current={step} completed={completed} onSelect={goTo} />
         </div>
+
+        <StudySettingsMenu
+          open={settingsOpen}
+          onOpenChange={setSettingsOpen}
+          preferences={preferences}
+          onUpdatePreferences={updatePreferences}
+          version={version}
+          versions={lesson.translations}
+          onVersionChange={changeVersion}
+          soundOn={soundOn}
+          onToggleSound={toggleSound}
+          fullscreen={fullscreen}
+          onToggleFullscreen={toggleFullscreen}
+          reduceMotion={reduceMotion}
+        />
 
         {/* The lesson navigator, hung off the header rather than off its trigger.
             Two things follow from that: it is centred on the window, and its

@@ -21,11 +21,12 @@ import React, { useEffect, useState } from "react"
 
 const mainNav = [
   { title: "Dashboard",    url: "/dashboard",    icon: LayoutDashboard, tourId: "nav-dashboard"    },
-  // "Lezen" is free browsing plus the reference panels; "Studies" is the guided
-  // step-by-step flow. /studie is no longer a page of its own - it resumes
-  // whichever study you were last working on.
-  { title: "Lezen",        url: "/lezen",        icon: BookOpen,        tourId: "nav-studie"       },
+  // "Studies" is the guided step-by-step flow and sits above "Lezen" - this is a
+  // study app before it is a reader, and the nav should say so. "Lezen" is free
+  // browsing plus the reference panels. /studie is no longer a page of its own -
+  // it resumes whichever study you were last working on.
   { title: "Studies",      url: "/studies",      icon: BookMarked,      tourId: "nav-studies"      },
+  { title: "Lezen",        url: "/lezen",        icon: BookOpen,        tourId: "nav-studie"       },
   { title: "Groepen",      url: "/groepen",      icon: Users,           tourId: "nav-groepen"      },
   { title: "Notities",     url: "/notities",     icon: StickyNote,      tourId: "nav-notities"     },
   // /hulpbronnen, /bijbelboeken and /bijbelstudie are public reference pages,
@@ -143,7 +144,10 @@ export function StudyRail() {
     <div className="hidden md:block flex-none w-14">
       <nav
         aria-label="Hoofdnavigatie"
-        className="group/rail fixed inset-y-0 left-0 z-40 w-14 hover:w-52 overflow-hidden flex flex-col
+        // z-[60], above the study flow's header (z-50). At z-40 the rail slid
+        // out UNDER the top beam - open on the lesson body, clipped by the bar
+        // above it. Navigation that is half-covered by chrome reads as a bug.
+        className="group/rail fixed inset-y-0 left-0 z-[60] w-14 hover:w-52 overflow-hidden flex flex-col
                    bg-white dark:bg-card border-r border-border
                    transition-[width,box-shadow] duration-300 ease-out
                    hover:shadow-[0_0_60px_-16px_rgba(15,23,42,0.45)]"
