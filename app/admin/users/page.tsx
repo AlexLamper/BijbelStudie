@@ -131,10 +131,19 @@ export default function AdminUsersPage() {
         setToast({ type: "err", msg: data?.details || data?.error || "Synchroniseren mislukt" })
         return
       }
-      const repaired = data.billingRepairs?.length ?? 0
+      // Two kinds of repair come back, and reporting only the billing one made
+      // the button lie: an account whose Stripe state was already correct but
+      // whose document carried an invalid `readChapters` key was repaired and
+      // then reported as "was al in sync", so the admin had no way to tell the
+      // fix had happened.
+      const billingRepaired = data.billingRepairs?.length ?? 0
+      const documentsRepaired = data.documentRepairs?.length ?? 0
+      const parts = []
+      if (billingRepaired > 0) parts.push("bijgewerkt vanuit Stripe")
+      if (documentsRepaired > 0) parts.push("ongeldige readChapters-sleutel verwijderd")
       setToast({
         type: "ok",
-        msg: repaired > 0 ? `${u.email} bijgewerkt vanuit Stripe` : `${u.email} was al in sync`,
+        msg: parts.length > 0 ? `${u.email}: ${parts.join(" en ")}` : `${u.email} was al in sync`,
       })
       await fetchUsers()
     } catch {

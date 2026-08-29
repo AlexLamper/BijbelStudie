@@ -121,8 +121,18 @@ export async function POST(req: NextRequest) {
         metadata: { userId: user._id.toString() },
       })
       stripeCustomerId = customer.id
+
+      // `updateOne` on the one field, not `user.save()`.
+      //
+      // This line is where the readChapters corruption came from. Saving the
+      // whole hydrated document to store a single id made Mongoose serialise the
+      // `readChapters` Map wholesale, and its own schema path `$*` went into the
+      // update as a literal key - which then made every later full save of that
+      // user throw. Writing the field we actually changed cannot touch anything
+      // else, and it is the same discipline the billing writes already follow
+      // (see the note in app/api/verify-subscription).
+      await User.updateOne({ _id: user._id }, { $set: { stripeCustomerId: customer.id } })
       user.stripeCustomerId = customer.id
-      await user.save()
     }
 
     const origin = ALLOWED_ORIGIN

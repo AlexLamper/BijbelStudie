@@ -101,4 +101,54 @@ const UserSchema = new mongoose.Schema(
   { timestamps: true },
 )
 
+/**
+ * Last line of defence for `readChapters`.
+ *
+ * That field is a `Map` of book name to chapter numbers, and the map key is the
+ * one part of this document a request has ever been able to choose. A key that
+ * is `$`-prefixed or dotted is not merely bad data: Mongoose refuses to save a
+ * document containing one, so a single junk key makes EVERY later `save()` on
+ * that user throw - profile edits, reading progress, and at one point the Pro
+ * entitlement write as well.
+ *
+ * The two routes that write chapter keys validate them (lib/readingProgress
+ * `isSafeBookKey`), and the billing writes have moved to targeted `updateOne`s.
+ * This hook exists because neither of those helps against the other way the key
+ * appears: a full-document `save()` can serialise the map's own schema path,
+ * `$*`, into the update as a literal key. That is how it happened in production
+ * on 2026-08-29 - a `user.save()` in the checkout route, moments before the
+ * Stripe session was created.
+ *
+ * So rather than trusting every present and future call site to be careful, the
+ * model drops structurally invalid entries on the way out. A save can no longer
+ * poison the document it is saving, and a document that was already poisoned
+ * heals itself the next time anything saves it.
+ */
+UserSchema.pre("save", function stripInvalidReadChapterKeys(next) {
+  const map = this.readChapters
+  if (map && typeof map.forEach === "function") {
+    const invalid = []
+    map.forEach((chapters, book) => {
+      const keyOk =
+        typeof book === "string" &&
+        book.length > 0 &&
+        !book.startsWith("$") &&
+        !book.includes(".")
+      const valueOk =
+        Array.isArray(chapters) &&
+        chapters.every((n) => typeof n === "number" && Number.isFinite(n))
+      if (!keyOk || !valueOk) invalid.push(book)
+    })
+
+    if (invalid.length > 0) {
+      for (const book of invalid) map.delete(book)
+      this.markModified("readChapters")
+      console.warn(
+        `[user] Ongeldige readChapters-sleutels verwijderd bij het opslaan: ${invalid.join(", ")}`
+      )
+    }
+  }
+  next()
+})
+
 export default mongoose.models.User || mongoose.model("User", UserSchema)
