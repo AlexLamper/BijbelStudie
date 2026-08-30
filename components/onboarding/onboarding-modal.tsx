@@ -1,13 +1,19 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { Check, BookOpen, Library, Sun, Moon, Monitor } from "lucide-react"
+import { Check, BookOpen, BookMarked, Library, Sun, Moon, Monitor } from "lucide-react"
 import { useTheme } from "next-themes"
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "../ui/dialog"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
 import { getBibleAttribution } from "../../lib/bible-attribution"
+import {
+  useStudyStyle,
+  normaliseStudyStyle,
+  DEFAULT_STUDY_STYLE,
+  type StudyStyle,
+} from "../providers/study-style-provider"
 
 /**
  * First-run preferences.
@@ -78,11 +84,64 @@ const THEMES: Choice[] = [
 
 const THEME_ICONS: Record<string, typeof Sun> = { light: Sun, dark: Moon, system: Monitor }
 
-const TOTAL = 3
+/**
+ * Step 1: guided study, or reading on your own.
+ *
+ * It goes first for two reasons. It is the only answer here that changes the
+ * shape of the app rather than its contents - it decides which item sits
+ * directly under Dashboard in the sidebar - so it belongs before the settings
+ * it frames. And it is the one step that needs nothing from the network, so the
+ * first thing a new account sees is a real question instead of the three grey
+ * skeletons the translation list used to open on while its fetch resolved.
+ *
+ * Each card names its own consequence in the footer. A menu that quietly
+ * rearranges itself after a dialog closes reads as a glitch; a menu that
+ * rearranges itself after you were told it would reads as the product doing
+ * what you asked.
+ *
+ * The icons are the ones these two destinations already carry in the sidebar
+ * (BookMarked = Studies, BookOpen = Lezen). That is the entire justification
+ * for them being here - they identify where the choice leads, and they are the
+ * icons the user will be clicking from tomorrow on. Ornament next to a heading
+ * would not have earned its place.
+ */
+const STUDY_STYLE_OPTIONS: {
+  code: StudyStyle
+  icon: typeof BookOpen
+  label: string
+  desc: string
+  points: string[]
+  result: string
+  track: string
+}[] = [
+  {
+    code: "guided",
+    icon: BookMarked,
+    label: "Begeleide studie",
+    desc: "Wij bepalen de route. Je werkt een studie les voor les door, met vragen en uitleg onderweg.",
+    points: ["Les voor les door één thema", "Uitleg en vragen bij elke stap"],
+    result: "Studies staat vooraan in je menu",
+    track: "onboarding_mode_guided",
+  },
+  {
+    code: "self",
+    icon: BookOpen,
+    label: "Zelf lezen",
+    desc: "Jij bepaalt de route. Je kiest zelf je hoofdstuk en leest in je eigen tempo.",
+    points: ["Elk bijbelboek meteen open", "Commentaar en notities ernaast"],
+    result: "Lezen staat vooraan in je menu",
+    track: "onboarding_mode_self",
+  },
+]
+
+const TOTAL = 4
 
 const TEAL = "#0D9488"
 /** #0D9488 is 3.7:1 on white - a fill colour, not a text colour. */
 const TEAL_TEXT = "#0F766E"
+/** The landing page's feature-card icon tile, reused at modal scale. */
+const TEAL_TILE = "#CCFBF1"
+const BORDER = "#E5E7EB"
 
 /**
  * The order the translations are offered in.
@@ -141,11 +200,28 @@ export function OnboardingModal({ isOpen: initialIsOpen, onClose, onComplete }: 
   const [translations, setTranslations] = useState<Choice[] | null>(null)
   const [commentaries, setCommentaries] = useState<Choice[] | null>(null)
 
-  const [prefs, setPrefs] = useState({
+  // `intent` is the THEME choice, not a study intent - the field has carried
+  // the theme since the first version of this modal and renaming it now would
+  // orphan every document that already has one. The study-style answer lives in
+  // its own `studyStyle` field for exactly that reason.
+  //
+  // `studyStyle` starts on the guided default like every other step here starts
+  // on a value: the app is a study app before it is a reader, so that is the
+  // house answer, and someone who skips onboarding lands on the menu order they
+  // would have had anyway.
+  const [prefs, setPrefs] = useState<{
+    translation: string
+    commentary: string
+    intent: string
+    studyStyle: StudyStyle
+  }>({
     translation: "statenvertaling",
     commentary: "matthew_henry_nl",
     intent: "light",
+    studyStyle: DEFAULT_STUDY_STYLE,
   })
+
+  const { setStudyStyle } = useStudyStyle()
 
   useEffect(() => { setOpen(initialIsOpen) }, [initialIsOpen])
 
@@ -201,6 +277,13 @@ export function OnboardingModal({ isOpen: initialIsOpen, onClose, onComplete }: 
   }, [step])
 
   const saveAndClose = async () => {
+    // Applied to the live app before the request goes out, not after it comes
+    // back. The sidebar reads this from context, so the menu behind the dialog
+    // is already in its new order the moment the dialog closes - `router.refresh()`
+    // re-runs the server render but next-auth's SessionProvider only reads its
+    // `session` prop once, on mount, so waiting for the round trip would leave
+    // the nav stale until the next full page load.
+    setStudyStyle(prefs.studyStyle)
     try {
       await fetch("/api/user/preferences", {
         method: "POST",
@@ -223,8 +306,25 @@ export function OnboardingModal({ isOpen: initialIsOpen, onClose, onComplete }: 
     else await finish(true)
   }
 
+  /**
+   * Step 1 is the only step rendered as a pair of cards rather than a list of
+   * rows, so it is the one branch the options block below has to know about.
+   */
+  const isStyleStep = step === 1
+
   const { title, subtitle, options, selected, onSelect, group, loading } = useMemo(() => {
     if (step === 1) {
+      return {
+        title: "Hoe studeer je het liefst?",
+        subtitle: "We zetten voorop wat jij het meest gebruikt. Je kunt dit later altijd aanpassen.",
+        options: [] as Choice[],
+        selected: prefs.studyStyle as string,
+        onSelect: (code: string) => setPrefs(p => ({ ...p, studyStyle: normaliseStudyStyle(code) })),
+        group: "studyStyle",
+        loading: false,
+      }
+    }
+    if (step === 2) {
       return {
         title: "Kies je bijbelvertaling",
         subtitle: "Welke vertaling wil je standaard gebruiken bij het studeren? Je kunt altijd wisselen.",
@@ -235,7 +335,7 @@ export function OnboardingModal({ isOpen: initialIsOpen, onClose, onComplete }: 
         loading: translations === null,
       }
     }
-    if (step === 2) {
+    if (step === 3) {
       return {
         title: "Kies je commentaar",
         subtitle: "Bij elk hoofdstuk lees je uitleg naast de tekst. Welke uitleg heeft je voorkeur?",
@@ -257,11 +357,16 @@ export function OnboardingModal({ isOpen: initialIsOpen, onClose, onComplete }: 
     }
   }, [step, translations, commentaries, prefs, setTheme])
 
-  const iconFor = (code: string) => (step === 3 ? THEME_ICONS[code] ?? Monitor : step === 2 ? Library : BookOpen)
+  const iconFor = (code: string) => (step === 4 ? THEME_ICONS[code] ?? Monitor : step === 3 ? Library : BookOpen)
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && finish(false)}>
-      <DialogContent className="sm:max-w-[440px] p-0 overflow-hidden gap-0 rounded-2xl border border-gray-200 dark:border-border shadow-2xl">
+      {/* 560px rather than the old 440: step 1 puts two option cards next to
+          each other, and the width is constant across steps because a dialog
+          that resizes as you page through it draws the eye to the frame instead
+          of to the question. Below the sm breakpoint the cards stack and the
+          base max-w-lg takes over. */}
+      <DialogContent className="sm:max-w-[560px] p-0 overflow-hidden gap-0 rounded-2xl border border-gray-200 dark:border-border shadow-2xl">
 
         {/* Header */}
         <div className="px-7 pt-7 pb-2">
@@ -284,13 +389,110 @@ export function OnboardingModal({ isOpen: initialIsOpen, onClose, onComplete }: 
 
         {/* Options */}
         <div
-          className={`px-7 py-5 flex flex-col gap-2.5 transition-all duration-200 ease-out motion-reduce:transition-none ${
-            entered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1"
-          }`}
+          className={`px-7 py-5 transition-all duration-200 ease-out motion-reduce:transition-none ${
+            isStyleStep ? "grid grid-cols-1 sm:grid-cols-2 gap-3" : "flex flex-col gap-2.5"
+          } ${entered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1"}`}
           role="radiogroup"
           aria-label={title}
         >
-          {loading
+          {isStyleStep
+            ? STUDY_STYLE_OPTIONS.map(o => {
+                const active = selected === o.code
+                const Icon = o.icon
+                return (
+                  // The landing page's feature-card treatment at modal scale:
+                  // rounded-2xl on a hairline border, a teal-tinted icon tile,
+                  // a bold title over muted body copy, and the same 1px shadow
+                  // that lifts on hover. Two boxes with labels would have made
+                  // the user read to tell them apart; this makes the difference
+                  // visible before the copy is read.
+                  <label
+                    key={o.code}
+                    // Same naming scheme as the rest of the app's instrumented
+                    // controls - see CLICK_TARGETS in lib/analyticsRoutes.ts,
+                    // where both values are registered.
+                    data-track={o.track}
+                    className="group relative flex flex-col rounded-2xl border-2 p-5 text-left cursor-pointer transition-all duration-200 motion-reduce:transition-none hover:-translate-y-0.5 motion-reduce:hover:translate-y-0 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-teal-600 has-[:focus-visible]:ring-offset-2"
+                    style={{
+                      borderColor: active ? TEAL : BORDER,
+                      backgroundColor: active ? "rgba(13,148,136,0.05)" : "transparent",
+                      boxShadow: active
+                        ? "0 10px 26px -14px rgba(13,148,136,0.55)"
+                        : "0 1px 3px rgba(0,0,0,0.04)",
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name={group}
+                      value={o.code}
+                      checked={active}
+                      onChange={() => onSelect(o.code)}
+                      className="sr-only"
+                    />
+
+                    <span className="flex items-start justify-between mb-4">
+                      <span
+                        className="h-10 w-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                        style={{
+                          backgroundColor: TEAL_TILE,
+                          backgroundImage: `linear-gradient(135deg, ${TEAL_TILE}, rgba(13,148,136,0.05))`,
+                        }}
+                      >
+                        <Icon className="h-[18px] w-[18px]" style={{ color: TEAL }} />
+                      </span>
+                      <span
+                        className="flex-shrink-0 h-5 w-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 motion-reduce:transition-none"
+                        style={{
+                          borderColor: active ? TEAL : "#D1D5DB",
+                          backgroundColor: active ? TEAL : "transparent",
+                        }}
+                      >
+                        {active && <Check className="h-3 w-3 text-white" />}
+                      </span>
+                    </span>
+
+                    <span className="block font-bold text-[15px] leading-snug text-gray-900 dark:text-foreground">
+                      {o.label}
+                    </span>
+                    <span className="block text-[12.5px] leading-relaxed text-gray-600 dark:text-muted-foreground mt-1.5">
+                      {o.desc}
+                    </span>
+
+                    <span className="flex flex-col gap-1.5 mt-3.5">
+                      {o.points.map(p => (
+                        <span
+                          key={p}
+                          className="flex items-start gap-2 text-[11.5px] leading-snug text-gray-600 dark:text-muted-foreground"
+                        >
+                          {/* A bullet, not an icon: the two icons in this step
+                              already carry meaning and a second glyph next to
+                              every line would be pure ornament. */}
+                          <span
+                            aria-hidden="true"
+                            className="mt-[5px] h-1 w-1 rounded-full flex-shrink-0"
+                            style={{ backgroundColor: TEAL }}
+                          />
+                          <span>{p}</span>
+                        </span>
+                      ))}
+                    </span>
+
+                    {/* What the choice actually does, spelled out on the card
+                        that does it. `mt-auto` keeps the two footers on the
+                        same line when the descriptions differ in height. */}
+                    <span
+                      className="block mt-auto pt-4 border-t text-[11px] font-semibold leading-snug"
+                      style={{
+                        borderColor: active ? "rgba(13,148,136,0.25)" : BORDER,
+                        color: active ? TEAL_TEXT : "#6B7280",
+                      }}
+                    >
+                      {o.result}
+                    </span>
+                  </label>
+                )
+              })
+            : loading
             ? [0, 1, 2].map(i => (
                 <div
                   key={i}
@@ -306,7 +508,7 @@ export function OnboardingModal({ isOpen: initialIsOpen, onClose, onComplete }: 
                     key={o.code}
                     className="group flex items-center justify-between p-4 rounded-xl border-2 text-left cursor-pointer transition-all duration-200 motion-reduce:transition-none has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-teal-600 has-[:focus-visible]:ring-offset-2"
                     style={{
-                      borderColor: active ? TEAL : "#E5E7EB",
+                      borderColor: active ? TEAL : BORDER,
                       backgroundColor: active ? "rgba(13,148,136,0.05)" : "transparent",
                     }}
                   >

@@ -70,6 +70,22 @@ const UserSchema = new mongoose.Schema(
       translation: { type: String, default: "statenvertaling" },
       commentary: { type: String, default: "matthew_henry_nl" },
       intent: { type: String },
+      // How the user answered onboarding's "Hoe studeer je het liefst?"
+      // question: "guided" (begeleide studies) or "self" (zelf lezen). It
+      // decides which item sits directly under Dashboard in the sidebar - see
+      // components/layout/app-sidebar.tsx.
+      //
+      // Deliberately NOT stored in `intent`, despite the name looking like an
+      // exact fit. That field is already taken: the onboarding modal has always
+      // written the *theme* choice into it, which is why live documents read
+      // `intent: "system"`. Reusing it would have made two unrelated settings
+      // overwrite each other on every pass through onboarding.
+      //
+      // Also deliberately without a default. Every account that predates this
+      // question has no value here, and "never asked" has to stay
+      // distinguishable from "asked, chose guided" - the reader falls back to
+      // the guided order either way, which is the order the menu already had.
+      studyStyle: { type: String, enum: ["guided", "self", null] },
       onboardingCompleted: { type: Boolean, default: false },
       tourCompleted: { type: Boolean, default: false },
       fontSize: { type: String, default: "base" },

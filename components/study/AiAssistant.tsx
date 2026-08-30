@@ -37,6 +37,24 @@ interface QuotaState {
   unlimited: boolean;
 }
 
+/**
+ * One line of the newline-delimited stream from POST /api/ai/chat.
+ *
+ * `meta` arrives first, then `delta` per fragment, then exactly one terminator:
+ * `done`, `blocked` (safety filter ate the answer) or `error`. An `error` with
+ * `partial: true` means words already arrived and are worth keeping.
+ */
+interface StreamEvent {
+  type: 'meta' | 'delta' | 'done' | 'blocked' | 'error';
+  text?: string;
+  reply?: string;
+  used?: number;
+  cap?: number | null;
+  error?: string;
+  code?: string;
+  partial?: boolean;
+}
+
 const STARTER_QUESTIONS = [
   'Wat is de kernboodschap van dit hoofdstuk?',
   'Leg de historische achtergrond van dit hoofdstuk uit',
@@ -50,11 +68,12 @@ const MAX_MESSAGE_LENGTH = 2000;
  * Escalating reassurance while an answer is generating, so a slow reply reads
  * as "still working" instead of "broken" and the user stays on the page.
  *
- * The thresholds follow what the server actually does. A cached answer returns
- * almost immediately and never reaches stage 1. A normal generation runs a few
- * seconds. Past ~25s the request is almost certainly inside the retry path in
- * lib/aiGemini.ts - the primary model retried after a 600ms backoff, then the
- * five fallback models tried in turn - which is slow but still progressing.
+ * Since the answer streams, this covers only the gap before the FIRST token -
+ * from then on the text itself is the progress indicator and this disappears.
+ * A cached answer returns almost immediately and never reaches stage 1. Past
+ * ~10s the request is almost certainly inside the retry path in lib/aiGemini.ts
+ * - the primary model retried after a 600ms backoff, then the fallback - which
+ * is slow but still progressing.
  *
  * The copy deliberately never claims the answer is nearly ready, and never
  * names a mechanism the client cannot observe: from here the only knowable
@@ -130,6 +149,10 @@ export default function AiAssistant({
   const [error, setError] = useState<string | null>(null);
   const [quota, setQuota] = useState<QuotaState | null>(null);
   const [quotaHit, setQuotaHit] = useState(false);
+  // True from the first streamed token until the answer ends. The skeleton is
+  // for an empty panel; once words are arriving they are the better progress
+  // indicator, and showing both would be a placeholder next to the real thing.
+  const [streaming, setStreaming] = useState(false);
   const [waitStage, setWaitStage] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -182,9 +205,17 @@ export default function AiAssistant({
 
       setError(null);
       setLoading(true);
+      setStreaming(false);
       setInput('');
       const history = messages.slice(-10);
       setMessages((prev) => [...prev, { role: 'user', content: trimmed }]);
+
+      // Puts the composer back exactly as the user left it, so a failure costs
+      // them the wait but never the typing.
+      const undoSend = () => {
+        setMessages((prev) => prev.slice(0, -1));
+        setInput(trimmed);
+      };
 
       try {
         const res = await fetch('/api/ai/chat', {
@@ -192,35 +223,139 @@ export default function AiAssistant({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: trimmed, history, book, chapter, version }),
         });
-        const data = await res.json().catch(() => null);
 
-        if (!res.ok) {
-          if (data?.code === 'QUOTA_EXCEEDED') {
+        // Only a live generation streams. A cache hit, and every refusal the
+        // server can decide before calling Gemini, still answers as one JSON
+        // object with its own status code.
+        const body = res.body;
+        const streamed =
+          res.ok && (res.headers.get('content-type') ?? '').includes('ndjson') && !!body;
+
+        if (!streamed || !body) {
+          const data = await res.json().catch(() => null);
+
+          if (!res.ok) {
+            if (data?.code === 'QUOTA_EXCEEDED') {
+              setQuotaHit(true);
+              setQuota((q) => (q ? { ...q, used: data.used ?? q.used } : q));
+              // Remove the optimistically added user message
+              setMessages((prev) => prev.slice(0, -1));
+            } else {
+              setError(data?.error || 'Er ging iets mis. Probeer het opnieuw.');
+              undoSend();
+            }
+            return;
+          }
+
+          setMessages((prev) => [...prev, { role: 'assistant', content: data.reply }]);
+          setQuota((q) =>
+            q ? { ...q, used: typeof data.used === 'number' ? data.used : q.used } : q,
+          );
+          if (data.cap !== null && typeof data.used === 'number' && data.used >= data.cap) {
             setQuotaHit(true);
-            setQuota((q) => (q ? { ...q, used: data.used ?? q.used } : q));
-            // Remove the optimistically added user message
-            setMessages((prev) => prev.slice(0, -1));
-          } else {
-            setError(data?.error || 'Er ging iets mis. Probeer het opnieuw.');
-            setMessages((prev) => prev.slice(0, -1));
-            setInput(trimmed);
           }
           return;
         }
 
-        setMessages((prev) => [...prev, { role: 'assistant', content: data.reply }]);
-        setQuota((q) =>
-          q ? { ...q, used: typeof data.used === 'number' ? data.used : q.used } : q,
-        );
-        if (data.cap !== null && typeof data.used === 'number' && data.used >= data.cap) {
-          setQuotaHit(true);
+        const reader = body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let answer = '';
+        let started = false;
+        let capFromMeta: number | null = null;
+
+        // Appends into the assistant bubble, creating it on the first fragment.
+        // Replacing only the last entry keeps the earlier messages
+        // referentially stable while tokens arrive.
+        const paint = (content: string) => {
+          if (!started) {
+            started = true;
+            setStreaming(true);
+            setMessages((prev) => [...prev, { role: 'assistant', content }]);
+            return;
+          }
+          setMessages((prev) => {
+            const next = [...prev];
+            next[next.length - 1] = { role: 'assistant', content };
+            return next;
+          });
+        };
+
+        const apply = (event: StreamEvent) => {
+          switch (event.type) {
+            case 'meta':
+              if (typeof event.cap === 'number') capFromMeta = event.cap;
+              if (typeof event.used === 'number') {
+                const used = event.used;
+                setQuota((q) => (q ? { ...q, used } : q));
+              }
+              break;
+            case 'delta':
+              answer += event.text ?? '';
+              paint(answer);
+              break;
+            case 'blocked':
+              answer = event.reply ?? '';
+              paint(answer);
+              if (typeof event.used === 'number') {
+                const used = event.used;
+                setQuota((q) => (q ? { ...q, used } : q));
+              }
+              break;
+            case 'done':
+              if (typeof event.used === 'number') {
+                const used = event.used;
+                setQuota((q) => (q ? { ...q, used } : q));
+                if (capFromMeta !== null && used >= capFromMeta) setQuotaHit(true);
+              }
+              break;
+            case 'error':
+              // Words that already arrived are kept: half an answer is worth
+              // more than a panel that erases itself and blames the network.
+              setError(event.error || 'Er ging iets mis. Probeer het opnieuw.');
+              if (!event.partial) undoSend();
+              break;
+          }
+        };
+
+        for (;;) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+
+          let newline = buffer.indexOf('\n');
+          while (newline >= 0) {
+            const line = buffer.slice(0, newline).trim();
+            buffer = buffer.slice(newline + 1);
+            if (line) {
+              try {
+                apply(JSON.parse(line) as StreamEvent);
+              } catch {
+                // A malformed line is not worth failing the whole answer over;
+                // the terminating event still decides the outcome.
+              }
+            }
+            newline = buffer.indexOf('\n');
+          }
+        }
+
+        // The connection ended without ever producing a token - a dropped
+        // stream rather than a refusal. Hand the question back.
+        if (!started) {
+          setError('Er ging iets mis. Probeer het opnieuw.');
+          undoSend();
         }
       } catch {
         setError('Er ging iets mis. Controleer je verbinding en probeer het opnieuw.');
-        setMessages((prev) => prev.slice(0, -1));
+        // Only the user's own message is rolled back; a partial answer that
+        // already arrived stays on screen.
+        setMessages((prev) =>
+          prev.length > 0 && prev[prev.length - 1].role === 'user' ? prev.slice(0, -1) : prev,
+        );
         setInput(trimmed);
       } finally {
         setLoading(false);
+        setStreaming(false);
       }
     },
     [messages, loading, book, chapter, version],
@@ -337,8 +472,9 @@ export default function AiAssistant({
             ),
           )}
 
-          {/* Loading */}
-          {loading && (
+          {/* Loading - only until the first token arrives; after that the text
+              itself is the progress indicator. */}
+          {loading && !streaming && (
             <div className="px-1 py-1 space-y-2">
               <SkeletonBlock className="h-3" />
               <SkeletonBlock className="h-3 w-11/12" />

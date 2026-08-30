@@ -9,6 +9,34 @@ const MAX_CHARS_PER_REQUEST = 4500;
 const MONTHLY_CAP = 800_000; // hard cap (Google free tier = 1,000,000 chars/maand Wavenet)
 const DEFAULT_VOICE = "diana";
 
+/**
+ * Google’s `error.details[0].reason` → a Dutch line the reader can act on.
+ *
+ * These are all beheerder-side configuration faults, not something the reader
+ * did wrong, so each one says plainly that voorlezen is off right now rather
+ * than pretending it was a hiccup. BILLING_DISABLED is the common one: Cloud
+ * Text-to-Speech has a free monthly tier but still refuses every call until a
+ * billing account is attached to the project.
+ */
+const GOOGLE_ERROR_HINTS: Record<string, string> = {
+  BILLING_DISABLED:
+    "Voorlezen staat uit: er is nog geen facturering gekoppeld aan het Google Cloud-project. " +
+    "Cloud Text-to-Speech weigert elke aanroep zonder facturatie-account, ook binnen de gratis maandlimiet. " +
+    "Gebruik zolang een browser-stem.",
+  API_KEY_HTTP_REFERRER_BLOCKED:
+    "De API key heeft HTTP referrer-restricties. Server-side aanroepen sturen geen Referer header. " +
+    "Zet Application restrictions op 'None' in Google Cloud Console.",
+  API_KEY_SERVICE_BLOCKED:
+    "De API key is niet toegestaan voor Cloud Text-to-Speech. Schakel de Text-to-Speech API in onder API restrictions.",
+  SERVICE_DISABLED:
+    "De Cloud Text-to-Speech API staat uit voor dit project. Schakel hem in via APIs & Services → Library.",
+  RATE_LIMIT_EXCEEDED:
+    "De limiet van Google is even bereikt. Probeer het over een paar minuten opnieuw, of gebruik een browser-stem.",
+};
+
+const GENERIC_GOOGLE_HINT =
+  "De voorleesdienst weigerde de aanvraag. Probeer het later opnieuw of gebruik een browser-stem.";
+
 function currentMonth(): string {
   const d = new Date();
   return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
@@ -116,14 +144,11 @@ export async function POST(req: NextRequest) {
         message = parsed?.error?.message;
         reason = parsed?.error?.details?.[0]?.reason;
       } catch { /* ignore */ }
-      const hint =
-        reason === "API_KEY_HTTP_REFERRER_BLOCKED"
-          ? "De API key heeft HTTP referrer-restricties. Server-side aanroepen sturen geen Referer header. Zet Application restrictions op 'None' in Google Cloud Console."
-          : reason === "API_KEY_SERVICE_BLOCKED"
-            ? "De API key is niet toegestaan voor Cloud Text-to-Speech. Schakel de Text-to-Speech API in onder API restrictions."
-            : reason === "SERVICE_DISABLED"
-              ? "De Cloud Text-to-Speech API staat uit voor dit project. Schakel hem in via APIs & Services → Library."
-              : undefined;
+      // The client shows `hint` verbatim to the reader, so every branch here has
+      // to be Dutch and readable. Falling through to Google's own `message`
+      // meant a wall of English ("This API method requires billing...") ended up
+      // in the UI, which is why there is always a generic Dutch fallback now.
+      const hint = GOOGLE_ERROR_HINTS[reason ?? ""] ?? GENERIC_GOOGLE_HINT;
       return NextResponse.json(
         { error: "TTS-aanroep mislukt", status: googleResponse.status, reason, message, hint },
         { status: 502 },

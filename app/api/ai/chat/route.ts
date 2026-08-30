@@ -9,8 +9,8 @@ import { getChapter } from "../../../../lib/local-data";
 import { buildSystemInstruction, formatChapterText } from "../../../../lib/aiPrompt";
 import {
   AiBusyError,
-  generateChatReply,
   isRateLimitError,
+  streamChatReply,
   type AiTurn,
 } from "../../../../lib/aiGemini";
 import {
@@ -19,6 +19,12 @@ import {
   writeCachedAnswer,
   type CacheContext,
 } from "../../../../lib/aiAnswerCache";
+import {
+  readAiBudget,
+  refundAiReservation,
+  reserveAiSpend,
+  settleAiSpend,
+} from "../../../../lib/aiBudget";
 
 /**
  * A slow answer is usually generateChatReply walking its fallback chain, which
@@ -166,6 +172,28 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // ── Application-wide budget ────────────────────────────────────
+    // The per-user cap above bounds one person; this bounds the bill. It is
+    // claimed only once the cache has missed, because a cache hit never reaches
+    // the provider and so costs nothing to serve.
+    const reservation = await reserveAiSpend();
+    if (!reservation.allowed) {
+      await refund();
+      console.warn(
+        `[ai-chat] Budget guard refused a call (${reservation.reason}) - month ${reservation.month}, ${reservation.requests} requests`,
+      );
+      return NextResponse.json(
+        {
+          error:
+            reservation.reason === "LEDGER_UNAVAILABLE"
+              ? "De AI-assistent is nu even niet beschikbaar. Probeer het zo opnieuw."
+              : "De AI-assistent is deze maand tijdelijk uitgeschakeld. Probeer het volgende maand opnieuw.",
+          code: "AI_BUDGET_EXHAUSTED",
+        },
+        { status: 503 },
+      );
+    }
+
     // ── Chapter context (best-effort, never fails the request) ─────
     let chapterText: string | null = null;
     if (book && chapter && version) {
@@ -179,7 +207,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // ── Gemini call ────────────────────────────────────────────────
+    // ── Gemini call, streamed ──────────────────────────────────────
     const contents: AiTurn[] = [
       ...history.map((m) => ({
         role: m.role === "assistant" ? ("model" as const) : ("user" as const),
@@ -188,49 +216,104 @@ export async function POST(req: NextRequest) {
       { role: "user" as const, parts: [{ text: message }] },
     ];
 
-    let reply: string | undefined;
-    let model: string | null = null;
-    try {
-      const generated = await generateChatReply({
-        apiKey,
-        contents,
-        systemInstruction: buildSystemInstruction(book, chapter, version, chapterText),
-      });
-      reply = generated.text;
-      model = generated.model;
-    } catch (err) {
-      await refund();
-      // A capacity blip that survived every retry reads the same to the user
-      // as a rate limit: come back in a minute.
-      if (err instanceof AiBusyError || isRateLimitError(err)) {
-        return NextResponse.json(
-          {
-            error: "Het is momenteel erg druk. Probeer het over een minuutje opnieuw.",
-            code: "AI_BUSY",
-          },
-          { status: 429 },
-        );
-      }
-      console.error("[ai-chat] Gemini error:", err);
-      return NextResponse.json({ error: "AI-aanroep mislukt" }, { status: 502 });
-    }
+    /**
+     * Everything above still answers with ordinary JSON and its own status code:
+     * not signed in, out of questions, budget spent, cache hit. Only the
+     * generation itself streams, as newline-delimited JSON, and the client
+     * branches on the content type.
+     *
+     * The trade of streaming is that the status line is committed before the
+     * answer exists, so a failure from here on is a 200 carrying an `error`
+     * event rather than a 502. That is the price of first words in half a second
+     * instead of a blank panel for eight.
+     */
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream<Uint8Array>({
+      async start(controller) {
+        const send = (event: Record<string, unknown>) => {
+          controller.enqueue(encoder.encode(`${JSON.stringify(event)}
+`));
+        };
 
-    if (!reply || reply.trim().length === 0) {
-      // Safety block or empty candidate - degrade gracefully and refund.
-      await refund();
-      return NextResponse.json({
-        reply: BLOCKED_REPLY,
-        used: newCount - 1,
-        cap: unlimited ? null : cap,
-      });
-    }
+        // What has actually reached the reader. Both the refund decision and the
+        // cache write hang off this, so it is the one thing kept honest.
+        let answer = "";
+        const generation = streamChatReply({
+          apiKey,
+          contents,
+          systemInstruction: buildSystemInstruction(book, chapter, version, chapterText),
+        });
 
-    if (cacheable) await writeCachedAnswer(cacheCtx, reply, model);
+        try {
+          // Sent before the first token so the counter under the composer is
+          // right even if the generation later breaks halfway.
+          send({ type: "meta", used: newCount, cap: unlimited ? null : cap });
 
-    return NextResponse.json({
-      reply,
-      used: newCount,
-      cap: unlimited ? null : cap,
+          let usage = { inputTokens: 0, outputTokens: 0 };
+          let model: string | null = null;
+          for (;;) {
+            const next = await generation.next();
+            if (next.done) {
+              usage = next.value.usage;
+              model = next.value.model;
+              break;
+            }
+            answer += next.value;
+            send({ type: "delta", text: next.value });
+          }
+
+          // The tokens are billed whatever the answer turned out to be, so the
+          // ledger settles before any judgement about the text itself.
+          await settleAiSpend(usage.inputTokens, usage.outputTokens);
+
+          if (answer.trim().length === 0) {
+            // Safety block or empty candidate - refund the user's question, but
+            // NOT the budget: the provider was called either way.
+            await refund();
+            send({ type: "blocked", reply: BLOCKED_REPLY, used: newCount - 1 });
+          } else {
+            if (cacheable) await writeCachedAnswer(cacheCtx, answer, model);
+            send({ type: "done", used: newCount });
+          }
+        } catch (err) {
+          if (answer.length === 0) {
+            // Nothing was generated and nothing was read: give back both the
+            // question and the reservation.
+            await refund();
+            await refundAiReservation();
+          } else {
+            // Half an answer is still a billed answer, so the reservation
+            // stands; the reader keeps the words that arrived.
+            console.error("[ai-chat] Stream broke mid-answer:", err);
+          }
+
+          const busy = err instanceof AiBusyError || isRateLimitError(err);
+          if (!busy) console.error("[ai-chat] Gemini error:", err);
+          send({
+            type: "error",
+            code: busy ? "AI_BUSY" : "AI_CALL_FAILED",
+            error: busy
+              ? "Het is momenteel erg druk. Probeer het over een minuutje opnieuw."
+              : "AI-aanroep mislukt",
+            partial: answer.length > 0,
+          });
+        } finally {
+          // A reader who closes the tab mid-answer leaves the provider call
+          // open; this ends it rather than letting it run on unread.
+          await generation.return?.({ model: "", usage: { inputTokens: 0, outputTokens: 0 } });
+          controller.close();
+        }
+      },
+    });
+
+    return new Response(stream, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/x-ndjson; charset=utf-8",
+        "Cache-Control": "no-store, no-transform",
+        // Proxy buffering would hold the tokens back and undo the streaming.
+        "X-Accel-Buffering": "no",
+      },
     });
   } catch (err) {
     console.error("[ai-chat] Server error:", err);
@@ -246,6 +329,7 @@ export async function GET() {
     }
 
     const configured = !!process.env.GEMINI_API_KEY;
+    const budget = await readAiBudget();
 
     await connectMongoDB();
     const user = await User.findOne({ email: session.user.email }).lean<{
@@ -270,7 +354,18 @@ export async function GET() {
       /* ignore */
     }
 
-    return NextResponse.json({ configured, used, cap, unlimited });
+    // `budgetExhausted` lets the client say "uitgeschakeld deze maand" instead of
+    // letting the reader discover it by asking a question and being refused.
+    // Only admins see the figures themselves; a number that reveals how close
+    // the app is to switching itself off is operational detail, not user copy.
+    return NextResponse.json({
+      configured,
+      used,
+      cap,
+      unlimited,
+      budgetExhausted: budget?.exhausted ?? false,
+      budget: user.isAdmin || isAdminEmail(session.user.email) ? budget : undefined,
+    });
   } catch (err) {
     console.error("[ai-chat] Server error:", err);
     return NextResponse.json({ error: "Server fout" }, { status: 500 });

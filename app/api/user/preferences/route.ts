@@ -4,6 +4,17 @@ import connectMongoDB from "../../../../lib/mongodb";
 import User from "../../../../models/User";
 import { authOptions } from "../../../../lib/authOptions";
 
+/**
+ * Accepted values for `preferences.studyStyle`, checked here rather than passed
+ * through like the other strings.
+ *
+ * This one drives the order of the sidebar's navigation, and an unrecognised
+ * value degrades silently to the guided order everywhere it is read. Rejecting
+ * it at the door is what keeps a typo from becoming an invisible bug that only
+ * shows up as a menu that never reorders.
+ */
+const STUDY_STYLES: readonly string[] = ["guided", "self"];
+
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -19,6 +30,7 @@ export async function POST(request: NextRequest) {
       translation,
       commentary,
       intent,
+      studyStyle,
       onboardingCompleted,
       tourCompleted,
       fontSize,
@@ -38,6 +50,7 @@ export async function POST(request: NextRequest) {
     if (translation) updateData["preferences.translation"] = translation;
     if (commentary) updateData["preferences.commentary"] = commentary;
     if (intent) updateData["preferences.intent"] = intent;
+    if (STUDY_STYLES.includes(studyStyle)) updateData["preferences.studyStyle"] = studyStyle;
     if (onboardingCompleted !== undefined) updateData["preferences.onboardingCompleted"] = onboardingCompleted;
     if (tourCompleted !== undefined) updateData["preferences.tourCompleted"] = tourCompleted;
 

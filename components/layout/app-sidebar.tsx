@@ -18,13 +18,20 @@ import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import React, { useEffect, useState } from "react"
+import { useStudyStyle } from "../providers/study-style-provider"
 
+/**
+ * The nav as someone who wants to be guided sees it - and the order the menu
+ * has always had, so it is also what an account that never answered onboarding
+ * gets.
+ *
+ * "Studies" is the guided step-by-step flow and sits above "Lezen" - this is a
+ * study app before it is a reader, and the nav should say so. "Lezen" is free
+ * browsing plus the reference panels. /studie is no longer a page of its own -
+ * it resumes whichever study you were last working on.
+ */
 const mainNav = [
   { title: "Dashboard",    url: "/dashboard",    icon: LayoutDashboard, tourId: "nav-dashboard"    },
-  // "Studies" is the guided step-by-step flow and sits above "Lezen" - this is a
-  // study app before it is a reader, and the nav should say so. "Lezen" is free
-  // browsing plus the reference panels. /studie is no longer a page of its own -
-  // it resumes whichever study you were last working on.
   { title: "Studies",      url: "/studies",      icon: BookMarked,      tourId: "nav-studies"      },
   { title: "Lezen",        url: "/lezen",        icon: BookOpen,        tourId: "nav-studie"       },
   { title: "Groepen",      url: "/groepen",      icon: Users,           tourId: "nav-groepen"      },
@@ -33,6 +40,33 @@ const mainNav = [
   // not things a signed-in user works in. They stay online and in the sitemap;
   // they are simply not part of the app's own navigation.
 ]
+
+/**
+ * The same nav for someone who told onboarding they would rather read on their
+ * own: "Lezen" and "Studies" trade places, nothing else moves.
+ *
+ * Derived from `mainNav` rather than written out again so the two lists can
+ * never drift - a nav item added above still exists in both orders. Built once
+ * at module scope: this is two constants, not a per-render computation.
+ */
+const mainNavSelfLed = [mainNav[0], mainNav[2], mainNav[1], ...mainNav.slice(3)]
+
+/**
+ * The nav in the order this user asked for.
+ *
+ * Both consumers below render this - `NavLink` in the full sidebar and
+ * `RailLink` in the study-mode rail - which is the whole reason the choice is
+ * resolved here instead of at either call site.
+ *
+ * `useStudyStyle` reads a value the server put in the HTML (see
+ * components/providers/study-style-provider.tsx), so the first render already
+ * has the final order. There is no fetch to wait on and therefore no frame in
+ * which the menu is in the wrong order and then rearranges itself.
+ */
+function useMainNav() {
+  const { studyStyle } = useStudyStyle()
+  return studyStyle === "self" ? mainNavSelfLed : mainNav
+}
 
 const bottomNav = [
   { title: "Profiel",      url: "/profiel",      icon: User,              tourId: "nav-profiel"      },
@@ -140,6 +174,8 @@ function RailAdminLink() {
  * own close button is the way out.
  */
 export function StudyRail() {
+  const nav = useMainNav()
+
   return (
     <div className="hidden md:block flex-none w-14">
       <nav
@@ -172,7 +208,7 @@ export function StudyRail() {
 
         <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-2">
           <ul className="m-0 p-0 flex flex-col gap-0.5">
-            {mainNav.map(item => <RailLink key={item.url} {...item} />)}
+            {nav.map(item => <RailLink key={item.url} {...item} />)}
             <RailAdminLink />
           </ul>
         </div>
@@ -290,6 +326,8 @@ function AdminLink() {
 }
 
 export function AppSidebar({ ...props }) {
+  const nav = useMainNav()
+
   return (
     <Sidebar
       {...props}
@@ -322,7 +360,7 @@ export function AppSidebar({ ...props }) {
       {/* Main nav */}
       <SidebarContent className="bg-white dark:bg-card !p-2">
         <ul className="m-0 p-0 flex flex-col gap-0.5">
-          {mainNav.map(item => <NavLink key={item.url} {...item} />)}
+          {nav.map(item => <NavLink key={item.url} {...item} />)}
           <AdminLink />
         </ul>
         <ProCTA />

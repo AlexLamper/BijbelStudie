@@ -9,6 +9,7 @@ import { GuidedTourLauncher } from "../components/onboarding/guided-tour";
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Suspense } from "react";
 import { PrefetchProvider } from "../components/providers/prefetch-provider";
+import { StudyStyleProvider } from "../components/providers/study-style-provider";
 import AnalyticsTracker from "../components/providers/AnalyticsTracker";
 import { JsonLd } from "../components/seo/JsonLd";
 import {
@@ -195,26 +196,33 @@ export default async function RootLayout({
           disableTransitionOnChange
           storageKey="bijbelstudie-theme-v2"
         >
-          <PrefetchProvider>
-            {/* Page views and clicks for /admin/insights. Renders nothing and
-                never blocks - see components/providers/AnalyticsTracker.tsx. */}
-            <Suspense fallback={null}>
-              <AnalyticsTracker />
-            </Suspense>
-            <div id="main-content" className="min-h-screen mx-auto w-full">
-              {children}
-            </div>
-            {session?.user && (
-              <>
-                <OnboardingWrapper shouldShow={!session.user.onboardingCompleted} />
-                {/* Numbered first-time tour: launches after a tiny delay if
-                    localStorage flag isn't set. Won't fight the OnboardingModal
-                    because the launcher's setTimeout starts immediately but
-                    the modal blocks interaction until dismissed. */}
-                <GuidedTourLauncher canShow={!!session.user.onboardingCompleted} tourCompleted={!!session.user.tourCompleted} isSubscribed={!!session.user.isSubscribed} />
-              </>
-            )}
-          </PrefetchProvider>
+          {/* Onboarding's guided-vs-self answer, handed to the client from the
+              one render that always has the enriched session. The sidebar is a
+              client component; reordering its nav after a fetch resolved made
+              the menu visibly rearrange itself on load, so the order is decided
+              here, before the HTML is sent. See study-style-provider.tsx. */}
+          <StudyStyleProvider initial={session?.user?.studyStyle}>
+            <PrefetchProvider>
+              {/* Page views and clicks for /admin/insights. Renders nothing and
+                  never blocks - see components/providers/AnalyticsTracker.tsx. */}
+              <Suspense fallback={null}>
+                <AnalyticsTracker />
+              </Suspense>
+              <div id="main-content" className="min-h-screen mx-auto w-full">
+                {children}
+              </div>
+              {session?.user && (
+                <>
+                  <OnboardingWrapper shouldShow={!session.user.onboardingCompleted} />
+                  {/* Numbered first-time tour: launches after a tiny delay if
+                      localStorage flag isn't set. Won't fight the OnboardingModal
+                      because the launcher's setTimeout starts immediately but
+                      the modal blocks interaction until dismissed. */}
+                  <GuidedTourLauncher canShow={!!session.user.onboardingCompleted} tourCompleted={!!session.user.tourCompleted} isSubscribed={!!session.user.isSubscribed} />
+                </>
+              )}
+            </PrefetchProvider>
+          </StudyStyleProvider>
         </ThemeProvider>
         <SpeedInsights />
       </body>

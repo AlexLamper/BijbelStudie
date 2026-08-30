@@ -22,6 +22,11 @@ const ALLOWED_STRING_KEYS = [
   'translation',
   'commentary',
   'intent',
+  // Guided study vs. reading on your own. Listed so the phone and the browser
+  // agree about it like they do about every other onboarding answer; unlike the
+  // website's own route this does not check the enum, so the UI narrows what it
+  // reads (normaliseStudyStyle) and an unknown value simply means "guided".
+  'studyStyle',
   'fontSize',
   'fontFamily',
   'lineHeight',

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Play, Pause, Square, Volume2, Settings2, Loader2, Cloud, Monitor, Sparkles, AlertCircle, X } from 'lucide-react';
 import { useTTS } from '../../hooks/useTTS';
 import type { CloudVoice } from '../../lib/cloudVoices';
@@ -32,6 +33,10 @@ export default function SpeakButton({
   const tts = useTTS();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const settingsRef = useRef<HTMLDivElement>(null);
+  // The compact error toast is portalled to <body>, so it has to wait for the
+  // client. See the toast itself for why a portal and not an inline panel.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     if (!settingsOpen) return;
@@ -52,38 +57,15 @@ export default function SpeakButton({
     } else if (tts.isPaused) {
       tts.resume();
     } else {
-      const text = getText();
-      if (text.trim()) tts.speak(text);
+      // No `if (text.trim())` guard any more - an empty passage is a fault worth
+      // reporting, and swallowing it here was one of the ways the button could
+      // look dead. `speak` raises the Dutch message for it.
+      tts.speak(getText());
     }
   };
 
   const isPlaying = tts.isSpeaking && !tts.isPaused;
   const browserDutch = tts.browserVoices.filter(v => v.lang.toLowerCase().startsWith('nl'));
-
-  if (compact) {
-    return (
-      <button
-        onClick={handlePlayPause}
-        title={isPlaying ? 'Pauzeren' : tts.isPaused ? 'Hervatten' : label}
-        aria-label={label}
-        disabled={tts.isLoading}
-        className={cn(
-          'inline-flex items-center justify-center rounded-md p-1.5 transition-colors disabled:opacity-50',
-          isPlaying
-            ? 'bg-[rgba(13,148,136,0.15)] text-[#0D9488]'
-            : 'text-gray-500 hover:text-[#0D9488] hover:bg-[rgba(13,148,136,0.08)]',
-          className,
-        )}
-      >
-        {tts.isLoading
-          ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          : isPlaying
-            ? <Pause className="h-3.5 w-3.5" />
-            : <Play className="h-3.5 w-3.5" />
-        }
-      </button>
-    );
-  }
 
   const handleFallbackToBrowser = () => {
     const fallback = browserDutch[0] ?? tts.browserVoices[0];
@@ -92,6 +74,54 @@ export default function SpeakButton({
     }
     tts.clearError();
   };
+
+  if (compact) {
+    return (
+      <>
+        <button
+          onClick={handlePlayPause}
+          title={tts.error ? tts.error : isPlaying ? 'Pauzeren' : tts.isPaused ? 'Hervatten' : label}
+          aria-label={label}
+          disabled={tts.isLoading}
+          className={cn(
+            'inline-flex items-center justify-center rounded-md p-1.5 transition-colors disabled:opacity-50',
+            tts.error
+              ? 'text-[#E11D48] bg-[rgba(225,29,72,0.08)]'
+              : isPlaying
+                ? 'bg-[rgba(13,148,136,0.15)] text-[#0D9488]'
+                : 'text-gray-500 hover:text-[#0D9488] hover:bg-[rgba(13,148,136,0.08)]',
+            className,
+          )}
+        >
+          {tts.isLoading
+            ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            : tts.error
+              ? <AlertCircle className="h-3.5 w-3.5" />
+              : isPlaying
+                ? <Pause className="h-3.5 w-3.5" />
+                : <Play className="h-3.5 w-3.5" />
+          }
+        </button>
+
+        {/* Portalled, not inline. In the study flow this button lives inside a
+            hover-only `opacity-0 group-hover:opacity-100` overlay and a header
+            row with no space to grow, so an inline panel would either be
+            invisible or wreck the layout - which is how a real failure (Google
+            refusing the key) reached the reader as "nothing happens". */}
+        {mounted && tts.error && createPortal(
+          <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[70] w-[calc(100%-2rem)] max-w-[420px] px-0">
+            <SpeakErrorPanel
+              message={tts.error}
+              onFallback={browserDutch.length > 0 ? handleFallbackToBrowser : undefined}
+              onDismiss={tts.clearError}
+              className="shadow-lg"
+            />
+          </div>,
+          document.body,
+        )}
+      </>
+    );
+  }
 
   return (
     <div className={cn('inline-flex flex-col items-end gap-1', className)}>
@@ -154,31 +184,60 @@ export default function SpeakButton({
     </div>
 
     {tts.error && (
-      <div className="flex items-start gap-2 max-w-[360px] p-2.5 rounded-lg text-[11px] leading-snug"
-        style={{ backgroundColor: 'rgba(225,29,72,0.06)', border: '1px solid rgba(225,29,72,0.25)' }}>
-        <AlertCircle className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" style={{ color: '#E11D48' }} />
-        <div className="flex-1 text-gray-700 dark:text-foreground/90">
-          <p className="font-semibold mb-0.5">Cloud-stem niet beschikbaar</p>
-          <p className="text-gray-600 dark:text-muted-foreground">{tts.error}</p>
-          {browserDutch.length > 0 && (
-            <button
-              onClick={handleFallbackToBrowser}
-              className="mt-1.5 text-[11px] font-semibold underline hover:no-underline"
-              style={{ color: TEAL }}
-            >
-              Wissel naar browser-stem
-            </button>
-          )}
-        </div>
-        <button
-          onClick={tts.clearError}
-          className="text-gray-400 hover:text-gray-700 dark:hover:text-foreground flex-shrink-0"
-          title="Sluiten"
-        >
-          <X className="h-3 w-3" />
-        </button>
-      </div>
+      <SpeakErrorPanel
+        message={tts.error}
+        onFallback={browserDutch.length > 0 ? handleFallbackToBrowser : undefined}
+        onDismiss={tts.clearError}
+        className="max-w-[360px]"
+      />
     )}
+    </div>
+  );
+}
+
+/**
+ * The one place voorlezen failures are worded, shared by the inline panel and
+ * the compact toast so the two can never drift apart.
+ *
+ * The heading stays generic ("Voorlezen lukt niet") because `message` now covers
+ * browser voices, empty passages and blocked autoplay as well - it is no longer
+ * only about the cloud stem.
+ */
+function SpeakErrorPanel({
+  message, onFallback, onDismiss, className,
+}: {
+  message: string;
+  onFallback?: () => void;
+  onDismiss: () => void;
+  className?: string;
+}) {
+  return (
+    <div
+      role="alert"
+      className={cn('flex items-start gap-2 p-2.5 rounded-lg text-[11px] leading-snug bg-white dark:bg-card', className)}
+      style={{ backgroundColor: 'rgba(225,29,72,0.06)', border: '1px solid rgba(225,29,72,0.25)' }}
+    >
+      <AlertCircle className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" style={{ color: '#E11D48' }} />
+      <div className="flex-1 text-gray-700 dark:text-foreground/90">
+        <p className="font-semibold mb-0.5">Voorlezen lukt niet</p>
+        <p className="text-gray-600 dark:text-muted-foreground">{message}</p>
+        {onFallback && (
+          <button
+            onClick={onFallback}
+            className="mt-1.5 text-[11px] font-semibold underline hover:no-underline"
+            style={{ color: TEAL }}
+          >
+            Wissel naar browser-stem
+          </button>
+        )}
+      </div>
+      <button
+        onClick={onDismiss}
+        className="text-gray-400 hover:text-gray-700 dark:hover:text-foreground flex-shrink-0"
+        title="Sluiten"
+      >
+        <X className="h-3 w-3" />
+      </button>
     </div>
   );
 }
@@ -364,5 +423,9 @@ function BrowserVoiceRow({
 function previewCloudVoice(voice: CloudVoice, tts: ReturnType<typeof useTTS>) {
   const sample = `Hallo, ik ben ${voice.name}. Zo klink ik wanneer ik de Bijbel voorlees.`;
   tts.setSelected({ kind: 'cloud', voice });
-  setTimeout(() => tts.speak(sample), 50);
+  // Handing `speak` the voice instead of waiting a tick for `selected` to land:
+  // this `tts` belongs to the render the click came from, so its `speak` closes
+  // over the *previous* voice and the preview played the wrong stem. Dropping
+  // the setTimeout also keeps play() inside the user gesture.
+  tts.speak(sample, { kind: 'cloud', voice });
 }

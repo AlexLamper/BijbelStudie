@@ -189,6 +189,11 @@ export const CLICK_TARGETS = [
   'tour_start',
   'tour_complete',
   'onboarding_complete',
+  // Which of the two working styles new users pick in onboarding. Worth its own
+  // pair of counters: the split decides how much of the product should lead
+  // with guided studies at all.
+  'onboarding_mode_guided',
+  'onboarding_mode_self',
 ] as const;
 
 export type ClickTarget = (typeof CLICK_TARGETS)[number];

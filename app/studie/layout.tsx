@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
+import { authOptions } from "../../lib/authOptions";
 import SessionProvider from "../../components/providers/SessionProvider";
 import { StudyRail } from "../../components/layout/app-sidebar";
 import { generatePageMetadata } from "../../lib/pageMetadata";
@@ -38,7 +39,12 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function StudyLayout({
   children,
 }: StudyLayoutProps) {
-  const session = await getServerSession();
+  // `authOptions` is required, not optional. Without it NextAuth returns only
+  // the default session ({name, email, image}) and skips the `session` callback
+  // in lib/authOptions that attaches isAdmin, isSubscribed and studyStyle - so
+  // any client-side check on those fields read undefined on this route, and a
+  // Pro user rendered as not-Pro.
+  const session = await getServerSession(authOptions);
 
   return (
     <div className="antialiased h-[100dvh] flex overflow-hidden bg-secondary dark:bg-black">

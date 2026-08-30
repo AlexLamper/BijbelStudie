@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { VariantProps, cva } from "class-variance-authority"
-import { PanelLeft } from "lucide-react"
+import { Menu } from "lucide-react"
 
 import { useIsMobile } from "../../hooks/use-mobile"
 import { cn } from "../../lib/utils"
@@ -263,7 +263,9 @@ const SidebarTrigger = React.forwardRef<
   React.ElementRef<typeof Button>,
   React.ComponentProps<typeof Button>
 >(({ className, onClick, ...props }, ref) => {
-  const { toggleSidebar } = useSidebar()
+  const { toggleSidebar, open, openMobile, isMobile } = useSidebar()
+  const isOpen = isMobile ? openMobile : open
+  const label = isOpen ? "Menu sluiten" : "Menu openen"
 
   return (
     <Button
@@ -271,6 +273,9 @@ const SidebarTrigger = React.forwardRef<
       data-sidebar="trigger"
       variant="ghost"
       size="icon"
+      title={label}
+      aria-label={label}
+      aria-expanded={isOpen}
       className={cn("h-7 w-7", className)}
       onClick={(event) => {
         onClick?.(event)
@@ -278,8 +283,19 @@ const SidebarTrigger = React.forwardRef<
       }}
       {...props}
     >
-      <PanelLeft />
-      <span className="sr-only">Toggle Sidebar</span>
+      {/* A hamburger, not `PanelLeft`.
+ 
+          The shadcn default is a rectangle with one edge filled in - a diagram of
+          a layout, which reads as "menu" only to people who already know what it
+          does. The three bars are the one navigation symbol nobody has to learn.
+ 
+          Deliberately the SAME icon in both states rather than swapping to an X
+          or a mirrored panel: this control sits in a fixed spot in the bar and is
+          pressed repeatedly, and an icon that changes shape under the cursor
+          makes it read as a different button each time. The state is carried by
+          `aria-expanded` and by the tooltip, where it costs nothing. */}
+      <Menu />
+      <span className="sr-only">{label}</span>
     </Button>
   )
 })

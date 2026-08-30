@@ -106,14 +106,14 @@ export const authOptions: NextAuthOptions = {
           // API call - so it fetches only the fields it uses instead of
           // hydrating the whole user document.
           const user = await User.findOne({ email: session.user.email })
-            .select("name isAdmin subscribed storePremium preferences.onboardingCompleted preferences.tourCompleted")
+            .select("name isAdmin subscribed storePremium preferences.onboardingCompleted preferences.tourCompleted preferences.studyStyle")
             .lean<{
               _id: unknown;
               name?: string;
               isAdmin?: boolean;
               subscribed?: boolean;
               storePremium?: boolean;
-              preferences?: { onboardingCompleted?: boolean; tourCompleted?: boolean };
+              preferences?: { onboardingCompleted?: boolean; tourCompleted?: boolean; studyStyle?: string };
             }>();
           if (user) {
             session.user.id = String(user._id);
@@ -133,6 +133,12 @@ export const authOptions: NextAuthOptions = {
             session.user.isSubscribed = resolveIsPro(user, isAdmin);
             session.user.onboardingCompleted = user.preferences?.onboardingCompleted || false;
             session.user.tourCompleted = user.preferences?.tourCompleted || false;
+            // Onboarding's guided-vs-self answer. It rides along on this query
+            // - which the root layout already runs on every render - so the
+            // sidebar can be ordered correctly in the server-rendered HTML
+            // instead of rearranging itself once a client fetch comes back.
+            // Left undefined when unanswered; the reader defaults it.
+            if (user.preferences?.studyStyle) session.user.studyStyle = user.preferences.studyStyle;
           }
         } catch {
           // Non-critical - return session without extra fields

@@ -17,6 +17,11 @@ import {
   writeCachedAnswer,
   type CacheContext,
 } from '../../../../../lib/aiAnswerCache';
+import {
+  refundAiReservation,
+  reserveAiSpend,
+  settleAiSpend,
+} from '../../../../../lib/aiBudget';
 
 export const dynamic = 'force-dynamic';
 
@@ -172,6 +177,27 @@ export async function POST(req: Request) {
       }
     }
 
+    // The same application-wide ceiling the website route claims against. This
+    // is the second door onto the provider, and a guard that only covers one of
+    // them is not a ceiling - the app would simply spend through this one.
+    const reservation = await reserveAiSpend();
+    if (!reservation.allowed) {
+      await refund();
+      console.warn(
+        `[api/v1/ai/chat] Budget guard refused a call (${reservation.reason}) - month ${reservation.month}`,
+      );
+      return jsonV1(
+        {
+          error: 'AI_BUDGET_EXHAUSTED',
+          message:
+            reservation.reason === 'LEDGER_UNAVAILABLE'
+              ? 'De AI-assistent is nu even niet beschikbaar. Probeer het zo opnieuw.'
+              : 'De AI-assistent is deze maand tijdelijk uitgeschakeld. Probeer het volgende maand opnieuw.',
+        },
+        { status: 503 },
+      );
+    }
+
     let chapterText: string | null = null;
     if (book && chapter && version) {
       try {
@@ -202,8 +228,10 @@ export async function POST(req: Request) {
       });
       reply = generated.text;
       model = generated.model;
+      await settleAiSpend(generated.usage.inputTokens, generated.usage.outputTokens);
     } catch (err) {
       await refund();
+      await refundAiReservation();
       // A capacity blip that survived every retry reads the same to the app as
       // a rate limit: come back in a minute.
       if (err instanceof AiBusyError || isRateLimitError(err)) {
@@ -220,6 +248,8 @@ export async function POST(req: Request) {
     }
 
     if (!reply || reply.trim().length === 0) {
+      // The user's question is refunded; the budget is not. Those tokens were
+      // billed whether or not the candidate survived the safety filter.
       await refund();
       return jsonV1({ reply: BLOCKED_REPLY, used: newCount - 1, cap: unlimited ? null : cap });
     }

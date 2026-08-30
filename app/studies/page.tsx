@@ -14,6 +14,20 @@ import {
 } from 'lucide-react'
 import { curatedStudies, type StudyType, type CuratedStudy } from '../../lib/data/curated-studies'
 import { estimateStudyMinutes } from '../../lib/studyFlow'
+import { BIBLE_BOOKS } from '../../lib/content/bibleBooks'
+import BookBrowser from '../../components/study/BookBrowser'
+import {
+  loadSavedPassage,
+  passageHref,
+  passageLabel,
+  readWithinSelection,
+  resolveBook,
+  sanitizeReadChapters,
+  saveSelectedPassage,
+  type ChaptersReadBySlug,
+  type PassageSelection,
+  type SavedPassage,
+} from '../../components/study/passageSelection'
 import { JsonLd } from '../../components/seo/JsonLd'
 import { absoluteUrl } from '../../lib/seo/constants'
 import {
@@ -29,6 +43,11 @@ const COMPLETED_KEY = 'bijbelstudie_completed_studies'
 /**
  * Each curated study is a Course, opened from its own detail page. The `anchor`
  * keeps the @id values distinct; duplicates would collapse into one node.
+ *
+ * The book browser adds no nodes here. Its destinations are /studies/:id, which
+ * is already in this graph, and /lezen, which is not a page search engines
+ * should be sent a list of - the sixty-six public book pages under
+ * /bijbelboeken are the indexable surface for that.
  */
 const STUDIES_GRAPH = (() => {
   const url = absoluteUrl('/studies')
@@ -86,6 +105,32 @@ const TYPE_LABEL: Record<StudyType, string> = {
   Gedeelte: 'Gedeelte',
   Onderwerp: 'Onderwerp',
 }
+
+/**
+ * The two ways into the page.
+ *
+ * A switch rather than two stacked sections. The curated catalogue and the
+ * canon are answers to the same question - "wat ga ik bestuderen?" - and
+ * showing both at once puts eleven cards and sixty-six tiles on one screen,
+ * which is exactly the wall this page is meant not to be. One is always fully
+ * visible, the other is one click away and counted on its own button.
+ */
+type Mode = 'studies' | 'boeken'
+
+const MODES: { value: Mode; label: string; count: number; hint: string }[] = [
+  {
+    value: 'studies',
+    label: 'Begeleide studies',
+    count: curatedStudies.length,
+    hint: 'Uitgewerkte studies in korte lessen: lezen, verdiepen, reflecteren en toetsen.',
+  },
+  {
+    value: 'boeken',
+    label: 'Bijbelboeken',
+    count: BIBLE_BOOKS.length,
+    hint: 'Kies zelf: een heel boek, een reeks hoofdstukken of één hoofdstuk.',
+  },
+]
 
 interface Enrollment {
   studyId: string
@@ -206,11 +251,54 @@ function StudyCard({ study, status }: { study: CuratedStudy; status: Status }) {
   )
 }
 
+/** The shell shared by both kinds of resume card, so the strip stays one row type. */
+function ResumeCard({
+  href,
+  title,
+  detail,
+  pct,
+  track,
+}: {
+  href: string
+  title: string
+  detail: string
+  pct: number
+  track: string
+}) {
+  return (
+    <Link
+      href={href}
+      data-track={track}
+      className="no-underline group flex items-center gap-3 rounded-xl border p-3 bg-white dark:bg-card transition-colors hover:border-teal-300 dark:hover:border-teal-700"
+      style={{ borderColor: 'rgba(13,148,136,0.30)' }}
+    >
+      <span
+        className="h-10 w-10 flex-none rounded-lg flex items-center justify-center"
+        style={{ backgroundColor: 'rgba(13,148,136,0.10)' }}
+      >
+        <Play size={15} style={{ color: TEAL }} />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-semibold text-foreground truncate">{title}</span>
+        <span className="block text-[11px] text-gray-500 dark:text-muted-foreground">{detail}</span>
+        <span className="mt-1.5 block h-1 rounded-full bg-gray-100 dark:bg-secondary overflow-hidden">
+          <span className="block h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: TEAL }} />
+        </span>
+      </span>
+      <ArrowRight size={15} className="flex-none opacity-40 group-hover:opacity-100 transition-opacity" style={{ color: TEAL }} />
+    </Link>
+  )
+}
+
 export default function StudiesPage() {
+  const [mode, setMode] = useState<Mode>('studies')
   const [filter, setFilter] = useState<StudyType | 'Alle'>('Alle')
   const [query, setQuery] = useState('')
   const [completedIds, setCompletedIds] = useState<string[]>([])
   const [enrollments, setEnrollments] = useState<Record<string, Enrollment>>({})
+  const [readChapters, setReadChapters] = useState<ChaptersReadBySlug>({})
+  const [savedPassage, setSavedPassage] = useState<SavedPassage | null>(null)
+  const [selectedSlug, setSelectedSlug] = useState<string | null>(null)
 
   useEffect(() => {
     // localStorage first so the badges paint immediately, then the server -
@@ -219,6 +307,8 @@ export default function StudiesPage() {
       const stored = JSON.parse(localStorage.getItem(COMPLETED_KEY) || '[]')
       setCompletedIds(stored)
     } catch { /* noop */ }
+
+    setSavedPassage(loadSavedPassage())
 
     let cancelled = false
 
@@ -241,6 +331,18 @@ export default function StudiesPage() {
         for (const entry of data.enrollments ?? []) map[entry.studyId] = entry
         setEnrollments(map)
       } catch { /* anonymous visitors simply see no progress */ }
+    })()
+
+    void (async () => {
+      try {
+        // 401 for a signed-out visitor, which is not an error here - the book
+        // grid simply shows no progress. sanitizeReadChapters is what stands
+        // between the corrupted keys this map has carried and the UI.
+        const response = await fetch('/api/user/reading-progress')
+        if (!response.ok || cancelled) return
+        const data = await response.json()
+        setReadChapters(sanitizeReadChapters(data?.readChapters))
+      } catch { /* offline, or signed out */ }
     })()
 
     return () => { cancelled = true }
@@ -267,6 +369,31 @@ export default function StudiesPage() {
     [statusFor],
   )
 
+  /**
+   * The reader's own last selection, as a resume card.
+   *
+   * There is no plan document behind it - see the note in passageSelection -
+   * so the progress shown is the real thing: which chapters of the range the
+   * server has actually recorded as read. Once the range is finished the card
+   * disappears, because "verder waar je was" is then a lie.
+   */
+  const passageResume = useMemo(() => {
+    if (!savedPassage) return null
+    const book = resolveBook(savedPassage.slug)
+    if (!book) return null
+    const selection: PassageSelection = savedPassage
+    const read = readChapters[book.slug] ?? []
+    const total = savedPassage.end - savedPassage.start + 1
+    const done = readWithinSelection(selection, read)
+    if (done >= total) return null
+    return {
+      href: passageHref(book, selection, read),
+      title: passageLabel(book, savedPassage.start, savedPassage.end),
+      detail: `${done} van ${total} ${total === 1 ? 'hoofdstuk' : 'hoofdstukken'} gelezen`,
+      pct: Math.round((done / total) * 100),
+    }
+  }, [savedPassage, readChapters])
+
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase()
     // Book studies first. They are the longest commitment and the thing people
@@ -289,6 +416,13 @@ export default function StudiesPage() {
     })
   }, [filter, query])
 
+  const activeMode = MODES.find(entry => entry.value === mode) ?? MODES[0]
+
+  /** Remember the passage as the reader leaves for it, so the strip can offer it back. */
+  function handlePassageStart(selection: PassageSelection) {
+    setSavedPassage(saveSelectedPassage(selection))
+  }
+
   return (
     <div className="h-full overflow-y-auto">
       <JsonLd data={STUDIES_GRAPH} />
@@ -308,9 +442,9 @@ export default function StudiesPage() {
             Begeleide bijbelstudies
           </h1>
           <p className="text-gray-600 dark:text-muted-foreground text-sm sm:text-[15px] max-w-2xl leading-relaxed">
-            Kies een bijbelboek, een persoon, een gedeelte of een thema. Elke studie is opgedeeld in
-            korte lessen die je stap voor stap door de tekst leiden - lezen, verdiepen, reflecteren
-            en toetsen.
+            Volg een uitgewerkte studie die je stap voor stap door de tekst leidt - lezen,
+            verdiepen, reflecteren en toetsen. Of kies zelf een bijbelboek, een reeks
+            hoofdstukken of één hoofdstuk.
           </p>
 
           <div className="relative mt-5 max-w-xl">
@@ -318,9 +452,18 @@ export default function StudiesPage() {
             <input
               type="search"
               value={query}
-              onChange={event => setQuery(event.target.value)}
-              placeholder="Zoek op boek, persoon, gedeelte of thema"
-              aria-label="Zoek een studie"
+              onChange={event => {
+                setQuery(event.target.value)
+                // Typing is a request to look around again, so it steps back
+                // out of an opened book rather than filtering nothing.
+                if (event.target.value) setSelectedSlug(null)
+              }}
+              placeholder={
+                mode === 'boeken'
+                  ? 'Zoek een bijbelboek'
+                  : 'Zoek op boek, persoon, gedeelte of thema'
+              }
+              aria-label={mode === 'boeken' ? 'Zoek een bijbelboek' : 'Zoek een studie'}
               className="w-full h-12 pl-11 pr-3 rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-background text-sm text-foreground placeholder:text-gray-400 shadow-sm focus:outline-none focus:ring-2"
               style={{ ['--tw-ring-color' as string]: 'rgba(13,148,136,0.35)' }}
             />
@@ -330,63 +473,51 @@ export default function StudiesPage() {
         {/* Resume strip, directly under the search box: a returning reader is
             here to carry on, not to browse. Only rendered when there is
             something to resume, so it never occupies space with an empty
-            state. */}
-        {inProgress.length > 0 && (
+            state. A self-picked passage sits in the same strip as an enrolled
+            study - from the reader's side both are "waar was ik". */}
+        {(inProgress.length > 0 || passageResume) && (
           <section className="mt-6">
             <h2 className="text-sm font-bold text-foreground mb-2.5">Verder waar je was</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+              {passageResume && (
+                <ResumeCard
+                  href={passageResume.href}
+                  title={passageResume.title}
+                  detail={passageResume.detail}
+                  pct={passageResume.pct}
+                  track="study_passage_resume"
+                />
+              )}
               {inProgress.map(study => {
                 const status = statusFor(study)
                 const pct = Math.round((status.done / status.total) * 100)
                 return (
-                  <Link
+                  <ResumeCard
                     key={study.id}
                     href={`/studies/${study.id}`}
-                    className="no-underline group flex items-center gap-3 rounded-xl border p-3 bg-white dark:bg-card transition-colors hover:border-teal-300 dark:hover:border-teal-700"
-                    style={{ borderColor: 'rgba(13,148,136,0.30)' }}
-                  >
-                    <span
-                      className="h-10 w-10 flex-none rounded-lg flex items-center justify-center"
-                      style={{ backgroundColor: 'rgba(13,148,136,0.10)' }}
-                    >
-                      <Play size={15} style={{ color: TEAL }} />
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-sm font-semibold text-foreground truncate">
-                        {study.title}
-                      </span>
-                      <span className="block text-[11px] text-gray-500 dark:text-muted-foreground">
-                        Les {status.resumeDay ?? status.done + 1} van {status.total} &middot; {pct}% klaar
-                      </span>
-                      <span className="mt-1.5 block h-1 rounded-full bg-gray-100 dark:bg-secondary overflow-hidden">
-                        <span className="block h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: TEAL }} />
-                      </span>
-                    </span>
-                    <ArrowRight size={15} className="flex-none opacity-40 group-hover:opacity-100 transition-opacity" style={{ color: TEAL }} />
-                  </Link>
+                    title={study.title}
+                    detail={`Les ${status.resumeDay ?? status.done + 1} van ${status.total} · ${pct}% klaar`}
+                    pct={pct}
+                    track="study_resume_card"
+                  />
                 )
               })}
             </div>
           </section>
         )}
 
-        {/* Filter toolbar. The category buttons carry a one-line explanation of
-            what that kind of study is, shown for whichever is active. */}
+        {/* What am I browsing: the catalogue, or the canon. */}
         <section className="mt-8">
           <div className="flex flex-wrap items-center gap-2">
-            {FILTERS.map(entry => {
-              const active = filter === entry.value
-              const count =
-                entry.value === 'Alle'
-                  ? curatedStudies.length
-                  : curatedStudies.filter(study => study.type === entry.value).length
+            {MODES.map(entry => {
+              const active = entry.value === mode
               return (
                 <button
                   key={entry.value}
-                  onClick={() => setFilter(entry.value)}
-                  title={entry.hint}
+                  onClick={() => setMode(entry.value)}
+                  data-track={entry.value === 'boeken' ? 'study_mode_books' : 'study_mode_studies'}
                   aria-pressed={active}
-                  className={`h-9 px-3.5 rounded-lg text-[13px] font-medium transition-colors border ${
+                  className={`h-10 px-4 rounded-lg text-[13.5px] font-semibold transition-colors border ${
                     active
                       ? 'text-white border-transparent'
                       : 'bg-white dark:bg-card border-gray-200 dark:border-border text-gray-600 dark:text-muted-foreground hover:bg-gray-50 dark:hover:bg-secondary'
@@ -394,26 +525,92 @@ export default function StudiesPage() {
                   style={active ? { backgroundColor: TEAL } : undefined}
                 >
                   {entry.label}
-                  <span className="ml-1.5 text-xs opacity-60">{count}</span>
+                  <span className="ml-1.5 text-xs opacity-60 tabular-nums">{entry.count}</span>
                 </button>
               )
             })}
           </div>
-
-          {/* The per-filter explanation that used to sit here is gone. The
-              buttons are one word each and the cards below say the rest; a
-              caption explaining a caption is the definition of too much. */}
-          <p className="mt-2 text-xs text-gray-400 dark:text-muted-foreground tabular-nums">
-            {filtered.length} {filtered.length === 1 ? 'studie' : 'studies'}
+          <p className="mt-2 text-xs text-gray-400 dark:text-muted-foreground">
+            {activeMode.hint}
           </p>
         </section>
 
-        {/* Grid */}
-        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
-          {filtered.map(study => (
-            <StudyCard key={study.id} study={study} status={statusFor(study)} />
-          ))}
-        </div>
+        {mode === 'studies' ? (
+          <>
+            {/* Filter toolbar. The category buttons carry a one-line explanation
+                of what that kind of study is, shown as a title on hover. */}
+            <section className="mt-5">
+              <div className="flex flex-wrap items-center gap-2">
+                {FILTERS.map(entry => {
+                  const active = filter === entry.value
+                  const count =
+                    entry.value === 'Alle'
+                      ? curatedStudies.length
+                      : curatedStudies.filter(study => study.type === entry.value).length
+                  return (
+                    <button
+                      key={entry.value}
+                      onClick={() => setFilter(entry.value)}
+                      title={entry.hint}
+                      aria-pressed={active}
+                      className={`h-9 px-3.5 rounded-lg text-[13px] font-medium transition-colors border ${
+                        active
+                          ? 'text-white border-transparent'
+                          : 'bg-white dark:bg-card border-gray-200 dark:border-border text-gray-600 dark:text-muted-foreground hover:bg-gray-50 dark:hover:bg-secondary'
+                      }`}
+                      style={active ? { backgroundColor: TEAL } : undefined}
+                    >
+                      {entry.label}
+                      <span className="ml-1.5 text-xs opacity-60">{count}</span>
+                    </button>
+                  )
+                })}
+              </div>
+
+              {/* The per-filter explanation that used to sit here is gone. The
+                  buttons are one word each and the cards below say the rest; a
+                  caption explaining a caption is the definition of too much. */}
+              <p className="mt-2 text-xs text-gray-400 dark:text-muted-foreground tabular-nums">
+                {filtered.length} {filtered.length === 1 ? 'studie' : 'studies'}
+              </p>
+            </section>
+
+            {/* Grid */}
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
+              {filtered.map(study => (
+                <StudyCard key={study.id} study={study} status={statusFor(study)} />
+              ))}
+            </div>
+
+            {filtered.length === 0 && (
+              <div className="content-in flex flex-col items-center justify-center py-20 text-center">
+                <BookOpen size={32} className="mb-3 text-gray-300" />
+                <p className="text-gray-500 dark:text-muted-foreground">
+                  Geen studie gevonden{query ? ` voor "${query}"` : ''}.
+                </p>
+                {(query || filter !== 'Alle') && (
+                  <button
+                    onClick={() => { setQuery(''); setFilter('Alle') }}
+                    className="mt-3 text-sm font-semibold"
+                    style={{ color: TEAL }}
+                  >
+                    Alles tonen
+                  </button>
+                )}
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="mt-5">
+            <BookBrowser
+              progress={readChapters}
+              query={query}
+              selectedSlug={selectedSlug}
+              onSelect={setSelectedSlug}
+              onStart={handlePassageStart}
+            />
+          </div>
+        )}
 
         {/* Studying together, at the bottom and on one line.
 
@@ -438,24 +635,6 @@ export default function StudiesPage() {
           </span>
           <ArrowRight size={14} className="flex-none ml-auto opacity-40" style={{ color: TEAL }} />
         </Link>
-
-        {filtered.length === 0 && (
-          <div className="content-in flex flex-col items-center justify-center py-20 text-center">
-            <BookOpen size={32} className="mb-3 text-gray-300" />
-            <p className="text-gray-500 dark:text-muted-foreground">
-              Geen studie gevonden{query ? ` voor "${query}"` : ''}.
-            </p>
-            {(query || filter !== 'Alle') && (
-              <button
-                onClick={() => { setQuery(''); setFilter('Alle') }}
-                className="mt-3 text-sm font-semibold"
-                style={{ color: TEAL }}
-              >
-                Alles tonen
-              </button>
-            )}
-          </div>
-        )}
       </div>
     </div>
   )

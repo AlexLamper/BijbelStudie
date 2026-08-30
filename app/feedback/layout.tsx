@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
+import { authOptions } from "../../lib/authOptions";
 import SessionProvider from "../../components/providers/SessionProvider";
 import { Header } from "../../components/layout/header";
 import { AppSidebar } from "../../components/layout/app-sidebar";
@@ -15,7 +16,12 @@ export const metadata: Metadata = {
 export default async function FeedbackLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const session = await getServerSession();
+  // `authOptions` is required, not optional. Without it NextAuth returns only
+  // the default session ({name, email, image}) and skips the `session` callback
+  // in lib/authOptions that attaches isAdmin, isSubscribed and studyStyle - so
+  // any client-side check on those fields read undefined on this route, and a
+  // Pro user rendered as not-Pro.
+  const session = await getServerSession(authOptions);
 
   return (
     <div className="antialiased bg-background h-screen flex flex-col overflow-hidden">
