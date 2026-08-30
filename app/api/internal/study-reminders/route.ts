@@ -3,7 +3,7 @@ import connectMongoDB from '../../../../lib/mongodb';
 import User from '../../../../models/User';
 import StudyEnrollment from '../../../../models/StudyEnrollment.js';
 import { computeNextReminderAt } from '../../../../lib/studyReminders';
-import { curatedStudies } from '../../../../lib/data/curated-studies';
+import { ALL_STUDIES } from '../../../../lib/bookStudies';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -81,7 +81,7 @@ export async function GET(req: NextRequest) {
       .limit(limit)
       .lean<DueEnrollment[]>();
 
-    const titles = new Map(curatedStudies.map((study) => [study.id, study.title]));
+    const titles = new Map(ALL_STUDIES.map((study) => [study.id, study.title]));
     const results: {
       studyId: string;
       studyTitle: string;

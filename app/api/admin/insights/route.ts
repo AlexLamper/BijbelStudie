@@ -9,7 +9,7 @@ import StudyProgress from "../../../../models/StudyProgress.js";
 import StudyLessonState from "../../../../models/StudyLessonState.js";
 import { requireAdmin } from "../../../../lib/adminGuard";
 import { ROUTE_LABELS, type RouteKey } from "../../../../lib/analyticsRoutes";
-import { curatedStudies } from "../../../../lib/data/curated-studies";
+import { ALL_STUDIES } from "../../../../lib/bookStudies";
 
 /**
  * Everything /admin/insights renders.
@@ -61,7 +61,7 @@ function mergeBuckets(
   return base.map((row) => ({ ...row, count: map.get(row.date) ?? 0 }));
 }
 
-const STUDY_TITLES = new Map(curatedStudies.map((s) => [s.id, s.title]));
+const STUDY_TITLES = new Map(ALL_STUDIES.map((s) => [s.id, s.title]));
 
 export async function GET(req: Request) {
   const guard = await requireAdmin();

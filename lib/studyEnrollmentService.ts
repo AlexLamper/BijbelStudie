@@ -3,7 +3,8 @@ import User from '../models/User';
 import StudyEnrollment from '../models/StudyEnrollment.js';
 import StudyLessonState from '../models/StudyLessonState.js';
 import StudyProgress from '../models/StudyProgress.js';
-import { curatedStudies, type StudyDepth, type StudyRhythm } from './data/curated-studies';
+import { type StudyDepth, type StudyRhythm } from './data/curated-studies';
+import { findAnyStudy } from './bookStudies';
 import { computeNextReminderAt } from './studyReminders';
 import { STEP_ORDER, type CursorStep } from './studyFlow';
 
@@ -89,8 +90,13 @@ async function loadUserPrefs(userId: string): Promise<UserReminderPrefs> {
   };
 }
 
+/**
+ * Every study, authored or generated per book. Enrollment, progress and the
+ * flow itself all resolve ids through here, which is what makes a generated
+ * book study behave exactly like an authored one.
+ */
 export function findStudy(studyId: string) {
-  return curatedStudies.find((study) => study.id === studyId) ?? null;
+  return findAnyStudy(studyId);
 }
 
 /** The lowest lesson day, which is where a fresh enrollment starts. */

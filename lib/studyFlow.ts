@@ -148,6 +148,19 @@ export function estimateStudyMinutes(study: CuratedStudy): number {
   return study.lessons.reduce((total, lesson) => total + (lesson.estimatedMinutes ?? 12), 0);
 }
 
+/**
+ * That total, in words a reader can picture.
+ *
+ * A whole-book study is fifty chapters, and "± 500 min" is a number nobody
+ * converts in their head - it reads as a wall rather than as a commitment. Past
+ * an hour and a half this switches to hours, rounded to the half.
+ */
+export function formatStudyMinutes(minutes: number): string {
+  if (minutes < 90) return `${minutes} min`;
+  const hours = Math.round(minutes / 30) / 2;
+  return `${hours.toString().replace('.', ',')} uur`;
+}
+
 export function findLesson(study: CuratedStudy, day: number): Lesson | undefined {
   return study.lessons.find((lesson) => lesson.day === day);
 }

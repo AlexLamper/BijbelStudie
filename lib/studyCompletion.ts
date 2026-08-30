@@ -3,7 +3,7 @@ import StudyProgress from '../models/StudyProgress.js';
 import Note from '../models/Note';
 import { grantXp } from './gamification';
 import { getChapter } from './local-data';
-import { curatedStudies } from './data/curated-studies';
+import { findAnyStudy } from './bookStudies';
 
 /**
  * The one place a lesson is written to the completion ledger.
@@ -77,7 +77,7 @@ export async function recordLessonCompletion(
   // Finishing the last lesson of a curated study is its own milestone.
   let studyCompleted = false;
   if (input.studyId) {
-    const study = curatedStudies.find((entry) => entry.id === input.studyId);
+    const study = findAnyStudy(input.studyId);
     if (study) {
       const done = (await StudyProgress.distinct('lessonDay', {
         userId: input.userId,

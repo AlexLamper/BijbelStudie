@@ -2,7 +2,7 @@ import { requireUser } from '../../../../lib/apiAuth';
 import { corsPreflight, errorV1, handleV1Error, jsonV1 } from '../../../../lib/apiV1';
 import connectMongoDB from '../../../../lib/mongodb';
 import StudyProgress from '../../../../models/StudyProgress.js';
-import { curatedStudies } from '../../../../lib/data/curated-studies';
+import { ALL_STUDIES } from '../../../../lib/bookStudies';
 import { recordLessonCompletion } from '../../../../lib/studyCompletion';
 
 export const dynamic = 'force-dynamic';
@@ -43,7 +43,9 @@ export async function GET(req: Request) {
     }
 
     const completedStudies: string[] = [];
-    for (const study of curatedStudies) {
+    // Every study, generated book ones included - a reader who finished
+    // Genesis has finished a study, and the badge has to say so.
+    for (const study of ALL_STUDIES) {
       const done = byStudy.get(study.id);
       if (done && study.lessons.every((lesson) => done.has(lesson.day))) {
         completedStudies.push(study.id);

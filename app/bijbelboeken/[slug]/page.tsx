@@ -9,6 +9,7 @@ import {
   adjacentBooks,
   readerHref,
 } from "../../../lib/content/bibleBooks";
+import { bookStudyId } from "../../../lib/bookStudies";
 import { ContentShell, RelatedLinks } from "../../../components/content/ContentShell";
 import { JsonLd } from "../../../components/seo/JsonLd";
 import { absoluteUrl } from "../../../lib/seo/constants";
@@ -228,14 +229,27 @@ export default async function BijbelboekPage({ params }: PageProps) {
             In de Statenvertaling en drie andere Nederlandse vertalingen, met
             commentaar en grondtekst ernaast. Een gratis account is genoeg.
           </p>
-          <Link
-            href={readerHref(book)}
-            className="mt-4 inline-flex items-center justify-center gap-2 font-semibold text-white px-5 py-2.5 rounded-xl no-underline"
-            style={{ backgroundColor: TEAL }}
-          >
-            <BookOpen className="h-4 w-4" aria-hidden />
-            {book.name} 1 openen
-          </Link>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2.5">
+            <Link
+              href={readerHref(book)}
+              className="inline-flex items-center justify-center gap-2 font-semibold text-white px-5 py-2.5 rounded-xl no-underline"
+              style={{ backgroundColor: TEAL }}
+            >
+              <BookOpen className="h-4 w-4" aria-hidden />
+              {book.name} 1 openen
+            </Link>
+            {/* The same book, as a guided study: one lesson per chapter, with
+                commentary, reflection and the assistant alongside. Reading and
+                studying are two intents, and this page previously offered only
+                the first. */}
+            <Link
+              href={`/studies/${bookStudyId(book.slug)}`}
+              className="inline-flex items-center justify-center gap-2 font-semibold px-5 py-2.5 rounded-xl border no-underline text-gray-700 dark:text-foreground"
+              style={{ borderColor: "#E5E7EB" }}
+            >
+              {book.name} bestuderen
+            </Link>
+          </div>
         </section>
 
         {/* Prev/next keeps the 66 detail pages linked in a chain, so a crawler

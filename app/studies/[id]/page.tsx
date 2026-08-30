@@ -9,7 +9,8 @@ import User from '../../../models/User';
 import StudyProgress from '../../../models/StudyProgress.js';
 import { buildMetadata } from '../../../lib/pageMetadata';
 import { getVersions } from '../../../lib/local-data';
-import { estimateStudyMinutes } from '../../../lib/studyFlow';
+import { estimateStudyMinutes, formatStudyMinutes } from '../../../lib/studyFlow';
+import { isBookStudyId } from '../../../lib/bookStudies';
 import { findStudy, getEnrollment } from '../../../lib/studyEnrollmentService';
 import StudySetupProvider, { StudyActionBar, StudySettingsButton } from './StudyOnboardingForm';
 import LessonList from './LessonList';
@@ -50,7 +51,16 @@ export async function generateMetadata({ params }: PageProps) {
     description: study.description,
     path: `/studies/${study.id}`,
     type: 'article',
-    ogEyebrow: 'Begeleide studie',
+    ogEyebrow: 'Bijbelstudie',
+    /**
+     * Generated book studies are not indexed.
+     *
+     * Their subject already has a public, hand-written page at
+     * /bijbelboeken/[slug]; two URLs competing for "Genesis bestuderen" splits
+     * the signal and lets Google pick the thinner one. Authored studies have
+     * content that exists nowhere else, so they stay indexable.
+     */
+    indexable: !isBookStudyId(study.id),
   });
 }
 
@@ -278,7 +288,7 @@ export default async function StudyDetailPage({ params }: PageProps) {
                 </li>
                 <li className="inline-flex items-center gap-1.5">
                   <Clock size={13} className="flex-none" style={{ color: TEAL }} />
-                  ± {minutes} min totaal
+                  ± {formatStudyMinutes(minutes)} totaal
                 </li>
                 {readingPlan.map((entry) => (
                   <li key={entry.book} className="inline-flex items-center gap-1.5">

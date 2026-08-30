@@ -11,7 +11,7 @@ import { Footer } from "./footer"
 import { FAQItem } from "./FAQItem"
 import { HOME_FAQS } from "../../lib/content/homeFaq"
 import { HOW_IT_WORKS_STEPS } from "../../lib/content/howItWorks"
-import { curatedStudies } from "../../lib/data/curated-studies"
+import { ALL_STUDIES } from "../../lib/bookStudies"
 
 /* ─── Design tokens ──────────────────────────────────────────── */
 const T = {
@@ -392,9 +392,11 @@ function Hero() {
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-2">
             {[
               { icon: Sparkles,   label: "AI-assistent" },
-              // Counted from lib/data/curated-studies.ts rather than hardcoded:
-              // the number was stale within a week of being written.
-              { icon: BookMarked, label: `${curatedStudies.length} begeleide studies` },
+              // Counted from the catalogue rather than hardcoded: the number was
+              // stale within a week of being written. It is every bible book plus
+              // the authored studies on people, passages and themes - which is
+              // exactly what /studies lists.
+              { icon: BookMarked, label: `${ALL_STUDIES.length} bijbelstudies` },
               { icon: Star,       label: "Gratis te gebruiken" },
               { icon: Smartphone, label: "Ook als iOS-app" },
               { icon: Shield,     label: "Privacy-first" },
