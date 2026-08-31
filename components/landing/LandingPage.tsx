@@ -54,10 +54,10 @@ const SHADOW = {
  * hero feel wrong on laptop-sized screens.
  */
 const TYPE = {
-  h1:   "clamp(2.25rem, 1.4rem + 1.9vw, 3.25rem)",
+  h1:   "clamp(2rem, 1.25rem + 1.5vw, 2.75rem)",
   h2:   "clamp(1.75rem, 1.15rem + 1.5vw, 2.5rem)",
   h3:   "clamp(1.375rem, 1.1rem + 0.85vw, 1.875rem)",
-  lead: "clamp(1.0625rem, 1rem + 0.3vw, 1.1875rem)",
+  lead: "clamp(1rem, 0.95rem + 0.2vw, 1.125rem)",
 }
 
 /**
