@@ -416,7 +416,7 @@ function Hero() {
            height-derived value is smaller. On a short laptop the vh term wins
            and the hero compresses; on a tall desktop the vw term wins and it
            breathes. */
-        paddingTop: "clamp(3rem, min(6vw, 7.5vh), 5rem)",
+        paddingTop: "clamp(3.5rem, min(6.5vw, 8vh), 5.5rem)",
         paddingBottom: "clamp(3rem, min(6vw, 8vh), 6rem)",
       }}
     >
