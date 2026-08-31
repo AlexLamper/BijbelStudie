@@ -11,9 +11,13 @@ interface Note {
   _id: string;
   noteText: string;
   verseReference?: string;
+  chapter?: number;
   tags: string[];
   createdAt: string;
 }
+
+/** How many notes from elsewhere in the book are worth showing as context. */
+const BOOK_FALLBACK_LIMIT = 8;
 
 interface ChapterNotesProps {
   book: string;
@@ -38,6 +42,16 @@ export function ChapterNotes({ book, chapter, bare = false }: ChapterNotesProps)
   const [loading, setLoading]     = useState(false);
   const [error, setError]         = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
+  /**
+   * Whether what is on screen belongs to this chapter or to the book.
+   *
+   * An empty panel is the common case early on - you have written in Genesis,
+   * just not in the chapter you happen to be reading - and it told the reader
+   * nothing except that they had failed to write something. Showing what they
+   * DID write in this book turns the dead state into their own thinking about
+   * the book they are in. Chapter notes always win when there are any.
+   */
+  const [scope, setScope]         = useState<'chapter' | 'book'>('chapter');
 
   const fetchNotes = useCallback(async () => {
     if (!session?.user?.email) return;
@@ -45,12 +59,27 @@ export function ChapterNotes({ book, chapter, bare = false }: ChapterNotesProps)
     setError(null);
     try {
       const res = await fetch(`/api/notes?book=${encodeURIComponent(book)}&chapter=${chapter}`);
-      if (res.ok) {
-        const data = await res.json();
-        setNotes(data.notes || []);
-      } else {
+      if (!res.ok) {
         setError('Notities konden niet worden geladen.');
+        return;
       }
+      const data = await res.json();
+      const chapterNotes: Note[] = data.notes || [];
+      if (chapterNotes.length > 0) {
+        setNotes(chapterNotes);
+        setScope('chapter');
+        return;
+      }
+
+      // Nothing here: widen to the book. A failure of this second request is
+      // not an error the reader needs to see - they simply get the empty state
+      // they would have got anyway.
+      const bookRes = await fetch(
+        `/api/notes?book=${encodeURIComponent(book)}&limit=${BOOK_FALLBACK_LIMIT}`,
+      );
+      const bookNotes: Note[] = bookRes.ok ? (await bookRes.json()).notes || [] : [];
+      setNotes(bookNotes);
+      setScope(bookNotes.length > 0 ? 'book' : 'chapter');
     } catch {
       setError('Fout bij het laden van notities.');
     } finally {
@@ -93,6 +122,13 @@ export function ChapterNotes({ book, chapter, bare = false }: ChapterNotesProps)
 
         {!loading && !error && notes.length > 0 && (
           <div className="stagger-in">
+            {/* Says whose notes these are before the reader wonders why a note
+                about another chapter is in front of them. */}
+            {scope === 'book' && (
+              <p className="text-[13px] text-gray-500 dark:text-muted-foreground mb-3">
+                Nog geen notities bij {book} {chapter}. Dit schreef je eerder in {book}:
+              </p>
+            )}
             {/* Divided, not carded. A rule between entries is enough to separate
                 two short paragraphs; a rounded border and a shadow around each
                 turns a list of thoughts into a stack of receipts. */}
@@ -149,7 +185,7 @@ export function ChapterNotes({ book, chapter, bare = false }: ChapterNotesProps)
           <div className="flex items-center gap-2">
             <StickyNote className="w-4 h-4" style={{ color: '#0D9488' }} />
             <span className="text-sm font-medium text-gray-600">
-              {book} {chapter}
+              {scope === 'book' ? book : `${book} ${chapter}`}
             </span>
             {notes.length > 0 && (
               <span className="text-xs px-1.5 py-0.5 rounded-full font-medium"
@@ -206,6 +242,11 @@ export function ChapterNotes({ book, chapter, bare = false }: ChapterNotesProps)
 
           {!loading && !error && notes.length > 0 && (
             <div className="stagger-in space-y-3 pb-16">
+              {scope === 'book' && (
+                <p className="text-sm text-gray-500 dark:text-muted-foreground">
+                  Nog geen notities bij {book} {chapter}. Dit schreef je eerder in {book}:
+                </p>
+              )}
               {notes.map(note => (
                 <div key={note._id}
                   className="rounded-xl border border-gray-100 dark:border-border bg-white dark:bg-card p-4 shadow-sm">

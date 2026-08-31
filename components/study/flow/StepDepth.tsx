@@ -45,7 +45,9 @@ const PANELS: { key: PanelKey; label: string; icon: typeof Images; blurb: string
     key: 'notes',
     label: 'Notities',
     icon: StickyNote,
-    blurb: 'Wat jij eerder bij dit hoofdstuk hebt opgeschreven',
+    // Chapter first, and the rest of the book when this chapter is still
+    // blank - so the line has to be true of both.
+    blurb: 'Wat jij eerder in dit bijbelboek hebt opgeschreven',
   },
 ];
 

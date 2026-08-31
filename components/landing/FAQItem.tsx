@@ -33,7 +33,7 @@ export function FAQItem({
     <div className="border-b" style={{ borderColor }}>
       <h3>
         <button
-          className="w-full flex items-center justify-between gap-4 py-4 text-left font-semibold text-sm select-none"
+          className="w-full flex items-center justify-between gap-4 py-5 text-left font-semibold text-sm select-none transition-opacity hover:opacity-80"
           style={{ color: textColor }}
           onClick={() => setOpen(!open)}
           aria-expanded={open}
@@ -41,7 +41,7 @@ export function FAQItem({
           id={`${id}-question`}
         >
           <span>{q}</span>
-          <span className={`flex-shrink-0 transition-transform duration-250 ${open ? "rotate-180" : ""}`}>
+          <span className={`flex-shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""}`}>
             <ChevronDown className="h-4 w-4" style={{ color: mutedColor }} />
           </span>
         </button>

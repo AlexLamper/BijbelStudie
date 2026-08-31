@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Play, Pause, Square, Volume2, Settings2, Loader2, Cloud, Monitor, Sparkles, AlertCircle, X } from 'lucide-react';
-import { useTTS } from '../../hooks/useTTS';
+import { useTTS, type SelectedVoice } from '../../hooks/useTTS';
+import { useSpokenTextPublisher } from './SpokenText';
 import type { CloudVoice } from '../../lib/cloudVoices';
 import { cn } from '../../lib/utils';
 
@@ -33,6 +34,11 @@ export default function SpeakButton({
   const tts = useTTS();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const settingsRef = useRef<HTMLDivElement>(null);
+  // The string this button last read out loud. The hook reports the reader's
+  // position as offsets into it, and the verses on screen can only make sense of
+  // those offsets if they are told which string they count into.
+  const spokenTextRef = useRef<string | null>(null);
+  const publishSpoken = useSpokenTextPublisher();
   // The compact error toast is portalled to <body>, so it has to wait for the
   // client. See the toast itself for why a portal and not an inline panel.
   const [mounted, setMounted] = useState(false);
@@ -49,7 +55,25 @@ export default function SpeakButton({
     return () => document.removeEventListener('mousedown', handleClick);
   }, [settingsOpen]);
 
+  // Hand the reader's position to whatever is rendering this text. Publishing
+  // from an effect rather than from the hook itself keeps useTTS free of any
+  // knowledge of the page: the hook only says where in the string the voice is,
+  // and this is the component that knows which string that was.
+  useEffect(() => {
+    publishSpoken(spokenTextRef.current, tts.spokenRange);
+  }, [publishSpoken, tts.spokenRange]);
+
+  // A button can be unmounted mid-sentence - the verse list rebuilds when the
+  // chapter changes - and a highlight nobody is speaking to would stay lit.
+  useEffect(() => () => publishSpoken(null, null), [publishSpoken]);
+
   if (!tts.isSupported && !tts.cloudAvailable) return null;
+
+  /** The one way this component starts a voice, so the text is never unrecorded. */
+  const startSpeaking = (text: string, voiceOverride?: SelectedVoice) => {
+    spokenTextRef.current = text;
+    tts.speak(text, voiceOverride);
+  };
 
   const handlePlayPause = () => {
     if (tts.isSpeaking && !tts.isPaused) {
@@ -60,7 +84,7 @@ export default function SpeakButton({
       // No `if (text.trim())` guard any more - an empty passage is a fault worth
       // reporting, and swallowing it here was one of the ways the button could
       // look dead. `speak` raises the Dutch message for it.
-      tts.speak(getText());
+      startSpeaking(getText());
     }
   };
 
@@ -177,6 +201,7 @@ export default function SpeakButton({
             <SettingsPopover
               tts={tts}
               browserDutch={browserDutch}
+              onSpeak={startSpeaking}
             />
           )}
         </div>
@@ -245,9 +270,11 @@ function SpeakErrorPanel({
 function SettingsPopover({
   tts,
   browserDutch,
+  onSpeak,
 }: {
   tts: ReturnType<typeof useTTS>;
   browserDutch: SpeechSynthesisVoice[];
+  onSpeak: (text: string, voiceOverride?: SelectedVoice) => void;
 }) {
   const selectedCloudId = tts.selected?.kind === 'cloud' ? tts.selected.voice.id : null;
   const selectedBrowserName = tts.selected?.kind === 'browser' ? tts.selected.voice.name : null;
@@ -296,7 +323,7 @@ function SettingsPopover({
                 voice={v}
                 selected={selectedCloudId === v.id}
                 onSelect={() => tts.setSelected({ kind: 'cloud', voice: v })}
-                onPreview={() => previewCloudVoice(v, tts)}
+                onPreview={() => previewCloudVoice(v, tts, onSpeak)}
                 isLoading={tts.isLoading && selectedCloudId === v.id}
               />
             ))}
@@ -420,12 +447,20 @@ function BrowserVoiceRow({
   );
 }
 
-function previewCloudVoice(voice: CloudVoice, tts: ReturnType<typeof useTTS>) {
+function previewCloudVoice(
+  voice: CloudVoice,
+  tts: ReturnType<typeof useTTS>,
+  onSpeak: (text: string, voiceOverride?: SelectedVoice) => void,
+) {
   const sample = `Hallo, ik ben ${voice.name}. Zo klink ik wanneer ik de Bijbel voorlees.`;
   tts.setSelected({ kind: 'cloud', voice });
   // Handing `speak` the voice instead of waiting a tick for `selected` to land:
   // this `tts` belongs to the render the click came from, so its `speak` closes
   // over the *previous* voice and the preview played the wrong stem. Dropping
   // the setTimeout also keeps play() inside the user gesture.
-  tts.speak(sample, { kind: 'cloud', voice });
+  //
+  // It goes through the button's own `onSpeak` so the sample sentence replaces
+  // whatever passage was recorded last; a preview highlights nothing, and it
+  // must not leave the previous passage's offsets standing either.
+  onSpeak(sample, { kind: 'cloud', voice });
 }

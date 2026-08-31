@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { AlertCircle, ChevronDown, Lock } from 'lucide-react';
 import { SkeletonBlock, SkeletonText } from '../ui/skeletons';
 import { Card, CardContent } from '../ui/card';
@@ -8,6 +8,7 @@ import { useTranslation } from '../../app/i18n/client';
 import { ReadingPreferences } from '../../hooks/useReadingPreferences';
 import { getPreferenceClasses, getPreferenceStyles } from '../../lib/preferenceClasses';
 import SpeakButton from './SpeakButton';
+import { SpokenTextScope, useSpokenLocalRange } from './SpokenText';
 import UpgradePrompt from "../pricing/UpgradePrompt";
 
 function stripHtml(html: string): string {
@@ -263,6 +264,63 @@ function formatCommentaryText(raw: string): string {
   return formatPlainText(raw);
 }
 
+/**
+ * One commentary entry, washed teal while it is the one being read aloud.
+ *
+ * The bible text is highlighted word by word because it is rendered as text. A
+ * commentary entry is rendered as `dangerouslySetInnerHTML` - blockquotes,
+ * footnote superscripts, headings - and moving a word-level mark through markup
+ * React does not own means editing the DOM behind React's back. So the unit here
+ * is the entry, which is also the unit `buildCommentaryText` reads them in:
+ * whichever entry the voice is currently inside is the one that lights up.
+ */
+function CommentaryEntry({
+  label,
+  text,
+  prefClasses,
+  prefStyles,
+}: {
+  label: string;
+  text: string;
+  prefClasses: string;
+  prefStyles: CSSProperties;
+}) {
+  const isHtml = /<[a-zA-Z][^>]*>/.test(text);
+  // Character for character what `buildCommentaryText` puts in the spoken
+  // string, which is the only reason this entry can find itself in there.
+  const spoken = useMemo(() => stripHtml(text), [text]);
+  const html = useMemo(() => formatCommentaryText(text), [text]);
+  const beingRead = useSpokenLocalRange(spoken) !== null;
+
+  return (
+    <div
+      className="border-b border-gray-100 dark:border-border pb-6 last:border-0 pr-2 mb-6 last:mb-0 rounded-md -ml-3 pl-3 motion-safe:transition-colors"
+      style={
+        beingRead
+          ? { backgroundColor: 'rgba(13,148,136,0.06)', boxShadow: 'inset 3px 0 0 0 #0D9488' }
+          : undefined
+      }
+    >
+      {isHtml ? (
+        <div className="inline-flex items-center gap-1.5 mb-1">
+          <span className="text-[11px] font-semibold tracking-wider uppercase text-[#0D9488] dark:text-teal-400 bg-[rgba(13,148,136,0.08)] dark:bg-[rgba(13,148,136,0.15)] px-2 py-0.5 rounded-full">
+            {label}
+          </span>
+        </div>
+      ) : (
+        <h3 className="font-merriweather font-semibold text-gray-900 dark:text-foreground mb-2 mt-1">
+          {label}
+        </h3>
+      )}
+      <div
+        className={`text-gray-700 dark:text-foreground max-w-none ${prefClasses}`}
+        style={prefStyles}
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
+    </div>
+  );
+}
+
 const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
   book,
   chapter,
@@ -397,159 +455,146 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
   });
 
   return (
-    <Card className={`border-0 shadow-none rounded-lg dark:bg-card ${height ? 'h-full flex flex-col' : ''}`}>
-      {/* Source Selector */}
-      <div className="px-4 sm:px-6 py-3 border-b border-gray-100 dark:border-border flex items-center justify-between gap-2 bg-gray-50 dark:bg-card">
-        <span className="text-sm font-medium text-gray-600 dark:text-muted-foreground">Commentaarbron</span>
-        <div className="flex items-center gap-2">
-          {commentary && Object.keys(commentary).length > 0 && (
-            <SpeakButton
-              compact
-              showSettings={false}
-              getText={() => buildCommentaryText(commentary)}
-              label="Lees commentaar voor"
-            />
-          )}
-          <div className="relative">
-              <select
-                  value={selectedSource}
-                  onChange={(e) => {
-                    const newSource = e.target.value;
-                    setSelectedSource(newSource);
-                    if (onSourceChange) {
-                      onSourceChange(newSource);
-                    }
-                  }}
-                  className="appearance-none bg-white dark:bg-secondary border border-gray-200 dark:border-border rounded-md py-1 pl-3 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-[#0D9488] dark:text-foreground"
-              >
-                  {availableSources.length > 0 ? (
-                      sortedLanguages.map(lang => (
-                          <optgroup key={lang} label={languageNames[lang] || lang.toUpperCase()}>
-                              {groupedSources[lang].map(src => (
-                                  <option key={src.id} value={src.id}>
-                                    {src.name}
-                                  </option>
-                              ))}
-                          </optgroup>
-                      ))
-                  ) : (
-                      <option value={selectedSource}>{formatSourceLabel(selectedSource)}</option>
-                  )}
-              </select>
-              <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+    // The button that reads the commentary sits in this header and the entries
+    // it reads are further down the same card, so the scope goes around both.
+    <SpokenTextScope>
+      <Card className={`border-0 shadow-none rounded-lg dark:bg-card ${height ? 'h-full flex flex-col' : ''}`}>
+        {/* Source Selector */}
+        <div className="px-4 sm:px-6 py-3 border-b border-gray-100 dark:border-border flex items-center justify-between gap-2 bg-gray-50 dark:bg-card">
+          <span className="text-sm font-medium text-gray-600 dark:text-muted-foreground">Commentaarbron</span>
+          <div className="flex items-center gap-2">
+            {commentary && Object.keys(commentary).length > 0 && (
+              <SpeakButton
+                compact
+                showSettings={false}
+                getText={() => buildCommentaryText(commentary)}
+                label="Lees commentaar voor"
+              />
+            )}
+            <div className="relative">
+                <select
+                    value={selectedSource}
+                    onChange={(e) => {
+                      const newSource = e.target.value;
+                      setSelectedSource(newSource);
+                      if (onSourceChange) {
+                        onSourceChange(newSource);
+                      }
+                    }}
+                    className="appearance-none bg-white dark:bg-secondary border border-gray-200 dark:border-border rounded-md py-1 pl-3 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-[#0D9488] dark:text-foreground"
+                >
+                    {availableSources.length > 0 ? (
+                        sortedLanguages.map(lang => (
+                            <optgroup key={lang} label={languageNames[lang] || lang.toUpperCase()}>
+                                {groupedSources[lang].map(src => (
+                                    <option key={src.id} value={src.id}>
+                                      {src.name}
+                                    </option>
+                                ))}
+                            </optgroup>
+                        ))
+                    ) : (
+                        <option value={selectedSource}>{formatSourceLabel(selectedSource)}</option>
+                    )}
+                </select>
+                <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Content Area */}
-      <CardContent className={`px-4 sm:px-6 pt-4 pb-24 space-y-6 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-secondary scrollbar-track-transparent ${height ? 'flex-1 min-h-0' : 'max-h-[600px] lg:max-h-[calc(100vh-300px)]'}`}>
-        {isLocked() ? (
-          <div className="flex flex-col items-center justify-center py-12 text-center space-y-4">
-            <div className="bg-amber-100 dark:bg-amber-900/20 p-4 rounded-full">
-              <Lock className="h-8 w-8 text-amber-600 dark:text-amber-500" />
-            </div>
-            <div className="max-w-md space-y-2">
-              <h3 className="font-merriweather font-bold text-xl text-gray-900 dark:text-gray-100">
-                Pro-commentaar
-              </h3>
-              <p className="text-muted-foreground text-sm">
-                KingComments en andere premium commentaren zijn beschikbaar voor Pro-abonnees van BijbelStudie.
-              </p>
-            </div>
-            <UpgradePrompt
-              surface="commentary"
-              title="Pro-commentaar"
-              body="KingComments en de andere premium commentaren zijn onderdeel van Pro."
-              cta="Commentaren ontgrendelen"
-              compact
-            />
-          </div>
-        ) : loading ? (
-            <div className="py-6 space-y-8" role="status" aria-label="Commentaar laden">
-                {[0, 1, 2].map((i) => (
-                  <div key={i} className="space-y-3">
-                    <SkeletonBlock className="h-4 w-32" />
-                    <SkeletonText lines={4} />
-                  </div>
-                ))}
-            </div>
-        ) : error ? (
-            <div className="py-12 text-center">
-                <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-4" />
-                <p className="font-merriweather text-red-600 font-semibold mb-2 text-base dark:text-red-400">
-                    Error loading commentary
-                </p>
-                <p className="font-inter text-gray-700 dark:text-muted-foreground text-sm">{error}</p>
-            </div>
-        ) : notFound ? (
-            <div className="py-12 text-center text-gray-500 dark:text-muted-foreground text-sm">
-                <p className="font-inter">{t('no_commentary_for_chapter', { source: formatSourceLabel(selectedSource) })}</p>
-            </div>
-        ) : !commentary ? (
-            <div className="py-12 text-center text-gray-500 dark:text-muted-foreground text-sm">
-                <p className="font-inter">Geen commentaar beschikbaar voor dit hoofdstuk.</p>
-            </div>
-        ) : (() => {
-            const allEntries = Object.entries(commentary);
-            // The server decides. It applies the same rules this component used
-            // to apply itself - KingComments always free, short chapters never
-            // paywalled - but it applies them before sending the text rather
-            // than after, so the mask below is now cosmetic rather than the
-            // only thing standing between a visitor and the full chapter.
-            const showPaywall = locked;
-            return (
-              <div className="content-in">
-                <div
-                  style={showPaywall ? {
-                    maxHeight: 1100,
-                    overflow: 'hidden',
-                    WebkitMaskImage: 'linear-gradient(to bottom, black 82%, transparent 100%)',
-                    maskImage: 'linear-gradient(to bottom, black 82%, transparent 100%)',
-                  } : undefined}
-                >
-                  {allEntries.map(([key, text]) => {
-                    const isHtml = /<[a-zA-Z][^>]*>/.test(text);
-                    const label = key === 'intro' || key === '0'
-                      ? 'Inleiding'
-                      : `Vers ${key}`;
-                    return (
-                      <div key={key} className="border-b border-gray-100 dark:border-border pb-6 last:border-0 pr-2 mb-6 last:mb-0">
-                        {isHtml ? (
-                          <div className="inline-flex items-center gap-1.5 mb-1">
-                            <span className="text-[11px] font-semibold tracking-wider uppercase text-[#0D9488] dark:text-teal-400 bg-[rgba(13,148,136,0.08)] dark:bg-[rgba(13,148,136,0.15)] px-2 py-0.5 rounded-full">
-                              {label}
-                            </span>
-                          </div>
-                        ) : (
-                          <h3 className="font-merriweather font-semibold text-gray-900 dark:text-foreground mb-2 mt-1">
-                            {label}
-                          </h3>
-                        )}
-                        <div
-                          className={`text-gray-700 dark:text-foreground max-w-none ${prefClasses}`}
-                          style={prefStyles}
-                          dangerouslySetInnerHTML={{ __html: formatCommentaryText(text) }}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-                {showPaywall && (
-                  <div className="mt-6">
-                    <UpgradePrompt
-                      surface="commentary"
-                      title="Lees het volledige commentaar"
-                      body="Je leest nu het begin. Met Pro lees je elk commentaar bij elk hoofdstuk volledig."
-                      cta="Verder lezen met Pro"
-                    />
-                  </div>
-                )}
+        {/* Content Area */}
+        <CardContent className={`px-4 sm:px-6 pt-4 pb-24 space-y-6 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-secondary scrollbar-track-transparent ${height ? 'flex-1 min-h-0' : 'max-h-[600px] lg:max-h-[calc(100vh-300px)]'}`}>
+          {isLocked() ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center space-y-4">
+              <div className="bg-amber-100 dark:bg-amber-900/20 p-4 rounded-full">
+                <Lock className="h-8 w-8 text-amber-600 dark:text-amber-500" />
               </div>
-            );
-          })()
-        }
-      </CardContent>
-    </Card>
+              <div className="max-w-md space-y-2">
+                <h3 className="font-merriweather font-bold text-xl text-gray-900 dark:text-gray-100">
+                  Pro-commentaar
+                </h3>
+                <p className="text-muted-foreground text-sm">
+                  KingComments en andere premium commentaren zijn beschikbaar voor Pro-abonnees van BijbelStudie.
+                </p>
+              </div>
+              <UpgradePrompt
+                surface="commentary"
+                title="Pro-commentaar"
+                body="KingComments en de andere premium commentaren zijn onderdeel van Pro."
+                cta="Commentaren ontgrendelen"
+                compact
+              />
+            </div>
+          ) : loading ? (
+              <div className="py-6 space-y-8" role="status" aria-label="Commentaar laden">
+                  {[0, 1, 2].map((i) => (
+                    <div key={i} className="space-y-3">
+                      <SkeletonBlock className="h-4 w-32" />
+                      <SkeletonText lines={4} />
+                    </div>
+                  ))}
+              </div>
+          ) : error ? (
+              <div className="py-12 text-center">
+                  <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-4" />
+                  <p className="font-merriweather text-red-600 font-semibold mb-2 text-base dark:text-red-400">
+                      Error loading commentary
+                  </p>
+                  <p className="font-inter text-gray-700 dark:text-muted-foreground text-sm">{error}</p>
+              </div>
+          ) : notFound ? (
+              <div className="py-12 text-center text-gray-500 dark:text-muted-foreground text-sm">
+                  <p className="font-inter">{t('no_commentary_for_chapter', { source: formatSourceLabel(selectedSource) })}</p>
+              </div>
+          ) : !commentary ? (
+              <div className="py-12 text-center text-gray-500 dark:text-muted-foreground text-sm">
+                  <p className="font-inter">Geen commentaar beschikbaar voor dit hoofdstuk.</p>
+              </div>
+          ) : (() => {
+              const allEntries = Object.entries(commentary);
+              // The server decides. It applies the same rules this component used
+              // to apply itself - KingComments always free, short chapters never
+              // paywalled - but it applies them before sending the text rather
+              // than after, so the mask below is now cosmetic rather than the
+              // only thing standing between a visitor and the full chapter.
+              const showPaywall = locked;
+              return (
+                <div className="content-in">
+                  <div
+                    style={showPaywall ? {
+                      maxHeight: 1100,
+                      overflow: 'hidden',
+                      WebkitMaskImage: 'linear-gradient(to bottom, black 82%, transparent 100%)',
+                      maskImage: 'linear-gradient(to bottom, black 82%, transparent 100%)',
+                    } : undefined}
+                  >
+                    {allEntries.map(([key, text]) => (
+                      <CommentaryEntry
+                        key={key}
+                        label={key === 'intro' || key === '0' ? 'Inleiding' : `Vers ${key}`}
+                        text={text}
+                        prefClasses={prefClasses}
+                        prefStyles={prefStyles}
+                      />
+                    ))}
+                  </div>
+                  {showPaywall && (
+                    <div className="mt-6">
+                      <UpgradePrompt
+                        surface="commentary"
+                        title="Lees het volledige commentaar"
+                        body="Je leest nu het begin. Met Pro lees je elk commentaar bij elk hoofdstuk volledig."
+                        cta="Verder lezen met Pro"
+                      />
+                    </div>
+                  )}
+                </div>
+              );
+            })()
+          }
+        </CardContent>
+      </Card>
+    </SpokenTextScope>
   );
 };
 

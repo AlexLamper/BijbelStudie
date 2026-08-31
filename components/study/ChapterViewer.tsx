@@ -7,6 +7,7 @@ import { HIGHLIGHT_TINTS, useVerseAnnotations } from '../../hooks/useVerseAnnota
 import { cn } from '../../lib/utils';
 import { getBibleAttribution } from '../../lib/bible-attribution';
 import SpeakButton from './SpeakButton';
+import { SpokenText, SpokenTextScope } from './SpokenText';
 import VerseMarkers from './VerseMarkers';
 
 type Props = {
@@ -188,107 +189,112 @@ export default function ChapterViewer({
         </div>
       )}
 
+      {/* One scope for the whole chapter: the header button reads every verse,
+          each verse has a button of its own, and all of them have to reach the
+          same rendered text. */}
       {!loading && !error && Object.keys(verses).length > 0 && (
-        <div className="content-in">
-          <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-100 dark:border-border">
-            <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-muted-foreground">
-              {book} {chapter}
-            </p>
-            <SpeakButton
-              compact
-              showSettings={false}
-              getText={() => buildChapterText(verses)}
-              label="Lees hoofdstuk voor"
-            />
-          </div>
-          <div className="space-y-2 text-justify">
-            {Object.entries(verses).map(([verseNumber, text]) => {
-              const vNum = parseInt(verseNumber, 10);
-              const isHighlighted = highlightRange
-                ? vNum >= highlightRange.start && vNum <= highlightRange.end
-                : false;
-              const marks = annotations.get(vNum);
-              // The reader's own highlight wins over the lesson's range tint:
-              // one is something they chose, the other is context.
-              const tint = marks?.highlight ? HIGHLIGHT_TINTS[marks.highlight] : null;
-              return (
-              <div
-                key={verseNumber}
-                id={`verse-${verseNumber}`}
-                className={cn(
-                  "group relative rounded-sm -mx-1 px-1",
-                  isHighlighted && !tint && "bg-teal-50 dark:bg-teal-950/30 border-l-2 border-teal-500 pl-2"
-                )}
-                style={
-                  tint
-                    ? { backgroundColor: tint.bg, boxShadow: `inset 2px 0 0 0 ${tint.border}` }
-                    : undefined
-                }
-              >
-                <p className={cn(
-                  "dark:text-foreground text-gray-900",
-                  fontSizeClass,
-                  fontFamilyClass,
-                  lineHeightClass,
-                  letterSpacingClass,
-                )}>
-                  {prefs.showVerseNumbers && (
-                    <sup className={cn(
-                      "font-semibold mr-1",
-                      isHighlighted ? "text-teal-600 dark:text-teal-400" : "text-gray-700 dark:text-muted-foreground"
-                    )}>
-                      {verseNumber}
-                    </sup>
+        <SpokenTextScope>
+          <div className="content-in">
+            <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-100 dark:border-border">
+              <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-muted-foreground">
+                {book} {chapter}
+              </p>
+              <SpeakButton
+                compact
+                showSettings={false}
+                getText={() => buildChapterText(verses)}
+                label="Lees hoofdstuk voor"
+              />
+            </div>
+            <div className="space-y-2 text-justify">
+              {Object.entries(verses).map(([verseNumber, text]) => {
+                const vNum = parseInt(verseNumber, 10);
+                const isHighlighted = highlightRange
+                  ? vNum >= highlightRange.start && vNum <= highlightRange.end
+                  : false;
+                const marks = annotations.get(vNum);
+                // The reader's own highlight wins over the lesson's range tint:
+                // one is something they chose, the other is context.
+                const tint = marks?.highlight ? HIGHLIGHT_TINTS[marks.highlight] : null;
+                return (
+                <div
+                  key={verseNumber}
+                  id={`verse-${verseNumber}`}
+                  className={cn(
+                    "group relative rounded-sm -mx-1 px-1",
+                    isHighlighted && !tint && "bg-teal-50 dark:bg-teal-950/30 border-l-2 border-teal-500 pl-2"
                   )}
-                  <span className="hover:bg-[#0D9488]/10 cursor-pointer transition-colors px-1"
-                        onClick={() => handleVerseClick(verseNumber, text)}>
-                    {text}
-                  </span>
-                  <VerseMarkers annotation={marks} />
-                </p>
-                <div className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
-                  <SpeakButton
-                    compact
-                    showSettings={false}
-                    getText={() => text}
-                    label={`Vers ${verseNumber} voorlezen`}
-                    className="bg-white dark:bg-card shadow-[0_2px_4px_-1px_rgba(0,0,0,0.1)] border border-gray-200 dark:border-border"
-                  />
-                  <button
-                    onClick={() => handleVerseClick(verseNumber, text)}
-                    className="bg-[#0D9488] hover:bg-[#0f766e] text-white p-1.5 shadow-[0_2px_4px_-1px_rgba(0,0,0,0.1)]"
-                    title="Add note to this verse"
-                  >
-                    <Plus className="h-3 w-3" />
-                  </button>
+                  style={
+                    tint
+                      ? { backgroundColor: tint.bg, boxShadow: `inset 2px 0 0 0 ${tint.border}` }
+                      : undefined
+                  }
+                >
+                  <p className={cn(
+                    "dark:text-foreground text-gray-900",
+                    fontSizeClass,
+                    fontFamilyClass,
+                    lineHeightClass,
+                    letterSpacingClass,
+                  )}>
+                    {prefs.showVerseNumbers && (
+                      <sup className={cn(
+                        "font-semibold mr-1",
+                        isHighlighted ? "text-teal-600 dark:text-teal-400" : "text-gray-700 dark:text-muted-foreground"
+                      )}>
+                        {verseNumber}
+                      </sup>
+                    )}
+                    <span className="hover:bg-[#0D9488]/10 cursor-pointer transition-colors px-1"
+                          onClick={() => handleVerseClick(verseNumber, text)}>
+                      <SpokenText text={text} />
+                    </span>
+                    <VerseMarkers annotation={marks} />
+                  </p>
+                  <div className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
+                    <SpeakButton
+                      compact
+                      showSettings={false}
+                      getText={() => text}
+                      label={`Vers ${verseNumber} voorlezen`}
+                      className="bg-white dark:bg-card shadow-[0_2px_4px_-1px_rgba(0,0,0,0.1)] border border-gray-200 dark:border-border"
+                    />
+                    <button
+                      onClick={() => handleVerseClick(verseNumber, text)}
+                      className="bg-[#0D9488] hover:bg-[#0f766e] text-white p-1.5 shadow-[0_2px_4px_-1px_rgba(0,0,0,0.1)]"
+                      title="Add note to this verse"
+                    >
+                      <Plus className="h-3 w-3" />
+                    </button>
+                  </div>
                 </div>
-              </div>
-              );
-            })}
+                );
+              })}
+            </div>
+
+            {getBibleAttribution(version) && (
+              <p className="mt-4 pt-3 border-t border-gray-100 dark:border-border text-[11px] leading-snug text-gray-400 dark:text-muted-foreground">
+                {getBibleAttribution(version)}
+              </p>
+            )}
+
+            {/* Note Creation Modal */}
+            {selectedVerse && (
+              <CreateNoteModal
+                isOpen={showCreateNoteModal}
+                onClose={handleCancelNote}
+                verseReference={selectedVerse.reference}
+                book={book}
+                chapter={chapter}
+                verse={parseInt(selectedVerse.verseNumber)}
+                verseText={selectedVerse.text}
+                translation={version || "statenvertaling"}
+                onSave={handleNoteSaved}
+                availableVerses={Object.keys(verses).map(Number).sort((a, b) => a - b)}
+              />
+            )}
           </div>
-
-          {getBibleAttribution(version) && (
-            <p className="mt-4 pt-3 border-t border-gray-100 dark:border-border text-[11px] leading-snug text-gray-400 dark:text-muted-foreground">
-              {getBibleAttribution(version)}
-            </p>
-          )}
-
-          {/* Note Creation Modal */}
-          {selectedVerse && (
-            <CreateNoteModal
-              isOpen={showCreateNoteModal}
-              onClose={handleCancelNote}
-              verseReference={selectedVerse.reference}
-              book={book}
-              chapter={chapter}
-              verse={parseInt(selectedVerse.verseNumber)}
-              verseText={selectedVerse.text}
-              translation={version || "statenvertaling"}
-              onSave={handleNoteSaved}
-              availableVerses={Object.keys(verses).map(Number).sort((a, b) => a - b)}
-            />
-          )}
-        </div>
+        </SpokenTextScope>
       )}
 
       {!loading && !error && Object.keys(verses).length === 0 && (

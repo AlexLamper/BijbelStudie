@@ -141,8 +141,18 @@ export function CreateNoteModal({
     if (verse != null) { setVerseStart(verse); setVerseEnd(verse); }
   };
 
+  /**
+   * A pure highlight has no note text.
+   *
+   * The thoughts field is hidden for it, so it must not be required - and
+   * whatever was typed before the type was switched must not be saved either:
+   * the reader was told that text belongs to a note, and a highlight is not
+   * one. The state itself is kept, so switching back restores what they wrote.
+   */
+  const wantsText = noteType !== "highlight";
+
   const handleSave = async () => {
-    if (!noteText.trim()) { setError(t("error_note_text_required")); return; }
+    if (wantsText && !noteText.trim()) { setError(t("error_note_text_required")); return; }
     setIsSaving(true);
     setError(null);
 
@@ -155,7 +165,7 @@ export function CreateNoteModal({
         verseEnd: scope === "gedeelte" ? verseEnd : undefined,
         verseText: displayVerseText(),
         translation,
-        noteText: noteText.trim(),
+        noteText: wantsText ? noteText.trim() : "",
         highlightColor: selectedColor,
         tags,
         isPrivate: !selectedGroupId,
@@ -310,7 +320,10 @@ export function CreateNoteModal({
           </div>
         )}
 
-        {/* Note text */}
+        {/* Note text. Absent for a pure highlight: marking a verse is not
+            writing about it, and an empty box under "Markering" invited people
+            to type something the save would then have thrown away. */}
+        {wantsText && (
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
             {t("note_thoughts_label")}
@@ -323,6 +336,7 @@ export function CreateNoteModal({
             className="resize-none"
           />
         </div>
+        )}
 
         {/* Tags */}
         <div>
@@ -424,7 +438,7 @@ export function CreateNoteModal({
           </Button>
           <Button
             onClick={handleSave}
-            disabled={isSaving || !noteText.trim()}
+            disabled={isSaving || (wantsText && !noteText.trim())}
             className="gap-2 bg-teal-700 hover:bg-teal-800 text-white"
           >
             {isSaving ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" /> : <Save className="h-4 w-4" />}

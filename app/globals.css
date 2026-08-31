@@ -118,61 +118,108 @@
 
 :focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }
 
-/* ─── Scroll reveal, entirely on the compositor ─────────────────
-   These used to be framer-motion elements. That put the hero copy behind
-   hydration - the served HTML carried `opacity: 0` and nothing painted until
-   the animation library had loaded, which is what pushed mobile LCP past 2.5s.
-   A view-progress timeline needs no JavaScript at all, and browsers without
-   one simply render the content visible, which is the correct fallback. */
-@keyframes reveal-up {
-  from { transform: translateY(28px); }
-  to   { transform: none; }
-}
+/* ─── Scroll reveal ─────────────────────────────────────────────
+   This started as framer-motion, which served `opacity: 0` in the HTML and
+   waited for hydration to undo it - that is what put the animation library on
+   the critical path and pushed mobile LCP past 2.5s, and framer-motion must
+   never come back to this page. It was then rewritten onto a CSS view-progress
+   timeline, which needs no JavaScript at all but only exists in Chromium: on
+   Safari and Firefox the page had no entrance motion whatsoever, which is the
+   "the landing page has no animations" report.
 
-/* Deliberately no opacity ramp: half-faded text fails contrast while it is
-   mid-animation, and it hides content from anything that samples the page
-   before the animation has run. */
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .reveal {
-      animation: reveal-up linear both;
-      animation-timeline: view();
-      animation-range: entry 0% cover 22%;
-    }
+   So: a plain transition, flipped by an `is-visible` class that one
+   IntersectionObserver in components/landing/ScrollEffects.tsx sets. The
+   guarantee that mattered about the timeline version is kept intact, because
+   the hidden state is scoped to `html.js-reveal` and only that observer adds
+   that class. A crawler, a failed bundle, a browser without
+   IntersectionObserver and anyone who asked for reduced motion all get the
+   fully visible page exactly as it was served - nothing readable is ever
+   gated on JavaScript. The observer also marks whatever is already on screen
+   visible *before* it enables the hidden state, so content the visitor is
+   looking at cannot blink out and back in.
+
+   Short and small on purpose: 500ms, 24px, one ease-out curve. This belongs on
+   a section wrapper, never on the element whose paint LCP is measured against. */
+@media (prefers-reduced-motion: no-preference) {
+  html.js-reveal .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition:
+      opacity   500ms cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay, 0ms),
+      transform 500ms cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay, 0ms);
+  }
+
+  html.js-reveal .reveal.is-visible {
+    opacity: 1;
+    transform: none;
   }
 }
 
+/* Siblings that cross the fold together should read as one movement rather
+   than as a dozen separate ones, so the cascade is capped at four steps and
+   180ms total - beyond that the last card arrives late enough to feel like a
+   stall instead of a flourish. */
+.reveal-stagger > *:nth-child(2)   { --reveal-delay:  60ms; }
+.reveal-stagger > *:nth-child(3)   { --reveal-delay: 120ms; }
+.reveal-stagger > *:nth-child(n+4) { --reveal-delay: 180ms; }
+
 /* Continuous motion on decorative elements only, never on text that LCP
-   is measured against. */
+   is measured against. The amplitude is deliberately small: the hero mockup
+   should read as resting slightly off the page, not as bobbing. */
 @keyframes float-y {
   0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-10px); }
-}
-@keyframes cta-pulse {
-  0%   { box-shadow: 0 0 0 0   rgba(13, 148, 136, 0.45); }
-  70%  { box-shadow: 0 0 0 10px rgba(13, 148, 136, 0); }
-  100% { box-shadow: 0 0 0 0   rgba(13, 148, 136, 0); }
+  50%      { transform: translateY(-6px); }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .float-slow { animation: float-y 5.5s ease-in-out infinite; }
-  .cta-pulse  { animation: cta-pulse 2.4s ease-out 1s infinite; }
+  .float-slow { animation: float-y 7s ease-in-out infinite; }
 }
 
-/* Sticky-header shadow, driven by scroll position instead of a scroll listener
-   plus a React state update. Browsers without scroll timelines keep the flat
-   header, which is the same thing they saw at the top of the page anyway. */
-@keyframes nav-shadow {
-  from { box-shadow: 0 1px 16px rgba(0, 0, 0, 0); }
-  to   { box-shadow: 0 1px 16px rgba(0, 0, 0, 0.07); }
+/* Sticky-header elevation. Also a scroll-progress timeline until now, and so
+   also Chromium-only - the same observer that drives the reveals toggles
+   `is-stuck` from a one-pixel sentinel at the top of the document, which costs
+   nothing extra and behaves identically in every browser. The header owns its
+   own bottom border here rather than in the markup, because the hairline
+   should only appear once there is content scrolling underneath it. */
+.nav-shadow {
+  border-bottom: 1px solid transparent;
+  transition: box-shadow 200ms ease-out, border-color 200ms ease-out;
 }
 
-@supports (animation-timeline: scroll()) {
-  .nav-shadow {
-    animation: nav-shadow linear both;
-    animation-timeline: scroll();
-    animation-range: 0 80px;
-  }
+html.is-stuck .nav-shadow {
+  border-bottom-color: #E5E7EB;
+  box-shadow: 0 1px 16px rgba(15, 23, 42, 0.07);
+}
+
+/* ─── Marketing card surface ────────────────────────────────────
+   Every card on the landing page used to carry its resting shadow as an inline
+   style and then ask Tailwind's `hover:shadow-lg` to replace it. An inline
+   style wins over any stylesheet rule, so none of those cards ever gained a
+   hover shadow - they only moved. Both states live here so they can actually
+   swap, and the hover lift stays out of the reduced-motion branch.
+
+   Kept off the same element as `.reveal`: they would both be writing
+   `transform`, and the reveal's `transform: none` is the more specific rule,
+   which would silently kill the hover lift. The reveal goes on the wrapper. */
+.lp-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  transition:
+    border-color 200ms ease-out,
+    box-shadow   200ms ease-out,
+    transform    200ms ease-out;
+}
+
+.lp-card:hover {
+  border-color: #D1D5DB;
+  box-shadow:
+    0 14px 30px -14px rgba(15, 23, 42, 0.18),
+    0 4px 10px -6px rgba(15, 23, 42, 0.08);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .lp-card:hover { transform: translateY(-2px); }
 }
 
 /* ─── Arrival and micro-interaction vocabulary ──────────────────

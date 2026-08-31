@@ -11,7 +11,7 @@ import {
 } from "../ui/sidebar"
 import {
   LayoutDashboard, BookOpen, BookMarked,
-  StickyNote, User, Settings, Sparkles, Users, ShieldCheck,
+  StickyNote, User, Settings, Sparkles, ShieldCheck,
   ArrowRight, Check, MessageSquareText,
 } from "lucide-react"
 import { useSession } from "next-auth/react"
@@ -34,7 +34,14 @@ const mainNav = [
   { title: "Dashboard",    url: "/dashboard",    icon: LayoutDashboard, tourId: "nav-dashboard"    },
   { title: "Studies",      url: "/studies",      icon: BookMarked,      tourId: "nav-studies"      },
   { title: "Lezen",        url: "/lezen",        icon: BookOpen,        tourId: "nav-studie"       },
-  { title: "Groepen",      url: "/groepen",      icon: Users,           tourId: "nav-groepen"      },
+  // TEMPORARILY HIDDEN: Groepen.
+  //   { title: "Groepen", url: "/groepen", icon: Users, tourId: "nav-groepen" },
+  // (`Users` was dropped from the lucide import above with it; put it back too.)
+  // The feature is unfinished and effectively unused, so it is taken out of the
+  // navigation rather than out of the codebase: /groepen, its API and its models
+  // all still work, and restoring the line above puts it back. The guided tour
+  // step that pointed at this item was removed with it - a tour that highlights
+  // an element that no longer renders stalls on that step.
   { title: "Notities",     url: "/notities",     icon: StickyNote,      tourId: "nav-notities"     },
   // /hulpbronnen, /bijbelboeken and /bijbelstudie are public reference pages,
   // not things a signed-in user works in. They stay online and in the sitemap;

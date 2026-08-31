@@ -33,9 +33,14 @@ const NoteSchema = new mongoose.Schema(
       type: String, 
       default: "ASV" // Bible translation version
     },
-    noteText: { 
-      type: String, 
-      required: true // User's personal note/reflection
+    noteText: {
+      type: String,
+      default: ""
+      // The user's own words. Empty for a pure highlight, which is a mark on a
+      // verse and nothing more - so this cannot be `required`. The API requires
+      // it for type "note" and "both", which is where that rule belongs: update
+      // validators run against the query rather than the document, so a
+      // conditional `required` here would fire on the wrong writes.
     },
     highlightColor: { 
       type: String, 

@@ -71,13 +71,9 @@ const STEPS: TourStep[] = [
     page: "/lezen",
     side: "right",
   },
-  {
-    target: "nav-groepen",
-    title: "Bijbelgroepen",
-    description: "Studeer samen: maak een groep of word lid, deel notities en bespreek bijbelgedeeltes met anderen.",
-    page: "/lezen",
-    side: "right",
-  },
+  // Removed with the Groepen nav item: this step highlighted "nav-groepen",
+  // which no longer renders, and a tour step anchored to a missing element has
+  // nothing to point at. Restore both together.
   {
     target: "pro-cta",
     title: "Upgrade naar Pro",

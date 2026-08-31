@@ -113,7 +113,7 @@ export const HELP_TOPICS: HelpTopic[] = [
       },
       {
         q: "Zijn mijn notities privé?",
-        a: "Ja. Je notities zijn alleen voor jou zichtbaar, tenzij je ze zelf deelt in een studiegroep.",
+        a: "Ja. Je notities zijn alleen voor jou zichtbaar.",
       },
     ],
   },

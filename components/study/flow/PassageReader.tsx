@@ -6,6 +6,7 @@ import { AlertCircle, Plus } from 'lucide-react';
 import { SkeletonChapter } from '../../ui/skeletons';
 import { CreateNoteModal } from '../CreateNoteModal';
 import SpeakButton from '../SpeakButton';
+import { SpokenText, SpokenTextScope } from '../SpokenText';
 import VerseMarkers from '../VerseMarkers';
 import { getBibleAttribution } from '../../../lib/bible-attribution';
 import { cn } from '../../../lib/utils';
@@ -143,82 +144,87 @@ export default function PassageReader({
   }
 
   return (
-    <div className="content-in">
-      <div className="space-y-4">
-        {inRange.map(([number, text]) => {
-          const marks = annotations.get(number);
-          const tint = marks?.highlight ? HIGHLIGHT_TINTS[marks.highlight] : null;
+    // A scope of its own so the per-verse buttons work wherever this reader is
+    // used; inside the study flow StepWord has already opened one, and this
+    // call then falls through to it rather than shadowing it.
+    <SpokenTextScope>
+      <div className="content-in">
+        <div className="space-y-4">
+          {inRange.map(([number, text]) => {
+            const marks = annotations.get(number);
+            const tint = marks?.highlight ? HIGHLIGHT_TINTS[marks.highlight] : null;
 
-          return (
-          <div
-            key={number}
-            id={`verse-${number}`}
-            className="group relative rounded-md -mx-2 px-2"
-            style={
-              tint
-                ? { backgroundColor: tint.bg, boxShadow: `inset 2px 0 0 0 ${tint.border}` }
-                : undefined
-            }
-          >
-            <p className={cn('text-gray-900 dark:text-foreground', typography)}>
-              {prefs.showVerseNumbers && (
-                <sup className="font-semibold mr-2 text-[0.62em] text-gray-400 dark:text-muted-foreground select-none">
-                  {number}
-                </sup>
-              )}
-              <span
-                className="cursor-pointer transition-colors hover:bg-[#0D9488]/10 rounded px-0.5"
-                onClick={() => setSelected({ verseNumber: String(number), text })}
-              >
-                {text}
-              </span>
-              <VerseMarkers annotation={marks} />
-            </p>
+            return (
+            <div
+              key={number}
+              id={`verse-${number}`}
+              className="group relative rounded-md -mx-2 px-2"
+              style={
+                tint
+                  ? { backgroundColor: tint.bg, boxShadow: `inset 2px 0 0 0 ${tint.border}` }
+                  : undefined
+              }
+            >
+              <p className={cn('text-gray-900 dark:text-foreground', typography)}>
+                {prefs.showVerseNumbers && (
+                  <sup className="font-semibold mr-2 text-[0.62em] text-gray-400 dark:text-muted-foreground select-none">
+                    {number}
+                  </sup>
+                )}
+                <span
+                  className="cursor-pointer transition-colors hover:bg-[#0D9488]/10 rounded px-0.5"
+                  onClick={() => setSelected({ verseNumber: String(number), text })}
+                >
+                  <SpokenText text={text} />
+                </span>
+                <VerseMarkers annotation={marks} />
+              </p>
 
-            <div className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
-              <SpeakButton
-                compact
-                showSettings={false}
-                getText={() => text}
-                label={`Vers ${number} voorlezen`}
-                className="bg-white dark:bg-card shadow-sm border border-gray-200 dark:border-border"
-              />
-              <button
-                onClick={() => setSelected({ verseNumber: String(number), text })}
-                className="bg-[#0D9488] hover:bg-[#0f766e] text-white p-1.5 rounded-sm shadow-sm"
-                title={`Notitie bij vers ${number}`}
-              >
-                <Plus className="h-3 w-3" />
-              </button>
+              <div className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
+                <SpeakButton
+                  compact
+                  showSettings={false}
+                  getText={() => text}
+                  label={`Vers ${number} voorlezen`}
+                  className="bg-white dark:bg-card shadow-sm border border-gray-200 dark:border-border"
+                />
+                <button
+                  onClick={() => setSelected({ verseNumber: String(number), text })}
+                  className="bg-[#0D9488] hover:bg-[#0f766e] text-white p-1.5 rounded-sm shadow-sm"
+                  title={`Notitie bij vers ${number}`}
+                >
+                  <Plus className="h-3 w-3" />
+                </button>
+              </div>
             </div>
-          </div>
-          );
-        })}
+            );
+          })}
+        </div>
+
+        {attribution && (
+          <p className="mt-8 pt-4 border-t border-gray-100 dark:border-border text-[11px] leading-snug text-gray-400 dark:text-muted-foreground">
+            {attribution}
+          </p>
+        )}
+
+        {selected && (
+          <CreateNoteModal
+            isOpen
+            onClose={() => setSelected(null)}
+            verseReference={`${book} ${chapter}:${selected.verseNumber}`}
+            book={book}
+            chapter={chapter}
+            verse={parseInt(selected.verseNumber, 10)}
+            verseText={selected.text}
+            translation={version || 'statenvertaling'}
+            onSave={() => {
+              setSelected(null);
+              void reloadAnnotations();
+            }}
+            availableVerses={inRange.map(([number]) => number)}
+          />
+        )}
       </div>
-
-      {attribution && (
-        <p className="mt-8 pt-4 border-t border-gray-100 dark:border-border text-[11px] leading-snug text-gray-400 dark:text-muted-foreground">
-          {attribution}
-        </p>
-      )}
-
-      {selected && (
-        <CreateNoteModal
-          isOpen
-          onClose={() => setSelected(null)}
-          verseReference={`${book} ${chapter}:${selected.verseNumber}`}
-          book={book}
-          chapter={chapter}
-          verse={parseInt(selected.verseNumber, 10)}
-          verseText={selected.text}
-          translation={version || 'statenvertaling'}
-          onSave={() => {
-            setSelected(null);
-            void reloadAnnotations();
-          }}
-          availableVerses={inRange.map(([number]) => number)}
-        />
-      )}
-    </div>
+    </SpokenTextScope>
   );
 }

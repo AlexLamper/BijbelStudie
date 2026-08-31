@@ -124,7 +124,6 @@ export function softwareApplicationNode(opts: {
       "Persoonlijke notities en markeringen",
       "AI-assistent voor vragen over de Schrift",
       "Begeleide bijbelstudies over personen, themas en bijbelboeken",
-      "Studiegroepen om samen te studeren",
     ],
     offers: [
       {

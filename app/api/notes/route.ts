@@ -121,7 +121,9 @@ export async function POST(request: NextRequest) {
     } = body;
 
     // Validate required fields
-    if (!verseReference || !book || !chapter || !verseText || !noteText) {
+    // A highlight carries no text; a note (or a note+highlight) must have some.
+    const textRequired = type !== "highlight";
+    if (!verseReference || !book || !chapter || !verseText || (textRequired && !noteText)) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }

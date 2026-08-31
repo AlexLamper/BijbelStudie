@@ -106,8 +106,17 @@ export function EditNoteModal({
     setError(null);
   };
 
+  /**
+  * A pure highlight has no note text - see the same rule in CreateNoteModal.
+  *
+  * On an existing note this also covers the downgrade case: switching a note to
+  * "Markering" clears the stored text, which is what the reader is being shown.
+  * The typed value stays in state, so switching back restores it.
+  */
+  const wantsText = noteType !== "highlight";
+
   const handleSave = async () => {
-    if (!noteText.trim()) {
+    if (wantsText && !noteText.trim()) {
       setError(t("error_note_text_required"));
       return;
     }
@@ -122,7 +131,7 @@ export function EditNoteModal({
 
     try {
       const updatedNoteData = {
-        noteText: noteText.trim(),
+        noteText: wantsText ? noteText.trim() : "",
         highlightColor: selectedColor,
         tags,
         isPrivate: !selectedGroupId,
@@ -238,17 +247,20 @@ export function EditNoteModal({
           </div>
         )}
 
-        {/* Note Text */}
-        <div>
-          <label className="block text-sm font-medium mb-2">{t("note_thoughts_label")}</label>
-          <Textarea
-            value={noteText}
-            onChange={(e) => setNoteText(e.target.value)}
-            placeholder={t("note_thoughts_placeholder")}
-            rows={4}
-            className="resize-none"
-          />
-        </div>
+        {/* Note Text. Hidden for a pure highlight: the field is for a note,
+            and offering it under "Markering" promised the text would be kept. */}
+        {wantsText && (
+          <div>
+            <label className="block text-sm font-medium mb-2">{t("note_thoughts_label")}</label>
+            <Textarea
+              value={noteText}
+              onChange={(e) => setNoteText(e.target.value)}
+              placeholder={t("note_thoughts_placeholder")}
+              rows={4}
+              className="resize-none"
+            />
+          </div>
+        )}
 
         {/* Tags */}
         <div>
@@ -369,7 +381,7 @@ export function EditNoteModal({
           </Button>
           <Button
             onClick={handleSave}
-            disabled={isSaving || !noteText.trim()}
+            disabled={isSaving || (wantsText && !noteText.trim())}
             className="gap-2 bg-teal-700 hover:bg-teal-800 text-white rounded-lg"
           >
             {isSaving ? (
