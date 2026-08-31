@@ -68,8 +68,6 @@ const SHELVES: Shelf[] = [
   { id: 'openbaring', label: 'Openbaring', band: 'rgba(153,27,27,0.16)', text: '#991b1b' },
 ]
 
-const SHELF_BY_ID = new Map(SHELVES.map(shelf => [shelf.id, shelf]))
-
 /** De brieven die aan Paulus worden toegeschreven; de rest is een algemene brief. */
 const PAULINE = new Set([
   'Romeinen',
