@@ -416,7 +416,7 @@ function Hero() {
            height-derived value is smaller. On a short laptop the vh term wins
            and the hero compresses; on a tall desktop the vw term wins and it
            breathes. */
-        paddingTop: "clamp(2.25rem, min(5vw, 6.5vh), 4.5rem)",
+        paddingTop: "clamp(3rem, min(6vw, 7.5vh), 5rem)",
         paddingBottom: "clamp(3rem, min(6vw, 8vh), 6rem)",
       }}
     >
@@ -425,7 +425,8 @@ function Hero() {
         aria-hidden
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: "radial-gradient(ellipse 55% 60% at 80% 45%, rgba(13,148,136,0.10), transparent 70%)",
+          background:
+            "radial-gradient(ellipse 55% 60% at 80% 45%, rgba(13,148,136,0.10), transparent 70%)",
         }}
       />
       {/* Top-left subtle glow */}
@@ -433,7 +434,8 @@ function Hero() {
         aria-hidden
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: "radial-gradient(ellipse 45% 55% at 5% 10%, rgba(13,148,136,0.06), transparent 70%)",
+          background:
+            "radial-gradient(ellipse 45% 55% at 5% 10%, rgba(13,148,136,0.06), transparent 70%)",
         }}
       />
 
@@ -444,7 +446,9 @@ function Hero() {
           illustration column came out around 427px, which is where the mockup
           started looking undersized next to a much taller text column. Two
           tracks and one gutter make the split mean what it says. */}
-      <div className={`relative ${SHELL} grid items-center gap-y-14 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:gap-x-[clamp(2rem,3vw,3.5rem)]`}>
+      <div
+        className={`relative ${SHELL} grid items-center gap-y-14 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:gap-x-[clamp(2rem,3vw,3.5rem)]`}
+      >
         <div className="lg:max-w-[32rem]">
           {/* The h1 carries the head term verbatim ("online bijbelstudie") and
               is the only h1 on the page. Nothing here is inside a `.reveal`:
@@ -467,11 +471,14 @@ function Hero() {
             className="mt-5 max-w-xl text-pretty"
             style={{ color: T.muted, fontSize: TYPE.lead, lineHeight: 1.65 }}
           >
-            Lees en bestudeer de Bijbel diep en persoonlijk: Nederlandse vertalingen,
-            bijbelcommentaren per vers, de Hebreeuwse en Griekse grondtekst, eigen
-            notities en een AI-assistent die uw vragen over de Schrift beantwoordt.{" "}
-            <strong style={{ color: T.text, fontWeight: 600 }}>Gratis te beginnen</strong>,
-            zonder creditcard.
+            Lees en bestudeer de Bijbel diep en persoonlijk: Nederlandse
+            vertalingen, bijbelcommentaren per vers, de Hebreeuwse en Griekse
+            grondtekst, eigen notities en een AI-assistent die uw vragen over de
+            Schrift beantwoordt.{" "}
+            <strong style={{ color: T.text, fontWeight: 600 }}>
+              Gratis te beginnen
+            </strong>
+            , zonder creditcard.
           </p>
 
           {/* Two CTAs, not three. A "Bekijk functies" outline button used to sit
@@ -484,13 +491,17 @@ function Hero() {
 
               The teal button no longer sits in a pulsing ring. A CTA that
               throbs forever is the single loudest thing on the page and reads
-              as an ad; a solid button with a soft teal cast under it carries
-              the same emphasis without the noise. */}
-          <div className="mt-8 flex flex-col sm:flex-row sm:items-center gap-3">
-            <Link href="/inloggen"
+              as an ad; a solid button with a soft teal cast under it carries the
+              same emphasis without the noise. */}
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Link
+              href="/inloggen"
               data-track="hero_cta_signup"
               className="press group h-14 w-full sm:w-auto inline-flex items-center justify-center gap-2 font-semibold text-white px-7 rounded-xl bg-teal-700 hover:bg-teal-800 transition-colors"
-              style={{ boxShadow: "0 12px 28px -14px rgba(13,148,136,0.9)" }}>
+              style={{
+                boxShadow: "0 12px 28px -14px rgba(13,148,136,0.9)",
+              }}
+            >
               Start gratis
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
@@ -507,8 +518,12 @@ function Hero() {
             >
               <AppleLogo className="h-7 w-7 shrink-0" />
               <span className="text-left leading-none">
-                <span className="block text-[10px] font-medium opacity-80">Download in de</span>
-                <span className="block text-lg font-semibold tracking-tight">App Store</span>
+                <span className="block text-[10px] font-medium opacity-80">
+                  Download in de
+                </span>
+                <span className="block text-lg font-semibold tracking-tight">
+                  App Store
+                </span>
               </span>
             </a>
           </div>
@@ -518,8 +533,14 @@ function Hero() {
               five chips wrapped to three ragged lines on a laptop. One quiet
               line of facts under a rule does the same job and looks like a
               product rather than a banner. */}
-          <div className="mt-8 border-t pt-6" style={{ borderColor: T.border }}>
-            <p className="text-[0.8125rem] leading-relaxed" style={{ color: T.muted }}>
+          <div
+            className="mt-8 border-t pt-6"
+            style={{ borderColor: T.border }}
+          >
+            <p
+              className="text-[0.8125rem] leading-relaxed"
+              style={{ color: T.muted }}
+            >
               {[
                 `${ALL_STUDIES.length} bijbelstudies`,
                 "Bijbelcommentaren per vers",
@@ -539,7 +560,7 @@ function Hero() {
         </div>
       </div>
     </section>
-  )
+  );
 }
 
 /* ─── Features ───────────────────────────────────────────────── */
