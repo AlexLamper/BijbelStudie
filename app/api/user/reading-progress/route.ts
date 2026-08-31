@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "../../../../lib/authOptions"
 import connectMongoDB from "../../../../lib/mongodb"
 import User from "../../../../models/User"
+import { canonicaliseReadChapters } from "../../../../lib/readChaptersCanon"
 
 export async function GET() {
   try {
@@ -17,14 +18,14 @@ export async function GET() {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
-    const readChapters: Record<string, number[]> = {}
+    const rawReadChapters: Record<string, number[]> = {}
     if (user.readChapters) {
       for (const [book, chapters] of user.readChapters.entries()) {
-        readChapters[book] = chapters
+        rawReadChapters[book] = chapters
       }
     }
 
-    return NextResponse.json({ readChapters })
+    return NextResponse.json({ readChapters: canonicaliseReadChapters(rawReadChapters) })
   } catch (err) {
     console.error("[reading-progress]", err)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })

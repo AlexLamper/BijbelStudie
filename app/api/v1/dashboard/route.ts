@@ -8,6 +8,7 @@ import { fetchDayText } from '../../../../lib/mobileDayText';
 import { getActivePlanCard } from '../../../../lib/planService';
 import { describeLevel } from '../../../../lib/gamification';
 import { suggestPlans } from '../../../../lib/planGenerator';
+import { canonicaliseReadChapters } from '../../../../lib/readChaptersCanon';
 
 export const dynamic = 'force-dynamic';
 
@@ -72,12 +73,17 @@ export async function GET(req: Request) {
     }));
 
     // ── Chapters read per book ───────────────────────────────────────────────
-    const readChapters: Record<string, number[]> = {};
+    // Keys are folded onto the canonical Dutch spelling the dashboards look up
+    // by; without this, chapters opened in a translation that names its books
+    // differently ("1 Corinthiërs", "John", "Numberi") never light up the map
+    // or count towards "… van 66 boeken geopend".
+    const rawReadChapters: Record<string, number[]> = {};
     if (user.readChapters) {
       for (const [book, chapters] of user.readChapters.entries()) {
-        readChapters[book] = chapters;
+        rawReadChapters[book] = chapters;
       }
     }
+    const readChapters = canonicaliseReadChapters(rawReadChapters);
 
     // With no plan running, the card's job is to offer one rather than vanish.
     const planSuggestions = activePlan

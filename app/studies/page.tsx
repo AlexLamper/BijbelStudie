@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight, CheckCircle2, Search } from 'lucide-react'
 import { curatedStudies, type CuratedStudy } from '../../lib/data/curated-studies'
-import { estimateStudyMinutes, formatStudyMinutes } from '../../lib/studyFlow'
 import { BOOK_STUDY_ENTRIES, THEME_STUDIES } from '../../lib/bookStudies'
 import { JsonLd } from '../../components/seo/JsonLd'
 import { absoluteUrl } from '../../lib/seo/constants'
@@ -141,11 +140,11 @@ const SECTION_TITLES: Record<Exclude<Group, 'alles'>, string> = {
 /**
  * One study in the catalogue.
  *
- * Four lines, the same four on every card, so sixty-six of them can be scanned
- * rather than read: what kind of book it is, what it is called, what it is
- * about, and what it costs you in lessons and time. Anything else - the banner
- * art, the type badge, a call-to-action button repeating the link the whole card
- * already is - was texture between the reader and their choice.
+ * A compact row, not a poster. Picking a bible book is a menu choice, so the
+ * card carries only what the choice needs: the name, one word for what kind of
+ * book it is, and the lesson/time cost on a single muted line. The description,
+ * the banner art and the CTA button were all texture between the reader and a
+ * list of sixty-six names they mostly already know.
  */
 function StudyCard({ item, status }: { item: Item; status: Status }) {
   const { study } = item
@@ -155,42 +154,34 @@ function StudyCard({ item, status }: { item: Item; status: Status }) {
     <Link
       href={`/studies/${study.id}`}
       data-track="study_card"
-      className="lift group no-underline flex flex-col rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card p-3.5 transition-colors hover:border-teal-400 dark:hover:border-teal-700"
+      className="group no-underline flex flex-col justify-between gap-2 rounded-lg border border-gray-200 dark:border-border bg-white dark:bg-card px-3 py-2.5 transition-colors hover:border-teal-400 dark:hover:border-teal-700"
     >
-      <div className="flex items-baseline justify-between gap-2">
-        <span className="text-[10.5px] font-semibold uppercase tracking-wider text-gray-400 dark:text-muted-foreground">
-          {item.kind}
-        </span>
+      <div className="flex items-start justify-between gap-2">
+        <h3 className="font-semibold text-[13.5px] text-gray-900 dark:text-foreground leading-snug group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors">
+          {study.title}
+        </h3>
         {status.completed ? (
+          <CheckCircle2 size={14} className="mt-0.5 flex-none" style={{ color: TEAL }} />
+        ) : status.started ? (
           <span
-            className="inline-flex items-center gap-1 text-[11px] font-semibold"
+            className="mt-0.5 flex-none text-[10.5px] font-semibold tabular-nums"
             style={{ color: TEAL }}
           >
-            <CheckCircle2 size={12} /> Voltooid
-          </span>
-        ) : status.started ? (
-          <span className="text-[11px] font-semibold tabular-nums" style={{ color: TEAL }}>
             {pct}%
           </span>
         ) : null}
       </div>
 
-      <h3 className="mt-1 font-bold text-[15px] text-gray-900 dark:text-foreground leading-snug group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors">
-        {study.title}
-      </h3>
-      <p className="mt-1 text-[12.5px] text-gray-500 dark:text-muted-foreground leading-relaxed line-clamp-2">
-        {study.description}
-      </p>
-
-      {/* Pinned to the bottom so the numbers line up across the grid however
-          long the description turned out. */}
-      <div className="mt-auto pt-3 text-[11.5px] text-gray-400 dark:text-muted-foreground tabular-nums">
-        {study.lessons.length} {study.lessons.length === 1 ? 'les' : 'lessen'} · ±{' '}
-        {formatStudyMinutes(estimateStudyMinutes(study))}
+      <div className="flex items-center gap-1.5 text-[10.5px] text-gray-400 dark:text-muted-foreground tabular-nums">
+        <span className="font-semibold uppercase tracking-wider">{item.kind}</span>
+        <span aria-hidden>·</span>
+        <span>
+          {study.lessons.length} {study.lessons.length === 1 ? 'les' : 'lessen'}
+        </span>
       </div>
 
       {status.started && !status.completed && (
-        <div className="mt-2 h-1 rounded-full bg-gray-100 dark:bg-secondary overflow-hidden">
+        <div className="h-0.5 rounded-full bg-gray-100 dark:bg-secondary overflow-hidden">
           <div
             className="h-full rounded-full transition-all"
             style={{ width: `${pct}%`, backgroundColor: TEAL }}
@@ -416,7 +407,7 @@ export default function StudiesPage() {
                   </span>
                 </h2>
               )}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2">
                 {section.items.map(item => (
                   <StudyCard key={item.study.id} item={item} status={statusFor(item.study)} />
                 ))}

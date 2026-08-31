@@ -1,5 +1,6 @@
 import { requireUser } from '../../../../lib/apiAuth';
 import { isSafeBookKey, isSafeChapter } from '../../../../lib/readingProgress';
+import { canonicaliseReadChapters, toCanonicalDutchBook } from '../../../../lib/readChaptersCanon';
 import { corsPreflight, errorV1, handleV1Error, jsonV1 } from '../../../../lib/apiV1';
 import connectMongoDB from '../../../../lib/mongodb';
 import User from '../../../../models/User';
@@ -19,14 +20,17 @@ export async function GET(req: Request) {
     const user = await User.findById(auth.id).select('lastReadChapter readChapters');
     if (!user) return errorV1('NOT_FOUND', 404);
 
-    const readChapters: Record<string, number[]> = {};
+    const rawReadChapters: Record<string, number[]> = {};
     if (user.readChapters) {
       for (const [book, chapters] of user.readChapters.entries()) {
-        readChapters[book] = chapters;
+        rawReadChapters[book] = chapters;
       }
     }
 
-    return jsonV1({ lastReadChapter: user.lastReadChapter ?? null, readChapters });
+    return jsonV1({
+      lastReadChapter: user.lastReadChapter ?? null,
+      readChapters: canonicaliseReadChapters(rawReadChapters),
+    });
   } catch (error) {
     return handleV1Error(error);
   }
@@ -59,6 +63,12 @@ export async function POST(req: Request) {
 
     await connectMongoDB();
 
+    // `lastReadChapter.book` stays the translation's own spelling — the reader
+    // reopens the chapter by it. Only the `readChapters` map key is folded onto
+    // the canonical Dutch name, so progress lands under one key per book no
+    // matter which translation it was read in. See lib/readChaptersCanon.
+    const progressKey = toCanonicalDutchBook(book) ?? book;
+
     const updateData: Record<string, string | number | Date> = {
       'lastReadChapter.book': book,
       'lastReadChapter.chapter': chapter,
@@ -71,12 +81,12 @@ export async function POST(req: Request) {
     // time the reader scrolls back to it.
     const alreadyRead = await User.exists({
       _id: auth.id,
-      [`readChapters.${book}`]: chapter,
+      [`readChapters.${progressKey}`]: chapter,
     });
 
     const user = await User.findByIdAndUpdate(
       auth.id,
-      { $set: updateData, $addToSet: { [`readChapters.${book}`]: chapter } },
+      { $set: updateData, $addToSet: { [`readChapters.${progressKey}`]: chapter } },
       { new: true },
     );
     if (!user) return errorV1('NOT_FOUND', 404);

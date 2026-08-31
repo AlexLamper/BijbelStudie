@@ -5,6 +5,7 @@ import User from "../../../../models/User"
 import { authOptions } from "../../../../lib/authOptions"
 import { grantXp } from "../../../../lib/gamification"
 import { isSafeBookKey, isSafeChapter } from "../../../../lib/readingProgress"
+import { toCanonicalDutchBook } from "../../../../lib/readChaptersCanon"
 
 // GET - Fetch user's last read chapter
 export async function GET() {
@@ -73,17 +74,22 @@ export async function POST(request: NextRequest) {
       updateData['lastReadChapter.commentary'] = commentary;
     }
 
+    // Only the `readChapters` map key is canonicalised — `lastReadChapter.book`
+    // keeps the translation's own spelling. See lib/readChaptersCanon and the
+    // v1 route, which does the same.
+    const progressKey = toCanonicalDutchBook(book) ?? book;
+
     // Read before the write, so a chapter only ever earns XP the first time.
     const alreadyRead = await User.exists({
       email: session.user.email,
-      [`readChapters.${book}`]: chapter,
+      [`readChapters.${progressKey}`]: chapter,
     })
 
     const user = await User.findOneAndUpdate(
       { email: session.user.email },
       {
         $set: updateData,
-        $addToSet: { [`readChapters.${book}`]: chapter },
+        $addToSet: { [`readChapters.${progressKey}`]: chapter },
       },
       { new: true }
     )
