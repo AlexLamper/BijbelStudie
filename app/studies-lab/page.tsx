@@ -20,6 +20,24 @@ const VERSIONS = [
     blurb:
       "Snel en minimaal. Direct-filter zoekbalk met toetsenbordnavigatie, facet-chips per genre, compacte dichte grid. Voor wie weet wat hij zoekt.",
   },
+  {
+    slug: "d",
+    name: "Versie D — Traject",
+    blurb:
+      "Onboarding-stijl. Eén duidelijke 'start hier', een paar samengestelde startsporen (beginners, leven van Jezus, in 30 dagen), en pas daaronder inklapbaar alle 66 boeken. Minste keuzestress.",
+  },
+  {
+    slug: "e",
+    name: "Versie E — Grote categoriekaarten",
+    blurb:
+      "Mobiel-eerst. Landing toont ~6 grote tapkaarten (OT, NT, Personen, Thema's, Mijn studies, Populair). Tik → schermvullende sublijst. Weinig op het scherm, stapsgewijs.",
+  },
+  {
+    slug: "f",
+    name: "Versie F — Op doel & tijd",
+    blurb:
+      "Kies op intentie, niet op taxonomie. 'Hoeveel tijd heb je?' + 'Wat zoek je?' filteren op uitkomst. Alfabetische lijst als vangnet.",
+  },
 ];
 
 export default function StudiesLabIndex() {
