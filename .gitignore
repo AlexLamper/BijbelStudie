@@ -87,3 +87,15 @@ scripts/*.cmt.mybible
 # Original-language (Hebrew/Greek) text — built locally from STEPBible CC BY data
 # (see scripts/build-original-text.mjs)
 # NOTE: keep generated /public/data/original files in source control for production deployments.
+
+CLAUDE.md
+.ignore
+
+# Internal planning / setup docs — not needed in repo
+*_PLAN.md
+*_SETUP.md
+*_MIGRATION.md
+AI_TIERING_PLAN.md
+DOMAIN_MIGRATION.md
+MONETISATION_SETUP.md
+STUDY_FLOW_SETUP.md

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "model": "sonnet",
+  "effortLevel": "low",
+  "env": {
+    "CLAUDE_CODE_GOAL_CHECKIN_MINUTES": "0"
+  },
+  "permissions": {
+    "deny": [
+      "Read(public/data/**)",
+      "Read(private/**)",
+      "Read(.next/**)",
+      "Read(.next-verify/**)",
+      "Read(out/**)",
+      "Read(node_modules/**)",
+      "Read(.vercel/**)",
+      "Read(coverage/**)",
+      "Read(build/**)",
+      "Read(**/*.tsbuildinfo)",
+      "Read(package-lock.json)",
+      "Read(scripts/*.mybible)",
+      "Read(.env)",
+      "Read(.env.local)",
+      "Read(.env.local.bak-prestripe)"
+    ]
+  }
+}
