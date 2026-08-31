@@ -178,7 +178,7 @@ const HERO_VERSES = [
 
 function BibleStudyIllustration() {
   return (
-    <div className="relative select-none" style={{ fontFamily: "Inter, system-ui, sans-serif" }}>
+    <div className="relative w-full select-none" style={{ fontFamily: "Inter, system-ui, sans-serif" }}>
 
       {/* Browser window frame */}
       <div className="rounded-xl overflow-hidden border bg-white"
@@ -444,8 +444,8 @@ function Hero() {
           illustration column came out around 427px, which is where the mockup
           started looking undersized next to a much taller text column. Two
           tracks and one gutter make the split mean what it says. */}
-      <div className={`relative ${SHELL} grid items-center gap-y-14 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.85fr)] lg:gap-x-[clamp(2.5rem,4vw,4.5rem)]`}>
-        <div className="lg:max-w-[36rem]">
+      <div className={`relative ${SHELL} grid items-center gap-y-14 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:gap-x-[clamp(2rem,3vw,3.5rem)]`}>
+        <div className="lg:max-w-[32rem]">
           {/* The h1 carries the head term verbatim ("online bijbelstudie") and
               is the only h1 on the page. Nothing here is inside a `.reveal`:
               this is the LCP element and it must be painted from the served
@@ -532,8 +532,8 @@ function Hero() {
         </div>
 
         {/* Illustration column - rests slightly off the page */}
-        <div className="relative w-full max-w-md mx-auto lg:max-w-none lg:mx-0">
-          <div className="float-slow">
+        <div className="relative w-full mx-auto lg:max-w-[54rem] lg:w-full lg:mx-0 lg:justify-self-end">
+          <div className="float-slow w-full">
             <BibleStudyIllustration />
           </div>
         </div>
