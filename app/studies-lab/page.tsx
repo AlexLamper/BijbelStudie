@@ -1,42 +1,25 @@
 import Link from "next/link";
 
-// Index for the admin sandbox. Links to the three parallel redesigns.
+// Index voor de admin-sandbox. G, H en I combineren elk de sterke punten van
+// de eerdere versies D (inhoud), E (eenvoud) en F (flow) op een andere manier.
 const VERSIONS = [
   {
-    slug: "a",
-    name: "Versie A — Boekenplank",
+    slug: "g",
+    name: "Versie G — Traject in kaarten",
     blurb:
-      "De canon als visueel rooster, gegroepeerd per bijbelgenre met kleurbanden. Ruimtelijk geheugen: je onthoudt waar een boek staat.",
+      "Het skelet van D (verder waar je was → één aanbevolen start → startsporen), maar elk spoor is een grote tapkaart uit E die schermvullend openklapt. In dat scherm staat de zin in gewone taal uit F. Structuur van D, ritme van E, toon van F.",
   },
   {
-    slug: "b",
-    name: "Versie B — Cursusgids",
+    slug: "h",
+    name: "Versie H — Twee vragen, één antwoord",
     blurb:
-      "Voortgang eerst. Grote 'verder waar je was', daaronder één verticale lijst met rijke rijen: omschrijving, lessen, voortgangsbalk. Filters in een zijbalk.",
+      "De flow van F voorop: hoeveel tijd, wat wil je doen. Maar het antwoord is D's 'start hier'-kaart — één aanbeveling, groot, met waaróm juist die. De rest compact eronder, de categoriekaarten van E dichtgeklapt onderaan.",
   },
   {
-    slug: "c",
-    name: "Versie C — Commandobalk",
+    slug: "i",
+    name: "Versie I — Drie deuren",
     blurb:
-      "Snel en minimaal. Direct-filter zoekbalk met toetsenbordnavigatie, facet-chips per genre, compacte dichte grid. Voor wie weet wat hij zoekt.",
-  },
-  {
-    slug: "d",
-    name: "Versie D — Traject",
-    blurb:
-      "Onboarding-stijl. Eén duidelijke 'start hier', een paar samengestelde startsporen (beginners, leven van Jezus, in 30 dagen), en pas daaronder inklapbaar alle 66 boeken. Minste keuzestress.",
-  },
-  {
-    slug: "e",
-    name: "Versie E — Grote categoriekaarten",
-    blurb:
-      "Mobiel-eerst. Landing toont ~6 grote tapkaarten (OT, NT, Personen, Thema's, Mijn studies, Populair). Tik → schermvullende sublijst. Weinig op het scherm, stapsgewijs.",
-  },
-  {
-    slug: "f",
-    name: "Versie F — Op doel & tijd",
-    blurb:
-      "Kies op intentie, niet op taxonomie. 'Hoeveel tijd heb je?' + 'Wat zoek je?' filteren op uitkomst. Alfabetische lijst als vangnet.",
+      "De stapsgewijze schil van E, maar stap 1 is geen boekenkast: drie deuren voor drie soorten lezers. 'Weet niet waar te beginnen' → D, 'ik heb even tijd' → F, 'ik zoek iets specifieks' → de catalogus. Per scherm precies één ding.",
   },
 ];
 
@@ -47,7 +30,7 @@ export default function StudiesLabIndex() {
         Studies — ontwerpvarianten
       </h1>
       <p className="mt-1 text-sm text-gray-500 dark:text-muted-foreground">
-        Alleen zichtbaar voor admins. Drie parallelle herontwerpen van{" "}
+        Alleen zichtbaar voor admins. Drie combinaties van{" "}
         <code>/studies</code>.
       </p>
       <ul className="mt-6 space-y-3">
