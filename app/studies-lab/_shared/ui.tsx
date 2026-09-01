@@ -1,78 +1,17 @@
 'use client'
 
-import type { ReactNode } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Check, CheckCircle2 } from 'lucide-react'
+import { ArrowRight, CheckCircle2 } from 'lucide-react'
 import { TEAL, type Entry, type Status } from './lab'
 
-/** Chip-knop voor de tijd- en doelvragen (versie F). */
-export function Chip({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean
-  onClick: () => void
-  children: ReactNode
-}) {
-  return (
-    <button
-      type="button"
-      aria-pressed={active}
-      onClick={onClick}
-      className={`h-9 px-3.5 rounded-full text-[13px] font-medium transition-colors border ${
-        active
-          ? 'text-white border-transparent'
-          : 'bg-white dark:bg-card border-gray-200 dark:border-border text-gray-600 dark:text-muted-foreground hover:bg-gray-50 dark:hover:bg-secondary'
-      }`}
-      style={active ? { backgroundColor: TEAL } : undefined}
-    >
-      {children}
-    </button>
-  )
-}
+/**
+ * De paginabreedte van de rest van de app: dezelfde padding als /studies en
+ * /dashboard, en geen max-w-cap — het scherm wordt volledig gebruikt.
+ */
+export const SHELL = 'px-5 sm:px-8 xl:px-10 py-6 w-full'
 
-/** Compacte regel: titel, soort, lessen, minuten, voortgang. */
-export function CompactRow({ entry, status }: { entry: Entry; status: Status }) {
-  return (
-    <Link
-      href={`/studies/${entry.study.id}`}
-      data-track="study_card"
-      className="group no-underline flex items-center gap-3 rounded-lg border border-gray-200 dark:border-border bg-white dark:bg-card px-3.5 py-3 transition-colors hover:border-teal-400 dark:hover:border-teal-700"
-    >
-      <span className="min-w-0 flex-1">
-        <span className="flex items-center gap-2">
-          <span className="truncate font-semibold text-[13.5px] text-gray-900 dark:text-foreground group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors">
-            {entry.study.title}
-          </span>
-          {status.completed && (
-            <Check size={14} className="flex-none" style={{ color: TEAL }} aria-label="Afgerond" />
-          )}
-        </span>
-        <span className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[10.5px] text-gray-400 dark:text-muted-foreground tabular-nums">
-          <span className="font-semibold uppercase tracking-wider">{entry.kind}</span>
-          <span aria-hidden>·</span>
-          <span>
-            {entry.lessonCount} {entry.lessonCount === 1 ? 'les' : 'lessen'}
-          </span>
-          <span aria-hidden>·</span>
-          <span>±{entry.avgMinutes} min per les</span>
-          {status.started && !status.completed && (
-            <>
-              <span aria-hidden>·</span>
-              <span style={{ color: TEAL }}>{status.pct}% klaar</span>
-            </>
-          )}
-        </span>
-      </span>
-      <ArrowRight
-        size={15}
-        className="flex-none opacity-30 group-hover:opacity-100 transition-opacity"
-        style={{ color: TEAL }}
-      />
-    </Link>
-  )
-}
+/** Raster dat op brede schermen doorschaalt in plaats van bij twee te stoppen. */
+export const CARD_GRID = 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3'
 
 /** Ruimere kaart met voortgangsbalk — de rustige lijstregel uit versie E. */
 export function StudyCard({ entry, status }: { entry: Entry; status: Status }) {

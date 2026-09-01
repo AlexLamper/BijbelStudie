@@ -1,44 +1,45 @@
 import Link from "next/link";
 
-// Index voor de admin-sandbox. G, H en I combineren elk de sterke punten van
-// de eerdere versies D (inhoud), E (eenvoud) en F (flow) op een andere manier.
+// Index voor de admin-sandbox. G1, G2 en G3 zijn drie uitwerkingen van versie
+// G: dezelfde inhoud (verder waar je was → één aanbevolen start → startsporen →
+// boekenkast), een andere indeling. Alle drie op volle schermbreedte.
 const VERSIONS = [
   {
-    slug: "g",
-    name: "Versie G — Traject in kaarten",
+    slug: "g1",
+    name: "Versie G1 — Kolommen",
     blurb:
-      "Het skelet van D (verder waar je was → één aanbevolen start → startsporen), maar elk spoor is een grote tapkaart uit E die schermvullend openklapt. In dat scherm staat de zin in gewone taal uit F. Structuur van D, ritme van E, toon van F.",
+      "Dashboard-indeling: links de beslissing (aanbevolen start + startsporen), rechts een smalle rail met je voortgang en de boekenkast. Alles in één blik op een breed scherm. Een spoor openen vervangt het scherm.",
   },
   {
-    slug: "h",
-    name: "Versie H — Twee vragen, één antwoord",
+    slug: "g2",
+    name: "Versie G2 — Band",
     blurb:
-      "De flow van F voorop: hoeveel tijd, wat wil je doen. Maar het antwoord is D's 'start hier'-kaart — één aanbeveling, groot, met waaróm juist die. De rest compact eronder, de categoriekaarten van E dichtgeklapt onderaan.",
+      "De aanbevolen start is een schermbrede teal band, daaronder de startsporen als één rij en de boekenkast als chipstrip. In het detailscherm blijft de sporenrail staan, dus je springt van spoor naar spoor zonder terug.",
   },
   {
-    slug: "i",
-    name: "Versie I — Drie deuren",
+    slug: "g3",
+    name: "Versie G3 — Split",
     blurb:
-      "De stapsgewijze schil van E, maar stap 1 is geen boekenkast: drie deuren voor drie soorten lezers. 'Weet niet waar te beginnen' → D, 'ik heb even tijd' → F, 'ik zoek iets specifieks' → de catalogus. Per scherm precies één ding.",
+      "Master-detail: vaste rail links met start, sporen en categorieën; rechts het paneel dat meeverandert. Niets vervangt ooit het scherm. Onder lg valt de rail om in een chipstrip boven het paneel.",
   },
 ];
 
 export default function StudiesLabIndex() {
   return (
-    <div className="px-6 py-8 max-w-3xl mx-auto">
+    <div className="px-5 sm:px-8 xl:px-10 py-8 w-full">
       <h1 className="text-2xl font-bold text-gray-900 dark:text-foreground">
         Studies — ontwerpvarianten
       </h1>
       <p className="mt-1 text-sm text-gray-500 dark:text-muted-foreground">
-        Alleen zichtbaar voor admins. Drie combinaties van{" "}
+        Alleen zichtbaar voor admins. Drie uitwerkingen van versie G voor{" "}
         <code>/studies</code>.
       </p>
-      <ul className="mt-6 space-y-3">
+      <ul className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-3 list-none p-0">
         {VERSIONS.map(v => (
           <li key={v.slug}>
             <Link
               href={`/studies-lab/${v.slug}`}
-              className="block no-underline rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card p-4 transition-colors hover:border-teal-400"
+              className="block h-full no-underline rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card p-4 transition-colors hover:border-teal-400"
             >
               <span className="block font-semibold text-gray-900 dark:text-foreground">
                 {v.name}

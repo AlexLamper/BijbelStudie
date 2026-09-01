@@ -5,46 +5,37 @@ import { curatedStudies, type CuratedStudy } from '../../../lib/data/curated-stu
 import { BOOK_STUDY_ENTRIES, THEME_STUDIES } from '../../../lib/bookStudies'
 
 /**
- * Gedeelde bouwstenen voor de studies-lab varianten G, H en I.
+ * Gedeelde bouwstenen voor de studies-lab varianten G1, G2 en G3.
  *
- * Alle drie combineren dezelfde drie ingrediënten in een andere volgorde:
- *  - D: een traject (verder waar je was → één aanbevolen start → startsporen)
- *  - E: grote categoriekaarten die schermvullend openklappen
- *  - F: kiezen op tijd en doel, met een samenvatting in gewone taal
- *
- * De data-afleiding en de voortgangs-fetch zijn identiek, dus die staan hier
- * één keer in plaats van drie keer.
+ * Alle drie tonen dezelfde inhoud - verder waar je was, één aanbevolen start,
+ * de startsporen, en daarachter de boekenkast - in een andere indeling. De
+ * data-afleiding en de voortgangs-fetch zijn identiek, dus die staan hier één
+ * keer in plaats van drie keer.
  */
 
 export const TEAL = '#0D9488'
 const COMPLETED_KEY = 'bijbelstudie_completed_studies'
 const MINUTES_FALLBACK = 12
 
-export type Intent = 'boek' | 'persoon' | 'thema' | 'vraag'
-export type TimeKey = 'alles' | 'kort' | 'gemiddeld' | 'uitgebreid'
 export type Category = 'ot' | 'nt' | 'personen' | 'themas'
 
 export interface Entry {
   study: CuratedStudy
-  /** Wat de lezer met deze studie wil doen. */
-  intent: Intent
   /** De boekenkast-indeling: OT, NT, personen, thema's. */
   category: Category
   /** Eén woord voor wat voor soort studie dit is ("Wet", "Evangelie", "Persoon"). */
   kind: string
   lessonCount: number
-  totalMinutes: number
   avgMinutes: number
-  /** Alles waar een zoekopdracht op mag matchen, eenmalig lowercased. */
-  haystack: string
 }
 
-function minutesOf(study: CuratedStudy): { total: number; avg: number } {
+/** Gemiddelde leestijd per les; lessen zonder schatting krijgen de fallback. */
+function minutesOf(study: CuratedStudy): { avg: number } {
   const total = study.lessons.reduce(
     (sum, lesson) => sum + (lesson.estimatedMinutes ?? MINUTES_FALLBACK),
     0,
   )
-  return { total, avg: Math.round(total / (study.lessons.length || 1)) }
+  return { avg: Math.round(total / (study.lessons.length || 1)) }
 }
 
 export const ENTRIES: Entry[] = [
@@ -52,28 +43,21 @@ export const ENTRIES: Entry[] = [
     const m = minutesOf(study)
     return {
       study,
-      intent: 'boek' as const,
       category: (book.testament === 'oude-testament' ? 'ot' : 'nt') as Category,
       kind: book.genre,
       lessonCount: study.lessons.length,
-      totalMinutes: m.total,
       avgMinutes: m.avg,
-      haystack: `${study.title} ${book.name} ${book.genre} ${study.description}`.toLowerCase(),
     }
   }),
   ...THEME_STUDIES.map(study => {
     const m = minutesOf(study)
-    const intent: Intent =
-      study.type === 'Persoon' ? 'persoon' : study.type === 'Gedeelte' ? 'vraag' : 'thema'
+    const isPerson = study.type === 'Persoon'
     return {
       study,
-      intent,
-      category: (intent === 'persoon' ? 'personen' : 'themas') as Category,
-      kind: intent === 'persoon' ? 'Persoon' : intent === 'vraag' ? 'Gedeelte' : 'Thema',
+      category: (isPerson ? 'personen' : 'themas') as Category,
+      kind: isPerson ? 'Persoon' : study.type === 'Gedeelte' ? 'Gedeelte' : 'Thema',
       lessonCount: study.lessons.length,
-      totalMinutes: m.total,
       avgMinutes: m.avg,
-      haystack: `${study.title} ${study.description}`.toLowerCase(),
     }
   }),
 ]
@@ -94,49 +78,15 @@ export const CATEGORY_LABELS: Record<Category, string> = {
   themas: "Thema's",
 }
 
-export function inBucket(total: number, key: TimeKey): boolean {
-  if (key === 'alles') return true
-  if (key === 'kort') return total <= 80
-  if (key === 'gemiddeld') return total > 80 && total <= 250
-  return total > 250
-}
-
-export const TIME_CHIPS: { key: TimeKey; label: string }[] = [
-  { key: 'kort', label: 'Een kwartier' },
-  { key: 'gemiddeld', label: 'Een paar weken' },
-  { key: 'uitgebreid', label: 'Een lange reis' },
-  { key: 'alles', label: 'Maakt niet uit' },
-]
-
-export const INTENT_CHIPS: { key: Intent; label: string }[] = [
-  { key: 'boek', label: 'Een bijbelboek begrijpen' },
-  { key: 'persoon', label: 'Een persoon leren kennen' },
-  { key: 'thema', label: 'Een thema volgen' },
-  { key: 'vraag', label: 'Bij één vraag blijven' },
-]
-
-const TIME_ADJ: Record<TimeKey, string> = {
-  alles: '',
-  kort: 'korte ',
-  gemiddeld: 'middellange ',
-  uitgebreid: 'uitgebreide ',
-}
-
-const INTENT_PHRASE: Record<Intent, string> = {
-  boek: ' waarin je een bijbelboek leert begrijpen',
-  persoon: ' waarin je een persoon leert kennen',
-  thema: ' waarin je een thema volgt',
-  vraag: ' die bij één vraag of gedeelte blijft',
-}
-
-/** De zin in gewone taal onder de keuzes — het "flow"-idee uit versie F. */
-export function summarize(rows: Entry[], time: TimeKey, intent: Intent | null): string {
-  if (rows.length === 0) {
-    return 'Geen studies die hierbij passen. Pas je keuze aan, of blader door de volledige lijst.'
-  }
+/**
+ * De regel onder een spoor of categorie, in gewone taal: hoeveel studies het
+ * zijn en wat een les je ongeveer kost. Voorkomt dat de lezer zelf moet tellen.
+ */
+export function summarize(rows: Entry[]): string {
+  if (rows.length === 0) return 'Hier staat nog niets.'
   const noun = rows.length === 1 ? 'studie' : 'studies'
   const avg = Math.round(rows.reduce((sum, entry) => sum + entry.avgMinutes, 0) / rows.length)
-  return `${rows.length} ${TIME_ADJ[time]}${noun}${intent ? INTENT_PHRASE[intent] : ''} — ±${avg} minuten per les.`
+  return `${rows.length} ${noun} — ±${avg} minuten per les.`
 }
 
 /* ---- De aanbevolen start (versie D) ------------------------------------- */
@@ -231,9 +181,14 @@ export interface Status {
  * Leest de voortgang: eerst localStorage zodat de badges meteen staan, daarna
  * de server — die het echte record is en van andere apparaten weet.
  */
+/** Hoeveel "verder waar je was"-kaarten we maximaal tonen. */
+export const RESUME_LIMIT = 3
+
 export function useStudyProgress() {
   const [completedIds, setCompletedIds] = useState<string[]>([])
   const [enrollments, setEnrollments] = useState<Record<string, Enrollment>>({})
+  /** De volgorde van de API: laatst aangeraakte studie eerst. */
+  const [recentIds, setRecentIds] = useState<string[]>([])
 
   useEffect(() => {
     try {
@@ -261,9 +216,13 @@ export function useStudyProgress() {
         const response = await fetch('/api/v1/study-enrollments')
         if (!response.ok || cancelled) return
         const data = await response.json()
+        const list: Enrollment[] = data.enrollments ?? []
         const map: Record<string, Enrollment> = {}
-        for (const entry of data.enrollments ?? []) map[entry.studyId] = entry
+        for (const entry of list) map[entry.studyId] = entry
         setEnrollments(map)
+        // De API levert al gesorteerd op lastActivityAt; die volgorde bewaren
+        // we, want alleen dan is "de laatste drie" ook echt de laatste drie.
+        setRecentIds(list.map(entry => entry.studyId))
       } catch {
         /* anonieme bezoekers zien simpelweg geen voortgang */
       }
@@ -290,13 +249,23 @@ export function useStudyProgress() {
     }
   }, [enrollments, completedIds])
 
-  const inProgress = useMemo(
-    () =>
-      ENTRIES.map(entry => ({ entry, status: statusFor(entry.study) })).filter(
-        row => row.status.started && !row.status.completed,
-      ),
-    [statusFor],
-  )
+  /**
+   * Wat je nog niet af hebt, laatst aangeraakt eerst en afgekapt op
+   * RESUME_LIMIT: drie kaarten is een strip, tien is een tweede catalogus
+   * boven de eigenlijke pagina.
+   */
+  const inProgress = useMemo(() => {
+    const byId = new Map(ENTRIES.map(entry => [entry.study.id, entry] as const))
+    const ordered = [
+      ...recentIds.map(id => byId.get(id)).filter((entry): entry is Entry => Boolean(entry)),
+      // Studies zonder enrollment-record (alleen lokaal bekend) achteraan.
+      ...ENTRIES.filter(entry => !recentIds.includes(entry.study.id)),
+    ]
+    return ordered
+      .map(entry => ({ entry, status: statusFor(entry.study) }))
+      .filter(row => row.status.started && !row.status.completed)
+      .slice(0, RESUME_LIMIT)
+  }, [statusFor, recentIds])
 
   const completed = useMemo(
     () =>

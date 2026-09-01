@@ -12,7 +12,7 @@ import User from "../../models/User";
 import { isAdminEmail } from "../../lib/adminEmails";
 
 // Secret admin-only sandbox: three parallel redesigns of /studies live at
-// /studies-lab/g, /studies-lab/h, /studies-lab/i. Gated exactly like /admin so
+// /studies-lab/g1, /studies-lab/g2, /studies-lab/g3. Gated exactly like /admin so
 // no non-admin can reach them; not in the sitemap or pageMetadata.
 export const metadata = { robots: { index: false, follow: false } };
 
