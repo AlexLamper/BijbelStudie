@@ -49,7 +49,7 @@ export default function Reader({ item }: { item: LibraryItem }) {
       </div>
 
       <p className="text-[11px] text-gray-400 dark:text-muted-foreground text-center">
-        Wordt de tekst niet geladen? Sommige bronnen blokkeren inbedding —{" "}
+        Wordt de tekst niet geladen? Sommige bronnen blokkeren inbedding -{" "}
         <a href={item.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline hover:text-[#0D9488]">
           open op {item.source}
         </a>

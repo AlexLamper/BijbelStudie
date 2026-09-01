@@ -11,7 +11,7 @@ import {
  * `BiblePlan` document stores.
  *
  * Chapter granularity is the floor: the repo has no verse counts and no
- * pericope data (see lib/local-data.ts — verse counts are only knowable by
+ * pericope data (see lib/local-data.ts - verse counts are only knowable by
  * loading a chapter and counting keys), so a day is a whole number of chapters.
  */
 
@@ -24,9 +24,9 @@ export const PACE_CHAPTERS_PER_DAY: Record<Pace, number> = {
 };
 
 export const PACE_LABELS: Record<Pace, string> = {
-  rustig: 'Rustig — 1 hoofdstuk per dag',
-  gestaag: 'Gestaag — 2 hoofdstukken per dag',
-  stevig: 'Stevig — 4 hoofdstukken per dag',
+  rustig: 'Rustig - 1 hoofdstuk per dag',
+  gestaag: 'Gestaag - 2 hoofdstukken per dag',
+  stevig: 'Stevig - 4 hoofdstukken per dag',
 };
 
 export function isPace(value: unknown): value is Pace {
@@ -87,7 +87,7 @@ export function recommendedDuration(totalChapters: number, pace: Pace): number {
  * possible; the remainder lands on the earliest days so the plan front-loads
  * rather than ending on a heavy one.
  *
- * Asking for more days than there are chapters is not an error — the plan is
+ * Asking for more days than there are chapters is not an error - the plan is
  * simply as long as it can be, and the caller is told so.
  */
 export function generateReadings(options: {
@@ -170,7 +170,7 @@ function suggestionForBook(book: PlanBook, reason: string, pace: Pace): PlanSugg
   return {
     key: `book:${book.en}`,
     title: `${book.nl} in ${recommendedDuration(book.chapters, pace)} dagen`,
-    description: `Lees en bestudeer ${book.nl} van begin tot eind — ${book.chapters} hoofdstukken.`,
+    description: `Lees en bestudeer ${book.nl} van begin tot eind - ${book.chapters} hoofdstukken.`,
     reason,
     bookNames: [book.nl],
     totalChapters: book.chapters,
@@ -192,7 +192,7 @@ function chaptersReadIn(book: PlanBook, readChapters: Record<string, number[]>):
 /**
  * The example from the brief: someone whose last read was Job is offered a Job
  * plan. If they have already been most of the way through it, offering it again
- * is noise — they get the next book instead.
+ * is noise - they get the next book instead.
  *
  * Evergreen fallbacks fill the list so a brand-new account still sees three
  * options rather than an empty state.
@@ -236,7 +236,7 @@ export function suggestPlans(input: {
         suggestionForBook(
           next,
           coverage >= 0.8
-            ? `Je hebt ${lastBook.nl} vrijwel uit — ${next.nl} volgt erop.`
+            ? `Je hebt ${lastBook.nl} vrijwel uit - ${next.nl} volgt erop.`
             : `Na ${lastBook.nl} volgt ${next.nl}.`,
           pace,
         ),

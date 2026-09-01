@@ -252,7 +252,7 @@ function StudyPageInner() {
       setLessonIdx(s.currentLessonIndex ?? 0);
 
       // sessionStorage only knows about this tab. Anything already recorded on
-      // the server — from another device, or before a refresh wiped the tab —
+      // the server - from another device, or before a refresh wiped the tab -
       // is merged back in so a lesson is never asked for twice.
       void (async () => {
         try {
@@ -273,7 +273,7 @@ function StudyPageInner() {
             sessionStorage.setItem('activeStudy', JSON.stringify(merged));
             return merged;
           });
-        } catch { /* offline is fine — sessionStorage still holds this session */ }
+        } catch { /* offline is fine - sessionStorage still holds this session */ }
       })();
     } catch { /* noop */ }
 
@@ -359,7 +359,7 @@ function StudyPageInner() {
     if (idx < activeStudy.lessons.length - 1) goToLesson(idx + 1);
   }, [activeStudy, saveStudy, goToLesson]);
 
-  // Called when user clicks the trophy (finish) button — completes the entire study immediately
+  // Called when user clicks the trophy (finish) button - completes the entire study immediately
   const finishStudy = useCallback(() => {
     if (!activeStudy) return;
     // Mark every lesson as done
@@ -420,7 +420,7 @@ function StudyPageInner() {
         <CompletionOverlay study={activeStudy} onClose={handleCloseOverlay} />
       )}
 
-      {/* Mobile pane switcher — only below lg; desktop/landscape keeps the split */}
+      {/* Mobile pane switcher - only below lg; desktop/landscape keeps the split */}
       <div className="lg:hidden flex-none flex items-stretch border-b border-gray-200 dark:border-border bg-gray-50 dark:bg-card">
         <button
           onClick={() => setMobileView('bible')}

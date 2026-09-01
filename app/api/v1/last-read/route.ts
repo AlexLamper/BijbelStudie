@@ -63,7 +63,7 @@ export async function POST(req: Request) {
 
     await connectMongoDB();
 
-    // `lastReadChapter.book` stays the translation's own spelling — the reader
+    // `lastReadChapter.book` stays the translation's own spelling - the reader
     // reopens the chapter by it. Only the `readChapters` map key is folded onto
     // the canonical Dutch name, so progress lands under one key per book no
     // matter which translation it was read in. See lib/readChaptersCanon.

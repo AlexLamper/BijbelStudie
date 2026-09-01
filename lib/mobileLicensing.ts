@@ -26,7 +26,7 @@
 
 /**
  * Bible version ids exactly as they appear in `public/data/manifest.json`
- * (with `.json` stripped). Do not invent shorthand — the id in this Set is
+ * (with `.json` stripped). Do not invent shorthand - the id in this Set is
  * the id the client sends and the id `lib/local-data.ts` resolves.
  */
 export const MOBILE_ALLOWED_BIBLES: ReadonlySet<string> = new Set([
@@ -34,7 +34,7 @@ export const MOBILE_ALLOWED_BIBLES: ReadonlySet<string> = new Set([
   // NBG-vertaling 1951. Licensed, not public domain: the mobile app is covered
   // by the licence held for this product. The text itself is served from
   // /private (never a static asset) and only ever per chapter, exactly as on
-  // the website — see `fetchJson` in lib/local-data.ts.
+  // the website - see `fetchJson` in lib/local-data.ts.
   'nbg51',
   'heilige_schrift_1917', // Public domain
   'canisiusbijbel', // ebible.org cleared with KBS; treated as public domain
@@ -54,21 +54,21 @@ export const MOBILE_ALLOWED_BIBLES: ReadonlySet<string> = new Set([
  * It is allowlisted here so that registering it is the only step needed.
  */
 export const MOBILE_ALLOWED_COMMENTARIES: ReadonlySet<string> = new Set([
-  'matthew_henry_nl', // Matthew Henry, d. 1714 — public domain
-  'dachsel', // Karl August Dachsel, d. 1893 — public domain
-  'meyer', // Heinrich Meyer, d. 1898 — public domain
+  'matthew_henry_nl', // Matthew Henry, d. 1714 - public domain
+  'dachsel', // Karl August Dachsel, d. 1893 - public domain
+  'meyer', // Heinrich Meyer, d. 1898 - public domain
 ]);
 
 /**
  * Original-language sources. STEPBible TAHOT/TAGNT is CC BY 4.0 and REQUIRES
- * visible attribution wherever it is rendered — see `STEPBIBLE_ATTRIBUTION`.
+ * visible attribution wherever it is rendered - see `STEPBIBLE_ATTRIBUTION`.
  */
 export const MOBILE_ALLOWED_ORIGINALS: ReadonlySet<string> = new Set([
   'stepbible',
 ]);
 
 export const STEPBIBLE_ATTRIBUTION =
-  'Grondtekst: STEPBible (TAHOT/TAGNT), CC BY 4.0 — tyndale.org';
+  'Grondtekst: STEPBible (TAHOT/TAGNT), CC BY 4.0 - tyndale.org';
 
 export type MobileContentKind = 'bible' | 'commentary' | 'original';
 

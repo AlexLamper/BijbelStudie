@@ -13,7 +13,7 @@ export async function OPTIONS() {
 }
 
 /**
- * POST /api/v1/sync-premium — client-triggered reconciliation.
+ * POST /api/v1/sync-premium - client-triggered reconciliation.
  *
  * This is not belt-and-braces, it is load-bearing. RevenueCat only fires a
  * webhook for a NEW transaction: an already-owned purchase, a "Herstel

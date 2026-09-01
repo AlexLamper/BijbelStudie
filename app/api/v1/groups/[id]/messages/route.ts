@@ -24,7 +24,7 @@ async function assertMember(groupId: string, userId: string) {
   return { group };
 }
 
-/** `?limit=50&before=<iso>` — newest first, so the app can page upwards. */
+/** `?limit=50&before=<iso>` - newest first, so the app can page upwards. */
 export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }) {
   try {
     const auth = await requireUser(req);

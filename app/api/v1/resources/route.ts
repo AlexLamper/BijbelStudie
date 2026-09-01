@@ -14,7 +14,7 @@ export async function OPTIONS() {
  * Every entry is a public-domain scan hosted by a third party (DBNL, Archive,
  * Gutenberg, Delpher), so the app links out rather than mirroring anything.
  * `locked` is resolved server-side: a Pro-only item still appears in the list
- * — the site shows it too — but the client never has to decide entitlement.
+ * - the site shows it too - but the client never has to decide entitlement.
  */
 export async function GET(req: Request) {
   try {

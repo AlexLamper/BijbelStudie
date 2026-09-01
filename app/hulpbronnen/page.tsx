@@ -178,7 +178,7 @@ export default function ResourcesPage() {
           <p className="text-sm text-gray-700 dark:text-foreground/90 leading-relaxed">
             <strong className="font-semibold">Vrij beschikbaar.</strong> Alle werken in deze bibliotheek
             zijn publiek domein of vrij raadpleegbaar bij hun bron (DBNL, Project Gutenberg, universitaire repositories).
-            We hosten geen content zelf — we verwijzen door of tonen materiaal direct vanuit de oorspronkelijke uitgever.
+            We hosten geen content zelf - we verwijzen door of tonen materiaal direct vanuit de oorspronkelijke uitgever.
           </p>
         </div>
 

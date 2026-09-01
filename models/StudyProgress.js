@@ -9,7 +9,7 @@ import mongoose from 'mongoose';
  * that a passage was actually studied, which is what the streak, the XP curve
  * and the plan day cards are scored on.
  *
- * A row is a completed unit of study — one lesson of a curated study, or one
+ * A row is a completed unit of study - one lesson of a curated study, or one
  * day of a reading plan finished in study mode.
  */
 const studyProgressSchema = new mongoose.Schema(
@@ -39,7 +39,7 @@ const studyProgressSchema = new mongoose.Schema(
   { timestamps: true, collection: 'studyprogress' },
 );
 
-// "How much has this user studied, most recent first" — the profile and the
+// "How much has this user studied, most recent first" - the profile and the
 // weekly strip both read it this way.
 studyProgressSchema.index({ userId: 1, completedAt: -1 });
 // Re-completing the same lesson must not double-count XP.

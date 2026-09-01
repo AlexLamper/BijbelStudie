@@ -29,7 +29,7 @@ const MAX_CHANGES = 500;
  *
  * Returns: { serverChanges: SyncRecord[], serverTime, applied, rejected }
  *
- * CONFLICT RULE — last write wins by `updatedAt`; a tie goes to the server.
+ * CONFLICT RULE - last write wins by `updatedAt`; a tie goes to the server.
  * The client's change is applied only when its `updatedAt` is strictly newer
  * than the stored row's. Anything older comes back in `serverChanges` so the
  * device can overwrite its stale copy rather than retrying forever.

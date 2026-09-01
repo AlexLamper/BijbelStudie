@@ -4,7 +4,7 @@ import { createRemoteJWKSet, jwtVerify } from 'jose';
  * ID-token verification for Sign in with Apple and Google Sign-In.
  *
  * Both providers publish a JWKS; `jose` fetches and caches it, so no extra SDK
- * is pulled in for what is two signature checks. The audience must be pinned —
+ * is pulled in for what is two signature checks. The audience must be pinned -
  * an ID token minted for a *different* app is a perfectly valid JWT, and
  * accepting one would let any developer log in as any of our users.
  */

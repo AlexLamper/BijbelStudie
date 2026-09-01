@@ -6,7 +6,7 @@ import StudyGroup from "../../../../models/StudyGroup"
 import User from "../../../../models/User"
 
 /**
- * POST /api/groepen/join-by-code — join a group with an invite code.
+ * POST /api/groepen/join-by-code - join a group with an invite code.
  * Body: { inviteCode }
  *
  * The invite bar used to resolve the code client-side: it fetched the public

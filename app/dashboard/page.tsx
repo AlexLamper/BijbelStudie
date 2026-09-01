@@ -239,7 +239,7 @@ export default function DashboardPage() {
                 ))
               ) : [
                 { label: "Dagelijkse reeks", value: streak > 0 ? `${streak} dag${streak === 1 ? "" : "en"}` : "0 dagen", icon: Flame, color: streak > 0 ? "#EA580C" : "#9CA3AF" },
-                // Level rises from studying, not from volume — see lib/gamification.ts.
+                // Level rises from studying, not from volume - see lib/gamification.ts.
                 { label: level ? `${level.xp} XP` : "Niveau", value: `Niveau ${level?.level ?? 1}`, icon: Sparkles, color: "#0D9488" },
                 { label: "Bijbelboeken", value: `${booksWithProgress} / 66`, icon: BookOpen, color: "#0D9488" },
                 { label: "Notities geschreven", value: `${notesCount}`, icon: StickyNote, color: "#0D9488" },

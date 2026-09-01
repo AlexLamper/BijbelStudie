@@ -7,7 +7,7 @@ import mongoose from "mongoose";
  * the website's existing `/api/notes` route has no idea about soft deletes, so
  * flagging a Note as deleted would leave it visible on the web. Recording the
  * deletion here keeps the website's behaviour identical while still giving an
- * offline device something to replay against — a device that has been offline
+ * offline device something to replay against - a device that has been offline
  * for a week must learn the row is gone, and an absent row is indistinguishable
  * from a row it has not synced yet.
  *

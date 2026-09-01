@@ -25,7 +25,7 @@ interface BadgeInfo {
 }
 
 // Descriptions are Dutch like the rest of the app, and now describe what
-// actually awards each badge — see lib/gamification.ts `evaluateBadges`. The
+// actually awards each badge - see lib/gamification.ts `evaluateBadges`. The
 // `points*` ids date from a quiz that no longer exists; they are XP milestones
 // now, and the copy says so.
 const badges: BadgeInfo[] = [

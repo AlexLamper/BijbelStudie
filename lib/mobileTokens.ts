@@ -65,7 +65,7 @@ export type RotateResult =
  * If the presented token was already revoked, the entire family is revoked and
  * the caller must log in again: either the client replayed an old token (a
  * bug) or someone else is holding a copy (theft). Both deserve the same
- * response — invalidate everything descended from that login.
+ * response - invalidate everything descended from that login.
  */
 export async function rotateRefreshToken(rawToken: string): Promise<RotateResult> {
   const tokenHash = hashRefreshToken(rawToken);

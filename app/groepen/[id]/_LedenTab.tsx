@@ -193,7 +193,7 @@ export default function LedenTab({
         )}
       </div>
 
-      {/* Group settings — leaders only */}
+      {/* Group settings - leaders only */}
       {currentUserRole === "leader" && (
         <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-4">
           <p className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-muted-foreground mb-4">

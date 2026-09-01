@@ -11,7 +11,7 @@ export async function OPTIONS() {
   return corsPreflight();
 }
 
-// Same limits as `/api/tts` on the website — one Google quota, two clients.
+// Same limits as `/api/tts` on the website - one Google quota, two clients.
 const MAX_CHARS_PER_REQUEST = 4500;
 const MONTHLY_CAP = 800_000;
 const DEFAULT_VOICE = 'diana';
@@ -52,7 +52,7 @@ export async function GET(req: Request) {
  * Synthesises a passage and returns `audio/mpeg`.
  *
  * The app plays the bytes directly rather than being handed a signed URL,
- * which keeps the Google key server-side — the same reason the website
+ * which keeps the Google key server-side - the same reason the website
  * proxies it.
  */
 export async function POST(req: Request) {

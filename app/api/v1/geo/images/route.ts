@@ -6,7 +6,7 @@ export async function OPTIONS() {
 }
 
 /**
- * Photographs of the places a chapter names — the strip above "Algemene info"
+ * Photographs of the places a chapter names - the strip above "Algemene info"
  * on the study page.
  *
  * Every image is hosted by Wikimedia with an absolute URL, so the app renders

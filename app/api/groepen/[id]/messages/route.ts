@@ -20,7 +20,7 @@ function getMemberRole(
   return m ? (m.role as "leader" | "member") : null
 }
 
-// GET — paginated discussion feed
+// GET - paginated discussion feed
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -99,7 +99,7 @@ export async function GET(
   })
 }
 
-// POST — create a message
+// POST - create a message
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }

@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
       await revokeRefreshToken(refreshToken);
     }
 
-    // 204 whether or not the token existed. Logout must never fail — a client
+    // 204 whether or not the token existed. Logout must never fail - a client
     // that cannot log out would keep a live token on the device.
     return new NextResponse(null, { status: 204, headers: V1_CORS_HEADERS });
   } catch (error) {

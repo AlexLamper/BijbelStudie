@@ -23,7 +23,7 @@ async function requireLeader(email: string, groupId: string) {
   return { error: null, status: 200, userId: user._id, user }
 }
 
-// POST — set weekly reading assignment (leader only)
+// POST - set weekly reading assignment (leader only)
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -64,7 +64,7 @@ export async function POST(
   return NextResponse.json({ weeklyAssignment: (updated as Record<string, unknown>)?.weeklyAssignment ?? null })
 }
 
-// DELETE — clear weekly assignment (leader only)
+// DELETE - clear weekly assignment (leader only)
 export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }

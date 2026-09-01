@@ -5,7 +5,7 @@
  * *translation being read* calls that book: the Statenvertaling folders say
  * "1 Corinthiërs" and (a real typo in the source data) "Numberi", an
  * English-keyed translation says "John", a German one "1 Mose". Both dashboards
- * — web (`app/dashboard/page.tsx`) and the app (`BibleBooks`) — look those keys
+ * - web (`app/dashboard/page.tsx`) and the app (`BibleBooks`) - look those keys
  * up against ONE fixed Dutch spelling set, so every chapter opened under a
  * different spelling is invisible: the "… van 66 boeken geopend" counter and
  * the 66-square heat map both under-report, badly for anyone reading a
@@ -20,7 +20,7 @@
 import { normaliseBookName, toBookCode, type BookCode } from './bookCanon';
 import { BIBLE_BOOKS_ORDER, bookNameMap } from './book-mapping';
 
-/** OSIS-ish codes in canonical order — the same order `bookCanon` assigns. */
+/** OSIS-ish codes in canonical order - the same order `bookCanon` assigns. */
 const CODES_IN_ORDER: BookCode[] = [
   'GEN', 'EXOD', 'LEV', 'NUM', 'DEUT', 'JOSH', 'JUDG', 'RUTH', '1SAM', '2SAM',
   '1KGS', '2KGS', '1CHR', '2CHR', 'EZRA', 'NEH', 'ESTH', 'JOB', 'PS', 'PROV',
@@ -32,7 +32,7 @@ const CODES_IN_ORDER: BookCode[] = [
 ];
 
 /**
- * Canonical Dutch display name per code — spelled exactly as the two dashboards
+ * Canonical Dutch display name per code - spelled exactly as the two dashboards
  * spell it (`app/dashboard/page.tsx` OT/NT arrays; `BibleBooks` in the app).
  */
 const NL_IN_ORDER: string[] = [
@@ -59,7 +59,7 @@ const ENGLISH_TO_CODE: Record<string, BookCode> = Object.fromEntries(
 );
 
 /**
- * Spellings neither `bookCanon` nor the English canon catches — every one of
+ * Spellings neither `bookCanon` nor the English canon catches - every one of
  * these is a key that actually exists in the production `readChapters` data.
  */
 const EXTRA_TO_CODE: Record<string, BookCode> = {
@@ -79,7 +79,7 @@ export function toCanonicalDutchBook(name: string | null | undefined): string | 
   if (!name || typeof name !== 'string') return null;
   const key = normaliseBookName(name);
   // `bookNameMap` covers the German source names (1 Mose, Apostelgeschichte, …)
-  // that `bookCanon` — Dutch-only — does not; it yields an English name, which
+  // that `bookCanon` - Dutch-only - does not; it yields an English name, which
   // ENGLISH_TO_CODE then resolves.
   const viaEnglish = bookNameMap[name.trim()];
   const code =
@@ -95,7 +95,7 @@ export function toCanonicalDutchBook(name: string | null | undefined): string | 
  * Rewrites a `readChapters` map so every recognised key is the canonical Dutch
  * name and the chapter arrays behind merged keys are unioned, sorted and
  * de-duplicated. Unrecognised keys are passed through untouched rather than
- * dropped — losing reading history is worse than a stray key the dashboards
+ * dropped - losing reading history is worse than a stray key the dashboards
  * already ignore.
  */
 export function canonicaliseReadChapters(

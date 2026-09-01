@@ -64,7 +64,7 @@ export default async function Page() {
   try {
     session = await getServerSession(authOptions)
   } catch {
-    // ignore — treat as unauthenticated
+    // ignore - treat as unauthenticated
   }
   if (session?.user) {
     redirect("/dashboard")

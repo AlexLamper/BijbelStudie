@@ -55,20 +55,20 @@ export const LIBRARY: LibraryItem[] = [
     sourceUrl: "https://www.dbnl.org/tekst/revi001clps01_01/",
     embedUrl: "https://www.dbnl.org/tekst/revi001clps01_01/",
     canEmbed: false,
-    rightsNote: "Auteur † 1658 — publiek domein in Nederland (auteursrecht: leven + 70 jaar).",
+    rightsNote: "Auteur † 1658 - publiek domein in Nederland (auteursrecht: leven + 70 jaar).",
   },
   {
     slug: "boek-der-psalmen-1773",
     title: "Het Boek der Psalmen",
     year: "1773",
     description:
-      "De officiële Staten-kerkpsalmen uit 1773 — de berijming die ruim twee eeuwen in de Nederlandse hervormde kerken werd gezongen.",
+      "De officiële Staten-kerkpsalmen uit 1773 - de berijming die ruim twee eeuwen in de Nederlandse hervormde kerken werd gezongen.",
     category: "bijbels",
     source: "DBNL",
     sourceUrl: "https://www.dbnl.org/tekst/_boe008boek00/",
     embedUrl: "https://www.dbnl.org/tekst/_boe008boek00/",
     canEmbed: false,
-    rightsNote: "Uitgave 1773 — ruim buiten de auteursrechtelijke termijn; publiek domein.",
+    rightsNote: "Uitgave 1773 - ruim buiten de auteursrechtelijke termijn; publiek domein.",
   },
   {
     slug: "utenhove-psalmen-1557",
@@ -82,7 +82,7 @@ export const LIBRARY: LibraryItem[] = [
     sourceUrl: "https://www.dbnl.org/tekst/uten001psal01_01/",
     embedUrl: "https://www.dbnl.org/tekst/uten001psal01_01/",
     canEmbed: false,
-    rightsNote: "Auteur † 1566 — publiek domein in Nederland.",
+    rightsNote: "Auteur † 1566 - publiek domein in Nederland.",
   },
   {
     slug: "nbg-nieuwe-testament-1879",
@@ -96,7 +96,7 @@ export const LIBRARY: LibraryItem[] = [
     sourceUrl: "https://hdl.handle.net/20.500.14918/235981",
     canEmbed: false,
     rightsNote:
-      "Uitgave 1879, gepubliceerd door NBG — ruim buiten de auteursrechtelijke termijn; publiek domein.",
+      "Uitgave 1879, gepubliceerd door NBG - ruim buiten de auteursrechtelijke termijn; publiek domein.",
   },
   {
     slug: "portielje-bijbelsch-magazijn-1864",
@@ -110,11 +110,11 @@ export const LIBRARY: LibraryItem[] = [
     sourceUrl: "https://www.dbnl.org/tekst/port015bijb02_01/",
     embedUrl: "https://www.dbnl.org/tekst/port015bijb02_01/",
     canEmbed: false,
-    rightsNote: "Auteur † 1900 — publiek domein in Nederland.",
+    rightsNote: "Auteur † 1900 - publiek domein in Nederland.",
   },
   {
     slug: "uit-de-diepte-leerredenen-1887",
-    title: "Uit de diepte — Leerredenen",
+    title: "Uit de diepte - Leerredenen",
     year: "1887–1888",
     description:
       "Een prekenbundel uit het laatste kwart van de negentiende eeuw. Klassieke leerredenen die het zielsleven van de gelovige in beeld brengen.",
@@ -123,11 +123,11 @@ export const LIBRARY: LibraryItem[] = [
     sourceUrl: "https://www.dbnl.org/tekst/_die006diep01_01/",
     embedUrl: "https://www.dbnl.org/tekst/_die006diep01_01/",
     canEmbed: false,
-    rightsNote: "Uitgave 1887–1888 — auteurs ruim meer dan 70 jaar overleden; publiek domein.",
+    rightsNote: "Uitgave 1887–1888 - auteurs ruim meer dan 70 jaar overleden; publiek domein.",
   },
   {
     slug: "schilder-preken-deel-2",
-    title: "Preken — deel 2",
+    title: "Preken - deel 2",
     author: "K. Schilder",
     year: "1954",
     description:
@@ -139,11 +139,11 @@ export const LIBRARY: LibraryItem[] = [
     canEmbed: false,
     isPro: true,
     rightsNote:
-      "Auteur † 1952 — sinds 2023 publiek domein in Nederland (leven + 70 jaar).",
+      "Auteur † 1952 - sinds 2023 publiek domein in Nederland (leven + 70 jaar).",
   },
   {
     slug: "schilder-preken-deel-3",
-    title: "Preken — deel 3",
+    title: "Preken - deel 3",
     author: "K. Schilder",
     year: "1955",
     description:
@@ -155,11 +155,11 @@ export const LIBRARY: LibraryItem[] = [
     canEmbed: false,
     isPro: true,
     rightsNote:
-      "Auteur † 1952 — sinds 2023 publiek domein in Nederland (leven + 70 jaar).",
+      "Auteur † 1952 - sinds 2023 publiek domein in Nederland (leven + 70 jaar).",
   },
   {
     slug: "bavinck-gereformeerde-dogmatiek-1",
-    title: "Gereformeerde Dogmatiek — Deel 1",
+    title: "Gereformeerde Dogmatiek - Deel 1",
     author: "Herman Bavinck",
     year: "1906–1911",
     description:
@@ -170,11 +170,11 @@ export const LIBRARY: LibraryItem[] = [
     embedUrl: "https://www.gutenberg.org/cache/epub/51052/pg51052-images.html",
     canEmbed: true,
     isPro: true,
-    rightsNote: "Auteur † 1921 — publiek domein in Nederland en de VS.",
+    rightsNote: "Auteur † 1921 - publiek domein in Nederland en de VS.",
   },
   {
     slug: "bavinck-gereformeerde-dogmatiek-2",
-    title: "Gereformeerde Dogmatiek — Deel 2",
+    title: "Gereformeerde Dogmatiek - Deel 2",
     author: "Herman Bavinck",
     year: "1906–1911",
     description:
@@ -185,11 +185,11 @@ export const LIBRARY: LibraryItem[] = [
     embedUrl: "https://www.gutenberg.org/cache/epub/67966/pg67966-images.html",
     canEmbed: true,
     isPro: true,
-    rightsNote: "Auteur † 1921 — publiek domein in Nederland en de VS.",
+    rightsNote: "Auteur † 1921 - publiek domein in Nederland en de VS.",
   },
   {
     slug: "bavinck-gereformeerde-dogmatiek-4",
-    title: "Gereformeerde Dogmatiek — Deel 4",
+    title: "Gereformeerde Dogmatiek - Deel 4",
     author: "Herman Bavinck",
     year: "1906–1911",
     description:
@@ -200,7 +200,7 @@ export const LIBRARY: LibraryItem[] = [
     embedUrl: "https://www.gutenberg.org/cache/epub/69005/pg69005-images.html",
     canEmbed: true,
     isPro: true,
-    rightsNote: "Auteur † 1921 — publiek domein in Nederland en de VS.",
+    rightsNote: "Auteur † 1921 - publiek domein in Nederland en de VS.",
   },
 ];
 

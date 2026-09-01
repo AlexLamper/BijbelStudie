@@ -21,7 +21,7 @@ export async function OPTIONS() {
  *  1. `email`, `givenName` and `familyName` are sent ONLY on the very first
  *     authorisation for this Apple ID. Every later sign-in carries the `sub`
  *     and nothing else. So the first request must persist them or they are
- *     gone for good — the user has to revoke the app in iOS Settings to get
+ *     gone for good - the user has to revoke the app in iOS Settings to get
  *     another chance.
  *  2. If the user chose "Hide My Email", the address is an
  *     @privaterelay.appleid.com alias. It is a real, deliverable address and

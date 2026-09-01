@@ -3,7 +3,7 @@
  * the mobile `/api/v1/daytext` route.
  *
  * Upstream is a third-party service, so every caller treats a failure as "no
- * verse today" rather than an error — the dashboard must still render.
+ * verse today" rather than an error - the dashboard must still render.
  */
 
 export type DayText = {

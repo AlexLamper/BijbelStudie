@@ -39,7 +39,7 @@ export type PlanDTO = {
   completedDays: number[];
   studiedDays: number[];
   progressPercentage: number;
-  /** First day that is not yet done — where "lees verder" goes. */
+  /** First day that is not yet done - where "lees verder" goes. */
   currentDay: number | null;
   /** Where a user on the original schedule would be today. */
   scheduledDay: number | null;

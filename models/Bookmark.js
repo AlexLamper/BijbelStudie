@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 /**
- * Chapter/verse bookmarks. Mobile-first, but nothing here is mobile-specific —
+ * Chapter/verse bookmarks. Mobile-first, but nothing here is mobile-specific -
  * the website can adopt the same collection later.
  *
  * `clientId` is a UUID generated on the device so an offline create that is

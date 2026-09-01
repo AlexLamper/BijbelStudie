@@ -15,7 +15,7 @@ export async function OPTIONS() {
  * Records that a passage was studied, not merely read.
  *
  * `/studie` kept lesson completion in localStorage, so the server could not
- * tell a finished eight-lesson study from a chapter someone scrolled past —
+ * tell a finished eight-lesson study from a chapter someone scrolled past -
  * and clearing the tab wiped the user's progress. This is where that state now
  * lives.
  */

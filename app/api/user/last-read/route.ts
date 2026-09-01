@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
       updateData['lastReadChapter.commentary'] = commentary;
     }
 
-    // Only the `readChapters` map key is canonicalised — `lastReadChapter.book`
+    // Only the `readChapters` map key is canonicalised - `lastReadChapter.book`
     // keeps the translation's own spelling. See lib/readChaptersCanon and the
     // v1 route, which does the same.
     const progressKey = toCanonicalDutchBook(book) ?? book;

@@ -12,7 +12,7 @@ export type { ActivePlanCard, DayMode, PlanDTO, PlanDayDTO } from './planTypes';
 /**
  * All plan reads and writes go through here so the website's
  * `/api/bible-plans/*` and the app's `/api/v1/plans/*` cannot drift apart
- * again — they previously disagreed on whether `completedDays` was a count or
+ * again - they previously disagreed on whether `completedDays` was a count or
  * an array, and only one of them knew about the free-tier cap.
  */
 
@@ -300,7 +300,7 @@ export type SetDayResult = {
  *
  * `mode` is the whole point: a day ticked as `studied` is worth three times a
  * day ticked as `read`, and only a studied day writes a `StudyProgress` row.
- * Un-ticking never takes XP back — clawing back points for correcting a
+ * Un-ticking never takes XP back - clawing back points for correcting a
  * mistake teaches users not to correct mistakes.
  */
 export async function setDay(

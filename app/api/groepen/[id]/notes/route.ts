@@ -28,7 +28,7 @@ export async function GET(
   )
   if (!isMember) return NextResponse.json({ error: "Geen toegang" }, { status: 403 })
 
-  // Notes shared with this group — stored with groupId field
+  // Notes shared with this group - stored with groupId field
   const notes = await Note.find({ groupId: id })
     .populate("userId", "name image")
     .sort({ createdAt: -1 })

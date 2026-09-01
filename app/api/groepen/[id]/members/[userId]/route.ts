@@ -5,7 +5,7 @@ import connectMongoDB from "../../../../../../lib/mongodb"
 import StudyGroup from "../../../../../../models/StudyGroup"
 import User from "../../../../../../models/User"
 
-// PATCH — promote or demote a member (leader only)
+// PATCH - promote or demote a member (leader only)
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string; userId: string }> }
@@ -52,7 +52,7 @@ export async function PATCH(
   return NextResponse.json({ message: "Rol bijgewerkt" })
 }
 
-// DELETE — remove a member (leader only)
+// DELETE - remove a member (leader only)
 export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string; userId: string }> }

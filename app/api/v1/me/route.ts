@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-/** PATCH /api/v1/me — name, bio, image and reading preferences. */
+/** PATCH /api/v1/me - name, bio, image and reading preferences. */
 export async function PATCH(req: NextRequest) {
   try {
     const caller = await requireUser(req);

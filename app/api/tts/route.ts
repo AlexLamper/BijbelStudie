@@ -127,13 +127,13 @@ export async function POST(req: NextRequest) {
         },
       );
     } catch (fetchErr) {
-      // Network error — refund the increment.
+      // Network error - refund the increment.
       await TtsUsage.updateOne({ month }, { $inc: { charsUsed: -text.length } });
       throw fetchErr;
     }
 
     if (!googleResponse.ok) {
-      // Google rejected — refund.
+      // Google rejected - refund.
       await TtsUsage.updateOne({ month }, { $inc: { charsUsed: -text.length } });
       const errText = await googleResponse.text();
       console.error("[tts] Google TTS error:", googleResponse.status, errText);

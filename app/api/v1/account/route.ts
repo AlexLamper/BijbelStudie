@@ -23,7 +23,7 @@ export async function OPTIONS() {
 }
 
 /**
- * DELETE /api/v1/account   — Apple guideline 5.1.1(v).
+ * DELETE /api/v1/account   - Apple guideline 5.1.1(v).
  *
  * Body: { "confirm": "VERWIJDER" }
  *
@@ -33,7 +33,7 @@ export async function OPTIONS() {
  *
  * Everything below runs in one transaction where the deployment supports it
  * (MongoDB Atlas replica set). On a standalone mongod, transactions are
- * unavailable and the same steps run sequentially — the user document is
+ * unavailable and the same steps run sequentially - the user document is
  * deleted last so a partial failure never leaves an account that can log in
  * but has lost its data.
  */
@@ -79,7 +79,7 @@ export async function DELETE(req: NextRequest) {
       // Billing linkage is severed, not kept "for records": an id that can be
       // used to look the person up again is still personal data. Any active
       // Stripe subscription must be cancelled in the Stripe dashboard or it
-      // keeps billing a card with no account behind it — surfaced to the user
+      // keeps billing a card with no account behind it - surfaced to the user
       // in the app before they confirm.
       await User.deleteOne({ _id: userId }, opts);
     };

@@ -11,7 +11,7 @@ export async function OPTIONS() {
   return corsPreflight();
 }
 
-/** `?type=mine|public` — defaults to the caller's groups plus public ones. */
+/** `?type=mine|public` - defaults to the caller's groups plus public ones. */
 export async function GET(req: Request) {
   try {
     const auth = await requireUser(req);

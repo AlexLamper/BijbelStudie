@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, CheckCircle2, Search } from 'lucide-react'
+import { ArrowLeft, ArrowRight, CheckCircle2, Search } from 'lucide-react'
 import { curatedStudies, type CuratedStudy } from '../../lib/data/curated-studies'
 import { BOOK_STUDY_ENTRIES, THEME_STUDIES } from '../../lib/bookStudies'
 import { JsonLd } from '../../components/seo/JsonLd'
@@ -16,6 +16,10 @@ import {
 
 const TEAL = '#0D9488'
 const COMPLETED_KEY = 'bijbelstudie_completed_studies'
+const MINUTES_FALLBACK = 12
+
+/** How many "verder waar je was" pills we show. Three is a strip; ten is a second catalogue. */
+const RESUME_LIMIT = 3
 
 /**
  * Only the hand-authored studies are described here.
@@ -62,22 +66,24 @@ const STUDIES_GRAPH = (() => {
 })()
 
 /**
- * One catalogue, four views of it.
+ * One question, answered top to bottom: waar begin je?
  *
- * There is no longer a "begeleide studies" mode beside a "bijbelboeken" mode.
- * Every book IS a study - same flow, same lesson list, same detail page - so
- * splitting them was a distinction the reader had to decode before they could
- * start. What is left is a way to narrow sixty-six books down, plus the themed
- * studies that are not a book at all.
+ * The page used to be a catalogue - four filter buttons over sixty-six evenly
+ * weighted cards - which answers "welke van de 77 wil ik", a question almost
+ * nobody arrives with. What a reader actually needs is a first step. So the
+ * main column is a route: carry on where you were, one recommended start, then
+ * a handful of prepared tracks. The full shelf lives in the rail beside it,
+ * one click away, for the reader who already knows the book they want.
  */
-type Group = 'alles' | 'oude-testament' | 'nieuwe-testament' | 'themas'
 
-const GROUPS: { value: Group; label: string }[] = [
-  { value: 'alles', label: 'Alles' },
-  { value: 'oude-testament', label: 'Oude Testament' },
-  { value: 'nieuwe-testament', label: 'Nieuwe Testament' },
-  { value: 'themas', label: "Thema's" },
-]
+type Category = 'ot' | 'nt' | 'personen' | 'themas'
+
+const CATEGORY_LABELS: Record<Category, string> = {
+  ot: 'Oude Testament',
+  nt: 'Nieuwe Testament',
+  personen: 'Personen',
+  themas: "Thema's",
+}
 
 interface Enrollment {
   studyId: string
@@ -93,110 +99,218 @@ interface Status {
   total: number
   resumeDay: number | null
   started: boolean
+  pct: number
 }
 
 /** A catalogue row: the study, plus the words underneath it. */
-interface Item {
+interface Entry {
   study: CuratedStudy
-  /** "Wet", "Evangelie", "Thema" - what kind of thing this is, in one word. */
+  /** "Wet", "Evangelie", "Persoon" - what kind of thing this is, in one word. */
   kind: string
-  group: Exclude<Group, 'alles'>
+  category: Category
+  lessonCount: number
+  /** Average minutes per lesson; lessons without an estimate take the fallback. */
+  avgMinutes: number
   /** Everything a search should match, lowercased once at module load. */
   haystack: string
 }
 
-const ITEMS: Item[] = [
+function avgMinutesOf(study: CuratedStudy): number {
+  const total = study.lessons.reduce(
+    (sum, lesson) => sum + (lesson.estimatedMinutes ?? MINUTES_FALLBACK),
+    0,
+  )
+  return Math.round(total / (study.lessons.length || 1))
+}
+
+const ENTRIES: Entry[] = [
   ...BOOK_STUDY_ENTRIES.map(({ book, study }) => ({
     study,
     kind: book.genre,
-    group: (book.testament === 'oude-testament' ? 'oude-testament' : 'nieuwe-testament') as
-      | 'oude-testament'
-      | 'nieuwe-testament',
+    category: (book.testament === 'oude-testament' ? 'ot' : 'nt') as Category,
+    lessonCount: study.lessons.length,
+    avgMinutes: avgMinutesOf(study),
     haystack: `${study.title} ${book.name} ${book.genre} ${study.description}`.toLowerCase(),
   })),
-  ...THEME_STUDIES.map(study => ({
-    study,
-    kind: study.type === 'Persoon' ? 'Persoon' : study.type === 'Gedeelte' ? 'Gedeelte' : 'Thema',
-    group: 'themas' as const,
-    haystack: `${study.title} ${study.description} ${study.lessons
-      .map(lesson => lesson.book)
-      .join(' ')}`.toLowerCase(),
-  })),
+  ...THEME_STUDIES.map(study => {
+    const isPerson = study.type === 'Persoon'
+    return {
+      study,
+      kind: isPerson ? 'Persoon' : study.type === 'Gedeelte' ? 'Gedeelte' : 'Thema',
+      category: (isPerson ? 'personen' : 'themas') as Category,
+      lessonCount: study.lessons.length,
+      avgMinutes: avgMinutesOf(study),
+      haystack: `${study.title} ${study.description} ${study.lessons
+        .map(lesson => lesson.book)
+        .join(' ')}`.toLowerCase(),
+    }
+  }),
 ]
 
-const COUNTS: Record<Group, number> = {
-  alles: ITEMS.length,
-  'oude-testament': ITEMS.filter(item => item.group === 'oude-testament').length,
-  'nieuwe-testament': ITEMS.filter(item => item.group === 'nieuwe-testament').length,
-  themas: ITEMS.filter(item => item.group === 'themas').length,
-}
+const ENTRY_BY_ID = new Map(ENTRIES.map(entry => [entry.study.id, entry] as const))
 
-const SECTION_TITLES: Record<Exclude<Group, 'alles'>, string> = {
-  'oude-testament': 'Oude Testament',
-  'nieuwe-testament': 'Nieuwe Testament',
-  themas: "Thema's",
+const byCategory = (category: Category) => ENTRIES.filter(entry => entry.category === category)
+
+const COUNTS: Record<Category, number> = {
+  ot: byCategory('ot').length,
+  nt: byCategory('nt').length,
+  personen: byCategory('personen').length,
+  themas: byCategory('themas').length,
 }
 
 /**
- * One study in the catalogue.
- *
- * A compact row, not a poster. Picking a bible book is a menu choice, so the
- * card carries only what the choice needs: the name, one word for what kind of
- * book it is, and the lesson/time cost on a single muted line. The description,
- * the banner art and the CTA button were all texture between the reader and a
- * list of sixty-six names they mostly already know.
+ * The recommended start. Markus if it exists, otherwise the first study there
+ * is - the page must never empty out because one id moved.
  */
-function StudyCard({ item, status }: { item: Item; status: Status }) {
-  const { study } = item
-  const pct = status.total > 0 ? Math.round((status.done / status.total) * 100) : 0
+const HERO_ENTRY =
+  ENTRY_BY_ID.get('boek-markus') ??
+  ENTRIES.find(entry => entry.study.title.toLowerCase().includes('markus'))
+const HERO_STUDY: CuratedStudy = HERO_ENTRY?.study ?? curatedStudies[0]
+const HERO_WHY = HERO_ENTRY
+  ? 'Het kortste evangelie: veel vaart, weinig omhaal, en meteen bij de kern - wie is Jezus, en wat vraagt hij van je?'
+  : HERO_STUDY.description
 
+interface Track {
+  key: string
+  label: string
+  blurb: string
+  studies: CuratedStudy[]
+}
+
+const TRACK_SEEDS: { key: string; label: string; blurb: string; matchers: string[] }[] = [
+  {
+    key: 'beginners',
+    label: 'Voor beginners',
+    blurb: 'Korte, verhalende boeken om het ritme te pakken te krijgen.',
+    matchers: ['markus', 'johannes', 'ruth', 'genesis', 'psalmen'],
+  },
+  {
+    key: 'jezus',
+    label: 'Het leven van Jezus',
+    blurb: 'Van de evangelieverslagen naar de laatste week en de opstanding.',
+    matchers: ['markus', 'johannes', 'bergrede', 'intocht', 'opstanding'],
+  },
+  {
+    key: 'ot-verhalen',
+    label: 'De grote verhalen van het OT',
+    blurb: 'De mensen en gebeurtenissen waar de rest van de Bijbel op terugkijkt.',
+    matchers: ['genesis', 'exodus', 'noach', 'abraham', 'mozes', 'david', 'daniël'],
+  },
+  {
+    key: 'thema',
+    label: 'Een thema volgen',
+    blurb: 'Studies die één lijn door meerdere bijbelboeken heen trekken.',
+    matchers: ['bergrede', 'psalmen', 'geloof-in-storm', 'opstanding', 'abraham'],
+  },
+]
+
+/**
+ * Every matcher is held against the themed studies first (on id or title) and
+ * then against the bible books (on book name). A matcher that finds nothing is
+ * skipped and duplicates fall away, so a track never empties out over one
+ * missing id.
+ */
+const TRACKS: Track[] = TRACK_SEEDS.map(seed => {
+  const seen = new Set<string>()
+  const studies: CuratedStudy[] = []
+  for (const raw of seed.matchers) {
+    const needle = raw.toLowerCase()
+    const theme = THEME_STUDIES.find(
+      study => study.id === needle || study.title.toLowerCase().includes(needle),
+    )
+    const bookEntry = BOOK_STUDY_ENTRIES.find(entry =>
+      entry.book.name.toLowerCase().includes(needle),
+    )
+    const hit = theme ?? bookEntry?.study
+    if (hit && !seen.has(hit.id)) {
+      seen.add(hit.id)
+      studies.push(hit)
+    }
+  }
+  return { key: seed.key, label: seed.label, blurb: seed.blurb, studies }
+}).filter(track => track.studies.length > 0)
+
+/** The line under a track or category, in plain Dutch, so nobody has to count. */
+function summarize(rows: Entry[]): string {
+  if (rows.length === 0) return 'Hier staat nog niets.'
+  const noun = rows.length === 1 ? 'studie' : 'studies'
+  const avg = Math.round(rows.reduce((sum, entry) => sum + entry.avgMinutes, 0) / rows.length)
+  return `${rows.length} ${noun} - ±${avg} minuten per les.`
+}
+
+/**
+ * One study in a list.
+ *
+ * A card, not a poster: the name, one word for what kind of book it is, and the
+ * lesson/time cost on a single muted line. Where you left off gets a bar, since
+ * that is the only number worth reading twice.
+ */
+function StudyCard({ entry, status }: { entry: Entry; status: Status }) {
   return (
     <Link
-      href={`/studies/${study.id}`}
+      href={`/studies/${entry.study.id}`}
       data-track="study_card"
-      className="group no-underline flex flex-col justify-between gap-2 rounded-lg border border-gray-200 dark:border-border bg-white dark:bg-card px-3 py-2.5 transition-colors hover:border-teal-400 dark:hover:border-teal-700"
+      className="group no-underline flex flex-col gap-2 rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card px-4 py-3.5 transition-colors hover:border-teal-400 dark:hover:border-teal-700"
     >
-      <div className="flex items-start justify-between gap-2">
-        <h3 className="font-semibold text-[13.5px] text-gray-900 dark:text-foreground leading-snug group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors">
-          {study.title}
+      <div className="flex items-start justify-between gap-3">
+        <h3 className="font-semibold text-[15px] text-gray-900 dark:text-foreground leading-snug group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors">
+          {entry.study.title}
         </h3>
         {status.completed ? (
-          <CheckCircle2 size={14} className="mt-0.5 flex-none" style={{ color: TEAL }} />
-        ) : status.started ? (
           <span
-            className="mt-0.5 flex-none text-[10.5px] font-semibold tabular-nums"
+            className="mt-0.5 flex-none inline-flex items-center gap-1 text-[11px] font-semibold"
             style={{ color: TEAL }}
           >
-            {pct}%
+            <CheckCircle2 size={14} /> Afgerond
+          </span>
+        ) : status.started ? (
+          <span
+            className="mt-0.5 flex-none text-xs font-semibold tabular-nums"
+            style={{ color: TEAL }}
+          >
+            {status.pct}%
           </span>
         ) : null}
       </div>
 
-      <div className="flex items-center gap-1.5 text-[10.5px] text-gray-400 dark:text-muted-foreground tabular-nums">
-        <span className="font-semibold uppercase tracking-wider">{item.kind}</span>
+      <div className="flex items-center gap-1.5 text-[11px] text-gray-400 dark:text-muted-foreground tabular-nums">
+        <span className="font-semibold uppercase tracking-wider">{entry.kind}</span>
         <span aria-hidden>·</span>
         <span>
-          {study.lessons.length} {study.lessons.length === 1 ? 'les' : 'lessen'}
+          {entry.lessonCount} {entry.lessonCount === 1 ? 'les' : 'lessen'}
         </span>
+        <span aria-hidden>·</span>
+        <span>±{entry.avgMinutes} min per les</span>
       </div>
 
       {status.started && !status.completed && (
-        <div className="h-0.5 rounded-full bg-gray-100 dark:bg-secondary overflow-hidden">
-          <div
-            className="h-full rounded-full transition-all"
-            style={{ width: `${pct}%`, backgroundColor: TEAL }}
-          />
+        <div className="mt-0.5">
+          <div className="h-1 rounded-full bg-gray-100 dark:bg-secondary overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all"
+              style={{ width: `${status.pct}%`, backgroundColor: TEAL }}
+            />
+          </div>
+          <p className="mt-1 text-[11px] text-gray-500 dark:text-muted-foreground tabular-nums">
+            Les {status.resumeDay ?? status.done + 1} van {status.total}
+          </p>
         </div>
       )}
     </Link>
   )
 }
 
+const CARD_GRID = 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3'
+
+type View = { kind: 'track'; key: string } | { kind: 'category'; key: Category }
+
 export default function StudiesPage() {
-  const [group, setGroup] = useState<Group>('alles')
+  const [view, setView] = useState<View | null>(null)
   const [query, setQuery] = useState('')
   const [completedIds, setCompletedIds] = useState<string[]>([])
   const [enrollments, setEnrollments] = useState<Record<string, Enrollment>>({})
+  /** The API's order: most recently touched study first. */
+  const [recentIds, setRecentIds] = useState<string[]>([])
 
   useEffect(() => {
     // localStorage first so the badges paint immediately, then the server -
@@ -227,9 +341,13 @@ export default function StudiesPage() {
         const response = await fetch('/api/v1/study-enrollments')
         if (!response.ok || cancelled) return
         const data = await response.json()
+        const list: Enrollment[] = data.enrollments ?? []
         const map: Record<string, Enrollment> = {}
-        for (const entry of data.enrollments ?? []) map[entry.studyId] = entry
+        for (const entry of list) map[entry.studyId] = entry
         setEnrollments(map)
+        // The API already sorts on lastActivityAt; keeping that order is the
+        // only thing that makes "the last three" actually the last three.
+        setRecentIds(list.map(entry => entry.studyId))
       } catch {
         /* anonymous visitors simply see no progress */
       }
@@ -244,176 +362,274 @@ export default function StudiesPage() {
     return (study: CuratedStudy): Status => {
       const enrollment = enrollments[study.id]
       const done = enrollment?.lessonsCompleted ?? 0
+      const total = study.lessons.length
       return {
         completed: completedIds.includes(study.id) || !!enrollment?.completedAt,
         done,
-        total: study.lessons.length,
+        total,
         resumeDay: enrollment?.currentLessonDay ?? null,
         started: done > 0 || enrollment?.currentLessonDay != null,
+        pct: total > 0 ? Math.round((done / total) * 100) : 0,
       }
     }
   }, [enrollments, completedIds])
 
-  /** Studies with progress, newest section of the page: carry on beats browse. */
-  const inProgress = useMemo(
-    () =>
-      ITEMS.map(item => ({ item, status: statusFor(item.study) })).filter(
-        entry => entry.status.started && !entry.status.completed,
-      ),
-    [statusFor],
+  /** Unfinished studies, most recently touched first, capped at RESUME_LIMIT. */
+  const inProgress = useMemo(() => {
+    const ordered = [
+      ...recentIds.map(id => ENTRY_BY_ID.get(id)).filter((e): e is Entry => Boolean(e)),
+      // Studies known only from localStorage have no enrollment row; they go last.
+      ...ENTRIES.filter(entry => !recentIds.includes(entry.study.id)),
+    ]
+    return ordered
+      .map(entry => ({ entry, status: statusFor(entry.study) }))
+      .filter(row => row.status.started && !row.status.completed)
+      .slice(0, RESUME_LIMIT)
+  }, [statusFor, recentIds])
+
+  /** A search cuts across everything: the reader typed a name, not a category. */
+  const searchResults = useMemo(() => {
+    const needle = query.trim().toLowerCase()
+    if (!needle) return null
+    return ENTRIES.filter(entry => entry.haystack.includes(needle))
+  }, [query])
+
+  const resumeStrip = inProgress.length > 0 && (
+    <div className="mt-5 flex gap-2 overflow-x-auto pb-1">
+      {inProgress.map(({ entry, status }) => (
+        <Link
+          key={entry.study.id}
+          href={`/studies/${entry.study.id}`}
+          data-track="study_resume_card"
+          className="no-underline flex flex-none items-center gap-2 rounded-full border px-3 py-1.5 bg-white dark:bg-card transition-colors hover:border-teal-400"
+          style={{ borderColor: 'rgba(13,148,136,0.30)' }}
+        >
+          <span className="text-[12px] font-semibold text-gray-900 dark:text-foreground">
+            {entry.study.title}
+          </span>
+          <span className="text-[11px] text-gray-500 dark:text-muted-foreground tabular-nums">
+            les {status.resumeDay ?? status.done + 1}/{status.total} · {status.pct}%
+          </span>
+          <ArrowRight size={13} className="flex-none" style={{ color: TEAL }} />
+        </Link>
+      ))}
+    </div>
   )
 
-  /** Sections to render, in reading order, after the filter and the search. */
-  const sections = useMemo(() => {
-    const needle = query.trim().toLowerCase()
-    const order: Exclude<Group, 'alles'>[] =
-      group === 'alles' ? ['oude-testament', 'nieuwe-testament', 'themas'] : [group]
+  const searchField = (
+    <div className="relative w-full sm:w-72 flex-none">
+      <Search
+        size={16}
+        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-muted-foreground pointer-events-none"
+      />
+      <input
+        type="search"
+        value={query}
+        onChange={event => setQuery(event.target.value)}
+        placeholder="Zoek een boek of thema"
+        aria-label="Zoek een studie"
+        className="w-full h-10 pl-9 pr-3 rounded-lg border border-gray-200 dark:border-border bg-white dark:bg-background text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:ring-2"
+        style={{ ['--tw-ring-color' as string]: 'rgba(13,148,136,0.35)' }}
+      />
+    </div>
+  )
 
-    return order
-      .map(value => ({
-        value,
-        title: SECTION_TITLES[value],
-        items: ITEMS.filter(
-          item => item.group === value && (!needle || item.haystack.includes(needle)),
-        ),
-      }))
-      .filter(section => section.items.length > 0)
-  }, [group, query])
+  // ---- Detail: one track or one category fills the page. ------------------
+  if (view !== null && searchResults === null) {
+    const track = view.kind === 'track' ? TRACKS.find(item => item.key === view.key) : undefined
+    const rows: Entry[] =
+      view.kind === 'track'
+        ? (track?.studies ?? [])
+            .map(study => ENTRY_BY_ID.get(study.id))
+            .filter((entry): entry is Entry => Boolean(entry))
+        : byCategory(view.key)
 
-  const nothingFound = sections.length === 0
+    const title = view.kind === 'track' ? (track?.label ?? '') : CATEGORY_LABELS[view.key]
+    const blurb =
+      view.kind === 'track' ? track?.blurb : 'Op volgorde van de canon, zoals ze in de Bijbel staan.'
 
+    return (
+      <div className="h-full overflow-y-auto">
+        <JsonLd data={STUDIES_GRAPH} />
+
+        <div className="px-5 sm:px-8 xl:px-10 py-6 w-full">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <button
+              onClick={() => setView(null)}
+              className="self-start inline-flex items-center gap-1.5 text-[13px] font-medium text-gray-500 dark:text-muted-foreground hover:text-teal-700 dark:hover:text-teal-400 transition-colors"
+            >
+              <ArrowLeft size={15} /> Terug
+            </button>
+            {searchField}
+          </div>
+
+          <h1 className="mt-3 text-xl sm:text-2xl font-bold text-gray-900 dark:text-foreground">
+            {title}
+          </h1>
+          {blurb && (
+            <p className="mt-1 text-[13px] text-gray-500 dark:text-muted-foreground">{blurb}</p>
+          )}
+          <p className="mt-2 text-[13px] text-gray-600 dark:text-muted-foreground">
+            {summarize(rows)}
+          </p>
+
+          <ol className={`mt-5 list-none p-0 ${CARD_GRID}`}>
+            {rows.map((entry, index) => (
+              <li key={entry.study.id} className="relative">
+                {/* A track has an order; the canon already carries its own. */}
+                {view.kind === 'track' && (
+                  <span
+                    className="absolute -left-0.5 -top-2 z-10 flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold text-white tabular-nums"
+                    style={{ backgroundColor: TEAL }}
+                  >
+                    {index + 1}
+                  </span>
+                )}
+                <StudyCard entry={entry} status={statusFor(entry.study)} />
+              </li>
+            ))}
+          </ol>
+        </div>
+      </div>
+    )
+  }
+
+  // ---- Landing (or search results). --------------------------------------
   return (
     <div className="h-full overflow-y-auto">
       <JsonLd data={STUDIES_GRAPH} />
 
-      <div className="px-5 sm:px-8 xl:px-10 py-6 max-w-[1400px] mx-auto">
-        {/* Header. One row on desktop: what this page is on the left, the way
-            to find something on the right. It used to be a tinted hero panel
-            with an eyebrow, a heading, a three-line paragraph and a full-width
-            search field - about 240px of chrome before the first study. */}
+      <div className="px-5 sm:px-8 xl:px-10 py-6 w-full">
         <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-foreground">
-              Bijbelstudies
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-foreground">
+              Waar begin je?
             </h1>
-            <p className="mt-0.5 text-[13px] text-gray-500 dark:text-muted-foreground">
-              Kies een bijbelboek of een thema. Elke studie leidt je hoofdstuk voor hoofdstuk door
-              de tekst.
+            <p className="mt-1 text-sm text-gray-500 dark:text-muted-foreground">
+              Van boven naar beneden. Eén keuze per keer, en elke studie leidt je hoofdstuk voor
+              hoofdstuk door de tekst.
             </p>
           </div>
-
-          <div className="relative w-full sm:w-72 flex-none">
-            <Search
-              size={16}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-muted-foreground pointer-events-none"
-            />
-            <input
-              type="search"
-              value={query}
-              onChange={event => setQuery(event.target.value)}
-              placeholder="Zoek een boek of thema"
-              aria-label="Zoek een studie"
-              className="w-full h-10 pl-9 pr-3 rounded-lg border border-gray-200 dark:border-border bg-white dark:bg-background text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:ring-2"
-              style={{ ['--tw-ring-color' as string]: 'rgba(13,148,136,0.35)' }}
-            />
-          </div>
+          {searchField}
         </header>
 
-        {/* Resume strip. A returning reader is here to carry on, not to browse,
-            so it sits above the catalogue - and disappears entirely when there
-            is nothing to resume rather than holding an empty state. */}
-        {inProgress.length > 0 && (
-          <section className="mt-5">
-            <h2 className="text-[13px] font-bold text-foreground mb-2">Verder waar je was</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2.5">
-              {inProgress.map(({ item, status }) => {
-                const pct = Math.round((status.done / status.total) * 100)
-                return (
-                  <Link
-                    key={item.study.id}
-                    href={`/studies/${item.study.id}`}
-                    data-track="study_resume_card"
-                    className="no-underline group flex items-center gap-3 rounded-xl border p-3 bg-white dark:bg-card transition-colors hover:border-teal-400"
-                    style={{ borderColor: 'rgba(13,148,136,0.30)' }}
-                  >
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-sm font-semibold text-foreground truncate">
-                        {item.study.title}
-                      </span>
-                      <span className="block text-[11px] text-gray-500 dark:text-muted-foreground tabular-nums">
-                        Les {status.resumeDay ?? status.done + 1} van {status.total} · {pct}% klaar
-                      </span>
-                      <span className="mt-1.5 block h-1 rounded-full bg-gray-100 dark:bg-secondary overflow-hidden">
-                        <span
-                          className="block h-full rounded-full"
-                          style={{ width: `${pct}%`, backgroundColor: TEAL }}
-                        />
-                      </span>
-                    </span>
-                    <ArrowRight
-                      size={15}
-                      className="flex-none opacity-40 group-hover:opacity-100 transition-opacity"
-                      style={{ color: TEAL }}
-                    />
-                  </Link>
-                )
-              })}
-            </div>
-          </section>
-        )}
+        {resumeStrip}
 
-        {/* Filters. Counts on the buttons, because "hoeveel zijn er" is the
-            question the labels raise. */}
-        <div className="mt-5 flex flex-wrap items-center gap-2">
-          {GROUPS.map(entry => {
-            const active = entry.value === group
-            return (
-              <button
-                key={entry.value}
-                onClick={() => setGroup(entry.value)}
-                aria-pressed={active}
-                data-track={`study_filter_${entry.value}`}
-                className={`h-9 px-3.5 rounded-lg text-[13px] font-medium transition-colors border ${
-                  active
-                    ? 'text-white border-transparent'
-                    : 'bg-white dark:bg-card border-gray-200 dark:border-border text-gray-600 dark:text-muted-foreground hover:bg-gray-50 dark:hover:bg-secondary'
-                }`}
-                style={active ? { backgroundColor: TEAL } : undefined}
-              >
-                {entry.label}
-                <span className="ml-1.5 text-xs opacity-60 tabular-nums">
-                  {COUNTS[entry.value]}
-                </span>
-              </button>
-            )
-          })}
-        </div>
-
-        {nothingFound ? (
-          <p className="mt-8 text-sm text-gray-500 dark:text-muted-foreground">
-            Niets gevonden voor &ldquo;{query.trim()}&rdquo;. Probeer de naam van een bijbelboek.
-          </p>
-        ) : (
-          sections.map(section => (
-            <section key={section.value} className="mt-6">
-              {/* The heading is dropped when a filter already names the section:
-                  repeating "Oude Testament" under a pressed button labelled
-                  "Oude Testament" is a line that tells the reader nothing. */}
-              {group === 'alles' && (
-                <h2 className="text-[13px] font-bold text-foreground mb-2.5">
-                  {section.title}
-                  <span className="ml-1.5 font-medium text-gray-400 dark:text-muted-foreground tabular-nums">
-                    {section.items.length}
-                  </span>
-                </h2>
-              )}
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2">
-                {section.items.map(item => (
-                  <StudyCard key={item.study.id} item={item} status={statusFor(item.study)} />
+        {/* A search replaces the route: you already know what you are after. */}
+        {searchResults !== null ? (
+          searchResults.length === 0 ? (
+            <p className="mt-8 text-sm text-gray-500 dark:text-muted-foreground">
+              Niets gevonden voor &ldquo;{query.trim()}&rdquo;. Probeer de naam van een bijbelboek.
+            </p>
+          ) : (
+            <section className="mt-6">
+              <p className="text-[13px] text-gray-600 dark:text-muted-foreground">
+                {summarize(searchResults)}
+              </p>
+              <div className={`mt-3 ${CARD_GRID}`}>
+                {searchResults.map(entry => (
+                  <StudyCard key={entry.study.id} entry={entry} status={statusFor(entry.study)} />
                 ))}
               </div>
             </section>
-          ))
+          )
+        ) : (
+          <div className="mt-6 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-6 items-start">
+            {/* Main column: the decision. */}
+            <div className="min-w-0">
+              <div
+                className="rounded-2xl border p-6 sm:p-8 bg-white dark:bg-card"
+                style={{ borderColor: 'rgba(13,148,136,0.35)' }}
+              >
+                <p
+                  className="text-[11px] font-semibold uppercase tracking-wider"
+                  style={{ color: TEAL }}
+                >
+                  Aanbevolen om mee te beginnen
+                </p>
+                <h2 className="mt-1.5 text-xl sm:text-2xl font-bold text-gray-900 dark:text-foreground">
+                  {HERO_STUDY.title}
+                </h2>
+                <p className="mt-2 max-w-[70ch] text-sm sm:text-[14.5px] leading-relaxed text-gray-600 dark:text-muted-foreground">
+                  {HERO_WHY}
+                </p>
+                <p className="mt-2 text-[11.5px] text-gray-400 dark:text-muted-foreground tabular-nums">
+                  {HERO_STUDY.lessons.length} {HERO_STUDY.lessons.length === 1 ? 'les' : 'lessen'} ·
+                  één hoofdstuk per keer
+                </p>
+                <Link
+                  href={`/studies/${HERO_STUDY.id}`}
+                  data-track="study_hero_start"
+                  className="mt-4 inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white no-underline transition-opacity hover:opacity-90"
+                  style={{ backgroundColor: TEAL }}
+                >
+                  Begin
+                  <ArrowRight size={16} />
+                </Link>
+              </div>
+
+              {TRACKS.length > 0 && (
+                <section className="mt-7">
+                  <h2 className="text-[13px] font-bold text-foreground mb-2.5">
+                    Of kies een startspoor
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-4 gap-3">
+                    {TRACKS.map(track => (
+                      <button
+                        key={track.key}
+                        onClick={() => setView({ kind: 'track', key: track.key })}
+                        data-track={`study_track_${track.key}`}
+                        className="group text-left flex flex-col justify-between gap-4 rounded-2xl border border-gray-200 dark:border-border bg-white dark:bg-card p-5 min-h-[150px] transition-colors hover:border-teal-400 dark:hover:border-teal-700"
+                      >
+                        <span className="flex items-start justify-between gap-3">
+                          <span className="text-base font-bold text-gray-900 dark:text-foreground group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors">
+                            {track.label}
+                          </span>
+                          <span
+                            className="flex-none text-xl font-bold tabular-nums"
+                            style={{ color: TEAL }}
+                          >
+                            {track.studies.length}
+                          </span>
+                        </span>
+                        <span className="text-[13px] text-gray-500 dark:text-muted-foreground leading-relaxed">
+                          {track.blurb}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              )}
+            </div>
+
+            {/* Rail: the shelf, for the reader who already knows the book. */}
+            <aside className="min-w-0">
+              <section className="rounded-2xl border border-gray-200 dark:border-border bg-white dark:bg-card p-4">
+                <h2 className="text-[13px] font-bold text-foreground">Of blader zelf</h2>
+                <ul className="mt-2 divide-y divide-gray-100 dark:divide-border list-none p-0">
+                  {(Object.keys(CATEGORY_LABELS) as Category[]).map(key => (
+                    <li key={key}>
+                      <button
+                        onClick={() => setView({ kind: 'category', key })}
+                        data-track={`study_filter_${key}`}
+                        className="group w-full flex items-center justify-between gap-2 py-2.5 text-left"
+                      >
+                        <span className="text-[13.5px] text-gray-800 dark:text-foreground group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors">
+                          {CATEGORY_LABELS[key]}
+                        </span>
+                        <span
+                          className="flex-none text-[12px] font-semibold tabular-nums"
+                          style={{ color: TEAL }}
+                        >
+                          {COUNTS[key]}
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            </aside>
+          </div>
         )}
       </div>
     </div>

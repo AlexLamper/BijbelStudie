@@ -6,7 +6,7 @@ export async function OPTIONS() {
 }
 
 /**
- * Verse of the day. Public, exactly like the website's `/api/bible/daytext` —
+ * Verse of the day. Public, exactly like the website's `/api/bible/daytext` -
  * the splash and the widget need it before a session exists.
  */
 export async function GET() {

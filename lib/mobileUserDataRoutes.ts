@@ -26,7 +26,7 @@ export function collectionHandlers(kind: SyncKind) {
   return {
     OPTIONS: async () => corsPreflight(),
 
-    /** GET ?since=<ISO> — omit `since` for everything. */
+    /** GET ?since=<ISO> - omit `since` for everything. */
     GET: async (req: NextRequest) => {
       try {
         const user = await requireUser(req);
@@ -39,7 +39,7 @@ export function collectionHandlers(kind: SyncKind) {
       }
     },
 
-    /** POST — create or replace by client id. Idempotent on retry. */
+    /** POST - create or replace by client id. Idempotent on retry. */
     POST: async (req: NextRequest) => {
       try {
         const user = await requireUser(req);

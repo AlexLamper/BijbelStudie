@@ -8,7 +8,7 @@ export async function OPTIONS() {
   return corsPreflight();
 }
 
-/** GET /api/v1/bibles — the manifest, allowlisted. Blocked ids never appear. */
+/** GET /api/v1/bibles - the manifest, allowlisted. Blocked ids never appear. */
 export async function GET(req: NextRequest) {
   try {
     const bibles = await listMobileBibles();

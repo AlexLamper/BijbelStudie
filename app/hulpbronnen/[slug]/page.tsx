@@ -44,7 +44,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     });
   }
 
-  const byline = item.author ? ` — ${item.author}` : "";
+  const byline = item.author ? ` - ${item.author}` : "";
   return buildMetadata({
     title: `${item.title}${byline}${item.year ? ` (${item.year})` : ""}`,
     description: item.description.slice(0, 300),

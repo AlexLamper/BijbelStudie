@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic';
  * POST /api/mobile/revenuecat-webhook
  *
  * Authentication: RevenueCat's webhook feature sends a static value in the
- * `Authorization` header that you set in their dashboard — it does not sign
+ * `Authorization` header that you set in their dashboard - it does not sign
  * the body. So the primary check is an exact match against
  * REVENUECAT_WEBHOOK_AUTHORIZATION.
  *
@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
   } catch (e) {
     console.error('revenuecat-webhook: entitlement sync failed:', e);
     // 500 so RevenueCat retries. The ledger row is already written, so the
-    // retry would be swallowed as a duplicate — remove it first.
+    // retry would be swallowed as a duplicate - remove it first.
     await WebhookEvent.deleteOne({ provider: 'revenuecat', eventId: event.id });
     return NextResponse.json({ error: 'Sync failed' }, { status: 500 });
   }

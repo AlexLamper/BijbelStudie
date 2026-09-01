@@ -22,7 +22,7 @@ export async function POST(req: Request) {
   }
 }
 
-/** `?planId=<id>` — leaves the plan and drops the caller's progress. */
+/** `?planId=<id>` - leaves the plan and drops the caller's progress. */
 export async function DELETE(req: Request) {
   try {
     const auth = await requireUser(req);

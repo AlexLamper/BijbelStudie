@@ -6,7 +6,7 @@ import StudyGroup from "../../../../../../../models/StudyGroup"
 import GroupMessage from "../../../../../../../models/GroupMessage"
 import User from "../../../../../../../models/User"
 
-// POST — toggle a reaction emoji on a message
+// POST - toggle a reaction emoji on a message
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string; msgId: string }> }

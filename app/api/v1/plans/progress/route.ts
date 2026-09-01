@@ -8,7 +8,7 @@ export async function OPTIONS() {
   return corsPreflight();
 }
 
-/** `?planId=<id>` — the caller's progress on one plan. */
+/** `?planId=<id>` - the caller's progress on one plan. */
 export async function GET(req: Request) {
   try {
     const auth = await requireUser(req);
@@ -32,7 +32,7 @@ export async function GET(req: Request) {
 
 /**
  * Marks a plan day done. `mode: 'studied'` records that the passage was worked
- * through rather than only read — it is worth three times the XP and is the
+ * through rather than only read - it is worth three times the XP and is the
  * only form that writes a StudyProgress row.
  */
 export async function POST(req: Request) {
@@ -65,7 +65,7 @@ export async function POST(req: Request) {
   }
 }
 
-/** `?planId=<id>&day=<n>` — undoes a completed day. XP already earned stays. */
+/** `?planId=<id>&day=<n>` - undoes a completed day. XP already earned stays. */
 export async function DELETE(req: Request) {
   try {
     const auth = await requireUser(req);

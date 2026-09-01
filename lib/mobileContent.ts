@@ -163,7 +163,7 @@ export type OriginalEnvelope = {
  * with spaces replaced by underscores. Read directly rather than through
  * local-data, whose parsers assume a verse-string shape this data does not have.
  *
- * The slug is ENGLISH — `Judges`, `1_Samuel`, `Song_of_Solomon` — while the app
+ * The slug is ENGLISH - `Judges`, `1_Samuel`, `Song_of_Solomon` - while the app
  * addresses chapters by the book name of the translation it is reading, which
  * for every Dutch version is Dutch. Slugifying that name directly (what this
  * did before) only ever hit the handful of books whose Dutch name happens to be
@@ -226,7 +226,7 @@ export type SearchHit = {
  * A whole-version scan is ~1200 small file reads. That is survivable because
  * `local-data` memoises each chapter, but the first cold query would still
  * blow a serverless timeout, so there is a wall-clock budget as well as a hit
- * cap. Both surface as `truncated: true` rather than a silent short answer —
+ * cap. Both surface as `truncated: true` rather than a silent short answer -
  * the client shows "meer resultaten beschikbaar, verfijn je zoekopdracht".
  */
 const SEARCH_BUDGET_MS = 3500;

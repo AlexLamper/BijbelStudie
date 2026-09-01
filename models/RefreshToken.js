@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 /**
  * Opaque refresh tokens for the mobile apps.
  *
- * The raw token is never stored — only its SHA-256 hash. A `family` groups
+ * The raw token is never stored - only its SHA-256 hash. A `family` groups
  * every token descended from one login, so a replayed (already-rotated) token
  * can revoke the whole chain instead of just itself. See lib/mobileTokens.ts.
  */

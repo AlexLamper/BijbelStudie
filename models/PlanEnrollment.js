@@ -32,7 +32,7 @@ const planEnrollmentSchema = new mongoose.Schema(
     /**
      * How many chapters a day the user signed up for, kept as a label rather
      * than a number so the day cards can say "rustig" instead of "1".
-     * Depth is a separate axis entirely — see `days[].mode`.
+     * Depth is a separate axis entirely - see `days[].mode`.
      */
     pace: { type: String, enum: ['rustig', 'gestaag', 'stevig'], default: 'gestaag' },
 

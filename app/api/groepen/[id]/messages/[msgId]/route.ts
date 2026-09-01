@@ -6,7 +6,7 @@ import StudyGroup from "../../../../../../models/StudyGroup"
 import GroupMessage from "../../../../../../models/GroupMessage"
 import User from "../../../../../../models/User"
 
-// DELETE — soft-delete a message (own message or leader)
+// DELETE - soft-delete a message (own message or leader)
 export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string; msgId: string }> }

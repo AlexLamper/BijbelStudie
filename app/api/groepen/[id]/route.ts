@@ -61,7 +61,7 @@ export async function GET(
   return NextResponse.json({ group, isMember: true })
 }
 
-// PATCH — update group settings (leader only)
+// PATCH - update group settings (leader only)
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }

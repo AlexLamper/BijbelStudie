@@ -15,8 +15,8 @@ export type SessionPayload = {
 };
 
 /**
- * `proExpiresAt` should always be a Date (schema-typed), but a legacy row — or
- * one written by a script that bypassed mongoose — can still hold a raw
+ * `proExpiresAt` should always be a Date (schema-typed), but a legacy row - or
+ * one written by a script that bypassed mongoose - can still hold a raw
  * string. A truthy-but-unparseable value is the dangerous case: it survives a
  * `user.proExpiresAt ? …` check and then throws `RangeError: Invalid time
  * value` out of `toISOString()`, which `handleV1Error` turns into a 500. That

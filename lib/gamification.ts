@@ -8,7 +8,7 @@ import PlanEnrollment from '../models/PlanEnrollment.js';
  *
  * The weighting is the argument the feature is built on: finishing a plan day
  * you actually studied is worth six read chapters. Volume is cheap here on
- * purpose — the app should reward understanding a small portion, not covering
+ * purpose - the app should reward understanding a small portion, not covering
  * a large one.
  *
  * Before this existed, `badges` was written in exactly one place (the streak
@@ -93,7 +93,7 @@ export type BadgeContext = {
 /**
  * Which of the badge ids in components/profile/badges.tsx the user has now
  * earned. `verified`, `contributor`, `invite` and `tester` are deliberately
- * absent — those are granted by hand, not by activity.
+ * absent - those are granted by hand, not by activity.
  */
 export function evaluateBadges(ctx: BadgeContext): string[] {
   const earned: string[] = [];

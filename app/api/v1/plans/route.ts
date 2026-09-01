@@ -12,7 +12,7 @@ export async function OPTIONS() {
   return corsPreflight();
 }
 
-/** `?type=public|my|all|enrolled` — defaults to public plans plus the caller's own. */
+/** `?type=public|my|all|enrolled` - defaults to public plans plus the caller's own. */
 export async function GET(req: Request) {
   try {
     const auth = await requireUser(req);
@@ -93,7 +93,7 @@ export async function POST(req: Request) {
 
     // A self-built plan the user never joins is dead on arrival, so the builder
     // enrols by default; the free-tier cap still applies and is not an error
-    // here — the plan is created either way.
+    // here - the plan is created either way.
     if (autoEnrol !== false) {
       const active = await PlanEnrollment.countDocuments({ userId: auth.id, status: 'active' });
       if (auth.isPro || active === 0) {
@@ -115,7 +115,7 @@ export async function POST(req: Request) {
   }
 }
 
-/** `?id=<planId>` — creator or admin only. */
+/** `?id=<planId>` - creator or admin only. */
 export async function DELETE(req: Request) {
   try {
     const auth = await requireUser(req);

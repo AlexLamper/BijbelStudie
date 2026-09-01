@@ -6,7 +6,7 @@ import StudyGroup from "../../../../../models/StudyGroup"
 import User from "../../../../../models/User"
 
 // POST /api/groepen/[id]/join
-// Body: { inviteCode? } — required only if group is private
+// Body: { inviteCode? } - required only if group is private
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }

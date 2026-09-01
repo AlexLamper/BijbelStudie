@@ -10,7 +10,7 @@ const SITE_ORIGIN = 'https://www.bijbelstudie.io';
 /**
  * The guided studies shown on `/studies`.
  *
- * Static content, so it is ETagged and cached hard — the app ships no copy of
+ * Static content, so it is ETagged and cached hard - the app ships no copy of
  * it, which keeps a lesson edit on the website a deploy rather than a release.
  * Image paths are absolutised because the client has no notion of the site
  * root.

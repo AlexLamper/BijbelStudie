@@ -14,7 +14,7 @@ import SyncTombstone from '../models/SyncTombstone';
  * permanent identity immediately, and have a retried upload be a no-op instead
  * of a duplicate.
  *
- * CONFLICT RULE — last write wins by `updatedAt`, ties go to the server.
+ * CONFLICT RULE - last write wins by `updatedAt`, ties go to the server.
  * An incoming change older than the stored row is dropped, not merged: a
  * device that has been offline for a week must not silently overwrite edits
  * made on the website since. Deletes are tombstones (see SyncTombstone), so a
@@ -255,7 +255,7 @@ export type UpsertOutcome = { record: SyncRecord | null; skipped: 'stale' | 'del
  *
  * Returns `skipped: 'stale'` when the incoming `updatedAt` is older than what
  * is stored, and `skipped: 'deleted'` when a tombstone already exists for this
- * id — both are normal outcomes of a device catching up, not errors.
+ * id - both are normal outcomes of a device catching up, not errors.
  */
 export async function upsertRecord(
   userId: string,

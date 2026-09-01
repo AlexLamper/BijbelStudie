@@ -5,13 +5,13 @@
  * nowhere else: `CommentaryComponent` hid long commentary behind a mask,
  * `OriginalText` sliced the verse list to one, and `study_screen.dart` swapped
  * the grondtekst pane for a wall. The APIs underneath served the full text to
- * anyone who asked, with or without a token — `curl` against
+ * anyone who asked, with or without a token - `curl` against
  * `/api/v1/original/Genesis/1` returned 31 KB of Hebrew, and
  * `/api/commentary?...` returned 60 KB of Matthew Henry. A paywall a `fetch`
  * can walk around is a suggestion, not a paywall.
  *
  * The policy below is deliberately the same as the one the clients already
- * implemented, so nothing a paying or non-paying user sees changes shape — the
+ * implemented, so nothing a paying or non-paying user sees changes shape - the
  * difference is that the bytes a free user is not entitled to now never leave
  * the server.
  *
@@ -59,7 +59,7 @@ export type Gated<T> = {
  * Whole entries are kept while the budget allows and the entry that overruns it
  * is cut mid-text. Keeping only whole entries would be tidier to read but would
  * hand a free user the entirety of any single long introduction, which on
- * Matthew Henry is most of the chapter — the cap has to bind on characters, not
+ * Matthew Henry is most of the chapter - the cap has to bind on characters, not
  * on entry count.
  *
  * A chapter whose total is already within the allowance is returned untouched

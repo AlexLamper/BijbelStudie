@@ -30,7 +30,7 @@ export type PlanCategory =
   | 'overig';
 
 export type PlanBook = {
-  /** Canonical English name — the key used by BIBLE_BOOKS_ORDER. */
+  /** Canonical English name - the key used by BIBLE_BOOKS_ORDER. */
   en: string;
   /** Display + data-folder name, i.e. the CANONICAL_NL spelling. */
   nl: string;

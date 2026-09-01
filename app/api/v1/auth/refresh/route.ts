@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
 
     if (!result.ok) {
       // A replay means the whole family has just been revoked. The client must
-      // treat this as "signed out everywhere" and send the user to login —
+      // treat this as "signed out everywhere" and send the user to login -
       // retrying with a stored token will only fail again.
       if (result.reason === 'replayed') {
         return errorV1(

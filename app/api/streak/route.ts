@@ -38,7 +38,7 @@ export async function POST(request: Request) {
 
   // `?test=true` skips every rule and just increments. It is a development
   // aid, but as a production route it let any signed-in user inflate their own
-  // streak — and now their badges and XP with it — from the browser console.
+  // streak - and now their badges and XP with it - from the browser console.
   const url = new URL(request.url)
   const test = url.searchParams.get("test") === "true" && process.env.NODE_ENV !== "production"
 
@@ -90,7 +90,7 @@ export async function POST(request: Request) {
 
   // Badges are no longer awarded here. `lib/gamification.ts` evaluates the
   // whole set at once, which also fixes the old `else if` chain that could
-  // only ever grant one badge per call — a user crossing two thresholds
+  // only ever grant one badge per call - a user crossing two thresholds
   // together silently lost the lower one.
   const xp = advanced
     ? await grantXp(String(user._id), "streak_day", { isPro: Boolean(user.subscribed) })

@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
 /**
  * Commentary for one chapter.
  *
- * The response used to be the raw verse map, in full, to anyone — the paywall
+ * The response used to be the raw verse map, in full, to anyone - the paywall
  * lived entirely in `CommentaryComponent`, which masked the overflow in CSS.
  * Anything that skipped the component (curl, devtools, the Network tab) got the
  * whole chapter. The entitlement is now resolved here and the text a free

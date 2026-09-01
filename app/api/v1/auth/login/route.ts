@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
       // address is right, retypes the password they use elsewhere, and is
       // locked out forever with no hint that this form is the wrong door.
       //
-      // This does confirm the address has an account — the oracle the generic
+      // This does confirm the address has an account - the oracle the generic
       // message above avoids. It is the same disclosure Google, GitHub and
       // Slack all make on this exact screen, and it only fires for accounts
       // that already federate their identity to a provider. If that trade is

@@ -145,7 +145,7 @@ export async function applyStorePremium(
     throw new Error(`User not found for app_user_id: ${appUserId}`);
   }
   // NOTE: `subscribed` (Stripe) is deliberately left alone. Effective Pro is
-  // the OR of the two — see lib/mobilePremium.ts.
+  // the OR of the two - see lib/mobilePremium.ts.
 }
 
 export async function syncStorePremiumForAppUser(

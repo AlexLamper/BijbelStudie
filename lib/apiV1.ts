@@ -55,7 +55,7 @@ export function handleV1Error(error: unknown) {
     return errorV1('UNAUTHORIZED', 401);
   }
   // Duck-typed rather than `instanceof PlanError` so this module stays free of
-  // model imports — every v1 route loads it, including the ones with no DB.
+  // model imports - every v1 route loads it, including the ones with no DB.
   if (error instanceof Error && error.name === 'PlanError') {
     const { code, status } = error as Error & { code?: string; status?: number };
     return errorV1(code ?? 'PLAN_ERROR', status ?? 400, error.message);
@@ -80,7 +80,7 @@ export function contentEtag(payload: unknown): string {
  *
  * **`private` is load-bearing on any entitlement-dependent response.** The
  * default here is `public`, which lets Vercel's CDN keep one copy and hand it
- * to everyone — correct while every caller got identical bytes, and a hole the
+ * to everyone - correct while every caller got identical bytes, and a hole the
  * moment a response depends on who is asking. The first Pro reader to fetch a
  * chapter would populate the shared cache with the full text and every free
  * reader behind it would be served the same entry. Callers that gate on

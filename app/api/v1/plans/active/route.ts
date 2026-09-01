@@ -13,7 +13,7 @@ export async function OPTIONS() {
 
 /**
  * The dashboard's plan card in one call: the plan the user is actually working
- * on plus today's reading, or — when there is none — what to offer instead, so
+ * on plus today's reading, or - when there is none - what to offer instead, so
  * the card has something to show rather than disappearing.
  */
 export async function GET(req: Request) {

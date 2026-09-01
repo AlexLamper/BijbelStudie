@@ -2,7 +2,7 @@
  * Per-IP throttling for the mobile auth endpoints.
  *
  * In-process fixed windows. On Vercel each lambda instance keeps its own
- * counters, so the real limit is (instances x limit) — enough to stop
+ * counters, so the real limit is (instances x limit) - enough to stop
  * credential stuffing from one host, not a substitute for a shared store. Set
  * UPSTASH_REDIS_REST_URL/TOKEN and swap `checkRateLimit` for a Redis INCR if
  * this ever needs to be exact.

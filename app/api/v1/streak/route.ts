@@ -33,7 +33,7 @@ export async function GET(req: Request) {
  * one bump per calendar day, a freeze absorbs a single missed day for Pro
  * users, and every fifth day grants a freeze.
  *
- * The website's `?test=true` escape hatch is deliberately not carried over —
+ * The website's `?test=true` escape hatch is deliberately not carried over -
  * a client-triggerable streak increment has no place in a shipped binary.
  */
 export async function POST(req: Request) {

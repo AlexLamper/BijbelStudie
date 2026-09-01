@@ -73,7 +73,7 @@ export async function verifyAccessToken(token: string): Promise<MobileAccessClai
       exp: typeof payload.exp === 'number' ? payload.exp : 0,
     };
   } catch {
-    // Expired, wrong signature, malformed — all the same answer to the caller.
+    // Expired, wrong signature, malformed - all the same answer to the caller.
     return null;
   }
 }

@@ -9,7 +9,7 @@ export async function OPTIONS() {
 }
 
 /**
- * GET /api/v1/commentaries — allowlisted only.
+ * GET /api/v1/commentaries - allowlisted only.
  *
  * `kingcomments_nl` is registered in manifest.json for the website but is
  * absent here by design (see lib/mobileLicensing.ts).

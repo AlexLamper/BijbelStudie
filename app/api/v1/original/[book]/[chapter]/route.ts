@@ -16,7 +16,7 @@ export async function OPTIONS() {
 }
 
 /**
- * GET /api/v1/original/:book/:chapter — STEPBible TAHOT/TAGNT.
+ * GET /api/v1/original/:book/:chapter - STEPBible TAHOT/TAGNT.
  *
  * CC BY 4.0: the `attribution` field in the response is not decoration, it is
  * the licence condition. The reader must render it wherever these words appear.

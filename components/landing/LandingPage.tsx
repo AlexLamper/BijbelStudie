@@ -168,7 +168,7 @@ function GroupLabel({
   )
 }
 
-/* ─── Bible Study Illustration — looks like an actual app screenshot ─── */
+/* ─── Bible Study Illustration - looks like an actual app screenshot ─── */
 const HERO_VERSES = [
   { num: 1, text: "De HEERE is mijn Herder, mij zal niets ontbreken.",                                                                       highlight: false },
   { num: 2, text: "Hij doet mij nederliggen in grazige weiden; Hij voert mij zachtjes aan zeer stille wateren.",                            highlight: true  },
@@ -854,7 +854,7 @@ function BibleLibrary() {
 const HEBREW_STACK = "'SBL Hebrew','Ezra SIL','David CLM','Frank Ruhl CLM','Times New Roman','Noto Serif Hebrew',serif"
 
 function GrondtekstMockup() {
-  // Genesis 1:1 — בְּרֵאשִׁית בָּרָא אֱלֹהִים
+  // Genesis 1:1 - בְּרֵאשִׁית בָּרָא אֱלֹהִים
   const words = [
     { h: "בְּרֵאשִׁית",  t: "bere'shit", e: "in het begin", s: "H7225" },
     { h: "בָּרָא",        t: "bara",      e: "schiep",        s: "H1254" },
