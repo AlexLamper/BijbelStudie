@@ -1,10 +1,10 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   Users, ShieldCheck, Sparkles, StickyNote, BookOpen, BarChart3,
-  TrendingUp, ArrowRight, Flame, Euro, Settings2,
+  TrendingUp, ArrowRight, Flame, Euro, Settings2, RefreshCw,
 } from "lucide-react"
 import BillingHealthCard, { type BillingStats } from "../../components/admin/BillingHealthCard"
 
@@ -127,9 +127,11 @@ export default function AdminDashboardPage() {
   const [insights, setInsights] = useState<InsightsResponse | null>(null)
   const [recent, setRecent] = useState<RecentUser[]>([])
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
 
-  useEffect(() => {
+  const loadData = useCallback(async () => {
     const fetchJson = async (url: string): Promise<FetchResult> => {
       try {
         const response = await fetch(url, { cache: "no-store", credentials: "include" })
@@ -159,7 +161,7 @@ export default function AdminDashboardPage() {
       return fetchStatsWithRetry(attempt + 1)
     }
 
-    Promise.all([
+    return Promise.all([
       fetchStatsWithRetry(),
       fetchJson("/api/admin/insights?days=30"),
       fetchJson("/api/admin/users?limit=8"),
@@ -174,10 +176,20 @@ export default function AdminDashboardPage() {
         if (u && typeof u === "object" && "users" in u && Array.isArray((u as { users?: unknown[] }).users)) {
           setRecent(((u as { users: RecentUser[] }).users).slice(0, 6))
         }
-        if (!s) setLoadError(describeStatsFailure(statsRes))
+        setLoadError(s ? null : describeStatsFailure(statsRes))
+        if (s) setLastUpdated(new Date())
       })
       .finally(() => setLoading(false))
   }, [])
+
+  useEffect(() => {
+    void loadData()
+  }, [loadData])
+
+  const handleRefresh = useCallback(() => {
+    setRefreshing(true)
+    void loadData().finally(() => setRefreshing(false))
+  }, [loadData])
 
   const degraded = stats?.degraded ?? []
 
@@ -210,9 +222,21 @@ export default function AdminDashboardPage() {
             </div>
             <p className="text-sm text-muted-foreground mt-0.5">
               Overzicht van gebruikers, abonnementen en activiteit
+              {lastUpdated && (
+                <span className="text-muted-foreground/70">
+                  {" "}· bijgewerkt {lastUpdated.toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })}
+                </span>
+              )}
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing || loading}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-colors border border-border bg-white dark:bg-card hover:bg-gray-50 dark:hover:bg-secondary text-foreground disabled:opacity-60"
+            >
+              <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} /> Vernieuwen
+            </button>
             <Link
               href="/admin/users"
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium no-underline transition-colors border border-border bg-white dark:bg-card hover:bg-gray-50 dark:hover:bg-secondary text-foreground"

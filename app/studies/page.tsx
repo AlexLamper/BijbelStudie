@@ -323,7 +323,12 @@ function TrackStep({ entry, step, status }: { entry: Entry; step: number; status
         <h3 className="text-[14.5px] font-semibold leading-snug text-gray-900 dark:text-foreground group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors">
           {entry.study.title}
         </h3>
-        <div className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-[11px] text-gray-400 dark:text-muted-foreground tabular-nums">
+        {entry.study.description && (
+          <p className="mt-0.5 text-[12.5px] leading-snug text-gray-500 dark:text-muted-foreground line-clamp-2">
+            {entry.study.description}
+          </p>
+        )}
+        <div className="mt-1 flex flex-wrap items-center gap-x-1.5 text-[11px] text-gray-400 dark:text-muted-foreground tabular-nums">
           <span className="font-semibold uppercase tracking-wider">{entry.kind}</span>
           <span aria-hidden>·</span>
           <span>
@@ -600,6 +605,51 @@ export default function StudiesPage() {
               </span>
             )}
           </p>
+
+          {view.kind === 'track' && (() => {
+            /* One glance at the whole spoor: how much work, how far you are,
+               and which book it opens on. All derived from `rows`, so it never
+               drifts from the list underneath it. */
+            const statuses = rows.map(entry => statusFor(entry.study))
+            const totalLessons = rows.reduce((sum, entry) => sum + entry.lessonCount, 0)
+            const totalMinutes = rows.reduce(
+              (sum, entry) => sum + entry.lessonCount * entry.avgMinutes,
+              0,
+            )
+            const totalHours = Math.max(1, Math.round(totalMinutes / 60))
+            const doneCount = statuses.filter(status => status.completed).length
+            const startBook = rows[0]?.study.lessons[0]?.book ?? rows[0]?.study.startBook
+            return (
+              <dl className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-[760px]">
+                {[
+                  { label: 'Studies', value: `${rows.length}` },
+                  { label: 'Lessen totaal', value: `${totalLessons}` },
+                  { label: 'Tijd totaal', value: `±${totalHours} uur` },
+                  {
+                    label: 'Afgerond',
+                    value: `${doneCount}/${rows.length}`,
+                  },
+                ].map(stat => (
+                  <div
+                    key={stat.label}
+                    className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card px-3 py-2.5"
+                  >
+                    <dt className="text-[10.5px] font-semibold uppercase tracking-wider text-gray-400 dark:text-muted-foreground">
+                      {stat.label}
+                    </dt>
+                    <dd className="mt-0.5 text-lg font-bold tabular-nums text-gray-900 dark:text-foreground">
+                      {stat.value}
+                    </dd>
+                  </div>
+                ))}
+                {startBook && (
+                  <p className="col-span-2 sm:col-span-4 -mt-1 text-[12.5px] text-gray-500 dark:text-muted-foreground">
+                    Je begint in <span className="font-semibold text-gray-700 dark:text-foreground">{startBook}</span> en werkt de studies van boven naar beneden af.
+                  </p>
+                )}
+              </dl>
+            )
+          })()}
 
           {view.kind === 'track' ? (
             /* One panel, one row per step. Capped at a readable measure: a track
