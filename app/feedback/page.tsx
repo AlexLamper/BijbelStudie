@@ -28,6 +28,10 @@ export default function FeedbackPage() {
   const [message, setMessage] = useState("")
   const [status, setStatus] = useState<Status>("idle")
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  // Honeypot. Left empty by anyone who can see the form; a bot fills
+  // every input it finds. The server answers 200 and writes nothing when
+  // this arrives filled - see app/api/feedback/route.ts.
+  const [website, setWebsite] = useState("")
 
   useEffect(() => {
     if (status !== "success") return
@@ -58,6 +62,7 @@ export default function FeedbackPage() {
           rating: rating || undefined,
           message: message.trim(),
           page: pathname || "",
+          website,
         }),
       })
       if (!res.ok) {
@@ -91,6 +96,19 @@ export default function FeedbackPage() {
 
           {/* Left column - form */}
           <form onSubmit={handleSubmit} className="flex flex-col gap-5 min-w-0">
+            {/* Honeypot: off-screen rather than display:none, which some bots
+                skip, and aria-hidden + tabIndex so it is invisible to assistive
+                technology and to the keyboard. */}
+            <input
+              type="text"
+              name="website"
+              value={website}
+              onChange={(e) => setWebsite(e.target.value)}
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden="true"
+              style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }}
+            />
 
             {/* Category selector */}
             <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-2xl overflow-hidden">

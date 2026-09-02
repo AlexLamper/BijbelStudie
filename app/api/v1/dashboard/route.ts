@@ -8,9 +8,30 @@ import { fetchDayText } from '../../../../lib/mobileDayText';
 import { getActivePlanCard } from '../../../../lib/planService';
 import { describeLevel } from '../../../../lib/gamification';
 import { suggestPlans } from '../../../../lib/planGenerator';
-import { canonicaliseReadChapters } from '../../../../lib/readChaptersCanon';
+import {
+  canonicaliseReadChapters,
+  readChaptersFrom,
+  unreadableBookKeys,
+} from '../../../../lib/readChaptersCanon';
 
 export const dynamic = 'force-dynamic';
+
+type LeanUser = {
+  _id: unknown;
+  readChapters?: unknown;
+  lastReadChapter?: {
+    book?: string;
+    chapter?: number;
+    version?: string;
+    commentary?: string;
+    updatedAt?: Date;
+  } | null;
+  streak?: number;
+  freezeCount?: number;
+  xp?: number;
+  badges?: string[];
+};
+
 
 export async function OPTIONS() {
   return corsPreflight();
@@ -29,7 +50,10 @@ export async function GET(req: Request) {
     const auth = await requireUser(req);
     await connectMongoDB();
 
-    const user = await User.findById(auth.id);
+    // `.lean()` for the same reason as /api/user/reading-progress: a hydrated
+    // document drops `readChapters` entirely when one key in it will not cast,
+    // and this handler reads nothing off the user but plain fields.
+    const user = await User.findById(auth.id).lean<LeanUser | null>();
     if (!user) return jsonV1({ error: 'NOT_FOUND' }, { status: 404 });
 
     const now = new Date();
@@ -77,13 +101,12 @@ export async function GET(req: Request) {
     // by; without this, chapters opened in a translation that names its books
     // differently ("1 Corinthiërs", "John", "Numberi") never light up the map
     // or count towards "… van 66 boeken geopend".
-    const rawReadChapters: Record<string, number[]> = {};
-    if (user.readChapters) {
-      for (const [book, chapters] of user.readChapters.entries()) {
-        rawReadChapters[book] = chapters;
-      }
+    const stored = readChaptersFrom(user.readChapters);
+    const broken = unreadableBookKeys(user.readChapters);
+    if (broken.length > 0) {
+      await User.updateOne({ _id: user._id }, { $set: { readChapters: stored } });
     }
-    const readChapters = canonicaliseReadChapters(rawReadChapters);
+    const readChapters = canonicaliseReadChapters(stored);
 
     // With no plan running, the card's job is to offer one rather than vanish.
     const planSuggestions = activePlan

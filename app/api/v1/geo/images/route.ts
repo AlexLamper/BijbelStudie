@@ -23,11 +23,18 @@ export async function GET(req: Request) {
       return errorV1('MISSING_FIELDS', 400, 'book and chapter are required');
     }
 
-    const images = geoDataService.getImagesForChapter(book, chapter);
+    // `fallback=book` is what the guided study flow asks for: most chapters name
+    // no place at all, and an empty Beeld panel reads as broken rather than as
+    // "nothing here". The web route has had this since the flow shipped.
+    const chapterImages = geoDataService.getImagesForChapter(book, chapter);
+    const useBookFallback =
+      chapterImages.length === 0 && searchParams.get('fallback') === 'book';
+    const images = useBookFallback ? geoDataService.getImagesForBook(book) : chapterImages;
 
     return cachedJsonV1(
       req,
       {
+        scope: useBookFallback ? 'book' : 'chapter',
         images: images.map((image) => ({
           id: image.id,
           url: image.fileUrl || image.url,

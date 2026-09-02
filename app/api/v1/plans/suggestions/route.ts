@@ -6,6 +6,7 @@ import BiblePlan from '../../../../../models/BiblePlan.js';
 import PlanEnrollment from '../../../../../models/PlanEnrollment.js';
 import { generateReadings, isPace, suggestPlans, type Pace } from '../../../../../lib/planGenerator';
 import { getPlan } from '../../../../../lib/planService';
+import { readChaptersFrom } from '../../../../../lib/readChaptersCanon';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,14 +16,12 @@ export async function OPTIONS() {
 
 async function readingContext(userId: string) {
   await connectMongoDB();
-  const user = await User.findById(userId).select('lastReadChapter readChapters');
-
-  const readChapters: Record<string, number[]> = {};
-  if (user?.readChapters) {
-    for (const [book, chapters] of user.readChapters.entries()) {
-      readChapters[book] = chapters;
-    }
-  }
+  // `.lean()`: a hydrated document loses `readChapters` entirely when one key
+  // in it will not cast. See lib/readChaptersCanon `readChaptersFrom`.
+  const user = await User.findById(userId)
+    .select('lastReadChapter readChapters')
+    .lean<{ lastReadChapter?: { book?: string } | null; readChapters?: unknown } | null>();
+  const readChapters = readChaptersFrom(user?.readChapters);
 
   return { lastReadBook: user?.lastReadChapter?.book ?? null, readChapters };
 }

@@ -1,6 +1,10 @@
 import { requireUser } from '../../../../lib/apiAuth';
 import { isSafeBookKey, isSafeChapter } from '../../../../lib/readingProgress';
-import { canonicaliseReadChapters, toCanonicalDutchBook } from '../../../../lib/readChaptersCanon';
+import {
+  canonicaliseReadChapters,
+  readChaptersFrom,
+  toCanonicalDutchBook,
+} from '../../../../lib/readChaptersCanon';
 import { corsPreflight, errorV1, handleV1Error, jsonV1 } from '../../../../lib/apiV1';
 import connectMongoDB from '../../../../lib/mongodb';
 import User from '../../../../models/User';
@@ -17,19 +21,16 @@ export async function GET(req: Request) {
   try {
     const auth = await requireUser(req);
     await connectMongoDB();
-    const user = await User.findById(auth.id).select('lastReadChapter readChapters');
+    // `.lean()`: hydrating drops `readChapters` wholesale when a single key in
+    // it will not cast. See lib/readChaptersCanon `readChaptersFrom`.
+    const user = await User.findById(auth.id)
+      .select('lastReadChapter readChapters')
+      .lean<{ lastReadChapter?: unknown; readChapters?: unknown } | null>();
     if (!user) return errorV1('NOT_FOUND', 404);
-
-    const rawReadChapters: Record<string, number[]> = {};
-    if (user.readChapters) {
-      for (const [book, chapters] of user.readChapters.entries()) {
-        rawReadChapters[book] = chapters;
-      }
-    }
 
     return jsonV1({
       lastReadChapter: user.lastReadChapter ?? null,
-      readChapters: canonicaliseReadChapters(rawReadChapters),
+      readChapters: canonicaliseReadChapters(readChaptersFrom(user.readChapters)),
     });
   } catch (error) {
     return handleV1Error(error);
@@ -48,7 +49,7 @@ export async function POST(req: Request) {
   try {
     const auth = await requireUser(req);
     const body = await req.json();
-    const { book, chapter, version, commentary } = body ?? {};
+    const { book, chapter, version, commentary, awardXp } = body ?? {};
 
     if (!book || !chapter || !version) {
       return errorV1('MISSING_FIELDS', 400, 'book, chapter and version are required');
@@ -98,7 +99,14 @@ export async function POST(req: Request) {
     });
     if (!recent) await ReadingSession.create({ userId: user._id });
 
-    const xp = alreadyRead ? null : await grantXp(auth.id, 'chapter_read', { isPro: auth.isPro });
+    // A guided lesson opens the same chapter it is about, and completing that
+    // lesson already pays 25 XP. `awardXp: false` lets the study flow record the
+    // reading position without also paying chapter XP for the same passage.
+    // Absent means true, so every existing caller keeps its XP.
+    const xp =
+      alreadyRead || awardXp === false
+        ? null
+        : await grantXp(auth.id, 'chapter_read', { isPro: auth.isPro });
 
     return jsonV1({ lastReadChapter: user.lastReadChapter, xp });
   } catch (error) {

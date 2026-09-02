@@ -158,7 +158,9 @@ function ResetPasswordForm() {
       if (response.ok) {
         setSuccess(true);
         setTimeout(() => {
-          router.push("/api/auth/signin?message=Password reset successful! Please sign in with your new password.");
+          // `/inloggen`, not `/api/auth/signin`: NextAuth's own page is not used
+          // here (`authOptions.pages.signIn`), and this is a Dutch-only UI.
+          router.push("/inloggen");
         }, 2000);
       } else {
         setError(data.error || t.errors.resetFailed);

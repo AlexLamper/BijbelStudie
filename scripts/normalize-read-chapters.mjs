@@ -11,6 +11,10 @@
  * chapters opened under any other spelling never counted towards
  * "… van 66 boeken geopend" and never coloured the heat map.
  *
+ * It also drops keys that are not book names at all - `$*` above all, which is
+ * the Map's own schema path and made Mongoose refuse to hydrate the field, so
+ * the dashboards saw an empty map however much the user had read.
+ *
  * The API routes now canonicalise on the way in and on the way out, so new
  * writes are clean and reads are corrected on the fly. This script rewrites the
  * stored documents so the correction is not recomputed on every request and so
@@ -141,6 +145,11 @@ function canonicaliseReadChapters(raw) {
   const out = {};
   if (!raw) return out;
   for (const [book, chapters] of Object.entries(raw)) {
+    // `$*` is the schema path of the Map itself and got serialised into live
+    // documents as a literal key. Keeping it is not cosmetic: Mongoose cannot
+    // cast the map while it is there, so it hydrates the whole field as
+    // `undefined` and every reader looks like they have opened no book at all.
+    if (book.startsWith('$') || book.includes('.')) continue;
     const key = toCanonicalDutchBook(book) ?? book;
     const clean = (Array.isArray(chapters) ? chapters : []).filter(
       (n) => typeof n === 'number' && Number.isInteger(n) && n >= 1,

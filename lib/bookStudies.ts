@@ -159,3 +159,60 @@ export function findAnyStudy(studyId: string): CuratedStudy | null {
 export function bookSlugFromStudyId(studyId: string): string | null {
   return isBookStudyId(studyId) ? studyId.slice(BOOK_STUDY_PREFIX.length) : null;
 }
+
+/**
+ * How the catalogue groups a study.
+ *
+ * `category` is the coarse bucket the browse rail offers; `kind` is the one-word
+ * label above a group ("Wet", "Evangelie", "Persoon"). Both live here rather
+ * than on the page because /studies and the app's /api/v1/studies/catalog have
+ * to agree on them - a study that is a "Profeten" book on the website must not
+ * be something else in the app.
+ */
+export type StudyCategory = 'ot' | 'nt' | 'personen' | 'themas';
+
+/** Minutes assumed for a lesson that carries no estimate of its own. */
+export const MINUTES_FALLBACK = 12;
+
+export interface CatalogueEntry {
+  study: CuratedStudy;
+  /** The book behind a bible-book study; absent for theme/person/passage ones. */
+  book?: BibleBook;
+  /** "Wet", "Evangelie", "Persoon" - what kind of thing this is, in one word. */
+  kind: string;
+  category: StudyCategory;
+  lessonCount: number;
+  /** Average minutes per lesson; lessons without an estimate take the fallback. */
+  avgMinutes: number;
+}
+
+/** Mean minutes per lesson, rounded. */
+export function avgMinutesOf(study: CuratedStudy): number {
+  const total = study.lessons.reduce(
+    (sum, lesson) => sum + (lesson.estimatedMinutes ?? MINUTES_FALLBACK),
+    0,
+  );
+  return Math.round(total / (study.lessons.length || 1));
+}
+
+/** Every study with its grouping metadata - books first, themes after. */
+export const CATALOGUE_ENTRIES: CatalogueEntry[] = [
+  ...BOOK_STUDY_ENTRIES.map(({ book, study }) => ({
+    study,
+    book,
+    kind: book.genre,
+    category: (book.testament === 'oude-testament' ? 'ot' : 'nt') as StudyCategory,
+    lessonCount: study.lessons.length,
+    avgMinutes: avgMinutesOf(study),
+  })),
+  ...THEME_STUDIES.map((study) => {
+    const isPerson = study.type === 'Persoon';
+    return {
+      study,
+      kind: isPerson ? 'Persoon' : study.type === 'Gedeelte' ? 'Gedeelte' : 'Thema',
+      category: (isPerson ? 'personen' : 'themas') as StudyCategory,
+      lessonCount: study.lessons.length,
+      avgMinutes: avgMinutesOf(study),
+    };
+  }),
+];

@@ -25,3 +25,4 @@ export async function requireAdmin() {
   }
   return { ok: true as const, email: session.user.email };
 }
+

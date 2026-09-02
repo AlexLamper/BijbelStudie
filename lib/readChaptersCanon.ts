@@ -96,7 +96,9 @@ export function toCanonicalDutchBook(name: string | null | undefined): string | 
  * name and the chapter arrays behind merged keys are unioned, sorted and
  * de-duplicated. Unrecognised keys are passed through untouched rather than
  * dropped - losing reading history is worse than a stray key the dashboards
- * already ignore.
+ * already ignore. Keys that are not book names at all (`$`-prefixed or dotted)
+ * are the exception: those are corruption, and passing one to a client would
+ * put it on the heat map.
  */
 export function canonicaliseReadChapters(
   raw: Record<string, number[]> | null | undefined,
@@ -113,7 +115,71 @@ export function canonicaliseReadChapters(
   };
 
   for (const [book, chapters] of Object.entries(raw)) {
+    if (!isReadableBookKey(book)) continue;
     merge(toCanonicalDutchBook(book) ?? book, Array.isArray(chapters) ? chapters : []);
   }
   return out;
+}
+
+/**
+ * A key that can safely stand for a book. Mongo's own metacharacters cannot:
+ * `$*` is the schema path of the `readChapters` Map itself and got serialised
+ * into live documents as a literal key (see app/api/checkout/route.ts), and a
+ * dotted key would name a nested path rather than a book.
+ */
+function isReadableBookKey(key: string): boolean {
+  return key.length > 0 && !key.startsWith('$') && !key.includes('.');
+}
+
+/** A chapter list as stored: a plain array of positive integers. */
+function isChapterList(value: unknown): value is number[] {
+  return (
+    Array.isArray(value) &&
+    value.every((n) => typeof n === 'number' && Number.isInteger(n) && n >= 1)
+  );
+}
+
+/**
+ * The stored `readChapters` of a user document, as a plain object.
+ *
+ * Read it through here rather than off the document, because the field cannot
+ * be trusted to arrive as a Map. Mongoose types it `Map of [Number]`, and when
+ * ONE value in the map fails to cast it does not throw - it leaves the whole
+ * path `undefined`. A single `$*` key (the corruption described in
+ * app/api/checkout/route.ts) therefore hid every book a reader had ever opened:
+ * both dashboards guard with `if (user.readChapters)`, so they reported
+ * "0 van 66 boeken geopend" while the writes underneath kept landing, because
+ * `$addToSet` goes to Mongo without hydrating anything.
+ *
+ * Callers pass a `.lean()` document, where the field arrives as the raw stored
+ * object and one bad key costs only that key. A hydrated Map still works.
+ */
+export function readChaptersFrom(value: unknown): Record<string, number[]> {
+  const out: Record<string, number[]> = {};
+  if (!value) return out;
+
+  const entries: Iterable<[string, unknown]> =
+    value instanceof Map
+      ? value.entries()
+      : Object.entries(value as Record<string, unknown>);
+
+  for (const [book, chapters] of entries) {
+    if (typeof book !== 'string' || !isReadableBookKey(book)) continue;
+    // A Mongoose array is a real array; anything else here is corruption.
+    if (!isChapterList(chapters)) continue;
+    out[book] = [...chapters];
+  }
+  return out;
+}
+
+/**
+ * The keys of a stored map that `readChaptersFrom` had to drop - the ones that
+ * make Mongoose refuse to hydrate the field at all. Non-empty means the stored
+ * document needs repairing, not just reading around.
+ */
+export function unreadableBookKeys(value: unknown): string[] {
+  if (!value || value instanceof Map) return [];
+  return Object.entries(value as Record<string, unknown>)
+    .filter(([book, chapters]) => !isReadableBookKey(book) || !isChapterList(chapters))
+    .map(([book]) => book);
 }

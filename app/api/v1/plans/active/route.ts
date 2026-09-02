@@ -4,6 +4,7 @@ import connectMongoDB from '../../../../../lib/mongodb';
 import User from '../../../../../models/User';
 import { getActivePlanCard } from '../../../../../lib/planService';
 import { suggestPlans } from '../../../../../lib/planGenerator';
+import { readChaptersFrom } from '../../../../../lib/readChaptersCanon';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,14 +25,12 @@ export async function GET(req: Request) {
     if (activePlan) return jsonV1({ activePlan, suggestions: [] });
 
     await connectMongoDB();
-    const user = await User.findById(auth.id).select('lastReadChapter readChapters');
-
-    const readChapters: Record<string, number[]> = {};
-    if (user?.readChapters) {
-      for (const [book, chapters] of user.readChapters.entries()) {
-        readChapters[book] = chapters;
-      }
-    }
+    // `.lean()`: a hydrated document loses `readChapters` entirely when one key
+    // in it will not cast. See lib/readChaptersCanon `readChaptersFrom`.
+    const user = await User.findById(auth.id)
+      .select('lastReadChapter readChapters')
+      .lean<{ lastReadChapter?: { book?: string } | null; readChapters?: unknown } | null>();
+    const readChapters = readChaptersFrom(user?.readChapters);
 
     return jsonV1({
       activePlan: null,

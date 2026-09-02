@@ -2,9 +2,9 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, ArrowRight, CheckCircle2, Search } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Check, CheckCircle2, ChevronRight, Search } from 'lucide-react'
 import { curatedStudies, type CuratedStudy } from '../../lib/data/curated-studies'
-import { BOOK_STUDY_ENTRIES, THEME_STUDIES } from '../../lib/bookStudies'
+import { BOOK_STUDY_ENTRIES, CATALOGUE_ENTRIES, THEME_STUDIES } from '../../lib/bookStudies'
 import { JsonLd } from '../../components/seo/JsonLd'
 import { absoluteUrl } from '../../lib/seo/constants'
 import {
@@ -16,7 +16,6 @@ import {
 
 const TEAL = '#0D9488'
 const COMPLETED_KEY = 'bijbelstudie_completed_studies'
-const MINUTES_FALLBACK = 12
 
 /** How many "verder waar je was" pills we show. Three is a strip; ten is a second catalogue. */
 const RESUME_LIMIT = 3
@@ -85,6 +84,17 @@ const CATEGORY_LABELS: Record<Category, string> = {
   themas: "Thema's",
 }
 
+/** The line under a category title: what you are looking at, and in what order. */
+const CATEGORY_BLURBS: Record<Category, string> = {
+  ot: 'Op volgorde van de canon, gegroepeerd per soort boek.',
+  nt: 'Op volgorde van de canon, gegroepeerd per soort boek.',
+  personen: 'Studies die één persoon door de tekst heen volgen.',
+  themas: 'Studies die één lijn door meerdere bijbelboeken trekken.',
+}
+
+/** The categories that hold bible books, whose titles are short enough to pack tight. */
+const BOOK_CATEGORIES: Category[] = ['ot', 'nt']
+
 interface Enrollment {
   studyId: string
   currentLessonDay: number
@@ -115,39 +125,22 @@ interface Entry {
   haystack: string
 }
 
-function avgMinutesOf(study: CuratedStudy): number {
-  const total = study.lessons.reduce(
-    (sum, lesson) => sum + (lesson.estimatedMinutes ?? MINUTES_FALLBACK),
-    0,
-  )
-  return Math.round(total / (study.lessons.length || 1))
-}
+// `kind`, `category`, `lessonCount` and `avgMinutes` come from lib/bookStudies
+// so this page and /api/v1/studies/catalog group studies identically. Only the
+// search haystack is built here - the API has no use for it.
+const ENTRIES: Entry[] = CATALOGUE_ENTRIES.map(({ study, book, kind, category, lessonCount, avgMinutes }) => ({
+  study,
+  kind,
+  category,
+  lessonCount,
+  avgMinutes,
+  haystack: (book
+    ? `${study.title} ${book.name} ${book.genre} ${study.description}`
+    : `${study.title} ${study.description} ${study.lessons.map(lesson => lesson.book).join(' ')}`
+  ).toLowerCase(),
+}))
 
-const ENTRIES: Entry[] = [
-  ...BOOK_STUDY_ENTRIES.map(({ book, study }) => ({
-    study,
-    kind: book.genre,
-    category: (book.testament === 'oude-testament' ? 'ot' : 'nt') as Category,
-    lessonCount: study.lessons.length,
-    avgMinutes: avgMinutesOf(study),
-    haystack: `${study.title} ${book.name} ${book.genre} ${study.description}`.toLowerCase(),
-  })),
-  ...THEME_STUDIES.map(study => {
-    const isPerson = study.type === 'Persoon'
-    return {
-      study,
-      kind: isPerson ? 'Persoon' : study.type === 'Gedeelte' ? 'Gedeelte' : 'Thema',
-      category: (isPerson ? 'personen' : 'themas') as Category,
-      lessonCount: study.lessons.length,
-      avgMinutes: avgMinutesOf(study),
-      haystack: `${study.title} ${study.description} ${study.lessons
-        .map(lesson => lesson.book)
-        .join(' ')}`.toLowerCase(),
-    }
-  }),
-]
-
-const ENTRY_BY_ID = new Map(ENTRIES.map(entry => [entry.study.id, entry] as const))
+const ENTRY_BY_ID = new Map(ENTRIES.map(entry => [entry.study.id, entry]))
 
 const byCategory = (category: Category) => ENTRIES.filter(entry => entry.category === category)
 
@@ -300,6 +293,134 @@ function StudyCard({ entry, status }: { entry: Entry; status: Status }) {
   )
 }
 
+/**
+ * One step of a track.
+ *
+ * A track is an order, not a shelf, so it reads as a numbered list: the step
+ * number, the title, and the same cost line the cards carry. The number used to
+ * be a teal disc floating over the corner of a card, which clipped the border
+ * and left the reader to work out that the grid was a sequence at all.
+ */
+function TrackStep({ entry, step, status }: { entry: Entry; step: number; status: Status }) {
+  return (
+    <Link
+      href={`/studies/${entry.study.id}`}
+      data-track="study_card"
+      className="group no-underline flex items-center gap-3 px-4 py-3 transition-colors hover:bg-gray-50 dark:hover:bg-secondary"
+    >
+      <span
+        className="flex h-7 w-7 flex-none items-center justify-center rounded-full text-[11px] font-bold tabular-nums"
+        style={
+          status.completed
+            ? { backgroundColor: TEAL, color: '#ffffff' }
+            : { backgroundColor: 'rgba(13,148,136,0.12)', color: TEAL }
+        }
+      >
+        {status.completed ? <Check size={14} /> : step}
+      </span>
+
+      <div className="min-w-0 flex-1">
+        <h3 className="text-[14.5px] font-semibold leading-snug text-gray-900 dark:text-foreground group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors">
+          {entry.study.title}
+        </h3>
+        <div className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-[11px] text-gray-400 dark:text-muted-foreground tabular-nums">
+          <span className="font-semibold uppercase tracking-wider">{entry.kind}</span>
+          <span aria-hidden>·</span>
+          <span>
+            {entry.lessonCount} {entry.lessonCount === 1 ? 'les' : 'lessen'}
+          </span>
+          <span aria-hidden>·</span>
+          <span>±{entry.avgMinutes} min per les</span>
+        </div>
+        {status.started && !status.completed && (
+          <div className="mt-1.5 h-1 max-w-[220px] overflow-hidden rounded-full bg-gray-100 dark:bg-secondary">
+            <div
+              className="h-full rounded-full"
+              style={{ width: `${status.pct}%`, backgroundColor: TEAL }}
+            />
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-none items-center gap-2">
+        {status.completed ? (
+          <span className="text-[11px] font-semibold" style={{ color: TEAL }}>
+            Afgerond
+          </span>
+        ) : status.started ? (
+          <span
+            className="hidden sm:block text-[11px] font-semibold tabular-nums"
+            style={{ color: TEAL }}
+          >
+            les {status.resumeDay ?? status.done + 1}/{status.total}
+          </span>
+        ) : null}
+        <ChevronRight
+          size={15}
+          className="text-gray-300 dark:text-muted-foreground transition-transform group-hover:translate-x-0.5"
+        />
+      </div>
+    </Link>
+  )
+}
+
+/**
+ * One line in the browse grid: a title, and one number for what it costs you.
+ *
+ * Deliberately not a card. Browsing the Oude Testament is thirty-nine names you
+ * scan for the one you already have in mind, and thirty-nine cards carrying a
+ * genre, a lesson count and a minute estimate turned that into a page and a half
+ * of scrolling. The lesson count stays because it is the one thing that differs
+ * between Obadja and Jesaja; progress takes its place once you have any.
+ */
+function BookRow({ entry, status }: { entry: Entry; status: Status }) {
+  return (
+    <Link
+      href={`/studies/${entry.study.id}`}
+      data-track="study_card"
+      className="group no-underline flex items-baseline justify-between gap-2 rounded-lg px-2.5 py-1.5 transition-colors hover:bg-gray-50 dark:hover:bg-secondary"
+    >
+      <span className="text-[13.5px] leading-snug text-gray-800 dark:text-foreground group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors">
+        {entry.study.title}
+      </span>
+      {status.completed ? (
+        <span className="flex-none self-center" style={{ color: TEAL }}>
+          <CheckCircle2 size={13} />
+          <span className="sr-only">Afgerond</span>
+        </span>
+      ) : status.started ? (
+        <span className="flex-none text-[11px] font-semibold tabular-nums" style={{ color: TEAL }}>
+          {status.pct}%
+        </span>
+      ) : (
+        <span className="flex-none text-[11px] tabular-nums text-gray-300 dark:text-muted-foreground">
+          {entry.lessonCount}
+          <span className="sr-only"> lessen</span>
+        </span>
+      )}
+    </Link>
+  )
+}
+
+/**
+ * Rows bucketed on `kind`, in the order the kinds first appear.
+ *
+ * The canon already arrives grouped - five books of Wet, then Geschiedenis, and
+ * so on - so first appearance is the right order and there is no second list of
+ * genres to keep in sync. A category with one kind yields one group, which the
+ * browse grid then renders without a caption.
+ */
+function groupByKind(rows: Entry[]): { kind: string; rows: Entry[] }[] {
+  const buckets = new Map<string, Entry[]>()
+  for (const entry of rows) {
+    const bucket = buckets.get(entry.kind)
+    if (bucket) bucket.push(entry)
+    else buckets.set(entry.kind, [entry])
+  }
+  return [...buckets].map(([kind, entries]) => ({ kind, rows: entries }))
+}
+
+/** The card grid, still what a search returns: mixed results, no shared order. */
 const CARD_GRID = 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3'
 
 type View = { kind: 'track'; key: string } | { kind: 'category'; key: Category }
@@ -445,8 +566,9 @@ export default function StudiesPage() {
         : byCategory(view.key)
 
     const title = view.kind === 'track' ? (track?.label ?? '') : CATEGORY_LABELS[view.key]
-    const blurb =
-      view.kind === 'track' ? track?.blurb : 'Op volgorde van de canon, zoals ze in de Bijbel staan.'
+    const blurb = view.kind === 'track' ? track?.blurb : CATEGORY_BLURBS[view.key]
+    /** Book titles are one or two words, so they pack into far more columns. */
+    const dense = view.kind === 'category' && BOOK_CATEGORIES.includes(view.key)
 
     return (
       <div className="h-full overflow-y-auto">
@@ -471,24 +593,55 @@ export default function StudiesPage() {
           )}
           <p className="mt-2 text-[13px] text-gray-600 dark:text-muted-foreground">
             {summarize(rows)}
+            {view.kind === 'category' && (
+              <span className="text-gray-400 dark:text-muted-foreground">
+                {' '}
+                Het getal achter een titel is het aantal lessen.
+              </span>
+            )}
           </p>
 
-          <ol className={`mt-5 list-none p-0 ${CARD_GRID}`}>
-            {rows.map((entry, index) => (
-              <li key={entry.study.id} className="relative">
-                {/* A track has an order; the canon already carries its own. */}
-                {view.kind === 'track' && (
-                  <span
-                    className="absolute -left-0.5 -top-2 z-10 flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold text-white tabular-nums"
-                    style={{ backgroundColor: TEAL }}
+          {view.kind === 'track' ? (
+            /* One panel, one row per step. Capped at a readable measure: a track
+               is five studies, and stretched over a 2xl screen the numbers and
+               the titles end up half a metre apart. */
+            <ol className="mt-5 max-w-[760px] list-none p-0 overflow-hidden rounded-2xl border border-gray-200 dark:border-border bg-white dark:bg-card divide-y divide-gray-100 dark:divide-border">
+              {rows.map((entry, index) => (
+                <li key={entry.study.id}>
+                  <TrackStep entry={entry} step={index + 1} status={statusFor(entry.study)} />
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <section className="mt-5 rounded-2xl border border-gray-200 dark:border-border bg-white dark:bg-card p-3 sm:p-4 space-y-4">
+              {groupByKind(rows).map(group => (
+                <div key={group.kind}>
+                  {/* One group is the whole list - naming it says nothing. */}
+                  {rows.length > group.rows.length && (
+                    <h2 className="mb-1 px-2.5 text-[11px] font-bold uppercase tracking-widest text-gray-500 dark:text-muted-foreground">
+                      {group.kind}
+                      <span className="ml-1.5 font-medium tabular-nums text-gray-400 dark:text-muted-foreground">
+                        {group.rows.length}
+                      </span>
+                    </h2>
+                  )}
+                  <ul
+                    className={`list-none p-0 grid gap-x-2 ${
+                      dense
+                        ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6'
+                        : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+                    }`}
                   >
-                    {index + 1}
-                  </span>
-                )}
-                <StudyCard entry={entry} status={statusFor(entry.study)} />
-              </li>
-            ))}
-          </ol>
+                    {group.rows.map(entry => (
+                      <li key={entry.study.id}>
+                        <BookRow entry={entry} status={statusFor(entry.study)} />
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </section>
+          )}
         </div>
       </div>
     )
