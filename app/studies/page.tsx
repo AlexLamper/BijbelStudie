@@ -266,7 +266,13 @@ function StudyCard({ entry, status }: { entry: Entry; status: Status }) {
         ) : null}
       </div>
 
-      <div className="flex items-center gap-1.5 text-[11px] text-gray-400 dark:text-muted-foreground tabular-nums">
+      {entry.study.description && (
+        <p className="text-[12.5px] leading-snug text-gray-500 dark:text-muted-foreground line-clamp-2">
+          {entry.study.description}
+        </p>
+      )}
+
+      <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-gray-400 dark:text-muted-foreground tabular-nums">
         <span className="font-semibold uppercase tracking-wider">{entry.kind}</span>
         <span aria-hidden>·</span>
         <span>
@@ -398,9 +404,8 @@ function BookRow({ entry, status }: { entry: Entry; status: Status }) {
           {status.pct}%
         </span>
       ) : (
-        <span className="flex-none text-[11px] tabular-nums text-gray-300 dark:text-muted-foreground">
-          {entry.lessonCount}
-          <span className="sr-only"> lessen</span>
+        <span className="flex-none text-[11px] tabular-nums text-gray-400 dark:text-muted-foreground">
+          {entry.lessonCount} {entry.lessonCount === 1 ? 'les' : 'lessen'}
         </span>
       )}
     </Link>
@@ -598,18 +603,20 @@ export default function StudiesPage() {
           )}
           <p className="mt-2 text-[13px] text-gray-600 dark:text-muted-foreground">
             {summarize(rows)}
-            {view.kind === 'category' && (
+            {view.kind === 'category' && dense && (
               <span className="text-gray-400 dark:text-muted-foreground">
                 {' '}
-                Het getal achter een titel is het aantal lessen.
+                Gegroepeerd per soort boek, op volgorde van de canon. Achter elke titel staat het aantal lessen.
               </span>
             )}
           </p>
 
-          {view.kind === 'track' && (() => {
-            /* One glance at the whole spoor: how much work, how far you are,
-               and which book it opens on. All derived from `rows`, so it never
-               drifts from the list underneath it. */
+          {view.kind === 'track' ? (() => {
+            /* A track is an order (the numbered list) plus a summary of what it
+               costs. On a wide screen the summary sits in a column beside the
+               list, where there is room to spare; on a narrow one it stacks
+               above it. Every figure is derived from `rows`, so it never drifts
+               from the list. */
             const statuses = rows.map(entry => statusFor(entry.study))
             const totalLessons = rows.reduce((sum, entry) => sum + entry.lessonCount, 0)
             const totalMinutes = rows.reduce(
@@ -619,69 +626,61 @@ export default function StudiesPage() {
             const totalHours = Math.max(1, Math.round(totalMinutes / 60))
             const doneCount = statuses.filter(status => status.completed).length
             const startBook = rows[0]?.study.lessons[0]?.book ?? rows[0]?.study.startBook
+            const stats = [
+              { label: 'Studies', value: `${rows.length}` },
+              { label: 'Lessen totaal', value: `${totalLessons}` },
+              { label: 'Tijd totaal', value: `±${totalHours} uur` },
+              { label: 'Afgerond', value: `${doneCount}/${rows.length}` },
+            ]
             return (
-              <dl className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-[760px]">
-                {[
-                  { label: 'Studies', value: `${rows.length}` },
-                  { label: 'Lessen totaal', value: `${totalLessons}` },
-                  { label: 'Tijd totaal', value: `±${totalHours} uur` },
-                  {
-                    label: 'Afgerond',
-                    value: `${doneCount}/${rows.length}`,
-                  },
-                ].map(stat => (
-                  <div
-                    key={stat.label}
-                    className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card px-3 py-2.5"
-                  >
-                    <dt className="text-[10.5px] font-semibold uppercase tracking-wider text-gray-400 dark:text-muted-foreground">
-                      {stat.label}
-                    </dt>
-                    <dd className="mt-0.5 text-lg font-bold tabular-nums text-gray-900 dark:text-foreground">
-                      {stat.value}
-                    </dd>
-                  </div>
-                ))}
-                {startBook && (
-                  <p className="col-span-2 sm:col-span-4 -mt-1 text-[12.5px] text-gray-500 dark:text-muted-foreground">
-                    Je begint in <span className="font-semibold text-gray-700 dark:text-foreground">{startBook}</span> en werkt de studies van boven naar beneden af.
-                  </p>
-                )}
-              </dl>
-            )
-          })()}
+              <div className="mt-5 flex flex-col-reverse gap-5 lg:flex-row lg:items-start">
+                <ol className="min-w-0 flex-1 lg:max-w-[760px] list-none p-0 overflow-hidden rounded-2xl border border-gray-200 dark:border-border bg-white dark:bg-card divide-y divide-gray-100 dark:divide-border">
+                  {rows.map((entry, index) => (
+                    <li key={entry.study.id}>
+                      <TrackStep entry={entry} step={index + 1} status={statusFor(entry.study)} />
+                    </li>
+                  ))}
+                </ol>
 
-          {view.kind === 'track' ? (
-            /* One panel, one row per step. Capped at a readable measure: a track
-               is five studies, and stretched over a 2xl screen the numbers and
-               the titles end up half a metre apart. */
-            <ol className="mt-5 max-w-[760px] list-none p-0 overflow-hidden rounded-2xl border border-gray-200 dark:border-border bg-white dark:bg-card divide-y divide-gray-100 dark:divide-border">
-              {rows.map((entry, index) => (
-                <li key={entry.study.id}>
-                  <TrackStep entry={entry} step={index + 1} status={statusFor(entry.study)} />
-                </li>
-              ))}
-            </ol>
-          ) : (
-            <section className="mt-5 rounded-2xl border border-gray-200 dark:border-border bg-white dark:bg-card p-3 sm:p-4 space-y-4">
-              {groupByKind(rows).map(group => (
-                <div key={group.kind}>
-                  {/* One group is the whole list - naming it says nothing. */}
-                  {rows.length > group.rows.length && (
-                    <h2 className="mb-1 px-2.5 text-[11px] font-bold uppercase tracking-widest text-gray-500 dark:text-muted-foreground">
-                      {group.kind}
-                      <span className="ml-1.5 font-medium tabular-nums text-gray-400 dark:text-muted-foreground">
-                        {group.rows.length}
-                      </span>
-                    </h2>
+                <aside className="flex-none lg:w-64">
+                  <dl className="grid grid-cols-2 gap-3 lg:grid-cols-1">
+                    {stats.map(stat => (
+                      <div
+                        key={stat.label}
+                        className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card px-3 py-2.5 lg:flex lg:items-baseline lg:justify-between"
+                      >
+                        <dt className="text-[10.5px] font-semibold uppercase tracking-wider text-gray-400 dark:text-muted-foreground">
+                          {stat.label}
+                        </dt>
+                        <dd className="mt-0.5 lg:mt-0 text-lg font-bold tabular-nums text-gray-900 dark:text-foreground">
+                          {stat.value}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                  {startBook && (
+                    <p className="mt-3 text-[12.5px] leading-snug text-gray-500 dark:text-muted-foreground">
+                      Je begint in <span className="font-semibold text-gray-700 dark:text-foreground">{startBook}</span> en werkt de studies van boven naar beneden af.
+                    </p>
                   )}
-                  <ul
-                    className={`list-none p-0 grid gap-x-2 ${
-                      dense
-                        ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6'
-                        : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
-                    }`}
-                  >
+                </aside>
+              </div>
+            )
+          })() : dense ? (
+            /* Oude / Nieuwe Testament: dozens of short book titles. A packed
+               grid the reader scans for the one name they arrived with, split
+               into the canon's own genre sections so the structure is visible
+               rather than implied. */
+            <section className="mt-5 rounded-2xl border border-gray-200 dark:border-border bg-white dark:bg-card p-3 sm:p-4 divide-y divide-gray-100 dark:divide-border">
+              {groupByKind(rows).map(group => (
+                <div key={group.kind} className="py-3 first:pt-0 last:pb-0">
+                  <h2 className="mb-1.5 px-2.5 flex items-baseline gap-1.5 text-[11px] font-bold uppercase tracking-widest text-gray-500 dark:text-muted-foreground">
+                    {group.kind}
+                    <span className="font-medium tabular-nums text-gray-400 dark:text-muted-foreground">
+                      {group.rows.length} {group.rows.length === 1 ? 'boek' : 'boeken'}
+                    </span>
+                  </h2>
+                  <ul className="list-none p-0 grid gap-x-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
                     {group.rows.map(entry => (
                       <li key={entry.study.id}>
                         <BookRow entry={entry} status={statusFor(entry.study)} />
@@ -691,6 +690,28 @@ export default function StudiesPage() {
                 </div>
               ))}
             </section>
+          ) : (
+            /* Personen / Thema's: a handful of studies, each worth a full card
+               with its own one-line description and lesson/time cost. */
+            <div className="mt-5 space-y-6">
+              {groupByKind(rows).map(group => (
+                <section key={group.kind}>
+                  {rows.length > group.rows.length && (
+                    <h2 className="mb-2 flex items-baseline gap-1.5 text-[11px] font-bold uppercase tracking-widest text-gray-500 dark:text-muted-foreground">
+                      {group.kind}
+                      <span className="font-medium tabular-nums text-gray-400 dark:text-muted-foreground">
+                        {group.rows.length}
+                      </span>
+                    </h2>
+                  )}
+                  <div className={CARD_GRID}>
+                    {group.rows.map(entry => (
+                      <StudyCard key={entry.study.id} entry={entry} status={statusFor(entry.study)} />
+                    ))}
+                  </div>
+                </section>
+              ))}
+            </div>
           )}
         </div>
       </div>

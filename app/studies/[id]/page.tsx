@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getServerSession } from 'next-auth';
@@ -272,6 +273,24 @@ export default async function StudyDetailPage({ params }: PageProps) {
               left a band of dead background between the two. */}
           <div className="lg:flex-1 lg:min-w-0 lg:overflow-y-auto">
             <div className="px-5 sm:px-8 py-6 lg:max-w-[680px]">
+              {/* The banner. Its own 16:6 SVG under /images/studies - authored
+                  per study, or per genre for a generated book study. `unoptimized`
+                  because the optimiser refuses SVG without `dangerouslyAllowSVG`,
+                  and these are our own files: nothing to optimise anyway.
+
+                  A study without art renders nothing rather than an empty frame. */}
+              {study.image ? (
+                <Image
+                  src={study.image}
+                  alt={`Illustratie bij de studie ${study.title}`}
+                  width={1200}
+                  height={450}
+                  unoptimized
+                  priority
+                  className="mb-5 block w-full h-auto rounded-xl border border-gray-200 dark:border-border"
+                />
+              ) : null}
+
               <h2 className="text-sm font-bold text-foreground mb-2.5">Waar gaat deze studie over?</h2>
               <div className="space-y-3">
                 {description.map((paragraph, index) => (

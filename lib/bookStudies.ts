@@ -1,5 +1,27 @@
-import { BIBLE_BOOKS, readerBookName, type BibleBook } from './content/bibleBooks';
+import { BIBLE_BOOKS, readerBookName, type BibleBook, type BookGenre } from './content/bibleBooks';
 import { curatedStudies, type CuratedStudy, type Lesson } from './data/curated-studies';
+
+/**
+ * Banner art for a generated book study, keyed by genre.
+ *
+ * Sixty-six books cannot each have their own drawing, and a study with no image
+ * is a flat tint on the card and nothing at all on the detail page. Genre is the
+ * coarsest grouping that still says something true about the book, so the wet
+ * gets wilderness rock, the psalms get water at dusk, and the gospels get
+ * sunrise over the lake. The eleven authored studies keep their own scene.
+ *
+ * Same 16:6 SVGs as `curatedStudies`, under /images/studies.
+ */
+const GENRE_IMAGE: Record<BookGenre, string> = {
+  'Wet': '/images/studies/genre-wet.svg',
+  'Geschiedenis': '/images/studies/genre-geschiedenis.svg',
+  'Poëzie en wijsheid': '/images/studies/genre-poezie.svg',
+  'Grote profeten': '/images/studies/genre-grote-profeten.svg',
+  'Kleine profeten': '/images/studies/genre-kleine-profeten.svg',
+  'Evangelie': '/images/studies/genre-evangelie.svg',
+  'Brief': '/images/studies/genre-brief.svg',
+  'Apocalyptiek': '/images/studies/genre-apocalyptiek.svg',
+};
 
 /**
  * Every bible book, as a study.
@@ -95,9 +117,9 @@ export function generateBookStudy(book: BibleBook): CuratedStudy {
     startBook: readerBookName(book),
     startChapter: 1,
     startVersion: 'statenvertaling',
-    // Authored studies have a hand-drawn SVG banner; the unified catalogue does
-    // not show cover art, so a generated study has nothing to carry here.
-    image: '',
+    // One banner per genre. It used to be '' - which the catalogue rendered as a
+    // flat tint and `/api/v1/studies/catalog` handed the app as an empty string.
+    image: GENRE_IMAGE[book.genre],
     lessons: generateLessons(book),
     about: book.summary.slice(0, 2),
     suggestedRhythm: 'dagelijks',
