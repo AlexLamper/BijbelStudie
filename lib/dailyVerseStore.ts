@@ -139,3 +139,33 @@ export function dayLabel(date: string): string {
     month: 'long',
   });
 }
+
+/**
+ * Six royalty-free nature photographs, one per day, rotating. The same set the
+ * app ships in `assets/images/daytext/`.
+ */
+const PHOTOS = [
+  '/images/daytext/1418065460487.jpg',
+  '/images/daytext/1441974231531.jpg',
+  '/images/daytext/1447752875215.jpg',
+  '/images/daytext/1470071459604.jpg',
+  '/images/daytext/1472214103451.jpg',
+  '/images/daytext/1506905925346.jpg',
+];
+
+/**
+ * The photo behind the card on a given day.
+ *
+ * Picked from the calendar day rather than at random, so it is stable across
+ * re-renders - the card must not flicker through six backgrounds while the
+ * dashboard re-paints - while still changing from one day to the next. Same
+ * rule, and the same order, as `dailyVersePhoto` in the app's
+ * `daily_verse_card.dart`, so both surfaces show the same picture on the same
+ * day.
+ */
+export function dailyVersePhoto(date = new Date()): string {
+  const days = Math.floor(
+    Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86_400_000,
+  );
+  return PHOTOS[((days % PHOTOS.length) + PHOTOS.length) % PHOTOS.length];
+}
