@@ -10,6 +10,7 @@ import {
 import { curatedStudies, BADGE_STYLES } from "../../lib/data/curated-studies"
 import { CHAPTER_COUNTS } from "../../lib/data/bible-chapter-counts"
 import BillingNotices from "../../components/pricing/BillingNotices"
+import DailyVerseCard, { type DailyVerse as DailyVerseData } from "../../components/dashboard/DailyVerseCard"
 
 /* ── Dutch Bible book names (66) ─────────────────────────── */
 const OT = [
@@ -34,7 +35,9 @@ const NT = [
 
 
 interface LastRead   { book: string; chapter: number; version: string }
-interface DailyVerse { text: string; reference: string; book: string; chapter: number }
+// Shape comes from the card that renders it, so the verse number and the
+// translation the daytext route sends are not dropped on the way in.
+type DailyVerse = DailyVerseData
 interface WeekDay    { label: string; count: number; heightPct: number; isToday: boolean }
 
 function getGreeting(name: string): string {
@@ -412,42 +415,9 @@ export default function DashboardPage() {
           {/* ── Right sidebar ─────────────────────────── */}
           <div className="flex flex-col gap-4">
 
-            {/* Vers van de dag */}
-            <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-5 min-w-0">
-              <p className="text-xs font-semibold uppercase tracking-widest mb-3 text-gray-400 dark:text-muted-foreground">
-                Vers van de dag
-              </p>
-              {verseLoading ? (
-                <div className="space-y-2.5 border-l-2 pl-4" style={{ borderColor: "#D1FAE5" }}>
-                  <div className="h-3.5 rounded skeleton-pulse bg-gray-100 dark:bg-secondary" />
-                  <div className="h-3.5 rounded skeleton-pulse w-4/5 bg-gray-100 dark:bg-secondary" />
-                  <div className="h-3.5 rounded skeleton-pulse w-3/5 bg-gray-100 dark:bg-secondary" />
-                </div>
-              ) : verse ? (
-                <div className="content-in">
-                  <div className="border-l-2 pl-4 mb-4" style={{ borderColor: "#0D9488" }}>
-                    <p className="text-gray-700 dark:text-foreground/80"
-                      style={{ fontFamily: "Georgia, serif", fontSize: "0.95rem", fontStyle: "italic", lineHeight: 1.8, wordBreak: "break-word", overflowWrap: "break-word" }}>
-                      &ldquo;{verse.text}&rdquo;
-                    </p>
-                  </div>
-                  <div className="flex items-end justify-between gap-2 flex-wrap">
-                    <div>
-                      <p className="text-sm font-semibold" style={{ color: "#0D9488" }}>{verse.reference}</p>
-                      <a href="https://bijbelapi.com" target="_blank" rel="noopener noreferrer"
-                        className="text-xs hover:underline text-gray-500 dark:text-muted-foreground">
-                        via BijbelAPI.com
-                      </a>
-                    </div>
-                    <Link
-                      href={`/lezen?book=${encodeURIComponent(verse.book)}&chapter=${verse.chapter}&version=statenvertaling`}
-                      className="text-xs font-medium whitespace-nowrap text-gray-500 dark:text-muted-foreground">
-                      Lees hoofdstuk →
-                    </Link>
-                  </div>
-                </div>
-              ) : null}
-            </div>
+            {/* Tekst van de dag - same layout as the app's card, see
+                components/dashboard/DailyVerseCard. */}
+            <DailyVerseCard verse={verse} loading={verseLoading} />
 
             {/* Leesstatistieken */}
             <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-4">
