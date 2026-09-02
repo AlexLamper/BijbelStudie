@@ -27,7 +27,11 @@
 
 ## Over BijbelStudie
 
-*BijbelStudie* is een modern, webgebaseerd bijbelstudie-platform dat gebruikers helpt de Bijbel vers voor vers te verkennen en te bestuderen. Of je nu een beginner bent of al uitgebreide bijbelkennis hebt, *BijbelStudie* biedt gepersonaliseerde hulpmiddelen, bijbelvertalingen, commentaren en andere bronnen om je begrip van de Schrift te verdiepen.
+*BijbelStudie* is een Nederlands bijbelstudie-platform, op het web en als iOS-app. Het lost een simpel probleem op: de Bijbel lezen is makkelijk, hem *begrijpen* niet. Wie een moeilijk hoofdstuk opslaat, heeft meestal geen uitleg bij de hand, geen idee waar te beginnen, en niemand die meeleest.
+
+BijbelStudie zet die hulp naast de tekst. Je leest een hoofdstuk in de vertaling die je gewend bent, met klassiek commentaar ernaast, de grondtekst binnen handbereik en uitleg wanneer je vastloopt. Daarnaast staan er geleide studies klaar die je stap voor stap door een bijbelboek of thema heen nemen, zodat je niet elke dag zelf hoeft te bedenken waar je begint.
+
+Voor beginners én voor mensen die de Bijbel al jaren lezen.
 
 ## Inhoudsopgave
 
@@ -43,11 +47,13 @@
 
 ## Functies
 
-- ![📖](https://img.shields.io/badge/📖-Gepersonaliseerd_leren-lightgrey?style=flat-square) **Gepersonaliseerd leren** - Volg je voortgang met op maat gemaakte suggesties en dagelijkse bijbelleesprompts.
-- ![🎓](https://img.shields.io/badge/🎓-Bijbelcursussen-lightgrey?style=flat-square) **Leesplannen** - Verdiep je bijbelkennis via onze leesplannen.
-- ![📈](https://img.shields.io/badge/📈-Voortgang_bijhouden-lightgrey?style=flat-square) **Voortgang bijhouden** - Volg je studie via scores, reeksen en dagelijkse bijbelbetrokkenheid.  
-- ![💬](https://img.shields.io/badge/💬-Notities_en_bladwijzers-lightgrey?style=flat-square) **Notities & Bladwijzers** - Schrijf notities, reflecties, of sla verzen op om later op terug te komen.
-- ![✨](https://img.shields.io/badge/✨-Dagelijkse_verzen-lightgrey?style=flat-square) **Dagelijkse verzen en onderwijs** - Overdenk dagelijkse bijbelverzen en thematische lessen.
+- ![📖](https://img.shields.io/badge/📖-Lezen_met_uitleg-lightgrey?style=flat-square) **Lezen met uitleg ernaast** - Lees een hoofdstuk in je eigen vertaling, met klassieke commentaren, de grondtekst en context binnen handbereik.
+- ![🎓](https://img.shields.io/badge/🎓-Geleide_studies-lightgrey?style=flat-square) **Geleide studies** - Stap voor stap door een bijbelboek of thema, in lessen die je in één zitting afmaakt.
+- ![🔤](https://img.shields.io/badge/🔤-Grondtekst-lightgrey?style=flat-square) **Grondtekst** - Zie het oorspronkelijke Hebreeuws en Grieks bij het vers dat je leest, zonder de taal te kennen.
+- ![💬](https://img.shields.io/badge/💬-Notities-lightgrey?style=flat-square) **Notities** - Schrijf je gedachten op bij een vers en vind ze later terug.
+- ![📈](https://img.shields.io/badge/📈-Voortgang-lightgrey?style=flat-square) **Voortgang** - Zie welke bijbelboeken je hebt geopend, hoeveel je leest en hoe lang je reeks staat.
+- ![✨](https://img.shields.io/badge/✨-Dagelijkse_verzen-lightgrey?style=flat-square) **Dagvers** - Elke dag een vers om bij stil te staan.
+- ![📱](https://img.shields.io/badge/📱-Mobiele_app-lightgrey?style=flat-square) **Mobiele app** - Dezelfde studies en voortgang op je telefoon, met een dagelijkse herinnering op het moment dat jij kiest.
 
 ## Technologieën
 
@@ -63,7 +69,12 @@
   <img src="https://img.shields.io/badge/Framer_Motion-000000?style=for-the-badge&logo=framer&logoColor=white" alt="Framer Motion" />
   <img src="https://img.shields.io/badge/NextAuth-333333?style=for-the-badge&logo=nextauth.js&logoColor=white" alt="NextAuth" />
   <img src="https://img.shields.io/badge/Stripe-635BFF?style=for-the-badge&logo=stripe&logoColor=white" alt="Stripe" />
+  <img src="https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white" alt="Flutter" />
+  <img src="https://img.shields.io/badge/RevenueCat-F25A5A?style=for-the-badge&logo=revenuecat&logoColor=white" alt="RevenueCat" />
+  <img src="https://img.shields.io/badge/Gemini-8E75B2?style=for-the-badge&logo=googlegemini&logoColor=white" alt="Google Gemini" />
 </p>
+
+De website draait op Next.js; de mobiele app is gebouwd met Flutter en praat met dezelfde API.
 
 ## Stripe betrouwbaarheid (beheer)
 
@@ -88,6 +99,9 @@ Bij Vercel draait de cron via [vercel.json](vercel.json) dagelijks op:
 - **v1.0.2** - Internationalisatie voor Engels, Nederlands en Duits
 - **v1.0.3** - BijbelStudie Pro-abonnement toegevoegd
 - **v1.0.4** - Commentaren en meer bijbelvertalingen toegevoegd
+- **v1.0.5** - Volledig Nederlandstalig; de meertalige versie is teruggedraaid om één taal goed te doen in plaats van drie half
+- **v1.0.6** - Grondtekst (Hebreeuws en Grieks) bij het vers dat je leest
+- **v1.0.7** - Geleide studies en de iOS-app
 
 ## Bijdragen
 
@@ -111,33 +125,37 @@ Dit project is gelicenseerd onder de [GNU General Public License v3.0](LICENSE).
 
 ## Versie
 
-**Huidige versie:** [v1.0.1](https://github.com/AlexLamper/BijbelStudie/releases/tag/v1.0.4)  
+**Huidige versie:** [v1.0.7](https://github.com/AlexLamper/BijbelStudie/releases/tag/v1.0.7)  
 
 ## Veelgestelde vragen
 
 <details>
 <summary>Is BijbelStudie gratis te gebruiken?</summary>
 
-Ja. BijbelStudie is voor iedereen volledig gratis te gebruiken. BijbelStudie heeft ook een Pro-abonnement met extra functies, beschikbaar voor slechts €9,99/maand.
+Ja. Lezen, notities maken en je voortgang bijhouden kost niets. Er is daarnaast BijbelStudie Pro met extra functies: €89,99 per jaar, of €9,99 per maand.
 
 </details>
 
 <details>
 <summary>Welke bijbelvertalingen worden ondersteund?</summary>
 
-We ondersteunen een lijst met bijbelvertalingen, waaronder:
+We ondersteunen op dit moment:
+
+**Nederlands**
+- Statenvertaling
+- NBG-vertaling 1951
+- De Heilige Schrift 1917
+- Canisiusbijbel 1939
+
+**Engels**
 - King James Version (KJV)
 - American Standard Version (ASV)
-- Coverdale Bijbel
-- Geneefse Bijbel
-- New English Translation
-- World English Bible
-- Statenvertaling
-- Herziene Statenvertaling
-- Afrikaans 1953
-- Elberfelder 1905
-- Luther 1912
-- Schlachter 2000
+- New English Translation (NET)
+- World English Bible (WEB)
+- Geneva Bible (1599)
+- Coverdale Bible (1535)
+
+Daarnaast staan er klassieke commentaren naast de tekst.
 
 </details>
 
