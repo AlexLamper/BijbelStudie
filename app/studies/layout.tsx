@@ -36,9 +36,9 @@ export default async function PlansLayout({
       <SessionProvider session={session}>
         <SidebarProvider>
           <AppSidebar />
-          <div className="flex flex-col flex-1 min-h-0 w-full">
+          <div className="flex flex-col flex-1 min-h-0 min-w-0 w-full">
             <Header />
-            <div className="flex-1 min-h-0 overflow-y-auto">
+            <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
               {children}
             </div>
           </div>

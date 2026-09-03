@@ -231,7 +231,7 @@ function StudyRow({ entry, status }: { entry: Entry; status: Status }) {
       data-track="study_card"
       className="group no-underline flex items-stretch gap-3 rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card p-3 transition-colors hover:border-teal-400 dark:hover:border-teal-700"
     >
-      <Banner entry={entry} art showLetter className="h-16 w-16 flex-none rounded-lg" />
+      <Banner entry={entry} art showLetter className="h-16 w-24 flex-none rounded-lg" />
 
       <div className="min-w-0 flex-1">
         <h3 className="truncate text-[15px] font-semibold text-gray-900 dark:text-foreground group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors">
@@ -418,7 +418,7 @@ export default function StudiesPage() {
   const sectionEyebrow = filtersOn ? 'Gefilterd' : 'De hele Bijbel'
 
   return (
-    <div className="h-full overflow-y-auto">
+    <div className="h-full overflow-y-auto overflow-x-hidden">
       <JsonLd data={STUDIES_GRAPH} />
 
       <div className="w-full px-5 sm:px-8 xl:px-10 py-6">
