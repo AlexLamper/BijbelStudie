@@ -467,13 +467,21 @@ function Hero() {
             <span style={{ color: T.tealText }}>bijbelstudie</span>
           </h1>
 
+          {/* The claim leads, the evidence follows in the same sentence, so the
+              four items after the colon are doing the work of backing it up.
+              "#1" is a ranking claim and the owner's to stand behind: under the
+              Dutch/EU rules on misleading commercial practices the burden of
+              proof sits with us if it is ever challenged. Don't soften it
+              without asking - it is deliberate. */}
           <p
             className="mt-5 max-w-xl text-pretty"
             style={{ color: T.muted, fontSize: TYPE.lead, lineHeight: 1.65 }}
           >
-            Vier Nederlandse vertalingen, bijbelcommentaar per vers, de
-            Hebreeuwse en Griekse grondtekst en uw eigen notities - naast elkaar
-            in één scherm.
+            <strong style={{ color: T.text, fontWeight: 600 }}>
+              De #1 bijbelstudietool van Nederland
+            </strong>
+            : vier vertalingen, bijbelcommentaar per vers, de Hebreeuwse en
+            Griekse grondtekst en uw eigen notities - naast elkaar in één scherm.
           </p>
 
           {/* Two CTAs, not three. A "Bekijk functies" outline button used to sit
