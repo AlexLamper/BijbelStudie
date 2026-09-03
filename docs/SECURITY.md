@@ -13,7 +13,7 @@ We currently support the following versions of **BijbelStudie** with security up
 If you discover a security vulnerability in **BijbelStudie**, please follow the steps below to report it:
 
 1. **Contact Us**  
-   - Report security vulnerabilities privately by emailing [devlamper06@gmail.com](mailto:devlamper06@gmail.com).
+   - Report security vulnerabilities privately by emailing [info@bijbelstudie.io](mailto:info@bijbelstudie.io).
    - **Do not** disclose security vulnerabilities in public issues or pull requests.
 
 2. **Information to Include**  

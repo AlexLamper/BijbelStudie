@@ -44,7 +44,7 @@ const sections = [
   },
   {
     title: "Neem contact met ons op",
-    body: "Als u vragen heeft over dit privacybeleid, neem dan contact met ons op via devlamper06@gmail.com.",
+    body: "Als u vragen heeft over dit privacybeleid, neem dan contact met ons op via info@bijbelstudie.io.",
   },
 ];
 

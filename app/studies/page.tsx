@@ -427,7 +427,7 @@ export default function StudiesPage() {
         {/* Header */}
         <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-foreground">
-            Studies
+            Kies je volgende studie
           </h1>
           {searchField}
         </header>

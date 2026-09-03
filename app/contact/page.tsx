@@ -25,7 +25,7 @@ export default function ContactPage() {
                 <Mail className="w-5 h-5 text-brand mt-1" />
                 <div>
                   <h3 className="font-medium text-gray-900 dark:text-white">{t("email")}</h3>
-                  <p className="text-gray-600 dark:text-gray-400">devlamper06@gmail.com</p>
+                  <p className="text-gray-600 dark:text-gray-400">info@bijbelstudie.io</p>
                 </div>
               </div>
             </CardContent>

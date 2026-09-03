@@ -32,7 +32,7 @@ export const SITE_LANG = "nl-NL";
 export const TWITTER_HANDLE = "@BijbelStudieEdu";
 
 /** Public contact address shown in Organization structured data. */
-export const CONTACT_EMAIL = "devlamper06@gmail.com";
+export const CONTACT_EMAIL = "info@bijbelstudie.io";
 
 /**
  * Stable JSON-LD node ids. Using @id lets every page reference the same

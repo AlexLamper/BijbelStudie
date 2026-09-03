@@ -132,7 +132,7 @@ Please open an issue on our [GitHub Issues page](https://github.com/AlexLamper/B
 
 For questions or feedback:  
 - Open an [issue on GitHub](https://github.com/AlexLamper/BijbelStudie/issues)  
-- Email: [devlamper06@gmail.com](mailto:devlamper06@gmail.com)  
+- Email: [info@bijbelstudie.io](mailto:info@bijbelstudie.io)  
 - GitHub: [@AlexLamper](https://github.com/AlexLamper)
 
 ---

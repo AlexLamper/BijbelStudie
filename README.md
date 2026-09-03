@@ -170,7 +170,7 @@ Open een issue op onze [GitHub Issues-pagina](https://github.com/AlexLamper/Bijb
 
 Voor vragen of feedback:  
 - Open een [issue op GitHub](https://github.com/AlexLamper/BijbelStudie/issues)  
-- E-mail: [devlamper06@gmail.com](mailto:devlamper06@gmail.com)  
+- E-mail: [info@bijbelstudie.io](mailto:info@bijbelstudie.io)  
 - GitHub: [@AlexLamper](https://github.com/AlexLamper)
 
 ---

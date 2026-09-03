@@ -2,13 +2,13 @@ import { BIBLE_BOOKS, readerBookName, type BibleBook, type BookGenre } from './c
 import { curatedStudies, type CuratedStudy, type Lesson } from './data/curated-studies';
 
 /**
- * Banner art for a generated book study, keyed by genre.
+ * Banner art for a generated book study when the book has no drawing of its own.
  *
- * Sixty-six books cannot each have their own drawing, and a study with no image
- * is a flat tint on the card and nothing at all on the detail page. Genre is the
- * coarsest grouping that still says something true about the book, so the wet
- * gets wilderness rock, the psalms get water at dusk, and the gospels get
- * sunrise over the lake. The eleven authored studies keep their own scene.
+ * This used to be the only rule: sixty-six books shared eight genre scenes, so
+ * every letter looked like every other letter in the catalogue. Each book now
+ * has its own scene (see `BOOKS_WITH_OWN_IMAGE`), and genre is what is left for
+ * anything that slips through - a book added without art, or a slug renamed
+ * without the file following it. Better a wilderness rock than a flat tint.
  *
  * Same 16:6 SVGs as `curatedStudies`, under /images/studies.
  */
@@ -22,6 +22,40 @@ const GENRE_IMAGE: Record<BookGenre, string> = {
   'Brief': '/images/studies/genre-brief.svg',
   'Apocalyptiek': '/images/studies/genre-apocalyptiek.svg',
 };
+
+/**
+ * The books that have a banner drawn for them, by slug.
+ *
+ * Listed rather than derived from `BIBLE_BOOKS`, because the thing that decides
+ * this is whether a file exists on disk - and nothing at runtime can see that.
+ * A slug in here without `/images/studies/book-<slug>.svg` next to it is a
+ * broken image, so the two are kept in step by tests/bookStudies.test.ts.
+ */
+const BOOKS_WITH_OWN_IMAGE = new Set([
+  'genesis', 'exodus', 'leviticus', 'numeri', 'deuteronomium',
+  'jozua', 'richteren', 'ruth', '1-samuel', '2-samuel', '1-koningen', '2-koningen',
+  '1-kronieken', '2-kronieken', 'ezra', 'nehemia', 'esther',
+  'job', 'psalmen', 'spreuken', 'prediker', 'hooglied',
+  'jesaja', 'jeremia', 'klaagliederen', 'ezechiel', 'daniel',
+  'hosea', 'joel', 'amos', 'obadja', 'jona', 'micha', 'nahum', 'habakuk',
+  'zefanja', 'haggai', 'zacharia', 'maleachi',
+  'mattheus', 'markus', 'lukas', 'johannes', 'handelingen',
+  'romeinen', '1-corinthiers', '2-corinthiers', 'galaten', 'efeziers',
+  'filippenzen', 'colossenzen', '1-thessalonicenzen', '2-thessalonicenzen',
+  '1-timotheus', '2-timotheus', 'titus', 'filemon', 'hebreeen', 'jakobus',
+  '1-petrus', '2-petrus', '1-johannes', '2-johannes', '3-johannes', 'judas',
+  'openbaring',
+]);
+
+/** Where a book's own banner lives; the slug goes in unchanged. */
+export function bookImagePath(slug: string): string {
+  return `/images/studies/book-${slug}.svg`;
+}
+
+/** A book's own scene, or its genre's, so a study always has a banner. */
+export function bookImage(book: BibleBook): string {
+  return BOOKS_WITH_OWN_IMAGE.has(book.slug) ? bookImagePath(book.slug) : GENRE_IMAGE[book.genre];
+}
 
 /**
  * Every bible book, as a study.
@@ -117,9 +151,9 @@ export function generateBookStudy(book: BibleBook): CuratedStudy {
     startBook: readerBookName(book),
     startChapter: 1,
     startVersion: 'statenvertaling',
-    // One banner per genre. It used to be '' - which the catalogue rendered as a
+    // One banner per book. It used to be '' - which the catalogue rendered as a
     // flat tint and `/api/v1/studies/catalog` handed the app as an empty string.
-    image: GENRE_IMAGE[book.genre],
+    image: bookImage(book),
     lessons: generateLessons(book),
     about: book.summary.slice(0, 2),
     suggestedRhythm: 'dagelijks',

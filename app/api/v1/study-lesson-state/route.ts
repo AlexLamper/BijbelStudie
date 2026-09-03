@@ -208,40 +208,86 @@ export async function PATCH(req: Request) {
         lessonDay,
       }).lean<LessonStateDoc>();
 
-      // Promote the draft only now. Doing it on every autosave would put every
-      // abandoned half-sentence in /notities.
-      if (current?.reflection?.text?.trim()) {
-        noteId = await promoteReflectionToNote({
-          userId: auth.id,
-          studyId,
-          studyTitle: study.title,
-          lessonTitle: lesson.title,
-          question: resolveReflectionQuestion(lesson, content),
-          reflection: current.reflection.text,
-          translation: enrollment?.translation ?? study.startVersion,
-          book: passage.book,
-          chapter: passage.chapter,
-          verseStart: passage.verseStart,
-          verseEnd: passage.verseEnd,
-          tags: content?.reflection?.noteTags,
-          existingNoteId: current.reflection.noteId ? String(current.reflection.noteId) : null,
-        });
-      }
-
+      // Mark the lesson finished BEFORE anything optional runs.
+      //
+      // Order matters more here than anywhere else in this file, because
+      // `recordLessonCompletion` above has already claimed the ledger row and
+      // that claim is deliberately not repeatable: a second attempt answers
+      // ALREADY_RECORDED and grants no XP. So every step that follows it is
+      // running with the reader's completion half-written. If one of them
+      // throws, the request 500s, `completedAt` stays null, and the retry -
+      // which the app does make - reruns the same failing step against a ledger
+      // row that is already claimed. The lesson is then stuck forever, and the
+      // reader is told "Je voortgang kon niet worden opgeslagen." for a lesson
+      // the server has in fact counted.
+      //
+      // Writing the completion first inverts that: whatever happens afterwards,
+      // the reader keeps what they earned, and a lesson left in the broken
+      // state by an older deploy heals on its next attempt.
       const steps = resolveSteps(lesson, content);
       await StudyLessonState.updateOne(
         { userId: auth.id, studyId, lessonDay },
         {
           $set: {
+            // Re-finishing keeps the original instant; only the first pass
+            // decides when this lesson was done.
             completedAt: current?.completedAt ?? new Date(),
             currentStep: 'done',
-            ...(noteId ? { 'reflection.noteId': noteId } : {}),
           },
           $addToSet: { stepsCompleted: { $each: steps } },
         },
       );
 
-      await syncEnrollmentAfterLesson(auth.id, studyId, nextLessonDay(study, lessonDay));
+      // Promote the draft only now. Doing it on every autosave would put every
+      // abandoned half-sentence in /notities.
+      //
+      // A note is a nice-to-have side effect of finishing, not part of
+      // finishing: it reads scripture off disk (or, on a cold serverless
+      // instance, over HTTP) and writes a second collection, so it has failure
+      // modes the completion itself does not have. Those must degrade, never
+      // propagate. `noteId` stays null when it fails, which is the honest
+      // answer for the client rather than a silent success.
+      if (current?.reflection?.text?.trim()) {
+        try {
+          noteId = await promoteReflectionToNote({
+            userId: auth.id,
+            studyId,
+            studyTitle: study.title,
+            lessonTitle: lesson.title,
+            question: resolveReflectionQuestion(lesson, content),
+            reflection: current.reflection.text,
+            translation: enrollment?.translation ?? study.startVersion,
+            book: passage.book,
+            chapter: passage.chapter,
+            verseStart: passage.verseStart,
+            verseEnd: passage.verseEnd,
+            tags: content?.reflection?.noteTags,
+            existingNoteId: current.reflection.noteId ? String(current.reflection.noteId) : null,
+          });
+
+          if (noteId) {
+            await StudyLessonState.updateOne(
+              { userId: auth.id, studyId, lessonDay },
+              { $set: { 'reflection.noteId': noteId } },
+            );
+          }
+        } catch (error) {
+          // The draft is still on the lesson state, so re-finishing the lesson
+          // promotes it again rather than losing the reader's words.
+          console.error('[study-lesson-state] reflection promotion failed:', error);
+          noteId = null;
+        }
+      }
+
+      // Same reasoning: the enrollment cursor is derived state. It recounts the
+      // ledger every time it runs, so a skipped sync is repaired by the next
+      // lesson - whereas a throw here would hand the reader an error for a
+      // lesson that is already recorded and already marked complete.
+      try {
+        await syncEnrollmentAfterLesson(auth.id, studyId, nextLessonDay(study, lessonDay));
+      } catch (error) {
+        console.error('[study-lesson-state] enrollment sync failed:', error);
+      }
     } else if (set.currentStep !== undefined) {
       await moveCursor(auth.id, studyId, lessonDay, set.currentStep as never);
     } else if (set['reflection.text'] !== undefined) {

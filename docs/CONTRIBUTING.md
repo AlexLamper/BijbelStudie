@@ -86,7 +86,7 @@ Before submitting your pull request:
 
 If you have any questions or run into any issues, please do not hesitate to:
 - Open an issue on GitHub.
-- Contact us at [devlamper06@gmail.com](mailto:devlamper06@gmail.com).
+- Contact us at [info@bijbelstudie.io](mailto:info@bijbelstudie.io).
 
 We appreciate your support and collaboration in making **BijbelStudie** a valuable resource for Bible learning.
 

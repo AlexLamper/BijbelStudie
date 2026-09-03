@@ -17,7 +17,7 @@ const uri = env
   .trim()
   .replace(/^["']|["']$/g, '');
 
-const OWNER_EMAIL = process.env.OWNER_EMAIL || 'devlamper06@gmail.com';
+const OWNER_EMAIL = process.env.OWNER_EMAIL || 'info@bijbelstudie.io';
 const GROUP_NAME = 'Testgroep - Samen door Markus';
 
 await mongoose.connect(uri);
