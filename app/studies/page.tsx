@@ -164,11 +164,9 @@ const FEATURED: Entry[] = ENTRIES.filter(
 const BANNER_ICON = (type: CuratedStudy['type']) =>
   type === 'Persoon' ? User : type === 'Gedeelte' ? Quote : type === 'Boek' ? BookOpen : Lightbulb
 
-/** A stable hue per study id. The catalogue only ships eight genre images shared
- * across sixty-six book studies, so a raw <img> makes the list look like the
- * same card printed over and over. Instead every study gets its own generated
- * panel: a deterministic two-stop gradient, the type icon, and the title's
- * initial - unique enough to tell apart at a glance, no art needed. */
+/** A stable hue per study id, used for the gradient panel behind (or instead of)
+ * a study's art: a deterministic two-stop gradient, the type icon, and the
+ * title's initial - unique enough to tell studies apart at a glance. */
 function hueOf(id: string): number {
   let hash = 0
   for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) | 0
@@ -192,7 +190,7 @@ function Banner({
 }) {
   const Icon = BANNER_ICON(entry.study.type)
   const hue = hueOf(entry.study.id)
-  const authored = art && entry.study.type !== 'Boek' && entry.study.image
+  const authored = art && Boolean(entry.study.image)
 
   return (
     <div
@@ -233,7 +231,7 @@ function StudyRow({ entry, status }: { entry: Entry; status: Status }) {
       data-track="study_card"
       className="group no-underline flex items-stretch gap-3 rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card p-3 transition-colors hover:border-teal-400 dark:hover:border-teal-700"
     >
-      <Banner entry={entry} showLetter className="h-16 w-16 flex-none rounded-lg" />
+      <Banner entry={entry} art showLetter className="h-16 w-16 flex-none rounded-lg" />
 
       <div className="min-w-0 flex-1">
         <h3 className="truncate text-[15px] font-semibold text-gray-900 dark:text-foreground group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors">
