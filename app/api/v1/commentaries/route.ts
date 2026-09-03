@@ -11,8 +11,10 @@ export async function OPTIONS() {
 /**
  * GET /api/v1/commentaries - allowlisted only.
  *
- * `kingcomments_nl` is registered in manifest.json for the website but is
- * absent here by design (see lib/mobileLicensing.ts).
+ * See lib/mobileLicensing.ts for what may appear here at all, and
+ * lib/proContent.ts for what a free reader gets of it. `kingcomments_nl` is
+ * the one source where those two answers differ: it is licensed rather than
+ * public domain, and it is free in full to everyone.
  */
 export async function GET(req: NextRequest) {
   try {
