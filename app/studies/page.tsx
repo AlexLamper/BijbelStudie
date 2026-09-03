@@ -2,9 +2,17 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, ArrowRight, Check, CheckCircle2, ChevronRight, Search } from 'lucide-react'
+import {
+  BookOpen,
+  CheckCircle2,
+  Lightbulb,
+  Quote,
+  ScrollText,
+  Search,
+  User,
+} from 'lucide-react'
 import { curatedStudies, type CuratedStudy } from '../../lib/data/curated-studies'
-import { BOOK_STUDY_ENTRIES, CATALOGUE_ENTRIES, THEME_STUDIES } from '../../lib/bookStudies'
+import { CATALOGUE_ENTRIES } from '../../lib/bookStudies'
 import { JsonLd } from '../../components/seo/JsonLd'
 import { absoluteUrl } from '../../lib/seo/constants'
 import {
@@ -17,12 +25,7 @@ import {
 const TEAL = '#0D9488'
 const COMPLETED_KEY = 'bijbelstudie_completed_studies'
 
-/** How many "verder waar je was" pills we show. Three is a strip; ten is a second catalogue. */
-const RESUME_LIMIT = 3
-
 /**
- * Only the hand-authored studies are described here.
- *
  * The sixty-six generated book studies are not thin duplicates of each other,
  * but they ARE near-duplicates of /bijbelboeken/[slug], which is the indexable
  * surface for a book's own content. Listing both would split the same subject
@@ -54,9 +57,6 @@ const STUDIES_GRAPH = (() => {
         description: study.description,
         path: `/studies/${study.id}`,
         lessonCount: study.lessons.length,
-        // Not the card banner: that is a 320x120 decorative SVG, well under the
-        // size Google expects from a Course image. /og renders a real 1200x630
-        // PNG carrying this study's title.
         image: `/og?${new URLSearchParams({ title: study.title, subtitle: study.description }).toString()}`,
         anchor: study.id,
       })
@@ -64,16 +64,13 @@ const STUDIES_GRAPH = (() => {
   )
 })()
 
-/**
- * One question, answered top to bottom: waar begin je?
- *
- * The page used to be a catalogue - four filter buttons over sixty-six evenly
- * weighted cards - which answers "welke van de 77 wil ik", a question almost
- * nobody arrives with. What a reader actually needs is a first step. So the
- * main column is a route: carry on where you were, one recommended start, then
- * a handful of prepared tracks. The full shelf lives in the rail beside it,
- * one click away, for the reader who already knows the book they want.
- */
+// ---------------------------------------------------------------------------
+// This page is the desktop counterpart of the mobile app's "Studies" screen
+// (bijbelstudie-app · features/studies/present/studies_screen.dart). Same
+// elements, same order, same wording: a header, the Ontdek/Mijn studies/Voltooid
+// tabs, a featured carousel, a topic grid, a kind-filter pill row, then the
+// list. Only the scale changes - wider container, more columns, larger cards.
+// ---------------------------------------------------------------------------
 
 type Category = 'ot' | 'nt' | 'personen' | 'themas'
 
@@ -84,16 +81,29 @@ const CATEGORY_LABELS: Record<Category, string> = {
   themas: "Thema's",
 }
 
-/** The line under a category title: what you are looking at, and in what order. */
-const CATEGORY_BLURBS: Record<Category, string> = {
-  ot: 'Op volgorde van de canon, gegroepeerd per soort boek.',
-  nt: 'Op volgorde van de canon, gegroepeerd per soort boek.',
-  personen: 'Studies die één persoon door de tekst heen volgen.',
-  themas: 'Studies die één lijn door meerdere bijbelboeken trekken.',
+const CATEGORY_ICON: Record<Category, typeof BookOpen> = {
+  ot: ScrollText,
+  nt: BookOpen,
+  personen: User,
+  themas: Lightbulb,
 }
 
-/** The categories that hold bible books, whose titles are short enough to pack tight. */
-const BOOK_CATEGORIES: Category[] = ['ot', 'nt']
+/** The kind pill row. `null` is "Alle"; the rest are study `type` values. */
+const KINDS: { value: CuratedStudy['type'] | null; label: string }[] = [
+  { value: null, label: 'Alle' },
+  { value: 'Boek', label: 'Bijbelboeken' },
+  { value: 'Persoon', label: 'Personen' },
+  { value: 'Gedeelte', label: 'Gedeelten' },
+  { value: 'Onderwerp', label: "Thema's" },
+]
+
+type Tab = 'discover' | 'mine' | 'completed'
+
+const TABS: { value: Tab; label: string }[] = [
+  { value: 'discover', label: 'Ontdek' },
+  { value: 'mine', label: 'Mijn studies' },
+  { value: 'completed', label: 'Voltooid' },
+]
 
 interface Enrollment {
   studyId: string
@@ -112,343 +122,169 @@ interface Status {
   pct: number
 }
 
-/** A catalogue row: the study, plus the words underneath it. */
+/** A catalogue row: the study plus the facts the list needs. */
 interface Entry {
   study: CuratedStudy
   /** "Wet", "Evangelie", "Persoon" - what kind of thing this is, in one word. */
   kind: string
   category: Category
   lessonCount: number
-  /** Average minutes per lesson; lessons without an estimate take the fallback. */
   avgMinutes: number
   /** Everything a search should match, lowercased once at module load. */
   haystack: string
 }
 
-// `kind`, `category`, `lessonCount` and `avgMinutes` come from lib/bookStudies
-// so this page and /api/v1/studies/catalog group studies identically. Only the
-// search haystack is built here - the API has no use for it.
-const ENTRIES: Entry[] = CATALOGUE_ENTRIES.map(({ study, book, kind, category, lessonCount, avgMinutes }) => ({
-  study,
-  kind,
-  category,
-  lessonCount,
-  avgMinutes,
-  haystack: (book
-    ? `${study.title} ${book.name} ${book.genre} ${study.description}`
-    : `${study.title} ${study.description} ${study.lessons.map(lesson => lesson.book).join(' ')}`
-  ).toLowerCase(),
-}))
-
-const ENTRY_BY_ID = new Map(ENTRIES.map(entry => [entry.study.id, entry]))
-
-const byCategory = (category: Category) => ENTRIES.filter(entry => entry.category === category)
+const ENTRIES: Entry[] = CATALOGUE_ENTRIES.map(
+  ({ study, book, kind, category, lessonCount, avgMinutes }) => ({
+    study,
+    kind,
+    category,
+    lessonCount,
+    avgMinutes,
+    haystack: (book
+      ? `${study.title} ${book.name} ${book.genre} ${study.description}`
+      : `${study.title} ${study.description} ${study.lessons.map(lesson => lesson.book).join(' ')}`
+    ).toLowerCase(),
+  }),
+)
 
 const COUNTS: Record<Category, number> = {
-  ot: byCategory('ot').length,
-  nt: byCategory('nt').length,
-  personen: byCategory('personen').length,
-  themas: byCategory('themas').length,
+  ot: ENTRIES.filter(entry => entry.category === 'ot').length,
+  nt: ENTRIES.filter(entry => entry.category === 'nt').length,
+  personen: ENTRIES.filter(entry => entry.category === 'personen').length,
+  themas: ENTRIES.filter(entry => entry.category === 'themas').length,
 }
 
-/**
- * The recommended start. Markus if it exists, otherwise the first study there
- * is - the page must never empty out because one id moved.
- */
-const HERO_ENTRY =
-  ENTRY_BY_ID.get('boek-markus') ??
-  ENTRIES.find(entry => entry.study.title.toLowerCase().includes('markus'))
-const HERO_STUDY: CuratedStudy = HERO_ENTRY?.study ?? curatedStudies[0]
-const HERO_WHY = HERO_ENTRY
-  ? 'Het kortste evangelie: veel vaart, weinig omhaal, en meteen bij de kern - wie is Jezus, en wat vraagt hij van je?'
-  : HERO_STUDY.description
+/** The featured carousel: the hand-authored studies, the ones with real art and
+ * a written intro that a large card can actually fill. */
+const FEATURED: Entry[] = ENTRIES.filter(
+  entry => entry.study.type !== 'Boek' || (entry.study.about?.length ?? 0) > 0,
+).slice(0, 8)
 
-interface Track {
-  key: string
-  label: string
-  blurb: string
-  studies: CuratedStudy[]
-}
+const BANNER_ICON = (type: CuratedStudy['type']) =>
+  type === 'Persoon' ? User : type === 'Gedeelte' ? Quote : type === 'Boek' ? BookOpen : Lightbulb
 
-const TRACK_SEEDS: { key: string; label: string; blurb: string; matchers: string[] }[] = [
-  {
-    key: 'beginners',
-    label: 'Voor beginners',
-    blurb: 'Korte, verhalende boeken om het ritme te pakken te krijgen.',
-    matchers: ['markus', 'johannes', 'ruth', 'genesis', 'psalmen'],
-  },
-  {
-    key: 'jezus',
-    label: 'Het leven van Jezus',
-    blurb: 'Van de evangelieverslagen naar de laatste week en de opstanding.',
-    matchers: ['markus', 'johannes', 'bergrede', 'intocht', 'opstanding'],
-  },
-  {
-    key: 'ot-verhalen',
-    label: 'De grote verhalen van het OT',
-    blurb: 'De mensen en gebeurtenissen waar de rest van de Bijbel op terugkijkt.',
-    matchers: ['genesis', 'exodus', 'noach', 'abraham', 'mozes', 'david', 'daniël'],
-  },
-  {
-    key: 'thema',
-    label: 'Een thema volgen',
-    blurb: 'Studies die één lijn door meerdere bijbelboeken heen trekken.',
-    matchers: ['bergrede', 'psalmen', 'geloof-in-storm', 'opstanding', 'abraham'],
-  },
-]
+// ---------------------------------------------------------------------------
 
-/**
- * Every matcher is held against the themed studies first (on id or title) and
- * then against the bible books (on book name). A matcher that finds nothing is
- * skipped and duplicates fall away, so a track never empties out over one
- * missing id.
- */
-const TRACKS: Track[] = TRACK_SEEDS.map(seed => {
-  const seen = new Set<string>()
-  const studies: CuratedStudy[] = []
-  for (const raw of seed.matchers) {
-    const needle = raw.toLowerCase()
-    const theme = THEME_STUDIES.find(
-      study => study.id === needle || study.title.toLowerCase().includes(needle),
-    )
-    const bookEntry = BOOK_STUDY_ENTRIES.find(entry =>
-      entry.book.name.toLowerCase().includes(needle),
-    )
-    const hit = theme ?? bookEntry?.study
-    if (hit && !seen.has(hit.id)) {
-      seen.add(hit.id)
-      studies.push(hit)
-    }
-  }
-  return { key: seed.key, label: seed.label, blurb: seed.blurb, studies }
-}).filter(track => track.studies.length > 0)
-
-/** The line under a track or category, in plain Dutch, so nobody has to count. */
-function summarize(rows: Entry[]): string {
-  if (rows.length === 0) return 'Hier staat nog niets.'
-  const noun = rows.length === 1 ? 'studie' : 'studies'
-  const avg = Math.round(rows.reduce((sum, entry) => sum + entry.avgMinutes, 0) / rows.length)
-  return `${rows.length} ${noun} - ±${avg} minuten per les.`
-}
-
-/**
- * One study in a list.
- *
- * A card, not a poster: the name, one word for what kind of book it is, and the
- * lesson/time cost on a single muted line. Where you left off gets a bar, since
- * that is the only number worth reading twice.
- */
-function StudyCard({ entry, status }: { entry: Entry; status: Status }) {
+/** The 16:7 banner on a card. The study art is a hand-authored SVG; when there
+ * is none, a tinted panel with the type icon stands in. */
+function Banner({ entry, className = '' }: { entry: Entry; className?: string }) {
+  const Icon = BANNER_ICON(entry.study.type)
   return (
-    <Link
-      href={`/studies/${entry.study.id}`}
-      data-track="study_card"
-      className="group no-underline flex flex-col gap-2 rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card px-4 py-3.5 transition-colors hover:border-teal-400 dark:hover:border-teal-700"
+    <div
+      className={`relative overflow-hidden bg-gradient-to-br from-teal-700 to-slate-900 ${className}`}
     >
-      <div className="flex items-start justify-between gap-3">
-        <h3 className="font-semibold text-[15px] text-gray-900 dark:text-foreground leading-snug group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors">
-          {entry.study.title}
-        </h3>
-        {status.completed ? (
-          <span
-            className="mt-0.5 flex-none inline-flex items-center gap-1 text-[11px] font-semibold"
-            style={{ color: TEAL }}
-          >
-            <CheckCircle2 size={14} /> Afgerond
-          </span>
-        ) : status.started ? (
-          <span
-            className="mt-0.5 flex-none text-xs font-semibold tabular-nums"
-            style={{ color: TEAL }}
-          >
-            {status.pct}%
-          </span>
-        ) : null}
-      </div>
-
-      {entry.study.description && (
-        <p className="text-[12.5px] leading-snug text-gray-500 dark:text-muted-foreground line-clamp-2">
-          {entry.study.description}
-        </p>
+      {entry.study.image && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={entry.study.image}
+          alt=""
+          loading="lazy"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
       )}
-
-      <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-gray-400 dark:text-muted-foreground tabular-nums">
-        <span className="font-semibold uppercase tracking-wider">{entry.kind}</span>
-        <span aria-hidden>·</span>
-        <span>
-          {entry.lessonCount} {entry.lessonCount === 1 ? 'les' : 'lessen'}
-        </span>
-        <span aria-hidden>·</span>
-        <span>±{entry.avgMinutes} min per les</span>
-      </div>
-
-      {status.started && !status.completed && (
-        <div className="mt-0.5">
-          <div className="h-1 rounded-full bg-gray-100 dark:bg-secondary overflow-hidden">
-            <div
-              className="h-full rounded-full transition-all"
-              style={{ width: `${status.pct}%`, backgroundColor: TEAL }}
-            />
-          </div>
-          <p className="mt-1 text-[11px] text-gray-500 dark:text-muted-foreground tabular-nums">
-            Les {status.resumeDay ?? status.done + 1} van {status.total}
-          </p>
-        </div>
-      )}
-    </Link>
+      <Icon className="absolute bottom-2 right-3 text-white/25" size={26} aria-hidden />
+    </div>
   )
 }
 
-/**
- * One step of a track.
- *
- * A track is an order, not a shelf, so it reads as a numbered list: the step
- * number, the title, and the same cost line the cards carry. The number used to
- * be a teal disc floating over the corner of a card, which clipped the border
- * and left the reader to work out that the grid was a sequence at all.
- */
-function TrackStep({ entry, step, status }: { entry: Entry; step: number; status: Status }) {
+/** One study, as a row: banner thumbnail, title, the two facts that help a
+ * reader choose (lessons, minutes), then progress or the kind, then the action.
+ * The mobile `_StudyRow`, widened. */
+function StudyRow({ entry, status }: { entry: Entry; status: Status }) {
+  const action = status.completed ? 'Opnieuw' : status.started ? 'Verder' : 'Start'
   return (
     <Link
       href={`/studies/${entry.study.id}`}
       data-track="study_card"
-      className="group no-underline flex items-center gap-3 px-4 py-3 transition-colors hover:bg-gray-50 dark:hover:bg-secondary"
+      className="group no-underline flex items-stretch gap-3 rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card p-3 transition-colors hover:border-teal-400 dark:hover:border-teal-700"
     >
-      <span
-        className="flex h-7 w-7 flex-none items-center justify-center rounded-full text-[11px] font-bold tabular-nums"
-        style={
-          status.completed
-            ? { backgroundColor: TEAL, color: '#ffffff' }
-            : { backgroundColor: 'rgba(13,148,136,0.12)', color: TEAL }
-        }
-      >
-        {status.completed ? <Check size={14} /> : step}
-      </span>
+      <Banner entry={entry} className="h-16 w-16 flex-none rounded-lg" />
 
       <div className="min-w-0 flex-1">
-        <h3 className="text-[14.5px] font-semibold leading-snug text-gray-900 dark:text-foreground group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors">
+        <h3 className="truncate text-[15px] font-semibold text-gray-900 dark:text-foreground group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors">
           {entry.study.title}
         </h3>
-        {entry.study.description && (
-          <p className="mt-0.5 text-[12.5px] leading-snug text-gray-500 dark:text-muted-foreground line-clamp-2">
-            {entry.study.description}
+        <p className="mt-0.5 text-[12px] text-gray-400 dark:text-muted-foreground tabular-nums">
+          {entry.lessonCount} {entry.lessonCount === 1 ? 'les' : 'lessen'} · ±{entry.avgMinutes} min
+        </p>
+
+        {status.completed ? (
+          <p className="mt-1 inline-flex items-center gap-1 text-[12px] font-medium" style={{ color: TEAL }}>
+            <CheckCircle2 size={13} /> Voltooid
+          </p>
+        ) : status.started ? (
+          <div className="mt-1.5 max-w-[240px]">
+            <div className="h-1 overflow-hidden rounded-full bg-gray-100 dark:bg-secondary">
+              <div
+                className="h-full rounded-full transition-all"
+                style={{ width: `${status.pct}%`, backgroundColor: TEAL }}
+              />
+            </div>
+            <p className="mt-1 text-[11px] text-gray-500 dark:text-muted-foreground tabular-nums">
+              les {status.resumeDay ?? status.done + 1} van {status.total}
+            </p>
+          </div>
+        ) : (
+          <p className="mt-1 text-[12px] font-medium" style={{ color: TEAL }}>
+            {entry.kind}
           </p>
         )}
-        <div className="mt-1 flex flex-wrap items-center gap-x-1.5 text-[11px] text-gray-400 dark:text-muted-foreground tabular-nums">
-          <span className="font-semibold uppercase tracking-wider">{entry.kind}</span>
-          <span aria-hidden>·</span>
-          <span>
-            {entry.lessonCount} {entry.lessonCount === 1 ? 'les' : 'lessen'}
-          </span>
-          <span aria-hidden>·</span>
-          <span>±{entry.avgMinutes} min per les</span>
-        </div>
-        {status.started && !status.completed && (
-          <div className="mt-1.5 h-1 max-w-[220px] overflow-hidden rounded-full bg-gray-100 dark:bg-secondary">
-            <div
-              className="h-full rounded-full"
-              style={{ width: `${status.pct}%`, backgroundColor: TEAL }}
-            />
-          </div>
-        )}
       </div>
 
-      <div className="flex flex-none items-center gap-2">
-        {status.completed ? (
-          <span className="text-[11px] font-semibold" style={{ color: TEAL }}>
-            Afgerond
-          </span>
-        ) : status.started ? (
-          <span
-            className="hidden sm:block text-[11px] font-semibold tabular-nums"
-            style={{ color: TEAL }}
-          >
-            les {status.resumeDay ?? status.done + 1}/{status.total}
-          </span>
-        ) : null}
-        <ChevronRight
-          size={15}
-          className="text-gray-300 dark:text-muted-foreground transition-transform group-hover:translate-x-0.5"
-        />
+      <div className="flex flex-none items-center">
+        <span
+          className="rounded-lg px-4 py-2 text-[13px] font-semibold text-white transition-opacity group-hover:opacity-90"
+          style={{ backgroundColor: TEAL }}
+        >
+          {action}
+        </span>
       </div>
     </Link>
   )
 }
 
-/**
- * One line in the browse grid: a title, and one number for what it costs you.
- *
- * Deliberately not a card. Browsing the Oude Testament is thirty-nine names you
- * scan for the one you already have in mind, and thirty-nine cards carrying a
- * genre, a lesson count and a minute estimate turned that into a page and a half
- * of scrolling. The lesson count stays because it is the one thing that differs
- * between Obadja and Jesaja; progress takes its place once you have any.
- */
-function BookRow({ entry, status }: { entry: Entry; status: Status }) {
+/** eyebrow + title, with an optional "clear the filters" action on the right. */
+function SectionHeader({
+  eyebrow,
+  title,
+  onClear,
+}: {
+  eyebrow: string
+  title: string
+  onClear?: () => void
+}) {
   return (
-    <Link
-      href={`/studies/${entry.study.id}`}
-      data-track="study_card"
-      className="group no-underline flex items-baseline justify-between gap-2 rounded-lg px-2.5 py-1.5 transition-colors hover:bg-gray-50 dark:hover:bg-secondary"
-    >
-      <span className="text-[13.5px] leading-snug text-gray-800 dark:text-foreground group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors">
-        {entry.study.title}
-      </span>
-      {status.completed ? (
-        <span className="flex-none self-center" style={{ color: TEAL }}>
-          <CheckCircle2 size={13} />
-          <span className="sr-only">Afgerond</span>
-        </span>
-      ) : status.started ? (
-        <span className="flex-none text-[11px] font-semibold tabular-nums" style={{ color: TEAL }}>
-          {status.pct}%
-        </span>
-      ) : (
-        <span className="flex-none text-[11px] tabular-nums text-gray-400 dark:text-muted-foreground">
-          {entry.lessonCount} {entry.lessonCount === 1 ? 'les' : 'lessen'}
-        </span>
+    <div className="mt-8 flex items-end justify-between gap-3">
+      <div>
+        <p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: TEAL }}>
+          {eyebrow}
+        </p>
+        <h2 className="mt-0.5 text-lg font-bold text-gray-900 dark:text-foreground">{title}</h2>
+      </div>
+      {onClear && (
+        <button
+          onClick={onClear}
+          className="flex-none text-[13px] font-medium text-gray-500 dark:text-muted-foreground hover:text-teal-700 dark:hover:text-teal-400 transition-colors"
+        >
+          Alles bekijken
+        </button>
       )}
-    </Link>
+    </div>
   )
 }
-
-/**
- * Rows bucketed on `kind`, in the order the kinds first appear.
- *
- * The canon already arrives grouped - five books of Wet, then Geschiedenis, and
- * so on - so first appearance is the right order and there is no second list of
- * genres to keep in sync. A category with one kind yields one group, which the
- * browse grid then renders without a caption.
- */
-function groupByKind(rows: Entry[]): { kind: string; rows: Entry[] }[] {
-  const buckets = new Map<string, Entry[]>()
-  for (const entry of rows) {
-    const bucket = buckets.get(entry.kind)
-    if (bucket) bucket.push(entry)
-    else buckets.set(entry.kind, [entry])
-  }
-  return [...buckets].map(([kind, entries]) => ({ kind, rows: entries }))
-}
-
-/** The card grid, still what a search returns: mixed results, no shared order. */
-const CARD_GRID = 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3'
-
-type View = { kind: 'track'; key: string } | { kind: 'category'; key: Category }
 
 export default function StudiesPage() {
-  const [view, setView] = useState<View | null>(null)
+  const [tab, setTab] = useState<Tab>('discover')
+  const [category, setCategory] = useState<Category | null>(null)
+  const [kind, setKind] = useState<CuratedStudy['type'] | null>(null)
   const [query, setQuery] = useState('')
   const [completedIds, setCompletedIds] = useState<string[]>([])
   const [enrollments, setEnrollments] = useState<Record<string, Enrollment>>({})
-  /** The API's order: most recently touched study first. */
-  const [recentIds, setRecentIds] = useState<string[]>([])
 
   useEffect(() => {
-    // localStorage first so the badges paint immediately, then the server -
-    // which is the real record and knows about other devices.
     try {
-      const stored = JSON.parse(localStorage.getItem(COMPLETED_KEY) || '[]')
-      setCompletedIds(stored)
+      setCompletedIds(JSON.parse(localStorage.getItem(COMPLETED_KEY) || '[]'))
     } catch {
       /* noop */
     }
@@ -476,9 +312,6 @@ export default function StudiesPage() {
         const map: Record<string, Enrollment> = {}
         for (const entry of list) map[entry.studyId] = entry
         setEnrollments(map)
-        // The API already sorts on lastActivityAt; keeping that order is the
-        // only thing that makes "the last three" actually the last three.
-        setRecentIds(list.map(entry => entry.studyId))
       } catch {
         /* anonymous visitors simply see no progress */
       }
@@ -505,47 +338,24 @@ export default function StudiesPage() {
     }
   }, [enrollments, completedIds])
 
-  /** Unfinished studies, most recently touched first, capped at RESUME_LIMIT. */
-  const inProgress = useMemo(() => {
-    const ordered = [
-      ...recentIds.map(id => ENTRY_BY_ID.get(id)).filter((e): e is Entry => Boolean(e)),
-      // Studies known only from localStorage have no enrollment row; they go last.
-      ...ENTRIES.filter(entry => !recentIds.includes(entry.study.id)),
-    ]
-    return ordered
-      .map(entry => ({ entry, status: statusFor(entry.study) }))
-      .filter(row => row.status.started && !row.status.completed)
-      .slice(0, RESUME_LIMIT)
-  }, [statusFor, recentIds])
-
-  /** A search cuts across everything: the reader typed a name, not a category. */
   const searchResults = useMemo(() => {
     const needle = query.trim().toLowerCase()
     if (!needle) return null
     return ENTRIES.filter(entry => entry.haystack.includes(needle))
   }, [query])
 
-  const resumeStrip = inProgress.length > 0 && (
-    <div className="mt-5 flex gap-2 overflow-x-auto pb-1">
-      {inProgress.map(({ entry, status }) => (
-        <Link
-          key={entry.study.id}
-          href={`/studies/${entry.study.id}`}
-          data-track="study_resume_card"
-          className="no-underline flex flex-none items-center gap-2 rounded-full border px-3 py-1.5 bg-white dark:bg-card transition-colors hover:border-teal-400"
-          style={{ borderColor: 'rgba(13,148,136,0.30)' }}
-        >
-          <span className="text-[12px] font-semibold text-gray-900 dark:text-foreground">
-            {entry.study.title}
-          </span>
-          <span className="text-[11px] text-gray-500 dark:text-muted-foreground tabular-nums">
-            les {status.resumeDay ?? status.done + 1}/{status.total} · {status.pct}%
-          </span>
-          <ArrowRight size={13} className="flex-none" style={{ color: TEAL }} />
-        </Link>
-      ))}
-    </div>
-  )
+  /** The list under the discovery furniture: the chosen tab, narrowed by the
+   * topic grid and the kind pills. */
+  const listEntries = useMemo(() => {
+    return ENTRIES.filter(entry => {
+      if (category && entry.category !== category) return false
+      if (kind && entry.study.type !== kind) return false
+      if (tab === 'discover') return true
+      const status = statusFor(entry.study)
+      if (tab === 'mine') return status.started && !status.completed
+      return status.completed
+    })
+  }, [tab, category, kind, statusFor])
 
   const searchField = (
     <div className="relative w-full sm:w-72 flex-none">
@@ -557,7 +367,7 @@ export default function StudiesPage() {
         type="search"
         value={query}
         onChange={event => setQuery(event.target.value)}
-        placeholder="Zoek een boek of thema"
+        placeholder="Zoek een bijbelboek, persoon of thema"
         aria-label="Zoek een studie"
         className="w-full h-10 pl-9 pr-3 rounded-lg border border-gray-200 dark:border-border bg-white dark:bg-background text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:ring-2"
         style={{ ['--tw-ring-color' as string]: 'rgba(13,148,136,0.35)' }}
@@ -565,295 +375,186 @@ export default function StudiesPage() {
     </div>
   )
 
-  // ---- Detail: one track or one category fills the page. ------------------
-  if (view !== null && searchResults === null) {
-    const track = view.kind === 'track' ? TRACKS.find(item => item.key === view.key) : undefined
-    const rows: Entry[] =
-      view.kind === 'track'
-        ? (track?.studies ?? [])
-            .map(study => ENTRY_BY_ID.get(study.id))
-            .filter((entry): entry is Entry => Boolean(entry))
-        : byCategory(view.key)
-
-    const title = view.kind === 'track' ? (track?.label ?? '') : CATEGORY_LABELS[view.key]
-    const blurb = view.kind === 'track' ? track?.blurb : CATEGORY_BLURBS[view.key]
-    /** Book titles are one or two words, so they pack into far more columns. */
-    const dense = view.kind === 'category' && BOOK_CATEGORIES.includes(view.key)
-
-    return (
-      <div className="h-full overflow-y-auto">
-        <JsonLd data={STUDIES_GRAPH} />
-
-        <div className="px-5 sm:px-8 xl:px-10 py-6 w-full">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <button
-              onClick={() => setView(null)}
-              className="self-start inline-flex items-center gap-1.5 text-[13px] font-medium text-gray-500 dark:text-muted-foreground hover:text-teal-700 dark:hover:text-teal-400 transition-colors"
-            >
-              <ArrowLeft size={15} /> Terug
-            </button>
-            {searchField}
-          </div>
-
-          <h1 className="mt-3 text-xl sm:text-2xl font-bold text-gray-900 dark:text-foreground">
-            {title}
-          </h1>
-          {blurb && (
-            <p className="mt-1 text-[13px] text-gray-500 dark:text-muted-foreground">{blurb}</p>
-          )}
-          <p className="mt-2 text-[13px] text-gray-600 dark:text-muted-foreground">
-            {summarize(rows)}
-            {view.kind === 'category' && dense && (
-              <span className="text-gray-400 dark:text-muted-foreground">
-                {' '}
-                Gegroepeerd per soort boek, op volgorde van de canon. Achter elke titel staat het aantal lessen.
-              </span>
-            )}
-          </p>
-
-          {view.kind === 'track' ? (() => {
-            /* A track is an order (the numbered list) plus a summary of what it
-               costs. On a wide screen the summary sits in a column beside the
-               list, where there is room to spare; on a narrow one it stacks
-               above it. Every figure is derived from `rows`, so it never drifts
-               from the list. */
-            const statuses = rows.map(entry => statusFor(entry.study))
-            const totalLessons = rows.reduce((sum, entry) => sum + entry.lessonCount, 0)
-            const totalMinutes = rows.reduce(
-              (sum, entry) => sum + entry.lessonCount * entry.avgMinutes,
-              0,
-            )
-            const totalHours = Math.max(1, Math.round(totalMinutes / 60))
-            const doneCount = statuses.filter(status => status.completed).length
-            const startBook = rows[0]?.study.lessons[0]?.book ?? rows[0]?.study.startBook
-            const stats = [
-              { label: 'Studies', value: `${rows.length}` },
-              { label: 'Lessen totaal', value: `${totalLessons}` },
-              { label: 'Tijd totaal', value: `±${totalHours} uur` },
-              { label: 'Afgerond', value: `${doneCount}/${rows.length}` },
-            ]
-            return (
-              <div className="mt-5 flex flex-col-reverse gap-5 lg:flex-row lg:items-start">
-                <ol className="min-w-0 flex-1 lg:max-w-[760px] list-none p-0 overflow-hidden rounded-2xl border border-gray-200 dark:border-border bg-white dark:bg-card divide-y divide-gray-100 dark:divide-border">
-                  {rows.map((entry, index) => (
-                    <li key={entry.study.id}>
-                      <TrackStep entry={entry} step={index + 1} status={statusFor(entry.study)} />
-                    </li>
-                  ))}
-                </ol>
-
-                <aside className="flex-none lg:w-64">
-                  <dl className="grid grid-cols-2 gap-3 lg:grid-cols-1">
-                    {stats.map(stat => (
-                      <div
-                        key={stat.label}
-                        className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card px-3 py-2.5 lg:flex lg:items-baseline lg:justify-between"
-                      >
-                        <dt className="text-[10.5px] font-semibold uppercase tracking-wider text-gray-400 dark:text-muted-foreground">
-                          {stat.label}
-                        </dt>
-                        <dd className="mt-0.5 lg:mt-0 text-lg font-bold tabular-nums text-gray-900 dark:text-foreground">
-                          {stat.value}
-                        </dd>
-                      </div>
-                    ))}
-                  </dl>
-                  {startBook && (
-                    <p className="mt-3 text-[12.5px] leading-snug text-gray-500 dark:text-muted-foreground">
-                      Je begint in <span className="font-semibold text-gray-700 dark:text-foreground">{startBook}</span> en werkt de studies van boven naar beneden af.
-                    </p>
-                  )}
-                </aside>
-              </div>
-            )
-          })() : dense ? (
-            /* Oude / Nieuwe Testament: dozens of short book titles. A packed
-               grid the reader scans for the one name they arrived with, split
-               into the canon's own genre sections so the structure is visible
-               rather than implied. */
-            <section className="mt-5 rounded-2xl border border-gray-200 dark:border-border bg-white dark:bg-card p-3 sm:p-4 divide-y divide-gray-100 dark:divide-border">
-              {groupByKind(rows).map(group => (
-                <div key={group.kind} className="py-3 first:pt-0 last:pb-0">
-                  <h2 className="mb-1.5 px-2.5 flex items-baseline gap-1.5 text-[11px] font-bold uppercase tracking-widest text-gray-500 dark:text-muted-foreground">
-                    {group.kind}
-                    <span className="font-medium tabular-nums text-gray-400 dark:text-muted-foreground">
-                      {group.rows.length} {group.rows.length === 1 ? 'boek' : 'boeken'}
-                    </span>
-                  </h2>
-                  <ul className="list-none p-0 grid gap-x-2 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-                    {group.rows.map(entry => (
-                      <li key={entry.study.id}>
-                        <BookRow entry={entry} status={statusFor(entry.study)} />
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </section>
-          ) : (
-            /* Personen / Thema's: a handful of studies, each worth a full card
-               with its own one-line description and lesson/time cost. */
-            <div className="mt-5 space-y-6">
-              {groupByKind(rows).map(group => (
-                <section key={group.kind}>
-                  {rows.length > group.rows.length && (
-                    <h2 className="mb-2 flex items-baseline gap-1.5 text-[11px] font-bold uppercase tracking-widest text-gray-500 dark:text-muted-foreground">
-                      {group.kind}
-                      <span className="font-medium tabular-nums text-gray-400 dark:text-muted-foreground">
-                        {group.rows.length}
-                      </span>
-                    </h2>
-                  )}
-                  <div className={CARD_GRID}>
-                    {group.rows.map(entry => (
-                      <StudyCard key={entry.study.id} entry={entry} status={statusFor(entry.study)} />
-                    ))}
-                  </div>
-                </section>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    )
+  const showFurniture = searchResults === null && tab === 'discover'
+  const filtersOn = category !== null || kind !== null
+  const clearFilters = () => {
+    setCategory(null)
+    setKind(null)
   }
 
-  // ---- Landing (or search results). --------------------------------------
+  const sectionTitle = category ? CATEGORY_LABELS[category] : 'Alle studies'
+  const sectionEyebrow = filtersOn ? 'Gefilterd' : 'De hele Bijbel'
+
   return (
     <div className="h-full overflow-y-auto">
       <JsonLd data={STUDIES_GRAPH} />
 
-      <div className="px-5 sm:px-8 xl:px-10 py-6 w-full">
+      <div className="mx-auto max-w-[1100px] px-5 sm:px-8 py-6 w-full">
+        {/* Header */}
         <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="min-w-0">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-foreground">
-              Ontdek de Bijbel
-            </h1>
-            <p className="mt-1 text-sm text-gray-500 dark:text-muted-foreground">
-              Van boven naar beneden. Eén keuze per keer, en elke studie leidt je hoofdstuk voor
-              hoofdstuk door de tekst.
-            </p>
-          </div>
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-foreground">
+            Studies
+          </h1>
           {searchField}
         </header>
 
-        {resumeStrip}
-
-        {/* A search replaces the route: you already know what you are after. */}
         {searchResults !== null ? (
-          searchResults.length === 0 ? (
-            <p className="mt-8 text-sm text-gray-500 dark:text-muted-foreground">
-              Niets gevonden voor &ldquo;{query.trim()}&rdquo;. Probeer de naam van een bijbelboek.
-            </p>
-          ) : (
-            <section className="mt-6">
-              <p className="text-[13px] text-gray-600 dark:text-muted-foreground">
-                {summarize(searchResults)}
+          /* A search replaces the page: the reader already told you what they
+             want, so the browsing aids are noise. */
+          <section className="mt-6">
+            {searchResults.length === 0 ? (
+              <p className="text-sm text-gray-500 dark:text-muted-foreground">
+                Niets gevonden voor &ldquo;{query.trim()}&rdquo;. Probeer de naam van een bijbelboek,
+                een persoon of een thema.
               </p>
-              <div className={`mt-3 ${CARD_GRID}`}>
+            ) : (
+              <div className="grid gap-3 xl:grid-cols-2">
                 {searchResults.map(entry => (
-                  <StudyCard key={entry.study.id} entry={entry} status={statusFor(entry.study)} />
+                  <StudyRow key={entry.study.id} entry={entry} status={statusFor(entry.study)} />
                 ))}
               </div>
-            </section>
-          )
+            )}
+          </section>
         ) : (
-          <div className="mt-6 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-6 items-start">
-            {/* Main column: the decision. */}
-            <div className="min-w-0">
-              <div
-                className="rounded-2xl border p-6 sm:p-8 bg-white dark:bg-card"
-                style={{ borderColor: 'rgba(13,148,136,0.35)' }}
-              >
-                <p
-                  className="text-[11px] font-semibold uppercase tracking-wider"
-                  style={{ color: TEAL }}
-                >
-                  Aanbevolen om mee te beginnen
-                </p>
-                <h2 className="mt-1.5 text-xl sm:text-2xl font-bold text-gray-900 dark:text-foreground">
-                  {HERO_STUDY.title}
-                </h2>
-                <p className="mt-2 max-w-[70ch] text-sm sm:text-[14.5px] leading-relaxed text-gray-600 dark:text-muted-foreground">
-                  {HERO_WHY}
-                </p>
-                <p className="mt-2 text-[11.5px] text-gray-400 dark:text-muted-foreground tabular-nums">
-                  {HERO_STUDY.lessons.length} {HERO_STUDY.lessons.length === 1 ? 'les' : 'lessen'} ·
-                  één hoofdstuk per keer
-                </p>
-                <Link
-                  href={`/studies/${HERO_STUDY.id}`}
-                  data-track="study_hero_start"
-                  className="mt-4 inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white no-underline transition-opacity hover:opacity-90"
-                  style={{ backgroundColor: TEAL }}
-                >
-                  Begin
-                  <ArrowRight size={16} />
-                </Link>
-              </div>
-
-              {TRACKS.length > 0 && (
-                <section className="mt-7">
-                  <h2 className="text-[13px] font-bold text-foreground mb-2.5">
-                    Of kies een startspoor
-                  </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-4 gap-3">
-                    {TRACKS.map(track => (
-                      <button
-                        key={track.key}
-                        onClick={() => setView({ kind: 'track', key: track.key })}
-                        data-track={`study_track_${track.key}`}
-                        className="group text-left flex flex-col justify-between gap-4 rounded-2xl border border-gray-200 dark:border-border bg-white dark:bg-card p-5 min-h-[150px] transition-colors hover:border-teal-400 dark:hover:border-teal-700"
-                      >
-                        <span className="flex items-start justify-between gap-3">
-                          <span className="text-base font-bold text-gray-900 dark:text-foreground group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors">
-                            {track.label}
-                          </span>
-                          <span
-                            className="flex-none text-xl font-bold tabular-nums"
-                            style={{ color: TEAL }}
-                          >
-                            {track.studies.length}
-                          </span>
-                        </span>
-                        <span className="text-[13px] text-gray-500 dark:text-muted-foreground leading-relaxed">
-                          {track.blurb}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </section>
-              )}
+          <>
+            {/* Tabs */}
+            <div className="mt-5 flex flex-wrap gap-2">
+              {TABS.map(item => {
+                const active = item.value === tab
+                return (
+                  <button
+                    key={item.value}
+                    onClick={() => setTab(item.value)}
+                    data-track={`study_tab_${item.value}`}
+                    className="rounded-full border px-4 py-1.5 text-[13px] font-semibold transition-colors"
+                    style={
+                      active
+                        ? { backgroundColor: TEAL, borderColor: TEAL, color: '#fff' }
+                        : { borderColor: 'rgb(229 231 235)', color: 'rgb(75 85 99)' }
+                    }
+                  >
+                    {item.label}
+                  </button>
+                )
+              })}
             </div>
 
-            {/* Rail: the shelf, for the reader who already knows the book. */}
-            <aside className="min-w-0">
-              <section className="rounded-2xl border border-gray-200 dark:border-border bg-white dark:bg-card p-4">
-                <h2 className="text-[13px] font-bold text-foreground">Of blader zelf</h2>
-                <ul className="mt-2 divide-y divide-gray-100 dark:divide-border list-none p-0">
-                  {(Object.keys(CATEGORY_LABELS) as Category[]).map(key => (
-                    <li key={key}>
-                      <button
-                        onClick={() => setView({ kind: 'category', key })}
-                        data-track={`study_filter_${key}`}
-                        className="group w-full flex items-center justify-between gap-2 py-2.5 text-left"
-                      >
-                        <span className="text-[13.5px] text-gray-800 dark:text-foreground group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors">
-                          {CATEGORY_LABELS[key]}
-                        </span>
-                        <span
-                          className="flex-none text-[12px] font-semibold tabular-nums"
-                          style={{ color: TEAL }}
+            {showFurniture && (
+              <>
+                {/* Featured carousel */}
+                {FEATURED.length > 0 && (
+                  <section className="mt-6">
+                    <div className="flex gap-4 overflow-x-auto pb-2">
+                      {FEATURED.map(entry => (
+                        <Link
+                          key={entry.study.id}
+                          href={`/studies/${entry.study.id}`}
+                          data-track="study_featured_card"
+                          className="group no-underline flex w-[300px] flex-none flex-col overflow-hidden rounded-2xl border border-gray-200 dark:border-border bg-white dark:bg-card transition-colors hover:border-teal-400 dark:hover:border-teal-700"
                         >
-                          {COUNTS[key]}
-                        </span>
+                          <Banner entry={entry} className="h-[104px] w-full" />
+                          <div className="p-4">
+                            <h3 className="truncate text-[15px] font-bold text-gray-900 dark:text-foreground group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors">
+                              {entry.study.title}
+                            </h3>
+                            <p className="mt-1 line-clamp-2 text-[12.5px] leading-snug text-gray-500 dark:text-muted-foreground">
+                              {entry.study.description}
+                            </p>
+                            <p className="mt-2 text-[11px] text-gray-400 dark:text-muted-foreground tabular-nums">
+                              {entry.lessonCount} {entry.lessonCount === 1 ? 'les' : 'lessen'} · ±
+                              {entry.avgMinutes} min
+                            </p>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {/* Topic grid */}
+                <section className="mt-8">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-muted-foreground">
+                    Waar wil je lezen?
+                  </p>
+                  <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">
+                    {(Object.keys(CATEGORY_LABELS) as Category[]).map(key => {
+                      const Icon = CATEGORY_ICON[key]
+                      const active = category === key
+                      return (
+                        <button
+                          key={key}
+                          onClick={() => setCategory(active ? null : key)}
+                          data-track={`study_topic_${key}`}
+                          className="flex flex-col gap-2 rounded-xl border p-4 text-left transition-colors"
+                          style={{
+                            borderColor: active ? TEAL : 'rgb(229 231 235)',
+                            backgroundColor: active ? 'rgba(13,148,136,0.08)' : 'transparent',
+                          }}
+                        >
+                          <Icon size={18} style={{ color: TEAL }} aria-hidden />
+                          <span className="text-[14px] font-semibold text-gray-900 dark:text-foreground">
+                            {CATEGORY_LABELS[key]}
+                          </span>
+                          <span className="text-[11px] text-gray-400 dark:text-muted-foreground tabular-nums">
+                            {COUNTS[key]} studies
+                          </span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </section>
+
+                {/* Kind pill row */}
+                <div className="mt-6 flex flex-wrap gap-2">
+                  {KINDS.map(item => {
+                    const active = item.value === kind
+                    return (
+                      <button
+                        key={item.label}
+                        onClick={() => setKind(item.value)}
+                        data-track={`study_kind_${item.value ?? 'all'}`}
+                        className="rounded-full border px-3.5 py-1.5 text-[12.5px] font-medium transition-colors"
+                        style={{
+                          borderColor: active ? TEAL : 'rgb(229 231 235)',
+                          backgroundColor: active ? 'rgba(13,148,136,0.08)' : 'transparent',
+                          color: active ? '#0f766e' : 'rgb(75 85 99)',
+                        }}
+                      >
+                        {item.label}
                       </button>
-                    </li>
+                    )
+                  })}
+                </div>
+              </>
+            )}
+
+            {showFurniture && (
+              <SectionHeader
+                eyebrow={sectionEyebrow}
+                title={sectionTitle}
+                onClear={filtersOn ? clearFilters : undefined}
+              />
+            )}
+
+            {/* The list */}
+            <section className="mt-4 pb-16">
+              {listEntries.length === 0 ? (
+                <p className="text-sm text-gray-500 dark:text-muted-foreground">
+                  {tab === 'mine'
+                    ? 'Nog geen studie begonnen. Kies er een bij Ontdek en begin.'
+                    : tab === 'completed'
+                      ? 'Nog niets afgerond. Zodra je alle lessen van een studie afrondt, staat die hier.'
+                      : 'Geen studie past bij deze filters.'}
+                </p>
+              ) : (
+                <div className="grid gap-3 xl:grid-cols-2">
+                  {listEntries.map(entry => (
+                    <StudyRow key={entry.study.id} entry={entry} status={statusFor(entry.study)} />
                   ))}
-                </ul>
-              </section>
-            </aside>
-          </div>
+                </div>
+              )}
+            </section>
+          </>
         )}
       </div>
     </div>
