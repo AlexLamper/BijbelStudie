@@ -1,6 +1,7 @@
 ﻿import { NextResponse } from "next/server"
 import { CANONICAL_NL } from "../../../../lib/book-mapping"
 import { DAY_TEXT_CACHE_CONTROL } from "../../../../lib/httpCache"
+import { recordDayText } from "../../../../lib/mobileDayText"
 
 export async function GET() {
   try {
@@ -17,6 +18,18 @@ export async function GET() {
     // BijbelAPI returns English book names ("Ecclesiastes"); the app is Dutch-only,
     // and the Statenvertaling data is keyed on the canonical Dutch names.
     const book = CANONICAL_NL[data.book] ?? data.book
+
+    // Files the day in the shared archive that backs "Voorgaande dagen". Best
+    // effort inside its own helper, so a database hiccup cannot cost the
+    // reader today's verse.
+    await recordDayText({
+      text:      data.text,
+      reference: `${book} ${data.chapter}:${data.verse}`,
+      version:   "Statenvertaling",
+      book,
+      chapter:   Number(data.chapter),
+      verse:     Number(data.verse),
+    })
 
     return NextResponse.json(
       {
