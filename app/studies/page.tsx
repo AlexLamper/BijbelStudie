@@ -164,17 +164,44 @@ const FEATURED: Entry[] = ENTRIES.filter(
 const BANNER_ICON = (type: CuratedStudy['type']) =>
   type === 'Persoon' ? User : type === 'Gedeelte' ? Quote : type === 'Boek' ? BookOpen : Lightbulb
 
+/** A stable hue per study id. The catalogue only ships eight genre images shared
+ * across sixty-six book studies, so a raw <img> makes the list look like the
+ * same card printed over and over. Instead every study gets its own generated
+ * panel: a deterministic two-stop gradient, the type icon, and the title's
+ * initial - unique enough to tell apart at a glance, no art needed. */
+function hueOf(id: string): number {
+  let hash = 0
+  for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) | 0
+  return Math.abs(hash) % 360
+}
+
 // ---------------------------------------------------------------------------
 
-/** The 16:7 banner on a card. The study art is a hand-authored SVG; when there
- * is none, a tinted panel with the type icon stands in. */
-function Banner({ entry, className = '' }: { entry: Entry; className?: string }) {
+/** The generated panel on every study card. `art` lets a study with genuine
+ * hand-authored art (the featured ones) show it instead. */
+function Banner({
+  entry,
+  className = '',
+  art = false,
+  showLetter = false,
+}: {
+  entry: Entry
+  className?: string
+  art?: boolean
+  showLetter?: boolean
+}) {
   const Icon = BANNER_ICON(entry.study.type)
+  const hue = hueOf(entry.study.id)
+  const authored = art && entry.study.type !== 'Boek' && entry.study.image
+
   return (
     <div
-      className={`relative overflow-hidden bg-gradient-to-br from-teal-700 to-slate-900 ${className}`}
+      className={`relative flex items-center justify-center overflow-hidden ${className}`}
+      style={{
+        backgroundImage: `linear-gradient(135deg, hsl(${hue} 45% 32%), hsl(${(hue + 40) % 360} 55% 18%))`,
+      }}
     >
-      {entry.study.image && (
+      {authored && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={entry.study.image}
@@ -183,7 +210,14 @@ function Banner({ entry, className = '' }: { entry: Entry; className?: string })
           className="absolute inset-0 h-full w-full object-cover"
         />
       )}
-      <Icon className="absolute bottom-2 right-3 text-white/25" size={26} aria-hidden />
+      {!authored && showLetter && (
+        <span className="select-none text-2xl font-black text-white/90">
+          {entry.study.title.trim().charAt(0).toUpperCase()}
+        </span>
+      )}
+      {!authored && (
+        <Icon className="absolute bottom-2 right-3 text-white/25" size={26} aria-hidden />
+      )}
     </div>
   )
 }
@@ -199,7 +233,7 @@ function StudyRow({ entry, status }: { entry: Entry; status: Status }) {
       data-track="study_card"
       className="group no-underline flex items-stretch gap-3 rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card p-3 transition-colors hover:border-teal-400 dark:hover:border-teal-700"
     >
-      <Banner entry={entry} className="h-16 w-16 flex-none rounded-lg" />
+      <Banner entry={entry} showLetter className="h-16 w-16 flex-none rounded-lg" />
 
       <div className="min-w-0 flex-1">
         <h3 className="truncate text-[15px] font-semibold text-gray-900 dark:text-foreground group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors">
@@ -389,7 +423,7 @@ export default function StudiesPage() {
     <div className="h-full overflow-y-auto">
       <JsonLd data={STUDIES_GRAPH} />
 
-      <div className="mx-auto max-w-[1100px] px-5 sm:px-8 py-6 w-full">
+      <div className="w-full px-5 sm:px-8 xl:px-10 py-6">
         {/* Header */}
         <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-foreground">
@@ -408,7 +442,7 @@ export default function StudiesPage() {
                 een persoon of een thema.
               </p>
             ) : (
-              <div className="grid gap-3 xl:grid-cols-2">
+              <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
                 {searchResults.map(entry => (
                   <StudyRow key={entry.study.id} entry={entry} status={statusFor(entry.study)} />
                 ))}
@@ -452,7 +486,7 @@ export default function StudiesPage() {
                           data-track="study_featured_card"
                           className="group no-underline flex w-[300px] flex-none flex-col overflow-hidden rounded-2xl border border-gray-200 dark:border-border bg-white dark:bg-card transition-colors hover:border-teal-400 dark:hover:border-teal-700"
                         >
-                          <Banner entry={entry} className="h-[104px] w-full" />
+                          <Banner entry={entry} art showLetter className="h-[104px] w-full" />
                           <div className="p-4">
                             <h3 className="truncate text-[15px] font-bold text-gray-900 dark:text-foreground group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors">
                               {entry.study.title}
@@ -476,7 +510,7 @@ export default function StudiesPage() {
                   <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-muted-foreground">
                     Waar wil je lezen?
                   </p>
-                  <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4">
+                  <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-6">
                     {(Object.keys(CATEGORY_LABELS) as Category[]).map(key => {
                       const Icon = CATEGORY_ICON[key]
                       const active = category === key
@@ -547,7 +581,7 @@ export default function StudiesPage() {
                       : 'Geen studie past bij deze filters.'}
                 </p>
               ) : (
-                <div className="grid gap-3 xl:grid-cols-2">
+                <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
                   {listEntries.map(entry => (
                     <StudyRow key={entry.study.id} entry={entry} status={statusFor(entry.study)} />
                   ))}
