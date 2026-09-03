@@ -116,6 +116,39 @@ async function fetchJson(relativePath: string) {
     }
 }
 
+/**
+ * Reads and parses one whole data file, once per instance.
+ *
+ * The in-flight map matters as much as the cache: a warm instance handles
+ * several chapter requests concurrently, and without it two requests arriving
+ * before the first parse finishes would each run their own multi-megabyte
+ * `JSON.parse`. Sharing the promise means the second one waits for bytes the
+ * first is already producing. A failed read is not cached, so a transient
+ * filesystem or network error does not poison the source for the life of the
+ * instance.
+ */
+type ParsedFile = Awaited<ReturnType<typeof fetchJson>>;
+
+const FILE_CACHE: Record<string, ParsedFile> = {};
+const FILE_INFLIGHT: Record<string, Promise<ParsedFile>> = {};
+
+async function getWholeFile(relativePath: string): Promise<ParsedFile> {
+    if (relativePath in FILE_CACHE) return FILE_CACHE[relativePath];
+    if (relativePath in FILE_INFLIGHT) return FILE_INFLIGHT[relativePath];
+
+    const pending = fetchJson(relativePath)
+        .then((data) => {
+            if (data) FILE_CACHE[relativePath] = data;
+            return data;
+        })
+        .finally(() => {
+            delete FILE_INFLIGHT[relativePath];
+        });
+
+    FILE_INFLIGHT[relativePath] = pending;
+    return pending;
+}
+
 async function getManifest(): Promise<Manifest> {
     if (MANIFEST_CACHE) return MANIFEST_CACHE;
     const manifest = await fetchJson('/data/manifest.json');
@@ -162,18 +195,27 @@ export async function getBibleData(version: string, bookName?: string, chapter?:
     const entry = await findEntry(version);
     if (!entry) return null;
 
+    if (entry.type === 'file') {
+        // A single-file source is read WHOLE - there is no per-chapter file to
+        // read instead - so it must be cached by the file, not by the chapter
+        // that happened to ask for it.
+        //
+        // It used to share the `${version}-${book}-${chapter}` key below, which
+        // meant Genesis 2 missed the entry Genesis 1 had just written and
+        // re-read and re-parsed the entire translation (megabytes) for every
+        // chapter anyone opened, then kept a separate copy of it in memory per
+        // key. On Vercel that parse is Active CPU, charged per request, and the
+        // duplicate copies push the instance towards its memory ceiling and so
+        // towards more cold starts. Keyed by the file, the parse happens once
+        // per instance.
+        return getWholeFile(`/data/${entry.category}/${entry.name}`);
+    }
+
     const cacheKey = `${version}-${bookName || 'full'}-${chapter || 'all'}`;
     if (CACHE[cacheKey]) return CACHE[cacheKey];
 
-    if (entry.type === 'file') {
-        // Fetch full file
-        const data = await fetchJson(`/data/${entry.category}/${entry.name}`);
-        if (data) {
-            CACHE[cacheKey] = data;
-            return data;
-        }
-    } else if (entry.type === 'dir') {
-        // Directory based (e.g. King Comments, Karl August Dachsel)
+    if (entry.type === 'dir') {
+        // Directory based (e.g. KingComments, Karl August Dachsel)
         if (bookName) {
             // Try to find the specific book file or folder
             const targetFile = entry.files?.find(f => {
@@ -465,13 +507,25 @@ export async function getCommentary(source: string, bookName: string, chapterNum
     return result ? result.verses : null;
 }
 
+/**
+ * The manifest is generated data and spells it "King Comments". The publisher
+ * writes it as one word, so every surface that reads a title out of the
+ * manifest - web picker, settings, onboarding, /api/v1/commentaries - is
+ * corrected here rather than in each of them.
+ */
+function normaliseCommentaryTitle(title: string): string {
+    return title.replace(/\bKing\s+Comments\b/gi, 'KingComments');
+}
+
 export async function getCommentaries() {
     const manifest = await getManifest();
     return manifest.commentaries
         .filter((c: { hidden?: boolean }) => !c.hidden)
         .map(c => ({
             id: c.name.replace('.json', ''),
-            name: c.title || c.name.replace('.json', '').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+            name: normaliseCommentaryTitle(
+                c.title || c.name.replace('.json', '').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+            ),
             language: c.language || 'en'
         }));
 }

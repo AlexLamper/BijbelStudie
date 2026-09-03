@@ -1,5 +1,6 @@
 ﻿import { NextResponse } from "next/server"
 import { CANONICAL_NL } from "../../../../lib/book-mapping"
+import { DAY_TEXT_CACHE_CONTROL } from "../../../../lib/httpCache"
 
 export async function GET() {
   try {
@@ -17,14 +18,18 @@ export async function GET() {
     // and the Statenvertaling data is keyed on the canonical Dutch names.
     const book = CANONICAL_NL[data.book] ?? data.book
 
-    return NextResponse.json({
-      text:      data.text,
-      reference: `${book} ${data.chapter}:${data.verse}`,
-      version:   "Statenvertaling",
-      book,
-      chapter:   Number(data.chapter),
-      verse:     Number(data.verse),
-    })
+    return NextResponse.json(
+      {
+        text:      data.text,
+        reference: `${book} ${data.chapter}:${data.verse}`,
+        version:   "Statenvertaling",
+        book,
+        chapter:   Number(data.chapter),
+        verse:     Number(data.verse),
+      },
+      // Everyone gets the same verse today, so one shared copy serves them all.
+      { headers: { "Cache-Control": DAY_TEXT_CACHE_CONTROL } },
+    )
   } catch {
     return NextResponse.json({ error: "Verbindingsfout" }, { status: 500 })
   }

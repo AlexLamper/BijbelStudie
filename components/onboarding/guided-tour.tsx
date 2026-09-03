@@ -77,7 +77,7 @@ const STEPS: TourStep[] = [
   {
     target: "pro-cta",
     title: "Upgrade naar Pro",
-    description: "Pro ontgrendelt alle commentaren en historische context bij elk hoofdstuk. Het gratis plan blijft altijd beschikbaar.",
+    description: "KingComments lees je gratis. Pro voegt Matthew Henry, Dachsel en Meyer toe, plus de volledige grondtekst. Het gratis plan blijft altijd beschikbaar.",
     page: "/lezen",
     side: "right",
   },

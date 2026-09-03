@@ -251,7 +251,7 @@ function ProCTA() {
   // app/api/ai/chat. "Historische context" used to sit in this list and was
   // never gated at all - it is free for everyone.
   const perks = [
-    "Alle bijbelcommentaren",
+    "Matthew Henry, Dachsel en Meyer",
     "200 AI-vragen per dag",
     "Grondtekst: Hebreeuws en Grieks",
     "Prioriteit ondersteuning",

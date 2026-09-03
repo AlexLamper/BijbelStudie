@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getChapter } from '../../../../lib/local-data';
+import { PUBLIC_CONTENT_CACHE_CONTROL } from '../../../../lib/httpCache';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -13,6 +14,11 @@ export async function GET(request: Request) {
   if (!data) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
-  
-  return NextResponse.json(data);
+
+  // Only the 200 is cached. A 404 here can mean "not synced yet" as easily as
+  // "does not exist", and a week-long shared copy of that answer would outlive
+  // the deploy that fixes it.
+  return NextResponse.json(data, {
+    headers: { 'Cache-Control': PUBLIC_CONTENT_CACHE_CONTROL },
+  });
 }

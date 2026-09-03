@@ -115,7 +115,7 @@ const pageConfigs: Record<string, PageMetadataConfig> = {
     // Keep any price in this snippet identical to what Stripe actually charges
     // (lib/pricing.ts). A derived per-week/per-month figure without its billing
     // period is exactly what the EU Omnibus price-indication rules forbid.
-    description: 'BijbelStudie is gratis te gebruiken. Met Pro ontgrendel je alle bijbelcommentaren, een onbeperkte AI-assistent en historische context: €9,99 per maand of €89,99 per jaar.',
+    description: 'BijbelStudie is gratis te gebruiken, inclusief het KingComments-commentaar. Met Pro ontgrendel je Matthew Henry, Dachsel en Meyer, 200 AI-vragen per dag en de volledige grondtekst: €9,99 per maand of €89,99 per jaar.',
     path: '/abonnement',
     type: 'website'
   },

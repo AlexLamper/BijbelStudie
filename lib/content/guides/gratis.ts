@@ -52,7 +52,7 @@ export const GUIDE_FREE: Guide = {
       id: "gratis-commentaren",
       heading: "Gratis bijbelcommentaren",
       body: [
-        "Een commentaar vertelt je wat je zelf niet kon weten: historische achtergrond, parallellen, en hoe anderen het gedeelte door de eeuwen heen hebben uitgelegd. Deze klassiekers zijn publiek domein.",
+        "Een commentaar vertelt je wat je zelf niet kon weten: historische achtergrond, parallellen, en hoe anderen het gedeelte door de eeuwen heen hebben uitgelegd. De eerste drie hieronder zijn publiek domein; KingComments is hedendaags en door de auteur vrij beschikbaar gesteld.",
       ],
       list: [
         {
@@ -68,8 +68,8 @@ export const GUIDE_FREE: Guide = {
           text: "Kritisch-exegetisch commentaar op het Nieuwe Testament, technischer van aard en nuttig als je wilt weten wat de grammatica van een vers toelaat.",
         },
         {
-          title: "King Comments",
-          text: "Een hedendaags Nederlandstalig commentaar op de hele Bijbel, vrij online beschikbaar gesteld door de auteur.",
+          title: "KingComments",
+          text: "Een hedendaags Nederlandstalig commentaar op de hele Bijbel van Ger de Koning, vrij online beschikbaar gesteld door de auteur. Op BijbelStudie is het voor iedereen gratis en volledig te lezen.",
         },
       ],
     },
@@ -113,7 +113,11 @@ export const GUIDE_FREE: Guide = {
           text: "De AI-assistent is elke dag vijf vragen lang beschikbaar zonder abonnement.",
         },
         {
-          title: "Pro: commentaren, onbeperkte AI en historische context",
+          title: "Gratis: het KingComments-commentaar",
+          text: "Het vers-voor-vers commentaar van Ger de Koning is volledig en zonder abonnement te lezen, bij elk hoofdstuk.",
+        },
+        {
+          title: "Pro: de overige commentaren, meer AI en de grondtekst",
           text: "€9,99 per maand of €89,99 per jaar. Alleen nodig als je die onderdelen wilt gebruiken - de rest hierboven blijft gratis.",
         },
       ],
@@ -149,7 +153,7 @@ export const GUIDE_FREE: Guide = {
   faqs: [
     {
       q: "Is bijbelstudie online echt gratis?",
-      a: "Voor een groot deel wel. Bijbel lezen in meerdere vertalingen, notities maken, begeleide studies doorlopen en de publiek-domein bibliotheek raadplegen kan zonder te betalen. Op BijbelStudie is daarnaast elke dag vijf keer de AI-assistent te gebruiken. Alleen de bijbelcommentaren, de onbeperkte AI-assistent en de historische context zitten in het betaalde Pro-abonnement.",
+      a: "Voor een groot deel wel. Bijbel lezen in meerdere vertalingen, notities maken, begeleide studies doorlopen, het KingComments-commentaar lezen en de publiek-domein bibliotheek raadplegen kan zonder te betalen. Op BijbelStudie is daarnaast elke dag vijf keer de AI-assistent te gebruiken. Alleen de overige bijbelcommentaren, de ruimere AI-limiet en de volledige grondtekst zitten in het betaalde Pro-abonnement.",
     },
     {
       q: "Welke bijbelvertalingen zijn gratis te gebruiken?",
@@ -157,7 +161,7 @@ export const GUIDE_FREE: Guide = {
     },
     {
       q: "Zijn gratis bijbelcommentaren betrouwbaar?",
-      a: "Ze zijn gratis omdat het auteursrecht is vervallen, niet omdat ze van mindere kwaliteit zijn. Matthew Henry, Dachsel en Meyer worden nog altijd geraadpleegd. Wel zijn het commentaren van hun eigen tijd: ze kennen archeologische en tekstkritische vondsten van na hun overlijden niet. Lees ze als een goed geïnformeerde gesprekspartner, niet als het laatste woord.",
+      a: "Ze zijn gratis omdat het auteursrecht is vervallen of omdat de auteur ze zelf vrijgeeft, niet omdat ze van mindere kwaliteit zijn. Matthew Henry, Dachsel en Meyer worden nog altijd geraadpleegd, en KingComments is een hedendaags commentaar dat de auteur vrij beschikbaar stelt. Wel zijn het commentaren van hun eigen tijd: ze kennen archeologische en tekstkritische vondsten van na hun overlijden niet. Lees ze als een goed geïnformeerde gesprekspartner, niet als het laatste woord.",
     },
     {
       q: "Heb ik een account nodig om gratis te beginnen?",

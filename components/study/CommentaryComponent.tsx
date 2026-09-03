@@ -423,8 +423,15 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
     fetchCommentary();
   }, [book, chapter, selectedSource]);
 
+  // Fallback label for when the sources list has not loaded yet, so the id is
+  // all we have. `_nl` is a data-file suffix, not something to show a reader,
+  // and KingComments is one word.
   const formatSourceLabel = (src: string) => {
-      return src.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+      return src
+        .replace(/_nl$/i, '')
+        .replace(/[-_]/g, ' ')
+        .replace(/\b\w/g, l => l.toUpperCase())
+        .replace(/\bKing\s+Comments\b/gi, 'KingComments');
   };
 
   const isLocked = () => false;
@@ -514,13 +521,13 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
                   Pro-commentaar
                 </h3>
                 <p className="text-muted-foreground text-sm">
-                  KingComments en andere premium commentaren zijn beschikbaar voor Pro-abonnees van BijbelStudie.
+                  Matthew Henry, Karl August Dachsel en Heinrich Meyer horen bij Pro. KingComments blijft voor iedereen gratis.
                 </p>
               </div>
               <UpgradePrompt
                 surface="commentary"
                 title="Pro-commentaar"
-                body="KingComments en de andere premium commentaren zijn onderdeel van Pro."
+                body="Matthew Henry, Dachsel en Meyer zijn onderdeel van Pro. KingComments leest u gratis, volledig."
                 cta="Commentaren ontgrendelen"
                 compact
               />

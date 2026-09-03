@@ -280,7 +280,7 @@ function BibleStudyIllustration() {
               <span className="text-[10px] font-medium" style={{ color: T.muted }}>Bron</span>
               <div className="text-[10px] font-semibold px-2 py-0.5 rounded-md border bg-white inline-flex items-center gap-1"
                 style={{ borderColor: T.border, color: T.text }}>
-                King Comments
+                KingComments
                 <ChevronDown className="h-2.5 w-2.5" style={{ color: T.muted }} />
               </div>
             </div>
@@ -471,14 +471,9 @@ function Hero() {
             className="mt-5 max-w-xl text-pretty"
             style={{ color: T.muted, fontSize: TYPE.lead, lineHeight: 1.65 }}
           >
-            Lees en bestudeer de Bijbel diep en persoonlijk: Nederlandse
-            vertalingen, bijbelcommentaren per vers, de Hebreeuwse en Griekse
-            grondtekst, eigen notities en een AI-assistent die uw vragen over de
-            Schrift beantwoordt.{" "}
-            <strong style={{ color: T.text, fontWeight: 600 }}>
-              Gratis te beginnen
-            </strong>
-            , zonder creditcard.
+            Vier Nederlandse vertalingen, bijbelcommentaar per vers, de
+            Hebreeuwse en Griekse grondtekst en uw eigen notities - naast elkaar
+            in één scherm.
           </p>
 
           {/* Two CTAs, not three. A "Bekijk functies" outline button used to sit
@@ -681,7 +676,7 @@ function Features() {
             num="05"
             icon={Library}
             title="Bijbelcommentaren"
-            desc="Lees klassieke en hedendaagse commentaren - Matthew Henry, King Comments en meer."
+            desc="Lees klassieke en hedendaagse commentaren - KingComments, Matthew Henry, Dachsel en Meyer."
           />
 
           {/* Was "Bijbelgroepen", which is temporarily out of the product.
@@ -741,17 +736,49 @@ function Features() {
 }
 
 /* ─── Bibles & Commentaries ──────────────────────────────────── */
+/** The access pill on a library row. Two states only: free, or part of Pro. */
+function AccessPill({ free }: { free: boolean }) {
+  return (
+    <span
+      className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full whitespace-nowrap"
+      style={
+        free
+          ? { backgroundColor: T.tealLight, color: T.tealDeep }
+          : { backgroundColor: "#F3F4F6", color: T.muted, border: `1px solid ${T.border}` }
+      }
+    >
+      {free ? "Gratis" : "Pro"}
+    </span>
+  )
+}
+
+/**
+ * What is actually in the library, checked against what the app serves:
+ * `hooks/useBibleData.ts` for the translations and
+ * `lib/mobileAttribution.ts` for the commentaries. It had drifted - the
+ * NBG-vertaling 1951 and Heinrich Meyer were missing, and the section claimed
+ * three translations when there are four Dutch ones plus five English.
+ *
+ * Presentation changed with it. Three big serif cards per row, each opening
+ * with the same teal Library tile, was a lot of furniture around six short
+ * facts; a reader comparing sources wants them in a column they can run their
+ * eye down. Translations stay as cards because the year is the thing being
+ * compared. Commentaries became rows in one panel, each carrying whether it is
+ * free or Pro - the question people actually have about a commentary list.
+ */
 function BibleLibrary() {
   const translations = [
-    { name: "Statenvertaling",        year: "1637", note: "De klassieke Nederlandse vertaling",                      badge: "Standaard" },
-    { name: "De Heilige Schrift",     year: "1917", note: "NBG-vertaling, lange tijd standaard in kerken",           badge: null },
-    { name: "Canisiusbijbel",         year: "1939", note: "Rooms-katholieke vertaling met deuterocanonieke boeken", badge: null },
+    { name: "Statenvertaling",       year: "1637", note: "De klassieke Nederlandse vertaling",                        badge: "Standaard" },
+    { name: "NBG-vertaling",         year: "1951", note: "Decennialang de kanselbijbel van de protestantse kerken",   badge: "Onder licentie" },
+    { name: "De Heilige Schrift",    year: "1917", note: "De eerste NBG-vertaling, in de taal van haar tijd",         badge: null },
+    { name: "Canisiusbijbel",        year: "1939", note: "Rooms-katholieke vertaling met deuterocanonieke boeken",    badge: null },
   ]
 
   const commentaries = [
-    { name: "Matthew Henry",       author: "Vertaald naar Nederlands", note: "Klassiek Engels commentaar uit 1706, devotionele insteek" },
-    { name: "King Comments",       author: "Ger de Koning",            note: "Eigentijds Nederlandstalig commentaar, vers-voor-vers" },
-    { name: "Karl August Dachsel", author: "19e eeuws",                note: "Duits piëtistisch commentaar, in het Nederlands beschikbaar" },
+    { name: "KingComments",        author: "Ger de Koning",       note: "Eigentijds Nederlandstalig commentaar op de hele Bijbel, vers voor vers", free: true  },
+    { name: "Matthew Henry",       author: "1662-1714",           note: "Het bekendste commentaar op de hele Bijbel, in Nederlandse vertaling",    free: false },
+    { name: "Karl August Dachsel", author: "1818-1893",           note: "Uitvoerig vers-voor-vers commentaar met veel aandacht voor de grondtekst", free: false },
+    { name: "Heinrich Meyer",      author: "1800-1873",           note: "Kritisch-exegetisch commentaar op het Nieuwe Testament",                   free: false },
   ]
 
   return (
@@ -760,39 +787,37 @@ function BibleLibrary() {
         <SectionHeader
           label="Bibliotheek"
           title="Vertalingen en commentaren op één plek"
-          subtitle="Vergelijk Nederlandse bijbelvertalingen en lees gerenommeerde commentaren naast de tekst."
+          subtitle="Vier Nederlandse vertalingen naast elkaar, en bij elk vers de uitleg van vier commentaren."
         />
 
         {/* Translations */}
         <GroupLabel
           icon={BookOpen}
           label="Vertalingen"
-          meta={`${translations.length} Nederlandse vertalingen`}
+          meta={`${translations.length} Nederlandse · 5 Engelse`}
         />
-        <div className="reveal-stagger grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-16">
+        <div className="reveal-stagger grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
           {translations.map(({ name, year, note, badge }) => (
             <FadeUp key={name}>
               <div className="lp-card h-full overflow-hidden rounded-2xl">
-                {/* Teal accent bar */}
                 <div className="h-1" style={{ backgroundColor: T.teal }} />
 
-                <div className="p-6">
-                  {/* Top row: year + optional badge */}
-                  <div className="flex items-center justify-between mb-5">
+                <div className="p-5 flex flex-col h-full">
+                  <div className="flex items-center justify-between gap-2 mb-4">
                     <span className="text-[11px] font-bold tracking-widest tabular-nums"
                       style={{ color: T.muted }}>
                       ANNO {year}
                     </span>
                     {badge && (
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full whitespace-nowrap"
                         style={{ backgroundColor: T.tealLight, color: T.tealDeep }}>
                         {badge}
                       </span>
                     )}
                   </div>
 
-                  {/* Name in serif - feels like a book */}
-                  <h3 className="text-xl leading-tight mb-3"
+                  {/* Serif - a translation is a book, and the name should read like one. */}
+                  <h3 className="text-lg leading-tight mb-2"
                     style={{
                       color: T.text,
                       fontFamily: "Georgia, 'Times New Roman', serif",
@@ -801,48 +826,65 @@ function BibleLibrary() {
                     {name}
                   </h3>
 
-                  <p className="text-sm leading-relaxed" style={{ color: T.muted }}>{note}</p>
+                  <p className="text-[13px] leading-relaxed" style={{ color: T.muted }}>{note}</p>
                 </div>
               </div>
             </FadeUp>
           ))}
         </div>
 
-        {/* Commentaries */}
+        <FadeUp className="mb-14">
+          <p className="text-xs leading-relaxed" style={{ color: T.muted }}>
+            Daarnaast de King James Version, American Standard Version, World English Bible,
+            Geneva Bible en Coverdale Bible - per vers naast een Nederlandse vertaling te leggen.
+          </p>
+        </FadeUp>
+
+        {/* Commentaries - one panel of rows rather than a row of cards. */}
         <GroupLabel
           icon={Library}
           label="Commentaren"
-          meta={`${commentaries.length} Nederlandstalige commentaren`}
+          meta={`${commentaries.length} commentaren · 1 gratis`}
         />
-        <div className="reveal-stagger grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {commentaries.map(({ name, author, note }) => (
-            <FadeUp key={name}>
-              <div className="lp-card h-full rounded-2xl p-6">
-                <div className="h-10 w-10 rounded-xl flex items-center justify-center mb-5"
-                  style={{ backgroundColor: T.tealLight }}>
-                  <Library className="h-5 w-5" style={{ color: T.teal }} />
+        <FadeUp>
+          <div
+            className="overflow-hidden rounded-2xl border"
+            style={{ borderColor: T.border, backgroundColor: T.card, boxShadow: SHADOW.card }}
+          >
+            {commentaries.map(({ name, author, note, free }, i) => (
+              <div
+                key={name}
+                className="flex flex-col gap-1.5 px-5 py-4 sm:flex-row sm:items-baseline sm:gap-6 sm:px-6 sm:py-5"
+                style={i > 0 ? { borderTop: `1px solid ${T.border}` } : undefined}
+              >
+                <div className="sm:w-56 sm:flex-shrink-0">
+                  <div className="flex items-center gap-2.5">
+                    <h3 className="text-[17px] leading-tight"
+                      style={{
+                        color: T.text,
+                        fontFamily: "Georgia, 'Times New Roman', serif",
+                        fontWeight: 700,
+                      }}>
+                      {name}
+                    </h3>
+                    <AccessPill free={free} />
+                  </div>
+                  <p className="mt-0.5 text-xs font-semibold tabular-nums" style={{ color: T.tealText }}>
+                    {author}
+                  </p>
                 </div>
-
-                <h3 className="text-xl leading-tight mb-1"
-                  style={{
-                    color: T.text,
-                    fontFamily: "Georgia, 'Times New Roman', serif",
-                    fontWeight: 700,
-                  }}>
-                  {name}
-                </h3>
-
-                <p className="text-xs font-semibold mb-3" style={{ color: T.tealText }}>{author}</p>
-
-                <p className="text-sm leading-relaxed" style={{ color: T.muted }}>{note}</p>
+                <p className="text-[13.5px] leading-relaxed sm:flex-1" style={{ color: T.muted }}>
+                  {note}
+                </p>
               </div>
-            </FadeUp>
-          ))}
-        </div>
+            ))}
+          </div>
+        </FadeUp>
 
-        <FadeUp className="text-center mt-10">
-          <p className="text-xs" style={{ color: T.muted }}>
-            Alle vertalingen en commentaren direct beschikbaar in de webapp.
+        <FadeUp className="mt-5">
+          <p className="text-xs leading-relaxed" style={{ color: T.muted }}>
+            KingComments is voor iedereen gratis en volledig te lezen. De overige drie horen bij Pro.
+            De NBG-vertaling 1951 wordt gebruikt onder licentie van het Nederlands-Vlaams Bijbelgenootschap.
           </p>
         </FadeUp>
       </div>
@@ -930,7 +972,7 @@ function CommentaryMockup() {
         <span className="text-xs font-medium" style={{ color: T.muted }}>Commentaarbron</span>
         <div className="text-xs font-semibold flex items-center gap-1.5 px-2.5 py-1 rounded-md border bg-white"
           style={{ borderColor: T.border, color: T.text }}>
-          King Comments (NL)
+          KingComments (NL)
           <ChevronDown className="h-3 w-3" style={{ color: T.muted }} />
         </div>
       </div>
@@ -970,7 +1012,7 @@ function CommentaryMockup() {
           <Library className="h-3.5 w-3.5" style={{ color: T.teal }} />
         </div>
         <div className="min-w-0">
-          <p className="text-[11px] font-semibold leading-none" style={{ color: T.text }}>King Comments</p>
+          <p className="text-[11px] font-semibold leading-none" style={{ color: T.text }}>KingComments</p>
           <p className="text-[10px] mt-0.5" style={{ color: T.muted }}>Ger de Koning · vers-voor-vers</p>
         </div>
       </div>
@@ -1063,7 +1105,7 @@ function Showcase() {
             flip
             eyebrow="Commentaren"
             title="Leer van erkende bijbelcommentaren"
-            body="Lees vers-voor-vers commentaar van Ger de Koning (King Comments), Matthew Henry, Karl August Dachsel en anderen - direct naast de tekst die u bestudeert."
+            body="Lees vers-voor-vers commentaar van Ger de Koning (KingComments), Matthew Henry, Karl August Dachsel en Heinrich Meyer - direct naast de tekst die u bestudeert."
             bullets={[
               "Nederlandstalige en vertaalde klassieke commentaren",
               "Direct gekoppeld aan het vers dat u leest",
@@ -1158,7 +1200,8 @@ function Pricing() {
   // would be nice to claim. Historical context moved from the Pro column to
   // the free one because that is where the code puts it.
   const free = [
-    "Bijbel lezen (meerdere vertalingen)",
+    "Bijbel lezen (vier Nederlandse vertalingen)",
+    "KingComments commentaar, volledig",
     "5 vragen per dag aan de AI-assistent",
     "Persoonlijke notities bij verzen",
     "Historische context per hoofdstuk",
@@ -1168,7 +1211,7 @@ function Pricing() {
     "Alles in het gratis plan",
     "200 AI-vragen per dag, i.p.v. 5",
     "Matthew Henry commentaar (NL)",
-    "Karl August Dachsel commentaar",
+    "Karl August Dachsel en Heinrich Meyer",
     "Grondtekst: Hebreeuws en Grieks",
     "Prioriteitsondersteuning",
   ]
@@ -1180,7 +1223,7 @@ function Pricing() {
           <SectionHeader
             label="Prijzen"
             title="Begin gratis, groei verder"
-            subtitle="Geen creditcard vereist voor het gratis plan."
+            subtitle="Wat gratis is, blijft gratis. Pro voegt de overige commentaren, de grondtekst en meer AI-vragen toe."
           />
 
           {/* `items-stretch` plus a column layout inside each card, so the two
@@ -1203,7 +1246,7 @@ function Pricing() {
                   <span className="text-4xl font-extrabold tracking-tight" style={{ color: T.text }}>€0</span>
                   <span className="text-sm" style={{ color: T.muted }}>/maand</span>
                 </div>
-                <p className="mt-2 text-xs" style={{ color: T.muted }}>Voor altijd, zonder creditcard.</p>
+                <p className="mt-2 text-xs" style={{ color: T.muted }}>Voor altijd.</p>
 
                 <ul className="mt-7 mb-8 space-y-3 flex-1">
                   {free.map(f => <PlanFeature key={f}>{f}</PlanFeature>)}

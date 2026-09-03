@@ -1,7 +1,4 @@
 import type { Metadata } from "next"
-import { getServerSession } from "next-auth"
-import { redirect } from "next/navigation"
-import { authOptions } from "../lib/authOptions"
 import LandingPage from "../components/landing/LandingPage"
 import { JsonLd } from "../components/seo/JsonLd"
 import { HOME_FAQS } from "../lib/content/homeFaq"
@@ -56,20 +53,31 @@ export const metadata: Metadata = {
   },
 }
 
-export default async function Page() {
-  // Server-side guard: logged-in users skip the marketing landing entirely.
-  // Middleware already redirects, but this prevents any chance of the landing
-  // page HTML being rendered for an authenticated session.
-  let session = null
-  try {
-    session = await getServerSession(authOptions)
-  } catch {
-    // ignore - treat as unauthenticated
-  }
-  if (session?.user) {
-    redirect("/dashboard")
-  }
+/**
+ * Prerendered, not rendered per request.
+ *
+ * Nothing on this page varies by visitor: the copy is fixed, the prices come
+ * from lib/pricing at build time, and the studies list from lib/bookStudies.
+ * The one thing that used to make it dynamic was a `getServerSession()` guard
+ * redirecting a logged-in visitor to /dashboard - and middleware.ts already
+ * does exactly that, before this page is ever reached
+ * (`if (session && pathname === "/") redirect("/dashboard")`). The guard was
+ * belt-and-braces over a belt that runs first and cannot be bypassed: the
+ * middleware matcher covers "/".
+ *
+ * The cost of those braces was that the busiest public URL on the site - the
+ * one every search result, every crawler and every first-time visitor lands on
+ * - re-rendered the entire landing component in a serverless function on every
+ * single hit. On Vercel's Fluid pricing that is Active CPU per visit, for HTML
+ * that is byte-for-byte identical every time. Now it is built once.
+ *
+ * If middleware's `getToken` throws on a stale cookie it falls through without
+ * redirecting, and that visitor sees this page - exactly as they did before,
+ * because the guard below would have read the same unreadable cookie as null.
+ */
+export const dynamic = "force-static"
 
+export default async function Page() {
   const homeUrl = `${BASE_URL}/`
   const pageGraph = graph(
     webPageNode({

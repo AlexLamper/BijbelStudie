@@ -6,6 +6,7 @@ import { getLessonContent } from '../../../../lib/data/study-lessons';
 import { findLesson, resolvePassage } from '../../../../lib/studyFlow';
 import { findStudy } from '../../../../lib/studyEnrollmentService';
 import { fetchQuestions, gradeAnswers, isQuizBankConfigured } from '../../../../lib/quizBank';
+import { upsertLessonState } from '../../../../lib/lessonStateWrite';
 
 export const dynamic = 'force-dynamic';
 
@@ -88,7 +89,10 @@ export async function GET(req: Request) {
         };
       }>();
 
-    await StudyLessonState.updateOne(
+    // The other half of the race described in lib/lessonStateWrite: this GET
+    // runs when StepQuiz mounts, which is the same moment StudyFlowShell
+    // patches `currentStep: 'quiz'`.
+    await upsertLessonState(
       { userId: auth.id, studyId, lessonDay },
       {
         $setOnInsert: { userId: auth.id, studyId, lessonDay, startedAt: new Date() },
@@ -97,7 +101,6 @@ export async function GET(req: Request) {
           'quiz.quizIds': [...new Set(result.questions.map((question) => question.quizId))],
         },
       },
-      { upsert: true },
     );
 
     return jsonV1({

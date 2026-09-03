@@ -16,38 +16,38 @@ import {
 } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip"
 import { cn } from "../../lib/utils"
+import { BADGE_META } from "../../lib/badgeCatalog"
 import type { LucideIcon } from "lucide-react"
 
 interface BadgeInfo {
   id: string
   icon: LucideIcon
-  description: string
 }
 
-// Descriptions are Dutch like the rest of the app, and now describe what
-// actually awards each badge - see lib/gamification.ts `evaluateBadges`. The
-// `points*` ids date from a quiz that no longer exists; they are XP milestones
-// now, and the copy says so.
+// Order and icon live here; the name and the "what earns it" line live in
+// lib/badgeCatalog.ts, because the end-of-lesson card needs the same words and
+// two copies of them drift. The `points*` ids date from a quiz that no longer
+// exists; they are XP milestones now, and the copy says so.
 const badges: BadgeInfo[] = [
-  { id: "streak30", icon: Flame, description: "30 dagen op rij" },
-  { id: "streak60", icon: Flame, description: "60 dagen op rij" },
-  { id: "streak90", icon: Flame, description: "90 dagen op rij" },
-  { id: "streak120", icon: Flame, description: "120 dagen op rij" },
-  { id: "verified", icon: BadgeCheck, description: "Geverifieerd account" },
-  { id: "contributor", icon: Star, description: "Bijdrage aan een studie" },
-  { id: "completed1", icon: BookOpen, description: "1 studie voltooid" },
-  { id: "completed5", icon: BookOpen, description: "5 studies voltooid" },
-  { id: "completed10", icon: BookOpen, description: "10 studies voltooid" },
-  { id: "points100", icon: Trophy, description: "100 XP verdiend" },
-  { id: "points500", icon: Trophy, description: "500 XP verdiend" },
-  { id: "points1000", icon: Trophy, description: "1000 XP verdiend" },
-  { id: "premium", icon: Crown, description: "Pro-abonnement" },
-  { id: "invite", icon: Users, description: "Een vriend uitgenodigd" },
-  { id: "commenter", icon: MessageCircle, description: "Een bericht geplaatst" },
-  { id: "profilepic", icon: Camera, description: "Profielfoto ingesteld" },
-  { id: "firstlesson", icon: CheckCircle, description: "Eerste les bestudeerd" },
-  { id: "tester", icon: FlaskConical, description: "Bètatester" },
-  { id: "anniversary", icon: Gift, description: "Één jaar lid" },
+  { id: "streak30", icon: Flame },
+  { id: "streak60", icon: Flame },
+  { id: "streak90", icon: Flame },
+  { id: "streak120", icon: Flame },
+  { id: "verified", icon: BadgeCheck },
+  { id: "contributor", icon: Star },
+  { id: "completed1", icon: BookOpen },
+  { id: "completed5", icon: BookOpen },
+  { id: "completed10", icon: BookOpen },
+  { id: "points100", icon: Trophy },
+  { id: "points500", icon: Trophy },
+  { id: "points1000", icon: Trophy },
+  { id: "premium", icon: Crown },
+  { id: "invite", icon: Users },
+  { id: "commenter", icon: MessageCircle },
+  { id: "profilepic", icon: Camera },
+  { id: "firstlesson", icon: CheckCircle },
+  { id: "tester", icon: FlaskConical },
+  { id: "anniversary", icon: Gift },
 ]
 
 interface UserBadgesProps {
@@ -74,7 +74,11 @@ export default function UserBadges({ earned }: UserBadgesProps) {
                   <IconComponent className="w-5 h-5" />
                 </div>
               </TooltipTrigger>
-              <TooltipContent>{b.description}</TooltipContent>
+              <TooltipContent>
+                <span className="font-semibold">{BADGE_META[b.id]?.label ?? b.id}</span>
+                {" · "}
+                {BADGE_META[b.id]?.description ?? ""}
+              </TooltipContent>
             </Tooltip>
           )
         })}

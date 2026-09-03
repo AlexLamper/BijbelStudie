@@ -15,7 +15,7 @@ export interface Faq {
 export const HOME_FAQS: Faq[] = [
   {
     q: "Is BijbelStudie helemaal gratis?",
-    a: "Het gratis plan geeft volledige toegang tot bijbellezen, notities, begeleide studies en studiemethoden, plus 5 vragen per dag aan de AI-assistent. De Pro versie (€9,99 per maand of €89,99 per jaar) voegt bijbelcommentaren, onbeperkt gebruik van de AI-assistent en geavanceerde functies toe.",
+    a: "Het gratis plan geeft volledige toegang tot bijbellezen, notities, begeleide studies, het KingComments-commentaar en 5 vragen per dag aan de AI-assistent. De Pro versie (€9,99 per maand of €89,99 per jaar) voegt de overige bijbelcommentaren, 200 AI-vragen per dag en de volledige grondtekst toe.",
   },
   {
     q: "Wat doet de AI-assistent?",

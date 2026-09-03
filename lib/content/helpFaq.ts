@@ -55,7 +55,7 @@ export const HELP_TOPICS: HelpTopic[] = [
       },
       {
         q: "Welke bijbelcommentaren zijn beschikbaar?",
-        a: "Matthew Henry (Nederlandse vertaling), Karl August Dachsel en King Comments, allemaal per vers te raadplegen naast de bijbeltekst. De commentaren horen bij het Pro-abonnement.",
+        a: "KingComments (Ger de Koning), Matthew Henry in Nederlandse vertaling, Karl August Dachsel en Heinrich Meyer, allemaal per vers te raadplegen naast de bijbeltekst. KingComments is gratis en volledig te lezen; de overige commentaren horen bij het Pro-abonnement.",
       },
       {
         q: "Kan ik naar de gesproken tekst luisteren?",
@@ -123,11 +123,11 @@ export const HELP_TOPICS: HelpTopic[] = [
     faqs: [
       {
         q: "Wat kost BijbelStudie Pro?",
-        a: "Pro kost €9,99 per maand, maandelijks gefactureerd, of €89,99 per jaar, in één keer gefactureerd. Zonder Pro blijft bijbellezen, notities, begeleide studies, de bibliotheek en vijf AI-vragen per dag gratis beschikbaar.",
+        a: "Pro kost €9,99 per maand, maandelijks gefactureerd, of €89,99 per jaar, in één keer gefactureerd. Zonder Pro blijft bijbellezen, notities, begeleide studies, de bibliotheek, het KingComments-commentaar en vijf AI-vragen per dag gratis beschikbaar.",
       },
       {
         q: "Wat krijg ik met Pro?",
-        a: "Toegang tot alle bijbelcommentaren, onbeperkt gebruik van de AI-assistent, en historische context bij de gedeelten die je bestudeert.",
+        a: "Toegang tot de overige bijbelcommentaren - Matthew Henry, Dachsel en Meyer - naast het gratis KingComments, 200 AI-vragen per dag in plaats van vijf, en de volledige Hebreeuwse en Griekse grondtekst.",
       },
       {
         q: "Hoe zeg ik mijn abonnement op?",

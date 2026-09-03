@@ -126,7 +126,7 @@ export function resolvePriceId(interval: BillingInterval): string | undefined {
  * PREMIUM_DAILY_CAP = 200 per day.
  */
 export const PRO_FEATURES = [
-  "Alle bijbelcommentaren, onbeperkt",
+  "Matthew Henry, Dachsel en Meyer volledig",
   "200 AI-vragen per dag, i.p.v. 5",
   "Grondtekst: Hebreeuws en Grieks",
   "Prioriteit bij ondersteuning",

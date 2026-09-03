@@ -1,8 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, CheckCircle2, NotebookPen, PartyPopper, Trophy } from 'lucide-react';
+import { useReducedMotion } from 'framer-motion';
+import { ArrowRight, Award, NotebookPen, Trophy } from 'lucide-react';
+import { badgeDescription, badgeLabel } from '../../../lib/badgeCatalog';
 
 const TEAL = '#0D9488';
 const AMBER = '#D97706';
@@ -33,20 +35,154 @@ function scoreLabel(score: number, total: number): string {
   return 'Nog even teruglezen';
 }
 
+/**
+ * Counts up to `target` once, on mount.
+ *
+ * The XP figure is the reward, and a number that lands already at rest reads
+ * like a receipt. A short climb reads like something being awarded. It runs
+ * once and stops - nothing here re-animates on a re-render, and with reduced
+ * motion the value is simply there.
+ */
+function useCountUp(target: number, enabled: boolean): number {
+  const [value, setValue] = useState(enabled ? 0 : target);
+
+  useEffect(() => {
+    if (!enabled || target <= 0) {
+      setValue(target);
+      return;
+    }
+    const duration = 900;
+    const started = performance.now();
+    let frame = 0;
+
+    const tick = (now: number) => {
+      const t = Math.min((now - started) / duration, 1);
+      // Ease-out cubic: fast first, so the figure is legible almost at once.
+      setValue(Math.round(target * (1 - Math.pow(1 - t, 3))));
+      if (t < 1) frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+
+    return () => cancelAnimationFrame(frame);
+  }, [target, enabled]);
+
+  return value;
+}
+
+/**
+ * Progress through the study, as a ring.
+ *
+ * This replaces both the decorative icon medallion that used to open the card
+ * and the thin progress bar further down it - one figure, drawn once, instead
+ * of an ornament plus a duplicate of a number already in the stats row. The
+ * stroke animates from empty on mount, which is the only movement on the
+ * screen and so reads as the accomplishment landing.
+ */
+function ProgressRing({
+  pct,
+  done,
+  total,
+  accent,
+  animate,
+}: {
+  pct: number;
+  done: number;
+  total: number;
+  accent: string;
+  animate: boolean;
+}) {
+  const radius = 50;
+  const circumference = 2 * Math.PI * radius;
+  const [drawn, setDrawn] = useState(animate ? 0 : pct);
+
+  useEffect(() => {
+    if (!animate) {
+      setDrawn(pct);
+      return;
+    }
+    // A frame's delay so the browser paints the empty ring first; without it
+    // the transition has no start state to move from.
+    const id = requestAnimationFrame(() => setDrawn(pct));
+    return () => cancelAnimationFrame(id);
+  }, [pct, animate]);
+
+  return (
+    <div className="relative mx-auto h-[116px] w-[116px]">
+      <svg viewBox="0 0 120 120" className="h-full w-full -rotate-90" aria-hidden>
+        <circle
+          cx="60"
+          cy="60"
+          r={radius}
+          fill="none"
+          strokeWidth="8"
+          className="stroke-gray-200 dark:stroke-secondary"
+        />
+        <circle
+          cx="60"
+          cy="60"
+          r={radius}
+          fill="none"
+          strokeWidth="8"
+          strokeLinecap="round"
+          stroke={accent}
+          strokeDasharray={circumference}
+          strokeDashoffset={circumference - (circumference * drawn) / 100}
+          style={{ transition: animate ? 'stroke-dashoffset 1100ms cubic-bezier(0.16,1,0.3,1)' : undefined }}
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-[26px] font-extrabold leading-none tabular-nums" style={{ color: accent }}>
+          {pct}%
+        </span>
+        <span className="mt-1 text-[11px] font-semibold tabular-nums text-gray-500 dark:text-muted-foreground">
+          {done}/{total} lessen
+        </span>
+      </div>
+      <span className="sr-only">
+        {done} van {total} lessen afgerond, {pct} procent
+      </span>
+    </div>
+  );
+}
+
 /** One figure and its label. No icon tile - see the note on density below. */
 function Stat({ value, label, accent }: { value: string; label: string; accent?: string }) {
   return (
-    <div className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card px-3 py-2.5 text-center">
+    <div className="rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card px-3 py-3 text-center">
       <p
-        className="text-[17px] font-bold leading-none tabular-nums truncate"
+        className="text-[18px] font-bold leading-none tabular-nums truncate"
         style={accent ? { color: accent } : undefined}
       >
         {value}
       </p>
-      <p className="mt-1 text-[11px] text-gray-500 dark:text-muted-foreground leading-snug truncate">
+      <p className="mt-1.5 text-[11px] text-gray-500 dark:text-muted-foreground leading-snug truncate">
         {label}
       </p>
     </div>
+  );
+}
+
+/** A level-up or a newly earned badge. Named, never rendered as its id. */
+function RewardChip({
+  icon: Icon,
+  label,
+  detail,
+}: {
+  icon: typeof Trophy;
+  label: string;
+  detail: string;
+}) {
+  return (
+    <span
+      className="inline-flex items-center gap-2 rounded-full border px-3 py-1.5"
+      style={{ borderColor: 'rgba(217,119,6,0.35)', backgroundColor: 'rgba(217,119,6,0.08)' }}
+    >
+      <Icon size={13} style={{ color: AMBER }} className="flex-none" />
+      <span className="text-[12px] font-bold" style={{ color: AMBER }}>
+        {label}
+      </span>
+      <span className="text-[11.5px] text-gray-500 dark:text-muted-foreground">{detail}</span>
+    </span>
   );
 }
 
@@ -66,9 +202,14 @@ function Stat({ value, label, accent }: { value: string; label: string; accent?:
  *
  * What survives is what someone actually wants to know at that moment: that they
  * finished, what it earned, how far along they now are, and where the next
- * lesson is. The step checklist is gone - they had just done those five steps,
- * in order, seconds ago - and the stats lost their icon tiles, which were
- * decoration standing in for information.
+ * lesson is.
+ *
+ * Two later corrections. Badges arrive from the API as ids and were printed
+ * raw, so a tenth completed study congratulated the reader with the word
+ * "completed10"; they now go through lib/badgeCatalog. And the header's icon
+ * medallion plus the separate progress bar were two pieces of furniture saying
+ * less than one ring does, so they became the ring - the only animated thing on
+ * the screen, alongside the XP figure counting up to what was awarded.
  *
  * `justify-center` with `overflow-y-auto` underneath: the content is sized to
  * fit a laptop window with room to spare, and the scroll is only a safety valve
@@ -103,70 +244,64 @@ export default function LessonCompleteCard({
   nextLesson: NextLessonPreview | null;
   onContinue: () => void;
 }) {
+  const reduceMotion = useReducedMotion();
   const finished = summary.studyCompleted;
+  const accent = finished ? AMBER : TEAL;
   const hasQuiz = quizScore !== null && quizTotal !== null && quizTotal > 0;
   const done = Math.min(lessonsCompleted, lessonsTotal);
   const pct = lessonsTotal > 0 ? Math.round((done / lessonsTotal) * 100) : 0;
-  const remaining = Math.max(lessonsTotal - done, 0);
+  const xp = useCountUp(summary.xpAwarded, !reduceMotion);
 
   return (
     <div className="h-full overflow-y-auto flex flex-col justify-center">
       <div className="mx-auto w-full max-w-xl px-5 sm:px-8 py-6">
         <header className="text-center">
-          <div
-            className="mx-auto mb-3 h-12 w-12 rounded-2xl flex items-center justify-center"
-            style={{ backgroundColor: finished ? 'rgba(217,119,6,0.12)' : 'rgba(13,148,136,0.1)' }}
-          >
-            {finished ? (
-              <PartyPopper size={22} style={{ color: AMBER }} />
-            ) : (
-              <CheckCircle2 size={22} style={{ color: TEAL }} />
-            )}
-          </div>
+          <ProgressRing
+            pct={pct}
+            done={done}
+            total={lessonsTotal}
+            accent={accent}
+            animate={!reduceMotion}
+          />
 
           <p
-            className="text-[11px] font-bold uppercase tracking-widest mb-1"
-            style={{ color: finished ? AMBER : TEAL }}
+            className="mt-4 text-[11px] font-bold uppercase tracking-widest"
+            style={{ color: accent }}
           >
             {finished ? 'Studie afgerond' : `Les ${lessonDay} van ${lessonsTotal} afgerond`}
           </p>
-          <h1 className="text-xl sm:text-2xl font-bold text-foreground leading-tight">
+          <h1 className="mt-1 text-xl sm:text-2xl font-bold text-foreground leading-tight text-balance">
             {finished ? studyTitle : lessonTitle}
           </h1>
-          <p className="mt-1 text-[13px] text-gray-500 dark:text-muted-foreground">
+          <p className="mt-1.5 text-[13px] text-gray-500 dark:text-muted-foreground">
             {finished
               ? `Alle ${lessonsTotal} lessen zijn af. Sterk volgehouden.`
               : `${studyTitle} · ${passageReference}`}
           </p>
 
           {(summary.levelledUp || summary.newBadges.length > 0) && (
-            <div className="mt-2.5 flex flex-wrap items-center justify-center gap-1.5">
+            <div className="mt-3.5 flex flex-wrap items-center justify-center gap-2">
               {summary.levelledUp && (
-                <span
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11.5px] font-bold"
-                  style={{ backgroundColor: 'rgba(217,119,6,0.12)', color: AMBER }}
-                >
-                  <Trophy size={11} /> Nieuw level
-                </span>
+                <RewardChip icon={Trophy} label="Nieuw level" detail="bereikt" />
               )}
               {summary.newBadges.map((badge) => (
-                <span
+                <RewardChip
                   key={badge}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11.5px] font-bold"
-                  style={{ backgroundColor: 'rgba(217,119,6,0.12)', color: AMBER }}
-                >
-                  <Trophy size={11} /> {badge}
-                </span>
+                  icon={Award}
+                  label={badgeLabel(badge)}
+                  detail={badgeDescription(badge)}
+                />
               ))}
             </div>
           )}
         </header>
 
-        {/* Four figures, one row. The quiz result is one of them rather than a
-            card of its own - it is a number with a label, like the rest. */}
-        <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-2">
+        {/* Three figures, one row. The quiz result is one of them rather than a
+            card of its own - it is a number with a label, like the rest. The
+            lesson count is not here any more: the ring above already is it. */}
+        <div className="mt-6 grid grid-cols-3 gap-2">
           <Stat
-            value={summary.xpAwarded > 0 ? `+${summary.xpAwarded}` : '0'}
+            value={summary.xpAwarded > 0 ? `+${xp}` : '0'}
             label="XP verdiend"
             accent={TEAL}
           />
@@ -176,39 +311,12 @@ export default function LessonCompleteCard({
             <Stat value={passageReference} label="Gelezen" />
           )}
           <Stat value={`${minutes} min`} label="Leestijd" />
-          <Stat
-            value={`${done}/${lessonsTotal}`}
-            label={finished ? 'Alle lessen af' : `Nog ${remaining} te gaan`}
-            accent={finished ? AMBER : undefined}
-          />
-        </div>
-
-        {/* Progress, as a labelled bar rather than a titled section. */}
-        <div className="mt-4">
-          <div className="flex items-baseline justify-between mb-1.5">
-            <span className="text-[12px] font-semibold text-foreground">
-              Voortgang in deze studie
-            </span>
-            <span className="text-[12px] font-bold tabular-nums" style={{ color: TEAL }}>
-              {pct}%
-            </span>
-          </div>
-          <div className="h-1.5 rounded-full bg-gray-200 dark:bg-secondary overflow-hidden">
-            <div
-              className="h-full rounded-full"
-              style={{
-                width: `${pct}%`,
-                backgroundColor: finished ? AMBER : TEAL,
-                transition: 'width 700ms ease',
-              }}
-            />
-          </div>
         </div>
 
         {summary.noteId && (
           <Link
             href="/notities"
-            className="mt-3 flex items-center gap-2 text-[12.5px] no-underline text-gray-500 dark:text-muted-foreground hover:text-foreground transition-colors"
+            className="mt-4 flex items-center gap-2 text-[12.5px] no-underline text-gray-500 dark:text-muted-foreground hover:text-foreground transition-colors"
           >
             <NotebookPen size={14} className="flex-none" style={{ color: TEAL }} />
             Je reflectie is bewaard als notitie
@@ -252,7 +360,7 @@ export default function LessonCompleteCard({
             <Link
               href={`/studies/${studyId}`}
               className="press flex-1 inline-flex items-center justify-center gap-2 h-11 rounded-xl text-sm font-semibold text-white no-underline transition-opacity hover:opacity-90"
-              style={{ backgroundColor: finished ? AMBER : TEAL }}
+              style={{ backgroundColor: accent }}
             >
               Terug naar de studie <ArrowRight size={15} />
             </Link>

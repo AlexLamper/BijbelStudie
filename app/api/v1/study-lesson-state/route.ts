@@ -19,6 +19,7 @@ import {
   syncEnrollmentAfterLesson,
 } from '../../../../lib/studyEnrollmentService';
 import { promoteReflectionToNote, recordLessonCompletion } from '../../../../lib/studyCompletion';
+import { upsertLessonState } from '../../../../lib/lessonStateWrite';
 
 export const dynamic = 'force-dynamic';
 
@@ -178,9 +179,9 @@ export async function PATCH(req: Request) {
     if (Object.keys(set).length > 0) update.$set = set;
     if (Object.keys(addToSet).length > 0) update.$addToSet = addToSet;
 
-    await StudyLessonState.updateOne({ userId: auth.id, studyId, lessonDay }, update, {
-      upsert: true,
-    });
+    // Not a bare upsert: /api/v1/study-quiz upserts this same document, and the
+    // flow fires both at once on the quiz step. See lib/lessonStateWrite.
+    await upsertLessonState({ userId: auth.id, studyId, lessonDay }, update);
 
     let completion: Awaited<ReturnType<typeof recordLessonCompletion>> | null = null;
     let noteId: string | null = null;
