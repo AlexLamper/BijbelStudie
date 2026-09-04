@@ -2,13 +2,11 @@ import Link from "next/link"
 import { BookOpen, Compass, PenLine } from "lucide-react"
 
 import { curatedStudies, type StudyType } from "../../lib/data/curated-studies"
-import ContinueStudy from "./ContinueStudy"
 import { ST, ST_SHELL, ST_CARD_SHADOW, ST_EDGE, ST_HEADING } from "./studyLandingShared"
 
 /**
- * The study block on the landing page: the visitor-specific "Verder gaan" band
- * (a client island), then two server-rendered strips anyone can see - how a
- * study actually works, and a handful of studies to start with.
+ * The study block on the landing page: two server-rendered strips anyone can
+ * see - how a study actually works, and a handful of studies to start with.
  *
  * The existing "Hoe het werkt" section further down is about signing up and
  * finding the reference tools; this strip is about the lesson loop itself, so a
@@ -50,8 +48,6 @@ const STEPS = [
 export function StudyDiscovery() {
   return (
     <>
-      <ContinueStudy />
-
       <section
         className="py-[clamp(3.5rem,6vw,6.5rem)]"
         style={{ backgroundColor: ST.card, ...ST_EDGE }}
