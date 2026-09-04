@@ -10,6 +10,7 @@ import {
 import { Footer } from "./footer"
 import { FAQItem } from "./FAQItem"
 import { ScrollEffects } from "./ScrollEffects"
+import { StudyDiscovery } from "./StudyDiscovery"
 import { HOME_FAQS } from "../../lib/content/homeFaq"
 import { HOW_IT_WORKS_STEPS } from "../../lib/content/howItWorks"
 import { ALL_STUDIES } from "../../lib/bookStudies"
@@ -1438,6 +1439,7 @@ export default function LandingPage() {
       <Navbar />
       <main>
         <Hero />
+        <StudyDiscovery />
         <Showcase />
         <Features />
         <BibleLibrary />
