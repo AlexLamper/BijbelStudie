@@ -1,0 +1,3910 @@
+{
+  "meta": {
+    "id": "calvijn_nl",
+    "name": "Johannes Calvijn",
+    "englishName": "John Calvin",
+    "language": "nl",
+    "availableFormats": [
+      "json"
+    ]
+  },
+  "books": {
+    "1 John": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "1 J"
+    },
+    "1 Kings": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "11": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "12": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "13": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "14": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "15": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "16": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "17": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "18": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "19": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "20": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "21": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "22": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "1 K"
+    },
+    "1 Corinthians": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "11": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "12": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "13": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "14": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "15": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "16": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "1 C"
+    },
+    "1 Chronicles": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "11": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "12": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "13": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "14": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "15": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "16": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "17": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "18": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "19": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "20": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "21": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "22": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "23": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "24": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "25": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "26": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "27": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "28": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "29": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "1 C"
+    },
+    "1 Peter": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "1 P"
+    },
+    "1 Samuel": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "11": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "12": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "13": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "14": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "15": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "16": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "17": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "18": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "19": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "20": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "21": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "22": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "23": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "24": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "25": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "26": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "27": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "28": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "29": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "30": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "31": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "1 S"
+    },
+    "1 Thessalonians": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "1 T"
+    },
+    "1 Timothy": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "1 T"
+    },
+    "2 John": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "2 J"
+    },
+    "2 Kings": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "11": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "12": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "13": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "14": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "15": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "16": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "17": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "18": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "19": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "20": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "21": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "22": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "23": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "24": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "25": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "2 K"
+    },
+    "2 Corinthians": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "11": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "12": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "13": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "2 C"
+    },
+    "2 Chronicles": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "11": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "12": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "13": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "14": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "15": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "16": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "17": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "18": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "19": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "20": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "21": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "22": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "23": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "24": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "25": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "26": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "27": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "28": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "29": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "30": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "31": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "32": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "33": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "34": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "35": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "36": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "2 C"
+    },
+    "2 Peter": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "2 P"
+    },
+    "2 Samuel": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "11": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "12": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "13": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "14": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "15": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "16": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "17": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "18": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "19": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "20": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "21": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "22": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "23": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "24": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "2 S"
+    },
+    "2 Thessalonians": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "2 T"
+    },
+    "2 Timothy": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "2 T"
+    },
+    "3 John": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "3 J"
+    },
+    "Amos": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "AMO"
+    },
+    "Daniel": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "11": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "12": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "DAN"
+    },
+    "Deuteronomy": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "11": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "12": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "13": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "14": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "15": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "16": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "17": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "18": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "19": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "20": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "21": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "22": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "23": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "24": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "25": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "26": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "27": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "28": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "29": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "30": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "31": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "32": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "33": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "34": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "DEU"
+    },
+    "Ephesians": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "EPH"
+    },
+    "Esther": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "EST"
+    },
+    "Exodus": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "11": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "12": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "13": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "14": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "15": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "16": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "17": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "18": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "19": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "20": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "21": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "22": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "23": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "24": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "25": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "26": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "27": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "28": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "29": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "30": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "31": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "32": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "33": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "34": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "35": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "36": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "37": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "38": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "39": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "40": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "EXO"
+    },
+    "Ezekiel": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "11": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "12": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "13": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "14": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "15": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "16": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "17": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "18": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "19": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "20": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "21": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "22": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "23": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "24": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "25": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "26": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "27": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "28": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "29": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "30": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "31": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "32": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "33": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "34": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "35": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "36": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "37": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "38": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "39": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "40": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "41": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "42": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "43": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "44": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "45": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "46": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "47": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "48": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "EZE"
+    },
+    "Ezra": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "EZR"
+    },
+    "Philemon": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "PHI"
+    },
+    "Philippians": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "PHI"
+    },
+    "Galatians": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "GAL"
+    },
+    "Genesis": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "11": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "12": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "13": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "14": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "15": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "16": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "17": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "18": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "19": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "20": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "21": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "22": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "23": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "24": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "25": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "26": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "27": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "28": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "29": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "30": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "31": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "32": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "33": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "34": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "35": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "36": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "37": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "38": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "39": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "40": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "41": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "42": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "43": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "44": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "45": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "46": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "47": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "48": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "49": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "50": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "GEN"
+    },
+    "Habakkuk": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "HAB"
+    },
+    "Haggai": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "HAG"
+    },
+    "Acts": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "11": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "12": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "13": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "14": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "15": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "16": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "17": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "18": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "19": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "20": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "21": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "22": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "23": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "24": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "25": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "26": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "27": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "28": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "ACT"
+    },
+    "Hebrews": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "11": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "12": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "13": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "HEB"
+    },
+    "Song of Solomon": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "SON"
+    },
+    "Hosea": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "11": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "12": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "13": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "14": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "HOS"
+    },
+    "James": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "JAM"
+    },
+    "Jeremiah": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "11": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "12": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "13": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "14": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "15": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "16": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "17": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "18": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "19": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "20": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "21": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "22": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "23": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "24": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "25": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "26": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "27": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "28": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "29": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "30": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "31": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "32": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "33": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "34": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "35": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "36": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "37": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "38": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "39": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "40": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "41": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "42": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "43": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "44": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "45": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "46": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "47": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "48": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "49": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "50": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "51": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "52": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "JER"
+    },
+    "Isaiah": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "11": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "12": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "13": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "14": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "15": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "16": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "17": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "18": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "19": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "20": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "21": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "22": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "23": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "24": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "25": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "26": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "27": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "28": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "29": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "30": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "31": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "32": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "33": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "34": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "35": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "36": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "37": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "38": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "39": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "40": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "41": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "42": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "43": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "44": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "45": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "46": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "47": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "48": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "49": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "50": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "51": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "52": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "53": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "54": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "55": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "56": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "57": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "58": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "59": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "60": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "61": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "62": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "63": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "64": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "65": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "66": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "ISA"
+    },
+    "Job": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "11": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "12": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "13": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "14": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "15": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "16": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "17": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "18": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "19": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "20": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "21": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "22": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "23": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "24": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "25": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "26": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "27": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "28": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "29": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "30": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "31": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "32": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "33": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "34": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "35": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "36": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "37": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "38": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "39": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "40": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "41": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "42": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "JOB"
+    },
+    "Joel": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "JOE"
+    },
+    "John": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "11": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "12": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "13": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "14": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "15": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "16": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "17": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "18": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "19": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "20": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "21": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "JOH"
+    },
+    "Jonah": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "JON"
+    },
+    "Joshua": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "11": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "12": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "13": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "14": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "15": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "16": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "17": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "18": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "19": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "20": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "21": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "22": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "23": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "24": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "JOS"
+    },
+    "Jude": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "JUD"
+    },
+    "Lamentations": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "LAM"
+    },
+    "Colossians": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "COL"
+    },
+    "Leviticus": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "11": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "12": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "13": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "14": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "15": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "16": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "17": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "18": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "19": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "20": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "21": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "22": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "23": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "24": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "25": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "26": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "27": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "LEV"
+    },
+    "Luke": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "11": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "12": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "13": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "14": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "15": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "16": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "17": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "18": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "19": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "20": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "21": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "22": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "23": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "24": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "LUK"
+    },
+    "Malachi": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "MAL"
+    },
+    "Mark": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "11": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "12": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "13": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "14": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "15": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "16": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "MAR"
+    },
+    "Matthew": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "11": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "12": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "13": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "14": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "15": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "16": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "17": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "18": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "19": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "20": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "21": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "22": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "23": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "24": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "25": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "26": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "27": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "28": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "MAT"
+    },
+    "Micah": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "MIC"
+    },
+    "Nahum": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "NAH"
+    },
+    "Nehemiah": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "11": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "12": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "13": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "NEH"
+    },
+    "Numbers": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "11": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "12": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "13": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "14": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "15": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "16": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "17": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "18": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "19": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "20": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "21": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "22": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "23": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "24": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "25": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "26": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "27": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "28": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "29": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "30": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "31": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "32": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "33": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "34": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "35": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "36": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "NUM"
+    },
+    "Obadiah": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "OBA"
+    },
+    "Revelation": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "11": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "12": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "13": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "14": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "15": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "16": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "17": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "18": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "19": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "20": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "21": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "22": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "REV"
+    },
+    "Ecclesiastes": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "11": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "12": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "ECC"
+    },
+    "Psalms": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "11": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "12": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "13": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "14": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "15": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "16": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "17": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "18": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "19": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "20": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "21": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "22": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "23": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "24": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "25": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "26": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "27": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "28": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "29": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "30": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "31": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "32": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "33": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "34": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "35": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "36": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "37": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "38": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "39": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "40": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "41": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "42": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "43": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "44": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "45": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "46": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "47": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "48": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "49": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "50": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "51": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "52": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "53": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "54": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "55": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "56": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "57": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "58": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "59": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "60": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "61": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "62": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "63": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "64": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "65": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "66": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "67": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "68": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "69": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "70": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "71": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "72": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "73": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "74": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "75": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "76": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "77": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "78": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "79": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "80": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "81": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "82": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "83": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "84": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "85": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "86": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "87": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "88": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "89": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "90": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "91": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "92": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "93": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "94": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "95": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "96": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "97": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "98": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "99": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "100": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "101": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "102": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "103": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "104": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "105": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "106": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "107": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "108": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "109": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "110": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "111": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "112": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "113": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "114": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "115": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "116": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "117": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "118": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "119": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "120": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "121": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "122": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "123": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "124": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "125": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "126": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "127": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "128": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "129": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "130": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "131": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "132": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "133": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "134": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "135": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "136": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "137": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "138": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "139": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "140": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "141": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "142": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "143": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "144": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "145": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "146": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "147": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "148": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "149": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "150": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "PSA"
+    },
+    "Judges": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "11": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "12": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "13": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "14": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "15": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "16": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "17": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "18": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "19": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "20": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "21": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "JUD"
+    },
+    "Romans": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "11": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "12": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "13": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "14": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "15": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "16": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "ROM"
+    },
+    "Ruth": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "RUT"
+    },
+    "Proverbs": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "11": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "12": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "13": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "14": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "15": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "16": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "17": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "18": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "19": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "20": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "21": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "22": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "23": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "24": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "25": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "26": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "27": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "28": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "29": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "30": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "31": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "PRO"
+    },
+    "Titus": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "TIT"
+    },
+    "Zechariah": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "4": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "5": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "6": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "7": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "8": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "9": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "10": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "11": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "12": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "13": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "14": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "ZEC"
+    },
+    "Zephaniah": {
+      "chapters": {
+        "1": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "2": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        },
+        "3": {
+          "0": "Dit hoofdstuk is nog niet in het Nederlands beschikbaar."
+        }
+      },
+      "id": "ZEP"
+    }
+  }
+}

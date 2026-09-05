@@ -30,6 +30,7 @@ const MOBILE_COMMENTARY_ATTRIBUTION: Record<string, string> = {
   matthew_henry_nl: 'Matthew Henry (1662–1714) - publiek domein',
   dachsel: 'Karl August Dachsel (1818–1893) - publiek domein',
   meyer: 'Heinrich August Wilhelm Meyer (1800–1873) - publiek domein',
+  calvijn_nl: 'Johannes Calvijn — Nederlandse tekst in ontwikkeling',
   // The only commentary in the app that is not public domain, so this line is
   // the copyright notice rather than a provenance note. Reproduce as written.
   kingcomments_nl:

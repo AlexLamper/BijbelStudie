@@ -55,6 +55,9 @@ export const MOBILE_ALLOWED_COMMENTARIES: ReadonlySet<string> = new Set([
   'matthew_henry_nl', // Matthew Henry, d. 1714 - public domain
   'dachsel', // Karl August Dachsel, d. 1893 - public domain
   'meyer', // Heinrich Meyer, d. 1898 - public domain
+  // John Calvin, d. 1564 — Dutch text pending permission from Stichting de
+  // Gihonbron; placeholder-only until granted
+  'calvijn_nl',
   // KingComments (Ger de Koning), (c) Stichting Titus / Uitgeverij Daniel.
   // NOT public domain: it is here on the licence the product holds, the same
   // one that makes it free of charge for every reader on the website. That
