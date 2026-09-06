@@ -55,8 +55,11 @@ export const MOBILE_ALLOWED_COMMENTARIES: ReadonlySet<string> = new Set([
   'matthew_henry_nl', // Matthew Henry, d. 1714 - public domain
   'dachsel', // Karl August Dachsel, d. 1893 - public domain
   'meyer', // Heinrich Meyer, d. 1898 - public domain
-  // John Calvin, d. 1564 — Dutch text pending permission from Stichting de
-  // Gihonbron; placeholder-only until granted
+  // John Calvin, d. 1564. Dutch text is translated from the public-domain
+  // English Calvin Translation Society edition (public domain, John King et
+  // al., 1840s-50s) - our own translation of a public-domain work, no
+  // third-party rights. Rolled out per book in canonical order; chapters
+  // not yet translated carry the placeholder string.
   'calvijn_nl',
   // KingComments (Ger de Koning), (c) Stichting Titus / Uitgeverij Daniel.
   // NOT public domain: it is here on the licence the product holds, the same
