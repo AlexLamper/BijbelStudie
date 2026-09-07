@@ -9,7 +9,34 @@ it by a one-word build flag. Nothing here is automatic — the two setup steps i
 
 ---
 
-## 0. Why a separate database is the whole thing
+## 0. What this does and does not change
+
+**Nothing about production is edited.** Not the production `MONGODB_URI`, not
+the cluster, not the `scriptura` database, not a single existing environment
+variable value. Vercel stores an environment variable *per environment*, so the
+work below is adding a **second, Preview-only value** for `MONGODB_URI` beside
+the production one. The production value keeps whatever it has today and is
+never read by, or changed for, staging.
+
+The guard in `lib/appEnv.ts` cannot fire in production either: it requires
+`VERCEL_ENV=preview`, and Vercel sets that to `production` on the live
+deployment. It cannot fire on your laptop, where `VERCEL_ENV` is unset. There
+is a test for both (`tests/appEnv.test.ts`).
+
+What it **does** change: a Vercel **preview** deployment that inherits the
+production `MONGODB_URI` now refuses to serve, and answers with an error naming
+the fix. That is new behaviour for every preview branch on this project. If you
+want the old behaviour back, on any preview, set
+
+```
+ALLOW_PRODUCTION_DB_ON_PREVIEW = true      (Preview scope)
+```
+
+in the Vercel dashboard. No code change, no redeploy of `main`. The banner and
+`/api/health` will still say the preview is on live data — allowed is not the
+same as unremarkable.
+
+## 0.1 Why a separate database is the whole thing
 
 A preview deployment with the production `MONGODB_URI` is not a test
 environment. It is production with a different URL. Every account, note,
@@ -27,21 +54,37 @@ your own machine at whatever you like is a choice you make at a keyboard.
 
 ## 1. One-time: the staging database
 
-1. In MongoDB Atlas, on the existing cluster, nothing needs creating up front —
-   Mongo makes a database on first write. Just pick a name that is **not**
-   `scriptura`. The convention here is `scriptura_staging`.
-2. Take the production connection string and change **only the path segment**:
+Nothing is created, deleted or renamed in Atlas. A MongoDB database springs
+into existence on its first write, so "making" `scriptura_staging` is just a
+matter of writing a connection string that names it.
+
+1. **Copy** the production connection string out of Vercel (Settings →
+   Environment Variables → `MONGODB_URI` → the Production value → reveal, copy).
+   Copy it. Do not edit it there.
+2. In a text editor, change **only the path segment** — the bit between the
+   host's `/` and the `?`:
 
    ```
+   mongodb+srv://USER:PASS@cluster0.xxxxx.mongodb.net/scriptura?retryWrites=true&w=majority
+                                                     ^^^^^^^^^  before
+
    mongodb+srv://USER:PASS@cluster0.xxxxx.mongodb.net/scriptura_staging?retryWrites=true&w=majority
-                                                     ^^^^^^^^^^^^^^^^^^
+                                                     ^^^^^^^^^^^^^^^^^  after
    ```
 
-   Check the tail of the value, not just the host. That one word is the entire
-   safety boundary.
-3. Optionally seed it by restoring an Atlas snapshot of production into the new
-   database name, so staging has realistic content. Do this **into**
-   `scriptura_staging`, never the other way.
+   Same user, same password, same cluster, same options. One word different.
+   That word is the entire safety boundary, so check the tail of the value and
+   not just the host.
+
+   **Confirm the "before" really is `scriptura`.** That name is hardcoded as
+   `PRODUCTION_DATABASE` in `lib/appEnv.ts`, taken from the comment in
+   `.env.example`. If production actually uses some other name, change the
+   constant to match or the guard protects nothing.
+3. Optional: give staging realistic content by restoring an Atlas snapshot of
+   production **into** `scriptura_staging`. Never the other direction.
+
+The production database is untouched by all of this. The staging database
+starts empty and fills up as you use it.
 
 ## 2. One-time: Vercel
 
@@ -73,9 +116,18 @@ in that file, fix the constant.
 
 ### 2.2 Environment variables
 
-In **Project → Settings → Environment Variables**, add these with the
-**Preview** scope ticked and **Production unticked**. This is the step that
-actually creates the separate environment.
+In **Project → Settings → Environment Variables**, for each row below:
+
+1. click **Add New**;
+2. type the **same key** that already exists (`MONGODB_URI` and friends) —
+   Vercel allows one key to hold a different value per environment, so this
+   does not overwrite anything;
+3. paste the Preview value;
+4. tick **Preview** only. Leave **Production** and **Development** unticked.
+   This is the step that keeps production's own value in place.
+
+If you ever want to undo the whole thing: delete the rows you added here. The
+production values were never modified, so nothing needs restoring.
 
 | Variable | Preview value | Why |
 |---|---|---|
@@ -89,6 +141,10 @@ actually creates the separate environment.
 
 Anything you do not set for Preview falls through to the Production value —
 which is exactly the trap for `MONGODB_URI`, and exactly why the guard exists.
+
+The only genuinely required row is `MONGODB_URI`. Without it a preview refuses
+to serve; with it, everything else falling through to production values is
+merely untidy rather than dangerous. Add the rest as you need them.
 
 ### 2.3 OAuth callbacks
 
