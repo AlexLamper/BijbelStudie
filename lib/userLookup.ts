@@ -24,14 +24,16 @@ function escapeRegExp(value: string): string {
  */
 /** Just the slice of the User model these helpers touch, so callers can inject a
  * double in tests without pulling mongoose into the test process. */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export type UserModelLike = {
-  findOne(filter: Record<string, unknown>): Promise<unknown> | unknown;
+  findOne(filter: Record<string, unknown>): Promise<any>;
   findOneAndUpdate(
     filter: Record<string, unknown>,
     update: Record<string, unknown>,
     options?: Record<string, unknown>,
-  ): Promise<unknown> | unknown;
+  ): Promise<any>;
 };
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 export async function findUserByEmail(email: string, model: UserModelLike = User) {
   const normalised = normaliseEmail(email);
