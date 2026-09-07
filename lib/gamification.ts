@@ -23,7 +23,8 @@ export type XpEvent =
   | 'study_lesson'
   | 'study_completed'
   | 'plan_completed'
-  | 'streak_day';
+  | 'streak_day'
+  | 'note_written';
 
 export const XP_VALUES: Record<XpEvent, number> = {
   chapter_read: 5,
@@ -33,6 +34,10 @@ export const XP_VALUES: Record<XpEvent, number> = {
   study_completed: 60,
   plan_completed: 150,
   streak_day: 3,
+  // Writing something down is real engagement, but it is also the cheapest
+  // thing to fake, so it sits below a read chapter's neighbours and is capped
+  // per day in lib/noteXp.ts rather than being paid on every save.
+  note_written: 8,
 };
 
 export const XP_LABELS: Record<XpEvent, string> = {
@@ -43,6 +48,7 @@ export const XP_LABELS: Record<XpEvent, string> = {
   study_completed: 'Studie voltooid',
   plan_completed: 'Leesplan voltooid',
   streak_day: 'Dagelijkse reeks',
+  note_written: 'Aantekening gemaakt',
 };
 
 /** Cumulative XP required to reach a level: 100, 300, 600, 1000, 1500, … */

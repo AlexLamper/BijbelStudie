@@ -32,7 +32,8 @@ export type NotificationType =
   | 'daily_reading'
   | 'streak_risk'
   | 'streak_lost'
-  | 'study_nudge';
+  | 'study_nudge'
+  | 'tree_wilting';
 
 /** Values a variant can interpolate. Absent keys remove a variant from the pool. */
 export type CopyTokens = {
@@ -49,6 +50,8 @@ export type CopyTokens = {
   plandag?: number;
   vers?: string;
   versverwijzing?: string;
+  /** The reader's Levensboom level, for the tree nudge. */
+  niveau?: number;
 };
 
 export type Variant = {
@@ -127,6 +130,24 @@ const STUDY_NUDGE: Variant[] = [
   { id: 't05', title: 'Je leesplan', body: 'Dag {plandag} staat klaar in {plan}.', needs: ['plan', 'plandag'] },
 ];
 
+/**
+ * The Levensboom nudge, fired at exactly two days away - before the tree
+ * visibly wilts, never after.
+ *
+ * The plan's draft copy carried a seedling emoji; the house rules above forbid
+ * emoji, so it is gone. What survives is the useful half: the tree is a thing
+ * of the reader's own that responds to them, and one short sitting is enough.
+ * No variant says the tree could die, because it cannot - health floors at 0.3
+ * (lib/levensboom/health.ts) precisely so this copy never has to threaten.
+ */
+const TREE_WILTING: Variant[] = [
+  { id: 'b01', title: 'Je boom mist wat licht', body: 'Twee dagen zonder lezen. Een paar verzen en hij staat er weer fris bij.', needs: [] },
+  { id: 'b02', title: 'Je boom wacht op je', body: 'Eén kort stuk laat hem weer opveren.', needs: [] },
+  { id: 'b03', title: 'Even water geven', body: 'Je boom hangt wat slap. Tien minuten lezen is genoeg.', needs: [] },
+  { id: 'b04', title: 'Je boom op niveau {niveau}', body: 'Hij staat er wat stil bij. Lees {boek} {hoofdstuk} en hij groeit verder.', needs: ['niveau', 'boek', 'hoofdstuk'] },
+  { id: 'b05', title: 'Terug naar {boek}', body: 'Je boom veert op zodra je weer leest. Geen haast.', needs: ['boek'] },
+];
+
 /** The pool for a type, given the context that changes which pool applies. */
 export function poolFor(type: NotificationType, tokens: CopyTokens): Variant[] {
   switch (type) {
@@ -138,6 +159,8 @@ export function poolFor(type: NotificationType, tokens: CopyTokens): Variant[] {
       return STREAK_LOST;
     case 'study_nudge':
       return STUDY_NUDGE;
+    case 'tree_wilting':
+      return TREE_WILTING;
   }
 }
 
@@ -191,6 +214,8 @@ function fill(template: string, tokens: CopyTokens): string {
 export function deepLinkFor(type: NotificationType, tokens: CopyTokens): string {
   if (type === 'study_nudge') return '/studies';
   if (type === 'streak_lost') return '/dashboard';
+  // The nudge is about the tree, so it opens the tree rather than a chapter.
+  if (type === 'tree_wilting') return '/profiel/boom';
   if (tokens.boek && tokens.hoofdstuk) {
     return `/lezen?book=${encodeURIComponent(tokens.boek)}&chapter=${tokens.hoofdstuk}`;
   }

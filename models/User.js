@@ -20,6 +20,18 @@ const UserSchema = new mongoose.Schema(
     // is understanding a small portion, not covering a large one.
     xp: { type: Number, default: 0 },
     level: { type: Number, default: 1 },
+    // Levensboom (TREE_FEATURE_PLAN.md). Nothing about the tree's *shape* lives
+    // here - that is a pure function of xp, level, lastStreakDate and the user
+    // id, so an existing account renders its grown tree with no migration. All
+    // this holds is "have we celebrated up to here yet" plus the two prefs, so
+    // a level-up earned on the website is celebrated once, on whichever client
+    // the user opens next, and not again on the other.
+    levensboom: {
+      lastSeenLevel: { type: Number, default: 1 },
+      lastSeenAt: { type: Date },
+      reducedMotion: { type: Boolean, default: false },
+      disabled: { type: Boolean, default: false },
+    },
     subscribed: { type: Boolean, default: false },
     stripeCustomerId: { type: String },
     stripeSubscriptionId: { type: String },

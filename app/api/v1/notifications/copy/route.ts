@@ -4,6 +4,7 @@ import connectMongoDB from '../../../../../lib/mongodb';
 import User from '../../../../../models/User';
 import { CHAPTER_COUNTS } from '../../../../../lib/data/bible-chapter-counts';
 import { fetchDayText } from '../../../../../lib/mobileDayText';
+import { levelForXp } from '../../../../../lib/gamification';
 import {
   firstNameOf,
   pickSeries,
@@ -35,7 +36,15 @@ export async function OPTIONS() {
 const MAX_DAYS = 30;
 const DEFAULT_DAYS = 14;
 
-const SUPPORTED: NotificationType[] = ['daily_reading', 'streak_risk', 'streak_lost', 'study_nudge'];
+const SUPPORTED: NotificationType[] = [
+  'daily_reading',
+  'streak_risk',
+  'streak_lost',
+  'study_nudge',
+  // Fired by the app at exactly two days away, before the tree visibly wilts.
+  // No new channel: it rides the reminder channel and the existing quiet hours.
+  'tree_wilting',
+];
 
 function isSupported(value: string | null): value is NotificationType {
   return value !== null && (SUPPORTED as string[]).includes(value);
@@ -58,12 +67,13 @@ export async function GET(req: Request) {
 
     await connectMongoDB();
     const user = await User.findById(auth.id)
-      .select('name streak freezeCount subscribed lastReadChapter')
+      .select('name streak freezeCount subscribed lastReadChapter xp')
       .lean<{
         name?: string;
         streak?: number;
         freezeCount?: number;
         subscribed?: boolean;
+        xp?: number;
         lastReadChapter?: { book?: string; chapter?: number } | null;
       } | null>();
     if (!user) return errorV1('NOT_FOUND', 404);
@@ -96,6 +106,7 @@ export async function GET(req: Request) {
       vriesdagen: user.subscribed ? (user.freezeCount ?? 0) : 0,
       vers: dayText?.text ?? undefined,
       versverwijzing: dayText?.reference ?? undefined,
+      niveau: levelForXp(user.xp ?? 0),
     };
 
     // Seeded on the account and the day this batch was built, so two devices

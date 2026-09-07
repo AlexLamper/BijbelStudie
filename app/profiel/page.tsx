@@ -11,6 +11,7 @@ import {
 } from "lucide-react"
 import UserBadges from "../../components/profile/badges"
 import LevelCard from "../../components/profile/LevelCard"
+import TreeHero from "../../components/levensboom/TreeHero"
 import { SkeletonPage } from "../../components/ui/skeletons"
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
 
@@ -266,6 +267,9 @@ export default function ProfilePage() {
 
           {/* Left column */}
           <div className="flex flex-col gap-5 min-w-0">
+
+            {/* Levensboom. Renders nothing when the user has switched it off. */}
+            <TreeHero />
 
             {/* Identity / account card */}
             <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-2xl overflow-hidden">

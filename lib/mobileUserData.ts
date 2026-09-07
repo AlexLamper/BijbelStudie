@@ -248,7 +248,17 @@ export async function listTombstones(
   });
 }
 
-export type UpsertOutcome = { record: SyncRecord | null; skipped: 'stale' | 'deleted' | null };
+export type UpsertOutcome = {
+  record: SyncRecord | null;
+  skipped: 'stale' | 'deleted' | null;
+  /**
+   * True only when this call brought the record into existence. Note XP
+   * (lib/noteXp.ts) is paid on creates and never on edits, and the caller has
+   * no other way to tell the two apart - an upsert looks identical from
+   * outside.
+   */
+  created: boolean;
+};
 
 /**
  * Creates or updates one record.
@@ -267,12 +277,12 @@ export async function upsertRecord(
   const user = oid(userId);
 
   const tombstone = await SyncTombstone.findOne({ userId: user, kind, clientId });
-  if (tombstone) return { record: null, skipped: 'deleted' };
+  if (tombstone) return { record: null, skipped: 'deleted', created: false };
 
   if (kind === 'note' || kind === 'highlight') {
     const existing = await Note.findOne({ userId: user, clientId });
     if (existing && isStale(existing.updatedAt, clientUpdatedAt)) {
-      return { record: serialiseNote(existing.toObject(), kind), skipped: 'stale' };
+      return { record: serialiseNote(existing.toObject(), kind), skipped: 'stale', created: false };
     }
     const fields = noteFieldsFrom(data, kind);
     const doc = await Note.findOneAndUpdate(
@@ -280,32 +290,32 @@ export async function upsertRecord(
       { $set: { ...fields, userId: user, clientId } },
       { new: true, upsert: true, setDefaultsOnInsert: true },
     );
-    return { record: serialiseNote(doc.toObject(), kind), skipped: null };
+    return { record: serialiseNote(doc.toObject(), kind), skipped: null, created: !existing };
   }
 
   if (kind === 'bookmark') {
     const existing = await Bookmark.findOne({ userId: user, clientId });
     if (existing && isStale(existing.updatedAt, clientUpdatedAt)) {
-      return { record: serialiseBookmark(existing.toObject()), skipped: 'stale' };
+      return { record: serialiseBookmark(existing.toObject()), skipped: 'stale', created: false };
     }
     const doc = await Bookmark.findOneAndUpdate(
       { userId: user, clientId },
       { $set: { ...bookmarkFieldsFrom(data), userId: user, clientId } },
       { new: true, upsert: true, setDefaultsOnInsert: true },
     );
-    return { record: serialiseBookmark(doc.toObject()), skipped: null };
+    return { record: serialiseBookmark(doc.toObject()), skipped: null, created: !existing };
   }
 
   const existing = await ReadingHistory.findOne({ userId: user, clientId });
   if (existing && isStale(existing.updatedAt, clientUpdatedAt)) {
-    return { record: serialiseHistory(existing.toObject()), skipped: 'stale' };
+    return { record: serialiseHistory(existing.toObject()), skipped: 'stale', created: false };
   }
   const doc = await ReadingHistory.findOneAndUpdate(
     { userId: user, clientId },
     { $set: { ...historyFieldsFrom(data), userId: user, clientId } },
     { new: true, upsert: true, setDefaultsOnInsert: true },
   );
-  return { record: serialiseHistory(doc.toObject()), skipped: null };
+  return { record: serialiseHistory(doc.toObject()), skipped: null, created: !existing };
 }
 
 function isStale(serverUpdatedAt: unknown, clientUpdatedAt?: Date | null): boolean {
