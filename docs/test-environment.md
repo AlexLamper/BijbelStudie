@@ -157,9 +157,38 @@ It is `scriptura`, confirmed against a live preview's `/api/health` on
 - **Crons.** `vercel.json` schedules `/api/internal/reconcile-subscriptions`.
   Vercel runs crons on production deployments only. Trigger it by hand with its
   secret if you need to test it.
-- **OAuth sign-in**, until the staging origin is registered in the Google and
-  Apple consoles (`/api/auth/callback/google` on the staging URL). Use
-  email/password on staging until then.
+- **Google sign-in**, until the staging origin is registered. This is the one
+  that wastes an afternoon, so in detail:
+
+  NextAuth advertises the callback for whatever host is serving the request,
+  not the value of `NEXTAUTH_URL`. Confirm it for yourself on any deployment:
+
+  ```bash
+  curl -s https://bijbelstudie-git-staging-dev-f81e211e.vercel.app/api/auth/providers
+  ```
+
+  ```jsonc
+  { "google": { "callbackUrl": "https://bijbelstudie-git-staging-dev-f81e211e.vercel.app/api/auth/callback/google" } }
+  ```
+
+  Google rejects any `redirect_uri` that is not registered verbatim, so until
+  that exact string is added you get **`Error 400: redirect_uri_mismatch`**.
+
+  Fix: Google Cloud Console → APIs & Services → Credentials → the OAuth 2.0
+  Client used by `GOOGLE_ID` → **Authorized redirect URIs** → Add:
+
+  ```
+  https://bijbelstudie-git-staging-dev-f81e211e.vercel.app/api/auth/callback/google
+  ```
+
+  Register the **branch** alias, never a per-commit URL
+  (`bijbelstudie-<hash>-dev-f81e211e...`). The branch alias is stable; the
+  per-commit one changes every push and you would be adding a new URI forever.
+  This is also why you should always open staging by its branch URL.
+
+  Until then, **email/password sign-in works on a preview with no setup at all**
+  — it needs no external redirect registration. That is the path of least
+  resistance for testing.
 - **Store purchases.** The paywall renders, but a purchase will not unlock Pro
   unless the RevenueCat values point at a sandbox project.
 - **Outbound email.** Preview inherits the production `RESEND_API_KEY`, so a
