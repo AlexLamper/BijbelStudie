@@ -14,7 +14,7 @@ there is a fixed place to merge into before `main`.
 
 | | Preview (a branch) | Production (`main`) |
 |---|---|---|
-| URL | `bijbelstudie-git-<branch>-<scope>.vercel.app` | `www.bijbelstudie.io` |
+| URL | `bijbelstudie-git-<branch>-dev-f81e211e.vercel.app` | `www.bijbelstudie.io` |
 | Code | whatever you pushed | `main` |
 | Database | **the same one as production** | the same one |
 | Badge | red `LIVE DATA · scriptura · <branch>` | none |
@@ -53,13 +53,13 @@ Vercel builds it at a URL that is stable per branch, so it does not change
 between deployments:
 
 ```
-https://bijbelstudie-git-staging-<scope>.vercel.app
+https://bijbelstudie-git-staging-dev-f81e211e.vercel.app
 ```
 
 Before trusting what you see, confirm what it is:
 
 ```bash
-curl https://bijbelstudie-git-staging-<scope>.vercel.app/api/health
+curl https://bijbelstudie-git-staging-dev-f81e211e.vercel.app/api/health
 ```
 
 ```jsonc
@@ -110,8 +110,9 @@ flutter run --dart-define=API_BASE_URL=https://<any-preview>.vercel.app/api/v1
 
 The last form targets a single branch's preview rather than staging.
 
-The staging URL is a constant in `core/config/app_config.dart`. If your Vercel
-scope is not `alexlampers-projects`, fix it there.
+The staging URL is a constant in `core/config/app_config.dart`. The Vercel scope
+is `dev-f81e211e`; `vercel inspect <any deployment url>` prints the branch alias
+if it ever changes.
 
 ## 3. Promoting to production
 
@@ -148,9 +149,8 @@ Everything needed is already in place; it is two dashboard steps and one flag.
 To undo: delete the rows you added. Nothing else changes.
 
 `PRODUCTION_DATABASE` in `lib/appEnv.ts` is the name the guard compares against.
-It is set to `scriptura`, taken from the comment in `.env.example`. If that is
-wrong, the badge and `/api/health` will report `isProductionDatabase: false` on
-a preview and the guard would never fire — so check it before relying on step 3.
+It is `scriptura`, confirmed against a live preview's `/api/health` on
+2026-09-07 rather than assumed.
 
 ## 5. What a preview cannot cover
 
