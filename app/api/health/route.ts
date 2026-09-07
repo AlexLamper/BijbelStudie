@@ -31,9 +31,9 @@ export async function GET() {
     const conn = await connectMongoDB();
     database = conn && mongoose.connection.readyState === 1 ? 'up' : 'down';
   } catch {
-    // assertSafeDatabase throws on a preview pointed at production. Reporting
-    // it as its own state is the point - "down" would send you looking for an
-    // outage that is not there.
+    // `blocked` only happens when BLOCK_PRODUCTION_DB_ON_PREVIEW is armed.
+    // Reporting it as its own state is the point - "down" would send you
+    // looking for an outage that is not there.
     database = safety.unsafe ? 'blocked' : 'down';
   }
 
@@ -44,7 +44,11 @@ export async function GET() {
       status: database,
       name: safety.database,
       isProductionDatabase: safety.database === PRODUCTION_DATABASE,
-      warning: safety.message,
+      // True on a preview sharing the live database. Not an error by default -
+      // it is how this project is set up - but it is the single most important
+      // thing to know before testing anything destructive here.
+      sharesProductionData: safety.onProductionData,
+      note: safety.message,
     },
     commit: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? null,
     branch: process.env.VERCEL_GIT_COMMIT_REF ?? null,

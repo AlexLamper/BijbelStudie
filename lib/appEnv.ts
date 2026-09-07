@@ -72,64 +72,64 @@ export function currentDatabaseName(): string | null {
 export type DatabaseSafety = {
   env: AppEnv;
   database: string | null;
-  /** True when a non-production deployment is pointed at the live database. */
+  /** True when a preview deployment is reading and writing the live database. */
+  onProductionData: boolean;
+  /** True only when that is ALSO configured to be refused. See below. */
   unsafe: boolean;
   message: string | null;
 };
 
 /**
- * The deliberate escape hatch.
+ * Blocking is opt-IN, and off by default.
  *
- * Set `ALLOW_PRODUCTION_DB_ON_PREVIEW=true` (Preview scope) to keep the old
- * behaviour, where a preview deployment shares the live database. That is a
- * real workflow - it is how preview deployments work out of the box, and it is
- * what every existing preview on this project has always done - so blocking it
- * has to be something you can turn off from the dashboard without a code
- * change and without a redeploy of main.
+ * This project deliberately runs previews against the same database as
+ * production: there is one small cluster, one developer, and testing with your
+ * own real account is how the app actually gets exercised. Refusing to serve in
+ * that situation would break every preview branch to prevent a problem this
+ * setup does not have.
  *
- * It is opt-OUT rather than opt-in because the two failure modes are not
- * symmetric: a blocked preview is loud, instant and costs nothing, while a
- * preview quietly writing to real accounts is silent and permanent.
+ * So the default is to *say* what is going on - the red LIVE DATA badge and
+ * /api/health - and let the person reading it decide. Set
+ * `BLOCK_PRODUCTION_DB_ON_PREVIEW=true` on the Preview scope if a separate
+ * staging database is ever set up and you want the boundary enforced.
  */
-function guardDisabled(): boolean {
-  return process.env.ALLOW_PRODUCTION_DB_ON_PREVIEW === 'true';
+function blockingArmed(): boolean {
+  return process.env.BLOCK_PRODUCTION_DB_ON_PREVIEW === 'true';
 }
 
 export function checkDatabaseSafety(): DatabaseSafety {
   const env = appEnv();
   const database = currentDatabaseName();
   const onProductionData = env === 'preview' && database === PRODUCTION_DATABASE;
-  const unsafe = onProductionData && !guardDisabled();
 
   return {
     env,
     database,
-    unsafe,
+    onProductionData,
+    // "unsafe" means "refuse to run", which needs the block to be armed.
+    unsafe: onProductionData && blockingArmed(),
     message: onProductionData
-      ? `Preview deployment is pointed at the production database (${PRODUCTION_DATABASE}). ` +
-        'Fix it by adding MONGODB_URI with the Preview scope only, in Vercel -> Settings -> ' +
-        'Environment Variables, ending in a different database name. ' +
-        (guardDisabled()
-          ? 'Currently ALLOWED because ALLOW_PRODUCTION_DB_ON_PREVIEW=true.'
-          : 'To allow it anyway, set ALLOW_PRODUCTION_DB_ON_PREVIEW=true on Preview.')
+      ? 'This preview deployment shares the production database ' +
+        `(${PRODUCTION_DATABASE}). Anything you do here writes to real data. ` +
+        (blockingArmed()
+          ? 'Blocked, because BLOCK_PRODUCTION_DB_ON_PREVIEW=true.'
+          : 'That is the configured behaviour for this project.')
       : null,
   };
 }
 
 /**
- * Refuses to let a preview deployment touch the live database.
+ * Stops a preview deployment touching the live database - but only when asked.
  *
- * A throw and not a warning, because a warning in a serverless log is a warning
- * nobody reads and the cost of getting this wrong is writes landing on real
- * accounts during a test.
+ * Off by default (see [blockingArmed]). What it will never do, whatever the
+ * setting:
+ * - fire in production. `VERCEL_ENV` is `production` there, and the condition
+ *   requires `preview`;
+ * - fire on a local machine. `VERCEL_ENV` is unset, so `appEnv()` is
+ *   `development`.
  *
- * Three things it will NOT do, which matter more than what it does:
- * - it cannot fire in production. `VERCEL_ENV` is `production` there, and the
- *   condition requires `preview`;
- * - it cannot fire on a local machine. `VERCEL_ENV` is unset, so `appEnv()` is
- *   `development` - pointing `next dev` at whatever you like is a choice you
- *   make knowingly, at a keyboard;
- * - it can be switched off from the Vercel dashboard alone (see above).
+ * Both are covered by tests/appEnv.test.ts, because they are the whole "can
+ * this take the live site down?" question and the answer has to stay no.
  */
 export function assertSafeDatabase(): void {
   const safety = checkDatabaseSafety();

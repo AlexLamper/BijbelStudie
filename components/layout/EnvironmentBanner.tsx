@@ -8,6 +8,11 @@ import { appEnv, currentDatabaseName, PRODUCTION_DATABASE } from '../../lib/appE
  * follow from confusing them - testing a destructive change on the wrong one,
  * or reporting a bug against a build nobody shipped - are expensive and quiet.
  *
+ * This project runs previews against the production database on purpose, so
+ * the red LIVE DATA state is the normal one on a preview rather than an alarm.
+ * It is there to keep "the notes I just made are real notes" in view while you
+ * are testing, which is the whole protection now that nothing is blocked.
+ *
  * Renders nothing in production, so it costs the live site one boolean.
  */
 export default function EnvironmentBanner() {

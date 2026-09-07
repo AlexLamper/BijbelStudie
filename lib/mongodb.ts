@@ -82,10 +82,10 @@ const connectMongoDB = async (): Promise<typeof mongoose | null> => {
       return null;
     }
 
-    // Checked here because this is the one place every read and write in the
-    // product passes through. A preview deployment wired to the live database
-    // would otherwise look like a working test environment right up until it
-    // wrote to somebody's real account.
+    // A no-op unless BLOCK_PRODUCTION_DB_ON_PREVIEW is armed, which it is not
+    // by default - this project runs previews against the live database on
+    // purpose. Called here anyway because this is the one place every read and
+    // write passes through, so arming it later needs no further wiring.
     assertSafeDatabase();
 
     cache.promise = mongoose.connect(uri, {
