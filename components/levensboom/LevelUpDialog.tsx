@@ -3,8 +3,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import TreeCanvas from './TreeCanvas';
 import { buildPalette, seasonForMonth } from '../../lib/levensboom/palette';
-import { fruitAtLevel, TRAIT_LABELS, TRAIT_LEVELS, type TreeTrait } from '../../lib/levensboom/traits';
+import {
+  fruitAtLevel,
+  fruitCount,
+  TRAIT_LABELS,
+  TRAIT_LEVELS,
+  type TreeTrait,
+} from '../../lib/levensboom/traits';
 import { maxDepthForLevel } from '../../lib/levensboom/generate';
+import { playLevelUp } from '../../lib/levensboomSound';
 
 const TEAL = '#0D9488';
 const GROW_MS = 1200;
@@ -46,6 +53,8 @@ export default function LevelUpDialog({
   onClose: () => void;
 }) {
   const [reveal, setReveal] = useState(reducedMotion ? 1 : 0);
+  /** Drives the slow camera push: the tree eases in and scales up a hair. */
+  const [pushed, setPushed] = useState(reducedMotion);
 
   // Night, always: the sequence dims to a night sky so the new growth and the
   // rising motes read against something quiet.
@@ -56,12 +65,23 @@ export default function LevelUpDialog({
 
   const fruit = fruitAtLevel(level);
   const trait = traitAtLevel(level);
+  // The newest fruit is the last one on the tree, and the scene lists them in
+  // unlock order - so its ornament index is simply the count minus one.
+  const fruitIndex = fruitCount(level) - 1;
 
   useEffect(() => {
     if (reducedMotion) {
       setReveal(1);
+      setPushed(true);
       return;
     }
+
+    // Sound and the camera push are the two things that make this read as a
+    // moment rather than a dialog. Both are skipped above under reduced motion.
+    playLevelUp();
+    // Next frame, so the transition has an initial value to move away from.
+    const push = requestAnimationFrame(() => setPushed(true));
+
     // Start from where the previous level's silhouette ended, so what the user
     // watches grow is the new wood rather than the whole tree replaying.
     const from = Math.min(0.92, maxDepthForLevel(level - 1) / (maxDepthForLevel(level) + 1));
@@ -76,7 +96,10 @@ export default function LevelUpDialog({
     };
     setReveal(from);
     frame = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(frame);
+    return () => {
+      cancelAnimationFrame(frame);
+      cancelAnimationFrame(push);
+    };
   }, [level, reducedMotion]);
 
   useEffect(() => {
@@ -96,16 +119,23 @@ export default function LevelUpDialog({
       aria-label={`Niveau ${level} bereikt`}
     >
       <div className="w-full max-w-md overflow-hidden rounded-3xl bg-[#0B1027] shadow-2xl">
-        <div className="relative h-64">
-          <TreeCanvas
-            seed={seed}
-            level={level}
-            frac={0}
-            reveal={reveal}
-            palette={palette}
-            reducedMotion={reducedMotion}
-            className="block h-full w-full"
-          />
+        <div className="relative h-64 overflow-hidden">
+          <div
+            className="h-full w-full transition-transform duration-[1600ms] ease-out"
+            style={{ transform: `scale(${pushed ? 1.08 : 1})` }}
+          >
+            <TreeCanvas
+              seed={seed}
+              level={level}
+              frac={0}
+              reveal={reveal}
+              palette={palette}
+              reducedMotion={reducedMotion}
+              celebration
+              bloomFruit={fruit ? fruitIndex : null}
+              className="block h-full w-full"
+            />
+          </div>
         </div>
 
         <div className="p-6 text-center">

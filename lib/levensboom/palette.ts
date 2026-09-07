@@ -9,6 +9,9 @@ export type Season = 'spring' | 'summer' | 'autumn' | 'winter';
 export type TimeOfDay = 'dawn' | 'day' | 'dusk' | 'night';
 
 export type Palette = {
+  /** Carried through so a renderer can draw the seasonal events of §6's
+   *  `seasons` trait without re-deriving the month it already resolved. */
+  season: Season;
   skyTop: string;
   skyBottom: string;
   glow: string;
@@ -91,6 +94,7 @@ export function buildPalette(season: Season, timeOfDay: TimeOfDay, health = 1): 
   const wilt = (color: string) => mix(color, WILT_MIX, (1 - health) * 0.4);
 
   return {
+    season,
     skyTop: sky.top,
     skyBottom: sky.bottom,
     glow: sky.glow,

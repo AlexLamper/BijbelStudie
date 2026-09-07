@@ -24,6 +24,9 @@ const DEG = Math.PI / 180;
 const SWAY_DEGREES = 0.85;
 const MOTE_COUNT = 18;
 const STAR_COUNT = 60;
+const DRIFTER_COUNT = 14;
+/** The `seasons` trait (docs/levensboom-spec.md §6) arrives here. */
+const SEASONS_TRAIT_LEVEL = 25;
 
 export type TreeCanvasProps = {
   seed: string;
@@ -38,10 +41,16 @@ export type TreeCanvasProps = {
   className?: string;
   /** Overrides the device clock. Only the level-up dialog uses this (night). */
   palette?: Palette;
+  /** Adds the rising column of light motes the level-up sequence calls for. */
+  celebration?: boolean;
+  /** Index of a fruit to swell with a soft bloom, when a level-up unlocked one. */
+  bloomFruit?: number | null;
 };
 
 type Mote = { x: number; y: number; r: number; speed: number; phase: number };
 type Star = { x: number; y: number; r: number; phase: number };
+/** Petals and falling leaves: same shape, different season. */
+type Drifter = { x: number; y: number; size: number; speed: number; drift: number; phase: number };
 
 function prefersReducedMotion(): boolean {
   if (typeof window === 'undefined' || !window.matchMedia) return false;
@@ -117,6 +126,8 @@ export default function TreeCanvas({
   reducedMotion,
   className,
   palette: paletteOverride,
+  celebration = false,
+  bloomFruit = null,
 }: TreeCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -148,7 +159,17 @@ export default function TreeCanvas({
       r: 0.15 + rand() * 0.3,
       phase: rand(),
     }));
-    return { motes, stars };
+    // Autumn's falling leaves and the level-25 blossom storm are the same
+    // handful of drifters wearing different colours.
+    const drifters: Drifter[] = Array.from({ length: DRIFTER_COUNT }, () => ({
+      x: rand() * 100,
+      y: rand() * 100,
+      size: 0.7 + rand() * 0.9,
+      speed: 0.5 + rand() * 1.1,
+      drift: 0.6 + rand() * 1.6,
+      phase: rand(),
+    }));
+    return { motes, stars, drifters };
   }, [seed]);
 
   useEffect(() => {
@@ -309,7 +330,22 @@ export default function TreeCanvas({
       for (const fruit of scene.fruits) {
         const x = originX + fruit.x * scale;
         const y = originY + fruit.y * scale;
-        const size = Math.max(1.4, fruit.size * leafScale * 1.15);
+        // The fruit a level-up just unlocked swells and carries a soft bloom,
+        // so the eye is told which one is new (§8.4).
+        const blooming = bloomFruit != null && fruit.index === bloomFruit;
+        const swell = blooming && !still ? 1 + 0.28 * (0.5 + 0.5 * Math.sin(t * 0.0026)) : 1;
+        const size = Math.max(1.4, fruit.size * leafScale * 1.15) * swell;
+
+        if (blooming) {
+          const bloom = ctx.createRadialGradient(x, y, 0, x, y, size * 4.5);
+          bloom.addColorStop(0, `${palette.light}88`);
+          bloom.addColorStop(1, `${palette.light}00`);
+          ctx.fillStyle = bloom;
+          ctx.beginPath();
+          ctx.arc(x, y, size * 4.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
         ctx.fillStyle = palette.fruit;
         ctx.beginPath();
         ctx.arc(x, y, size, 0, Math.PI * 2);
@@ -320,6 +356,33 @@ export default function TreeCanvas({
         ctx.beginPath();
         ctx.arc(x - size * 0.3, y - size * 0.3, size * 0.3, 0, Math.PI * 2);
         ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+
+      // --- snow on the branches (level 25+, winter) ------------------------
+      // Drawn inside the swaying transform so the load rides with the tree.
+      if (level >= SEASONS_TRAIT_LEVEL && palette.season === 'winter') {
+        ctx.fillStyle = '#F2F6FA';
+        ctx.globalAlpha = 0.9;
+        for (const branch of scene.branches) {
+          if (branch.depth < scene.maxDepth - 2) continue;
+          if (revealAt(reveal, branch.depth, scene.maxDepth) <= 0) continue;
+          const [nx, ny] = normal(branch.x1 - branch.cx, branch.y1 - branch.cy);
+          // Only the upward-facing side carries snow.
+          const side = ny < 0 ? 1 : -1;
+          const w = Math.max(0.7, branch.w0 * scale * 0.75);
+          ctx.beginPath();
+          ctx.ellipse(
+            originX + branch.cx * scale + nx * side * w,
+            originY + branch.cy * scale + ny * side * w,
+            w * 1.5,
+            w * 0.7,
+            0,
+            0,
+            Math.PI * 2,
+          );
+          ctx.fill();
+        }
         ctx.globalAlpha = 1;
       }
 
@@ -351,6 +414,62 @@ export default function TreeCanvas({
             originX + (fly.x + drift) * scale,
             originY + fly.y * scale,
             0.6 * scale,
+            0,
+            Math.PI * 2,
+          );
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      // --- drifting petals and falling leaves ------------------------------
+      // Autumn drops the occasional leaf for everyone; the blossom storm is the
+      // level-25 `seasons` trait and only blows in spring. Both are the same
+      // drifters, so a season change costs a colour and nothing else.
+      const hasSeasons = level >= SEASONS_TRAIT_LEVEL;
+      const drifterColor =
+        palette.season === 'autumn'
+          ? palette.leafAlt
+          : hasSeasons && palette.season === 'spring' && palette.blossom
+            ? palette.blossom
+            : null;
+      if (drifterColor) {
+        // Three at a time in autumn - "occasional" is the point, and a constant
+        // fall reads as the tree dying rather than as the season.
+        const shown = palette.season === 'autumn' ? 3 : decor.drifters.length;
+        ctx.fillStyle = drifterColor;
+        ctx.globalAlpha = 0.75;
+        for (let i = 0; i < shown; i += 1) {
+          const drifter = decor.drifters[i];
+          const fall = still ? 0 : (t * 0.0055 * drifter.speed) % 130;
+          const y = (((drifter.y + fall) % 130) + 130) % 130 - 15;
+          if (y > 100 || y < 0) continue;
+          const swayX = still ? 0 : Math.sin(t * 0.0012 + drifter.phase * 6.283) * drifter.drift * 3;
+          ctx.save();
+          ctx.translate(((drifter.x + swayX) / 100) * width, (y / 100) * height);
+          ctx.rotate(still ? 0 : t * 0.0016 + drifter.phase * 6.283);
+          ctx.beginPath();
+          ctx.ellipse(0, 0, drifter.size * scale, drifter.size * 0.5 * scale, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      // --- the level-up column of light (§8.4) -----------------------------
+      if (celebration && !still) {
+        const columnX = originX + TRUNK_X * scale;
+        ctx.fillStyle = palette.light;
+        for (let i = 0; i < 22; i += 1) {
+          const phase = (i / 22 + t * 0.00022) % 1;
+          const y = pivotY - phase * (pivotY - originY);
+          const spread = (1 - phase) * 9 * scale;
+          ctx.globalAlpha = 0.5 * Math.sin(phase * Math.PI);
+          ctx.beginPath();
+          ctx.arc(
+            columnX + Math.sin(t * 0.0015 + i) * spread,
+            y,
+            Math.max(0.7, 0.7 * scale),
             0,
             Math.PI * 2,
           );
@@ -425,7 +544,7 @@ export default function TreeCanvas({
       intersectionObserver.disconnect();
       document.removeEventListener('visibilitychange', onVisibility);
     };
-  }, [scene, palette, decor, reveal, reducedMotion]);
+  }, [scene, palette, decor, reveal, reducedMotion, celebration, bloomFruit, level]);
 
   return (
     <canvas

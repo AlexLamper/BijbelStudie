@@ -237,6 +237,26 @@ Bark is `#4A3A2E`, lit edge `#6B5442`; night desaturates everything by mixing
 25 % toward `#1B2340`. Wilt mixes the leaf colours `(1 - health) * 0.4` toward
 `#8A8F7A`.
 
+The palette carries its own `season`, so a renderer can draw §7.1's seasonal
+events without re-deriving the month.
+
+### 7.1 Seasonal and celebration layers (renderer-only)
+
+Deliberately **not** in the generator: they would make the geometry — and so
+the parity fixtures — depend on the clock. Each is derived from data the
+renderer already has, so both platforms stay in step without new scene fields.
+
+| Layer | When | How |
+|---|---|---|
+| Falling leaves | autumn, any level | 3 of the 14 seeded drifters, tumbling down the viewport. "Occasional" is the point: a constant fall reads as the tree dying. |
+| Blossom storm | spring, `seasons` trait | all 14 drifters, tinted `blossom` |
+| Snow load | winter, `seasons` trait | a white cap on the upward-facing side of every branch at `depth >= maxDepth - 2` |
+| Column of light | during a level-up | 22 motes rising from the trunk base to the top of the canopy |
+| Fruit bloom | a level-up that unlocked a fruit | the newest fruit (`fruitCount(level) - 1`) swells on a slow sine under a radial `light` glow |
+
+Drifters come from the `"<seed>:decor"` stream, which is separate from the
+tree's own — adding one can never shift a branch.
+
 ## 8. Parity fixtures
 
 Given `seed = "65f0c1a2b3c4d5e6f7a8b9c0"`, `health = 1`, both sides assert the

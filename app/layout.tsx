@@ -12,6 +12,7 @@ import { PrefetchProvider } from "../components/providers/prefetch-provider";
 import { StudyStyleProvider } from "../components/providers/study-style-provider";
 import AnalyticsTracker from "../components/providers/AnalyticsTracker";
 import { JsonLd } from "../components/seo/JsonLd";
+import EnvironmentBanner from "../components/layout/EnvironmentBanner";
 import {
   BASE_URL,
   SITE_NAME,
@@ -224,6 +225,10 @@ export default async function RootLayout({
             </PrefetchProvider>
           </StudyStyleProvider>
         </ThemeProvider>
+        {/* Renders nothing in production. On a preview it names the branch and
+            the database, so a test deployment can never be mistaken for the
+            live site. */}
+        <EnvironmentBanner />
         <SpeedInsights />
       </body>
     </html>
