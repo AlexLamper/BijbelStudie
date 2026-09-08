@@ -42,6 +42,8 @@ export const EVENTS = {
       "nav", "direct", "landing", "unknown",
       // Mobile entry points.
       "app_profile", "app_resources", "app_study", "app_ai",
+      // A Pro tile in the Levensboom studio (app) - the cosmetics upsell.
+      "app_levensboom",
     ],
     logged_in: ["yes", "no"],
     platform: PLATFORM,
