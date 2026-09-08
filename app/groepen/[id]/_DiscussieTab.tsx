@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useRef } from "react"
 import { Send, Reply, Trash2, ChevronDown, BookOpen, X } from "lucide-react"
+import MiniTreeAvatar from "../../../components/levensboom/MiniTreeAvatar"
+import type { PublicLevensboomCard } from "../../../lib/levensboom/publicCard"
 
 type MsgType = "bericht" | "gebedsverzoek" | "aankondiging"
 
@@ -17,20 +19,15 @@ interface Message {
   replyCount: number
   parentId: string | null
   deletedAt: string | null
-  userId: { _id: string; name: string; image?: string } | null
+  userId: { _id: string; name: string; image?: string; levensboom?: PublicLevensboomCard | null } | null
   createdAt: string
 }
 
 const EMOJI_PICKER = ["🙏", "❤️", "🔥", "👍", "😢", "🤔", "✨", "🙌"]
 
-function Avatar({ name, size = 8 }: { name: string; size?: number }) {
-  const initials = (name || "?").split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
-  return (
-    <div className={`w-${size} h-${size} rounded-full flex items-center justify-center text-white font-bold flex-shrink-0`}
-      style={{ backgroundColor: "#0D9488", fontSize: size <= 7 ? 10 : 12 }}>
-      {initials}
-    </div>
-  )
+/** The author's tree at row size; initials only when there is no tree to show. */
+function Avatar({ name, size = 8, card }: { name: string; size?: number; card?: PublicLevensboomCard | null }) {
+  return <MiniTreeAvatar card={card} name={name || "?"} size={size * 4} />
 }
 
 function relativeTime(iso: string) {
@@ -154,7 +151,7 @@ function ReplyThread({
     <div className="ml-10 mt-2 space-y-2 border-l-2 border-gray-100 dark:border-border pl-3">
       {replies.map(r => (
         <div key={r._id} className="flex items-start gap-2">
-          {r.userId ? <Avatar name={r.userId.name} size={6} /> : <div className="w-6 h-6 rounded-full bg-gray-200" />}
+          {r.userId ? <Avatar name={r.userId.name} size={6} card={r.userId.levensboom} /> : <div className="w-6 h-6 rounded-full bg-gray-200" />}
           <div className="flex-1 min-w-0">
             {r.deletedAt ? (
               <p className="text-xs text-gray-400 dark:text-muted-foreground italic">Dit bericht is verwijderd.</p>
@@ -206,7 +203,7 @@ function MessageCard({
       ) : (
         <>
           <div className="flex items-start gap-3">
-            {msg.userId ? <Avatar name={msg.userId.name} size={8} /> : <div className="w-8 h-8 rounded-full bg-gray-200" />}
+            {msg.userId ? <Avatar name={msg.userId.name} size={8} card={msg.userId.levensboom} /> : <div className="w-8 h-8 rounded-full bg-gray-200" />}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap mb-1">
                 <span className="text-sm font-semibold text-gray-900 dark:text-foreground">{msg.userId?.name}</span>

@@ -5,6 +5,7 @@ import connectMongoDB from "../../../../../lib/mongodb"
 import StudyGroup from "../../../../../models/StudyGroup"
 import Note from "../../../../../models/Note"
 import User from "../../../../../models/User"
+import { PUBLIC_CARD_FIELDS, publicLevensboomCard, type PublicCardSource } from "../../../../../lib/levensboom/publicCard"
 
 export async function GET(
   _req: NextRequest,
@@ -29,11 +30,23 @@ export async function GET(
   if (!isMember) return NextResponse.json({ error: "Geen toegang" }, { status: 403 })
 
   // Notes shared with this group - stored with groupId field
-  const notes = await Note.find({ groupId: id })
-    .populate("userId", "name image")
+  const notes = (await Note.find({ groupId: id })
+    .populate("userId", `name image ${PUBLIC_CARD_FIELDS}`)
     .sort({ createdAt: -1 })
     .limit(50)
-    .lean()
+    .lean()) as Array<{ userId?: unknown }>
 
-  return NextResponse.json({ notes })
+  // The author as the group sees them: name, image and the Levensboom card;
+  // the raw fields the card is derived from never leave.
+  const shaped = notes.map((note) => {
+    const user = note.userId
+    if (!user || typeof user !== "object" || !("_id" in user)) return note
+    const doc = user as PublicCardSource & { name?: string; image?: string }
+    return {
+      ...note,
+      userId: { _id: doc._id, name: doc.name, image: doc.image, levensboom: publicLevensboomCard(doc) },
+    }
+  })
+
+  return NextResponse.json({ notes: shaped })
 }

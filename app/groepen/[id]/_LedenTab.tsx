@@ -2,9 +2,13 @@
 
 import { useState } from "react"
 import { Check, Copy, Shield, UserMinus } from "lucide-react"
+import MiniTreeAvatar from "../../../components/levensboom/MiniTreeAvatar"
+import type { PublicLevensboomCard } from "../../../lib/levensboom/publicCard"
 
 interface Member {
   _id: string; name: string; image?: string
+  /** The member's Levensboom, from the group API. Null when switched off. */
+  levensboom?: PublicLevensboomCard | null
 }
 interface GroupMember {
   userId: Member; role: string; joinedAt: string
@@ -14,14 +18,9 @@ interface Group {
   inviteCode?: string; members: GroupMember[]
 }
 
-function Avatar({ name, size = 9 }: { name: string; size?: number }) {
-  const initials = name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
-  return (
-    <div className={`w-${size} h-${size} rounded-full flex items-center justify-center text-white font-bold flex-shrink-0`}
-      style={{ backgroundColor: "#0D9488", fontSize: size <= 8 ? 11 : 13 }}>
-      {initials}
-    </div>
-  )
+/** The member's tree at row size; initials only when there is no tree to show. */
+function Avatar({ name, size = 9, card }: { name: string; size?: number; card?: PublicLevensboomCard | null }) {
+  return <MiniTreeAvatar card={card} name={name} size={size * 4} showLevel={size >= 9} />
 }
 
 function formatDate(iso: string) {
@@ -123,7 +122,7 @@ export default function LedenTab({
             const loadKey = m.userId._id
             return (
               <div key={m.userId._id} className="flex items-center gap-3 px-4 py-3">
-                <Avatar name={m.userId.name} size={9} />
+                <Avatar name={m.userId.name} size={9} card={m.userId.levensboom} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-semibold text-gray-900 dark:text-foreground truncate">

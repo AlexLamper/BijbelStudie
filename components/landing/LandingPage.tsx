@@ -15,6 +15,10 @@ import { HOME_FAQS } from "../../lib/content/homeFaq"
 import { HOW_IT_WORKS_STEPS } from "../../lib/content/howItWorks"
 import { ALL_STUDIES } from "../../lib/bookStudies"
 import { PLANS, euro } from "../../lib/pricing"
+import LandingTree from "./LandingTree"
+import { renderTreeSvg } from "../../lib/levensboom/svg"
+import { stageForLevel } from "../../lib/levensboom/stages"
+import { catalogItem } from "../../lib/levensboom/catalog"
 
 /* ─── Design tokens ──────────────────────────────────────────── */
 const T = {
@@ -319,6 +323,22 @@ function BibleStudyIllustration() {
         <span className="text-[11px] font-semibold" style={{ color: T.text }}>Notitie opgeslagen</span>
       </div>
 
+      {/* ── Floating Levensboom chip (top-right): the avatar that grows with
+          what you read, drawn from the same generator the product uses. ── */}
+      <div className="absolute -top-5 -right-4 bg-white rounded-full border pl-1 pr-3 py-1 hidden sm:flex items-center gap-2"
+        style={{ borderColor: T.border, boxShadow: "0 10px 24px -12px rgba(15,23,42,0.28)" }}>
+        <LandingTree
+          svg={renderTreeSvg({ seed: LANDING_SEED, level: 7, frac: 0.6, species: "eik", scene: "waterbeken", framing: "portrait", width: 64, height: 64, rootAttributes: 'aria-hidden="true"' })}
+          seed={LANDING_SEED}
+          level={7}
+          species="eik"
+          framing="portrait"
+          className="h-7 w-7 overflow-hidden rounded-full ring-2 ring-teal-600/40"
+        />
+        <span className="text-[11px] font-semibold" style={{ color: T.text }}>Jonge boom</span>
+        <span className="text-[11px]" style={{ color: T.muted }}>niveau 7</span>
+      </div>
+
       {/* ── Floating streak pill (bottom-right) ── */}
       <div className="absolute -bottom-4 -right-4 bg-white rounded-full border px-3 py-1.5 hidden sm:flex items-center gap-1.5"
         style={{ borderColor: T.border, boxShadow: "0 10px 24px -12px rgba(15,23,42,0.28)" }}>
@@ -400,6 +420,9 @@ function AppleLogo({ className }: { className?: string }) {
     </svg>
   )
 }
+
+/** One fixed seed for every tree on this page, so the build output is stable. */
+const LANDING_SEED = "bijbelstudie-levensboom"
 
 /* ─── Hero ───────────────────────────────────────────────────── */
 function Hero() {
@@ -1427,6 +1450,102 @@ function CTA() {
   )
 }
 
+
+/* ─── Levensboom ─────────────────────────────────────────────── */
+/**
+ * The avatar as a section: five stages of one tree growing in as they scroll
+ * into view, then three trees the reader can grow into. Every picture here is
+ * the product's own generator, rendered to SVG at build time and swapped for
+ * the live canvas on screen - so the page keeps its static HTML and the trees
+ * still move.
+ */
+const LEVENSBOOM_STAGES = [1, 3, 6, 10, 18] as const
+const LEVENSBOOM_EXAMPLES = [
+  { species: "olijf", scene: "meer", animal: "vogel", level: 12 },
+  { species: "palm", scene: "woestijn", animal: "schaap", level: 10 },
+  { species: "ceder", scene: "sterrennacht", animal: "vuurvliegjes", level: 16 },
+] as const
+
+function LevensboomSection() {
+  return (
+    <section id="levensboom" className={SECTION_Y} style={{ backgroundColor: T.card, ...EDGE }}>
+      <div className={SHELL}>
+        <SectionHeader
+          label="Jouw levensboom"
+          title="Een boom die meegroeit met wat je leest"
+          subtitle="Elke lezer plant een boom. Hij begint als kiem en groeit met elke les, elk hoofdstuk en elke aantekening - op de website en in de app dezelfde boom."
+        />
+
+        <FadeUp className="mt-10">
+          <div className="grid grid-cols-5 gap-2 sm:gap-4">
+            {LEVENSBOOM_STAGES.map((level, index) => {
+              const stage = stageForLevel(level)
+              return (
+                <div key={level} className="flex flex-col items-center text-center">
+                  <LandingTree
+                    svg={renderTreeSvg({ seed: LANDING_SEED, level, frac: 0.6, species: "eik", scene: "waterbeken", framing: "portrait", width: 200, height: 200, rootAttributes: 'aria-hidden="true"' })}
+                    seed={LANDING_SEED}
+                    level={level}
+                    species="eik"
+                    framing="portrait"
+                    growIn
+                    delayMs={index * 220}
+                    className="aspect-square w-full overflow-hidden rounded-full ring-1 ring-black/5"
+                    ariaLabel={`${stage.name}, niveau ${level}`}
+                  />
+                  <p className="mt-3 text-[12px] sm:text-sm font-bold leading-tight" style={{ color: T.text }}>
+                    {stage.name}
+                  </p>
+                  <p className="text-[11px] sm:text-xs" style={{ color: T.muted }}>
+                    niveau {level}{stage.to !== null && stage.to !== level ? `–${stage.to}` : stage.to === null ? "+" : ""}
+                  </p>
+                </div>
+              )
+            })}
+          </div>
+        </FadeUp>
+
+        <FadeUp className="mt-12">
+          <div className="grid gap-4 sm:grid-cols-3">
+            {LEVENSBOOM_EXAMPLES.map((example) => {
+              const species = catalogItem("species", example.species)
+              const scene = catalogItem("scene", example.scene)
+              return (
+                <div key={example.species} className="lp-card overflow-hidden rounded-2xl">
+                  <LandingTree
+                    svg={renderTreeSvg({ seed: LANDING_SEED, level: example.level, frac: 0.6, species: example.species, scene: example.scene, framing: "scene", width: 480, height: 300, rootAttributes: 'aria-hidden="true"' })}
+                    seed={LANDING_SEED}
+                    level={example.level}
+                    species={example.species}
+                    scene={example.scene}
+                    animal={example.animal}
+                    framing="scene"
+                    className="aspect-[16/10] w-full"
+                    ariaLabel={`${species?.name ?? ""} in ${scene?.name ?? ""}`}
+                  />
+                  <div className="p-4">
+                    <p className="text-sm font-bold" style={{ color: T.text }}>
+                      {species?.name}
+                      <span className="font-normal" style={{ color: T.muted }}> · {scene?.name}</span>
+                    </p>
+                    <p className="mt-1 text-xs leading-relaxed" style={{ color: T.muted }}>
+                      {species?.blurb} {species?.verse ? `(${species.verse})` : ""}
+                    </p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+          <p className="mt-6 text-center text-sm" style={{ color: T.muted }}>
+            Zes boomsoorten, acht omgevingen en dieren die je ontgrendelt met je voortgang. Een ceder,
+            de hof en de sterrennacht zijn er voor Pro-leden.
+          </p>
+        </FadeUp>
+      </div>
+    </section>
+  )
+}
+
 /* ─── Page ───────────────────────────────────────────────────── */
 export default function LandingPage() {
   return (
@@ -1441,6 +1560,7 @@ export default function LandingPage() {
         <Hero />
         <StudyDiscovery />
         <Showcase />
+        <LevensboomSection />
         <Features />
         <BibleLibrary />
         <HowItWorks />

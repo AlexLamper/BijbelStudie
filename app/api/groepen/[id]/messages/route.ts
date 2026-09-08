@@ -6,6 +6,21 @@ import StudyGroup from "../../../../../models/StudyGroup"
 import GroupMessage from "../../../../../models/GroupMessage"
 import User from "../../../../../models/User"
 import mongoose from "mongoose"
+import { PUBLIC_CARD_FIELDS, publicLevensboomCard, type PublicCardSource } from "../../../../../lib/levensboom/publicCard"
+
+/**
+ * The author as the group sees them: name, image and the Levensboom card.
+ * The raw fields the card is derived from (xp, streak, Pro) never leave.
+ */
+function publicAuthor(user: unknown) {
+  if (!user || typeof user !== "object" || !("_id" in user)) return user ?? null
+  const doc = user as PublicCardSource & { name?: string; image?: string }
+  return { _id: doc._id, name: doc.name, image: doc.image, levensboom: publicLevensboomCard(doc) }
+}
+
+const PUBLIC_CARD_PROJECTION = Object.fromEntries(
+  ["name", "image", ...PUBLIC_CARD_FIELDS.split(" ")].map((field) => [field, 1]),
+)
 
 async function getAuth(email: string) {
   const user = await User.findOne({ email }).lean() as unknown as { _id: mongoose.Types.ObjectId } | null
@@ -83,7 +98,7 @@ export async function GET(
           from: "users",
           localField: "userId",
           foreignField: "_id",
-          pipeline: [{ $project: { name: 1, image: 1 } }],
+          pipeline: [{ $project: PUBLIC_CARD_PROJECTION }],
           as: "_user",
         },
       },
@@ -94,7 +109,7 @@ export async function GET(
   ])
 
   return NextResponse.json({
-    messages,
+    messages: (messages as Array<{ userId?: unknown }>).map((m) => ({ ...m, userId: publicAuthor(m.userId) })),
     pagination: { page, totalPages: Math.ceil(totalCount / limit), totalCount },
   })
 }
@@ -141,9 +156,12 @@ export async function POST(
     parentId: parentId ?? null,
   })
 
-  const populated = await GroupMessage.findById(msg._id)
-    .populate("userId", "name image")
-    .lean()
+  const populated = (await GroupMessage.findById(msg._id)
+    .populate("userId", `name image ${PUBLIC_CARD_FIELDS}`)
+    .lean()) as { userId?: unknown } | null
 
-  return NextResponse.json({ message: { ...populated, replyCount: 0 } }, { status: 201 })
+  return NextResponse.json(
+    { message: { ...populated, userId: publicAuthor(populated?.userId), replyCount: 0 } },
+    { status: 201 },
+  )
 }
