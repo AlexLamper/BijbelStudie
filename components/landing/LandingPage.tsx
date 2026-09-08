@@ -2,20 +2,21 @@ import Link from "next/link"
 import Image from "next/image"
 import {
   BookOpen, Library,
-  ArrowRight, Check, ChevronDown, Users,
-  MessageSquare,
+  ArrowRight, Check,
 } from "lucide-react"
 import { Footer } from "./footer"
 import { FAQItem } from "./FAQItem"
 import { ScrollEffects } from "./ScrollEffects"
 import { StudyDiscovery } from "./StudyDiscovery"
 import { HOME_FAQS } from "../../lib/content/homeFaq"
-import { HOW_IT_WORKS_STEPS } from "../../lib/content/howItWorks"
+import { opstandingLessons } from "../../lib/data/study-lessons/opstanding"
 import { ALL_STUDIES } from "../../lib/bookStudies"
 import { PLANS, euro } from "../../lib/pricing"
 import LandingTree from "./LandingTree"
 import HeroLevensboom from "./HeroLevensboom"
 import LevensboomGroeiDemo from "./LevensboomGroeiDemo"
+import StudyFlowDemo, { type DemoLesson } from "./StudyFlowDemo"
+import CountUp from "./CountUp"
 import { renderTreeSvg } from "../../lib/levensboom/svg"
 import { STAGES } from "../../lib/levensboom/stages"
 import { CATALOG, catalogItem } from "../../lib/levensboom/catalog"
@@ -248,6 +249,20 @@ function AppleLogo({ className }: { className?: string }) {
 /** One fixed seed for every tree on this page, so the build output is stable. */
 const LANDING_SEED = "bijbelstudie-levensboom"
 
+/**
+ * The four facts under the hero copy. Every figure is counted from the data
+ * the page is built from, so none of them is a claim to defend: the studies
+ * and lessons from the catalogue, the translations and commentaries from the
+ * library section further down.
+ */
+const LESSONS_TOTAL = ALL_STUDIES.reduce((sum, study) => sum + study.lessons.length, 0)
+const HERO_STATS = [
+  { value: ALL_STUDIES.length, label: "begeleide bijbelstudies", count: true },
+  { value: LESSONS_TOTAL, label: "lessen van een kwartier", count: true },
+  { value: 4, label: "Nederlandse vertalingen", count: false },
+  { value: 4, label: "commentaren, per vers", count: false },
+]
+
 /* ─── Hero ───────────────────────────────────────────────────── */
 function Hero() {
   return (
@@ -379,28 +394,28 @@ function Hero() {
             </a>
           </div>
 
-          {/* Was a row of five icon-and-label chips. Every one of those icons was
-              decorative - a star next to "gratis", sparkles next to "AI" - and
-              five chips wrapped to three ragged lines on a laptop. One quiet
-              line of facts under a rule does the same job and looks like a
-              product rather than a banner. */}
-          <div
-            className="mt-8 border-t pt-6"
+          {/* Four counted facts under a rule. The two catalogue figures count
+              up the first time they scroll into view; the server renders the
+              final number, so the served HTML is complete without the bundle. */}
+          <ul
+            className="mt-8 grid grid-cols-2 gap-x-6 gap-y-5 border-t pt-6 sm:grid-cols-4"
             style={{ borderColor: T.border }}
+            aria-label="In cijfers"
           >
-            <p
-              className="text-[0.8125rem] leading-relaxed"
-              style={{ color: T.muted }}
-            >
-              {[
-                `${ALL_STUDIES.length} bijbelstudies`,
-                "Bijbelcommentaren per vers",
-                "Hebreeuwse en Griekse grondtekst",
-                "AI-assistent",
-                "Ook als iOS-app",
-              ].join("  ·  ")}
-            </p>
-          </div>
+            {HERO_STATS.map(stat => (
+              <li key={stat.label}>
+                <p
+                  className="text-2xl font-extrabold leading-none tabular-nums"
+                  style={{ color: T.text, letterSpacing: "-0.02em" }}
+                >
+                  {stat.count ? <CountUp value={stat.value} /> : stat.value}
+                </p>
+                <p className="mt-1.5 text-xs leading-snug" style={{ color: T.muted }}>
+                  {stat.label}
+                </p>
+              </li>
+            ))}
+          </ul>
         </div>
 
         {/* The product's face: a grown levensboom at dusk that grows in from a
@@ -511,7 +526,7 @@ function BibleLibrary() {
   ]
 
   return (
-    <section id="bibliotheek" className={`${SECTION_Y} scroll-mt-16`} style={{ backgroundColor: T.light, ...EDGE }}>
+    <section id="bibliotheek" className={`${SECTION_Y} scroll-mt-16`} style={{ backgroundColor: T.card, ...EDGE }}>
       <div className={SHELL}>
         <SectionHeader
           label="Bibliotheek"
@@ -621,290 +636,84 @@ function BibleLibrary() {
   )
 }
 
-/* ─── Showcase: see the real product in action ───────────────── */
-const HEBREW_STACK = "'SBL Hebrew','Ezra SIL','David CLM','Frank Ruhl CLM','Times New Roman','Noto Serif Hebrew',serif"
-
-function GrondtekstMockup() {
-  // Genesis 1:1 - בְּרֵאשִׁית בָּרָא אֱלֹהִים
-  const words = [
-    { h: "בְּרֵאשִׁית",  t: "bere'shit", e: "in het begin", s: "H7225" },
-    { h: "בָּרָא",        t: "bara",      e: "schiep",        s: "H1254" },
-    { h: "אֱלֹהִים",      t: "Elohim",    e: "God",           s: "H430"  },
-  ]
-  return (
-    <div className="rounded-2xl overflow-hidden border bg-white"
-      style={{ borderColor: T.border, boxShadow: SHADOW.raised }}>
-      {/* Header bar */}
-      <div className="h-11 px-4 flex items-center justify-between border-b"
-        style={{ borderColor: T.border, backgroundColor: T.light }}>
-        <div className="flex items-center gap-2 text-xs">
-          <span className="font-semibold" style={{ color: T.text }}>Genesis 1:1</span>
-          <span style={{ color: T.muted }}>·</span>
-          <span style={{ color: T.muted }}>Grondtekst</span>
-          <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
-            style={{ backgroundColor: "rgba(13,148,136,0.10)", color: T.tealDeep }}>
-            Hebreeuws
-          </span>
-        </div>
-        <span className="text-[10px] tabular-nums" style={{ color: T.muted }}>OT</span>
-      </div>
-
-      {/* Intro */}
-      <div className="px-5 pt-4 pb-3 border-b" style={{ borderColor: T.border + "80" }}>
-        <p className="text-[11px] leading-relaxed" style={{ color: T.muted }}>
-          De originele woorden van Genesis 1 in het Hebreeuws, met transliteratie,
-          betekenis en Strong-nummer.
-        </p>
-      </div>
-
-      {/* Word cards */}
-      <div className="px-5 py-5">
-        <div className="flex items-center gap-2 mb-3">
-          <span className="inline-flex items-center justify-center min-w-[24px] h-5 px-1.5 rounded-full text-[10px] font-bold tabular-nums"
-            style={{ backgroundColor: "rgba(13,148,136,0.10)", color: T.tealDeep }}>
-            1
-          </span>
-          <span className="text-[10px] uppercase tracking-wider" style={{ color: T.muted }}>
-            3 woorden
-          </span>
-        </div>
-        <div className="flex flex-wrap gap-x-1 gap-y-3 justify-end" dir="rtl">
-          {words.map(w => (
-            <div key={w.s} className="flex flex-col items-center text-center min-w-[64px] px-2 py-1.5 rounded-md hover:bg-teal-50 transition-colors"
-              dir="ltr">
-              <div className="text-2xl leading-snug font-medium"
-                dir="rtl" lang="he"
-                style={{ color: T.text, fontFamily: HEBREW_STACK }}>
-                {w.h}
-              </div>
-              <div className="text-[10px] italic mt-0.5" style={{ color: T.muted }}>{w.t}</div>
-              <div className="text-[11px] mt-0.5 leading-tight" style={{ color: T.text }}>{w.e}</div>
-              <span className="mt-1 text-[9.5px] tabular-nums tracking-wide px-1.5 py-0.5 rounded font-semibold inline-flex items-center gap-0.5"
-                style={{ backgroundColor: "rgba(13,148,136,0.10)", color: T.tealDeep }}>
-                {w.s}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
+/* ─── Zo werkt een les ───────────────────────────────────────── */
+/**
+ * The lesson the demo plays: les 1 of "De opstanding van Jezus", built from the
+ * same authored prose the real flow serves (lib/data/study-lessons/opstanding)
+ * and the Statenvertaling text of Johannes 20:1-3. Assembled on the server at
+ * build time - the page is static - so the browser receives finished copy and
+ * an SVG of the tree, and only the playback runs on the client.
+ */
+function demoLesson(): DemoLesson {
+  const authored = opstandingLessons[1]
+  return {
+    studyTitle: "De opstanding van Jezus",
+    lessonsTotal: 3,
+    lesson: { day: 1, title: "Het lege graf", reference: "Johannes 20:1–18", minutes: 12 },
+    intro: {
+      headline: authored.intro?.headline ?? "Het lege graf",
+      body: authored.intro?.body ?? [],
+      watchFor: authored.intro?.watchFor ?? [],
+    },
+    readingCue: authored.word?.readingCue ?? "Lees rustig.",
+    translation: "Statenvertaling",
+    verses: [
+      { n: 1, text: "En op den eersten dag der week ging Maria Magdalena vroeg, als het nog duister was, naar het graf; en zag den steen van het graf weggenomen." },
+      { n: 2, text: "Zij liep dan, en kwam tot Simon Petrus en tot den anderen discipel, welken Jezus liefhad, en zeide tot hen: Zij hebben den Heere weggenomen uit het graf, en wij weten niet, waar zij Hem gelegd hebben." },
+      { n: 3, text: "Petrus dan ging uit, en de andere discipel, en zij kwamen tot het graf." },
+    ],
+    depth: {
+      body: authored.depth?.body ?? [],
+      terms: authored.depth?.terms ?? [],
+    },
+    greek: [
+      { word: "μιᾷ", translit: "mia", meaning: "eerste", strong: "G1520" },
+      { word: "σαββάτων", translit: "sabbatōn", meaning: "van de week", strong: "G4521" },
+      { word: "πρωΐ", translit: "prōi", meaning: "vroeg", strong: "G4404" },
+      { word: "σκοτίας", translit: "skotias", meaning: "duisternis", strong: "G4653" },
+      { word: "μνημεῖον", translit: "mnēmeion", meaning: "graf", strong: "G3419" },
+      { word: "λίθον", translit: "lithon", meaning: "steen", strong: "G3037" },
+    ],
+    reflection: {
+      question: authored.reflection?.question ?? "",
+      prompts: authored.reflection?.prompts ?? [],
+      placeholder: authored.reflection?.placeholder ?? "Schrijf op wat je opviel...",
+      sample: "Maria zoekt een lichaam en vindt een stem. Ik herken Hem ook vaker in wat ik lees dan in wat ik zie.",
+    },
+    quiz: {
+      question: "Wie komt in Johannes 20 als eerste bij het graf?",
+      answers: ["Maria Magdalena", "Simon Petrus", "De andere discipel", "Thomas"],
+      correct: 0,
+    },
+    xp: 25,
+    nextLesson: { day: 2, title: "\u201cMijn Heer en mijn God\u201d", reference: "Johannes 20:19–31" },
+    tree: {
+      svg: renderTreeSvg({ seed: LANDING_SEED, level: 7, frac: 0.7, species: "eik", framing: "portrait", width: 176, height: 176, rootAttributes: 'aria-hidden="true"' }),
+      seed: LANDING_SEED,
+      level: 7,
+      species: "eik",
+    },
+  }
 }
 
-function CommentaryMockup() {
+/**
+ * The product, doing what it does. This replaced two static mockups
+ * (grondtekst, commentaar) and a three-step "hoe het werkt": one lesson that
+ * plays itself shows the same things - the Greek, the commentary, the note,
+ * the quiz, the XP on the tree - in the order a reader meets them.
+ */
+function StudyFlowSection() {
   return (
-    <div className="rounded-2xl overflow-hidden border bg-white"
-      style={{ borderColor: T.border, boxShadow: SHADOW.raised }}>
-      {/* Header */}
-      <div className="h-11 px-4 flex items-center justify-between border-b"
-        style={{ borderColor: T.border, backgroundColor: T.light }}>
-        <span className="text-xs font-medium" style={{ color: T.muted }}>Commentaarbron</span>
-        <div className="text-xs font-semibold flex items-center gap-1.5 px-2.5 py-1 rounded-md border bg-white"
-          style={{ borderColor: T.border, color: T.text }}>
-          KingComments (NL)
-          <ChevronDown className="h-3 w-3" style={{ color: T.muted }} />
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="px-5 py-5">
-        <div className="inline-flex items-center gap-1.5 mb-3">
-          <span className="text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full"
-            style={{ backgroundColor: "rgba(13,148,136,0.10)", color: T.tealDeep }}>
-            Vers 1
-          </span>
-        </div>
-        <p className="text-sm leading-relaxed mb-3" style={{ color: T.text }}>
-          Genesis is rond 1450 v.Chr. geschreven door Mozes, in de Sinaï woestijn.
-        </p>
-        <p className="text-sm leading-relaxed mb-3" style={{ color: T.text }}>
-          In het Hebreeuws heet dit boek <em style={{ color: T.tealText, fontStyle: "italic" }}>Bereshith</em>, dat
-          betekent &apos;in het begin&apos;, naar de eerste woorden waarmee dit boek begint. In het Grieks heet het Genesis, dat
-          &apos;geboorte&apos;, of &apos;ontstaan&apos;, of &apos;wording&apos; betekent.
-        </p>
-        <p className="text-sm leading-relaxed" style={{ color: T.text }}>
-          Het is terecht het boek van het begin. We vinden er de oorsprong van alle dingen in. Dit boek vertelt ons onder
-          andere over het ontstaan van de hemel en de aarde, de instelling van huwelijk en gezin, de eerste zonde en als
-          gevolg daarvan de dood, het eerste offer, het oordeel, het ontstaan van volken, de oorsprong van het volk Israël,
-          het verbond en de besnijdenis.
-        </p>
-
-        {/* Subtle fade hint that there's more */}
-        <div className="mt-4 h-8 -mb-5 bg-gradient-to-t from-white to-transparent" />
-      </div>
-
-      {/* Author footer */}
-      <div className="px-5 py-3 border-t flex items-center gap-2.5"
-        style={{ borderColor: T.border, backgroundColor: T.light }}>
-        <div className="h-7 w-7 rounded-full flex items-center justify-center flex-shrink-0"
-          style={{ backgroundColor: T.tealLight }}>
-          <Library className="h-3.5 w-3.5" style={{ color: T.teal }} />
-        </div>
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold leading-none" style={{ color: T.text }}>KingComments</p>
-          <p className="text-[10px] mt-0.5" style={{ color: T.muted }}>Ger de Koning · vers-voor-vers</p>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-/** The eyebrow pill that opens each showcase block. */
-function Eyebrow({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full"
-      style={{ backgroundColor: "rgba(13,148,136,0.10)" }}>
-      <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: T.teal }} />
-      <p className="text-[11px] font-bold uppercase" style={{ color: T.tealDeep, letterSpacing: "0.14em" }}>
-        {children}
-      </p>
-    </div>
-  )
-}
-
-function ShowcaseBlock({
-  eyebrow, title, body, bullets, mockup, flip = false,
-}: {
-  eyebrow: string
-  title: string
-  body: string
-  bullets: string[]
-  mockup: React.ReactNode
-  flip?: boolean
-}) {
-  return (
-    <div className="grid lg:grid-cols-2 items-center gap-10 lg:gap-16">
-      <FadeUp className={flip ? "lg:order-2" : undefined}>
-        <Eyebrow>{eyebrow}</Eyebrow>
-        <h3
-          className="mt-4 font-extrabold text-balance"
-          style={{ color: T.text, fontSize: TYPE.h3, lineHeight: 1.2, letterSpacing: "-0.02em" }}
-        >
-          {title}
-        </h3>
-        <p className="mt-4 leading-relaxed" style={{ color: T.muted, fontSize: "1rem" }}>
-          {body}
-        </p>
-        <ul className="mt-6 space-y-3">
-          {bullets.map(line => (
-            <li key={line} className="flex items-start gap-3 text-sm leading-relaxed" style={{ color: T.text }}>
-              <Check className="h-4 w-4 mt-0.5 flex-shrink-0" style={{ color: T.teal }} />
-              {line}
-            </li>
-          ))}
-        </ul>
-      </FadeUp>
-
-      <FadeUp className={flip ? "lg:order-1" : undefined}>
-        <div className="relative">
-          {/* Ambient glow */}
-          <div aria-hidden className="absolute -inset-8 -z-10"
-            style={{ background: "radial-gradient(ellipse 60% 70% at 50% 50%, rgba(13,148,136,0.10), transparent 70%)" }} />
-          {mockup}
-        </div>
-      </FadeUp>
-    </div>
-  )
-}
-
-function Showcase() {
-  return (
-    <section id="in-actie" className={`${SECTION_Y} scroll-mt-16`} style={{ backgroundColor: T.card, ...EDGE }}>
+    <section id="in-actie" className={`${SECTION_Y} scroll-mt-16`} style={{ backgroundColor: T.light, ...EDGE }}>
       <div className={SHELL}>
         <SectionHeader
-          label="In de praktijk"
-          title="Verdiep u in de Schrift"
-          subtitle="Zie hoe BijbelStudie u helpt om de Schrift te begrijpen zoals de oorspronkelijke schrijvers het bedoelden."
+          label="Zo werkt een les"
+          title="Vijf stappen, een kwartier per dag"
+          subtitle="Elke les leidt je in dezelfde vijf stappen door één bijbelgedeelte: intro, het Woord, verdieping, reflectie en toetsing. Hieronder speelt de eerste les van De opstanding van Jezus vanzelf af - de echte les, geen schermafbeelding."
         />
-
-        <div className="space-y-[clamp(3.5rem,6vw,6rem)]">
-          <ShowcaseBlock
-            eyebrow="Grondtekst"
-            title="Lees de Bijbel in de oorspronkelijke taal"
-            body="Bestudeer elk Hebreeuws of Grieks woord met transliteratie, Nederlandse betekenis en Strong-nummers. Klik door naar de lexicon voor diepere studie - geen taalkennis vereist."
-            bullets={[
-              "Volledige Hebreeuwse OT en Griekse NT (STEPBible)",
-              "Per-woord betekenis en uitspraak",
-              "Strong-nummers met directe lexicon-koppeling",
-            ]}
-            mockup={<GrondtekstMockup />}
-          />
-
-          <ShowcaseBlock
-            flip
-            eyebrow="Commentaren"
-            title="Leer van erkende bijbelcommentaren"
-            body="Lees vers-voor-vers commentaar van Ger de Koning (KingComments), Matthew Henry, Karl August Dachsel en Heinrich Meyer - direct naast de tekst die u bestudeert."
-            bullets={[
-              "Nederlandstalige en vertaalde klassieke commentaren",
-              "Direct gekoppeld aan het vers dat u leest",
-              "Wissel eenvoudig tussen verschillende auteurs",
-            ]}
-            mockup={<CommentaryMockup />}
-          />
-        </div>
-      </div>
-    </section>
-  )
-}
-
-/* ─── How it works ───────────────────────────────────────────── */
-const STEP_ICONS = {
-  account: Users,
-  book: BookOpen,
-  commentary: MessageSquare,
-} as const
-
-function HowItWorks() {
-  // Copy lives in lib/content so the HowTo JSON-LD on app/page.tsx describes
-  // exactly these steps.
-  const steps = HOW_IT_WORKS_STEPS.map(s => ({ ...s, icon: STEP_ICONS[s.icon] }))
-
-  return (
-    <section className={SECTION_Y} style={{ backgroundColor: T.card, ...EDGE }}>
-      <div className={SHELL}>
-        <div className="mx-auto max-w-5xl">
-          <SectionHeader label="Hoe het werkt" title="In drie stappen aan de slag" />
-
-          <div className="relative">
-            {/* The connecting line fades out at both ends instead of stopping
-                at a hardcoded 16.67%. That percentage assumed a gapless
-                three-column grid, so the true column centre moved every time
-                the gutter changed and the line ended slightly off each icon;
-                a gradient has no endpoint to misalign. */}
-            <div
-              aria-hidden
-              className="hidden lg:block absolute inset-x-0 top-7 h-px z-0 pointer-events-none"
-              style={{
-                background: `linear-gradient(90deg, transparent, ${T.border} 18%, ${T.border} 82%, transparent)`,
-              }}
-            />
-
-            <div className="reveal-stagger grid lg:grid-cols-3 gap-10 lg:gap-12 relative">
-              {steps.map(({ num, icon: Icon, title, desc }) => (
-                <FadeUp key={num}>
-                  <div className="relative z-10 text-center">
-                    {/* Icon centered with white ring to cleanly mask the connecting line */}
-                    <div
-                      className="w-14 h-14 rounded-full mx-auto flex items-center justify-center"
-                      style={{
-                        backgroundColor: T.teal,
-                        boxShadow: `0 0 0 8px ${T.card}, 0 8px 20px -8px rgba(13,148,136,0.55)`,
-                      }}
-                    >
-                      <Icon className="h-6 w-6 text-white" />
-                    </div>
-                    <p className="mt-5 text-[11px] font-bold" style={{ color: T.tealText, letterSpacing: "0.16em" }}>
-                      STAP {num}
-                    </p>
-                    <h3 className="font-bold text-base mt-2 tracking-tight" style={{ color: T.text }}>{title}</h3>
-                    <p className="text-sm leading-relaxed mt-2 max-w-xs mx-auto" style={{ color: T.muted }}>{desc}</p>
-                  </div>
-                </FadeUp>
-              ))}
-            </div>
-          </div>
-        </div>
+        <FadeUp>
+          <StudyFlowDemo lesson={demoLesson()} />
+        </FadeUp>
       </div>
     </section>
   )
@@ -1273,11 +1082,10 @@ export default function LandingPage() {
       <Navbar />
       <main>
         <Hero />
-        <StudyDiscovery />
+        <StudyFlowSection />
         <LevensboomSection />
-        <Showcase />
+        <StudyDiscovery />
         <BibleLibrary />
-        <HowItWorks />
         <Pricing />
         <FAQ />
         <CTA />

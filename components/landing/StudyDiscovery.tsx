@@ -1,17 +1,13 @@
 import Link from "next/link"
-import { BookOpen, Compass, PenLine } from "lucide-react"
 
 import { curatedStudies, type StudyType } from "../../lib/data/curated-studies"
-import { ST, ST_SHELL, ST_CARD_SHADOW, ST_EDGE, ST_HEADING } from "./studyLandingShared"
+import { ST, ST_SHELL, ST_EDGE, ST_HEADING } from "./studyLandingShared"
 
 /**
- * The study block on the landing page: two server-rendered strips anyone can
- * see - how a study actually works, and a handful of studies to start with.
- *
- * The existing "Hoe het werkt" section further down is about signing up and
- * finding the reference tools; this strip is about the lesson loop itself, so a
- * first-time visitor understands what "een begeleide studie volgen" means
- * before they click through to `/studies`.
+ * The study block on the landing page: three studies to start with, server
+ * rendered so anyone can see them. It used to open with a three-step "zo werkt
+ * een studie" strip as well; the lesson demo above it now shows the loop
+ * itself, so the steps went and the section is the studies.
  */
 
 const KIND_LABEL: Record<StudyType, string> = {
@@ -22,101 +18,24 @@ const KIND_LABEL: Record<StudyType, string> = {
 }
 
 /** The hand-authored studies - the ones with real cover art and an intro a
- *  card can carry. Same rule the `/studies` featured carousel uses. */
+ *  card can carry. Same rule the `/studies` featured carousel uses; three of
+ *  them here, one row, so the section is a taste of the catalogue and not the
+ *  catalogue. */
 const FEATURED = curatedStudies
   .filter((study) => study.type !== "Boek" || (study.about?.length ?? 0) > 0)
-  .slice(0, 6)
+  .slice(0, 3)
 
-const STEPS = [
-  {
-    icon: Compass,
-    title: "Kies een studie",
-    desc: "Een bijbelboek, een persoon of een thema. Je stelt zelf je vertaling en je tempo in.",
-  },
-  {
-    icon: BookOpen,
-    title: "Volg de lessen",
-    desc: "Per les lees je een kort gedeelte, met commentaren en de grondtekst binnen handbereik.",
-  },
-  {
-    icon: PenLine,
-    title: "Denk na en groei",
-    desc: "Elke les sluit af met een vraag. Je voortgang en je notities worden bewaard.",
-  },
-]
 
 export function StudyDiscovery() {
   return (
     <>
       <section
         className="py-[clamp(3.5rem,6vw,6.5rem)]"
-        style={{ backgroundColor: ST.card, ...ST_EDGE }}
+        style={{ backgroundColor: ST.light, ...ST_EDGE }}
       >
         <div className={ST_SHELL}>
-          {/* How a study works */}
-          <div className="reveal mx-auto max-w-2xl text-center">
-            <p
-              className="text-[0.6875rem] font-bold uppercase"
-              style={{ color: ST.tealText, letterSpacing: "0.16em" }}
-            >
-              Zo werkt een studie
-            </p>
-            <h2
-              className="mt-3 font-extrabold text-balance"
-              style={{
-                color: ST.text,
-                fontSize: ST_HEADING,
-                lineHeight: 1.2,
-                letterSpacing: "-0.02em",
-              }}
-            >
-              Van eerste hoofdstuk tot afgeronde studie
-            </h2>
-          </div>
-
-          <div className="reveal-stagger mt-[clamp(2rem,4vw,3rem)] grid gap-5 sm:grid-cols-3">
-            {STEPS.map(({ icon: Icon, title, desc }, index) => (
-              <div key={title} className="reveal">
-                <div
-                  className="flex h-full flex-col rounded-2xl border bg-white p-6"
-                  style={{ borderColor: ST.border, boxShadow: ST_CARD_SHADOW }}
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="flex h-10 w-10 flex-none items-center justify-center rounded-xl"
-                      style={{
-                        backgroundColor: ST.tealLight,
-                        backgroundImage: `linear-gradient(135deg, ${ST.tealLight}, rgba(13,148,136,0.05))`,
-                      }}
-                    >
-                      <Icon className="h-5 w-5" style={{ color: ST.teal }} />
-                    </div>
-                    <span
-                      className="text-[0.6875rem] font-bold uppercase tabular-nums"
-                      style={{ color: ST.muted, letterSpacing: "0.16em" }}
-                    >
-                      Stap {index + 1}
-                    </span>
-                  </div>
-                  <h3
-                    className="mt-4 text-base font-bold tracking-tight"
-                    style={{ color: ST.text }}
-                  >
-                    {title}
-                  </h3>
-                  <p
-                    className="mt-2 text-sm leading-relaxed"
-                    style={{ color: ST.muted }}
-                  >
-                    {desc}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-
           {/* Suggested studies */}
-          <div className="reveal mt-[clamp(3rem,5vw,4.5rem)] flex items-end justify-between gap-3">
+          <div className="reveal flex items-end justify-between gap-3">
             <div>
               <p
                 className="text-[0.6875rem] font-bold uppercase"
