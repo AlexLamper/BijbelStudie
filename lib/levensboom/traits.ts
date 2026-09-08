@@ -1,38 +1,34 @@
 /**
- * What the tree gains, and when.
+ * What the tree gains with level, beyond size.
  *
- * Continuous growth is the baseline; these are the punctuation - the moments
- * where a level-up adds something the user can name rather than a slightly
- * larger silhouette. All cosmetic, all free, nothing stored per trait: the set
- * is derived from `level` here, in the Dart mirror
- * (`lib/features/levensboom/domain/traits.dart`) and in the API response, so a
- * client that has not been updated still gets a correct list from the server.
+ * Continuous growth (`lib/levensboom/stages.ts`) is the baseline; these are
+ * the punctuation - the moments where a level-up adds something the user can
+ * name rather than a slightly larger silhouette. Nothing stored per trait: the
+ * set is derived from `level` here, in the Dart mirror
+ * (`lib/features/levensboom/domain/traits.dart`) and in the API response.
+ *
+ * The bird and the fireflies used to be traits; they are animals in the
+ * catalog now (`lib/levensboom/catalog.ts`), picked rather than granted.
  *
  * Contract: docs/levensboom-spec.md §6.
  */
 
-export type TreeTrait = 'canopy' | 'blossom' | 'fruit' | 'bird' | 'twin' | 'fireflies' | 'seasons';
+export type TreeTrait = 'blossom' | 'fruit' | 'twin' | 'seasons';
 
 export const TRAIT_LEVELS: Record<TreeTrait, number> = {
-  canopy: 3,
   blossom: 5,
   fruit: 8,
-  bird: 12,
   twin: 16,
-  fireflies: 20,
   seasons: 25,
 };
 
-const TRAIT_ORDER: TreeTrait[] = ['canopy', 'blossom', 'fruit', 'bird', 'twin', 'fireflies', 'seasons'];
+const TRAIT_ORDER: TreeTrait[] = ['blossom', 'fruit', 'twin', 'seasons'];
 
-/** Dutch, one line, shown in the detail sheet next to the level it arrives at. */
+/** Dutch, one line, shown on the Groei timeline next to the level it arrives at. */
 export const TRAIT_LABELS: Record<TreeTrait, string> = {
-  canopy: 'Je boom krijgt een echte kroon',
   blossom: 'Bloesem in het voorjaar',
   fruit: 'De eerste vrucht van de Geest',
-  bird: 'Een vogel keert terug naar je boom',
-  twin: 'Een tweede stam - je boom komt tot zijn recht',
-  fireflies: "Vuurvliegjes 's nachts",
+  twin: 'Een tweede stam',
   seasons: 'Zeldzame seizoenen: sneeuw en bloesemstorm',
 };
 
@@ -48,6 +44,14 @@ export function hasTrait(level: number, trait: TreeTrait): boolean {
 export function nextTrait(level: number): { trait: TreeTrait; level: number } | null {
   for (const trait of TRAIT_ORDER) {
     if (level < TRAIT_LEVELS[trait]) return { trait, level: TRAIT_LEVELS[trait] };
+  }
+  return null;
+}
+
+/** The trait that arrives at exactly this level, if any. */
+export function traitAtLevel(level: number): TreeTrait | null {
+  for (const trait of TRAIT_ORDER) {
+    if (TRAIT_LEVELS[trait] === level) return trait;
   }
   return null;
 }

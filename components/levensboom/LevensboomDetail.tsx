@@ -10,7 +10,7 @@ import { SkeletonPage } from '../ui/skeletons';
 
 const TEAL = '#0D9488';
 
-const TRAIT_ORDER: TreeTrait[] = ['canopy', 'blossom', 'fruit', 'bird', 'twin', 'fireflies', 'seasons'];
+const TRAIT_ORDER: TreeTrait[] = ['blossom', 'fruit', 'twin', 'seasons'];
 
 /**
  * /profiel/boom - the tree, what it is made of, and what makes it grow.
