@@ -4,6 +4,7 @@ import User from "../models/User";
 import Note from "../models/Note";
 
 import type { AdminPayload } from "./adminStats";
+import { proRingGrant } from "./levensboom/proRing";
 
 /**
  * The user list behind /admin/users and /api/v1/admin/users.
@@ -114,15 +115,28 @@ export async function updateAdminUserPayload(
 
   await connectMongoDB();
 
-  const target = await User.findById(id).select("email isAdmin subscribed");
+  const target = await User.findById(id).select("email isAdmin subscribed storePremium");
   if (!target) return { status: 404, body: { error: "Gebruiker niet gevonden" } };
 
   if (target.email === callerEmail && update.isAdmin === false) {
     return { status: 400, body: { error: "Je kunt je eigen admin-rechten niet intrekken" } };
   }
 
+  // Taken before the grant lands: only the transition to Pro equips the gold
+  // ring, never a re-grant of an account that already is Pro.
+  const before = {
+    subscribed: !!target.subscribed,
+    isAdmin: !!target.isAdmin,
+    storePremium: !!target.storePremium,
+  };
+
   Object.assign(target, update);
   await target.save();
+
+  // An explicit-path write, apart from the save(): `levensboom` is not in the
+  // selection above, and this must not be able to touch the rest of the choice.
+  const ring = proRingGrant(before, { ...before, ...update });
+  if (ring) await User.updateOne({ _id: target._id }, { $set: ring });
 
   return {
     status: 200,

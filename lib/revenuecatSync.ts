@@ -1,5 +1,7 @@
 import mongoose from 'mongoose';
 import User from '../models/User';
+import type { PremiumUserFields } from './mobilePremium';
+import { proRingGrant } from './levensboom/proRing';
 
 /**
  * RevenueCat -> MongoDB entitlement sync.
@@ -130,20 +132,31 @@ export async function applyStorePremium(
     throw new Error(`Invalid app_user_id (expected a Mongo ObjectId): ${appUserId}`);
   }
 
-  const result = await User.updateOne(
-    { _id: new mongoose.Types.ObjectId(appUserId) },
+  const _id = new mongoose.Types.ObjectId(appUserId);
+
+  // Read before write: the write below runs on every purchase, restore and
+  // launch-time reconciliation, and only the false -> true transition to Pro
+  // equips the gold ring (lib/levensboom/proRing.ts). Explicit paths and
+  // `.lean()`, for the same reason as lib/subscriptionSync: an unrelated
+  // corrupt field must never be able to block an entitlement write.
+  const before = await User.findById(_id)
+    .select('subscribed storePremium isAdmin')
+    .lean<PremiumUserFields>();
+  if (!before) {
+    throw new Error(`User not found for app_user_id: ${appUserId}`);
+  }
+
+  await User.updateOne(
+    { _id },
     {
       $set: {
         storePremium: patch.storePremium,
         storePremiumPlatform: patch.storePremiumPlatform,
         storePremiumExpiresAt: patch.storePremiumExpiresAt,
+        ...proRingGrant(before, { ...before, storePremium: patch.storePremium }),
       },
     },
   );
-
-  if (result.matchedCount === 0) {
-    throw new Error(`User not found for app_user_id: ${appUserId}`);
-  }
   // NOTE: `subscribed` (Stripe) is deliberately left alone. Effective Pro is
   // the OR of the two - see lib/mobilePremium.ts.
 }

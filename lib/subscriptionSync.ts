@@ -2,6 +2,7 @@ import type Stripe from "stripe";
 import stripe from "./stripe";
 import connectMongoDB from "./mongodb";
 import User from "../models/User";
+import { LEVENSBOOM_RING_PATH, proRingGrant } from "./levensboom/proRing";
 
 /**
  * Stripe -> Mongo billing state, in one place.
@@ -156,12 +157,17 @@ export interface LocalBilling {
   stripeCustomerId?: string | null;
   /** Store entitlement, so a comped account is not confused with an App Store one. */
   storePremium?: boolean;
+  /**
+   * Admins are Pro (lib/mobilePremium). Read so a Stripe grant on an account
+   * that is already Pro is not mistaken for the transition to Pro.
+   */
+  isAdmin?: boolean;
 }
 
 export const BILLING_SELECT =
   "email subscribed subscriptionStatus stripeSubscriptionId stripePriceId " +
   "subscriptionInterval cancelAtPeriodEnd currentPeriodEnd pausedUntil " +
-  "subscriptionStartedAt billingIssueSince stripeCustomerId storePremium";
+  "subscriptionStartedAt billingIssueSince stripeCustomerId storePremium isAdmin";
 
 function sameDate(a: Date | null | undefined, b: Date | null | undefined): boolean {
   const ta = a ? new Date(a).getTime() : null;
@@ -251,6 +257,18 @@ export function diffSnapshot(
   const revoking = !snapshot.subscribed && !!local.subscribed;
   if (!revoking || stripeGrantedAccess(local)) {
     assign("subscribed", snapshot.subscribed, !!local.subscribed);
+  }
+
+  // Buying Pro equips the gold ring. `set.subscribed` is only present when the
+  // flag actually moves, so a renewal of an already-subscribed account can never
+  // reach this; the helper then also rules out an account that was Pro through
+  // another channel. Same `$set` as the grant, so the two land together.
+  if (set.subscribed === true) {
+    const ring = proRingGrant(local, { ...local, subscribed: true });
+    if (ring) {
+      Object.assign(set, ring);
+      changed.push(LEVENSBOOM_RING_PATH);
+    }
   }
 
   assign("subscriptionStatus", snapshot.subscriptionStatus, local.subscriptionStatus ?? null);
