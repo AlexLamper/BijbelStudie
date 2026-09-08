@@ -97,8 +97,8 @@ const pageConfigs: Record<string, PageMetadataConfig> = {
     indexable: false
   },
   profileTree: {
-    title: 'Mijn boom',
-    description: 'Je levensboom groeit mee met wat je leest en bestudeert.',
+    title: 'Mijn levensboom',
+    description: 'Je levensboom groeit mee met wat je leest en bestudeert. Kies je boomsoort, je omgeving en wie er bij je boom woont.',
     path: '/profiel/boom',
     type: 'profile',
     indexable: false

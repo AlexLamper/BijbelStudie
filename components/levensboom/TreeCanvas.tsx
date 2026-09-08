@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef } from 'react';
-import { GROUND_PAD, GROUND_Y, TRUNK_X, type Leaf, type TreeScene } from '../../lib/levensboom/generate';
+import { GROUND_PAD, GROUND_Y, TRUNK_X, type TreeScene } from '../../lib/levensboom/generate';
 import { cachedTree } from '../../lib/levensboom/sceneCache';
 import { mix, paletteForNow, type Palette } from '../../lib/levensboom/palette';
 import { seededRng } from '../../lib/levensboom/rng';

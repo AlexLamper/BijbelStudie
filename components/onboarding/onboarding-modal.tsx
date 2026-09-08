@@ -7,6 +7,9 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "../ui/dia
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
+import TreeCanvas from "../levensboom/TreeCanvas"
+import { useLevensboom } from "../../hooks/useLevensboom"
+import { catalogItem } from "../../lib/levensboom/catalog"
 import { getBibleAttribution } from "../../lib/bible-attribution"
 import {
   useStudyStyle,
@@ -134,7 +137,18 @@ const STUDY_STYLE_OPTIONS: {
   },
 ]
 
-const TOTAL = 4
+const TOTAL = 5
+
+/**
+ * Step 5, "Plant je boom": the two free species. The tree is the face of the
+ * account, so the choice is made where the account is set up - and it is the
+ * grown tree that is shown, because a kiem looks the same in every species.
+ */
+type PlantSpecies = "eik" | "olijf"
+const PLANT_OPTIONS: { code: PlantSpecies; label: string; desc: string; verse: string }[] = [
+  { code: "eik", label: catalogItem("species", "eik")?.name ?? "Eik", desc: catalogItem("species", "eik")?.blurb ?? "", verse: "Genesis 18:1" },
+  { code: "olijf", label: catalogItem("species", "olijf")?.name ?? "Olijfboom", desc: catalogItem("species", "olijf")?.blurb ?? "", verse: "Psalm 52:10" },
+]
 
 const TEAL = "#0D9488"
 /** #0D9488 is 3.7:1 on white - a fill colour, not a text colour. */
@@ -223,6 +237,11 @@ export function OnboardingModal({ isOpen: initialIsOpen, onClose, onComplete }: 
 
   const { setStudyStyle } = useStudyStyle()
 
+  // The seed is the account id, which the provider already knows; before it
+  // has loaded the preview simply uses a stable stand-in.
+  const { data: levensboom, plant } = useLevensboom()
+  const [species, setSpecies] = useState<PlantSpecies>("eik")
+
   useEffect(() => { setOpen(initialIsOpen) }, [initialIsOpen])
 
   // Both lists are fetched up front so step 2 never shows its own spinner.
@@ -296,6 +315,8 @@ export function OnboardingModal({ isOpen: initialIsOpen, onClose, onComplete }: 
 
   const finish = async (complete: boolean) => {
     await saveAndClose()
+    // Planting is the last step's own save: skipping keeps the eik.
+    if (complete) await plant(species)
     setOpen(false)
     if (complete) onComplete()
     else onClose()
@@ -311,6 +332,7 @@ export function OnboardingModal({ isOpen: initialIsOpen, onClose, onComplete }: 
    * rows, so it is the one branch the options block below has to know about.
    */
   const isStyleStep = step === 1
+  const isPlantStep = step === TOTAL
 
   const { title, subtitle, options, selected, onSelect, group, loading } = useMemo(() => {
     if (step === 1) {
@@ -346,16 +368,27 @@ export function OnboardingModal({ isOpen: initialIsOpen, onClose, onComplete }: 
         loading: commentaries === null,
       }
     }
+    if (step === 4) {
+      return {
+        title: "Kies je weergave",
+        subtitle: "Hoe wil je de app weergeven? Je kunt dit later altijd aanpassen.",
+        options: THEMES,
+        selected: prefs.intent,
+        onSelect: (code: string) => { setPrefs(p => ({ ...p, intent: code })); setTheme(code) },
+        group: "theme",
+        loading: false,
+      }
+    }
     return {
-      title: "Kies je weergave",
-      subtitle: "Hoe wil je de app weergeven? Je kunt dit later altijd aanpassen.",
-      options: THEMES,
-      selected: prefs.intent,
-      onSelect: (code: string) => { setPrefs(p => ({ ...p, intent: code })); setTheme(code) },
-      group: "theme",
+      title: "Plant je boom",
+      subtitle: "Je levensboom groeit mee met alles wat je leest en bestudeert. Kies waarmee hij begint; meer soorten ontgrendel je onderweg.",
+      options: [] as Choice[],
+      selected: species as string,
+      onSelect: (code: string) => setSpecies(code === "olijf" ? "olijf" : "eik"),
+      group: "species",
       loading: false,
     }
-  }, [step, translations, commentaries, prefs, setTheme])
+  }, [step, translations, commentaries, prefs, setTheme, species])
 
   const iconFor = (code: string) => (step === 4 ? THEME_ICONS[code] ?? Monitor : step === 3 ? Library : BookOpen)
 
@@ -390,12 +423,71 @@ export function OnboardingModal({ isOpen: initialIsOpen, onClose, onComplete }: 
         {/* Options */}
         <div
           className={`px-7 py-5 transition-all duration-200 ease-out motion-reduce:transition-none ${
-            isStyleStep ? "grid grid-cols-1 sm:grid-cols-2 gap-3" : "flex flex-col gap-2.5"
+            isStyleStep || isPlantStep ? "grid grid-cols-1 sm:grid-cols-2 gap-3" : "flex flex-col gap-2.5"
           } ${entered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1"}`}
           role="radiogroup"
           aria-label={title}
         >
-          {isStyleStep
+          {isPlantStep
+            ? PLANT_OPTIONS.map(o => {
+                const active = selected === o.code
+                return (
+                  <label
+                    key={o.code}
+                    className="group relative flex flex-col overflow-hidden rounded-2xl border-2 text-left cursor-pointer transition-all duration-200 motion-reduce:transition-none hover:-translate-y-0.5 motion-reduce:hover:translate-y-0 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-teal-600 has-[:focus-visible]:ring-offset-2"
+                    style={{
+                      borderColor: active ? TEAL : BORDER,
+                      backgroundColor: active ? "rgba(13,148,136,0.05)" : "transparent",
+                      boxShadow: active ? "0 10px 26px -14px rgba(13,148,136,0.55)" : "0 1px 3px rgba(0,0,0,0.04)",
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name={group}
+                      value={o.code}
+                      checked={active}
+                      onChange={() => onSelect(o.code)}
+                      className="sr-only"
+                    />
+                    <span className="block aspect-[4/3] w-full overflow-hidden">
+                      <TreeCanvas
+                        seed={levensboom?.levensboom?.seed ?? "levensboom"}
+                        level={7}
+                        frac={0.6}
+                        species={o.code}
+                        scene="waterbeken"
+                        framing="scene"
+                        still
+                        className="block h-full w-full"
+                        ariaLabel=""
+                      />
+                    </span>
+                    <span className="flex items-start justify-between gap-3 p-4">
+                      <span className="min-w-0">
+                        <span className="block font-bold text-[15px] leading-snug text-gray-900 dark:text-foreground">
+                          {o.label}
+                        </span>
+                        <span className="block text-[12.5px] leading-relaxed text-gray-600 dark:text-muted-foreground mt-1">
+                          {o.desc}
+                        </span>
+                        <span className="block text-[11px] font-semibold mt-2" style={{ color: TEAL_TEXT }}>
+                          {o.verse}
+                        </span>
+                      </span>
+                      <span
+                        className="flex-shrink-0 h-5 w-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 motion-reduce:transition-none"
+                        style={{
+                          borderColor: active ? TEAL : "#D1D5DB",
+                          backgroundColor: active ? TEAL : "transparent",
+                        }}
+                      >
+                        {active && <Check className="h-3 w-3 text-white" />}
+                      </span>
+                    </span>
+                  </label>
+                )
+              })
+            : isStyleStep
             ? STUDY_STYLE_OPTIONS.map(o => {
                 const active = selected === o.code
                 const Icon = o.icon
@@ -565,7 +657,7 @@ export function OnboardingModal({ isOpen: initialIsOpen, onClose, onComplete }: 
             className="w-full py-3 rounded-xl font-semibold text-sm text-white transition-opacity hover:opacity-90 active:opacity-80 motion-reduce:transition-none"
             style={{ backgroundColor: TEAL_TEXT }}
           >
-            {step === TOTAL ? "Begin met studeren" : "Volgende"}
+            {step === TOTAL ? "Planten en beginnen" : "Volgende"}
           </button>
 
           <div className="flex items-center justify-between mt-2">
