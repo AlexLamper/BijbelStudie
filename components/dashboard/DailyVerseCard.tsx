@@ -52,7 +52,7 @@ export type DailyVerse = {
  *
  * Everything drawn over the photograph is literal white rather than a theme
  * token, and it sits on a scrim: the colours have to hold up over any of the
- * six images, in either light or dark mode, and a token that flips with the
+ * photographs, in either light or dark mode, and a token that flips with the
  * theme would go invisible on half of them.
  *
  * Like the app's card, everything it remembers is local: `/api/bible/daytext`
