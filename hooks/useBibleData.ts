@@ -122,7 +122,6 @@ interface UseBibleDataReturn {
   loadingVersions: boolean;
   loadingBooks: boolean;
   loadingChapters: boolean;
-  isInitialLoading: boolean;
   handleVersionChange: (version: string) => void;
   handleBookChange: (book: string) => void;
   handleChapterChange: (chapter: number) => void;
@@ -151,7 +150,6 @@ export function useBibleData(lng: string, options: UseBibleDataOptions = {}): Us
   const [maxChapter, setMaxChapter]     = useState<number>(1);
   const [loadingBooks, setLoadingBooks] = useState(true);
   const [loadingChapters, setLoadingChapters] = useState(false);
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [lastReadLoaded, setLastReadLoaded] = useState(false);
 
   const lastBookIndexRef = useRef<number>(-1);
@@ -179,7 +177,6 @@ export function useBibleData(lng: string, options: UseBibleDataOptions = {}): Us
           if (index) setBooks(resolveBooksFromIndex(index, initialVersion));
           applyChapters(chaps, initialChapter);
           setLoadingBooks(false);
-          setIsInitialLoading(false);
           return;
         }
       }
@@ -247,16 +244,12 @@ export function useBibleData(lng: string, options: UseBibleDataOptions = {}): Us
       setSelectedBook(book);
       setLastReadLoaded(true);
 
-      if (!book) {
-        setIsInitialLoading(false);
-        return;
-      }
+      if (!book) return;
 
       // Fetch chapters for the resolved book
       const chaps = await fetchChaptersDirect(version, book);
       if (cancelled) return;
       applyChapters(chaps, restoredChapter);
-      setIsInitialLoading(false);
     }
 
     function applyChapters(chaps: number[], preferred: number) {
@@ -327,7 +320,6 @@ export function useBibleData(lng: string, options: UseBibleDataOptions = {}): Us
         setMaxChapter(1);
         setSelectedChapter(1);
         setLoadingChapters(false);
-        setIsInitialLoading(false);
         return;
       }
 
@@ -342,7 +334,6 @@ export function useBibleData(lng: string, options: UseBibleDataOptions = {}): Us
       });
 
       setLoadingChapters(false);
-      setIsInitialLoading(false);
     }
 
     loadChapters();
@@ -421,7 +412,6 @@ export function useBibleData(lng: string, options: UseBibleDataOptions = {}): Us
     loadingVersions: false, // versions are hardcoded - always available
     loadingBooks,
     loadingChapters,
-    isInitialLoading,
     handleVersionChange,
     handleBookChange,
     handleChapterChange,
