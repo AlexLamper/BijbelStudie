@@ -69,7 +69,7 @@ const STEP_BLURB: Record<FrameKey, string> = {
   depth: 'Commentaar, achtergrond bij het boek en de grondtekst, woord voor woord.',
   reflection: 'Eén vraag voor jou. Je antwoord wordt bewaard als notitie.',
   quiz: 'Een korte quiz, en de les is af.',
-  done: 'XP voor je levensboom, en de volgende les staat klaar.',
+  done: 'XP voor je boom, en de volgende les staat klaar.',
 };
 
 /** How long each frame stays. The ones with something happening in them get longer. */
@@ -424,7 +424,7 @@ function DoneFrame({ lesson, live, reduce }: { lesson: DemoLesson; live: boolean
             reveal={reveal}
             reducedMotion={reduce}
             className="block h-full w-full"
-            ariaLabel="Je levensboom, met nieuwe blaadjes"
+            ariaLabel="Je boom, met nieuwe blaadjes"
           />
         ) : (
           <div className="h-full w-full [&>svg]:block [&>svg]:h-full [&>svg]:w-full" aria-hidden dangerouslySetInnerHTML={{ __html: lesson.tree.svg }} />
@@ -730,7 +730,7 @@ export default function StudyFlowDemo({ lesson }: { lesson: DemoLesson }) {
                     {isReward ? 'Les afgerond' : STEP_LABEL[key]}
                   </span>
                   <span className="hidden text-[12px] leading-relaxed lg:block" style={{ color: MUTED }}>
-                    {isReward ? `+${lesson.xp} XP voor je levensboom, en de volgende les staat klaar.` : STEP_BLURB[key]}
+                    {isReward ? `+${lesson.xp} XP voor je boom, en de volgende les staat klaar.` : STEP_BLURB[key]}
                   </span>
                 </span>
               </button>

@@ -55,12 +55,12 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const card = publicLevensboomCard(user);
   const species = catalogItem('species', card.avatar.species)?.name ?? 'Boom';
   return buildMetadata({
-    title: `De levensboom van ${firstName(user.name)}`,
+    title: `De boom van ${firstName(user.name)}`,
     description: `Een ${species.toLowerCase()} op niveau ${card.level} - ${card.stage.name.toLowerCase()}. Gegroeid door te lezen en te studeren in de Bijbel op BijbelStudie.`,
     path: `/gebruiker/${id}`,
     indexable: false,
     type: 'profile',
-    ogEyebrow: 'Levensboom',
+    ogEyebrow: 'Voortgang',
   });
 }
 
@@ -83,9 +83,9 @@ export default async function PublicProfilePage({ params }: Params) {
     <main className="min-h-screen bg-background">
       <div className="mx-auto w-full max-w-3xl px-5 py-10 sm:px-8 sm:py-14">
         <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: TEAL }}>
-          Levensboom
+          Voortgang
         </p>
-        <h1 className="mt-2 text-2xl font-bold text-foreground sm:text-3xl">De levensboom van {name}</h1>
+        <h1 className="mt-2 text-2xl font-bold text-foreground sm:text-3xl">De boom van {name}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {card.stage.name} · niveau {card.level}
           {since ? ` · lid sinds ${since}` : ''}
@@ -103,7 +103,7 @@ export default async function PublicProfilePage({ params }: Params) {
               animal={card.avatar.animal}
               framing="scene"
               className="block h-full w-full"
-              ariaLabel={`De levensboom van ${name}: ${card.stage.name.toLowerCase()} op niveau ${card.level}`}
+              ariaLabel={`De boom van ${name}: ${card.stage.name.toLowerCase()} op niveau ${card.level}`}
             />
           </div>
         </div>
@@ -141,7 +141,7 @@ export default async function PublicProfilePage({ params }: Params) {
         <div className="mt-8 rounded-2xl border border-gray-200 bg-white p-5 dark:border-border dark:bg-card">
           <p className="text-sm font-bold text-foreground">Plant je eigen boom</p>
           <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-            Je levensboom begint als kiem en groeit met alles wat je leest en bestudeert. Gratis, op de
+            Je boom begint als kiem en groeit met alles wat je leest en bestudeert. Gratis, op de
             website en in de app.
           </p>
           <Link

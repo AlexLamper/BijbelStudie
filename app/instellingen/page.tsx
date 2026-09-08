@@ -427,7 +427,7 @@ export default function SettingsPage() {
             {/* Levensboom */}
             <SectionCard
               icon={TreeDeciduous}
-              title="Levensboom"
+              title="Voortgang"
               subtitle="Je boom op je profiel"
             >
               <LevensboomSection />

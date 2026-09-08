@@ -62,7 +62,7 @@ export default function HeroLevensboom({ svg, seed, level }: { svg: string; seed
       palette={palette}
       reveal={reveal}
       className="block h-full w-full"
-      ariaLabel="Een levensboom bij zonsondergang, met vlinders"
+      ariaLabel="Een boom bij zonsondergang, met vlinders"
     />
   );
 }

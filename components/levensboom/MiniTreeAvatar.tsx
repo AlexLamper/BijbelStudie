@@ -51,7 +51,7 @@ export default function MiniTreeAvatar({
     <span
       className={`relative inline-block flex-shrink-0 ${className ?? ''}`}
       style={{ width: size, height: size }}
-      aria-label={`Levensboom van ${name}, ${card.stage.name.toLowerCase()} op niveau ${card.level}`}
+      aria-label={`Boom van ${name}, ${card.stage.name.toLowerCase()} op niveau ${card.level}`}
     >
       <span
         className="absolute inset-0 overflow-hidden rounded-full"

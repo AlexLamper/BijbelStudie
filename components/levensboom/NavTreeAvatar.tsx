@@ -38,7 +38,7 @@ export default function NavTreeAvatar({
     <span
       className={`relative inline-block flex-shrink-0 ${className ?? ''}`}
       style={{ width: size, height: size }}
-      aria-label={`Je levensboom, niveau ${data.level}`}
+      aria-label={`Je boom, niveau ${data.level}`}
     >
       <span
         className="absolute inset-0 overflow-hidden rounded-full"

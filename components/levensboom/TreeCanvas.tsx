@@ -1381,7 +1381,7 @@ export default function TreeCanvas({
       ref={canvasRef}
       className={className}
       role="img"
-      aria-label={ariaLabel ?? `Je levensboom op niveau ${scene.level}`}
+      aria-label={ariaLabel ?? `Je boom op niveau ${scene.level}`}
     />
   );
 }

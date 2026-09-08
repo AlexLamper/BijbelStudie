@@ -119,7 +119,7 @@ export default function LevensboomGroeiDemo({ seed, initialSvg }: { seed: string
             reveal={reveal}
             reducedMotion={still}
             className="absolute inset-0 block h-full w-full"
-            ariaLabel={`Levensboom op niveau ${level}: ${stage.name.toLowerCase()}`}
+            ariaLabel={`Je boom op niveau ${level}: ${stage.name.toLowerCase()}`}
           />
         ) : (
           <div

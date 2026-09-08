@@ -63,7 +63,7 @@ export default function StudioStage({
           framing="scene"
           reducedMotion={reducedMotion}
           className="absolute inset-0 block h-full w-full"
-          ariaLabel={`Je levensboom: ${stage.name.toLowerCase()} op niveau ${level}`}
+          ariaLabel={`Je boom: ${stage.name.toLowerCase()} op niveau ${level}`}
         />
 
         <div className="pointer-events-none absolute bottom-4 left-4 flex items-center gap-2">

@@ -166,7 +166,7 @@ export function Header({ title }: HeaderProps) {
                   <span className="mr-2 inline-flex h-4 w-4 items-center justify-center">
                     <NavTreeAvatar size={16} showLevel={false} fallback={<User className="h-4 w-4 text-muted-foreground" />} />
                   </span>
-                  Mijn levensboom
+                  Mijn voortgang
                 </Button>
                 <Button
                   variant="ghost"
@@ -193,7 +193,7 @@ export function Header({ title }: HeaderProps) {
 
       {/* Mobile: the tree first, then the menu. */}
       <div className="md:hidden relative flex items-center gap-1" ref={menuRef}>
-        <Link href="/profiel/boom" aria-label="Mijn levensboom" className="inline-flex items-center p-1">
+        <Link href="/profiel/boom" aria-label="Mijn voortgang" className="inline-flex items-center p-1">
           <NavTreeAvatar size={26} fallback={null} />
         </Link>
         <Button variant="ghost" size="sm" className="p-2" onClick={() => setIsMenuOpen(!isMenuOpen)}>
@@ -220,7 +220,7 @@ export function Header({ title }: HeaderProps) {
                 <span className="mr-2 inline-flex h-4 w-4 items-center justify-center">
                   <NavTreeAvatar size={16} showLevel={false} fallback={<User className="h-4 w-4 text-muted-foreground" />} />
                 </span>
-                Mijn levensboom
+                Mijn voortgang
               </Button>
               <Button variant="ghost" className="w-full justify-start px-3 py-2 text-sm hover:bg-secondary rounded-none"
                 onClick={() => { router.push("/instellingen"); setIsMenuOpen(false) }}>

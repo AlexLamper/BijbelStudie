@@ -66,7 +66,7 @@ export default function LevensboomSection() {
         </div>
       )}
       <Link href="/profiel/boom" className="inline-block text-xs font-semibold no-underline" style={{ color: TEAL }}>
-        Naar je levensboom →
+        Naar je boom →
       </Link>
     </div>
   );

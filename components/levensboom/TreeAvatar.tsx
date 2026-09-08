@@ -55,7 +55,7 @@ export default function TreeAvatar({
           href="/profiel/boom"
           className="group relative block no-underline"
           style={{ width: size, height: size }}
-          aria-label={`Je levensboom, ${levensboom.stage.name.toLowerCase()} op niveau ${data.level}. Open de studio`}
+          aria-label={`Je boom, ${levensboom.stage.name.toLowerCase()} op niveau ${data.level}. Open de studio`}
         >
           <div
             className="absolute overflow-hidden rounded-full ring-1 ring-black/5 transition-transform group-hover:scale-[1.02] dark:ring-white/10"
@@ -138,7 +138,7 @@ export default function TreeAvatar({
           className="mt-2 text-xs font-semibold no-underline hover:underline"
           style={{ color: TEAL }}
         >
-          Naar je levensboom →
+          Naar je boom →
         </Link>
       </div>
 

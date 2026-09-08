@@ -459,7 +459,7 @@ export function OnboardingModal({ isOpen: initialIsOpen, onClose, onComplete }: 
     }
     return {
       title: "Plant je boom",
-      subtitle: "Je levensboom groeit mee met alles wat je leest en bestudeert. Kies waarmee hij begint; meer soorten ontgrendel je onderweg.",
+      subtitle: "Je boom groeit mee met alles wat je leest en bestudeert. Kies waarmee hij begint; meer soorten ontgrendel je onderweg.",
       options: [] as Choice[],
       selected: species as string,
       onSelect: (code: string) => setSpecies(code === "olijf" ? "olijf" : "eik"),

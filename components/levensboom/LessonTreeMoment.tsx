@@ -78,7 +78,7 @@ export default function LessonTreeMoment({
         celebration={animate}
         reducedMotion={tree.reducedMotion || !!reduceMotion}
         className="block h-full w-full"
-        ariaLabel={`Je levensboom, ${tree.stage.name.toLowerCase()} op niveau ${level}`}
+        ariaLabel={`Je boom, ${tree.stage.name.toLowerCase()} op niveau ${level}`}
       />
       <div className="pointer-events-none absolute bottom-2.5 left-2.5 flex items-center gap-1.5">
         <span

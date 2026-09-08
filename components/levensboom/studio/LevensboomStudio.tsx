@@ -76,7 +76,7 @@ export default function LevensboomStudio() {
   if (!data || !tree || !draw) {
     return (
       <div className="px-6 py-10 xl:px-10">
-        <p className="text-sm text-muted-foreground">Je levensboom kon niet worden geladen.</p>
+        <p className="text-sm text-muted-foreground">Je boom kon niet worden geladen.</p>
       </div>
     );
   }
@@ -142,7 +142,7 @@ export default function LevensboomStudio() {
           <ArrowLeft size={16} />
         </Link>
         <div className="min-w-0 flex-1">
-          <h1 className="text-xl font-bold text-foreground">Mijn levensboom</h1>
+          <h1 className="text-xl font-bold text-foreground">Mijn voortgang</h1>
           <p className="mt-0.5 truncate text-sm text-muted-foreground">
             {tree.stage.name} · niveau {data.level}
           </p>

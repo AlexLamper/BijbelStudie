@@ -179,7 +179,7 @@ export default function LevelUpDialog({
                 className="mt-2 inline-block text-xs font-semibold no-underline hover:underline"
                 style={{ color: '#8FD694' }}
               >
-                Bekijk in je levensboom →
+                Bekijk je boom →
               </Link>
             </div>
           )}
