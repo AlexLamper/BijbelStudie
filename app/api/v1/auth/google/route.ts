@@ -1,11 +1,10 @@
 import type { NextRequest } from 'next/server';
 import connectMongoDB from '../../../../../lib/mongodb';
-import User from '../../../../../models/User';
 import { corsPreflight, errorV1, handleV1Error, jsonV1 } from '../../../../../lib/apiV1';
 import { checkRateLimit, clientIp } from '../../../../../lib/mobileRateLimit';
 import { issueSession } from '../../../../../lib/mobileAuthFlow';
 import { verifyGoogleIdToken } from '../../../../../lib/oauthVerify';
-import { findUserByEmail, normaliseEmail } from '../../../../../lib/userLookup';
+import { provisionOAuthUser } from '../../../../../lib/oauthUsers';
 
 export const runtime = 'nodejs';
 
@@ -35,28 +34,17 @@ export async function POST(req: NextRequest) {
 
     await connectMongoDB();
 
-    let user = await User.findOne({ googleId: identity.sub });
-    if (!user) {
-      // Case-insensitive: a website account registered as `Bob@x.com` must
-      // still be recognised as the same person signing in with Google as
-      // `bob@x.com`, or this creates a second, Google-only account for them.
-      user = await findUserByEmail(identity.email);
-      if (user) {
-        // Existing website account (created by the NextAuth signIn callback).
-        // Linking by verified email is safe here because Google asserts it.
-        user.googleId = identity.sub;
-        if (!user.image && identity.picture) user.image = identity.picture;
-        await user.save();
-      } else {
-        user = await User.create({
-          name: identity.name || identity.email.split('@')[0],
-          email: normaliseEmail(identity.email),
-          image: identity.picture ?? '',
-          googleId: identity.sub,
-          bio: '',
-        });
-      }
-    }
+    // Find, link (case-insensitively, so a website account registered as
+    // `Bob@x.com` is recognised as the same person signing in as `bob@x.com`)
+    // or create - atomically, so a racing first login cannot 500. Linking by
+    // verified email is safe because Google asserts the address.
+    const user = await provisionOAuthUser({
+      provider: 'google',
+      providerId: identity.sub,
+      email: identity.email,
+      name: identity.name || identity.email.split('@')[0],
+      image: identity.picture,
+    });
 
     return jsonV1(await issueSession(user, { platform, deviceName }));
   } catch (error) {

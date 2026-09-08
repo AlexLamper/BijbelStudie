@@ -4,6 +4,7 @@ import connectMongoDB from '../../../../../../lib/mongodb';
 import StudyGroup from '../../../../../../models/StudyGroup.js';
 import GroupMessage from '../../../../../../models/GroupMessage.js';
 import User from '../../../../../../models/User';
+import { PUBLIC_CARD_FIELDS, publicLevensboomCard, type PublicCardSource } from '../../../../../../lib/levensboom/publicCard';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,9 +47,9 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
       .limit(limit)
       .lean();
 
-    const authors = await User.find({ _id: { $in: messages.map((m) => m.userId) } })
-      .select('name image')
-      .lean();
+    const authors = (await User.find({ _id: { $in: messages.map((m) => m.userId) } })
+      .select(`name image ${PUBLIC_CARD_FIELDS}`)
+      .lean()) as unknown as Array<PublicCardSource & { name?: string; image?: string }>;
     const byId = new Map(authors.map((u) => [u._id.toString(), u]));
 
     return jsonV1({
@@ -61,6 +62,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
           authorId: m.userId.toString(),
           authorName: author?.name ?? 'Onbekend',
           authorImage: author?.image ?? null,
+          authorLevensboom: author ? publicLevensboomCard(author) : null,
           isSelf: m.userId.toString() === auth.id,
           verseRef: m.verseRef?.book ? m.verseRef : null,
           reactions: (m.reactions ?? []).map((r: { emoji: string }) => r.emoji),
@@ -115,6 +117,8 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
           authorId: auth.id,
           authorName: auth.name,
           authorImage: auth.image,
+          // The author is the caller, whose own tree state the client holds.
+          authorLevensboom: null,
           isSelf: true,
           verseRef: message.verseRef?.book ? message.verseRef : null,
           reactions: [],

@@ -12,6 +12,10 @@ const UserSchema = new mongoose.Schema(
     bio: { type: String },
     image: { type: String },
     streak: { type: Number, default: 0 },
+    // The longest streak ever, kept by `$max` wherever `streak` is written.
+    // Streak-gated Levensboom items (lib/levensboom/catalog.ts) read this, so
+    // an item earned with a 30-day run stays earned after the run breaks.
+    longestStreak: { type: Number, default: 0 },
     lastStreakDate: { type: Date },
     freezeCount: { type: Number, default: 0 },
     badges: { type: [String], default: [] },
@@ -20,6 +24,37 @@ const UserSchema = new mongoose.Schema(
     // is understanding a small portion, not covering a large one.
     xp: { type: Number, default: 0 },
     level: { type: Number, default: 1 },
+    // Levensboom (TREE_FEATURE_PLAN.md). Nothing about the tree's *shape* lives
+    // here - that is a pure function of xp, level, lastStreakDate and the user
+    // id, so an existing account renders its grown tree with no migration. All
+    // this holds is "have we celebrated up to here yet" plus the two prefs, so
+    // a level-up earned on the website is celebrated once, on whichever client
+    // the user opens next, and not again on the other.
+    levensboom: {
+      lastSeenLevel: { type: Number, default: 1 },
+      lastSeenAt: { type: Date },
+      reducedMotion: { type: Boolean, default: false },
+      disabled: { type: Boolean, default: false },
+      // The studio choice (LEVENSBOOM_AVATAR_PLAN.md). Ids from
+      // lib/levensboom/catalog.ts; whether the account may *use* an id is
+      // re-derived on every read, never stored, so a lapsed Pro item falls
+      // back by itself and comes straight back on renewal.
+      species: { type: String, default: 'eik' },
+      scene: { type: String, default: 'waterbeken' },
+      animal: { type: String, default: 'geen' },
+      // No default on purpose: an unset ring means "never chosen", and
+      // lib/levensboom/catalog.ts `defaultRingFor()` then gives a Pro account
+      // the gold ring and everyone else teal. A stored value is a real choice.
+      ring: { type: String },
+      // When the reader planted their tree in onboarding; unset means the
+      // studio still owes them its one-time intro.
+      planted: { type: Date },
+      introSeen: { type: Boolean, default: false },
+      // Opt-in: /gebruiker/[id] is a 404 until this is on.
+      publicProfile: { type: Boolean, default: false },
+      // Catalog keys whose "Nieuw" dot the reader has already seen.
+      seenItems: { type: [String], default: [] },
+    },
     subscribed: { type: Boolean, default: false },
     stripeCustomerId: { type: String },
     stripeSubscriptionId: { type: String },

@@ -15,6 +15,7 @@ import BiblePlan from '../../../../models/BiblePlan';
 import RefreshToken from '../../../../models/RefreshToken';
 import { corsPreflight, errorV1, handleV1Error, V1_CORS_HEADERS } from '../../../../lib/apiV1';
 import { requireUser } from '../../../../lib/apiAuth';
+import { archiveAccount } from '../../../../lib/accountArchive';
 
 export const runtime = 'nodejs';
 
@@ -46,8 +47,24 @@ export async function DELETE(req: NextRequest) {
       return errorV1('CONFIRMATION_REQUIRED', 400, 'Stuur { "confirm": "VERWIJDER" } mee.');
     }
 
+    // An admin account is never deleted from the app. The owner tests the app
+    // on their own account, and a preview build shares the production
+    // database (docs/test-environment.md): on 2026-09-08 that account was
+    // deleted and re-created empty. Remove the admin role first if you mean it.
+    if (caller.isAdmin) {
+      return errorV1(
+        'ADMIN_ACCOUNT',
+        403,
+        'Een beheerdersaccount kan niet via de app worden verwijderd. Haal eerst de beheerdersrol weg.',
+      );
+    }
+
     await connectMongoDB();
     const userId = new mongoose.Types.ObjectId(caller.id);
+
+    // Copy everything first. If this throws, nothing below runs and the
+    // account stays; lib/accountArchive.ts explains why.
+    await archiveAccount(userId, { route: 'v1/account', actor: caller.email, reason: 'self-service' });
 
     const purge = async (session?: mongoose.ClientSession) => {
       const opts = session ? { session } : {};

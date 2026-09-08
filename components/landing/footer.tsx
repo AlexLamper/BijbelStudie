@@ -33,10 +33,21 @@ export function Footer() {
 
           {/* Brand column */}
           <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Image src="/images/icon-192.png" alt="BijbelStudie" width={22} height={22} className="rounded-md" />
-              <span className="font-bold text-sm tracking-tight text-white">BijbelStudie</span>
-            </div>
+            {/* The app icon is a #262626 tile with a white cross; on this
+                #1F2937 footer the tile disappeared and only the cross was left
+                floating. The dark-mode wordmark is the inverted mark (light
+                tile, dark cross, light lettering), drawn for exactly this
+                ground, so it replaces icon + text together. 273x60 source,
+                shown at 26px tall. */}
+            <Link href="/" className="inline-flex items-center" aria-label="BijbelStudie">
+              <Image
+                src="/images/Logo-text-dark-mode.svg"
+                alt="BijbelStudie"
+                width={118}
+                height={26}
+                className="h-[26px] w-auto"
+              />
+            </Link>
             <p className="max-w-xs text-sm leading-relaxed" style={{ color: FOOTER_MUTED }}>
               Online bijbelstudie platform voor serieuze bijbelstudenten. Gratis beginnen, altijd.
             </p>

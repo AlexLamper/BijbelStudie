@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createHash } from 'crypto';
+import { createHash, randomUUID } from 'crypto';
 import { MobileLicensingError } from './mobileLicensing';
 import { UnauthorizedError } from './apiAuth';
 
@@ -63,8 +63,28 @@ export function handleV1Error(error: unknown) {
   if (error instanceof SyntaxError) {
     return errorV1('INVALID_JSON', 400);
   }
-  console.error('[api/v1] unhandled error:', error);
-  return errorV1('INTERNAL_ERROR', 500);
+  // An unhandled error must never describe itself to the client - the message
+  // can carry a query, an index name or a stack frame. But it has to be
+  // *findable*, and for a long time it was not: the client saw the bare string
+  // "INTERNAL_ERROR" and the server log said little more, so a 500 reported by
+  // a user could not be tied to anything. The id below is the only part that
+  // crosses the boundary; it is random, means nothing on its own, and is what
+  // turns "sometimes login fails" into one grep.
+  const errorId = randomUUID();
+  const detail =
+    error instanceof Error
+      ? {
+          name: error.name,
+          message: error.message,
+          // Mongo puts the useful part here: 11000 is a duplicate key, and
+          // `keyPattern` names the index that rejected the write.
+          code: (error as { code?: unknown }).code,
+          keyPattern: (error as { keyPattern?: unknown }).keyPattern,
+          stack: error.stack,
+        }
+      : { value: error };
+  console.error(`[api/v1] unhandled error ${errorId}:`, detail);
+  return jsonV1({ error: 'INTERNAL_ERROR', message: 'INTERNAL_ERROR', errorId }, { status: 500 });
 }
 
 /** Stable content hash used as the ETag for immutable scripture responses. */

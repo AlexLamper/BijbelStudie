@@ -1,13 +1,17 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
+import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { Check, BookOpen, BookMarked, Library, Sun, Moon, Monitor } from "lucide-react"
 import { useTheme } from "next-themes"
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from "../ui/dialog"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
+import TreeCanvas from "../levensboom/TreeCanvas"
+import { useLevensboom } from "../../hooks/useLevensboom"
+import { catalogItem } from "../../lib/levensboom/catalog"
 import { getBibleAttribution } from "../../lib/bible-attribution"
+import { cn } from "../../lib/utils"
 import {
   useStudyStyle,
   normaliseStudyStyle,
@@ -17,6 +21,20 @@ import {
 
 /**
  * First-run preferences.
+ *
+ * A full-screen surface, not a dialog over the page. A new account has nothing
+ * behind these five questions worth showing, and a card floating over a dimmed
+ * dashboard read as an interruption of something the visitor was already
+ * doing. The surface is opaque and painted in the app's own colours, so the
+ * theme step restyles the whole screen the moment an option is chosen.
+ *
+ * Radix's Dialog primitives are still underneath - they own the focus trap,
+ * the scroll lock and the title/description wiring - but they are composed
+ * here rather than through components/ui/dialog.tsx, whose content component
+ * puts a close button in the corner. Nothing on this screen closes it
+ * implicitly: Escape and pointer-downs outside are cancelled, and there is no
+ * open-change handler to call. Skipping is the visible "Overslaan" button,
+ * which keeps the defaults; it is never a gate.
  *
  * The translation step used to render a hardcoded array with exactly one entry
  * in it, so the "choice" was a single button the user had to press to continue.
@@ -134,14 +152,27 @@ const STUDY_STYLE_OPTIONS: {
   },
 ]
 
-const TOTAL = 4
+const TOTAL = 5
+
+/**
+ * Step 5, "Plant je boom": the two free species. The tree is the face of the
+ * account, so the choice is made where the account is set up - and it is the
+ * grown tree that is shown, because a kiem looks the same in every species.
+ */
+type PlantSpecies = "eik" | "olijf"
+const PLANT_OPTIONS: { code: PlantSpecies; label: string; desc: string; verse: string }[] = [
+  { code: "eik", label: catalogItem("species", "eik")?.name ?? "Eik", desc: catalogItem("species", "eik")?.blurb ?? "", verse: "Genesis 18:1" },
+  { code: "olijf", label: catalogItem("species", "olijf")?.name ?? "Olijfboom", desc: catalogItem("species", "olijf")?.blurb ?? "", verse: "Psalm 52:10" },
+]
 
 const TEAL = "#0D9488"
 /** #0D9488 is 3.7:1 on white - a fill colour, not a text colour. */
 const TEAL_TEXT = "#0F766E"
-/** The landing page's feature-card icon tile, reused at modal scale. */
-const TEAL_TILE = "#CCFBF1"
-const BORDER = "#E5E7EB"
+/**
+ * Teal as ink, in both themes. teal-700 is TEAL_TEXT; on the dark ground it
+ * falls to 3.3:1, so dark mode steps up to teal-400 (9.6:1 on #171717).
+ */
+const TEAL_INK = "text-teal-700 dark:text-teal-400"
 
 /**
  * The order the translations are offered in.
@@ -185,6 +216,40 @@ function toDutchChoices(
     }))
 }
 
+/**
+ * One selectable card, in either theme. At rest it is one of the app's own
+ * cards - white on the off-white ground, `card` on the dark one - with the
+ * theme's hairline. Selected, it takes the brand border (set inline, see
+ * TEAL) and a mint tint that is still visible on near-black. Every colour
+ * here is a theme class, so the whole set re-paints when step 4 flips the
+ * theme.
+ */
+function cardClass(active: boolean) {
+  return cn(
+    "group relative cursor-pointer border-2 text-left transition-all duration-200 motion-reduce:transition-none",
+    "ring-offset-background has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-teal-600 has-[:focus-visible]:ring-offset-2",
+    active
+      ? "bg-teal-50 shadow-[0_10px_26px_-14px_rgba(13,148,136,0.55)] dark:bg-[rgba(13,148,136,0.14)]"
+      : "border-border bg-card shadow-sm hover:border-gray-300 dark:shadow-none dark:hover:border-neutral-600",
+  )
+}
+
+/** The radio mark every card carries in its corner. Decorative to AT: the real radio is the sr-only input. */
+function RadioMark({ active }: { active: boolean }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={cn(
+        "flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 transition-colors duration-200 motion-reduce:transition-none",
+        !active && "border-gray-300 bg-transparent dark:border-neutral-600",
+      )}
+      style={active ? { borderColor: TEAL, backgroundColor: TEAL } : undefined}
+    >
+      {active && <Check className="h-3 w-3 text-white" />}
+    </span>
+  )
+}
+
 interface OnboardingModalProps {
   isOpen: boolean
   onClose: () => void
@@ -222,6 +287,11 @@ export function OnboardingModal({ isOpen: initialIsOpen, onClose, onComplete }: 
   })
 
   const { setStudyStyle } = useStudyStyle()
+
+  // The seed is the account id, which the provider already knows; before it
+  // has loaded the preview simply uses a stable stand-in.
+  const { data: levensboom, plant } = useLevensboom()
+  const [species, setSpecies] = useState<PlantSpecies>("eik")
 
   useEffect(() => { setOpen(initialIsOpen) }, [initialIsOpen])
 
@@ -267,14 +337,35 @@ export function OnboardingModal({ isOpen: initialIsOpen, onClose, onComplete }: 
     return () => { cancelled = true }
   }, [])
 
-  // A one-frame fade as the panel swaps. `motion-reduce` turns it off, and the
-  // dialog is client-only by construction, so nothing readable waits on it.
+  // The step-to-step transition: the question block fades and slides a few
+  // pixels in the direction of travel. `goTo` hides the block in the same
+  // render that swaps the step, so the new question is never painted at full
+  // opacity before it starts; the effect then waits for that hidden frame to
+  // be painted (two frames, not one, so the transition cannot be coalesced
+  // away) before revealing it. `motion-reduce` keeps the block visible
+  // throughout and turns the transition off, so nothing readable waits on it.
   const [entered, setEntered] = useState(false)
+  const [direction, setDirection] = useState<1 | -1>(1)
   useEffect(() => {
-    setEntered(false)
-    const id = requestAnimationFrame(() => setEntered(true))
-    return () => cancelAnimationFrame(id)
+    let inner = 0
+    const outer = requestAnimationFrame(() => {
+      inner = requestAnimationFrame(() => setEntered(true))
+    })
+    return () => {
+      cancelAnimationFrame(outer)
+      cancelAnimationFrame(inner)
+    }
   }, [step])
+
+  const goTo = (target: number) => {
+    setDirection(target > step ? 1 : -1)
+    setEntered(false)
+    setStep(target)
+  }
+
+  // One finish at a time: a double tap on "Planten en beginnen" must not plant
+  // twice or post the preferences twice.
+  const [busy, setBusy] = useState(false)
 
   const saveAndClose = async () => {
     // Applied to the live app before the request goes out, not after it comes
@@ -295,14 +386,22 @@ export function OnboardingModal({ isOpen: initialIsOpen, onClose, onComplete }: 
   }
 
   const finish = async (complete: boolean) => {
-    await saveAndClose()
-    setOpen(false)
-    if (complete) onComplete()
-    else onClose()
+    if (busy) return
+    setBusy(true)
+    try {
+      await saveAndClose()
+      // Planting is the last step's own save: skipping keeps the eik.
+      if (complete) await plant(species)
+      setOpen(false)
+      if (complete) onComplete()
+      else onClose()
+    } finally {
+      setBusy(false)
+    }
   }
 
   const next = async () => {
-    if (step < TOTAL) setStep(s => s + 1)
+    if (step < TOTAL) goTo(step + 1)
     else await finish(true)
   }
 
@@ -311,6 +410,7 @@ export function OnboardingModal({ isOpen: initialIsOpen, onClose, onComplete }: 
    * rows, so it is the one branch the options block below has to know about.
    */
   const isStyleStep = step === 1
+  const isPlantStep = step === TOTAL
 
   const { title, subtitle, options, selected, onSelect, group, loading } = useMemo(() => {
     if (step === 1) {
@@ -346,270 +446,362 @@ export function OnboardingModal({ isOpen: initialIsOpen, onClose, onComplete }: 
         loading: commentaries === null,
       }
     }
+    if (step === 4) {
+      return {
+        title: "Kies je weergave",
+        subtitle: "Hoe wil je de app weergeven? Je kunt dit later altijd aanpassen.",
+        options: THEMES,
+        selected: prefs.intent,
+        onSelect: (code: string) => { setPrefs(p => ({ ...p, intent: code })); setTheme(code) },
+        group: "theme",
+        loading: false,
+      }
+    }
     return {
-      title: "Kies je weergave",
-      subtitle: "Hoe wil je de app weergeven? Je kunt dit later altijd aanpassen.",
-      options: THEMES,
-      selected: prefs.intent,
-      onSelect: (code: string) => { setPrefs(p => ({ ...p, intent: code })); setTheme(code) },
-      group: "theme",
+      title: "Plant je boom",
+      subtitle: "Je boom groeit mee met alles wat je leest en bestudeert. Kies waarmee hij begint; meer soorten ontgrendel je onderweg.",
+      options: [] as Choice[],
+      selected: species as string,
+      onSelect: (code: string) => setSpecies(code === "olijf" ? "olijf" : "eik"),
+      group: "species",
       loading: false,
     }
-  }, [step, translations, commentaries, prefs, setTheme])
+  }, [step, translations, commentaries, prefs, setTheme, species])
 
   const iconFor = (code: string) => (step === 4 ? THEME_ICONS[code] ?? Monitor : step === 3 ? Library : BookOpen)
 
   return (
-    <Dialog open={open} onOpenChange={(o) => !o && finish(false)}>
-      {/* 560px rather than the old 440: step 1 puts two option cards next to
-          each other, and the width is constant across steps because a dialog
-          that resizes as you page through it draws the eye to the frame instead
-          of to the question. Below the sm breakpoint the cards stack and the
-          base max-w-lg takes over. */}
-      <DialogContent className="sm:max-w-[560px] p-0 overflow-hidden gap-0 rounded-2xl border border-gray-200 dark:border-border shadow-2xl">
-
-        {/* Header */}
-        <div className="px-7 pt-7 pb-2">
-          <div className="flex items-center gap-2 mb-6">
-            <Image src="/images/icon-192.png" alt="" width={22} height={22} className="rounded-md" />
-            <span className="font-bold text-sm text-gray-900 dark:text-foreground">BijbelStudie</span>
-          </div>
-
-          <p className="text-xs font-bold uppercase tracking-widest mb-1.5" style={{ color: TEAL_TEXT }}>
-            Stap {step} van {TOTAL}
-          </p>
-
-          <DialogTitle className="text-xl font-bold text-gray-900 dark:text-foreground leading-snug">
-            {title}
-          </DialogTitle>
-          <DialogDescription className="text-sm text-gray-600 dark:text-muted-foreground mt-1">
-            {subtitle}
-          </DialogDescription>
-        </div>
-
-        {/* Options */}
-        <div
-          className={`px-7 py-5 transition-all duration-200 ease-out motion-reduce:transition-none ${
-            isStyleStep ? "grid grid-cols-1 sm:grid-cols-2 gap-3" : "flex flex-col gap-2.5"
-          } ${entered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1"}`}
-          role="radiogroup"
-          aria-label={title}
+    // Controlled, and deliberately without an onOpenChange: the primitives'
+    // own dismiss paths (Escape, pointer-down outside) are cancelled on the
+    // content below, and even if one slipped through there is no handler for
+    // it to close the screen with. The two buttons in the footer are the only
+    // way out.
+    <DialogPrimitive.Root open={open}>
+      <DialogPrimitive.Portal>
+        {/* Opaque, in the theme's ground colour, so nothing of the page shows
+            through - the content below covers the viewport as well, but the
+            overlay is what guarantees it on a viewport whose height shifts
+            under a mobile browser's toolbars. */}
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-background" />
+        <DialogPrimitive.Content
+          className="fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-background text-foreground outline-none"
+          onEscapeKeyDown={e => e.preventDefault()}
+          onPointerDownOutside={e => e.preventDefault()}
+          onInteractOutside={e => e.preventDefault()}
         >
-          {isStyleStep
-            ? STUDY_STYLE_OPTIONS.map(o => {
-                const active = selected === o.code
-                const Icon = o.icon
-                return (
-                  // The landing page's feature-card treatment at modal scale:
-                  // rounded-2xl on a hairline border, a teal-tinted icon tile,
-                  // a bold title over muted body copy, and the same 1px shadow
-                  // that lifts on hover. Two boxes with labels would have made
-                  // the user read to tell them apart; this makes the difference
-                  // visible before the copy is read.
-                  <label
-                    key={o.code}
-                    // Same naming scheme as the rest of the app's instrumented
-                    // controls - see CLICK_TARGETS in lib/analyticsRoutes.ts,
-                    // where both values are registered.
-                    data-track={o.track}
-                    className="group relative flex flex-col rounded-2xl border-2 p-5 text-left cursor-pointer transition-all duration-200 motion-reduce:transition-none hover:-translate-y-0.5 motion-reduce:hover:translate-y-0 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-teal-600 has-[:focus-visible]:ring-offset-2"
-                    style={{
-                      borderColor: active ? TEAL : BORDER,
-                      backgroundColor: active ? "rgba(13,148,136,0.05)" : "transparent",
-                      boxShadow: active
-                        ? "0 10px 26px -14px rgba(13,148,136,0.55)"
-                        : "0 1px 3px rgba(0,0,0,0.04)",
-                    }}
-                  >
-                    <input
-                      type="radio"
-                      name={group}
-                      value={o.code}
-                      checked={active}
-                      onChange={() => onSelect(o.code)}
-                      className="sr-only"
-                    />
+          {/* `min-h-full` rather than a fixed height: when the question block
+              is taller than the viewport (a phone on step 2, with four
+              translations and their attributions) the column grows and the
+              surface scrolls instead of clipping the centred block. */}
+          <div className="flex min-h-full flex-col">
 
-                    <span className="flex items-start justify-between mb-4">
-                      <span
-                        className="h-10 w-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                        style={{
-                          backgroundColor: TEAL_TILE,
-                          backgroundImage: `linear-gradient(135deg, ${TEAL_TILE}, rgba(13,148,136,0.05))`,
-                        }}
-                      >
-                        <Icon className="h-[18px] w-[18px]" style={{ color: TEAL }} />
-                      </span>
-                      <span
-                        className="flex-shrink-0 h-5 w-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 motion-reduce:transition-none"
-                        style={{
-                          borderColor: active ? TEAL : "#D1D5DB",
-                          backgroundColor: active ? TEAL : "transparent",
-                        }}
-                      >
-                        {active && <Check className="h-3 w-3 text-white" />}
-                      </span>
-                    </span>
+            {/* Top bar: who is asking, and how far along you are. The five
+                segments are the visual indicator; the "Stap x van y" line above
+                the question is the same information as text, which is what a
+                screen reader gets. */}
+            <div className="flex items-center justify-between gap-6 px-5 py-4 sm:px-8 sm:py-5">
+              <div className="flex items-center gap-2.5">
+                <Image src="/images/icon-192.png" alt="" width={28} height={28} className="rounded-lg" />
+                <span className="text-[15px] font-bold text-foreground">BijbelStudie</span>
+              </div>
+              <div aria-hidden="true" className="flex items-center gap-1.5">
+                {Array.from({ length: TOTAL }, (_, i) => (
+                  <span
+                    key={i}
+                    className={cn(
+                      "h-1.5 w-6 rounded-full transition-colors duration-300 motion-reduce:transition-none sm:w-10",
+                      i >= step && "bg-gray-300 dark:bg-neutral-700",
+                    )}
+                    style={i < step ? { backgroundColor: TEAL } : undefined}
+                  />
+                ))}
+              </div>
+            </div>
 
-                    <span className="block font-bold text-[15px] leading-snug text-gray-900 dark:text-foreground">
-                      {o.label}
-                    </span>
-                    <span className="block text-[12.5px] leading-relaxed text-gray-600 dark:text-muted-foreground mt-1.5">
-                      {o.desc}
-                    </span>
-
-                    <span className="flex flex-col gap-1.5 mt-3.5">
-                      {o.points.map(p => (
-                        <span
-                          key={p}
-                          className="flex items-start gap-2 text-[11.5px] leading-snug text-gray-600 dark:text-muted-foreground"
-                        >
-                          {/* A bullet, not an icon: the two icons in this step
-                              already carry meaning and a second glyph next to
-                              every line would be pure ornament. */}
-                          <span
-                            aria-hidden="true"
-                            className="mt-[5px] h-1 w-1 rounded-full flex-shrink-0"
-                            style={{ backgroundColor: TEAL }}
-                          />
-                          <span>{p}</span>
-                        </span>
-                      ))}
-                    </span>
-
-                    {/* What the choice actually does, spelled out on the card
-                        that does it. `mt-auto` keeps the two footers on the
-                        same line when the descriptions differ in height. */}
-                    <span
-                      className="block mt-auto pt-4 border-t text-[11px] font-semibold leading-snug"
-                      style={{
-                        borderColor: active ? "rgba(13,148,136,0.25)" : BORDER,
-                        color: active ? TEAL_TEXT : "#6B7280",
-                      }}
-                    >
-                      {o.result}
-                    </span>
-                  </label>
-                )
-              })
-            : loading
-            ? [0, 1, 2].map(i => (
-                <div
-                  key={i}
-                  aria-hidden="true"
-                  className="h-[68px] rounded-xl border-2 border-gray-100 dark:border-border bg-gray-50 dark:bg-secondary/40"
-                />
-              ))
-            : options.map(o => {
-                const active = selected === o.code
-                const Icon = iconFor(o.code)
-                return (
-                  <label
-                    key={o.code}
-                    className="group flex items-center justify-between p-4 rounded-xl border-2 text-left cursor-pointer transition-all duration-200 motion-reduce:transition-none has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-teal-600 has-[:focus-visible]:ring-offset-2"
-                    style={{
-                      borderColor: active ? TEAL : BORDER,
-                      backgroundColor: active ? "rgba(13,148,136,0.05)" : "transparent",
-                    }}
-                  >
-                    <input
-                      type="radio"
-                      name={group}
-                      value={o.code}
-                      checked={active}
-                      onChange={() => onSelect(o.code)}
-                      className="sr-only"
-                    />
-                    <span className="flex items-center gap-3 min-w-0">
-                      <span
-                        className="h-9 w-9 rounded-lg flex items-center justify-center flex-shrink-0"
-                        style={{ backgroundColor: active ? "rgba(13,148,136,0.12)" : "#F3F4F6" }}
-                      >
-                        <Icon className="h-4 w-4" style={{ color: active ? TEAL_TEXT : "#6B7280" }} />
-                      </span>
-                      <span className="min-w-0">
-                        <span className="block font-semibold text-sm text-gray-900 dark:text-foreground">
-                          {o.label}
-                        </span>
-                        {o.desc && (
-                          <span className="block text-xs text-gray-600 dark:text-muted-foreground mt-0.5">
-                            {o.desc}
-                          </span>
-                        )}
-                        {/* Reproduced exactly as the licence requires. */}
-                        {o.attribution && (
-                          <span className="block text-[11px] text-gray-600 dark:text-muted-foreground mt-1">
-                            {o.attribution}
-                          </span>
-                        )}
-                      </span>
-                    </span>
-                    <span
-                      className="flex-shrink-0 ml-3 h-5 w-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 motion-reduce:transition-none"
-                      style={{
-                        borderColor: active ? TEAL : "#D1D5DB",
-                        backgroundColor: active ? TEAL : "transparent",
-                      }}
-                    >
-                      {active && <Check className="h-3 w-3 text-white" />}
-                    </span>
-                  </label>
-                )
-              })}
-        </div>
-
-        {/* Footer */}
-        <div className="px-7 pb-7">
-          <button
-            onClick={next}
-            className="w-full py-3 rounded-xl font-semibold text-sm text-white transition-opacity hover:opacity-90 active:opacity-80 motion-reduce:transition-none"
-            style={{ backgroundColor: TEAL_TEXT }}
-          >
-            {step === TOTAL ? "Begin met studeren" : "Volgende"}
-          </button>
-
-          <div className="flex items-center justify-between mt-2">
-            <button
-              onClick={() => setStep(s => s - 1)}
-              disabled={step === 1}
-              className="py-2 text-xs text-gray-600 hover:text-gray-900 dark:text-muted-foreground dark:hover:text-foreground transition-colors motion-reduce:transition-none disabled:invisible"
-            >
-              Terug
-            </button>
-            {/* Onboarding is never a gate: skipping keeps the defaults. */}
-            <button
-              onClick={() => finish(false)}
-              className="py-2 text-xs text-gray-600 hover:text-gray-900 dark:text-muted-foreground dark:hover:text-foreground transition-colors motion-reduce:transition-none"
-            >
-              Overslaan
-            </button>
-          </div>
-
-          {step === TOTAL && (
-            <p className="mt-3 text-xs leading-relaxed text-gray-600 dark:text-muted-foreground">
-              Lezen is gratis, in elke vertaling. Met{" "}
-              <Link
-                href="/abonnement"
-                className="font-semibold underline underline-offset-2"
-                style={{ color: TEAL_TEXT }}
+            {/* The question, centred in whatever is left. One column width on
+                every step - a block that resizes as you page through it draws
+                the eye to its edges instead of to the question. */}
+            <div className="flex flex-1 flex-col items-center justify-center px-5 pt-6 pb-[max(2rem,env(safe-area-inset-bottom))] sm:px-8 sm:pt-8">
+              <div
+                className={cn(
+                  "w-full max-w-[640px] transition-all duration-300 ease-out motion-reduce:transition-none 2xl:max-w-[720px]",
+                  entered
+                    ? "translate-y-0 opacity-100"
+                    : cn(
+                        "opacity-0 motion-reduce:translate-y-0 motion-reduce:opacity-100",
+                        direction === 1 ? "translate-y-3" : "-translate-y-3",
+                      ),
+                )}
               >
-                Pro
-              </Link>{" "}
-              lees je commentaren volledig, open je de grondtekst en stel je meer vragen aan de
-              AI-assistent.
-            </p>
-          )}
-        </div>
+                {/* Announced as one unit when the step changes. */}
+                <div aria-live="polite" aria-atomic="true">
+                  <p className={cn("mb-3 text-xs font-bold uppercase tracking-widest", TEAL_INK)}>
+                    Stap {step} van {TOTAL}
+                  </p>
+                  <DialogPrimitive.Title asChild>
+                    <h1 className="text-2xl font-bold leading-tight tracking-tight text-foreground sm:text-3xl 2xl:text-4xl">
+                      {title}
+                    </h1>
+                  </DialogPrimitive.Title>
+                  <DialogPrimitive.Description className="mt-3 max-w-[56ch] text-[15px] leading-relaxed text-gray-600 dark:text-muted-foreground sm:text-base">
+                    {subtitle}
+                  </DialogPrimitive.Description>
+                </div>
 
-        {/* Progress bar */}
-        <div className="h-1 w-full bg-gray-100 dark:bg-secondary">
-          <div
-            className="h-1 transition-all duration-300 motion-reduce:transition-none"
-            style={{ width: `${(step / TOTAL) * 100}%`, backgroundColor: TEAL }}
-          />
-        </div>
+                {/* Options */}
+                <div
+                  className={cn(
+                    "mt-8",
+                    isStyleStep || isPlantStep
+                      ? "grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4"
+                      : "flex flex-col gap-3",
+                  )}
+                  role="radiogroup"
+                  aria-label={title}
+                >
+                  {isPlantStep
+                    ? PLANT_OPTIONS.map(o => {
+                        const active = selected === o.code
+                        return (
+                          <label
+                            key={o.code}
+                            className={cn(
+                              cardClass(active),
+                              "flex flex-col overflow-hidden rounded-2xl hover:-translate-y-0.5 motion-reduce:hover:translate-y-0",
+                            )}
+                            style={active ? { borderColor: TEAL } : undefined}
+                          >
+                            <input
+                              type="radio"
+                              name={group}
+                              value={o.code}
+                              checked={active}
+                              onChange={() => onSelect(o.code)}
+                              className="sr-only"
+                            />
+                            <span className="block aspect-[4/3] w-full overflow-hidden">
+                              <TreeCanvas
+                                seed={levensboom?.levensboom?.seed ?? "levensboom"}
+                                level={7}
+                                frac={0.6}
+                                species={o.code}
+                                scene="waterbeken"
+                                framing="scene"
+                                still
+                                className="block h-full w-full"
+                                ariaLabel=""
+                              />
+                            </span>
+                            <span className="flex items-start justify-between gap-3 p-4">
+                              <span className="min-w-0">
+                                <span className="block text-[15px] font-bold leading-snug text-foreground">
+                                  {o.label}
+                                </span>
+                                <span className="mt-1 block text-[12.5px] leading-relaxed text-gray-600 dark:text-muted-foreground">
+                                  {o.desc}
+                                </span>
+                                <span className={cn("mt-2 block text-[11px] font-semibold", TEAL_INK)}>
+                                  {o.verse}
+                                </span>
+                              </span>
+                              <RadioMark active={active} />
+                            </span>
+                          </label>
+                        )
+                      })
+                    : isStyleStep
+                    ? STUDY_STYLE_OPTIONS.map(o => {
+                        const active = selected === o.code
+                        const Icon = o.icon
+                        return (
+                          // The landing page's feature-card treatment: rounded-2xl
+                          // on a hairline border, a teal-tinted icon tile, a bold
+                          // title over muted body copy, and a shadow that lifts on
+                          // hover. Two boxes with labels would have made the user
+                          // read to tell them apart; this makes the difference
+                          // visible before the copy is read.
+                          <label
+                            key={o.code}
+                            // Same naming scheme as the rest of the app's instrumented
+                            // controls - see CLICK_TARGETS in lib/analyticsRoutes.ts,
+                            // where both values are registered.
+                            data-track={o.track}
+                            className={cn(
+                              cardClass(active),
+                              "flex flex-col rounded-2xl p-5 hover:-translate-y-0.5 motion-reduce:hover:translate-y-0",
+                            )}
+                            style={active ? { borderColor: TEAL } : undefined}
+                          >
+                            <input
+                              type="radio"
+                              name={group}
+                              value={o.code}
+                              checked={active}
+                              onChange={() => onSelect(o.code)}
+                              className="sr-only"
+                            />
 
-      </DialogContent>
-    </Dialog>
+                            <span className="mb-4 flex items-start justify-between">
+                              <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-teal-100 text-teal-600 dark:bg-[rgba(13,148,136,0.2)] dark:text-teal-300">
+                                <Icon className="h-[18px] w-[18px]" />
+                              </span>
+                              <RadioMark active={active} />
+                            </span>
+
+                            <span className="block text-[15px] font-bold leading-snug text-foreground">
+                              {o.label}
+                            </span>
+                            <span className="mt-1.5 block text-[12.5px] leading-relaxed text-gray-600 dark:text-muted-foreground">
+                              {o.desc}
+                            </span>
+
+                            <span className="mt-3.5 flex flex-col gap-1.5">
+                              {o.points.map(p => (
+                                <span
+                                  key={p}
+                                  className="flex items-start gap-2 text-[11.5px] leading-snug text-gray-600 dark:text-muted-foreground"
+                                >
+                                  {/* A bullet, not an icon: the two icons in this step
+                                      already carry meaning and a second glyph next to
+                                      every line would be pure ornament. */}
+                                  <span
+                                    aria-hidden="true"
+                                    className="mt-[5px] h-1 w-1 flex-shrink-0 rounded-full"
+                                    style={{ backgroundColor: TEAL }}
+                                  />
+                                  <span>{p}</span>
+                                </span>
+                              ))}
+                            </span>
+
+                            {/* What the choice actually does, spelled out on the card
+                                that does it. `mt-auto` keeps the two footers on the
+                                same line when the descriptions differ in height. */}
+                            <span
+                              className={cn(
+                                "mt-auto block border-t pt-4 text-[11px] font-semibold leading-snug",
+                                active
+                                  ? cn("border-[rgba(13,148,136,0.25)] dark:border-[rgba(13,148,136,0.4)]", TEAL_INK)
+                                  : "border-border text-gray-500 dark:text-muted-foreground",
+                              )}
+                            >
+                              {o.result}
+                            </span>
+                          </label>
+                        )
+                      })
+                    : loading
+                    ? [0, 1, 2].map(i => (
+                        <div
+                          key={i}
+                          aria-hidden="true"
+                          className="h-[74px] animate-pulse rounded-xl border-2 border-border bg-card motion-reduce:animate-none"
+                        />
+                      ))
+                    : options.map(o => {
+                        const active = selected === o.code
+                        const Icon = iconFor(o.code)
+                        return (
+                          <label
+                            key={o.code}
+                            className={cn(cardClass(active), "flex items-center justify-between gap-3 rounded-xl p-4")}
+                            style={active ? { borderColor: TEAL } : undefined}
+                          >
+                            <input
+                              type="radio"
+                              name={group}
+                              value={o.code}
+                              checked={active}
+                              onChange={() => onSelect(o.code)}
+                              className="sr-only"
+                            />
+                            <span className="flex min-w-0 items-center gap-3.5">
+                              {/* The tile follows the theme: `muted` on the card at
+                                  rest, a teal tint when selected. The icon takes its
+                                  colour from the tile, so the pair always agree. */}
+                              <span
+                                className={cn(
+                                  "flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg transition-colors duration-200 motion-reduce:transition-none",
+                                  active
+                                    ? "bg-[rgba(13,148,136,0.12)] text-teal-700 dark:bg-[rgba(13,148,136,0.24)] dark:text-teal-300"
+                                    : "bg-muted text-muted-foreground",
+                                )}
+                              >
+                                <Icon className="h-[18px] w-[18px]" />
+                              </span>
+                              <span className="min-w-0">
+                                <span className="block text-[15px] font-semibold text-foreground">
+                                  {o.label}
+                                </span>
+                                {o.desc && (
+                                  <span className="mt-0.5 block text-[13px] text-gray-600 dark:text-muted-foreground">
+                                    {o.desc}
+                                  </span>
+                                )}
+                                {/* Reproduced exactly as the licence requires. */}
+                                {o.attribution && (
+                                  <span className="mt-1 block text-[11px] text-gray-600 dark:text-muted-foreground">
+                                    {o.attribution}
+                                  </span>
+                                )}
+                              </span>
+                            </span>
+                            <RadioMark active={active} />
+                          </label>
+                        )
+                      })}
+                </div>
+
+                {/* Actions, in the same column as the question so the answer and
+                    the button that confirms it stay one movement of the eye
+                    apart, on a phone and on a 4K display alike. */}
+                <div className="mt-8">
+                  <button
+                    onClick={next}
+                    disabled={busy}
+                    className="w-full rounded-xl py-3.5 text-[15px] font-semibold text-white transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-60 motion-reduce:transition-none"
+                    style={{ backgroundColor: TEAL_TEXT }}
+                  >
+                    {step === TOTAL ? "Planten en beginnen" : "Volgende"}
+                  </button>
+
+                  <div className="mt-3 flex items-center justify-between">
+                    <button
+                      onClick={() => goTo(step - 1)}
+                      disabled={step === 1}
+                      className="py-2 text-sm text-gray-600 transition-colors hover:text-gray-900 disabled:invisible motion-reduce:transition-none dark:text-muted-foreground dark:hover:text-foreground"
+                    >
+                      Terug
+                    </button>
+                    {/* Onboarding is never a gate: skipping keeps the defaults. */}
+                    <button
+                      onClick={() => finish(false)}
+                      disabled={busy}
+                      className="py-2 text-sm text-gray-600 transition-colors hover:text-gray-900 disabled:opacity-60 motion-reduce:transition-none dark:text-muted-foreground dark:hover:text-foreground"
+                    >
+                      Overslaan
+                    </button>
+                  </div>
+
+                  {step === TOTAL && (
+                    <p className="mt-4 text-xs leading-relaxed text-gray-600 dark:text-muted-foreground">
+                      Lezen is gratis, in elke vertaling. Met{" "}
+                      <Link
+                        href="/abonnement"
+                        className={cn("font-semibold underline underline-offset-2", TEAL_INK)}
+                      >
+                        Pro
+                      </Link>{" "}
+                      lees je commentaren volledig, open je de grondtekst en stel je meer vragen aan de
+                      AI-assistent.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   )
 }

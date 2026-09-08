@@ -2,9 +2,8 @@ import type { Metadata } from "next"
 import LandingPage from "../components/landing/LandingPage"
 import { JsonLd } from "../components/seo/JsonLd"
 import { HOME_FAQS } from "../lib/content/homeFaq"
-import { HOW_IT_WORKS_STEPS } from "../lib/content/howItWorks"
 import { BASE_URL, ogImageUrl, OG_IMAGE_WIDTH, OG_IMAGE_HEIGHT, SITE_NAME, TWITTER_HANDLE, SITE_LOCALE } from "../lib/seo/constants"
-import { graph, webPageNode, faqNode, howToNode } from "../lib/seo/structuredData"
+import { graph, webPageNode, faqNode } from "../lib/seo/structuredData"
 
 const HOME_TITLE = "Bijbelstudie Online - Gratis de Bijbel Bestuderen | BijbelStudie"
 const HOME_DESCRIPTION =
@@ -89,15 +88,11 @@ export default async function Page() {
     // FAQPage must describe text that is actually on the page - the accordion
     // renders every answer into the HTML (collapsed, not unmounted) so this
     // stays truthful.
-    faqNode(HOME_FAQS, homeUrl),
-    howToNode({
-      name: "Zo begin je met online bijbelstudie",
-      description:
-        "In drie stappen van een leeg scherm naar bijbelstudie met commentaren, grondtekst en notities.",
-      pageUrl: homeUrl,
-      steps: HOW_IT_WORKS_STEPS.map(s => ({ name: s.title, text: s.desc })),
-      totalTime: "PT20M",
-    })
+    // Structured data must describe text that is on the page: the three-step
+    // "hoe het werkt" section is gone (the lesson demo shows it instead), so
+    // its HowTo node went with it. Google stopped showing HowTo rich results
+    // in 2023, so nothing is lost.
+    faqNode(HOME_FAQS, homeUrl)
   )
 
   return (

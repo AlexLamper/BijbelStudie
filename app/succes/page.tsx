@@ -9,6 +9,7 @@ import { useSession } from "next-auth/react"
 import { SkeletonBlock, SkeletonText } from "../../components/ui/skeletons"
 import { useTranslation } from "../i18n/client"
 import { trackNow } from "../../lib/analytics"
+import { useLevensboom } from "../../hooks/useLevensboom"
 
 export default function SuccessPage() {
   const { t } = useTranslation("success")
@@ -20,6 +21,18 @@ export default function SuccessPage() {
   // subscriber they are charged EUR 9,99 a month, which is simply untrue.
   const [billingInterval, setBillingInterval] = useState<"monthly" | "annual" | null>(null)
   const { update } = useSession()
+  const { refresh: refreshLevensboom } = useLevensboom()
+
+  useEffect(() => {
+    if (status !== "success") return
+    // /api/verify-subscription has just written the account's first Pro grant
+    // and, with it, the gold ring (lib/levensboom/proRing.ts). The shared tree
+    // state was fetched before the payment and sits in a one-minute session
+    // cache, so refetch it: the navbar and the profile then show the ring now,
+    // not after a reload. Its own effect, deliberately not a dependency of the
+    // verification below - that one must run exactly once per session id.
+    void refreshLevensboom()
+  }, [status, refreshLevensboom])
 
   useEffect(() => {
     // Redirect if no sessionId is found

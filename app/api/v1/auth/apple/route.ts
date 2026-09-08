@@ -5,7 +5,7 @@ import { corsPreflight, errorV1, handleV1Error, jsonV1 } from '../../../../../li
 import { checkRateLimit, clientIp } from '../../../../../lib/mobileRateLimit';
 import { issueSession } from '../../../../../lib/mobileAuthFlow';
 import { verifyAppleIdentityToken } from '../../../../../lib/oauthVerify';
-import { findUserByEmail, normaliseEmail } from '../../../../../lib/userLookup';
+import { provisionOAuthUser } from '../../../../../lib/oauthUsers';
 
 export const runtime = 'nodejs';
 
@@ -50,17 +50,9 @@ export async function POST(req: NextRequest) {
 
     await connectMongoDB();
 
+    // A returning private-relay user often sends no email at all, so the
+    // `appleId` lookup has to come before the NO_EMAIL check.
     let user = await User.findOne({ appleId: identity.sub });
-
-    if (!user && resolvedEmail) {
-      // Case-insensitive for the same reason as the Google route: this must
-      // link to an existing account rather than create a second one.
-      user = await findUserByEmail(resolvedEmail);
-      if (user) {
-        user.appleId = identity.sub;
-        await user.save();
-      }
-    }
 
     if (!user) {
       if (!resolvedEmail) {
@@ -74,11 +66,13 @@ export async function POST(req: NextRequest) {
         [givenName, familyName].filter((v) => typeof v === 'string' && v.trim()).join(' ').trim() ||
         resolvedEmail.split('@')[0];
 
-      user = await User.create({
+      // Links case-insensitively to an existing account, or creates one
+      // atomically. See lib/oauthUsers.ts for why neither is a `save()`.
+      user = await provisionOAuthUser({
+        provider: 'apple',
+        providerId: identity.sub,
+        email: resolvedEmail,
         name: displayName,
-        email: normaliseEmail(resolvedEmail),
-        appleId: identity.sub,
-        bio: '',
       });
     }
 

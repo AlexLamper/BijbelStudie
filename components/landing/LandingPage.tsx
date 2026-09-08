@@ -1,20 +1,22 @@
 import Link from "next/link"
 import Image from "next/image"
-import {
-  BookOpen, StickyNote, Library, Languages,
-  ArrowRight, Check, ChevronDown, Users, Shield,
-  Lightbulb, BarChart2,
-  MessageSquare, ChevronLeft, ChevronRight,
-  Flame, PenLine, Sparkles,
-} from "lucide-react"
+import { ArrowRight, Check } from "lucide-react"
 import { Footer } from "./footer"
 import { FAQItem } from "./FAQItem"
 import { ScrollEffects } from "./ScrollEffects"
 import { StudyDiscovery } from "./StudyDiscovery"
 import { HOME_FAQS } from "../../lib/content/homeFaq"
-import { HOW_IT_WORKS_STEPS } from "../../lib/content/howItWorks"
+import { opstandingLessons } from "../../lib/data/study-lessons/opstanding"
 import { ALL_STUDIES } from "../../lib/bookStudies"
 import { PLANS, euro } from "../../lib/pricing"
+import LandingTree from "./LandingTree"
+import HeroLevensboom from "./HeroLevensboom"
+import LevensboomGroeiDemo from "./LevensboomGroeiDemo"
+import StudyFlowDemo, { type DemoLesson } from "./StudyFlowDemo"
+import CountUp from "./CountUp"
+import { renderTreeSvg } from "../../lib/levensboom/svg"
+import { STAGES } from "../../lib/levensboom/stages"
+import { CATALOG } from "../../lib/levensboom/catalog"
 
 /* ─── Design tokens ──────────────────────────────────────────── */
 const T = {
@@ -140,196 +142,25 @@ function SectionHeader({
   )
 }
 
-/** The label above a group of cards: eyebrow, rule, count. */
-function GroupLabel({
-  icon: Icon,
-  label,
-  meta,
-}: {
-  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>
-  label: string
-  meta: string
-}) {
+/** The label above a group of ledger rows: eyebrow, rule, count. Not a reveal
+ *  of its own - the caller wraps the whole group, so the label and its rows
+ *  arrive as one movement. */
+function GroupLabel({ label, meta }: { label: string; meta: string }) {
   return (
-    <FadeUp className="mb-6">
-      <div className="flex items-baseline gap-3">
-        <div className="flex items-center gap-2">
-          <Icon className="h-4 w-4" style={{ color: T.teal }} />
-          <p
-            className="text-[0.6875rem] font-bold uppercase"
-            style={{ color: T.tealText, letterSpacing: "0.16em" }}
-          >
-            {label}
-          </p>
-        </div>
-        <div className="h-px flex-1" style={{ backgroundColor: T.border }} />
-        <p className="text-xs font-semibold" style={{ color: T.muted }}>{meta}</p>
-      </div>
-    </FadeUp>
+    <div className="mb-5 flex items-baseline gap-3">
+      <p
+        className="text-[0.6875rem] font-bold uppercase"
+        style={{ color: T.tealText, letterSpacing: "0.16em" }}
+      >
+        {label}
+      </p>
+      <div className="h-px flex-1" style={{ backgroundColor: T.border }} />
+      <p className="text-xs font-semibold tabular-nums" style={{ color: T.muted }}>{meta}</p>
+    </div>
   )
 }
 
 /* ─── Bible Study Illustration - looks like an actual app screenshot ─── */
-const HERO_VERSES = [
-  { num: 1, text: "De HEERE is mijn Herder, mij zal niets ontbreken.",                                                                       highlight: false },
-  { num: 2, text: "Hij doet mij nederliggen in grazige weiden; Hij voert mij zachtjes aan zeer stille wateren.",                            highlight: true  },
-  { num: 3, text: "Hij verkwikt mijn ziel; Hij leidt mij in het spoor der gerechtigheid, om Zijns Naams wil.",                               highlight: false },
-  { num: 4, text: "Al ging ik ook in een dal der schaduw des doods, ik zou geen kwaad vrezen, want Gij zijt met mij; Uw stok en Uw staf, die vertroosten mij.",   highlight: false },
-]
-
-function BibleStudyIllustration() {
-  return (
-    <div className="relative w-full select-none" style={{ fontFamily: "Inter, system-ui, sans-serif" }}>
-
-      {/* Browser window frame */}
-      <div className="rounded-xl overflow-hidden border bg-white"
-        style={{ borderColor: T.border, boxShadow: SHADOW.raised }}>
-
-        {/* macOS-style chrome with traffic lights + URL bar */}
-        <div className="h-9 px-3 flex items-center gap-3 border-b"
-          style={{ backgroundColor: T.light, borderColor: T.border }}>
-          <div className="flex items-center gap-1.5 flex-shrink-0">
-            <span className="w-3 h-3 rounded-full" style={{ backgroundColor: "#FF5F57" }} />
-            <span className="w-3 h-3 rounded-full" style={{ backgroundColor: "#FEBC2E" }} />
-            <span className="w-3 h-3 rounded-full" style={{ backgroundColor: "#28C840" }} />
-          </div>
-          <div className="flex-1 flex justify-center">
-            <div className="text-[10px] font-medium px-3 py-0.5 rounded-md border bg-white inline-flex items-center gap-1.5"
-              style={{ color: T.muted, borderColor: T.border }}>
-              <Shield className="h-2.5 w-2.5" style={{ color: T.teal }} />
-              www.bijbelstudie.io/studie
-            </div>
-          </div>
-          <div className="w-12" />
-        </div>
-
-        {/* App tab/chapter bar */}
-        <div className="h-10 px-4 flex items-center justify-between border-b"
-          style={{ borderColor: T.border, backgroundColor: "white" }}>
-          <div className="flex items-center gap-2">
-            <div className="h-5 w-5 rounded flex items-center justify-center flex-shrink-0"
-              style={{ backgroundColor: T.teal }}>
-              <BookOpen className="h-3 w-3 text-white" />
-            </div>
-            <span className="font-semibold text-xs" style={{ color: T.text }}>Psalm 23</span>
-            <span className="text-xs" style={{ color: T.muted }}>·</span>
-            <span className="text-xs" style={{ color: T.muted }}>Statenvertaling</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="h-6 w-6 rounded flex items-center justify-center" style={{ backgroundColor: T.bg }}>
-              <ChevronLeft size={11} color={T.muted} />
-            </span>
-            <span className="h-6 w-6 rounded flex items-center justify-center" style={{ backgroundColor: T.bg }}>
-              <ChevronRight size={11} color={T.muted} />
-            </span>
-          </div>
-        </div>
-
-        {/* Split-screen app interior: Bible left · Commentary right */}
-        <div className="grid grid-cols-5">
-
-          {/* Bible reading pane (3 cols) */}
-          <div className="col-span-3 border-r" style={{ borderColor: T.border }}>
-            <div className="px-5 pt-4 pb-3 text-center border-b" style={{ borderColor: T.border + "80" }}>
-              <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: T.tealText }}>
-                Psalmen
-              </p>
-              <p className="text-xl font-bold mt-0.5"
-                style={{ color: T.text, fontFamily: "Georgia, 'Times New Roman', serif" }}>
-                Psalm 23
-              </p>
-              <p className="text-[10px] mt-0.5" style={{ color: T.muted }}>Een psalm van David</p>
-            </div>
-
-            <div className="px-5 py-4 space-y-3">
-              {HERO_VERSES.map(v => (
-                <div key={v.num}
-                  className="flex gap-2.5 rounded-md px-2 py-1.5 -mx-2"
-                  style={{
-                    backgroundColor: v.highlight ? "rgba(13,148,136,0.07)" : "transparent",
-                    borderLeft: v.highlight ? `2px solid ${T.teal}` : "2px solid transparent",
-                  }}>
-                  <span className="text-[10px] font-bold flex-shrink-0 mt-0.5 w-3 text-right"
-                    style={{ color: T.tealText }}>
-                    {v.num}
-                  </span>
-                  <p className="text-[11px] leading-relaxed"
-                    style={{ color: T.text, fontFamily: "Georgia, serif", fontStyle: "italic" }}>
-                    {v.text}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Commentary pane (2 cols) */}
-          <div className="col-span-2" style={{ backgroundColor: "#FAFAFA" }}>
-            {/* Tabs row */}
-            <div className="h-9 px-3 flex items-center gap-3 border-b text-[10px]"
-              style={{ borderColor: T.border }}>
-              <span className="font-bold pb-0.5 border-b-2"
-                style={{ color: T.tealText, borderColor: T.teal }}>
-                Commentaar
-              </span>
-              <span style={{ color: T.muted }}>Grondtekst</span>
-              <span style={{ color: T.muted }}>Notities</span>
-            </div>
-
-            {/* Source pill */}
-            <div className="px-4 py-2.5 border-b flex items-center justify-between"
-              style={{ borderColor: T.border + "80" }}>
-              <span className="text-[10px] font-medium" style={{ color: T.muted }}>Bron</span>
-              <div className="text-[10px] font-semibold px-2 py-0.5 rounded-md border bg-white inline-flex items-center gap-1"
-                style={{ borderColor: T.border, color: T.text }}>
-                KingComments
-                <ChevronDown className="h-2.5 w-2.5" style={{ color: T.muted }} />
-              </div>
-            </div>
-
-            {/* Verse 1 commentary */}
-            <div className="px-4 py-4 space-y-3">
-              <div className="inline-flex items-center gap-1">
-                <span className="text-[9px] font-bold tracking-wider uppercase px-1.5 py-0.5 rounded-full"
-                  style={{ backgroundColor: "rgba(13,148,136,0.10)", color: T.tealDeep }}>
-                  Vers 1
-                </span>
-              </div>
-              <p className="text-[11px] leading-relaxed" style={{ color: T.text }}>
-                Deze psalm is de bekendste en meest geliefde van alle psalmen. In de{" "}
-                <span style={{ color: T.tealText, fontStyle: "italic" }}>Ps 23:1-4</span>
-                {" "}geeft hij ons een volledig beeld van de volcontinu bezigheden van de herder, in wie
-                we zonder enige moeite het beeld van de Heer Jezus herkennen.
-              </p>
-              <p className="text-[11px] leading-relaxed" style={{ color: T.text }}>
-                In de <span style={{ color: T.tealText, fontStyle: "italic" }}>Ps 23:5-6</span> wordt daaraan het beeld van een feestmaal toegevoegd. Deze psalm
-                geeft ons een complete beschrijving van de herder-relatie met onze Heer.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Floating "Notitie opgeslagen" badge (top-left) ── */}
-      <div className="absolute -top-5 -left-4 bg-white rounded-full border px-3 py-1.5 hidden sm:flex items-center gap-2"
-        style={{ borderColor: T.border, boxShadow: "0 10px 24px -12px rgba(15,23,42,0.28)" }}>
-        <div className="h-5 w-5 rounded-full flex items-center justify-center flex-shrink-0"
-          style={{ backgroundColor: T.tealLight }}>
-          <PenLine className="h-3 w-3" style={{ color: T.teal }} />
-        </div>
-        <span className="text-[11px] font-semibold" style={{ color: T.text }}>Notitie opgeslagen</span>
-      </div>
-
-      {/* ── Floating streak pill (bottom-right) ── */}
-      <div className="absolute -bottom-4 -right-4 bg-white rounded-full border px-3 py-1.5 hidden sm:flex items-center gap-1.5"
-        style={{ borderColor: T.border, boxShadow: "0 10px 24px -12px rgba(15,23,42,0.28)" }}>
-        <Flame className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "#EA580C" }} />
-        <span className="text-[11px] font-bold" style={{ color: T.text }}>12</span>
-        <span className="text-[11px]" style={{ color: T.muted }}>dagen streak</span>
-      </div>
-
-    </div>
-  )
-}
 
 /* ─── Navbar ─────────────────────────────────────────────────── */
 function Navbar() {
@@ -359,7 +190,7 @@ function Navbar() {
             sitemap, maar horen niet in de hoofdnavigatie van de app. */}
         <nav className="hidden md:flex items-center justify-center gap-1">
           {[
-            { href: "#functies",      label: "Functies" },
+            { href: "#levensboom",    label: "Voortgang" },
             { href: "#prijzen",       label: "Prijzen" },
             { href: "#faq",           label: "FAQ" },
           ].map(({ href, label }) => (
@@ -400,6 +231,32 @@ function AppleLogo({ className }: { className?: string }) {
     </svg>
   )
 }
+
+/** One fixed seed for every tree on this page, so the build output is stable. */
+const LANDING_SEED = "bijbelstudie-levensboom"
+
+/**
+ * The four facts under the hero copy. Every figure is counted from the data
+ * the page is built from, so none of them is a claim to defend: the studies
+ * and lessons from the catalogue, the translations and commentaries from the
+ * library section further down.
+ */
+const LESSONS_TOTAL = ALL_STUDIES.reduce((sum, study) => sum + study.lessons.length, 0)
+const HERO_STATS = [
+  { value: ALL_STUDIES.length, label: "begeleide bijbelstudies", count: true },
+  { value: LESSONS_TOTAL, label: "lessen van een kwartier", count: true },
+  { value: 4, label: "Nederlandse vertalingen", count: false },
+  { value: 4, label: "commentaren, per vers", count: false },
+]
+
+/**
+ * The light behind the hero frame: the dusk sky and ground of the scene it
+ * shows (`waterbeken` at `dusk`, lib/levensboom/scenes.ts), blurred and laid
+ * under the picture at low opacity. The frame then looks lit by its own
+ * scene instead of cut out of the white page. The sky value doubles as the
+ * frame's backdrop for the instant before the SVG paints.
+ */
+const HERO_GLOW = { sky: "#5A3E6E", ground: "#F0A56B" }
 
 /* ─── Hero ───────────────────────────────────────────────────── */
 function Hero() {
@@ -532,216 +389,108 @@ function Hero() {
             </a>
           </div>
 
-          {/* Was a row of five icon-and-label chips. Every one of those icons was
-              decorative - a star next to "gratis", sparkles next to "AI" - and
-              five chips wrapped to three ragged lines on a laptop. One quiet
-              line of facts under a rule does the same job and looks like a
-              product rather than a banner. */}
-          <div
-            className="mt-8 border-t pt-6"
+          {/* Four counted facts under a rule. The two catalogue figures count
+              up the first time they scroll into view; the server renders the
+              final number, so the served HTML is complete without the bundle. */}
+          <ul
+            className="mt-8 grid grid-cols-2 gap-x-6 gap-y-5 border-t pt-6 sm:grid-cols-4"
             style={{ borderColor: T.border }}
+            aria-label="In cijfers"
           >
-            <p
-              className="text-[0.8125rem] leading-relaxed"
-              style={{ color: T.muted }}
-            >
-              {[
-                `${ALL_STUDIES.length} bijbelstudies`,
-                "Bijbelcommentaren per vers",
-                "Hebreeuwse en Griekse grondtekst",
-                "AI-assistent",
-                "Ook als iOS-app",
-              ].join("  ·  ")}
-            </p>
-          </div>
+            {HERO_STATS.map(stat => (
+              <li key={stat.label}>
+                <p
+                  className="text-2xl font-extrabold leading-none tabular-nums"
+                  style={{ color: T.text, letterSpacing: "-0.02em" }}
+                >
+                  {stat.count ? <CountUp value={stat.value} /> : stat.value}
+                </p>
+                <p className="mt-1.5 text-xs leading-snug" style={{ color: T.muted }}>
+                  {stat.label}
+                </p>
+              </li>
+            ))}
+          </ul>
         </div>
 
-        {/* Illustration column - rests slightly off the page */}
-        <div className="relative w-full mx-auto lg:max-w-[54rem] lg:w-full lg:mx-0 lg:justify-self-end">
-          <div className="float-slow w-full">
-            <BibleStudyIllustration />
+        {/* The product's face: a grown tree at dusk that grows in from a kiem
+            when the page lands, with the reader's own numbers laid over it.
+            Everything in the picture is the real generator.
+
+            A framed picture, lit from behind. Two earlier treatments were
+            rejected: a rounded box on a solid purple backdrop under a heavy
+            shadow (a hard rectangle cut out of a white hero), and a picture
+            that dissolved into the page on all four sides (a blur with no edge
+            to hold on to). This one keeps a real edge - a generous radius and
+            a hairline ring - and rests on a soft wash of its own dusk colours,
+            so it reads as an object lit by the scene rather than a cut-out.
+            `slice` keeps the SVG, drawn at 5:4, covering the 4:3 box on phones,
+            so the frame never shows a letterbox band. */}
+        <div className="relative w-full mx-auto max-w-[34rem] lg:max-w-none lg:w-full lg:mx-0 lg:justify-self-end">
+          {/* Ambient glow. Sits behind the frame, a little larger and offset
+              down-right, so the light seems to fall out of the picture onto
+              the page. Purely decorative and invisible to assistive tech. */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -inset-x-6 -bottom-8 -top-4 rounded-[3rem] blur-3xl"
+            style={{
+              background: `radial-gradient(60% 55% at 35% 30%, ${HERO_GLOW.sky}, transparent 70%), radial-gradient(55% 45% at 72% 88%, ${HERO_GLOW.ground}, transparent 70%)`,
+              opacity: 0.3,
+            }}
+          />
+          <div
+            className="relative aspect-[4/3] overflow-hidden rounded-[1.75rem] ring-1 ring-black/[0.06] lg:aspect-[5/4]"
+            style={{
+              backgroundColor: HERO_GLOW.sky,
+              boxShadow: "0 30px 60px -32px rgba(15,23,42,0.35), 0 10px 20px -14px rgba(15,23,42,0.18)",
+            }}
+          >
+            <HeroLevensboom
+              svg={renderTreeSvg({ seed: LANDING_SEED, level: 14, frac: 0.7, species: "eik", scene: "waterbeken", framing: "scene", width: 800, height: 640, season: "summer", timeOfDay: "dusk", rootAttributes: 'aria-hidden="true" preserveAspectRatio="xMidYMid slice"' })}
+              seed={LANDING_SEED}
+              level={14}
+            />
+
+            {/* Two cards, not three. The "+25 XP" pill that sat top-right went:
+                three floating labels read as clutter, and the progress card
+                already says what the XP is for. */}
+            <div
+              className="absolute left-4 top-4 flex items-center gap-3 rounded-2xl border bg-white/85 py-2 pl-2 pr-4 backdrop-blur-md"
+              style={{ borderColor: "rgba(15,23,42,0.08)", boxShadow: "0 10px 24px -14px rgba(15,23,42,0.35)" }}
+            >
+              <LandingTree
+                svg={renderTreeSvg({ seed: LANDING_SEED, level: 14, frac: 0.7, species: "eik", framing: "portrait", width: 96, height: 96, rootAttributes: 'aria-hidden="true"' })}
+                seed={LANDING_SEED}
+                level={14}
+                species="eik"
+                framing="portrait"
+                className="h-11 w-11 overflow-hidden rounded-full ring-2 ring-teal-600/40"
+              />
+              <div>
+                <p className="text-[12px] font-bold leading-none" style={{ color: T.text }}>Jouw voortgang</p>
+                <p className="mt-1 text-[11px] leading-none" style={{ color: T.muted }}>Volwassen boom · niveau 14</p>
+              </div>
+            </div>
+
+            {/* Where it is going. The streak cell that used to share this card
+                came off: one line and one bar is the calmer composition. */}
+            <div
+              className="absolute inset-x-4 bottom-4 rounded-2xl border bg-white/85 px-4 py-3 backdrop-blur-md"
+              style={{ borderColor: "rgba(15,23,42,0.08)", boxShadow: "0 10px 24px -14px rgba(15,23,42,0.35)" }}
+            >
+              <div className="flex items-baseline justify-between gap-3">
+                <p className="text-[12px] font-bold" style={{ color: T.text }}>Nog 340 XP tot de amandelboom</p>
+                <p className="text-[11px] tabular-nums" style={{ color: T.muted }}>62%</p>
+              </div>
+              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full" style={{ backgroundColor: "rgba(15,23,42,0.08)" }}>
+                <div className="h-full rounded-full" style={{ width: "62%", backgroundColor: T.teal }} />
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </section>
   );
-}
-
-/* ─── Features ───────────────────────────────────────────────── */
-function FeatureCard({
-  num, icon: Icon, title, desc, className = "", children,
-}: {
-  num: string
-  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>
-  title: string
-  desc: string
-  className?: string
-  children?: React.ReactNode
-}) {
-  return (
-    <FadeUp className={className}>
-      <div className="lp-card flex h-full flex-col rounded-2xl p-6 lg:p-7">
-        <div className="flex items-start justify-between mb-5">
-          <div className="h-11 w-11 rounded-xl flex items-center justify-center"
-            style={{
-              backgroundColor: T.tealLight,
-              backgroundImage: `linear-gradient(135deg, ${T.tealLight}, rgba(13,148,136,0.05))`,
-            }}>
-            <Icon className="h-5 w-5" style={{ color: T.teal }} />
-          </div>
-          <span className="text-[10px] font-bold tracking-widest tabular-nums" style={{ color: T.muted }}>
-            {num}
-          </span>
-        </div>
-
-        <h3 className="font-bold text-base lg:text-lg tracking-tight" style={{ color: T.text }}>{title}</h3>
-        <p className="mt-2 text-sm leading-relaxed" style={{ color: T.muted }}>{desc}</p>
-
-        {children && <div className="mt-5">{children}</div>}
-      </div>
-    </FadeUp>
-  )
-}
-
-/** The example-query and topic chips. One shape, used in both feature cards. */
-function Chip({ children }: { children: React.ReactNode }) {
-  return (
-    <span
-      className="text-[11px] font-medium px-2.5 py-1 rounded-full border"
-      style={{ borderColor: T.border, color: T.muted, backgroundColor: T.light }}
-    >
-      {children}
-    </span>
-  )
-}
-
-function Features() {
-  return (
-    <section id="functies" className={`${SECTION_Y} scroll-mt-16`} style={{ backgroundColor: T.light, ...EDGE }}>
-      <div className={SHELL}>
-        <SectionHeader
-          label="Functies"
-          title="Alles wat u nodig heeft voor bijbelstudie"
-          subtitle="Van bijbeltekst tot studiehulpmiddelen - alles samengebracht in één overzichtelijk platform."
-        />
-
-        <div className="reveal-stagger grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {/* Featured: AI-assistent (full width banner) */}
-          <FeatureCard
-            num="01"
-            icon={Sparkles}
-            title="AI-assistent voor al uw bijbelvragen"
-            desc="Stel elke vraag over de Bijbel en krijg direct een serieus, theologisch onderbouwd antwoord met verwijzingen naar de tekst. De assistent kent het hoofdstuk dat u leest en helpt u de Schrift beter begrijpen."
-            className="lg:col-span-3"
-          >
-            <div className="flex flex-wrap gap-1.5">
-              {[
-                "Wat is de kernboodschap van dit hoofdstuk?",
-                "Leg de historische achtergrond uit",
-                "Wie was Paulus?",
-                "Welke teksten sluiten hierop aan?",
-              ].map(q => <Chip key={q}>{q}</Chip>)}
-            </div>
-          </FeatureCard>
-
-          {/* Featured: Begeleide studies (large, spans 2 columns on lg). The
-              count comes from the catalogue for the same reason the hero's
-              does: a hardcoded number was stale within a week.
-              It counts the WHOLE catalogue, not just the themed studies: every
-              bible book is a guided study now, run through the same five-step
-              flow, so quoting the seven themed ones here next to "73
-              bijbelstudies" in the hero would read as two different products. */}
-          <FeatureCard
-            num="02"
-            icon={Lightbulb}
-            title={`${ALL_STUDIES.length} begeleide bijbelstudies`}
-            desc="Elk bijbelboek hoofdstuk voor hoofdstuk, plus studies over personen, gebeurtenissen en thema's - met gerichte vragen per les."
-            className="lg:col-span-2"
-          >
-            <div className="flex flex-wrap gap-1.5">
-              {["Het leven van David", "De Bergrede", "Brieven van Paulus", "Profeten", "Genesis"].map(s => (
-                <Chip key={s}>{s}</Chip>
-              ))}
-            </div>
-          </FeatureCard>
-
-          {/* Persoonlijke notities */}
-          <FeatureCard
-            num="03"
-            icon={StickyNote}
-            title="Persoonlijke notities"
-            desc="Noteer gedachten bij verzen en bewaar alles op één plek - automatisch gesynchroniseerd."
-          />
-
-          {/* Row 2: 3 equal cards */}
-          <FeatureCard
-            num="04"
-            icon={BookOpen}
-            title="Meerdere vertalingen"
-            desc="Lees en vergelijk Nederlandse bijbelvertalingen direct naast elkaar."
-          />
-
-          <FeatureCard
-            num="05"
-            icon={Library}
-            title="Bijbelcommentaren"
-            desc="Lees klassieke en hedendaagse commentaren - KingComments, Matthew Henry, Dachsel en Meyer."
-          />
-
-          {/* Was "Bijbelgroepen", which is temporarily out of the product.
-              The slot is filled rather than left empty: the grid is two rows of
-              three, and an advertised feature the visitor cannot find anywhere
-              in the app is worse than one fewer card. */}
-          <FeatureCard
-            num="06"
-            icon={Languages}
-            title="Hebreeuws en Grieks"
-            desc="Bekijk de grondtekst bij elk vers, met transliteratie en woordbetekenis."
-          />
-
-          {/* Row 3: Voortgang - wide. Numbered 07, not 06: it shared a number
-              with the grondtekst card above it. */}
-          <FadeUp className="lg:col-span-3">
-            <div className="lp-card rounded-2xl px-6 lg:px-7 py-5 lg:py-6 flex flex-col lg:flex-row lg:items-center gap-5 lg:gap-8">
-              <div className="flex items-start gap-5 flex-1 min-w-0">
-                <div className="h-11 w-11 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{
-                    backgroundColor: T.tealLight,
-                    backgroundImage: `linear-gradient(135deg, ${T.tealLight}, rgba(13,148,136,0.05))`,
-                  }}>
-                  <BarChart2 className="h-5 w-5" style={{ color: T.teal }} />
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-bold text-base lg:text-lg tracking-tight" style={{ color: T.text }}>Voortgang bijhouden</h3>
-                    <span className="text-[10px] font-bold tracking-widest tabular-nums" style={{ color: T.muted }}>07</span>
-                  </div>
-                  <p className="text-sm leading-relaxed" style={{ color: T.muted }}>
-                    Zie hoeveel u gelezen heeft, houd uw leestreeks bij en blijf gemotiveerd met dagelijkse statistieken.
-                  </p>
-                </div>
-              </div>
-              {/* Mini stat strip */}
-              <div className="flex items-center gap-6 lg:gap-8 flex-shrink-0">
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <Flame className="h-4 w-4" style={{ color: "#EA580C" }} />
-                    <span className="text-2xl font-extrabold tabular-nums" style={{ color: T.text }}>12</span>
-                  </div>
-                  <p className="text-[11px] mt-0.5" style={{ color: T.muted }}>dagen streak</p>
-                </div>
-                <div className="h-10 w-px" style={{ backgroundColor: T.border }} />
-                <div>
-                  <div className="text-2xl font-extrabold tabular-nums" style={{ color: T.text }}>847</div>
-                  <p className="text-[11px] mt-0.5" style={{ color: T.muted }}>verzen gelezen</p>
-                </div>
-              </div>
-            </div>
-          </FadeUp>
-        </div>
-      </div>
-    </section>
-  )
 }
 
 /* ─── Bibles & Commentaries ──────────────────────────────────── */
@@ -763,35 +512,116 @@ function AccessPill({ free }: { free: boolean }) {
 
 /**
  * What is actually in the library, checked against what the app serves:
- * `hooks/useBibleData.ts` for the translations and
- * `lib/mobileAttribution.ts` for the commentaries. It had drifted - the
- * NBG-vertaling 1951 and Heinrich Meyer were missing, and the section claimed
- * three translations when there are four Dutch ones plus five English.
+ * `hooks/useBibleData.ts` for the translations and `lib/mobileAttribution.ts`
+ * for the commentaries. `short` is the tab label in the mock reader below -
+ * the reader's own names, cut to fit one row on a phone.
+ */
+const TRANSLATIONS = [
+  { name: "Statenvertaling",    short: "Statenvertaling", year: "1637", note: "De klassieke Nederlandse vertaling",                      tag: "Standaard" },
+  { name: "NBG-vertaling",      short: "NBG 1951",        year: "1951", note: "Decennialang de kanselbijbel van de protestantse kerken", tag: "Onder licentie" },
+  { name: "De Heilige Schrift", short: "1917",            year: "1917", note: "De eerste NBG-vertaling, in de taal van haar tijd",       tag: null },
+  { name: "Canisiusbijbel",     short: "Canisius",        year: "1939", note: "Rooms-katholieke vertaling met deuterocanonieke boeken",  tag: null },
+]
+const ENGLISH_TRANSLATIONS = 5
+
+const COMMENTARIES = [
+  { name: "KingComments",        author: "Ger de Koning", note: "Eigentijds Nederlandstalig commentaar op de hele Bijbel, vers voor vers",  free: true  },
+  { name: "Matthew Henry",       author: "1662-1714",     note: "Het bekendste commentaar op de hele Bijbel, in Nederlandse vertaling",     free: false },
+  { name: "Karl August Dachsel", author: "1818-1893",     note: "Uitvoerig vers-voor-vers commentaar met veel aandacht voor de grondtekst", free: false },
+  { name: "Heinrich Meyer",      author: "1800-1873",     note: "Kritisch-exegetisch commentaar op het Nieuwe Testament",                   free: false },
+]
+
+/**
+ * One verse the way the reader shows it: the translation tabs, the text, the
+ * commentaries underneath. Static - nothing here is a control, so the tabs are
+ * spans and the active states are fixed.
  *
- * Presentation changed with it. Three big serif cards per row, each opening
- * with the same teal Library tile, was a lot of furniture around six short
- * facts; a reader comparing sources wants them in a column they can run their
- * eye down. Translations stay as cards because the year is the thing being
- * compared. Commentaries became rows in one panel, each carrying whether it is
- * free or Pro - the question people actually have about a commentary list.
+ * Only the Statenvertaling is quoted, because it is the one translation here
+ * that is public domain. The NBG 1951 is licensed and the HSV and BasisBijbel
+ * never ship at all, so none of them may ever appear as text on this page; the
+ * other tabs carry a name and nothing else. The commentaries are named, not
+ * quoted, for the same reason - KingComments may not be redistributed.
+ */
+function ReadingPane() {
+  return (
+    <div
+      className="overflow-hidden rounded-2xl border"
+      style={{ borderColor: T.border, backgroundColor: T.card, boxShadow: SHADOW.card }}
+    >
+      <div className="flex overflow-x-auto border-b px-2" style={{ borderColor: T.border }}>
+        {TRANSLATIONS.map((translation, i) => {
+          const active = i === 0
+          return (
+            <span
+              key={translation.name}
+              className="relative inline-flex h-10 flex-none items-center whitespace-nowrap px-3 text-[12px] font-semibold"
+              style={{ color: active ? T.tealText : T.muted }}
+            >
+              {translation.short}
+              {active && (
+                <span aria-hidden className="absolute inset-x-2 -bottom-px h-[2px] rounded-full" style={{ backgroundColor: T.teal }} />
+              )}
+            </span>
+          )
+        })}
+      </div>
+
+      <div className="px-5 py-5 sm:px-7 sm:py-6">
+        <div className="flex items-baseline justify-between gap-3">
+          <p className="text-[13px] font-bold tracking-tight" style={{ color: T.text }}>Psalm 1:3</p>
+          <p className="text-[11px]" style={{ color: T.muted }}>Statenvertaling · 1637</p>
+        </div>
+        <p className="mt-3 font-serif text-[15.5px] leading-[1.75]" style={{ color: T.text }}>
+          <sup className="mr-1.5 font-sans text-[10px] font-bold" style={{ color: T.teal }}>3</sup>
+          Want hij zal zijn als een boom, geplant aan waterbeken, die zijn vrucht geeft op zijn tijd, en
+          welks blad niet afvalt; en al wat hij doet, zal wel gelukken.
+        </p>
+      </div>
+
+      <div className="border-t px-5 py-4 sm:px-7" style={{ borderColor: T.border, backgroundColor: T.light }}>
+        <p className="text-[0.625rem] font-bold uppercase" style={{ color: T.muted, letterSpacing: "0.14em" }}>
+          Commentaar bij dit vers
+        </p>
+        <div className="mt-2.5 flex flex-wrap gap-1.5">
+          {COMMENTARIES.map((commentary, i) => {
+            const active = i === 0
+            return (
+              <span
+                key={commentary.name}
+                className="rounded-full border px-2.5 py-1 text-[11px] font-semibold"
+                style={
+                  active
+                    ? { borderColor: T.teal, backgroundColor: T.teal, color: "#FFFFFF" }
+                    : { borderColor: T.border, backgroundColor: T.card, color: T.muted }
+                }
+              >
+                {commentary.name}
+              </span>
+            )
+          })}
+        </div>
+        <p className="mt-3 text-[12px] leading-relaxed" style={{ color: T.muted }}>
+          Vers voor vers uitgelegd door Ger de Koning - voor iedereen gratis en volledig te lezen.
+        </p>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * The library: a reading pane beside a ledger. The pane shows one verse as the
+ * reader presents it; the ledger lists the sources themselves, in two groups,
+ * each a name, a year and one line, with the one question people have about a
+ * commentary - is it free - answered in the margin. On a laptop the pane stays
+ * put while the ledger scrolls past it, so the two columns end together.
+ *
+ * It replaced four "ANNO 1637" cards with teal top bars and a panel of
+ * commentary rows: two kinds of furniture in one section, neither of which
+ * looked like the sections around it.
  */
 function BibleLibrary() {
-  const translations = [
-    { name: "Statenvertaling",       year: "1637", note: "De klassieke Nederlandse vertaling",                        badge: "Standaard" },
-    { name: "NBG-vertaling",         year: "1951", note: "Decennialang de kanselbijbel van de protestantse kerken",   badge: "Onder licentie" },
-    { name: "De Heilige Schrift",    year: "1917", note: "De eerste NBG-vertaling, in de taal van haar tijd",         badge: null },
-    { name: "Canisiusbijbel",        year: "1939", note: "Rooms-katholieke vertaling met deuterocanonieke boeken",    badge: null },
-  ]
-
-  const commentaries = [
-    { name: "KingComments",        author: "Ger de Koning",       note: "Eigentijds Nederlandstalig commentaar op de hele Bijbel, vers voor vers", free: true  },
-    { name: "Matthew Henry",       author: "1662-1714",           note: "Het bekendste commentaar op de hele Bijbel, in Nederlandse vertaling",    free: false },
-    { name: "Karl August Dachsel", author: "1818-1893",           note: "Uitvoerig vers-voor-vers commentaar met veel aandacht voor de grondtekst", free: false },
-    { name: "Heinrich Meyer",      author: "1800-1873",           note: "Kritisch-exegetisch commentaar op het Nieuwe Testament",                   free: false },
-  ]
-
   return (
-    <section id="bibliotheek" className={`${SECTION_Y} scroll-mt-16`} style={{ backgroundColor: T.light, ...EDGE }}>
+    <section id="bibliotheek" className={`${SECTION_Y} scroll-mt-16`} style={{ backgroundColor: T.card, ...EDGE }}>
       <div className={SHELL}>
         <SectionHeader
           label="Bibliotheek"
@@ -799,392 +629,159 @@ function BibleLibrary() {
           subtitle="Vier Nederlandse vertalingen naast elkaar, en bij elk vers de uitleg van vier commentaren."
         />
 
-        {/* Translations */}
-        <GroupLabel
-          icon={BookOpen}
-          label="Vertalingen"
-          meta={`${translations.length} Nederlandse · 5 Engelse`}
-        />
-        <div className="reveal-stagger grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-          {translations.map(({ name, year, note, badge }) => (
-            <FadeUp key={name}>
-              <div className="lp-card h-full overflow-hidden rounded-2xl">
-                <div className="h-1" style={{ backgroundColor: T.teal }} />
+        <div className="reveal-stagger grid gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start lg:gap-x-14">
+          <FadeUp className="lg:sticky lg:top-24">
+            <ReadingPane />
+          </FadeUp>
 
-                <div className="p-5 flex flex-col h-full">
-                  <div className="flex items-center justify-between gap-2 mb-4">
-                    <span className="text-[11px] font-bold tracking-widest tabular-nums"
-                      style={{ color: T.muted }}>
-                      ANNO {year}
-                    </span>
-                    {badge && (
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full whitespace-nowrap"
-                        style={{ backgroundColor: T.tealLight, color: T.tealDeep }}>
-                        {badge}
-                      </span>
-                    )}
+          <FadeUp>
+            <GroupLabel
+              label="Vertalingen"
+              meta={`${TRANSLATIONS.length} Nederlandse · ${ENGLISH_TRANSLATIONS} Engelse`}
+            />
+            <ol className="border-t" style={{ borderColor: T.border }}>
+              {TRANSLATIONS.map(({ name, year, note, tag }) => (
+                <li
+                  key={name}
+                  className="grid grid-cols-[3.25rem_minmax(0,1fr)] gap-x-4 border-b py-4 sm:grid-cols-[3.25rem_minmax(0,1fr)_auto]"
+                  style={{ borderColor: T.border }}
+                >
+                  <p className="pt-0.5 text-xs font-semibold tabular-nums" style={{ color: T.muted }}>{year}</p>
+                  <div className="min-w-0">
+                    <p className="text-[15px] font-bold leading-snug tracking-tight" style={{ color: T.text }}>{name}</p>
+                    <p className="mt-1 text-[13px] leading-relaxed" style={{ color: T.muted }}>{note}</p>
                   </div>
+                  {tag && (
+                    <p
+                      className="col-start-2 mt-1.5 text-[11px] font-semibold sm:col-start-3 sm:mt-0 sm:pt-0.5"
+                      style={{ color: tag === "Standaard" ? T.tealText : T.muted }}
+                    >
+                      {tag}
+                    </p>
+                  )}
+                </li>
+              ))}
+            </ol>
+            <p className="mt-4 text-xs leading-relaxed" style={{ color: T.muted }}>
+              Daarnaast de King James Version, American Standard Version, World English Bible,
+              Geneva Bible en Coverdale Bible - per vers naast een Nederlandse vertaling te leggen.
+            </p>
 
-                  {/* Serif - a translation is a book, and the name should read like one. */}
-                  <h3 className="text-lg leading-tight mb-2"
-                    style={{
-                      color: T.text,
-                      fontFamily: "Georgia, 'Times New Roman', serif",
-                      fontWeight: 700,
-                    }}>
-                    {name}
-                  </h3>
-
-                  <p className="text-[13px] leading-relaxed" style={{ color: T.muted }}>{note}</p>
-                </div>
-              </div>
-            </FadeUp>
-          ))}
+            <div className="mt-12">
+              <GroupLabel
+                label="Commentaren"
+                meta={`${COMMENTARIES.length} commentaren · ${COMMENTARIES.filter(c => c.free).length} gratis`}
+              />
+              <ol className="border-t" style={{ borderColor: T.border }}>
+                {COMMENTARIES.map(({ name, author, note, free }) => (
+                  <li
+                    key={name}
+                    className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 border-b py-4"
+                    style={{ borderColor: T.border }}
+                  >
+                    <div className="min-w-0">
+                      <p className="text-[15px] font-bold leading-snug tracking-tight" style={{ color: T.text }}>
+                        {name}
+                        <span className="ml-2 text-xs font-semibold tabular-nums" style={{ color: T.muted }}>{author}</span>
+                      </p>
+                      <p className="mt-1 text-[13px] leading-relaxed" style={{ color: T.muted }}>{note}</p>
+                    </div>
+                    <div className="pt-0.5">
+                      <AccessPill free={free} />
+                    </div>
+                  </li>
+                ))}
+              </ol>
+              <p className="mt-4 text-xs leading-relaxed" style={{ color: T.muted }}>
+                KingComments is voor iedereen gratis en volledig te lezen. De overige drie horen bij Pro.
+                De NBG-vertaling 1951 wordt gebruikt onder licentie van het Nederlands-Vlaams Bijbelgenootschap.
+              </p>
+            </div>
+          </FadeUp>
         </div>
-
-        <FadeUp className="mb-14">
-          <p className="text-xs leading-relaxed" style={{ color: T.muted }}>
-            Daarnaast de King James Version, American Standard Version, World English Bible,
-            Geneva Bible en Coverdale Bible - per vers naast een Nederlandse vertaling te leggen.
-          </p>
-        </FadeUp>
-
-        {/* Commentaries - one panel of rows rather than a row of cards. */}
-        <GroupLabel
-          icon={Library}
-          label="Commentaren"
-          meta={`${commentaries.length} commentaren · 1 gratis`}
-        />
-        <FadeUp>
-          <div
-            className="overflow-hidden rounded-2xl border"
-            style={{ borderColor: T.border, backgroundColor: T.card, boxShadow: SHADOW.card }}
-          >
-            {commentaries.map(({ name, author, note, free }, i) => (
-              <div
-                key={name}
-                className="flex flex-col gap-1.5 px-5 py-4 sm:flex-row sm:items-baseline sm:gap-6 sm:px-6 sm:py-5"
-                style={i > 0 ? { borderTop: `1px solid ${T.border}` } : undefined}
-              >
-                <div className="sm:w-56 sm:flex-shrink-0">
-                  <div className="flex items-center gap-2.5">
-                    <h3 className="text-[17px] leading-tight"
-                      style={{
-                        color: T.text,
-                        fontFamily: "Georgia, 'Times New Roman', serif",
-                        fontWeight: 700,
-                      }}>
-                      {name}
-                    </h3>
-                    <AccessPill free={free} />
-                  </div>
-                  <p className="mt-0.5 text-xs font-semibold tabular-nums" style={{ color: T.tealText }}>
-                    {author}
-                  </p>
-                </div>
-                <p className="text-[13.5px] leading-relaxed sm:flex-1" style={{ color: T.muted }}>
-                  {note}
-                </p>
-              </div>
-            ))}
-          </div>
-        </FadeUp>
-
-        <FadeUp className="mt-5">
-          <p className="text-xs leading-relaxed" style={{ color: T.muted }}>
-            KingComments is voor iedereen gratis en volledig te lezen. De overige drie horen bij Pro.
-            De NBG-vertaling 1951 wordt gebruikt onder licentie van het Nederlands-Vlaams Bijbelgenootschap.
-          </p>
-        </FadeUp>
       </div>
     </section>
   )
 }
 
-/* ─── Showcase: see the real product in action ───────────────── */
-const HEBREW_STACK = "'SBL Hebrew','Ezra SIL','David CLM','Frank Ruhl CLM','Times New Roman','Noto Serif Hebrew',serif"
-
-function GrondtekstMockup() {
-  // Genesis 1:1 - בְּרֵאשִׁית בָּרָא אֱלֹהִים
-  const words = [
-    { h: "בְּרֵאשִׁית",  t: "bere'shit", e: "in het begin", s: "H7225" },
-    { h: "בָּרָא",        t: "bara",      e: "schiep",        s: "H1254" },
-    { h: "אֱלֹהִים",      t: "Elohim",    e: "God",           s: "H430"  },
-  ]
-  return (
-    <div className="rounded-2xl overflow-hidden border bg-white"
-      style={{ borderColor: T.border, boxShadow: SHADOW.raised }}>
-      {/* Header bar */}
-      <div className="h-11 px-4 flex items-center justify-between border-b"
-        style={{ borderColor: T.border, backgroundColor: T.light }}>
-        <div className="flex items-center gap-2 text-xs">
-          <span className="font-semibold" style={{ color: T.text }}>Genesis 1:1</span>
-          <span style={{ color: T.muted }}>·</span>
-          <span style={{ color: T.muted }}>Grondtekst</span>
-          <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
-            style={{ backgroundColor: "rgba(13,148,136,0.10)", color: T.tealDeep }}>
-            Hebreeuws
-          </span>
-        </div>
-        <span className="text-[10px] tabular-nums" style={{ color: T.muted }}>OT</span>
-      </div>
-
-      {/* Intro */}
-      <div className="px-5 pt-4 pb-3 border-b" style={{ borderColor: T.border + "80" }}>
-        <p className="text-[11px] leading-relaxed" style={{ color: T.muted }}>
-          De originele woorden van Genesis 1 in het Hebreeuws, met transliteratie,
-          betekenis en Strong-nummer.
-        </p>
-      </div>
-
-      {/* Word cards */}
-      <div className="px-5 py-5">
-        <div className="flex items-center gap-2 mb-3">
-          <span className="inline-flex items-center justify-center min-w-[24px] h-5 px-1.5 rounded-full text-[10px] font-bold tabular-nums"
-            style={{ backgroundColor: "rgba(13,148,136,0.10)", color: T.tealDeep }}>
-            1
-          </span>
-          <span className="text-[10px] uppercase tracking-wider" style={{ color: T.muted }}>
-            3 woorden
-          </span>
-        </div>
-        <div className="flex flex-wrap gap-x-1 gap-y-3 justify-end" dir="rtl">
-          {words.map(w => (
-            <div key={w.s} className="flex flex-col items-center text-center min-w-[64px] px-2 py-1.5 rounded-md hover:bg-teal-50 transition-colors"
-              dir="ltr">
-              <div className="text-2xl leading-snug font-medium"
-                dir="rtl" lang="he"
-                style={{ color: T.text, fontFamily: HEBREW_STACK }}>
-                {w.h}
-              </div>
-              <div className="text-[10px] italic mt-0.5" style={{ color: T.muted }}>{w.t}</div>
-              <div className="text-[11px] mt-0.5 leading-tight" style={{ color: T.text }}>{w.e}</div>
-              <span className="mt-1 text-[9.5px] tabular-nums tracking-wide px-1.5 py-0.5 rounded font-semibold inline-flex items-center gap-0.5"
-                style={{ backgroundColor: "rgba(13,148,136,0.10)", color: T.tealDeep }}>
-                {w.s}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
+/* ─── Zo werkt een les ───────────────────────────────────────── */
+/**
+ * The lesson the demo plays: les 1 of "De opstanding van Jezus", built from the
+ * same authored prose the real flow serves (lib/data/study-lessons/opstanding)
+ * and the Statenvertaling text of Johannes 20:1-3. Assembled on the server at
+ * build time - the page is static - so the browser receives finished copy and
+ * an SVG of the tree, and only the playback runs on the client.
+ */
+function demoLesson(): DemoLesson {
+  const authored = opstandingLessons[1]
+  return {
+    studyTitle: "De opstanding van Jezus",
+    lessonsTotal: 3,
+    lesson: { day: 1, title: "Het lege graf", reference: "Johannes 20:1–18", minutes: 12 },
+    intro: {
+      headline: authored.intro?.headline ?? "Het lege graf",
+      body: authored.intro?.body ?? [],
+      watchFor: authored.intro?.watchFor ?? [],
+    },
+    readingCue: authored.word?.readingCue ?? "Lees rustig.",
+    translation: "Statenvertaling",
+    verses: [
+      { n: 1, text: "En op den eersten dag der week ging Maria Magdalena vroeg, als het nog duister was, naar het graf; en zag den steen van het graf weggenomen." },
+      { n: 2, text: "Zij liep dan, en kwam tot Simon Petrus en tot den anderen discipel, welken Jezus liefhad, en zeide tot hen: Zij hebben den Heere weggenomen uit het graf, en wij weten niet, waar zij Hem gelegd hebben." },
+      { n: 3, text: "Petrus dan ging uit, en de andere discipel, en zij kwamen tot het graf." },
+    ],
+    depth: {
+      body: authored.depth?.body ?? [],
+      terms: authored.depth?.terms ?? [],
+    },
+    greek: [
+      { word: "μιᾷ", translit: "mia", meaning: "eerste", strong: "G1520" },
+      { word: "σαββάτων", translit: "sabbatōn", meaning: "van de week", strong: "G4521" },
+      { word: "πρωΐ", translit: "prōi", meaning: "vroeg", strong: "G4404" },
+      { word: "σκοτίας", translit: "skotias", meaning: "duisternis", strong: "G4653" },
+      { word: "μνημεῖον", translit: "mnēmeion", meaning: "graf", strong: "G3419" },
+      { word: "λίθον", translit: "lithon", meaning: "steen", strong: "G3037" },
+    ],
+    reflection: {
+      question: authored.reflection?.question ?? "",
+      prompts: authored.reflection?.prompts ?? [],
+      placeholder: authored.reflection?.placeholder ?? "Schrijf op wat je opviel...",
+      sample: "Maria zoekt een lichaam en vindt een stem. Ik herken Hem ook vaker in wat ik lees dan in wat ik zie.",
+    },
+    quiz: {
+      question: "Wie komt in Johannes 20 als eerste bij het graf?",
+      answers: ["Maria Magdalena", "Simon Petrus", "De andere discipel", "Thomas"],
+      correct: 0,
+    },
+    xp: 25,
+    nextLesson: { day: 2, title: "\u201cMijn Heer en mijn God\u201d", reference: "Johannes 20:19–31" },
+    tree: {
+      svg: renderTreeSvg({ seed: LANDING_SEED, level: 7, frac: 0.7, species: "eik", framing: "portrait", width: 176, height: 176, rootAttributes: 'aria-hidden="true"' }),
+      seed: LANDING_SEED,
+      level: 7,
+      species: "eik",
+    },
+  }
 }
 
-function CommentaryMockup() {
+/**
+ * The product, doing what it does. This replaced two static mockups
+ * (grondtekst, commentaar) and a three-step "hoe het werkt": one lesson that
+ * plays itself shows the same things - the Greek, the commentary, the note,
+ * the quiz, the XP on the tree - in the order a reader meets them.
+ */
+function StudyFlowSection() {
   return (
-    <div className="rounded-2xl overflow-hidden border bg-white"
-      style={{ borderColor: T.border, boxShadow: SHADOW.raised }}>
-      {/* Header */}
-      <div className="h-11 px-4 flex items-center justify-between border-b"
-        style={{ borderColor: T.border, backgroundColor: T.light }}>
-        <span className="text-xs font-medium" style={{ color: T.muted }}>Commentaarbron</span>
-        <div className="text-xs font-semibold flex items-center gap-1.5 px-2.5 py-1 rounded-md border bg-white"
-          style={{ borderColor: T.border, color: T.text }}>
-          KingComments (NL)
-          <ChevronDown className="h-3 w-3" style={{ color: T.muted }} />
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="px-5 py-5">
-        <div className="inline-flex items-center gap-1.5 mb-3">
-          <span className="text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full"
-            style={{ backgroundColor: "rgba(13,148,136,0.10)", color: T.tealDeep }}>
-            Vers 1
-          </span>
-        </div>
-        <p className="text-sm leading-relaxed mb-3" style={{ color: T.text }}>
-          Genesis is rond 1450 v.Chr. geschreven door Mozes, in de Sinaï woestijn.
-        </p>
-        <p className="text-sm leading-relaxed mb-3" style={{ color: T.text }}>
-          In het Hebreeuws heet dit boek <em style={{ color: T.tealText, fontStyle: "italic" }}>Bereshith</em>, dat
-          betekent &apos;in het begin&apos;, naar de eerste woorden waarmee dit boek begint. In het Grieks heet het Genesis, dat
-          &apos;geboorte&apos;, of &apos;ontstaan&apos;, of &apos;wording&apos; betekent.
-        </p>
-        <p className="text-sm leading-relaxed" style={{ color: T.text }}>
-          Het is terecht het boek van het begin. We vinden er de oorsprong van alle dingen in. Dit boek vertelt ons onder
-          andere over het ontstaan van de hemel en de aarde, de instelling van huwelijk en gezin, de eerste zonde en als
-          gevolg daarvan de dood, het eerste offer, het oordeel, het ontstaan van volken, de oorsprong van het volk Israël,
-          het verbond en de besnijdenis.
-        </p>
-
-        {/* Subtle fade hint that there's more */}
-        <div className="mt-4 h-8 -mb-5 bg-gradient-to-t from-white to-transparent" />
-      </div>
-
-      {/* Author footer */}
-      <div className="px-5 py-3 border-t flex items-center gap-2.5"
-        style={{ borderColor: T.border, backgroundColor: T.light }}>
-        <div className="h-7 w-7 rounded-full flex items-center justify-center flex-shrink-0"
-          style={{ backgroundColor: T.tealLight }}>
-          <Library className="h-3.5 w-3.5" style={{ color: T.teal }} />
-        </div>
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold leading-none" style={{ color: T.text }}>KingComments</p>
-          <p className="text-[10px] mt-0.5" style={{ color: T.muted }}>Ger de Koning · vers-voor-vers</p>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-/** The eyebrow pill that opens each showcase block. */
-function Eyebrow({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full"
-      style={{ backgroundColor: "rgba(13,148,136,0.10)" }}>
-      <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: T.teal }} />
-      <p className="text-[11px] font-bold uppercase" style={{ color: T.tealDeep, letterSpacing: "0.14em" }}>
-        {children}
-      </p>
-    </div>
-  )
-}
-
-function ShowcaseBlock({
-  eyebrow, title, body, bullets, mockup, flip = false,
-}: {
-  eyebrow: string
-  title: string
-  body: string
-  bullets: string[]
-  mockup: React.ReactNode
-  flip?: boolean
-}) {
-  return (
-    <div className="grid lg:grid-cols-2 items-center gap-10 lg:gap-16">
-      <FadeUp className={flip ? "lg:order-2" : undefined}>
-        <Eyebrow>{eyebrow}</Eyebrow>
-        <h3
-          className="mt-4 font-extrabold text-balance"
-          style={{ color: T.text, fontSize: TYPE.h3, lineHeight: 1.2, letterSpacing: "-0.02em" }}
-        >
-          {title}
-        </h3>
-        <p className="mt-4 leading-relaxed" style={{ color: T.muted, fontSize: "1rem" }}>
-          {body}
-        </p>
-        <ul className="mt-6 space-y-3">
-          {bullets.map(line => (
-            <li key={line} className="flex items-start gap-3 text-sm leading-relaxed" style={{ color: T.text }}>
-              <Check className="h-4 w-4 mt-0.5 flex-shrink-0" style={{ color: T.teal }} />
-              {line}
-            </li>
-          ))}
-        </ul>
-      </FadeUp>
-
-      <FadeUp className={flip ? "lg:order-1" : undefined}>
-        <div className="relative">
-          {/* Ambient glow */}
-          <div aria-hidden className="absolute -inset-8 -z-10"
-            style={{ background: "radial-gradient(ellipse 60% 70% at 50% 50%, rgba(13,148,136,0.10), transparent 70%)" }} />
-          {mockup}
-        </div>
-      </FadeUp>
-    </div>
-  )
-}
-
-function Showcase() {
-  return (
-    <section id="in-actie" className={`${SECTION_Y} scroll-mt-16`} style={{ backgroundColor: T.card, ...EDGE }}>
+    <section id="in-actie" className={`${SECTION_Y} scroll-mt-16`} style={{ backgroundColor: T.light, ...EDGE }}>
       <div className={SHELL}>
         <SectionHeader
-          label="In de praktijk"
-          title="Verdiep u in de Schrift"
-          subtitle="Zie hoe BijbelStudie u helpt om de Schrift te begrijpen zoals de oorspronkelijke schrijvers het bedoelden."
+          label="Zo werkt een les"
+          title="Vijf stappen, een kwartier per dag"
+          subtitle="Elke les leidt je in dezelfde vijf stappen door één bijbelgedeelte: intro, het Woord, verdieping, reflectie en toetsing. Hieronder speelt de eerste les van De opstanding van Jezus vanzelf af - de echte les, geen schermafbeelding."
         />
-
-        <div className="space-y-[clamp(3.5rem,6vw,6rem)]">
-          <ShowcaseBlock
-            eyebrow="Grondtekst"
-            title="Lees de Bijbel in de oorspronkelijke taal"
-            body="Bestudeer elk Hebreeuws of Grieks woord met transliteratie, Nederlandse betekenis en Strong-nummers. Klik door naar de lexicon voor diepere studie - geen taalkennis vereist."
-            bullets={[
-              "Volledige Hebreeuwse OT en Griekse NT (STEPBible)",
-              "Per-woord betekenis en uitspraak",
-              "Strong-nummers met directe lexicon-koppeling",
-            ]}
-            mockup={<GrondtekstMockup />}
-          />
-
-          <ShowcaseBlock
-            flip
-            eyebrow="Commentaren"
-            title="Leer van erkende bijbelcommentaren"
-            body="Lees vers-voor-vers commentaar van Ger de Koning (KingComments), Matthew Henry, Karl August Dachsel en Heinrich Meyer - direct naast de tekst die u bestudeert."
-            bullets={[
-              "Nederlandstalige en vertaalde klassieke commentaren",
-              "Direct gekoppeld aan het vers dat u leest",
-              "Wissel eenvoudig tussen verschillende auteurs",
-            ]}
-            mockup={<CommentaryMockup />}
-          />
-        </div>
-      </div>
-    </section>
-  )
-}
-
-/* ─── How it works ───────────────────────────────────────────── */
-const STEP_ICONS = {
-  account: Users,
-  book: BookOpen,
-  commentary: MessageSquare,
-} as const
-
-function HowItWorks() {
-  // Copy lives in lib/content so the HowTo JSON-LD on app/page.tsx describes
-  // exactly these steps.
-  const steps = HOW_IT_WORKS_STEPS.map(s => ({ ...s, icon: STEP_ICONS[s.icon] }))
-
-  return (
-    <section className={SECTION_Y} style={{ backgroundColor: T.card, ...EDGE }}>
-      <div className={SHELL}>
-        <div className="mx-auto max-w-5xl">
-          <SectionHeader label="Hoe het werkt" title="In drie stappen aan de slag" />
-
-          <div className="relative">
-            {/* The connecting line fades out at both ends instead of stopping
-                at a hardcoded 16.67%. That percentage assumed a gapless
-                three-column grid, so the true column centre moved every time
-                the gutter changed and the line ended slightly off each icon;
-                a gradient has no endpoint to misalign. */}
-            <div
-              aria-hidden
-              className="hidden lg:block absolute inset-x-0 top-7 h-px z-0 pointer-events-none"
-              style={{
-                background: `linear-gradient(90deg, transparent, ${T.border} 18%, ${T.border} 82%, transparent)`,
-              }}
-            />
-
-            <div className="reveal-stagger grid lg:grid-cols-3 gap-10 lg:gap-12 relative">
-              {steps.map(({ num, icon: Icon, title, desc }) => (
-                <FadeUp key={num}>
-                  <div className="relative z-10 text-center">
-                    {/* Icon centered with white ring to cleanly mask the connecting line */}
-                    <div
-                      className="w-14 h-14 rounded-full mx-auto flex items-center justify-center"
-                      style={{
-                        backgroundColor: T.teal,
-                        boxShadow: `0 0 0 8px ${T.card}, 0 8px 20px -8px rgba(13,148,136,0.55)`,
-                      }}
-                    >
-                      <Icon className="h-6 w-6 text-white" />
-                    </div>
-                    <p className="mt-5 text-[11px] font-bold" style={{ color: T.tealText, letterSpacing: "0.16em" }}>
-                      STAP {num}
-                    </p>
-                    <h3 className="font-bold text-base mt-2 tracking-tight" style={{ color: T.text }}>{title}</h3>
-                    <p className="text-sm leading-relaxed mt-2 max-w-xs mx-auto" style={{ color: T.muted }}>{desc}</p>
-                  </div>
-                </FadeUp>
-              ))}
-            </div>
-          </div>
-        </div>
+        <FadeUp>
+          <StudyFlowDemo lesson={demoLesson()} />
+        </FadeUp>
       </div>
     </section>
   )
@@ -1409,7 +1006,7 @@ function CTA() {
                   Gratis beginnen
                   <ArrowRight className="h-4 w-4" />
                 </Link>
-                <Link href="#functies"
+                <Link href="#levensboom"
                   className="press inline-flex items-center justify-center gap-2 rounded-xl border bg-white px-8 py-3.5 font-semibold transition-colors hover:bg-gray-50"
                   style={{ borderColor: T.border, color: T.text }}>
                   Meer informatie
@@ -1420,6 +1017,79 @@ function CTA() {
                 Geen creditcard vereist · Gratis te gebruiken · Altijd opzegbaar
               </p>
             </div>
+          </div>
+        </FadeUp>
+      </div>
+    </section>
+  )
+}
+
+
+/* ─── Levensboom ─────────────────────────────────────────────── */
+/**
+ * The avatar as a section - "voortgang" to the reader, never "levensboom".
+ * Left, one tree walking through every level from kiem to eeuwenoude boom on
+ * its own (or under the visitor's thumb on the slider); right, the five stages
+ * with what each one brings. Every picture is the product's own generator,
+ * rendered to SVG at build time and swapped for the live canvas on screen - so
+ * the page keeps its static HTML and the trees still move. A gallery of three
+ * grown trees used to close the section; the growth demo already makes the
+ * point, and a second row of pictures only made the section run on.
+ */
+function LevensboomSection() {
+  const levelItems = CATALOG.filter(item => item.unlock.kind === "level")
+  return (
+    <section id="levensboom" className={`${SECTION_Y} scroll-mt-16`} style={{ backgroundColor: T.card, ...EDGE }}>
+      <div className={SHELL}>
+        <SectionHeader
+          label="Jouw voortgang"
+          title="Elk niveau een nieuwe boom"
+          subtitle="Iedere lezer plant een boom. Hij begint als kiem en groeit met elke les, elk hoofdstuk en elke aantekening - op de website en in de app dezelfde boom. Schuif door de niveaus en zie hem groeien."
+        />
+
+        <FadeUp>
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,0.7fr)] lg:items-start">
+            <LevensboomGroeiDemo
+              seed={LANDING_SEED}
+              initialSvg={renderTreeSvg({ seed: LANDING_SEED, level: 6, frac: 0.6, species: "eik", scene: "waterbeken", framing: "scene", width: 720, height: 450, rootAttributes: 'aria-hidden="true"' })}
+            />
+
+            <ol className="relative space-y-2">
+              {STAGES.map((stage, index) => {
+                const next = STAGES[index + 1]
+                const to = next ? next.from - 1 : null
+                const range = to === null ? `niveau ${stage.from}+` : stage.from === to ? `niveau ${stage.from}` : `niveau ${stage.from}–${to}`
+                const inBand = (at: number) => at >= stage.from && (to === null || at <= to)
+                const brings = [
+                  ...(inBand(8) ? ["de eerste vrucht van de Geest"] : []),
+                  ...(inBand(16) ? ["een tweede stam"] : []),
+                  ...levelItems.filter(item => inBand((item.unlock as { level: number }).level)).map(item => item.name.toLowerCase()),
+                ]
+                const sample = to === null ? stage.from + 2 : Math.round((stage.from + to) / 2)
+                return (
+                  <li key={stage.id} className="lp-card flex items-center gap-4 rounded-2xl p-3">
+                    <LandingTree
+                      svg={renderTreeSvg({ seed: LANDING_SEED, level: sample, frac: 0.6, species: "eik", framing: "portrait", width: 120, height: 120, rootAttributes: 'aria-hidden="true"' })}
+                      seed={LANDING_SEED}
+                      level={sample}
+                      species="eik"
+                      framing="portrait"
+                      className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-full ring-1 ring-black/5"
+                    />
+                    <div className="min-w-0">
+                      <div className="flex items-baseline justify-between gap-3">
+                        <p className="text-sm font-bold" style={{ color: T.text }}>{stage.name}</p>
+                        <p className="flex-shrink-0 text-[11px] tabular-nums" style={{ color: T.muted }}>{range}</p>
+                      </div>
+                      <p className="mt-0.5 text-xs leading-relaxed" style={{ color: T.muted }}>
+                        {stage.blurb}
+                        {brings.length > 0 ? ` Brengt ${brings.join(", ")}.` : ""}
+                      </p>
+                    </div>
+                  </li>
+                )
+              })}
+            </ol>
           </div>
         </FadeUp>
       </div>
@@ -1439,11 +1109,10 @@ export default function LandingPage() {
       <Navbar />
       <main>
         <Hero />
+        <StudyFlowSection />
+        <LevensboomSection />
         <StudyDiscovery />
-        <Showcase />
-        <Features />
         <BibleLibrary />
-        <HowItWorks />
         <Pricing />
         <FAQ />
         <CTA />

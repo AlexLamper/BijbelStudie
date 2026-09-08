@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { StickyNote, ArrowRight, BookOpen } from "lucide-react"
+import MiniTreeAvatar from "../../../components/levensboom/MiniTreeAvatar"
+import type { PublicLevensboomCard } from "../../../lib/levensboom/publicCard"
 
 interface SharedNote {
   _id: string
-  userId: { _id: string; name: string; image?: string }
+  userId: { _id: string; name: string; image?: string; levensboom?: PublicLevensboomCard | null }
   verseReference: string
   noteText: string
   book?: string
@@ -14,16 +16,9 @@ interface SharedNote {
   createdAt: string
 }
 
-function Avatar({ name, size = 8 }: { name: string; size?: number }) {
-  const initials = name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
-  return (
-    <div
-      className={`w-${size} h-${size} rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0`}
-      style={{ backgroundColor: "#0D9488", fontSize: size <= 6 ? 10 : 12 }}
-    >
-      {initials}
-    </div>
-  )
+/** The author's tree at row size; initials only when there is no tree to show. */
+function Avatar({ name, size = 8, card }: { name: string; size?: number; card?: PublicLevensboomCard | null }) {
+  return <MiniTreeAvatar card={card} name={name} size={size * 4} />
 }
 
 function formatDate(iso: string) {
@@ -90,7 +85,7 @@ export default function NotitiesTab({ groupId }: { groupId: string }) {
             <div key={note._id}
               className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-4">
               <div className="flex items-start gap-3">
-                <Avatar name={note.userId.name} size={8} />
+                <Avatar name={note.userId.name} size={8} card={note.userId.levensboom} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2 mb-1">
                     <span className="text-sm font-semibold text-gray-900 dark:text-foreground">

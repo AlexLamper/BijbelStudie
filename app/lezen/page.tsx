@@ -8,7 +8,6 @@ import { useReadingPreferences } from '../../hooks/useReadingPreferences';
 import BibleViewerSection from '../../components/study/BibleViewerSection';
 import StudyMaterialsSection from '../../components/study/StudyMaterialsSection';
 import AiAssistantWidget from '../../components/study/AiAssistantWidget';
-import StartupAnimation from '../../components/ui/startup-animation';
 import { BookOpen, CheckCircle, ChevronLeft, ChevronRight, X, Trophy, MessageCircle } from 'lucide-react';
 import { toast } from '../../hooks/use-toast';
 
@@ -224,7 +223,6 @@ function StudyPageInner() {
   const searchParams = useSearchParams();
 
   const { preferences, updatePreferences } = useReadingPreferences();
-  const [showAnimation, setShowAnimation]           = useState(false);
   const [activeStudy, setActiveStudy]               = useState<ActiveStudy | null>(null);
   const [lessonIdx, setLessonIdx]                   = useState(0);
   const [pendingChapter, setPendingChapter]         = useState<number | null>(null);
@@ -233,11 +231,6 @@ function StudyPageInner() {
   const [mobileView, setMobileView]                 = useState<'bible' | 'materials'>('bible');
   const [materialsTab, setMaterialsTab]             = useState('commentary');
   const [aiQuestion, setAiQuestion]                 = useState<string | null>(null);
-
-  useEffect(() => {
-    const hasShown = sessionStorage.getItem('study-startup-shown');
-    if (!hasShown) setShowAnimation(true);
-  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -280,11 +273,6 @@ function StudyPageInner() {
     return () => { cancelled = true; };
   }, []);
 
-  const handleAnimationComplete = () => {
-    sessionStorage.setItem('study-startup-shown', 'true');
-    setShowAnimation(false);
-  };
-
   const initialBook    = searchParams.get('book')    ?? undefined;
   const initialChapter = searchParams.get('chapter') ? Number(searchParams.get('chapter')) : undefined;
   const initialVersion = searchParams.get('version') ?? undefined;
@@ -293,7 +281,7 @@ function StudyPageInner() {
     versions, books, chapters,
     selectedVersion, selectedBook, selectedChapter,
     selectedCommentary, maxChapter,
-    loadingVersions, loadingBooks, loadingChapters, isInitialLoading,
+    loadingVersions, loadingBooks, loadingChapters,
     handleVersionChange, handleBookChange, handleChapterChange,
     handleCommentaryChange, handlePreviousChapter, handleNextChapter,
   } = useBibleData(lng ?? 'nl', { initialBook, initialChapter, initialVersion });
@@ -412,10 +400,6 @@ function StudyPageInner() {
 
   return (
     <div className="h-full flex flex-col font-inter overflow-hidden">
-      {showAnimation && (
-        <StartupAnimation isReady={!isInitialLoading} onComplete={handleAnimationComplete} />
-      )}
-
       {showCompletionOverlay && activeStudy && (
         <CompletionOverlay study={activeStudy} onClose={handleCloseOverlay} />
       )}

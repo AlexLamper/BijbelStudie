@@ -4,6 +4,7 @@ import { authOptions } from "../../../lib/authOptions";
 import connectMongoDB from "../../../lib/mongodb";
 import Note from "../../../models/Note";
 import User from "../../../models/User";
+import { grantNoteXp } from "../../../lib/noteXp";
 import { randomUUID } from "crypto";
 
 interface NotesQuery {
@@ -153,7 +154,17 @@ export async function POST(request: NextRequest) {
 
     const savedNote = await newNote.save();
 
-    return NextResponse.json(savedNote, { status: 201 });
+    // Feeds the Levensboom the same way reading and studying do. The guardrails
+    // (creates only, 15 characters, three a day) live in lib/noteXp.ts so this
+    // route and the app's /api/v1/notes cannot pay different amounts.
+    const xp = await grantNoteXp(user._id.toString(), {
+      isPro: Boolean(user.subscribed),
+      noteText,
+      type: type || "note",
+      created: true,
+    });
+
+    return NextResponse.json({ ...savedNote.toObject(), xp }, { status: 201 });
 
   } catch (error) {
     console.error("Error creating note:", error);

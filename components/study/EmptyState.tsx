@@ -25,11 +25,12 @@ export default function EmptyState({
   loadingVersions,
 }: EmptyStateProps) {
   if (selectedBook && selectedChapter && selectedVersion) return null;
-  if (loadingBooks || loadingChapters) return null;
 
-  if (loadingVersions) {
+  // Books, chapters and the last-read position resolve in parallel on startup.
+  // The pane keeps the shape of a chapter while that runs, so it never sits empty.
+  if (loadingVersions || loadingBooks || loadingChapters) {
     return (
-      <div className="px-6 py-8">
+      <div className="px-6 py-8" role="status" aria-label="Bijbel laden">
         <SkeletonChapter verses={6} />
       </div>
     );

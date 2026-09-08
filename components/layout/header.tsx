@@ -10,6 +10,8 @@ import { SidebarTrigger } from "../ui/sidebar"
 import { ModeToggle } from "../dark-mode-toggle"
 import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar"
 import { SubscriptionBadge } from "../subscription-badge"
+import Link from "next/link"
+import NavTreeAvatar from "../levensboom/NavTreeAvatar"
 
 const PAGE_TITLES: Record<string, string> = {
   dashboard: "Dashboard",
@@ -111,16 +113,24 @@ export function Header({ title }: HeaderProps) {
             className="flex items-center gap-2 h-9 px-2 hover:bg-secondary rounded-md"
             onClick={() => setIsProfileOpen(!isProfileOpen)}
           >
-            <Avatar className="h-7 w-7 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-border">
-              <AvatarImage
-                src={userImage || session.user?.image || ""}
-                alt={session.user?.name || "Gebruiker"}
-                className="object-cover"
-              />
-              <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
-                {session.user?.name?.[0]?.toUpperCase() || "G"}
-              </AvatarFallback>
-            </Avatar>
+            {/* The face of the account is the Levensboom, not a photo. The
+                initials/photo circle only stands in while the tree loads or
+                when the reader has switched it off. */}
+            <NavTreeAvatar
+              size={28}
+              fallback={
+                <Avatar className="h-7 w-7 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-border">
+                  <AvatarImage
+                    src={userImage || session.user?.image || ""}
+                    alt={session.user?.name || "Gebruiker"}
+                    className="object-cover"
+                  />
+                  <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
+                    {session.user?.name?.[0]?.toUpperCase() || "G"}
+                  </AvatarFallback>
+                </Avatar>
+              }
+            />
             <div className="text-sm text-left hidden lg:block">
               <p className="font-medium text-foreground leading-none">{session.user?.name}</p>
               <p className="text-muted-foreground text-xs mt-0.5 leading-none">{session.user?.email}</p>
@@ -151,6 +161,16 @@ export function Header({ title }: HeaderProps) {
                 <Button
                   variant="ghost"
                   className="w-full justify-start px-3 py-2 text-sm hover:bg-secondary rounded-none"
+                  onClick={() => { router.push("/profiel/boom"); setIsProfileOpen(false) }}
+                >
+                  <span className="mr-2 inline-flex h-4 w-4 items-center justify-center">
+                    <NavTreeAvatar size={16} showLevel={false} fallback={<User className="h-4 w-4 text-muted-foreground" />} />
+                  </span>
+                  Mijn voortgang
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start px-3 py-2 text-sm hover:bg-secondary rounded-none"
                   onClick={() => { router.push("/instellingen"); setIsProfileOpen(false) }}
                 >
                   <Settings className="h-4 w-4 mr-2 text-muted-foreground" />
@@ -171,8 +191,11 @@ export function Header({ title }: HeaderProps) {
         </div>
       </div>
 
-      {/* Mobile menu */}
-      <div className="md:hidden relative" ref={menuRef}>
+      {/* Mobile: the tree first, then the menu. */}
+      <div className="md:hidden relative flex items-center gap-1" ref={menuRef}>
+        <Link href="/profiel/boom" aria-label="Mijn voortgang" className="inline-flex items-center p-1">
+          <NavTreeAvatar size={26} fallback={null} />
+        </Link>
         <Button variant="ghost" size="sm" className="p-2" onClick={() => setIsMenuOpen(!isMenuOpen)}>
           <Menu className="w-5 h-5" />
         </Button>
@@ -191,6 +214,13 @@ export function Header({ title }: HeaderProps) {
               <Button variant="ghost" className="w-full justify-start px-3 py-2 text-sm hover:bg-secondary rounded-none"
                 onClick={() => { router.push("/profiel"); setIsMenuOpen(false) }}>
                 <User className="h-4 w-4 mr-2 text-muted-foreground" /> Profiel
+              </Button>
+              <Button variant="ghost" className="w-full justify-start px-3 py-2 text-sm hover:bg-secondary rounded-none"
+                onClick={() => { router.push("/profiel/boom"); setIsMenuOpen(false) }}>
+                <span className="mr-2 inline-flex h-4 w-4 items-center justify-center">
+                  <NavTreeAvatar size={16} showLevel={false} fallback={<User className="h-4 w-4 text-muted-foreground" />} />
+                </span>
+                Mijn voortgang
               </Button>
               <Button variant="ghost" className="w-full justify-start px-3 py-2 text-sm hover:bg-secondary rounded-none"
                 onClick={() => { router.push("/instellingen"); setIsMenuOpen(false) }}>

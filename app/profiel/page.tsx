@@ -1,16 +1,17 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { getSession } from "next-auth/react"
 import {
   User as UserIcon, ShieldCheck, Sparkles, Award, Crown,
-  Camera, Loader2, Check, X, Mail, Flame,
+  Loader2, Check, X, Mail, Flame,
 } from "lucide-react"
 import UserBadges from "../../components/profile/badges"
 import LevelCard from "../../components/profile/LevelCard"
+import TreeAvatar from "../../components/levensboom/TreeAvatar"
 import { SkeletonPage } from "../../components/ui/skeletons"
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
 
@@ -47,12 +48,6 @@ export default function ProfilePage() {
   const [draftBio, setDraftBio] = useState("")
   const [nameStatus, setNameStatus] = useState<Status>("idle")
   const [bioStatus, setBioStatus] = useState<Status>("idle")
-
-  // image upload state
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const [imageUploading, setImageUploading] = useState(false)
-  const [imageStatus, setImageStatus] = useState<Status>("idle")
-  const [imageError, setImageError] = useState<string | null>(null)
 
   useEffect(() => { setMounted(true) }, [])
 
@@ -94,13 +89,6 @@ export default function ProfilePage() {
       return () => clearTimeout(t)
     }
   }, [bioStatus])
-  useEffect(() => {
-    if (imageStatus === "success" || imageStatus === "error") {
-      const t = setTimeout(() => setImageStatus("idle"), 2500)
-      return () => clearTimeout(t)
-    }
-  }, [imageStatus])
-
   async function saveName() {
     if (!user) return
     const trimmed = draftName.trim()
@@ -163,47 +151,6 @@ export default function ProfilePage() {
     setEditing(null)
     setNameStatus("idle")
     setBioStatus("idle")
-  }
-
-  async function onImageChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    e.target.value = ""
-    if (!file || !user) return
-
-    if (file.size > 5 * 1024 * 1024) {
-      setImageError("Bestand is groter dan 5MB")
-      setImageStatus("error")
-      return
-    }
-    if (!file.type.startsWith("image/")) {
-      setImageError("Selecteer een afbeelding")
-      setImageStatus("error")
-      return
-    }
-
-    setImageUploading(true)
-    setImageError(null)
-    try {
-      const dataUrl = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader()
-        reader.onload = (ev) => resolve(ev.target?.result as string)
-        reader.onerror = () => reject(new Error("Kon afbeelding niet lezen"))
-        reader.readAsDataURL(file)
-      })
-      const res = await fetch("/api/user/upload-image", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageUrl: dataUrl }),
-      })
-      if (!res.ok) throw new Error("Upload mislukt")
-      setUser({ ...user, image: dataUrl })
-      setImageStatus("success")
-    } catch (err) {
-      setImageError(err instanceof Error ? err.message : "Upload mislukt")
-      setImageStatus("error")
-    } finally {
-      setImageUploading(false)
-    }
   }
 
   if (!mounted || loading) return <SkeletonPage fullHeight />
@@ -427,57 +374,22 @@ export default function ProfilePage() {
           {/* Right sidebar */}
           <div className="flex flex-col gap-5">
 
-            {/* Profile image */}
-            <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-2xl overflow-hidden">
-              <div className="flex items-center gap-2.5 px-5 py-4 border-b border-gray-100 dark:border-border">
-                <div className="h-7 w-7 rounded-lg flex items-center justify-center flex-shrink-0"
-                  style={{ backgroundColor: "rgba(13,148,136,0.08)" }}>
-                  <Camera size={14} style={{ color: TEAL }} />
-                </div>
-                <p className="text-sm font-bold text-foreground">Profielfoto</p>
-              </div>
-              <div className="p-5 flex flex-col items-center">
-                <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+            {/* The profile picture, which is the Levensboom. There is no photo
+                upload any more: the tree is the picture. The initials circle -
+                or the image an OAuth provider already gave us - only stands in
+                while the tree loads or when it has been switched off. */}
+            <div className="flex flex-col items-center py-2">
+              <TreeAvatar
+                size={132}
+                fallback={
                   <Avatar className="w-28 h-28 ring-2 ring-border">
                     <AvatarImage src={user.image || ""} alt={user.name} className="object-cover" />
                     <AvatarFallback className="text-2xl font-semibold" style={{ backgroundColor: "rgba(13,148,136,0.1)", color: TEAL }}>
                       {user.name?.charAt(0)?.toUpperCase() || "G"}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="absolute inset-0 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
-                    <Camera className="w-6 h-6 text-white" />
-                  </div>
-                </div>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  className="hidden"
-                  accept="image/*"
-                  onChange={onImageChange}
-                />
-                <button
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={imageUploading}
-                  className="mt-4 flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-border hover:bg-gray-50 dark:hover:bg-secondary disabled:opacity-60 transition-colors"
-                >
-                  {imageUploading ? (
-                    <><Loader2 size={12} className="animate-spin" /> Uploaden...</>
-                  ) : (
-                    <><Camera size={12} /> Foto wijzigen</>
-                  )}
-                </button>
-                {imageStatus === "success" && (
-                  <p className="mt-2 text-[11px] font-medium flex items-center gap-1" style={{ color: TEAL }}>
-                    <Check size={11} /> Bijgewerkt
-                  </p>
-                )}
-                {imageStatus === "error" && (
-                  <p className="mt-2 text-[11px] text-destructive">{imageError || "Mislukt"}</p>
-                )}
-                <p className="mt-2 text-[10px] text-muted-foreground text-center">
-                  JPG of PNG · Max 5MB
-                </p>
-              </div>
+                }
+              />
             </div>
 
             {/* Subscription */}

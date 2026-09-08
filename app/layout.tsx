@@ -10,8 +10,10 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Suspense } from "react";
 import { PrefetchProvider } from "../components/providers/prefetch-provider";
 import { StudyStyleProvider } from "../components/providers/study-style-provider";
+import { LevensboomProvider } from "../components/providers/levensboom-provider";
 import AnalyticsTracker from "../components/providers/AnalyticsTracker";
 import { JsonLd } from "../components/seo/JsonLd";
+import EnvironmentBanner from "../components/layout/EnvironmentBanner";
 import {
   BASE_URL,
   SITE_NAME,
@@ -203,27 +205,36 @@ export default async function RootLayout({
               here, before the HTML is sent. See study-style-provider.tsx. */}
           <StudyStyleProvider initial={session?.user?.studyStyle}>
             <PrefetchProvider>
-              {/* Page views and clicks for /admin/insights. Renders nothing and
-                  never blocks - see components/providers/AnalyticsTracker.tsx. */}
-              <Suspense fallback={null}>
-                <AnalyticsTracker />
-              </Suspense>
-              <div id="main-content" className="min-h-screen mx-auto w-full">
-                {children}
-              </div>
-              {session?.user && (
-                <>
-                  <OnboardingWrapper shouldShow={!session.user.onboardingCompleted} />
-                  {/* Numbered first-time tour: launches after a tiny delay if
-                      localStorage flag isn't set. Won't fight the OnboardingModal
-                      because the launcher's setTimeout starts immediately but
-                      the modal blocks interaction until dismissed. */}
-                  <GuidedTourLauncher canShow={!!session.user.onboardingCompleted} tourCompleted={!!session.user.tourCompleted} isSubscribed={!!session.user.isSubscribed} />
-                </>
-              )}
+              {/* The reader's Levensboom, fetched once per page load for the
+                  navbar, the profile, the studio and the lesson card alike.
+                  Idle when nobody is signed in. See levensboom-provider.tsx. */}
+              <LevensboomProvider enabled={Boolean(session?.user)} userKey={session?.user?.email ?? null}>
+                {/* Page views and clicks for /admin/insights. Renders nothing and
+                    never blocks - see components/providers/AnalyticsTracker.tsx. */}
+                <Suspense fallback={null}>
+                  <AnalyticsTracker />
+                </Suspense>
+                <div id="main-content" className="min-h-screen mx-auto w-full">
+                  {children}
+                </div>
+                {session?.user && (
+                  <>
+                    <OnboardingWrapper shouldShow={!session.user.onboardingCompleted} />
+                    {/* Numbered first-time tour: launches after a tiny delay if
+                        localStorage flag isn't set. Won't fight the OnboardingModal
+                        because the launcher's setTimeout starts immediately but
+                        the modal blocks interaction until dismissed. */}
+                    <GuidedTourLauncher canShow={!!session.user.onboardingCompleted} tourCompleted={!!session.user.tourCompleted} isSubscribed={!!session.user.isSubscribed} />
+                  </>
+                )}
+              </LevensboomProvider>
             </PrefetchProvider>
           </StudyStyleProvider>
         </ThemeProvider>
+        {/* Renders nothing in production. On a preview it names the branch and
+            the database, so a test deployment can never be mistaken for the
+            live site. */}
+        <EnvironmentBanner />
         <SpeedInsights />
       </body>
     </html>

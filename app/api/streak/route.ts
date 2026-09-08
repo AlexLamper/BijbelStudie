@@ -81,9 +81,13 @@ export async function POST(request: Request) {
   const updated = await User.findOneAndUpdate(
     { _id: user._id },
     {
-      streak: newStreak,
-      freezeCount: newFreezes,
-      lastStreakDate: newDate,
+      $set: {
+        streak: newStreak,
+        freezeCount: newFreezes,
+        lastStreakDate: newDate,
+      },
+      // The record the streak-gated Levensboom items read: it only ever grows.
+      $max: { longestStreak: newStreak },
     },
     { new: true }
   )

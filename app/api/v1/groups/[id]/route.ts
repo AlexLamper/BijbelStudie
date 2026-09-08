@@ -4,6 +4,7 @@ import connectMongoDB from '../../../../../lib/mongodb';
 import StudyGroup from '../../../../../models/StudyGroup.js';
 import User from '../../../../../models/User';
 import { serialiseGroup, type GroupDoc, type GroupMember } from '../../../../../lib/mobileGroups';
+import { PUBLIC_CARD_FIELDS, publicLevensboomCard, type PublicCardSource } from '../../../../../lib/levensboom/publicCard';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,11 +30,11 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
     );
     if (!isMember && !group.isPublic) return errorV1('FORBIDDEN', 403);
 
-    const memberDocs = await User.find({
+    const memberDocs = (await User.find({
       _id: { $in: group.members.map((m: Member) => m.userId) },
     })
-      .select('name image')
-      .lean();
+      .select(`name image ${PUBLIC_CARD_FIELDS}`)
+      .lean()) as unknown as Array<PublicCardSource & { name?: string; image?: string }>;
 
     const byId = new Map(memberDocs.map((u) => [u._id.toString(), u]));
 
@@ -48,6 +49,8 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
           role: m.role,
           joinedAt: m.joinedAt,
           isSelf: m.userId.toString() === auth.id,
+          // Enough to draw the member's tree, nothing else - see publicCard.ts.
+          levensboom: doc ? publicLevensboomCard(doc) : null,
         };
       }),
     });

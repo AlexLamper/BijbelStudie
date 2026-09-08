@@ -10,6 +10,7 @@ import {
   upsertRecord,
   type SyncKind,
 } from './mobileUserData';
+import { grantNoteXp } from './noteXp';
 
 /**
  * The four user-data collections differ only in their kind, so they share one
@@ -59,7 +60,22 @@ export function collectionHandlers(kind: SyncKind) {
         if (outcome.skipped === 'deleted') {
           return errorV1('RECORD_DELETED', 409, 'Dit item is verwijderd.');
         }
-        return jsonV1({ item: outcome.record, skipped: outcome.skipped }, { status: 201 });
+
+        // Writing a reflection feeds the Levensboom like reading and studying
+        // do. `grantNoteXp` decides whether this one earns anything - creates
+        // only, real text only, three a day - so `null` is the ordinary answer
+        // and never an error. Additive field; existing clients ignore it.
+        const xp =
+          kind === 'note'
+            ? await grantNoteXp(user.id, {
+                isPro: user.isPro,
+                noteText: data.noteText,
+                type: data.type,
+                created: outcome.created,
+              })
+            : null;
+
+        return jsonV1({ item: outcome.record, skipped: outcome.skipped, xp }, { status: 201 });
       } catch (error) {
         return statusAwareError(error);
       }

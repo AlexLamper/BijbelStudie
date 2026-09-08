@@ -92,6 +92,9 @@ scripts/*.cmt.mybible
 CLAUDE.md
 .ignore
 
+# Generated video scripts — local reference only, not in repo
+/video-scripts/
+
 # Internal planning / setup docs — not needed in repo
 *_PLAN.md
 *_SETUP.md
@@ -100,3 +103,6 @@ AI_TIERING_PLAN.md
 DOMAIN_MIGRATION.md
 MONETISATION_SETUP.md
 STUDY_FLOW_SETUP.md
+
+# Prompt for Claude Design (end-card animation) — local reference only
+/CLAUDE_DESIGN_ENDCARD_PROMPT.md

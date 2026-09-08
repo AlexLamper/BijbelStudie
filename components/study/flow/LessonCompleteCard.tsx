@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useReducedMotion } from 'framer-motion';
 import { ArrowRight, Award, NotebookPen, Trophy } from 'lucide-react';
 import { badgeDescription, badgeLabel } from '../../../lib/badgeCatalog';
+import LessonTreeMoment from '../../levensboom/LessonTreeMoment';
 
 const TEAL = '#0D9488';
 const AMBER = '#D97706';
@@ -256,12 +257,21 @@ export default function LessonCompleteCard({
     <div className="h-full overflow-y-auto flex flex-col justify-center">
       <div className="mx-auto w-full max-w-xl px-5 sm:px-8 py-6">
         <header className="text-center">
-          <ProgressRing
-            pct={pct}
-            done={done}
-            total={lessonsTotal}
-            accent={accent}
-            animate={!reduceMotion}
+          {/* The reader's own tree, with what this lesson just did to it: the
+              XP is already applied, so new leaves are open and a level-up grows
+              its new wood in. The ring stands in for a reader without a tree. */}
+          <LessonTreeMoment
+            xpAwarded={summary.xpAwarded}
+            levelledUp={summary.levelledUp}
+            fallback={
+              <ProgressRing
+                pct={pct}
+                done={done}
+                total={lessonsTotal}
+                accent={accent}
+                animate={!reduceMotion}
+              />
+            }
           />
 
           <p
@@ -296,15 +306,15 @@ export default function LessonCompleteCard({
           )}
         </header>
 
-        {/* Three figures, one row. The quiz result is one of them rather than a
-            card of its own - it is a number with a label, like the rest. The
-            lesson count is not here any more: the ring above already is it. */}
-        <div className="mt-6 grid grid-cols-3 gap-2">
+        {/* Four figures, one row. The quiz result is one of them rather than a
+            card of its own - it is a number with a label, like the rest. */}
+        <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
           <Stat
             value={summary.xpAwarded > 0 ? `+${xp}` : '0'}
             label="XP verdiend"
             accent={TEAL}
           />
+          <Stat value={`${done}/${lessonsTotal}`} label={`${pct}% van de studie`} accent={accent} />
           {hasQuiz ? (
             <Stat value={`${quizScore}/${quizTotal}`} label={scoreLabel(quizScore, quizTotal)} />
           ) : (

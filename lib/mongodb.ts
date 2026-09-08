@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { assertSafeDatabase } from './appEnv';
 
 /**
  * One connection per serverless container, shared by every request it handles.
@@ -80,6 +81,12 @@ const connectMongoDB = async (): Promise<typeof mongoose | null> => {
       console.error('MongoDB connection error: MONGODB_URI is not set');
       return null;
     }
+
+    // A no-op unless BLOCK_PRODUCTION_DB_ON_PREVIEW is armed, which it is not
+    // by default - this project runs previews against the live database on
+    // purpose. Called here anyway because this is the one place every read and
+    // write passes through, so arming it later needs no further wiring.
+    assertSafeDatabase();
 
     cache.promise = mongoose.connect(uri, {
       // Fail fast instead of letting a request hang on a dead pool: a 500 the
