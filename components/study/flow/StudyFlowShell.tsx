@@ -26,6 +26,7 @@ import StepDepth from './StepDepth';
 import StepReflection from './StepReflection';
 import StepQuiz from './StepQuiz';
 import LessonCompleteCard, { type CompletionSummary } from './LessonCompleteCard';
+import { useLevensboom } from '../../../hooks/useLevensboom';
 import AiDock from './AiDock';
 import StudyExitGuard from './StudyExitGuard';
 import StudySettingsMenu from './StudySettingsMenu';
@@ -157,6 +158,9 @@ export default function StudyFlowShell({
   const [quizScore, setQuizScore] = useState<number | null>(initialState.quiz.score);
   const [quizTotal, setQuizTotal] = useState<number | null>(initialState.quiz.total);
   const [summary, setSummary] = useState<CompletionSummary | null>(null);
+  // The Levensboom applies the grant at once, so the navbar and the tree on
+  // the completion card move without waiting for a refetch.
+  const { applyXp } = useLevensboom();
   const [finishing, setFinishing] = useState(false);
 
   const [aiOpen, setAiOpen] = useState(false);
@@ -423,6 +427,7 @@ export default function StudyFlowShell({
     if (soundOnRef.current && !reduceMotion) playComplete();
 
     const completion = data?.completion;
+    applyXp(completion?.xp ?? null);
     setSummary({
       xpAwarded: completion?.xp?.awarded ?? 0,
       levelledUp: !!completion?.xp?.levelledUp,
@@ -431,7 +436,7 @@ export default function StudyFlowShell({
       noteId: completion?.noteId ?? null,
       nextLessonDay: completion?.nextLessonDay ?? lesson.nextLessonDay,
     });
-  }, [steps, step, patch, lesson.nextLessonDay, swipeSound, reduceMotion]);
+  }, [steps, step, patch, lesson.nextLessonDay, swipeSound, reduceMotion, applyXp]);
 
   const onPrevious = useCallback(() => {
     const previous = goBack(steps, step);
