@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef } from 'react';
-import { GROUND_PAD, GROUND_Y, TRUNK_X, type TreeScene } from '../../lib/levensboom/generate';
+import { GROUND_Y, MIN_SCENE_HEIGHT, MIN_SCENE_WIDTH, TRUNK_X, type TreeScene } from '../../lib/levensboom/generate';
 import { cachedTree } from '../../lib/levensboom/sceneCache';
 import { mix, paletteForNow, type Palette } from '../../lib/levensboom/palette';
 import { seededRng } from '../../lib/levensboom/rng';
@@ -231,10 +231,10 @@ function leafPath(ctx: CanvasRenderingContext2D, shape: LeafShape, size: number,
       ctx.ellipse(size * 0.65, 0, size * 1.15, size * 0.42, 0, 0, Math.PI * 2);
       break;
     case 'needle': {
-      // A tuft of three needles. At avatar sizes a single stroke is all that
+      // A tuft of needles. At avatar sizes a single stroke is all that
       // survives the downsample, so the fan collapses to one.
-      const length = size * 1.5;
-      const fan = scale > 1.6 ? [-26, 0, 26] : [0];
+      const length = size * 1.6;
+      const fan = scale > 1.6 ? [-40, -20, 0, 20, 40] : [0];
       for (const a of fan) {
         ctx.moveTo(0, 0);
         ctx.lineTo(Math.cos(a * DEG) * length, Math.sin(a * DEG) * length);
@@ -244,11 +244,11 @@ function leafPath(ctx: CanvasRenderingContext2D, shape: LeafShape, size: number,
     case 'frond': {
       // A long blade whose tip hangs toward the ground. `droop` is world-down
       // expressed in this leaf's rotated frame.
-      const length = size * 2.6;
-      const w = size * 0.55;
+      const length = size * 3.2;
+      const w = size * 0.42;
       const [dx, dy] = droop;
       const tipX = length + dx * length * 0.18;
-      const tipY = dy * length * 0.22;
+      const tipY = dy * length * 0.26;
       ctx.moveTo(0, -w);
       ctx.quadraticCurveTo(length * 0.55, -w * 0.7 + tipY * 0.3, tipX, tipY);
       ctx.quadraticCurveTo(length * 0.55, w * 0.7 + tipY * 0.3, 0, w);
@@ -883,11 +883,14 @@ function measureFrame(width: number, height: number, scene: TreeScene, framing: 
     return { width, height, scale, originX, originY, pivotX: originX + TRUNK_X * scale, pivotY, groundTop: pivotY };
   }
 
-  // The scene: the earth band is at least a tenth of the frame, and the trunk
-  // base sits just below its top edge so the tree stands in the ground rather
-  // than on a line above it - which is what the first pass drew.
-  const scale = Math.min((width * 0.92) / contentW, (height * 0.82) / treeH);
-  const band = Math.max(height * 0.1, GROUND_PAD * scale);
+  // The scene: a fixed earth band (never scaled from the tree, which for a
+  // kiem swallowed the whole frame), a minimum framed extent so a small tree
+  // stands small in a real landscape, and the trunk base just below the band's
+  // top edge so the tree stands in the ground rather than on a line above it.
+  const band = height * 0.12;
+  const sceneW = Math.max(contentW, MIN_SCENE_WIDTH);
+  const sceneH = Math.max(treeH, MIN_SCENE_HEIGHT);
+  const scale = Math.min((width * 0.9) / sceneW, ((height - band) * 0.84) / sceneH);
   const groundTop = height - band;
   const pivotY = groundTop + 0.6 * scale;
   const originX = width / 2 - ((minX + maxX) / 2) * scale;
@@ -933,6 +936,24 @@ export default function TreeCanvas({
   const animalId = typeof animal === 'string' ? animal : 'geen';
   const sp = speciesParams(species);
 
+  // The per-frame inputs of a grow-in or a celebration are read through refs,
+  // so an animation that sets `reveal` sixty times a second changes what the
+  // next frame draws without tearing the loop, the observers and the branch
+  // layer down and up again each time - which is what left a blank canvas
+  // whenever a resize callback landed between two of those rebuilds.
+  const revealRef = useRef(reveal);
+  revealRef.current = reveal;
+  const celebrationRef = useRef(celebration);
+  celebrationRef.current = celebration;
+  const bloomRef = useRef(bloomFruit);
+  bloomRef.current = bloomFruit;
+  /** Repaints a still canvas; set by the effect below, called when a ref changes. */
+  const repaintRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    repaintRef.current?.();
+  }, [reveal, celebration, bloomFruit]);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -944,13 +965,25 @@ export default function TreeCanvas({
     let visible = true;
     let running = false;
     let still = stillProp || (reducedMotion ?? prefersReducedMotion());
+    let dpr = 1;
 
-    // The branch layer, rebuilt only when the geometry or the box changes.
+    // The branch layer, rebuilt only when the geometry, the box or the reveal
+    // changes.
     const layer = document.createElement('canvas');
     const layerCtx = layer.getContext('2d');
+    let layerReveal = -1;
+
+    const ensureLayer = () => {
+      const reveal = revealRef.current;
+      if (!layerCtx || layerReveal === reveal) return;
+      layerCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      layerCtx.clearRect(0, 0, frame.width, frame.height);
+      drawBranches(layerCtx, scene, palette, frame, reveal);
+      layerReveal = reveal;
+    };
 
     const measure = () => {
-      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      dpr = Math.min(2, window.devicePixelRatio || 1);
       const rect = canvas.getBoundingClientRect();
       const width = Math.max(1, Math.round(rect.width));
       const height = Math.max(1, Math.round(rect.height));
@@ -966,11 +999,8 @@ export default function TreeCanvas({
 
       layer.width = canvas.width;
       layer.height = canvas.height;
-      if (layerCtx) {
-        layerCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        layerCtx.clearRect(0, 0, width, height);
-        drawBranches(layerCtx, scene, palette, frame, reveal);
-      }
+      layerReveal = -1;
+      ensureLayer();
     };
 
     const drawSky = (t: number) => {
@@ -1061,6 +1091,9 @@ export default function TreeCanvas({
 
     const drawTree = (t: number) => {
       const { width, height, scale, originX, originY, pivotX, pivotY } = frame;
+      const reveal = revealRef.current;
+      const bloomFruit = bloomRef.current;
+      ensureLayer();
       const sway = still ? 0 : Math.sin(t * 0.00042) * SWAY_DEGREES + Math.sin(t * 0.00097) * SWAY_DEGREES * 0.3;
 
       ctx.save();
@@ -1107,8 +1140,23 @@ export default function TreeCanvas({
             ctx.lineWidth = Math.max(0.5, size * 0.08);
             ctx.beginPath();
             ctx.moveTo(0, 0);
-            ctx.lineTo(size * (shape === 'frond' ? 2.3 : 1.5), 0);
+            ctx.lineTo(size * (shape === 'frond' ? 2.9 : 1.5), 0);
             ctx.stroke();
+            // Leaflets either side of the rib, where there is room to see them.
+            if (shape === 'frond' && scale > 1.4) {
+              const length = size * 3.2;
+              ctx.lineWidth = Math.max(0.5, size * 0.06);
+              ctx.beginPath();
+              for (let k = 1; k <= 6; k += 1) {
+                const at = (k / 7) * length;
+                const reach = size * 0.9 * (1 - k / 9);
+                ctx.moveTo(at, 0);
+                ctx.lineTo(at + reach * 0.55, -reach);
+                ctx.moveTo(at, 0);
+                ctx.lineTo(at + reach * 0.55, reach);
+              }
+              ctx.stroke();
+            }
           }
         }
         ctx.restore();
@@ -1237,7 +1285,7 @@ export default function TreeCanvas({
       }
 
       // --- the level-up column of light (§8.4) -----------------------------
-      if (celebration && !still) {
+      if (celebrationRef.current && !still) {
         ctx.fillStyle = palette.light;
         for (let i = 0; i < 22; i += 1) {
           const phase = (i / 22 + t * 0.00022) % 1;
@@ -1294,10 +1342,16 @@ export default function TreeCanvas({
     measure();
     draw(0);
     start();
+    // A still canvas repaints when a grow-in or celebration input changes.
+    repaintRef.current = () => {
+      if (!running) draw(0);
+    };
 
     const resizeObserver = new ResizeObserver(() => {
+      // Resizing the bitmap clears it; always paint straight back, running or
+      // not, so a frame is never lost between two loop ticks.
       measure();
-      if (!running) draw(0);
+      draw(0);
     });
     resizeObserver.observe(canvas);
 
@@ -1315,11 +1369,12 @@ export default function TreeCanvas({
 
     return () => {
       stop();
+      repaintRef.current = null;
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
       document.removeEventListener('visibilitychange', onVisibility);
     };
-  }, [scene, palette, decor, reveal, reducedMotion, stillProp, celebration, bloomFruit, level, framing, animalId, sp]);
+  }, [scene, palette, decor, reducedMotion, stillProp, level, framing, animalId, sp]);
 
   return (
     <canvas

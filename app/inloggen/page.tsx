@@ -8,6 +8,7 @@ import { Loader2, Eye, EyeOff, BookOpen, ArrowLeft, Check, Sparkles } from "luci
 import { useSearchParams } from "next/navigation"
 import { SkeletonBlock } from "../../components/ui/skeletons"
 import { safeRedirect } from "../../lib/safeRedirect"
+import AuthTreeBackdrop from "../../components/auth/AuthTreeBackdrop"
 
 const GOOGLE_SVG = (
   <svg width="18" height="18" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -28,6 +29,8 @@ function FeaturePanel() {
   return (
     <div className="hidden lg:flex lg:w-1/2 flex-col justify-center px-12 xl:px-16 relative overflow-hidden"
       style={{ backgroundColor: "#1F2937" }}>
+      {/* The reader's future: a grown levensboom at night behind the copy. */}
+      <AuthTreeBackdrop />
       <div className="absolute top-0 right-0 w-56 h-56 rounded-full opacity-10"
         style={{ background: "radial-gradient(circle, #0D9488, transparent)", transform: "translate(30%, -30%)" }} />
       <div className="absolute bottom-0 left-0 w-40 h-40 rounded-full opacity-10"

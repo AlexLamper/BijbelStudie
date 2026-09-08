@@ -11,6 +11,9 @@ const TEAL = '#0D9488';
  * The live stage: the tree in its scene, with the stage name and level in the
  * corner. A preview from the tile grid repaints this without a round trip;
  * the ring shows as the frame's own border.
+ *
+ * Fills whatever box the parent gives it - the studio hands it a 16:10 box on
+ * a phone and most of the viewport height on a laptop.
  */
 export default function StudioStage({
   seed,
@@ -22,6 +25,7 @@ export default function StudioStage({
   reducedMotion,
   wilting,
   daysSinceActive,
+  className,
 }: {
   seed: string;
   level: number;
@@ -32,21 +36,22 @@ export default function StudioStage({
   reducedMotion: boolean;
   wilting: boolean;
   daysSinceActive: number;
+  className?: string;
 }) {
   const ring = ringColors(avatar.ring);
   const gold = avatar.ring === 'goud';
 
   return (
     <div
-      className="relative overflow-hidden rounded-3xl"
+      className={`relative overflow-hidden rounded-[28px] ${className ?? ''}`}
       style={{
         padding: 3,
         background: gold
           ? `linear-gradient(135deg, ${ring.from}, ${ring.to})`
-          : 'linear-gradient(135deg, rgba(13,148,136,0.55), rgba(13,148,136,0.15))',
+          : 'linear-gradient(135deg, rgba(13,148,136,0.55), rgba(13,148,136,0.12))',
       }}
     >
-      <div className="relative aspect-[16/10] max-h-[440px] w-full overflow-hidden rounded-[21px] bg-[#0B1027]">
+      <div className="relative h-full w-full overflow-hidden rounded-[25px] bg-[#0B1027]">
         <TreeCanvas
           seed={seed}
           level={level}
@@ -57,24 +62,24 @@ export default function StudioStage({
           animal={avatar.animal}
           framing="scene"
           reducedMotion={reducedMotion}
-          className="block h-full w-full"
+          className="absolute inset-0 block h-full w-full"
           ariaLabel={`Je levensboom: ${stage.name.toLowerCase()} op niveau ${level}`}
         />
 
-        <div className="pointer-events-none absolute bottom-3 left-3 flex items-center gap-2">
+        <div className="pointer-events-none absolute bottom-4 left-4 flex items-center gap-2">
           <span
-            className="rounded-full px-2.5 py-1 text-xs font-bold text-white shadow"
+            className="rounded-full px-3 py-1.5 text-sm font-bold text-white shadow"
             style={{ backgroundColor: gold ? ring.stroke : TEAL }}
           >
             Niveau {level}
           </span>
-          <span className="rounded-full bg-black/45 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur">
+          <span className="rounded-full bg-black/45 px-3 py-1.5 text-sm font-semibold text-white backdrop-blur">
             {stage.name}
           </span>
         </div>
 
         {wilting && (
-          <div className="pointer-events-none absolute right-3 top-3 rounded-full bg-black/45 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur">
+          <div className="pointer-events-none absolute right-4 top-4 rounded-full bg-black/45 px-3 py-1.5 text-xs font-medium text-white backdrop-blur">
             {daysSinceActive} dagen niet gelezen — één sessie en hij veert op
           </div>
         )}

@@ -341,11 +341,15 @@ the parity fixtures — depend on the clock.
 
 ### 7.4 Framing
 
-`scene`: the earth band is at least 10 % of the frame (or the bounds' ground
-pad, whichever is more) and the trunk base sits 0.6 units *below* the band's
-top edge, so the tree stands in the ground. `portrait`: the tree's own bounds
-(without the ground pad, with any ground animal) centred with 10 % padding on a
-radial sky disc, standing on a soft shadow; no backdrop, no motes.
+`scene`: the earth band is a fixed 12 % of the frame (never derived from the
+tree's scale - for a kiem that swallowed the whole frame), the framed extent is
+at least `MIN_SCENE_HEIGHT = 26` by `MIN_SCENE_WIDTH = 34` units so a small
+tree stands small in a real landscape, and the trunk base sits 0.6 units
+*below* the band's top edge, so the tree stands in the ground. `portrait`: the
+tree's own bounds (without the ground pad, with any ground animal) centred with
+10 % padding on a radial sky disc, standing on a soft shadow; no backdrop, no
+motes. Fruit ornaments are capped at `MAX_FRUIT_SIZE = 1.6` so they never
+inherit a frond's or a fig leaf's size.
 
 Both renderers stop animating under reduced motion, when told `still`, and
 (web) below 64 CSS px.

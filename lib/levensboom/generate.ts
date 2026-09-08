@@ -94,6 +94,19 @@ export const TRUNK_X = 50;
 export const GROUND_PAD = 8;
 
 /**
+ * The smallest extent a `scene` framing shows, in tree units. A kiem is 8
+ * units tall; framed to its own bounds it would fill the stage like a
+ * monster sprout and the earth band, sized from the same scale, would swallow
+ * it. Framed to at least this much, it stands small in a real landscape - the
+ * "starts tiny" story the stages tell.
+ */
+export const MIN_SCENE_HEIGHT = 26;
+export const MIN_SCENE_WIDTH = 34;
+
+/** Fruit hangs from a leaf but must not inherit a frond's or a fig leaf's size. */
+export const MAX_FRUIT_SIZE = 1.6;
+
+/**
  * Hard stop on the recursion, checked before any random draw so it cannot
  * desync the two platforms' streams.
  *
@@ -233,15 +246,21 @@ export function generateTree(input: TreeInput): TreeScene {
         if (i === 1) {
           // The leader keeps going up; that is the whole cedar silhouette.
           raw = endAngle + jitter * 0.35;
-          childLen = len * 0.72;
+          childLen = len * 0.78;
           childWidth = width * 0.72;
           childLeader = true;
         } else {
           // Side branches go out nearly flat, longer near the ground.
-          raw = endAngle + t * (spread + 40) + jitter;
-          childLen = len * sp.childLenRatio * (0.55 + 0.45 * (1 - depth / maxDepth));
-          childWidth = width * 0.55;
+          raw = endAngle + t * (spread + 42) + jitter;
+          childLen = len * 0.62 * (1 - 0.55 * (depth / maxDepth));
+          childWidth = width * 0.5;
         }
+      } else if (sp.form === 'conical') {
+        // A tier keeps going outward with only a slight fan, so the cedar
+        // reads as layered shelves rather than as a second crown.
+        raw = endAngle + t * spread * 0.55 + jitter * 0.6;
+        childLen = len * 0.66;
+        childWidth = width * 0.66;
       } else {
         raw = endAngle + t * spread + jitter;
         childLen = len * sp.childLenRatio;
@@ -373,7 +392,7 @@ export function generateTree(input: TreeInput): TreeScene {
     const stride = Math.max(1, Math.floor(highest.length / wanted));
     for (let i = 0; i < wanted; i += 1) {
       const leaf = highest[Math.min(highest.length - 1, i * stride)];
-      fruits.push({ x: leaf.x, y: leaf.y, size: leaf.size, index: i });
+      fruits.push({ x: leaf.x, y: leaf.y, size: Math.min(leaf.size, MAX_FRUIT_SIZE), index: i });
     }
   }
 

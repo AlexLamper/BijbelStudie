@@ -90,7 +90,8 @@ export function seasonForMonth(month: number): Season {
   // `month` is 0-based, as `Date#getMonth` gives it.
   if (month <= 1 || month === 11) return 'winter';
   if (month <= 4) return 'spring';
-  if (month <= 7) return 'summer';
+  // September is still green in the Netherlands; autumn colours from October.
+  if (month <= 8) return 'summer';
   return 'autumn';
 }
 

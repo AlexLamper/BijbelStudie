@@ -43,7 +43,7 @@ export function ItemGrid({
   onPick: (pick: TilePick) => void;
 }) {
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4" role="radiogroup" aria-label={KIND_TITLES[kind]}>
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3" role="radiogroup" aria-label={KIND_TITLES[kind]}>
       {items.map((item) => {
         const key = itemKey(item);
         const isUnlocked = unlocked.has(key);

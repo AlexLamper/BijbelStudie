@@ -1,4 +1,4 @@
-import { generateTree, GROUND_PAD, GROUND_Y, TRUNK_X, type TreeScene } from './generate';
+import { generateTree, GROUND_Y, MIN_SCENE_HEIGHT, MIN_SCENE_WIDTH, TRUNK_X, type TreeScene } from './generate';
 import { buildPalette, type Palette, type Season, type TimeOfDay } from './palette';
 import { speciesParams } from './species';
 import { sceneSpec } from './scenes';
@@ -47,8 +47,10 @@ function measure(width: number, height: number, scene: TreeScene, framing: 'scen
     const originY = pivotY - GROUND_Y * scale;
     return { scale, originX, originY, pivotX: originX + TRUNK_X * scale, pivotY, groundTop: pivotY };
   }
-  const scale = Math.min((width * 0.92) / contentW, (height * 0.82) / treeH);
-  const band = Math.max(height * 0.1, GROUND_PAD * scale);
+  const band = height * 0.12;
+  const sceneW = Math.max(contentW, MIN_SCENE_WIDTH);
+  const sceneH = Math.max(treeH, MIN_SCENE_HEIGHT);
+  const scale = Math.min((width * 0.9) / sceneW, ((height - band) * 0.84) / sceneH);
   const groundTop = height - band;
   const pivotY = groundTop + 0.6 * scale;
   const originX = width / 2 - ((minX + maxX) / 2) * scale;
@@ -221,9 +223,9 @@ export function renderTreeSvg(options: TreeSvgOptions): string {
         ox = size * 0.5;
         break;
       case 'frond':
-        rx = size * 1.3;
-        ry = size * 0.28;
-        ox = size * 1.3;
+        rx = size * 1.6;
+        ry = size * 0.22;
+        ox = size * 1.6;
         break;
       default:
         break;

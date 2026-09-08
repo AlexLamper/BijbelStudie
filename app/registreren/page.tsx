@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { signIn } from "next-auth/react"
 import { Loader2, Eye, EyeOff, ArrowLeft, Check, BookOpen, Sparkles } from "lucide-react"
 import { safeRedirect } from "../../lib/safeRedirect"
+import AuthTreeBackdrop from "../../components/auth/AuthTreeBackdrop"
 
 const BENEFITS = [
   "Persoonlijke notities bij elk vers",
@@ -20,6 +21,8 @@ function FeaturePanel() {
       className="hidden lg:flex lg:w-1/2 flex-col justify-center px-12 xl:px-16 relative overflow-hidden"
       style={{ backgroundColor: "#1F2937" }}
     >
+      {/* The reader's future: a grown levensboom at night behind the copy. */}
+      <AuthTreeBackdrop />
       <div className="absolute top-0 right-0 w-56 h-56 rounded-full opacity-10"
         style={{ background: "radial-gradient(circle, #0D9488, transparent)", transform: "translate(30%, -30%)" }} />
       <div className="absolute bottom-0 left-0 w-40 h-40 rounded-full opacity-10"

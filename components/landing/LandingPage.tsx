@@ -1,11 +1,9 @@
 import Link from "next/link"
 import Image from "next/image"
 import {
-  BookOpen, StickyNote, Library, Languages,
-  ArrowRight, Check, ChevronDown, Users, Shield,
-  Lightbulb, BarChart2,
-  MessageSquare, ChevronLeft, ChevronRight,
-  Flame, PenLine, Sparkles,
+  BookOpen, Library,
+  ArrowRight, Check, ChevronDown, Users,
+  MessageSquare,
 } from "lucide-react"
 import { Footer } from "./footer"
 import { FAQItem } from "./FAQItem"
@@ -16,9 +14,11 @@ import { HOW_IT_WORKS_STEPS } from "../../lib/content/howItWorks"
 import { ALL_STUDIES } from "../../lib/bookStudies"
 import { PLANS, euro } from "../../lib/pricing"
 import LandingTree from "./LandingTree"
+import HeroLevensboom from "./HeroLevensboom"
+import LevensboomGroeiDemo from "./LevensboomGroeiDemo"
 import { renderTreeSvg } from "../../lib/levensboom/svg"
-import { stageForLevel } from "../../lib/levensboom/stages"
-import { catalogItem } from "../../lib/levensboom/catalog"
+import { STAGES } from "../../lib/levensboom/stages"
+import { CATALOG, catalogItem } from "../../lib/levensboom/catalog"
 
 /* ─── Design tokens ──────────────────────────────────────────── */
 const T = {
@@ -174,182 +174,6 @@ function GroupLabel({
 }
 
 /* ─── Bible Study Illustration - looks like an actual app screenshot ─── */
-const HERO_VERSES = [
-  { num: 1, text: "De HEERE is mijn Herder, mij zal niets ontbreken.",                                                                       highlight: false },
-  { num: 2, text: "Hij doet mij nederliggen in grazige weiden; Hij voert mij zachtjes aan zeer stille wateren.",                            highlight: true  },
-  { num: 3, text: "Hij verkwikt mijn ziel; Hij leidt mij in het spoor der gerechtigheid, om Zijns Naams wil.",                               highlight: false },
-  { num: 4, text: "Al ging ik ook in een dal der schaduw des doods, ik zou geen kwaad vrezen, want Gij zijt met mij; Uw stok en Uw staf, die vertroosten mij.",   highlight: false },
-]
-
-function BibleStudyIllustration() {
-  return (
-    <div className="relative w-full select-none" style={{ fontFamily: "Inter, system-ui, sans-serif" }}>
-
-      {/* Browser window frame */}
-      <div className="rounded-xl overflow-hidden border bg-white"
-        style={{ borderColor: T.border, boxShadow: SHADOW.raised }}>
-
-        {/* macOS-style chrome with traffic lights + URL bar */}
-        <div className="h-9 px-3 flex items-center gap-3 border-b"
-          style={{ backgroundColor: T.light, borderColor: T.border }}>
-          <div className="flex items-center gap-1.5 flex-shrink-0">
-            <span className="w-3 h-3 rounded-full" style={{ backgroundColor: "#FF5F57" }} />
-            <span className="w-3 h-3 rounded-full" style={{ backgroundColor: "#FEBC2E" }} />
-            <span className="w-3 h-3 rounded-full" style={{ backgroundColor: "#28C840" }} />
-          </div>
-          <div className="flex-1 flex justify-center">
-            <div className="text-[10px] font-medium px-3 py-0.5 rounded-md border bg-white inline-flex items-center gap-1.5"
-              style={{ color: T.muted, borderColor: T.border }}>
-              <Shield className="h-2.5 w-2.5" style={{ color: T.teal }} />
-              www.bijbelstudie.io/studie
-            </div>
-          </div>
-          <div className="w-12" />
-        </div>
-
-        {/* App tab/chapter bar */}
-        <div className="h-10 px-4 flex items-center justify-between border-b"
-          style={{ borderColor: T.border, backgroundColor: "white" }}>
-          <div className="flex items-center gap-2">
-            <div className="h-5 w-5 rounded flex items-center justify-center flex-shrink-0"
-              style={{ backgroundColor: T.teal }}>
-              <BookOpen className="h-3 w-3 text-white" />
-            </div>
-            <span className="font-semibold text-xs" style={{ color: T.text }}>Psalm 23</span>
-            <span className="text-xs" style={{ color: T.muted }}>·</span>
-            <span className="text-xs" style={{ color: T.muted }}>Statenvertaling</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="h-6 w-6 rounded flex items-center justify-center" style={{ backgroundColor: T.bg }}>
-              <ChevronLeft size={11} color={T.muted} />
-            </span>
-            <span className="h-6 w-6 rounded flex items-center justify-center" style={{ backgroundColor: T.bg }}>
-              <ChevronRight size={11} color={T.muted} />
-            </span>
-          </div>
-        </div>
-
-        {/* Split-screen app interior: Bible left · Commentary right */}
-        <div className="grid grid-cols-5">
-
-          {/* Bible reading pane (3 cols) */}
-          <div className="col-span-3 border-r" style={{ borderColor: T.border }}>
-            <div className="px-5 pt-4 pb-3 text-center border-b" style={{ borderColor: T.border + "80" }}>
-              <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: T.tealText }}>
-                Psalmen
-              </p>
-              <p className="text-xl font-bold mt-0.5"
-                style={{ color: T.text, fontFamily: "Georgia, 'Times New Roman', serif" }}>
-                Psalm 23
-              </p>
-              <p className="text-[10px] mt-0.5" style={{ color: T.muted }}>Een psalm van David</p>
-            </div>
-
-            <div className="px-5 py-4 space-y-3">
-              {HERO_VERSES.map(v => (
-                <div key={v.num}
-                  className="flex gap-2.5 rounded-md px-2 py-1.5 -mx-2"
-                  style={{
-                    backgroundColor: v.highlight ? "rgba(13,148,136,0.07)" : "transparent",
-                    borderLeft: v.highlight ? `2px solid ${T.teal}` : "2px solid transparent",
-                  }}>
-                  <span className="text-[10px] font-bold flex-shrink-0 mt-0.5 w-3 text-right"
-                    style={{ color: T.tealText }}>
-                    {v.num}
-                  </span>
-                  <p className="text-[11px] leading-relaxed"
-                    style={{ color: T.text, fontFamily: "Georgia, serif", fontStyle: "italic" }}>
-                    {v.text}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Commentary pane (2 cols) */}
-          <div className="col-span-2" style={{ backgroundColor: "#FAFAFA" }}>
-            {/* Tabs row */}
-            <div className="h-9 px-3 flex items-center gap-3 border-b text-[10px]"
-              style={{ borderColor: T.border }}>
-              <span className="font-bold pb-0.5 border-b-2"
-                style={{ color: T.tealText, borderColor: T.teal }}>
-                Commentaar
-              </span>
-              <span style={{ color: T.muted }}>Grondtekst</span>
-              <span style={{ color: T.muted }}>Notities</span>
-            </div>
-
-            {/* Source pill */}
-            <div className="px-4 py-2.5 border-b flex items-center justify-between"
-              style={{ borderColor: T.border + "80" }}>
-              <span className="text-[10px] font-medium" style={{ color: T.muted }}>Bron</span>
-              <div className="text-[10px] font-semibold px-2 py-0.5 rounded-md border bg-white inline-flex items-center gap-1"
-                style={{ borderColor: T.border, color: T.text }}>
-                KingComments
-                <ChevronDown className="h-2.5 w-2.5" style={{ color: T.muted }} />
-              </div>
-            </div>
-
-            {/* Verse 1 commentary */}
-            <div className="px-4 py-4 space-y-3">
-              <div className="inline-flex items-center gap-1">
-                <span className="text-[9px] font-bold tracking-wider uppercase px-1.5 py-0.5 rounded-full"
-                  style={{ backgroundColor: "rgba(13,148,136,0.10)", color: T.tealDeep }}>
-                  Vers 1
-                </span>
-              </div>
-              <p className="text-[11px] leading-relaxed" style={{ color: T.text }}>
-                Deze psalm is de bekendste en meest geliefde van alle psalmen. In de{" "}
-                <span style={{ color: T.tealText, fontStyle: "italic" }}>Ps 23:1-4</span>
-                {" "}geeft hij ons een volledig beeld van de volcontinu bezigheden van de herder, in wie
-                we zonder enige moeite het beeld van de Heer Jezus herkennen.
-              </p>
-              <p className="text-[11px] leading-relaxed" style={{ color: T.text }}>
-                In de <span style={{ color: T.tealText, fontStyle: "italic" }}>Ps 23:5-6</span> wordt daaraan het beeld van een feestmaal toegevoegd. Deze psalm
-                geeft ons een complete beschrijving van de herder-relatie met onze Heer.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Floating "Notitie opgeslagen" badge (top-left) ── */}
-      <div className="absolute -top-5 -left-4 bg-white rounded-full border px-3 py-1.5 hidden sm:flex items-center gap-2"
-        style={{ borderColor: T.border, boxShadow: "0 10px 24px -12px rgba(15,23,42,0.28)" }}>
-        <div className="h-5 w-5 rounded-full flex items-center justify-center flex-shrink-0"
-          style={{ backgroundColor: T.tealLight }}>
-          <PenLine className="h-3 w-3" style={{ color: T.teal }} />
-        </div>
-        <span className="text-[11px] font-semibold" style={{ color: T.text }}>Notitie opgeslagen</span>
-      </div>
-
-      {/* ── Floating Levensboom chip (top-right): the avatar that grows with
-          what you read, drawn from the same generator the product uses. ── */}
-      <div className="absolute -top-5 -right-4 bg-white rounded-full border pl-1 pr-3 py-1 hidden sm:flex items-center gap-2"
-        style={{ borderColor: T.border, boxShadow: "0 10px 24px -12px rgba(15,23,42,0.28)" }}>
-        <LandingTree
-          svg={renderTreeSvg({ seed: LANDING_SEED, level: 7, frac: 0.6, species: "eik", scene: "waterbeken", framing: "portrait", width: 64, height: 64, rootAttributes: 'aria-hidden="true"' })}
-          seed={LANDING_SEED}
-          level={7}
-          species="eik"
-          framing="portrait"
-          className="h-7 w-7 overflow-hidden rounded-full ring-2 ring-teal-600/40"
-        />
-        <span className="text-[11px] font-semibold" style={{ color: T.text }}>Jonge boom</span>
-        <span className="text-[11px]" style={{ color: T.muted }}>niveau 7</span>
-      </div>
-
-      {/* ── Floating streak pill (bottom-right) ── */}
-      <div className="absolute -bottom-4 -right-4 bg-white rounded-full border px-3 py-1.5 hidden sm:flex items-center gap-1.5"
-        style={{ borderColor: T.border, boxShadow: "0 10px 24px -12px rgba(15,23,42,0.28)" }}>
-        <Flame className="h-3.5 w-3.5 flex-shrink-0" style={{ color: "#EA580C" }} />
-        <span className="text-[11px] font-bold" style={{ color: T.text }}>12</span>
-        <span className="text-[11px]" style={{ color: T.muted }}>dagen streak</span>
-      </div>
-
-    </div>
-  )
-}
 
 /* ─── Navbar ─────────────────────────────────────────────────── */
 function Navbar() {
@@ -379,7 +203,7 @@ function Navbar() {
             sitemap, maar horen niet in de hoofdnavigatie van de app. */}
         <nav className="hidden md:flex items-center justify-center gap-1">
           {[
-            { href: "#functies",      label: "Functies" },
+            { href: "#levensboom",    label: "Levensboom" },
             { href: "#prijzen",       label: "Prijzen" },
             { href: "#faq",           label: "FAQ" },
           ].map(({ href, label }) => (
@@ -579,192 +403,65 @@ function Hero() {
           </div>
         </div>
 
-        {/* Illustration column - rests slightly off the page */}
-        <div className="relative w-full mx-auto lg:max-w-[54rem] lg:w-full lg:mx-0 lg:justify-self-end">
-          <div className="float-slow w-full">
-            <BibleStudyIllustration />
+        {/* The product's face: a grown levensboom at dusk that grows in from a
+            kiem when the page lands, with the reader's own numbers laid over
+            it. Everything in the picture is the real generator. */}
+        <div className="relative w-full mx-auto max-w-[34rem] lg:max-w-none lg:w-full lg:mx-0 lg:justify-self-end">
+          <div
+            className="relative overflow-hidden rounded-[2rem] aspect-[4/3] lg:aspect-[5/4]"
+            style={{ boxShadow: SHADOW.raised, backgroundColor: "#4B3B6B" }}
+          >
+            <HeroLevensboom
+              svg={renderTreeSvg({ seed: LANDING_SEED, level: 14, frac: 0.7, species: "eik", scene: "waterbeken", framing: "scene", width: 800, height: 640, season: "summer", timeOfDay: "dusk", rootAttributes: 'aria-hidden="true"' })}
+              seed={LANDING_SEED}
+              level={14}
+            />
+
+            {/* Who this is */}
+            <div className="absolute left-4 top-4 flex items-center gap-3 rounded-2xl border border-white/60 bg-white/85 py-2 pl-2 pr-4 backdrop-blur-md"
+              style={{ boxShadow: "0 10px 24px -14px rgba(15,23,42,0.35)" }}>
+              <LandingTree
+                svg={renderTreeSvg({ seed: LANDING_SEED, level: 14, frac: 0.7, species: "eik", framing: "portrait", width: 96, height: 96, rootAttributes: 'aria-hidden="true"' })}
+                seed={LANDING_SEED}
+                level={14}
+                species="eik"
+                framing="portrait"
+                className="h-11 w-11 overflow-hidden rounded-full ring-2 ring-teal-600/40"
+              />
+              <div>
+                <p className="text-[12px] font-bold leading-none" style={{ color: T.text }}>Jouw levensboom</p>
+                <p className="mt-1 text-[11px] leading-none" style={{ color: T.muted }}>Volwassen boom · niveau 14</p>
+              </div>
+            </div>
+
+            {/* What just happened */}
+            <div className="absolute right-4 top-4 rounded-full border border-white/60 bg-white/85 px-3 py-1.5 text-[12px] font-bold backdrop-blur-md"
+              style={{ color: T.tealText, boxShadow: "0 10px 24px -14px rgba(15,23,42,0.35)" }}>
+              +25 XP · Les 3 afgerond
+            </div>
+
+            {/* Where it is going */}
+            <div className="absolute inset-x-4 bottom-4 flex items-center gap-4 rounded-2xl border border-white/60 bg-white/85 px-4 py-3 backdrop-blur-md"
+              style={{ boxShadow: "0 10px 24px -14px rgba(15,23,42,0.35)" }}>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-baseline justify-between gap-3">
+                  <p className="text-[12px] font-bold" style={{ color: T.text }}>Nog 340 XP tot de amandelboom</p>
+                  <p className="text-[11px] tabular-nums" style={{ color: T.muted }}>62%</p>
+                </div>
+                <div className="mt-1.5 h-1.5 overflow-hidden rounded-full" style={{ backgroundColor: "rgba(15,23,42,0.08)" }}>
+                  <div className="h-full rounded-full" style={{ width: "62%", backgroundColor: T.teal }} />
+                </div>
+              </div>
+              <div className="flex-shrink-0 border-l pl-4" style={{ borderColor: T.border }}>
+                <p className="text-[12px] font-bold leading-none tabular-nums" style={{ color: T.text }}>12 dagen</p>
+                <p className="mt-1 text-[11px] leading-none" style={{ color: T.muted }}>reeks</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </section>
   );
-}
-
-/* ─── Features ───────────────────────────────────────────────── */
-function FeatureCard({
-  num, icon: Icon, title, desc, className = "", children,
-}: {
-  num: string
-  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>
-  title: string
-  desc: string
-  className?: string
-  children?: React.ReactNode
-}) {
-  return (
-    <FadeUp className={className}>
-      <div className="lp-card flex h-full flex-col rounded-2xl p-6 lg:p-7">
-        <div className="flex items-start justify-between mb-5">
-          <div className="h-11 w-11 rounded-xl flex items-center justify-center"
-            style={{
-              backgroundColor: T.tealLight,
-              backgroundImage: `linear-gradient(135deg, ${T.tealLight}, rgba(13,148,136,0.05))`,
-            }}>
-            <Icon className="h-5 w-5" style={{ color: T.teal }} />
-          </div>
-          <span className="text-[10px] font-bold tracking-widest tabular-nums" style={{ color: T.muted }}>
-            {num}
-          </span>
-        </div>
-
-        <h3 className="font-bold text-base lg:text-lg tracking-tight" style={{ color: T.text }}>{title}</h3>
-        <p className="mt-2 text-sm leading-relaxed" style={{ color: T.muted }}>{desc}</p>
-
-        {children && <div className="mt-5">{children}</div>}
-      </div>
-    </FadeUp>
-  )
-}
-
-/** The example-query and topic chips. One shape, used in both feature cards. */
-function Chip({ children }: { children: React.ReactNode }) {
-  return (
-    <span
-      className="text-[11px] font-medium px-2.5 py-1 rounded-full border"
-      style={{ borderColor: T.border, color: T.muted, backgroundColor: T.light }}
-    >
-      {children}
-    </span>
-  )
-}
-
-function Features() {
-  return (
-    <section id="functies" className={`${SECTION_Y} scroll-mt-16`} style={{ backgroundColor: T.light, ...EDGE }}>
-      <div className={SHELL}>
-        <SectionHeader
-          label="Functies"
-          title="Alles wat u nodig heeft voor bijbelstudie"
-          subtitle="Van bijbeltekst tot studiehulpmiddelen - alles samengebracht in één overzichtelijk platform."
-        />
-
-        <div className="reveal-stagger grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {/* Featured: AI-assistent (full width banner) */}
-          <FeatureCard
-            num="01"
-            icon={Sparkles}
-            title="AI-assistent voor al uw bijbelvragen"
-            desc="Stel elke vraag over de Bijbel en krijg direct een serieus, theologisch onderbouwd antwoord met verwijzingen naar de tekst. De assistent kent het hoofdstuk dat u leest en helpt u de Schrift beter begrijpen."
-            className="lg:col-span-3"
-          >
-            <div className="flex flex-wrap gap-1.5">
-              {[
-                "Wat is de kernboodschap van dit hoofdstuk?",
-                "Leg de historische achtergrond uit",
-                "Wie was Paulus?",
-                "Welke teksten sluiten hierop aan?",
-              ].map(q => <Chip key={q}>{q}</Chip>)}
-            </div>
-          </FeatureCard>
-
-          {/* Featured: Begeleide studies (large, spans 2 columns on lg). The
-              count comes from the catalogue for the same reason the hero's
-              does: a hardcoded number was stale within a week.
-              It counts the WHOLE catalogue, not just the themed studies: every
-              bible book is a guided study now, run through the same five-step
-              flow, so quoting the seven themed ones here next to "73
-              bijbelstudies" in the hero would read as two different products. */}
-          <FeatureCard
-            num="02"
-            icon={Lightbulb}
-            title={`${ALL_STUDIES.length} begeleide bijbelstudies`}
-            desc="Elk bijbelboek hoofdstuk voor hoofdstuk, plus studies over personen, gebeurtenissen en thema's - met gerichte vragen per les."
-            className="lg:col-span-2"
-          >
-            <div className="flex flex-wrap gap-1.5">
-              {["Het leven van David", "De Bergrede", "Brieven van Paulus", "Profeten", "Genesis"].map(s => (
-                <Chip key={s}>{s}</Chip>
-              ))}
-            </div>
-          </FeatureCard>
-
-          {/* Persoonlijke notities */}
-          <FeatureCard
-            num="03"
-            icon={StickyNote}
-            title="Persoonlijke notities"
-            desc="Noteer gedachten bij verzen en bewaar alles op één plek - automatisch gesynchroniseerd."
-          />
-
-          {/* Row 2: 3 equal cards */}
-          <FeatureCard
-            num="04"
-            icon={BookOpen}
-            title="Meerdere vertalingen"
-            desc="Lees en vergelijk Nederlandse bijbelvertalingen direct naast elkaar."
-          />
-
-          <FeatureCard
-            num="05"
-            icon={Library}
-            title="Bijbelcommentaren"
-            desc="Lees klassieke en hedendaagse commentaren - KingComments, Matthew Henry, Dachsel en Meyer."
-          />
-
-          {/* Was "Bijbelgroepen", which is temporarily out of the product.
-              The slot is filled rather than left empty: the grid is two rows of
-              three, and an advertised feature the visitor cannot find anywhere
-              in the app is worse than one fewer card. */}
-          <FeatureCard
-            num="06"
-            icon={Languages}
-            title="Hebreeuws en Grieks"
-            desc="Bekijk de grondtekst bij elk vers, met transliteratie en woordbetekenis."
-          />
-
-          {/* Row 3: Voortgang - wide. Numbered 07, not 06: it shared a number
-              with the grondtekst card above it. */}
-          <FadeUp className="lg:col-span-3">
-            <div className="lp-card rounded-2xl px-6 lg:px-7 py-5 lg:py-6 flex flex-col lg:flex-row lg:items-center gap-5 lg:gap-8">
-              <div className="flex items-start gap-5 flex-1 min-w-0">
-                <div className="h-11 w-11 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{
-                    backgroundColor: T.tealLight,
-                    backgroundImage: `linear-gradient(135deg, ${T.tealLight}, rgba(13,148,136,0.05))`,
-                  }}>
-                  <BarChart2 className="h-5 w-5" style={{ color: T.teal }} />
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-bold text-base lg:text-lg tracking-tight" style={{ color: T.text }}>Voortgang bijhouden</h3>
-                    <span className="text-[10px] font-bold tracking-widest tabular-nums" style={{ color: T.muted }}>07</span>
-                  </div>
-                  <p className="text-sm leading-relaxed" style={{ color: T.muted }}>
-                    Zie hoeveel u gelezen heeft, houd uw leestreeks bij en blijf gemotiveerd met dagelijkse statistieken.
-                  </p>
-                </div>
-              </div>
-              {/* Mini stat strip */}
-              <div className="flex items-center gap-6 lg:gap-8 flex-shrink-0">
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <Flame className="h-4 w-4" style={{ color: "#EA580C" }} />
-                    <span className="text-2xl font-extrabold tabular-nums" style={{ color: T.text }}>12</span>
-                  </div>
-                  <p className="text-[11px] mt-0.5" style={{ color: T.muted }}>dagen streak</p>
-                </div>
-                <div className="h-10 w-px" style={{ backgroundColor: T.border }} />
-                <div>
-                  <div className="text-2xl font-extrabold tabular-nums" style={{ color: T.text }}>847</div>
-                  <p className="text-[11px] mt-0.5" style={{ color: T.muted }}>verzen gelezen</p>
-                </div>
-              </div>
-            </div>
-          </FadeUp>
-        </div>
-      </div>
-    </section>
-  )
 }
 
 /* ─── Bibles & Commentaries ──────────────────────────────────── */
@@ -1432,7 +1129,7 @@ function CTA() {
                   Gratis beginnen
                   <ArrowRight className="h-4 w-4" />
                 </Link>
-                <Link href="#functies"
+                <Link href="#levensboom"
                   className="press inline-flex items-center justify-center gap-2 rounded-xl border bg-white px-8 py-3.5 font-semibold transition-colors hover:bg-gray-50"
                   style={{ borderColor: T.border, color: T.text }}>
                   Meer informatie
@@ -1453,13 +1150,13 @@ function CTA() {
 
 /* ─── Levensboom ─────────────────────────────────────────────── */
 /**
- * The avatar as a section: five stages of one tree growing in as they scroll
- * into view, then three trees the reader can grow into. Every picture here is
- * the product's own generator, rendered to SVG at build time and swapped for
- * the live canvas on screen - so the page keeps its static HTML and the trees
- * still move.
+ * The avatar as a section. Left, one tree walking through every level from
+ * kiem to eeuwenoude boom on its own (or under the visitor's thumb on the
+ * slider); right, the five stages with what each one brings; below, three
+ * trees the reader can grow into. Every picture is the product's own
+ * generator, rendered to SVG at build time and swapped for the live canvas on
+ * screen - so the page keeps its static HTML and the trees still move.
  */
-const LEVENSBOOM_STAGES = [1, 3, 6, 10, 18] as const
 const LEVENSBOOM_EXAMPLES = [
   { species: "olijf", scene: "meer", animal: "vogel", level: 12 },
   { species: "palm", scene: "woestijn", animal: "schaap", level: 10 },
@@ -1467,45 +1164,63 @@ const LEVENSBOOM_EXAMPLES = [
 ] as const
 
 function LevensboomSection() {
+  const levelItems = CATALOG.filter(item => item.unlock.kind === "level")
   return (
-    <section id="levensboom" className={SECTION_Y} style={{ backgroundColor: T.card, ...EDGE }}>
+    <section id="levensboom" className={`${SECTION_Y} scroll-mt-16`} style={{ backgroundColor: T.card, ...EDGE }}>
       <div className={SHELL}>
         <SectionHeader
           label="Jouw levensboom"
-          title="Een boom die meegroeit met wat je leest"
-          subtitle="Elke lezer plant een boom. Hij begint als kiem en groeit met elke les, elk hoofdstuk en elke aantekening - op de website en in de app dezelfde boom."
+          title="Elk niveau een nieuwe boom"
+          subtitle="Iedere lezer plant een boom. Hij begint als kiem en groeit met elke les, elk hoofdstuk en elke aantekening - op de website en in de app dezelfde boom. Schuif door de niveaus en zie hem groeien."
         />
 
-        <FadeUp className="mt-10">
-          <div className="grid grid-cols-5 gap-2 sm:gap-4">
-            {LEVENSBOOM_STAGES.map((level, index) => {
-              const stage = stageForLevel(level)
-              return (
-                <div key={level} className="flex flex-col items-center text-center">
-                  <LandingTree
-                    svg={renderTreeSvg({ seed: LANDING_SEED, level, frac: 0.6, species: "eik", scene: "waterbeken", framing: "portrait", width: 200, height: 200, rootAttributes: 'aria-hidden="true"' })}
-                    seed={LANDING_SEED}
-                    level={level}
-                    species="eik"
-                    framing="portrait"
-                    growIn
-                    delayMs={index * 220}
-                    className="aspect-square w-full overflow-hidden rounded-full ring-1 ring-black/5"
-                    ariaLabel={`${stage.name}, niveau ${level}`}
-                  />
-                  <p className="mt-3 text-[12px] sm:text-sm font-bold leading-tight" style={{ color: T.text }}>
-                    {stage.name}
-                  </p>
-                  <p className="text-[11px] sm:text-xs" style={{ color: T.muted }}>
-                    niveau {level}{stage.to !== null && stage.to !== level ? `–${stage.to}` : stage.to === null ? "+" : ""}
-                  </p>
-                </div>
-              )
-            })}
+        <FadeUp>
+          <div className="grid gap-10 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,0.7fr)] lg:items-start">
+            <LevensboomGroeiDemo
+              seed={LANDING_SEED}
+              initialSvg={renderTreeSvg({ seed: LANDING_SEED, level: 6, frac: 0.6, species: "eik", scene: "waterbeken", framing: "scene", width: 720, height: 450, rootAttributes: 'aria-hidden="true"' })}
+            />
+
+            <ol className="relative space-y-2">
+              {STAGES.map((stage, index) => {
+                const next = STAGES[index + 1]
+                const to = next ? next.from - 1 : null
+                const range = to === null ? `niveau ${stage.from}+` : stage.from === to ? `niveau ${stage.from}` : `niveau ${stage.from}–${to}`
+                const inBand = (at: number) => at >= stage.from && (to === null || at <= to)
+                const brings = [
+                  ...(inBand(8) ? ["de eerste vrucht van de Geest"] : []),
+                  ...(inBand(16) ? ["een tweede stam"] : []),
+                  ...levelItems.filter(item => inBand((item.unlock as { level: number }).level)).map(item => item.name.toLowerCase()),
+                ]
+                const sample = to === null ? stage.from + 2 : Math.round((stage.from + to) / 2)
+                return (
+                  <li key={stage.id} className="lp-card flex items-center gap-4 rounded-2xl p-3">
+                    <LandingTree
+                      svg={renderTreeSvg({ seed: LANDING_SEED, level: sample, frac: 0.6, species: "eik", framing: "portrait", width: 120, height: 120, rootAttributes: 'aria-hidden="true"' })}
+                      seed={LANDING_SEED}
+                      level={sample}
+                      species="eik"
+                      framing="portrait"
+                      className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-full ring-1 ring-black/5"
+                    />
+                    <div className="min-w-0">
+                      <div className="flex items-baseline justify-between gap-3">
+                        <p className="text-sm font-bold" style={{ color: T.text }}>{stage.name}</p>
+                        <p className="flex-shrink-0 text-[11px] tabular-nums" style={{ color: T.muted }}>{range}</p>
+                      </div>
+                      <p className="mt-0.5 text-xs leading-relaxed" style={{ color: T.muted }}>
+                        {stage.blurb}
+                        {brings.length > 0 ? ` Brengt ${brings.join(", ")}.` : ""}
+                      </p>
+                    </div>
+                  </li>
+                )
+              })}
+            </ol>
           </div>
         </FadeUp>
 
-        <FadeUp className="mt-12">
+        <FadeUp className="mt-14">
           <div className="grid gap-4 sm:grid-cols-3">
             {LEVENSBOOM_EXAMPLES.map((example) => {
               const species = catalogItem("species", example.species)
@@ -1559,9 +1274,8 @@ export default function LandingPage() {
       <main>
         <Hero />
         <StudyDiscovery />
-        <Showcase />
         <LevensboomSection />
-        <Features />
+        <Showcase />
         <BibleLibrary />
         <HowItWorks />
         <Pricing />
