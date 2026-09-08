@@ -170,15 +170,34 @@ export function resolveAvatar(
   };
 }
 
-/** Normalises whatever is stored into a full choice, without checking unlocks. */
-export function normaliseChoice(chosen: Partial<Record<keyof AvatarChoice, unknown>> | null | undefined): AvatarChoice {
+/**
+ * The ring an account gets when it has never chosen one. Pro accounts default
+ * to the gold ring: it is the one thing Pro visibly adds to every tree, and an
+ * account that paid before the ring existed should not have to find it in the
+ * studio. An explicit choice - either ring - always wins over this default,
+ * which is why models/User.js stores no default for `levensboom.ring`.
+ */
+export function defaultRingFor(isPro: boolean): RingId {
+  return isPro ? 'goud' : DEFAULT_RING;
+}
+
+/**
+ * Normalises whatever is stored into a full choice, without checking unlocks.
+ * `isPro` only decides the ring an account with no stored ring falls back to
+ * (see `defaultRingFor`); `resolveAvatar()` still swaps that ring for teal
+ * when the account is not entitled to it.
+ */
+export function normaliseChoice(
+  chosen: Partial<Record<keyof AvatarChoice, unknown>> | null | undefined,
+  opts: { isPro?: boolean } = {},
+): AvatarChoice {
   const has = <T extends string>(ids: readonly T[], value: unknown, fallback: T): T =>
     typeof value === 'string' && (ids as readonly string[]).includes(value) ? (value as T) : fallback;
   return {
     species: has(SPECIES_IDS, chosen?.species, DEFAULT_SPECIES),
     scene: has(SCENE_IDS, chosen?.scene, DEFAULT_SCENE),
     animal: has(ANIMAL_IDS, chosen?.animal, DEFAULT_ANIMAL),
-    ring: has(RING_IDS, chosen?.ring, DEFAULT_RING),
+    ring: has(RING_IDS, chosen?.ring, defaultRingFor(Boolean(opts.isPro))),
   };
 }
 

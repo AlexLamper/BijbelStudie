@@ -406,6 +406,8 @@ unlocked by exactly one rule; unlocks are never stored, they are evaluated from
 | ring | `teal` | free (default) |
 | ring | `goud` | Pro |
 
+**Default ring.** An account with no stored ring gets `goud` when it is Pro and `teal` otherwise (`defaultRingFor(isPro)`, applied in `normaliseChoice`). The server fills this in before `chosen` and `avatar` leave the API, so the app never decides it; a stored ring, either one, is a real choice and always wins.
+
 `streak` rules read `max(User.streak, User.longestStreak)`.
 
 **Resolution:** the avatar that is drawn is the stored choice with every item

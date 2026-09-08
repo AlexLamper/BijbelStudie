@@ -42,7 +42,10 @@ const UserSchema = new mongoose.Schema(
       species: { type: String, default: 'eik' },
       scene: { type: String, default: 'waterbeken' },
       animal: { type: String, default: 'geen' },
-      ring: { type: String, default: 'teal' },
+      // No default on purpose: an unset ring means "never chosen", and
+      // lib/levensboom/catalog.ts `defaultRingFor()` then gives a Pro account
+      // the gold ring and everyone else teal. A stored value is a real choice.
+      ring: { type: String },
       // When the reader planted their tree in onboarding; unset means the
       // studio still owes them its one-time intro.
       planted: { type: Date },

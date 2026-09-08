@@ -250,16 +250,13 @@ const HERO_STATS = [
 ]
 
 /**
- * The hero scene's edge. Two gradients, one per axis, intersected: every side
- * fades to transparent and the corners, where both run, fade twice over. The
- * vertical run is the longer one - the dusk sky at the top is the darkest
- * colour in the picture and needs more room than the grass to reach white
- * without leaving a band.
+ * The light behind the hero frame: the dusk sky and ground of the scene it
+ * shows (`waterbeken` at `dusk`, lib/levensboom/scenes.ts), blurred and laid
+ * under the picture at low opacity. The frame then looks lit by its own
+ * scene instead of cut out of the white page. The sky value doubles as the
+ * frame's backdrop for the instant before the SVG paints.
  */
-const HERO_MASK = [
-  "linear-gradient(to right, transparent 0%, #000 16%, #000 84%, transparent 100%)",
-  "linear-gradient(to bottom, transparent 0%, #000 18%, #000 80%, transparent 100%)",
-].join(", ")
+const HERO_GLOW = { sky: "#5A3E6E", ground: "#F0A56B" }
 
 /* ─── Hero ───────────────────────────────────────────────────── */
 function Hero() {
@@ -420,42 +417,45 @@ function Hero() {
             when the page lands, with the reader's own numbers laid over it.
             Everything in the picture is the real generator.
 
-            Not a card. The scene used to sit in a rounded, shadowed box with the
-            sky colour as its backdrop, which cut a hard rectangle out of a white
-            hero. It now dissolves into the page: the mask on the wrapper below
-            feathers all four edges, so the sky and the ground fade to the page
-            white before they reach an edge. The mask is on a wrapper and not on
-            the picture because HeroLevensboom swaps its SVG for a canvas after
-            hydration, and the fade has to survive the swap. `slice` keeps the
-            SVG - drawn at 5:4 - covering the 4:3 box on phones, so there is no
-            letterbox band for the fade to uncover. */}
+            A framed picture, lit from behind. Two earlier treatments were
+            rejected: a rounded box on a solid purple backdrop under a heavy
+            shadow (a hard rectangle cut out of a white hero), and a picture
+            that dissolved into the page on all four sides (a blur with no edge
+            to hold on to). This one keeps a real edge - a generous radius and
+            a hairline ring - and rests on a soft wash of its own dusk colours,
+            so it reads as an object lit by the scene rather than a cut-out.
+            `slice` keeps the SVG, drawn at 5:4, covering the 4:3 box on phones,
+            so the frame never shows a letterbox band. */}
         <div className="relative w-full mx-auto max-w-[34rem] lg:max-w-none lg:w-full lg:mx-0 lg:justify-self-end">
-          <div className="relative aspect-[4/3] lg:aspect-[5/4]">
-            <div
-              className="absolute inset-0"
-              style={{
-                maskImage: HERO_MASK,
-                WebkitMaskImage: HERO_MASK,
-                maskComposite: "intersect",
-                WebkitMaskComposite: "source-in",
-              }}
-            >
-              <HeroLevensboom
-                svg={renderTreeSvg({ seed: LANDING_SEED, level: 14, frac: 0.7, species: "eik", scene: "waterbeken", framing: "scene", width: 800, height: 640, season: "summer", timeOfDay: "dusk", rootAttributes: 'aria-hidden="true" preserveAspectRatio="xMidYMid slice"' })}
-                seed={LANDING_SEED}
-                level={14}
-              />
-            </div>
+          {/* Ambient glow. Sits behind the frame, a little larger and offset
+              down-right, so the light seems to fall out of the picture onto
+              the page. Purely decorative and invisible to assistive tech. */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -inset-x-6 -bottom-8 -top-4 rounded-[3rem] blur-3xl"
+            style={{
+              background: `radial-gradient(60% 55% at 35% 30%, ${HERO_GLOW.sky}, transparent 70%), radial-gradient(55% 45% at 72% 88%, ${HERO_GLOW.ground}, transparent 70%)`,
+              opacity: 0.3,
+            }}
+          />
+          <div
+            className="relative aspect-[4/3] overflow-hidden rounded-[1.75rem] ring-1 ring-black/[0.06] lg:aspect-[5/4]"
+            style={{
+              backgroundColor: HERO_GLOW.sky,
+              boxShadow: "0 30px 60px -32px rgba(15,23,42,0.35), 0 10px 20px -14px rgba(15,23,42,0.18)",
+            }}
+          >
+            <HeroLevensboom
+              svg={renderTreeSvg({ seed: LANDING_SEED, level: 14, frac: 0.7, species: "eik", scene: "waterbeken", framing: "scene", width: 800, height: 640, season: "summer", timeOfDay: "dusk", rootAttributes: 'aria-hidden="true" preserveAspectRatio="xMidYMid slice"' })}
+              seed={LANDING_SEED}
+              level={14}
+            />
 
             {/* Two cards, not three. The "+25 XP" pill that sat top-right went:
-                with the picture no longer boxed, three floating labels read as
-                clutter, and the progress card already says what the XP is for.
-                Both sit a step further in than before so they stay over the
-                picture rather than over its fading edge, and carry a hairline
-                instead of a white border - a white border disappears exactly
-                where the scene has faded to white. */}
+                three floating labels read as clutter, and the progress card
+                already says what the XP is for. */}
             <div
-              className="absolute left-6 top-6 flex items-center gap-3 rounded-2xl border bg-white/85 py-2 pl-2 pr-4 backdrop-blur-md sm:left-8 sm:top-8"
+              className="absolute left-4 top-4 flex items-center gap-3 rounded-2xl border bg-white/85 py-2 pl-2 pr-4 backdrop-blur-md"
               style={{ borderColor: "rgba(15,23,42,0.08)", boxShadow: "0 10px 24px -14px rgba(15,23,42,0.35)" }}
             >
               <LandingTree
@@ -475,7 +475,7 @@ function Hero() {
             {/* Where it is going. The streak cell that used to share this card
                 came off: one line and one bar is the calmer composition. */}
             <div
-              className="absolute inset-x-6 bottom-6 rounded-2xl border bg-white/85 px-4 py-3 backdrop-blur-md sm:inset-x-8 sm:bottom-8"
+              className="absolute inset-x-4 bottom-4 rounded-2xl border bg-white/85 px-4 py-3 backdrop-blur-md"
               style={{ borderColor: "rgba(15,23,42,0.08)", boxShadow: "0 10px 24px -14px rgba(15,23,42,0.35)" }}
             >
               <div className="flex items-baseline justify-between gap-3">

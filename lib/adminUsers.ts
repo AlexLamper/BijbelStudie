@@ -5,6 +5,8 @@ import Note from "../models/Note";
 
 import type { AdminPayload } from "./adminStats";
 import { proRingGrant } from "./levensboom/proRing";
+import { archiveAccount, isProtectedAccount } from "./accountArchive";
+import { normaliseEmail } from "./userLookup";
 
 /**
  * The user list behind /admin/users and /api/v1/admin/users.
@@ -161,14 +163,28 @@ export async function deleteAdminUserPayload(
 
   await connectMongoDB();
 
-  const target = await User.findById(id).select("email");
+  const target = await User.findById(id).select("email isAdmin");
   if (!target) return { status: 404, body: { error: "Gebruiker niet gevonden" } };
 
-  if (target.email === callerEmail) {
+  // Case-insensitive: the session email and the stored one can differ in case.
+  if (normaliseEmail(String(target.email ?? "")) === normaliseEmail(callerEmail)) {
     return { status: 400, body: { error: "Je kunt jezelf niet verwijderen" } };
   }
 
+  // An admin account never goes through here. Take the admin role away first
+  // if you really mean it; lib/accountArchive.ts describes the 2026-09-08 loss
+  // this guard exists for.
+  if (isProtectedAccount(target)) {
+    return {
+      status: 403,
+      body: { error: "Beheerdersaccounts kun je niet via het beheer verwijderen. Haal eerst de beheerdersrol weg." },
+    };
+  }
+
+  // Copy first; a failed copy aborts the delete (the error surfaces as a 500).
+  const archive = await archiveAccount(target._id, { route: "admin", actor: callerEmail });
+
   await Promise.all([Note.deleteMany({ userId: target._id }), User.deleteOne({ _id: target._id })]);
 
-  return { status: 200, body: { ok: true } };
+  return { status: 200, body: { ok: true, archiveId: archive.archiveId } };
 }

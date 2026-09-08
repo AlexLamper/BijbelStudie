@@ -57,7 +57,7 @@ export function publicLevensboomCard(doc: PublicCardSource, now: Date = new Date
     seed: doc._id.toString(),
     level,
     stage: { id: stage.id, name: stage.name, index: stage.index },
-    avatar: resolveAvatar(normaliseChoice(doc.levensboom), unlocked),
+    avatar: resolveAvatar(normaliseChoice(doc.levensboom, { isPro }), unlocked),
     health: readTreeHealth(doc.lastStreakDate, now).health,
     disabled: Boolean(doc.levensboom?.disabled),
   };

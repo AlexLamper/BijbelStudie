@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { ArrowLeft, Link2 } from 'lucide-react';
 import { useLevensboom, fracOf } from '../../../hooks/useLevensboom';
 import { itemsOfKind, itemKey, unlockLabel, type AvatarChoice, type ItemKind } from '../../../lib/levensboom/catalog';
-import { paletteForNow } from '../../../lib/levensboom/palette';
 import LevelUpDialog from '../LevelUpDialog';
 import StudioStage from './StudioStage';
 import { ItemGrid, KIND_TITLES, type TilePick } from './StudioTiles';
@@ -29,8 +28,8 @@ const TABS: { id: Tab; label: string }[] = [
  * The stage takes the room a laptop gives it: on a wide screen it is the left
  * two thirds and stays put while the tiles scroll beside it, so the tree is
  * never out of sight while the reader is choosing; on a phone it is the top of
- * one column. Behind everything, the sky of the reader's own scene bleeds into
- * the page. Tapping an unlocked tile saves at once (optimistic; a 403 rolls
+ * one column. The page sits on the app's own background; the scene lives
+ * inside the stage frame. Tapping an unlocked tile saves at once (optimistic; a 403 rolls
  * back and names the rule); tapping a locked one previews it on the stage and
  * says what it takes - the "achievable" half of the avatar. The mirror of the
  * app's `levensboom_studio_screen.dart`.
@@ -46,12 +45,6 @@ export default function LevensboomStudio() {
   const unlocked = useMemo(() => new Set(tree?.unlocked ?? []), [tree?.unlocked]);
   const seen = useMemo(() => new Set(tree?.seenItems ?? []), [tree?.seenItems]);
   const draw: AvatarChoice | null = tree ? { ...tree.avatar, ...preview } : null;
-  // The page takes the colour of the reader's sky, so the studio reads as one
-  // place rather than as a card on a form.
-  const sky = useMemo(
-    () => (draw ? paletteForNow(1, new Date(), { scene: draw.scene, species: draw.species }) : null),
-    [draw],
-  );
 
   // The "Nieuw" dots of the tab on screen are cleared once the reader has had
   // a moment to see them.
@@ -129,10 +122,7 @@ export default function LevensboomStudio() {
   };
 
   return (
-    <div
-      className="flex h-full flex-col"
-      style={sky ? { background: `linear-gradient(180deg, ${sky.skyBottom}55 0%, ${sky.skyBottom}1a 360px, transparent 640px)` } : undefined}
-    >
+    <div className="flex h-full flex-col">
       <div className="flex flex-shrink-0 items-center gap-3 px-5 pb-3 pt-5 lg:px-8">
         <Link
           href="/profiel"
@@ -150,7 +140,7 @@ export default function LevensboomStudio() {
         <button
           type="button"
           onClick={() => void share()}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-black/10 bg-white/70 px-3 py-1.5 text-xs font-semibold text-foreground backdrop-blur hover:bg-white dark:border-white/10 dark:bg-card/70 dark:hover:bg-card"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted"
         >
           <Link2 size={14} aria-hidden />
           {copied ? 'Link gekopieerd' : 'Deel link'}
@@ -163,7 +153,7 @@ export default function LevensboomStudio() {
             {/* The stage column: pinned while the tiles scroll. */}
             <div className="lg:sticky lg:top-0 lg:self-start">
               {tree.disabled ? (
-                <div className="rounded-3xl border border-black/10 bg-white/80 p-6 backdrop-blur dark:border-white/10 dark:bg-card/80">
+                <div className="rounded-3xl border border-border bg-card p-6">
                   <p className="text-sm font-bold text-foreground">Je boom staat uit</p>
                   <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                     Je XP, niveau en badges lopen gewoon door — alleen de boom wordt niet getoond.
@@ -213,7 +203,7 @@ export default function LevensboomStudio() {
               {notice && (
                 <div
                   role="status"
-                  className="mt-3 flex items-center justify-between gap-3 rounded-xl border px-3 py-2 text-xs backdrop-blur"
+                  className="mt-3 flex items-center justify-between gap-3 rounded-xl border px-3 py-2 text-xs"
                   style={{ borderColor: 'rgba(13,148,136,0.35)', backgroundColor: 'rgba(13,148,136,0.08)' }}
                 >
                   <span className="text-foreground">{notice.text}</span>

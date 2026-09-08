@@ -95,7 +95,7 @@ export function buildLevensboomPayload(input: {
     isPro: Boolean(input.isPro),
   };
   const unlocked = unlockedKeys(ctx);
-  const chosen = normaliseChoice(prefs);
+  const chosen = normaliseChoice(prefs, { isPro: ctx.isPro });
   const nextItem = nextLevelUnlock(ctx);
 
   return {
