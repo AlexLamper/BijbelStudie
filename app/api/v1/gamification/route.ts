@@ -3,7 +3,7 @@ import { corsPreflight, handleV1Error, jsonV1 } from '../../../../lib/apiV1';
 import connectMongoDB from '../../../../lib/mongodb';
 import User from '../../../../models/User';
 import { XP_LABELS, XP_VALUES, readProgressSummary } from '../../../../lib/gamification';
-import { buildLevensboomPayload } from '../../../../lib/levensboom/summary';
+import { buildLevensboomPayload, type LevensboomPrefs } from '../../../../lib/levensboom/summary';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,8 +16,9 @@ export async function OPTIONS() {
  * show "wat levert het op?" without hardcoding numbers that then drift.
  *
  * The `levensboom` block is additive: it is derived on every request from xp,
- * level and lastStreakDate, so the tree needs no stored state and the existing
- * consumers of this route keep the shape they already parse.
+ * level, lastStreakDate, badges, the longest streak, Pro and the stored studio
+ * choice, so the tree needs no stored shape and the existing consumers of this
+ * route keep the shape they already parse.
  */
 export async function GET(req: Request) {
   try {
@@ -27,15 +28,11 @@ export async function GET(req: Request) {
 
     await connectMongoDB();
     const user = await User.findById(auth.id)
-      .select('lastStreakDate levensboom')
+      .select('lastStreakDate longestStreak levensboom')
       .lean<{
         lastStreakDate?: Date | null;
-        levensboom?: {
-          lastSeenLevel?: number;
-          lastSeenAt?: Date;
-          reducedMotion?: boolean;
-          disabled?: boolean;
-        } | null;
+        longestStreak?: number | null;
+        levensboom?: LevensboomPrefs | null;
       } | null>();
 
     return jsonV1({
@@ -45,6 +42,10 @@ export async function GET(req: Request) {
         level: summary.level,
         lastStreakDate: user?.lastStreakDate ?? null,
         prefs: user?.levensboom ?? null,
+        badges: summary.badges,
+        streak: summary.streak,
+        longestStreak: user?.longestStreak ?? 0,
+        isPro: auth.isPro,
       }),
       xpTable: Object.entries(XP_VALUES).map(([event, value]) => ({
         event,

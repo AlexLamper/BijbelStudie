@@ -4,6 +4,7 @@ import { authOptions } from "../../../../lib/authOptions"
 import connectMongoDB from "../../../../lib/mongodb"
 import StudyGroup from "../../../../models/StudyGroup"
 import User from "../../../../models/User"
+import { PUBLIC_CARD_FIELDS, publicLevensboomCard, type PublicCardSource } from "../../../../lib/levensboom/publicCard"
 
 export async function GET(
   _req: NextRequest,
@@ -20,9 +21,12 @@ export async function GET(
     .lean<{ _id: { toString(): string } }>()
   if (!caller) return NextResponse.json({ error: "Gebruiker niet gevonden" }, { status: 404 })
 
+  // Members are populated with the fields their Levensboom card needs, then
+  // trimmed back to name, image and the card below: the raw fields (xp,
+  // streak, Pro) are nobody else's business.
   const group = await StudyGroup.findById(id)
     .populate("createdBy", "name image")
-    .populate("members.userId", "name image")
+    .populate("members.userId", `name image ${PUBLIC_CARD_FIELDS}`)
     .populate("planId")
     .lean<{
       _id: unknown
@@ -31,7 +35,7 @@ export async function GET(
       isPublic: boolean
       inviteCode?: string
       createdBy?: unknown
-      members: Array<{ userId?: { _id?: { toString(): string } } | null }>
+      members: Array<{ userId?: (PublicCardSource & { name?: string; image?: string }) | null }>
       createdAt?: Date
     }>()
 
@@ -58,7 +62,19 @@ export async function GET(
     )
   }
 
-  return NextResponse.json({ group, isMember: true })
+  const members = group.members.map(m => ({
+    ...m,
+    userId: m.userId?._id
+      ? {
+          _id: m.userId._id,
+          name: m.userId.name,
+          image: m.userId.image,
+          levensboom: publicLevensboomCard(m.userId),
+        }
+      : m.userId,
+  }))
+
+  return NextResponse.json({ group: { ...group, members }, isMember: true })
 }
 
 // PATCH - update group settings (leader only)

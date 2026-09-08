@@ -12,6 +12,10 @@ const UserSchema = new mongoose.Schema(
     bio: { type: String },
     image: { type: String },
     streak: { type: Number, default: 0 },
+    // The longest streak ever, kept by `$max` wherever `streak` is written.
+    // Streak-gated Levensboom items (lib/levensboom/catalog.ts) read this, so
+    // an item earned with a 30-day run stays earned after the run breaks.
+    longestStreak: { type: Number, default: 0 },
     lastStreakDate: { type: Date },
     freezeCount: { type: Number, default: 0 },
     badges: { type: [String], default: [] },
@@ -31,6 +35,22 @@ const UserSchema = new mongoose.Schema(
       lastSeenAt: { type: Date },
       reducedMotion: { type: Boolean, default: false },
       disabled: { type: Boolean, default: false },
+      // The studio choice (LEVENSBOOM_AVATAR_PLAN.md). Ids from
+      // lib/levensboom/catalog.ts; whether the account may *use* an id is
+      // re-derived on every read, never stored, so a lapsed Pro item falls
+      // back by itself and comes straight back on renewal.
+      species: { type: String, default: 'eik' },
+      scene: { type: String, default: 'waterbeken' },
+      animal: { type: String, default: 'geen' },
+      ring: { type: String, default: 'teal' },
+      // When the reader planted their tree in onboarding; unset means the
+      // studio still owes them its one-time intro.
+      planted: { type: Date },
+      introSeen: { type: Boolean, default: false },
+      // Opt-in: /gebruiker/[id] is a 404 until this is on.
+      publicProfile: { type: Boolean, default: false },
+      // Catalog keys whose "Nieuw" dot the reader has already seen.
+      seenItems: { type: [String], default: [] },
     },
     subscribed: { type: Boolean, default: false },
     stripeCustomerId: { type: String },
