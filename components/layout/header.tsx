@@ -35,6 +35,40 @@ const PAGE_TITLES: Record<string, string> = {
   read: "Bijbel lezen",
 }
 
+/**
+ * The profile menu's surface, and its two item shapes.
+ *
+ * `bg-popover` with no `text-popover-foreground` is what made this menu
+ * unreadable in the scene variant. The bar carries a scoped `dark` class, so
+ * `--popover` re-resolves to #212121 inside it - but `color` is INHERITED from
+ * <body> as an already-computed value, and nothing in the menu named a colour
+ * token, so the items kept the light theme's #111827. Near-black type on a
+ * near-black panel: about 1.06:1. Naming the token that pairs with `bg-popover`
+ * makes the colour re-resolve inside the scope like every other token does.
+ *
+ * Outside the scene variant this is a no-op by construction:
+ * `--popover-foreground` and `--foreground` are the same value in both themes
+ * (222 47% 11% light, 0 0% 90% dark), so the menu on an unconverted page paints
+ * exactly what it painted before.
+ */
+const MENU_PANEL =
+  "absolute right-0 mt-1 w-48 bg-popover text-popover-foreground border border-border rounded-lg shadow-lg py-1 z-50"
+
+const MENU_ITEM = "w-full justify-start px-3 py-2 text-sm hover:bg-secondary rounded-none"
+
+/**
+ * Uitloggen has the same problem in reverse: `text-destructive` DOES resolve
+ * inside the dark scope, to hsl(0 62% 35%) on that same #212121 panel - about
+ * 1.6:1, no better than the items above it. On a scene page the item borrows the
+ * destructive-on-dark vocabulary the converted pages already speak (red-300 /
+ * red-200, as in app/groepen). The default string is left byte for byte as it
+ * was, so an unconverted page keeps the red the rest of the product uses.
+ */
+const MENU_SIGN_OUT =
+  "w-full justify-start px-3 py-2 text-sm text-destructive hover:bg-destructive/10 rounded-none"
+const MENU_SIGN_OUT_SCENE =
+  "w-full justify-start px-3 py-2 text-sm text-red-300 hover:bg-red-500/15 hover:text-red-200 rounded-none"
+
 interface HeaderProps {
   params?: { lng: string }
   title?: string
@@ -121,7 +155,18 @@ export function Header({ title, variant = "default" }: HeaderProps) {
             column to open - its rail floats and answers to hover and focus. A
             button that visibly does nothing is worse than no button. */}
         {!scene && <SidebarTrigger className="text-muted-foreground hover:text-foreground" />}
-        <h1 className="text-base font-semibold text-foreground">{getPageTitle()}</h1>
+        {/*
+          On an unconverted page this bar is the only thing naming the page, so
+          it stays the h1. On a scene page the page itself opens with a real
+          heading - the greeting, the study's title, "Instellingen" - and two
+          h1s in one document is one too many. Same size and weight either way;
+          only the element changes.
+        */}
+        {scene ? (
+          <p className="text-base font-semibold text-foreground">{getPageTitle()}</p>
+        ) : (
+          <h1 className="text-base font-semibold text-foreground">{getPageTitle()}</h1>
+        )}
       </div>
 
       {/* Right: Desktop controls */}
@@ -164,8 +209,14 @@ export function Header({ title, variant = "default" }: HeaderProps) {
               <p className="font-medium text-foreground leading-none">{session.user?.name}</p>
               {/* `text-muted-foreground` on this line sat at roughly 3:1 - fine
                   for a hint, too faint for an address someone reads to check
-                  which account they are in. */}
-              <p className="text-foreground/75 text-xs mt-0.5 leading-none">{session.user?.email}</p>
+                  which account they are in.
+                  On the scene bar it is faint again for a different reason: the
+                  bar is transparent, so the ground under this line is a noon sky
+                  behind two scrims rather than a page, which puts 75% white at
+                  about 4.3:1 there. 90% clears 5:1 on the same ground and the
+                  hierarchy still comes off the size and the weight above it.
+                  Unconverted pages keep the value they have. */}
+              <p className={`${scene ? "text-foreground/90" : "text-foreground/75"} text-xs mt-0.5 leading-none`}>{session.user?.email}</p>
             </div>
             <SubscriptionBadge
               isSubscribed={isSubscribed || !!session.user?.isSubscribed}
@@ -180,11 +231,11 @@ export function Header({ title, variant = "default" }: HeaderProps) {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.12 }}
-                className="absolute right-0 mt-1 w-48 bg-popover border border-border rounded-lg shadow-lg py-1 z-50"
+                className={MENU_PANEL}
               >
                 <Button
                   variant="ghost"
-                  className="w-full justify-start px-3 py-2 text-sm hover:bg-secondary rounded-none"
+                  className={MENU_ITEM}
                   onClick={() => { router.push("/profiel"); setIsProfileOpen(false) }}
                 >
                   <User className="h-4 w-4 mr-2 text-muted-foreground" />
@@ -192,7 +243,7 @@ export function Header({ title, variant = "default" }: HeaderProps) {
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start px-3 py-2 text-sm hover:bg-secondary rounded-none"
+                  className={MENU_ITEM}
                   onClick={() => { router.push("/profiel/boom"); setIsProfileOpen(false) }}
                 >
                   <span className="mr-2 inline-flex h-4 w-4 items-center justify-center">
@@ -202,7 +253,7 @@ export function Header({ title, variant = "default" }: HeaderProps) {
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start px-3 py-2 text-sm hover:bg-secondary rounded-none"
+                  className={MENU_ITEM}
                   onClick={() => { router.push("/instellingen"); setIsProfileOpen(false) }}
                 >
                   <Settings className="h-4 w-4 mr-2 text-muted-foreground" />
@@ -211,7 +262,7 @@ export function Header({ title, variant = "default" }: HeaderProps) {
                 <div className="border-t border-border my-1" />
                 <Button
                   variant="ghost"
-                  className="w-full justify-start px-3 py-2 text-sm text-destructive hover:bg-destructive/10 rounded-none"
+                  className={scene ? MENU_SIGN_OUT_SCENE : MENU_SIGN_OUT}
                   onClick={() => signOut({ callbackUrl: "/" })}
                 >
                   <LogOut className="h-4 w-4 mr-2" />
@@ -238,30 +289,30 @@ export function Header({ title, variant = "default" }: HeaderProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.12 }}
-              className="absolute right-0 mt-1 w-48 bg-popover border border-border rounded-lg shadow-lg py-1 z-50"
+              className={MENU_PANEL}
             >
               {!scene && (
                 <div className="px-3 py-2 border-b border-border">
                   <ModeToggle />
                 </div>
               )}
-              <Button variant="ghost" className="w-full justify-start px-3 py-2 text-sm hover:bg-secondary rounded-none"
+              <Button variant="ghost" className={MENU_ITEM}
                 onClick={() => { router.push("/profiel"); setIsMenuOpen(false) }}>
                 <User className="h-4 w-4 mr-2 text-muted-foreground" /> Profiel
               </Button>
-              <Button variant="ghost" className="w-full justify-start px-3 py-2 text-sm hover:bg-secondary rounded-none"
+              <Button variant="ghost" className={MENU_ITEM}
                 onClick={() => { router.push("/profiel/boom"); setIsMenuOpen(false) }}>
                 <span className="mr-2 inline-flex h-4 w-4 items-center justify-center">
                   <NavTreeAvatar size={16} showLevel={false} fallback={<User className="h-4 w-4 text-muted-foreground" />} />
                 </span>
                 Mijn voortgang
               </Button>
-              <Button variant="ghost" className="w-full justify-start px-3 py-2 text-sm hover:bg-secondary rounded-none"
+              <Button variant="ghost" className={MENU_ITEM}
                 onClick={() => { router.push("/instellingen"); setIsMenuOpen(false) }}>
                 <Settings className="h-4 w-4 mr-2 text-muted-foreground" /> Instellingen
               </Button>
               <div className="border-t border-border my-1" />
-              <Button variant="ghost" className="w-full justify-start px-3 py-2 text-sm text-destructive hover:bg-destructive/10 rounded-none"
+              <Button variant="ghost" className={scene ? MENU_SIGN_OUT_SCENE : MENU_SIGN_OUT}
                 onClick={() => signOut({ callbackUrl: "/" })}>
                 <LogOut className="h-4 w-4 mr-2" /> Uitloggen
               </Button>

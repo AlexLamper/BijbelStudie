@@ -8,7 +8,7 @@ import {
   Settings, ShieldCheck, StickyNote, User,
 } from "lucide-react"
 import { useStudyStyle } from "../providers/study-style-provider"
-import { TEAL_ON_DARK } from "./tokens"
+import { RAIL_OPEN, TEAL_ON_DARK } from "./tokens"
 
 /**
  * The sidebar, solved for a full-bleed scene.
@@ -16,20 +16,35 @@ import { TEAL_ON_DARK } from "./tokens"
  * The permanent 16rem white column is the one piece of chrome that cuts the
  * landscape in half, so it is gone. What replaces it is the shape /studie
  * already uses for the same reason (`StudyRail` in components/layout/
- * app-sidebar.tsx): a narrow rail that FLOATS over the page instead of taking a
- * column out of it, and widens to its labels on hover or keyboard focus without
- * moving a single pixel of content.
+ * app-sidebar.tsx): a narrow rail that stands IN the landscape instead of
+ * taking a white column out of it, and widens to its labels on hover or
+ * keyboard focus without moving a single pixel of content.
  *
  * Two things are different here, because here it sits on a picture rather than
  * on a white page:
  *
- *  - It is glass. The rail is a film of white over a blur, so the sky and the
- *    land keep running underneath it; the legibility comes from the page's own
- *    left scrim behind it, not from painting the rail solid.
+ *  - Closed, it is glass. The rail is a film of white over a blur, so the sky
+ *    and the land keep running underneath it; the legibility comes from the
+ *    page's own left scrim behind it, not from painting the rail solid.
  *  - It tightens as the reader scrolls. `--veil`, the same variable that darkens
- *    the scene behind the working panels, fades in the rail's dark base and its
- *    right-hand hairline - at the top of the page the rail is barely there, over
- *    the panels it is a defined edge. Opacity only, so it costs nothing.
+ *    the scene behind the working panels, fades in the rail's dark base - at the
+ *    top of the page the rail is barely there, over the panels it is a defined
+ *    edge. Opacity only, so it costs nothing.
+ *
+ * What changed after the first round of use, and why:
+ *
+ *  - It no longer opens over the page. "Floats and costs the page nothing" was
+ *    true only while it was shut; open, it put 128px of blurred film over every
+ *    heading and every panel, with the copy still ghosting through - which does
+ *    not read as depth, it reads as a broken render. `SCENE_X` now reserves the
+ *    rail's OPEN width, so it opens into the left scrim. The two numbers have to
+ *    move together: open width here, gutter there.
+ *  - Open, it is opaque. Nothing may show through navigation, and a couple of
+ *    routes still set their own gutter, where the open rail can land on content
+ *    however wide this one is.
+ *  - The right-hand hairline is permanent instead of veil-driven. At the top of
+ *    a page the rail had no edge at all, which is half of why it read as a smear
+ *    over the page rather than as a rail beside it.
  *
  * Below `lg` there is no room for a rail and no hover to open one, so the same
  * items become a horizontally scrollable strip of pills that sticks under the
@@ -105,7 +120,7 @@ function RailItem({ item, active }: { item: NavItem; active: boolean }) {
           <span aria-hidden className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full" style={{ backgroundColor: TEAL_ON_DARK }} />
         )}
         <Icon size={18} className="flex-shrink-0" style={active ? { color: TEAL_ON_DARK } : undefined} />
-        <span className="-translate-x-1 whitespace-nowrap text-[13.5px] opacity-0 transition-[opacity,transform] duration-200 group-hover/rail:translate-x-0 group-hover/rail:opacity-100 group-focus-within/rail:translate-x-0 group-focus-within/rail:opacity-100">
+        <span className="-translate-x-1 whitespace-nowrap text-[13.5px] opacity-0 transition-[opacity,transform] duration-200 motion-reduce:transition-none group-hover/rail:translate-x-0 group-hover/rail:opacity-100 group-focus-within/rail:translate-x-0 group-focus-within/rail:opacity-100">
           {item.title}
         </span>
       </Link>
@@ -141,7 +156,7 @@ export default function SceneRail() {
     <>
       <nav
         aria-label="Hoofdnavigatie"
-        className="group/rail fixed bottom-0 left-0 top-14 z-40 hidden w-16 flex-col overflow-hidden transition-[width] duration-300 ease-out hover:w-56 focus-within:w-56 lg:flex"
+        className="group/rail fixed bottom-0 left-0 top-14 z-40 hidden w-16 flex-col overflow-hidden transition-[width] duration-300 ease-out motion-reduce:transition-none hover:w-44 focus-within:w-44 lg:flex"
       >
         <span aria-hidden className="pointer-events-none absolute inset-0 bg-white/[0.07] backdrop-blur-md" />
         <span
@@ -149,11 +164,14 @@ export default function SceneRail() {
           className="pointer-events-none absolute inset-0 bg-black/40"
           style={{ opacity: "var(--veil, 0)" }}
         />
+        {/* The opaque ground, faded in only while the rail is open. Painted over
+            the glass and the veil and under the list, so an open rail is a
+            surface rather than a filter over whatever is behind it. */}
         <span
           aria-hidden
-          className="pointer-events-none absolute inset-y-0 right-0 w-px bg-white/25"
-          style={{ opacity: "var(--veil, 0)" }}
+          className={`pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 motion-reduce:transition-none group-hover/rail:opacity-100 group-focus-within/rail:opacity-100 ${RAIL_OPEN}`}
         />
+        <span aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-px bg-white/20" />
 
         <div className="relative flex h-full min-h-0 flex-col p-2">
           <ul className="m-0 flex flex-col gap-0.5 p-0">

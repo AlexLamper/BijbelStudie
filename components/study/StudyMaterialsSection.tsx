@@ -57,10 +57,13 @@ export default function StudyMaterialsSection({
   ];
 
   return (
-    <section className="flex flex-col h-full min-w-0 overflow-hidden bg-white dark:bg-background">
+    /* Transparent, for the same reason as BibleViewerSection: this pane is
+       /lezen's and nothing else's, and the reading room behind it is now the
+       scene's own ground rather than a lit plate. */
+    <section className="flex flex-col h-full min-w-0 overflow-hidden">
 
       {/* Tab bar */}
-      <div className="h-14 flex items-center px-1 flex-none border-b bg-gray-50 dark:bg-card border-gray-200 dark:border-border">
+      <div className="h-14 flex items-center px-1 flex-none border-b border-white/10 bg-black/25">
         <div className="flex w-full gap-0.5">
           {tabs.map(({ id, label, icon: Icon, isPro }) => {
             const active = activeTab === id;
@@ -71,17 +74,20 @@ export default function StudyMaterialsSection({
                 title={label}
                 data-track={`reading_tab_${id === "historical" ? "historical" : id}`}
                 className={[
-                  'relative flex-1 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 px-1 py-1.5 text-[9px] sm:text-xs font-medium rounded-lg transition-colors min-w-0',
+                  // #2DD4BF, not #0D9488: the brand fill is drawn for a white
+                  // page and measures 3.7:1 on the tab's own tint, whichever
+                  // theme it was in. Its on-dark value measures 7.8:1 there.
+                  'relative flex-1 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 px-1 py-1.5 text-[9px] sm:text-xs font-medium rounded-lg outline-none transition-colors min-w-0 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#2DD4BF]',
                   active
-                    ? 'text-[#0D9488] bg-[rgba(13,148,136,0.07)] dark:bg-[rgba(13,148,136,0.12)]'
-                    : 'text-gray-500 dark:text-muted-foreground hover:text-gray-700 dark:hover:text-foreground hover:bg-gray-100 dark:hover:bg-secondary',
+                    ? 'text-[#2DD4BF] bg-[rgba(45,212,191,0.10)]'
+                    : 'text-white/60 hover:text-white hover:bg-white/[0.06]',
                 ].join(' ')}
               >
                 <Icon size={13} className="flex-shrink-0" />
                 <span className="leading-tight truncate max-w-full">{label}</span>
                 {isPro && <ProBadge size="xs" className="hidden leading-none sm:inline-flex" />}
                 {active && (
-                  <span className="absolute bottom-0 left-1.5 right-1.5 h-0.5 rounded-full bg-[#0D9488]" />
+                  <span className="absolute bottom-0 left-1.5 right-1.5 h-0.5 rounded-full bg-[#2DD4BF]" />
                 )}
               </button>
             );
@@ -90,7 +96,7 @@ export default function StudyMaterialsSection({
       </div>
 
       {/* Content */}
-      <div className="flex-1 min-h-0 min-w-0 overflow-hidden flex flex-col relative bg-white dark:bg-background">
+      <div className="flex-1 min-h-0 min-w-0 overflow-hidden flex flex-col relative">
         <TabComponent
           selectedBook={selectedBook}
           selectedChapter={selectedChapter}
@@ -109,7 +115,7 @@ export default function StudyMaterialsSection({
           onAiQuestionConsumed={onAiQuestionConsumed}
         />
         <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none z-10
-          bg-gradient-to-t from-white dark:from-background to-transparent" />
+          bg-gradient-to-t from-[#0B1220] to-transparent" />
       </div>
     </section>
   );

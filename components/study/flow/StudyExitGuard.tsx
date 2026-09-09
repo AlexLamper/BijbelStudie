@@ -4,8 +4,8 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
 
-/** The confirm button carries white type, so it is the deep end of the brand. */
-const TEAL_DEEP = '#0F766E';
+import { FOCUS_RING, INK, INK_MUTED, PANEL_SOLID } from './lesson-layout';
+import { TEAL_DEEP } from '../../scene/tokens';
 
 /**
  * Confirmation before leaving a lesson mid-step.
@@ -143,16 +143,16 @@ export default function StudyExitGuard({ enabled }: { enabled: boolean }) {
         aria-modal="true"
         aria-labelledby="study-exit-title"
         onClick={(event) => event.stopPropagation()}
-        className="w-full sm:max-w-md bg-white dark:bg-card rounded-t-2xl sm:rounded-2xl border border-gray-200 dark:border-white/10 shadow-[0_40px_80px_-32px_rgba(0,0,0,0.85)]"
+        className={`w-full sm:max-w-md ${PANEL_SOLID} rounded-t-2xl sm:rounded-2xl shadow-[0_40px_80px_-32px_rgba(0,0,0,0.85)]`}
       >
         {/* No icon tile. The question is in the heading; a door beside it says
             the same thing in a picture. */}
         <div className="flex items-start gap-3 p-5 sm:p-6">
           <div className="min-w-0 flex-1 pt-0.5">
-            <h2 id="study-exit-title" className="text-[15px] font-bold text-foreground">
+            <h2 id="study-exit-title" className={`text-[15px] font-bold ${INK}`}>
               Studie verlaten?
             </h2>
-            <p className="mt-1 text-[13px] leading-relaxed text-gray-600 dark:text-muted-foreground">
+            <p className={`mt-1 text-[13px] leading-relaxed ${INK_MUTED}`}>
               Je zit midden in een stap. Je afgeronde stappen zijn bewaard, maar een niet-opgeslagen
               reflectie of quiz gaat verloren. Wil je de studie verlaten?
             </p>
@@ -161,7 +161,7 @@ export default function StudyExitGuard({ enabled }: { enabled: boolean }) {
             type="button"
             onClick={stay}
             aria-label="Sluiten"
-            className="h-8 w-8 flex-none inline-flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-secondary text-muted-foreground hover:text-foreground outline-none focus-visible:ring-2 focus-visible:ring-[#0F766E] dark:focus-visible:ring-[#2DD4BF]"
+            className={`h-8 w-8 flex-none inline-flex items-center justify-center rounded-md hover:bg-white/10 text-white/60 hover:text-white ${FOCUS_RING}`}
           >
             <X size={16} />
           </button>
@@ -171,7 +171,7 @@ export default function StudyExitGuard({ enabled }: { enabled: boolean }) {
           <button
             type="button"
             onClick={leave}
-            className="inline-flex items-center justify-center h-10 px-4 rounded-lg text-sm font-semibold border border-gray-200 dark:border-border text-foreground hover:bg-gray-50 dark:hover:bg-secondary transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[#0F766E] dark:focus-visible:ring-[#2DD4BF]"
+            className={`inline-flex items-center justify-center h-10 px-4 rounded-lg text-sm font-semibold border border-white/20 ${INK} hover:bg-white/10 transition-colors ${FOCUS_RING}`}
           >
             Studie verlaten
           </button>

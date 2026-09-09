@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../lib/authOptions";
 import SessionProvider from "../../components/providers/SessionProvider";
 import { StudyRail } from "../../components/layout/app-sidebar";
+import { SCENE_BG } from "../../components/scene/tokens";
 import { generatePageMetadata } from "../../lib/pageMetadata";
 
 import { cookies } from "next/headers";
@@ -58,6 +59,25 @@ export async function generateMetadata(): Promise<Metadata> {
  * still wash so the border of the window belongs to a world rather than to a
  * grey app chrome. No canvas, no image, no second animated layer, nothing for
  * the reader to wait on: the lesson is in the HTML and the ground is a colour.
+ *
+ * AND THE INSIDE BELONGS TO THAT WORLD TOO.
+ *
+ * An earlier pass stopped at the frame: it darkened the ground and ringed the
+ * window, and left the interior answering the reader's light/dark setting. In
+ * light mode that produced a white document dropped into a night frame - the one
+ * screen in the product that had not joined the redesign.
+ *
+ * `dark` fixes that in one place. It is the same trick `Header variant="scene"`
+ * and the rail below already use: it scopes every theme token inside the window
+ * to its light-on-dark end, so the flow's own surfaces AND the shared components
+ * it hosts (the commentary, the grondtekst, the notes, the assistant) all land
+ * on the night without any of them being forked. `colorScheme` goes with it, so
+ * the browser's own furniture - select popups, scrollbars, the caret in the
+ * reflection box - is drawn dark rather than being the one light thing left.
+ *
+ * The single exception is deliberate: the passage itself sits on the scene's
+ * light `PLATE` (see StepWord), which is what the scene vocabulary reserves for
+ * the thing that has to be read for twenty minutes.
  */
 export default async function StudyLayout({
   children,
@@ -70,10 +90,14 @@ export default async function StudyLayout({
   const session = await getServerSession(authOptions);
 
   return (
-    // `bg-[#0B1220]` is written out rather than built from the SCENE_BG
-    // constant: Tailwind reads class names as literal text, so a value spliced
-    // in from an import is a class it never generates.
-    <div className="antialiased relative h-[100dvh] flex overflow-hidden bg-[#0B1220]">
+    // The ground is set through `style`, not a class: Tailwind reads class names
+    // as literal text, so a value spliced in from an import is a class it never
+    // generates - and the colour has to come from the token rather than be
+    // written out a second time.
+    <div
+      className="antialiased relative h-[100dvh] flex overflow-hidden"
+      style={{ backgroundColor: SCENE_BG }}
+    >
       {/* The still wash. One layer, no animation, purely decorative - the light
           the window is standing in. It sits under everything and takes no
           pointer events, so it can never come between the reader and a
@@ -108,8 +132,15 @@ export default async function StudyLayout({
               A ring rather than a border, and the scene's own plate shadow: the
               window reads as an object lit on the ground rather than a card
               boxed in a hairline, and a ring costs no layout the way a border
-              does. */}
-          <div className="h-full w-full overflow-hidden bg-background md:rounded-2xl md:ring-1 md:ring-white/10 shadow-none md:shadow-[0_40px_80px_-32px_rgba(0,0,0,0.85)]">
+              does.
+
+              `dark` and `color-scheme: dark` are what make the INSIDE the same
+              world as the outside in both themes - see the note above the
+              component. */}
+          <div
+            className="dark h-full w-full overflow-hidden md:rounded-2xl md:ring-1 md:ring-white/10 shadow-none md:shadow-[0_40px_80px_-32px_rgba(0,0,0,0.85)]"
+            style={{ backgroundColor: SCENE_BG, colorScheme: 'dark' }}
+          >
             {children}
           </div>
         </main>

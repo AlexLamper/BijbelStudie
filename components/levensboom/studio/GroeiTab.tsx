@@ -3,7 +3,7 @@
 import { STAGES } from '../../../lib/levensboom/stages';
 import { allFruits, TRAIT_LABELS, TRAIT_LEVELS } from '../../../lib/levensboom/traits';
 import { CATALOG, unlockLabel } from '../../../lib/levensboom/catalog';
-import { PANEL, TEAL_DEEP, TEAL_ON_DARK } from '../../scene/tokens';
+import { PANEL_DEEP, TEAL_DEEP, TEAL_ON_DARK } from '../../scene/tokens';
 
 /**
  * The Groei tab: where the tree is on its way, and what each stage brings.
@@ -14,6 +14,13 @@ import { PANEL, TEAL_DEEP, TEAL_ON_DARK } from '../../scene/tokens';
  *
  * Drawn for the landscape: literal whites, the accent teal for what is already
  * behind the reader, and TEAL_DEEP under the one chip that carries white type.
+ *
+ * The whole tab is one PANEL_DEEP, which is what that surface is for: this is a
+ * long block of copy, and it sits on the reader's own tree, whose sky runs to
+ * #DFF3F7 in the afternoon - the muted greys in a timeline do not survive a
+ * lighter ground than this. It is also why the XP list inside it lost its own
+ * panel: a panel inside a panel is a box in a box, and there is a picture
+ * behind both of them.
  */
 export default function GroeiTab({
   level,
@@ -28,7 +35,7 @@ export default function GroeiTab({
   const gated = CATALOG.filter((item) => item.unlock.kind === 'level');
 
   return (
-    <div className="space-y-6">
+    <div className={`${PANEL_DEEP} space-y-6 p-5`}>
       <ol className="relative m-0 list-none space-y-0 border-l border-white/20 p-0 pl-5">
         {STAGES.map((stage, index) => {
           const next = STAGES[index + 1];
@@ -91,7 +98,7 @@ export default function GroeiTab({
         })}
       </ol>
 
-      <details className={`${PANEL} p-4`}>
+      <details className="border-t border-white/15 pt-4">
         <summary className="cursor-pointer rounded-md text-sm font-semibold text-white outline-none focus-visible:ring-2 focus-visible:ring-white">
           Wat levert XP op?
         </summary>

@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import AiAssistant from '../AiAssistant';
+import { FOCUS_RING, INK, INK_FAINT, PANEL_FLAT, RULE } from './lesson-layout';
 import type { StepKey } from '../../../lib/studyFlow';
 
 /** Step-specific starters, replacing the assistant's generic ones. */
@@ -145,7 +146,8 @@ export default function AiDock({
       {/* Backdrop for the sheet only. On lg the panel sits beside the content. */}
       {open && (
         <div
-          className="fixed inset-0 z-40 bg-[#0B1220]/50 lg:hidden"
+          className="fixed inset-0 z-40 lg:hidden"
+          style={{ backgroundColor: 'rgba(11,18,32,0.55)' }}
           onClick={() => onOpenChange(false)}
           aria-hidden
         />
@@ -155,7 +157,7 @@ export default function AiDock({
         role="dialog"
         aria-label="AI-assistent"
         className={[
-          'bg-white dark:bg-card border-gray-200 dark:border-border flex flex-col',
+          `${PANEL_FLAT} ${RULE} flex flex-col`,
           'animate-panel-up lg:animate-none',
           'fixed z-50 inset-x-0 bottom-0 h-[75vh] rounded-t-2xl border-t',
           push
@@ -167,13 +169,13 @@ export default function AiDock({
               'lg:absolute lg:z-30 lg:inset-y-0 lg:left-1/2 lg:right-0 lg:h-auto lg:w-auto lg:rounded-none lg:border-t-0 lg:border-l',
         ].join(' ')}
       >
-        <header className="flex-none flex items-center justify-between px-4 h-14 border-b border-gray-200 dark:border-border">
+        <header className={`flex-none flex items-center justify-between px-4 h-14 border-b ${RULE}`}>
           {/* No icon: the panel is titled in words, and the trigger in the flow
               header is the one place a mark is still doing work (its label is
               hidden below sm). */}
           <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-foreground">AI-assistent</span>
-            <span className="text-xs text-gray-600 dark:text-muted-foreground">
+            <span className={`text-sm font-bold ${INK}`}>AI-assistent</span>
+            <span className={`text-xs ${INK_FAINT}`}>
               {book} {chapter}
             </span>
           </div>
@@ -181,7 +183,7 @@ export default function AiDock({
             type="button"
             onClick={() => onOpenChange(false)}
             aria-label="Sluiten"
-            className="h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-secondary text-muted-foreground hover:text-foreground outline-none focus-visible:ring-2 focus-visible:ring-[#0F766E] dark:focus-visible:ring-[#2DD4BF]"
+            className={`h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-white/10 ${INK_FAINT} hover:text-white ${FOCUS_RING}`}
           >
             <X size={16} />
           </button>

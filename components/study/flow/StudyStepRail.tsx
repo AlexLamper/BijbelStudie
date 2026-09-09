@@ -1,12 +1,13 @@
 'use client';
 
 import React from 'react';
+import { Check } from 'lucide-react';
+
+import { TEAL, TEAL_ON_DARK } from '../../scene/tokens';
+import { FOCUS_RING, INK_FAINT, RULE } from './lesson-layout';
 import type { StepKey } from '../../../lib/studyFlow';
 
-/** The filled segment carries no type, so it stays the plain brand fill. */
-const TEAL = '#0D9488';
-
-/** Dutch labels for each step, shown under the rail on wider screens. */
+/** Dutch labels for each step. */
 export const STEP_LABELS: Record<StepKey, string> = {
   intro: 'Intro',
   word: 'Het Woord',
@@ -16,38 +17,105 @@ export const STEP_LABELS: Record<StepKey, string> = {
 };
 
 /**
- * The lesson progress indicator: a single thin segmented bar, one segment per
- * step, spanning the header's full width.
+ * Where you are in the lesson, in the two shapes this screen needs.
  *
- * It used to carry a bolder beam plus a label and a check icon under every step,
- * with a glow around the current one. That is a lot of furniture for "how far
- * along am I" - the answer is just the filled proportion. So: no labels, no
- * icons, no halo. One 3px track, teal up to and including the current step,
- * muted after it. The header text already says "stap 3 van 5".
+ * `index` is the register ontwerp B put in the left margin: the steps numbered
+ * 01..05 down the page, the one you are on marked by a rule in the left gutter
+ * rather than by a fill, a check beside the ones behind you, and a final
+ * "Afronding" row that is never a target - it says the lesson ends somewhere
+ * without pretending you can jump there. That is the primary shape now.
  *
- * Segments stay individually clickable (with an invisible tall hit area) so a
- * reader can step back to the passage while answering the reflection question.
- * Steps not yet reached are inert - skipping ahead to the quiz makes the lesson
- * pointless.
+ * `bar` is the segmented track that used to span the header, kept for the widths
+ * where the margin is not on screen. Below lg there is no room for a 216px
+ * register beside a reading column, and "how far along am I" still has to be
+ * answerable there.
+ *
+ * Both shapes are the same control: the same reachability rule, the same
+ * `onSelect`. Anything already visited stays reachable and nothing beyond the
+ * current step ever is - skipping ahead to the quiz makes the lesson pointless.
  */
 export default function StudyStepRail({
   steps,
   current,
   completed,
   onSelect,
+  variant = 'bar',
 }: {
   steps: StepKey[];
   current: StepKey;
   completed: string[];
   onSelect: (step: StepKey) => void;
+  variant?: 'bar' | 'index';
 }) {
   const currentIndex = steps.indexOf(current);
+
+  if (variant === 'index') {
+    return (
+      <ol className="mt-4 space-y-0.5">
+        {steps.map((step, index) => {
+          const isCurrent = step === current;
+          const reachable = completed.includes(step) || index <= currentIndex;
+          const done = index < currentIndex || completed.includes(step);
+
+          return (
+            <li key={step}>
+              <button
+                type="button"
+                disabled={!reachable}
+                onClick={() => reachable && onSelect(step)}
+                aria-current={isCurrent ? 'step' : undefined}
+                className={[
+                  'flex w-full items-baseline gap-2 rounded-sm border-l-2 py-1.5 pl-2.5 text-left text-[12.5px] transition-colors',
+                  FOCUS_RING,
+                  isCurrent ? 'font-semibold' : 'border-l-transparent',
+                  reachable
+                    ? isCurrent
+                      ? ''
+                      : `${INK_FAINT} hover:text-white`
+                    : `${INK_FAINT} cursor-not-allowed opacity-45`,
+                ].join(' ')}
+                // The marker on the current step is the accent as type and as a
+                // rule - never a fill, which would put white on #2DD4BF.
+                style={isCurrent ? { color: TEAL_ON_DARK, borderLeftColor: TEAL_ON_DARK } : undefined}
+              >
+                <span className="flex-none text-[10.5px] tabular-nums opacity-70">
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+                <span className="min-w-0 truncate">{STEP_LABELS[step]}</span>
+                {done && !isCurrent ? (
+                  <Check
+                    size={11}
+                    strokeWidth={2.5}
+                    aria-hidden
+                    className="ml-auto flex-none"
+                    style={{ color: TEAL }}
+                  />
+                ) : null}
+              </button>
+            </li>
+          );
+        })}
+
+        {/* Not a button, and deliberately so: finishing a lesson writes XP and a
+            note, and that happens through "Les afronden" or not at all. */}
+        <li className={`mt-1.5 border-t pt-1.5 ${RULE}`}>
+          <span
+            className={`flex w-full items-baseline gap-2 border-l-2 border-l-transparent py-1.5 pl-2.5 text-[12.5px] ${INK_FAINT} opacity-70`}
+          >
+            <span className="flex-none text-[10.5px] tabular-nums opacity-70">
+              {String(steps.length + 1).padStart(2, '0')}
+            </span>
+            <span>Afronding</span>
+          </span>
+        </li>
+      </ol>
+    );
+  }
 
   return (
     <nav aria-label="Voortgang" className="w-full flex items-center gap-1">
       {steps.map((step, index) => {
         const isCurrent = step === current;
-        // Anything already visited stays reachable; nothing beyond does.
         const reachable = completed.includes(step) || index <= currentIndex;
         const filled = index <= currentIndex;
 
@@ -64,7 +132,7 @@ export default function StudyStepRail({
               'group flex-1 min-w-0 py-2 -my-2 rounded-sm',
               // A 3px bar has nowhere to show a ring, so the focus state is on
               // the hit area rather than on the track inside it.
-              'outline-none focus-visible:ring-2 focus-visible:ring-[#0F766E] dark:focus-visible:ring-[#2DD4BF]',
+              FOCUS_RING,
               reachable ? 'cursor-pointer' : 'cursor-default',
             ].join(' ')}
           >
@@ -74,8 +142,8 @@ export default function StudyStepRail({
                 and the bar does not ripple on every step. */}
             <span
               className={[
-                'relative block w-full h-[3px] rounded-full overflow-hidden bg-gray-200 dark:bg-border transition-colors',
-                reachable && !filled ? 'group-hover:bg-gray-300 dark:group-hover:bg-muted' : '',
+                'relative block w-full h-[3px] rounded-full overflow-hidden bg-white/15 transition-colors',
+                reachable && !filled ? 'group-hover:bg-white/25' : '',
               ].join(' ')}
             >
               {filled && (

@@ -5,9 +5,21 @@ import TreeCanvas from '../TreeCanvas';
 import { ProBadge } from '../../ui/ProBadge';
 import { ringColors } from '../../../lib/levensboom/ring';
 import { itemKey, unlockLabel, type AvatarChoice, type CatalogItem, type ItemKind } from '../../../lib/levensboom/catalog';
-import { TEAL_DEEP, TEAL_ON_DARK, TILE } from '../../scene/tokens';
+import { TEAL_DEEP, TEAL_ON_DARK } from '../../scene/tokens';
 
 export type TilePick = { item: CatalogItem; locked: boolean };
+
+/**
+ * The shared TILE, one step deeper.
+ *
+ * These tiles float on the reader's own tree rather than on the fixed dusk
+ * landscape every other page has, and that sky follows the reader's clock:
+ * between 09:00 and 18:00 it runs to #DFF3F7. On `bg-black/40` over that, the
+ * 11px caption under a tile measures about 3.7:1; on `bg-black/55` it measures
+ * 5.0:1, and at night the difference costs the picture nothing. Same border,
+ * same radius, same blur - only the ground is heavier.
+ */
+const STUDIO_TILE = 'rounded-2xl border border-white/20 bg-black/55 backdrop-blur-md';
 
 /**
  * One tile per catalog item, drawn as the reader's own tree wearing that item,
@@ -48,7 +60,10 @@ export function ItemGrid({
   onPick: (pick: TilePick) => void;
 }) {
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3" role="radiogroup" aria-label={KIND_TITLES[kind]}>
+    // Two columns from `lg` and no more: from there the grid is the studio's
+    // picking column beside the tree rather than the full width of the page, so
+    // a third column would put 130px tiles in a 22rem gutter.
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-2" role="radiogroup" aria-label={KIND_TITLES[kind]}>
       {items.map((item) => {
         const key = itemKey(item);
         const isUnlocked = unlocked.has(key);
@@ -121,7 +136,7 @@ function ItemTile({
       aria-checked={selected}
       aria-label={`${item.name}${locked ? `, vergrendeld: ${unlockLabel(item.unlock)}` : ''}`}
       onClick={onPick}
-      className={`group relative flex flex-col overflow-hidden text-left outline-none transition-transform hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-white motion-reduce:transition-none motion-reduce:hover:translate-y-0 ${TILE}`}
+      className={`group relative flex flex-col overflow-hidden text-left outline-none transition-transform hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-white motion-reduce:transition-none motion-reduce:hover:translate-y-0 ${STUDIO_TILE}`}
       style={{
         borderColor: selected || previewing ? outline : undefined,
         boxShadow: selected ? `0 0 0 2px ${TEAL_ON_DARK}` : undefined,

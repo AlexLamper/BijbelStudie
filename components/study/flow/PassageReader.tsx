@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { AlertCircle, Plus } from 'lucide-react';
 
-import { SkeletonChapter } from '../../ui/skeletons';
+import { SCENE_BG, TEAL_DEEP } from '../../scene/tokens';
 import { CreateNoteModal } from '../CreateNoteModal';
 import SpeakButton from '../SpeakButton';
 import { SpokenText, SpokenTextScope } from '../SpokenText';
@@ -17,6 +17,18 @@ type VerseMap = Record<string, string>;
 
 /**
  * The passage a lesson reads - and nothing else.
+ *
+ * EVERY COLOUR HERE IS FIXED, AND FIXED FOR A LIGHT GROUND. This reader is laid
+ * on the scene's light `PLATE` (see StepWord), which does not flip with the
+ * reader's theme - so a `dark:` variant on anything inside it would paint dark
+ * type on a light plate the moment someone switched to dark mode. The shared
+ * `SkeletonChapter` is not used for exactly that reason; its blocks carry
+ * `dark:bg-secondary`, and the local one below is a light-ground skeleton.
+ *
+ * The measured contrasts on #F9FAFB: scripture 18.1:1 (it is set in the scene's
+ * own night, SCENE_BG, rather than in gray-900 - a hair darker, and the same
+ * colour the window is standing in), verse numbers 7.2:1, the licensing line
+ * 9.9:1. All three are higher than the light window they replace.
  *
  * Two deliberate differences from `ChapterViewer`:
  *
@@ -120,8 +132,19 @@ export default function PassageReader({
 
   if (loading) {
     return (
-      <div className="py-4">
-        <SkeletonChapter verses={8} />
+      <div className="py-2 space-y-4" role="status" aria-label="Bijbeltekst laden">
+        {[100, 94, 88, 97, 82, 92, 76, 90].map((width, index) => (
+          <div key={index} className="flex gap-3">
+            <div className="h-3.5 w-5 flex-none rounded skeleton-pulse bg-gray-200" />
+            <div className="flex-1 space-y-2">
+              <div className="h-3.5 rounded skeleton-pulse bg-gray-200" />
+              <div
+                className="h-3.5 rounded skeleton-pulse bg-gray-200"
+                style={{ width: `${width}%` }}
+              />
+            </div>
+          </div>
+        ))}
       </div>
     );
   }
@@ -129,15 +152,15 @@ export default function PassageReader({
   if (error) {
     return (
       <div className="py-16 text-center">
-        <AlertCircle className="h-9 w-9 text-red-500 mx-auto mb-4" />
-        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        <AlertCircle className="h-9 w-9 text-red-600 mx-auto mb-4" />
+        <p className="text-sm text-red-700">{error}</p>
       </div>
     );
   }
 
   if (inRange.length === 0) {
     return (
-      <div className="py-16 text-center text-sm text-gray-600 dark:text-muted-foreground">
+      <div className="py-16 text-center text-sm text-gray-700">
         Geen bijbeltekst gevonden voor dit gedeelte.
       </div>
     );
@@ -165,9 +188,11 @@ export default function PassageReader({
                   : undefined
               }
             >
-              <p className={cn('text-gray-900 dark:text-foreground', typography)}>
+              {/* The ink is the scene's own night, so scripture is written in
+                  the colour the window is standing in: 18.1:1 on the plate. */}
+              <p className={typography} style={{ color: SCENE_BG }}>
                 {prefs.showVerseNumbers && (
-                  <sup className="font-semibold mr-2 text-[0.62em] text-gray-500 dark:text-muted-foreground select-none">
+                  <sup className="font-semibold mr-2 text-[0.62em] text-gray-600 select-none">
                     {number}
                   </sup>
                 )}
@@ -177,7 +202,19 @@ export default function PassageReader({
                 >
                   <SpokenText text={text} />
                 </span>
-                <VerseMarkers annotation={marks} />
+                {/* VerseMarkers paints its glyph #2DD4BF under a `dark` scope,
+                    which is right on the night ground /lezen reads on and 1.8:1
+                    on this light plate. That file is shared with /lezen and is
+                    being worked on there, so the colour is corrected here
+                    instead: the value comes from the token through a custom
+                    property, and `!` clears the `dark:` variant's specificity.
+                    #0F766E on the plate measures 5.2:1. */}
+                <span
+                  className="[&_*]:!text-[color:var(--verse-mark)]"
+                  style={{ '--verse-mark': TEAL_DEEP } as React.CSSProperties}
+                >
+                  <VerseMarkers annotation={marks} />
+                </span>
               </p>
 
               <div className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
@@ -186,7 +223,7 @@ export default function PassageReader({
                   showSettings={false}
                   getText={() => text}
                   label={`Vers ${number} voorlezen`}
-                  className="bg-white dark:bg-card shadow-sm border border-gray-200 dark:border-border"
+                  className="shadow-sm border border-gray-200"
                 />
                 <button
                   onClick={() => setSelected({ verseNumber: String(number), text })}
@@ -206,10 +243,12 @@ export default function PassageReader({
         {/* The licensing line. `getBibleAttribution` returns it verbatim and
             nothing here may reword, truncate or wrap it - the NBG51 licence is
             an exact string. It was set in #9CA3AF, which measures 2.5:1 on
-            white; a required copyright notice has to be readable, so it is
-            #4B5563 (7.5:1) on the light plate and unchanged on the dark one. */}
+            white; that was lifted to #4B5563 (7.5:1), and on the plate it is
+            #374151 - 9.9:1, and one shade darker rather than lighter so the
+            move to a fixed light ground cannot cost a required notice any
+            legibility. */}
         {attribution && (
-          <p className="mt-8 pt-4 border-t border-gray-200 dark:border-border text-[11px] leading-snug text-gray-600 dark:text-muted-foreground">
+          <p className="mt-8 pt-4 border-t border-gray-200 text-[11px] leading-snug text-gray-700">
             {attribution}
           </p>
         )}

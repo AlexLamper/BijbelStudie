@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useTheme } from "next-themes"
-import { Sun, Moon, Monitor, Check, Loader2, RotateCcw, Minus, Plus } from "lucide-react"
+import { ChevronDown, Loader2, Minus, Monitor, Moon, Plus, RotateCcw, Sun } from "lucide-react"
 import { useGeneralSettings } from "../../hooks/useGeneralSettings"
 import { useReadingPreferences } from "../../hooks/useReadingPreferences"
 import { Switch } from "../../components/ui/switch"
@@ -10,7 +10,7 @@ import { CLOUD_VOICES } from "../../lib/cloudVoices"
 import SubscriptionSection from "../../components/settings/SubscriptionSection"
 import LevensboomSection from "../../components/settings/LevensboomSection"
 import SceneShell from "../../components/scene/SceneShell"
-import { Panel, SectionHeading } from "../../components/scene/pieces"
+import { Panel } from "../../components/scene/pieces"
 import { PLATE, TEAL } from "../../components/scene/tokens"
 
 interface OptionItem { id: string; name: string; language?: string }
@@ -37,6 +37,15 @@ const LANGUAGE_LABELS: Record<string, string> = {
 }
 
 const FONT_SIZES = ["sm", "base", "lg", "xl"] as const
+
+/** The stored value is an internal token; the row shows the Dutch word for it. */
+const FONT_SIZE_LABELS: Record<string, string> = {
+  sm: "Klein",
+  base: "Normaal",
+  lg: "Groot",
+  xl: "Extra groot",
+}
+
 const FONT_FAMILIES = [
   { value: "sans", label: "Sans-serif", sample: "Aa" },
   { value: "serif", label: "Serif", sample: "Aa" },
@@ -71,35 +80,61 @@ const FALLBACK_VERSE: Record<string, string> = {
 const SCENE_SWITCH =
   "data-[state=unchecked]:bg-white/25 data-[state=checked]:bg-[#0D9488] focus-visible:ring-white focus-visible:ring-offset-transparent [&>span]:bg-white"
 
-const SEG_TRACK = "inline-flex rounded-lg bg-black/40 p-1 ring-1 ring-white/15"
+/**
+ * One control height for the whole page.
+ *
+ * Every field, segmented track and stepper here is 36px tall and ends at the
+ * same right edge of its row, so the column of controls reads as one system
+ * rather than as a stack of differently sized boxes.
+ */
+const CONTROL_H = "h-9"
+
+const SEG_TRACK = `inline-flex ${CONTROL_H} items-center rounded-lg bg-black/40 p-1 ring-1 ring-white/15`
 const SEG_ITEM =
-  "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-white"
+  "flex h-7 items-center gap-1.5 rounded-md px-3 text-xs font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-white"
 const SEG_ON = "bg-white text-gray-900 shadow-sm"
 const SEG_OFF = "text-white/70 hover:bg-white/10 hover:text-white"
 
 /** Solid rather than translucent so the native option list is legible too;
  *  `color-scheme: dark` is what turns the browser's own popup dark. */
 const SCENE_FIELD =
-  "rounded-lg border border-white/25 bg-[#111827] text-sm text-white outline-none transition-colors focus-visible:border-[#2DD4BF] focus-visible:ring-2 focus-visible:ring-[#2DD4BF]/50 disabled:cursor-not-allowed disabled:opacity-60"
+  "rounded-lg border border-white/25 bg-[#111827] text-sm text-white outline-none transition-colors hover:border-white/40 focus-visible:border-[#2DD4BF] focus-visible:ring-2 focus-visible:ring-[#2DD4BF]/50 disabled:cursor-not-allowed disabled:opacity-60"
 
-/** A quiet aside inside a panel: light enough to read, dark enough to keep the
- *  landscape running behind the panel it sits on. */
-const NOTE = "rounded-lg bg-white/10 p-3 text-xs leading-relaxed text-white/75 ring-1 ring-white/10"
-
-const HAIRLINE = "h-px bg-white/15"
+/**
+ * A closing line of explanation under a panel's rows.
+ *
+ * This used to be a tinted box inside the panel - a box drawn inside a box,
+ * which is part of what made the panels read as unfinished. A hairline and
+ * quieter type say "aside" without adding another surface.
+ */
+const FOOTNOTE = "mt-5 border-t border-white/10 pt-4 text-xs leading-relaxed text-white/65"
 
 /**
  * /instellingen, on the scene.
  *
- * Two layers rather than the dashboard's three: this is a page a reader
- * navigates to with a task in mind, so the sky is deliberately short of a full
- * screen - enough landscape to say it is the same world, not so much that the
- * first control is a scroll away - and there are no standing figures to break
- * the fold with.
+ * This is a form surface, so it is laid out as one: a short sky, then a single
+ * measured column of panels - never a second column - so that every panel is
+ * the same width, every row is divided by the same hairline, and every control
+ * ends at the same right edge.
  *
- * The verse preview is the one light surface on the page: it is drawn for a
- * white reading page and shows the product working, which is exactly what PLATE
- * is for. Everything else is a panel.
+ * The column is grouped, and the groups are the reading order:
+ *
+ *   1. Lezen    - what opens by default, how the text looks, how it sounds,
+ *                 closed by the light Voorbeeld plate that shows the result of
+ *                 all three
+ *   2. De app   - the theme and the daily reminder
+ *   3. Account  - Voortgang (je boom, the public profile) and Abonnement
+ *
+ * What was wrong before: the desk was the `1fr / 360px` grid borrowed from
+ * /profiel, but only one real thing lived in the side column. Below 1280px that
+ * column collapsed and dropped the live reading preview to the very bottom of
+ * the page - under the subscription, a screen and a half away from the
+ * typography controls it previews. A second, unlabelled black tile ("Huidig
+ * thema") floated beneath it with no heading and no section; it is a readout,
+ * so it is now a labelled row inside Weergave, where the theme control already
+ * was. The sections ran in no particular order, and their rows came in two
+ * different shapes, so no two controls on the page started or ended at the
+ * same x.
  *
  * Nothing about what this page reads or writes moved: the same
  * /api/v1/preferences GET and PATCH for the reminder, the same
@@ -199,38 +234,43 @@ export default function SettingsPage() {
     // shell owns the root, the scene, the scrims, the navbar, the rail and the
     // gutter - see components/scene/README.md.
     <SceneShell backdrop="reader" header rail>
-      {/* -- Layer 1: the sky ------------------------------------------ */}
-      <section
-        aria-labelledby="instellingen-titel"
-        className="flex min-h-[58vh] flex-col justify-end pb-16 pt-5"
-      >
+      {/* -- Layer 1: the sky, deliberately short ---------------------- */}
+      {/* A settings page is somewhere a reader arrives with a task in mind, so
+          the landscape gets a band rather than a screen and the first control is
+          never a scroll away. */}
+      <section aria-labelledby="instellingen-titel" className="pb-12 pt-6">
         <div className="scene-sky max-w-[46rem]">
           <h1
             id="instellingen-titel"
-            className="text-4xl font-semibold leading-[1.05] tracking-tight text-white drop-shadow-sm sm:text-5xl"
+            className="text-3xl font-semibold leading-[1.1] tracking-tight text-white drop-shadow-sm sm:text-4xl"
           >
             Instellingen
           </h1>
-          <p className="mt-4 max-w-[34rem] text-base leading-relaxed text-white/85 sm:text-lg">
+          <p className="mt-3 max-w-[34rem] text-sm leading-relaxed text-white/85 sm:text-base">
             Pas je bijbel-, lees- en weergavevoorkeuren aan
           </p>
         </div>
       </section>
 
       {/* -- Layer 2: the desk ----------------------------------------- */}
-      <div className="grid w-full grid-cols-1 items-start gap-6 pb-20 pt-6 xl:grid-cols-[minmax(0,1fr)_360px] xl:gap-8">
+      {/* One measured column, about as wide as /profiel's work column, so a wide
+          monitor gets more landscape rather than wider rows. */}
+      <div className="max-w-[56rem] space-y-14 pb-24">
 
-        {/* --- The work column -------------------------------------- */}
-        <div className="flex min-w-0 flex-col gap-6">
-
-          {/* Bible defaults */}
+        {/* ═══ Group 1: Lezen ═══════════════════════════════════════ */}
+        <Group
+          id="instellingen-groep-lezen"
+          title="Lezen"
+          subtitle="Wat er standaard opent, hoe de tekst eruitziet en hoe hij klinkt."
+        >
+          {/* Bijbel & commentaren */}
           <SectionCard
             id="instellingen-bijbel"
             title="Bijbel & commentaren"
             subtitle="Welke vertaling en welk commentaar worden standaard geopend"
           >
-            <div className="space-y-5">
-              <PreferenceRow
+            <Rows>
+              <Row
                 label="Standaard bijbelvertaling"
                 hint="Wordt geopend als je een nieuw hoofdstuk start"
               >
@@ -257,11 +297,9 @@ export default function SettingsPage() {
                   fallbackLabel={settingsLoading ? "Laden..." : "Selecteer vertaling"}
                   ariaLabel="Standaard bijbelvertaling"
                 />
-              </PreferenceRow>
+              </Row>
 
-              <div className={HAIRLINE} />
-
-              <PreferenceRow
+              <Row
                 label="Standaard commentaar"
                 hint="Wordt geladen naast de tekst voor uitleg en context"
               >
@@ -273,18 +311,18 @@ export default function SettingsPage() {
                   fallbackLabel={settingsLoading || commentariesLoading ? "Laden..." : "Selecteer commentaar"}
                   ariaLabel="Standaard commentaar"
                 />
-              </PreferenceRow>
+              </Row>
+            </Rows>
 
-              {settings.translation === "statenvertaling" && !settingsLoading && (
-                <p className={NOTE}>
-                  De <strong className="font-semibold text-white">Statenvertaling</strong> is de standaard vertaling.
-                  Hierin worden de meeste klassieke commentaren ook geschreven.
-                </p>
-              )}
-            </div>
+            {settings.translation === "statenvertaling" && !settingsLoading && (
+              <p className={FOOTNOTE}>
+                De <strong className="font-semibold text-white">Statenvertaling</strong> is de standaard vertaling.
+                Hierin worden de meeste klassieke commentaren ook geschreven.
+              </p>
+            )}
           </SectionCard>
 
-          {/* Reading preferences */}
+          {/* Leesvoorkeuren */}
           <SectionCard
             id="instellingen-lezen"
             title="Leesvoorkeuren"
@@ -298,32 +336,35 @@ export default function SettingsPage() {
               </button>
             }
           >
-            <div className="space-y-5">
+            <Rows>
               {/* Font size */}
-              <PreferenceRow label="Lettergrootte" hint={`Huidig: ${preferences.fontSize}`}>
-                <div className={`items-center gap-1 ${SEG_TRACK}`}>
+              <Row
+                label="Lettergrootte"
+                hint={`Huidig: ${FONT_SIZE_LABELS[preferences.fontSize] || preferences.fontSize}`}
+              >
+                <div className={`gap-1 ${SEG_TRACK}`}>
                   <button
                     onClick={() => adjustFontSize(-1)}
                     disabled={preferences.fontSize === FONT_SIZES[0]}
                     aria-label="Lettergrootte verkleinen"
-                    className="flex h-8 w-8 items-center justify-center rounded-md text-white outline-none transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-30"
+                    className="flex h-7 w-7 items-center justify-center rounded-md text-white outline-none transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-30"
                   >
                     <Minus size={14} aria-hidden />
                   </button>
-                  <span aria-hidden className="w-10 select-none text-center font-serif text-lg text-white">Aa</span>
+                  <span aria-hidden className="w-10 select-none text-center font-serif text-lg leading-none text-white">Aa</span>
                   <button
                     onClick={() => adjustFontSize(1)}
                     disabled={preferences.fontSize === FONT_SIZES[FONT_SIZES.length - 1]}
                     aria-label="Lettergrootte vergroten"
-                    className="flex h-8 w-8 items-center justify-center rounded-md text-white outline-none transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-30"
+                    className="flex h-7 w-7 items-center justify-center rounded-md text-white outline-none transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-30"
                   >
                     <Plus size={14} aria-hidden />
                   </button>
                 </div>
-              </PreferenceRow>
+              </Row>
 
               {/* Font family */}
-              <PreferenceRow label="Lettertype">
+              <Row label="Lettertype" hint="Waarin de bijbeltekst wordt gezet">
                 <SegmentedControl
                   label="Lettertype"
                   value={preferences.fontFamily}
@@ -334,38 +375,203 @@ export default function SettingsPage() {
                     className: f.value === "serif" ? "font-serif" : f.value === "mono" ? "font-mono" : "",
                   }))}
                 />
-              </PreferenceRow>
+              </Row>
 
               {/* Line height */}
-              <PreferenceRow label="Regelhoogte">
+              <Row label="Regelhoogte" hint="Hoeveel ruimte er tussen de regels staat">
                 <SegmentedControl
                   label="Regelhoogte"
                   value={preferences.lineHeight}
                   onChange={(v) => updatePreferences({ lineHeight: v })}
                   options={LINE_HEIGHTS.map(l => ({ value: l.value, label: l.label }))}
                 />
-              </PreferenceRow>
+              </Row>
 
               {/* Letter spacing */}
-              <PreferenceRow label="Letterafstand">
+              <Row label="Letterafstand" hint="Hoeveel ruimte er tussen de letters staat">
                 <SegmentedControl
                   label="Letterafstand"
                   value={preferences.letterSpacing}
                   onChange={(v) => updatePreferences({ letterSpacing: v })}
                   options={LETTER_SPACINGS.map(l => ({ value: l.value, label: l.label }))}
                 />
-              </PreferenceRow>
+              </Row>
 
-              <div className={HAIRLINE} />
+              {/* Verse numbers */}
+              <Row label="Versnummers tonen" hint="Toon nummering naast elk vers">
+                <Switch
+                  checked={preferences.showVerseNumbers}
+                  onCheckedChange={(v) => updatePreferences({ showVerseNumbers: v })}
+                  aria-label="Versnummers tonen"
+                  className={SCENE_SWITCH}
+                />
+              </Row>
+            </Rows>
+          </SectionCard>
 
-              {/* Toggles */}
-              <ToggleRow
-                label="Versnummers tonen"
-                hint="Toon nummering naast elk vers"
-                checked={preferences.showVerseNumbers}
-                onChange={(v) => updatePreferences({ showVerseNumbers: v })}
-              />
+          {/* Voorleesstem */}
+          <SectionCard
+            id="instellingen-voorlezen"
+            title="Voorlezen"
+            subtitle="Welke stem standaard wordt gebruikt om Bijbeltekst en commentaar voor te lezen"
+          >
+            <Rows>
+              <Row
+                label="Standaard stem"
+                hint="Wordt gebruikt zodra je op een voorlees-knop klikt"
+              >
+                <div className={SEG_TRACK} role="group" aria-label="Standaard stem">
+                  {CLOUD_VOICES.map(v => {
+                    const active = settings.ttsVoice === v.id
+                    return (
+                      <button
+                        key={v.id}
+                        onClick={() => updateSettings({ ttsVoice: v.id })}
+                        disabled={settingsLoading}
+                        aria-pressed={active}
+                        className={`${SEG_ITEM} disabled:opacity-50 ${active ? SEG_ON : SEG_OFF}`}
+                      >
+                        {v.gender === "F" ? "Vrouw" : "Man"}
+                      </button>
+                    )
+                  })}
+                </div>
+              </Row>
+            </Rows>
+
+            <p className={FOOTNOTE}>
+              Je kunt de stem altijd per onderdeel wijzigen via het tandwiel-icoon naast de voorlees-knop.
+              Deze keuze is je <strong className="font-semibold text-white">standaard</strong> over alle apparaten waar je inlogt.
+            </p>
+          </SectionCard>
+
+          {/* Voorbeeld.
+              The one light surface on the page, closing the group whose three
+              panels it is the result of: the translation and the commentary from
+              the first, the typography from the second. It is drawn for a white
+              reading page, which is exactly what PLATE is for, and it now sits
+              directly under the controls it previews at every width instead of
+              at the foot of the page. Every colour inside is a literal, because
+              a theme token here would flip to white-on-white. */}
+          <section aria-labelledby="instellingen-voorbeeld" className={`overflow-hidden ${PLATE}`}>
+            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-black/10 px-5 py-4 sm:px-6">
+              <h3 id="instellingen-voorbeeld" className="text-sm font-bold text-gray-900">Voorbeeld</h3>
+              <p className="text-xs text-gray-500">Zo ziet de bijbeltekst er nu voor je uit</p>
             </div>
+
+            <div className="grid gap-6 p-5 sm:p-6 md:grid-cols-[minmax(0,1fr)_13rem]">
+              <div className="min-w-0">
+                <div className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">
+                    Johannes 3:16
+                  </p>
+                  <p className="truncate text-[10px] text-gray-400">
+                    {activeVersion?.name}
+                  </p>
+                </div>
+                {previewLoading ? (
+                  <div className="space-y-1.5" role="status" aria-label="Voorbeeld laden">
+                    <div className="skeleton-pulse h-3.5 w-full rounded bg-black/10" />
+                    <div className="skeleton-pulse h-3.5 w-5/6 rounded bg-black/10" />
+                    <div className="skeleton-pulse h-3.5 w-4/5 rounded bg-black/10" />
+                  </div>
+                ) : (
+                  <p
+                    className={[
+                      "max-w-[38rem] text-gray-900 transition-all",
+                      preferences.fontFamily === "serif" ? "font-serif" :
+                        preferences.fontFamily === "mono" ? "font-mono" : "font-sans",
+                      preferences.fontSize === "sm" ? "text-sm" :
+                        preferences.fontSize === "lg" ? "text-lg" :
+                        preferences.fontSize === "xl" ? "text-xl" : "text-base",
+                      preferences.lineHeight === "normal" ? "leading-normal" :
+                        preferences.lineHeight === "loose" ? "leading-loose" : "leading-relaxed",
+                      preferences.letterSpacing === "tight" ? "tracking-tight" :
+                        preferences.letterSpacing === "wide" ? "tracking-wide" : "tracking-normal",
+                    ].join(" ")}
+                  >
+                    {preferences.showVerseNumbers && (
+                      <sup className="mr-1 font-semibold" style={{ color: TEAL }}>16</sup>
+                    )}
+                    {previewVerse}
+                  </p>
+                )}
+              </div>
+
+              {!settingsLoading && (
+                <div className="border-t border-black/10 pt-4 md:border-l md:border-t-0 md:pl-6 md:pt-0">
+                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-500">
+                    Actieve standaard
+                  </p>
+                  <dl className="space-y-2.5 text-xs">
+                    <div className="min-w-0">
+                      <dt className="text-gray-500">Vertaling</dt>
+                      <dd className="mt-0.5 truncate font-medium text-gray-900">
+                        {activeVersion?.name || settings.translation}
+                      </dd>
+                    </div>
+                    <div className="min-w-0">
+                      <dt className="text-gray-500">Commentaar</dt>
+                      <dd className="mt-0.5 truncate font-medium text-gray-900">
+                        {activeCommentary?.name || settings.commentary}
+                      </dd>
+                    </div>
+                  </dl>
+                </div>
+              )}
+            </div>
+          </section>
+        </Group>
+
+        {/* ═══ Group 2: De app ══════════════════════════════════════ */}
+        <Group
+          id="instellingen-groep-app"
+          title="De app"
+          subtitle="Hoe BijbelStudie eruitziet en wanneer het je aan het lezen herinnert."
+        >
+          {/* Weergave */}
+          <SectionCard
+            id="instellingen-weergave"
+            title="Weergave"
+            subtitle="Thema en uiterlijk van de applicatie"
+          >
+            <Rows>
+              <Row label="Thema" hint="Licht, donker of volg je systeem">
+                {mounted && (
+                  <div className={SEG_TRACK} role="group" aria-label="Thema">
+                    {[
+                      { value: "light", label: "Licht", icon: Sun },
+                      { value: "dark", label: "Donker", icon: Moon },
+                      { value: "system", label: "Systeem", icon: Monitor },
+                    ].map(opt => {
+                      const active = theme === opt.value
+                      const Icon = opt.icon
+                      return (
+                        <button
+                          key={opt.value}
+                          onClick={() => setTheme(opt.value)}
+                          aria-pressed={active}
+                          className={`${SEG_ITEM} ${active ? SEG_ON : SEG_OFF}`}
+                        >
+                          <Icon size={12} aria-hidden /> {opt.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+              </Row>
+
+              {/* A readout, not a control: what the app is showing right now,
+                  which is the only way to see what "Systeem" resolved to. It
+                  used to be an unlabelled tile floating in the side column. */}
+              <Row label="Huidig thema" hint="Wat de app op dit moment toont">
+                {mounted && (
+                  <p className="text-sm font-semibold text-white">
+                    {resolvedTheme === "dark" ? "Donker" : "Licht"}
+                  </p>
+                )}
+              </Row>
+            </Rows>
           </SectionCard>
 
           {/* Dagelijkse herinnering */}
@@ -374,15 +580,20 @@ export default function SettingsPage() {
             title="Dagelijkse herinnering"
             subtitle="Een vast moment om te lezen en te studeren"
           >
-            <div className="space-y-5">
-              <ToggleRow
+            <Rows>
+              <Row
                 label="Herinnering aan"
                 hint="De melding verschijnt op je telefoon in de BijbelStudie-app"
-                checked={reminderEnabled}
-                onChange={(v) => saveReminder({ reminderEnabled: v })}
-              />
+              >
+                <Switch
+                  checked={reminderEnabled}
+                  onCheckedChange={(v) => saveReminder({ reminderEnabled: v })}
+                  aria-label="Herinnering aan"
+                  className={SCENE_SWITCH}
+                />
+              </Row>
 
-              <PreferenceRow
+              <Row
                 label="Tijdstip"
                 labelFor="instellingen-tijdstip"
                 hint={reminderEnabled ? `Elke dag om ${reminderTime}` : "Zet de herinnering aan om een tijd te kiezen"}
@@ -399,83 +610,24 @@ export default function SettingsPage() {
                     }
                   }}
                   style={{ colorScheme: "dark" }}
-                  className={`h-9 px-3 ${SCENE_FIELD}`}
+                  className={`${CONTROL_H} w-[7.5rem] px-3 ${SCENE_FIELD}`}
                 />
-              </PreferenceRow>
+              </Row>
+            </Rows>
 
-              <p className={NOTE}>
-                De herinnering wordt door de mobiele app op je toestel ingepland. Op de website
-                verschijnt er geen melding - deze instelling bepaalt wél welk tijdstip de app gebruikt.
-              </p>
-            </div>
-          </SectionCard>
-
-          {/* Voorleesstem */}
-          <SectionCard
-            id="instellingen-voorlezen"
-            title="Voorlezen"
-            subtitle="Welke stem standaard wordt gebruikt om Bijbeltekst en commentaar voor te lezen"
-          >
-            <PreferenceRow
-              label="Standaard stem"
-              hint="Wordt gebruikt zodra je op een voorlees-knop klikt"
-            >
-              <div className={SEG_TRACK} role="group" aria-label="Standaard stem">
-                {CLOUD_VOICES.map(v => {
-                  const active = settings.ttsVoice === v.id
-                  return (
-                    <button
-                      key={v.id}
-                      onClick={() => updateSettings({ ttsVoice: v.id })}
-                      disabled={settingsLoading}
-                      aria-pressed={active}
-                      className={`${SEG_ITEM} disabled:opacity-50 ${active ? SEG_ON : SEG_OFF}`}
-                    >
-                      {v.gender === "F" ? "Vrouw" : "Man"}
-                    </button>
-                  )
-                })}
-              </div>
-            </PreferenceRow>
-
-            <p className={`mt-3 ${NOTE}`}>
-              Je kunt de stem altijd per onderdeel wijzigen via het tandwiel-icoon naast de voorlees-knop.
-              Deze keuze is je <strong className="font-semibold text-white">standaard</strong> over alle apparaten waar je inlogt.
+            <p className={FOOTNOTE}>
+              De herinnering wordt door de mobiele app op je toestel ingepland. Op de website
+              verschijnt er geen melding - deze instelling bepaalt wél welk tijdstip de app gebruikt.
             </p>
           </SectionCard>
+        </Group>
 
-          {/* Appearance */}
-          <SectionCard
-            id="instellingen-weergave"
-            title="Weergave"
-            subtitle="Thema en uiterlijk van de applicatie"
-          >
-            <PreferenceRow label="Thema" hint="Licht, donker of volg je systeem">
-              {mounted && (
-                <div className={SEG_TRACK} role="group" aria-label="Thema">
-                  {[
-                    { value: "light", label: "Licht", icon: Sun },
-                    { value: "dark", label: "Donker", icon: Moon },
-                    { value: "system", label: "Systeem", icon: Monitor },
-                  ].map(opt => {
-                    const active = theme === opt.value
-                    const Icon = opt.icon
-                    return (
-                      <button
-                        key={opt.value}
-                        onClick={() => setTheme(opt.value)}
-                        aria-pressed={active}
-                        className={`${SEG_ITEM} ${active ? SEG_ON : SEG_OFF}`}
-                      >
-                        <Icon size={12} aria-hidden /> {opt.label}
-                      </button>
-                    )
-                  })}
-                </div>
-              )}
-            </PreferenceRow>
-          </SectionCard>
-
+        {/* ═══ Group 3: Account ═════════════════════════════════════ */}
+        <Group
+          id="instellingen-groep-account"
+          title="Account"
+          subtitle="Je boom, je openbare profiel en je abonnement."
+        >
           {/* Voortgang - "je boom", never the internal name. */}
           <SectionCard
             id="instellingen-voortgang"
@@ -493,97 +645,42 @@ export default function SettingsPage() {
           >
             <SubscriptionSection />
           </SectionCard>
-        </div>
-
-        {/* --- The preview column ----------------------------------- */}
-        <div className="flex flex-col gap-5">
-          {/* The one light surface on the page: this shows the reading page as
-              the reader has just set it up, and it is drawn for a white page -
-              which is exactly what PLATE is for. Every colour inside is a
-              literal, because a theme token here would flip to white-on-white. */}
-          <section aria-labelledby="instellingen-voorbeeld" className={`overflow-hidden xl:sticky xl:top-20 ${PLATE}`}>
-            <div className="border-b border-black/10 px-5 py-4">
-              <h2 id="instellingen-voorbeeld" className="text-sm font-bold text-gray-900">Voorbeeld</h2>
-            </div>
-            <div className="p-5">
-              <div className="mb-2 flex items-center gap-2">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">
-                  Johannes 3:16
-                </p>
-                <p className="truncate text-[10px] text-gray-400">
-                  {activeVersion?.name}
-                </p>
-              </div>
-              {previewLoading ? (
-                <div className="space-y-1.5" role="status" aria-label="Voorbeeld laden">
-                  <div className="skeleton-pulse h-3.5 w-full rounded bg-black/10" />
-                  <div className="skeleton-pulse h-3.5 w-5/6 rounded bg-black/10" />
-                  <div className="skeleton-pulse h-3.5 w-4/5 rounded bg-black/10" />
-                </div>
-              ) : (
-                <p
-                  className={[
-                    "text-gray-900 transition-all",
-                    preferences.fontFamily === "serif" ? "font-serif" :
-                      preferences.fontFamily === "mono" ? "font-mono" : "font-sans",
-                    preferences.fontSize === "sm" ? "text-sm" :
-                      preferences.fontSize === "lg" ? "text-lg" :
-                      preferences.fontSize === "xl" ? "text-xl" : "text-base",
-                    preferences.lineHeight === "normal" ? "leading-normal" :
-                      preferences.lineHeight === "loose" ? "leading-loose" : "leading-relaxed",
-                    preferences.letterSpacing === "tight" ? "tracking-tight" :
-                      preferences.letterSpacing === "wide" ? "tracking-wide" : "tracking-normal",
-                  ].join(" ")}
-                >
-                  {preferences.showVerseNumbers && (
-                    <sup className="mr-1 font-semibold" style={{ color: TEAL }}>16</sup>
-                  )}
-                  {previewVerse}
-                </p>
-              )}
-              {!settingsLoading && (
-                <div className="mt-4 border-t border-black/10 pt-4">
-                  <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500">
-                    Actieve standaard
-                  </p>
-                  <dl className="space-y-1 text-xs">
-                    <div className="flex items-baseline gap-2">
-                      <dt className="w-20 flex-shrink-0 text-gray-500">Vertaling</dt>
-                      <dd className="min-w-0 truncate font-medium text-gray-900">
-                        {activeVersion?.name || settings.translation}
-                      </dd>
-                    </div>
-                    <div className="flex items-baseline gap-2">
-                      <dt className="w-20 flex-shrink-0 text-gray-500">Commentaar</dt>
-                      <dd className="min-w-0 truncate font-medium text-gray-900">
-                        {activeCommentary?.name || settings.commentary}
-                      </dd>
-                    </div>
-                  </dl>
-                </div>
-              )}
-            </div>
-          </section>
-
-          {/* Theme indicator */}
-          {mounted && (
-            <div className="rounded-2xl border border-white/20 bg-black/40 p-4 backdrop-blur-md">
-              <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-white/60">
-                Huidig thema
-              </p>
-              <p className="text-sm font-semibold text-white">
-                {resolvedTheme === "dark" ? "Donker" : "Licht"}
-              </p>
-            </div>
-          )}
-        </div>
-
+        </Group>
       </div>
     </SceneShell>
   )
 }
 
 /* ── Sub components ───────────────────────────────────────────── */
+
+/**
+ * A group of panels, with its heading typed straight on the landscape.
+ *
+ * The shared `SectionHeading` in components/scene/pieces.tsx always renders an
+ * h2, and that folder is shared. A settings page needs two heading levels below
+ * its h1 - the group and the panel inside it - so both are written out here in
+ * exactly that block's vocabulary (title, optional subtitle, hairline rule),
+ * with the group as the h2 and the panel below it as an h3. Nothing about the
+ * type, the spacing or the rule is new.
+ */
+function Group({
+  id, title, subtitle, children,
+}: {
+  id: string
+  title: string
+  subtitle?: string
+  children: React.ReactNode
+}) {
+  return (
+    <section aria-labelledby={id} className="space-y-6">
+      <div className="border-b border-white/15 pb-3">
+        <h2 id={id} className="text-xl font-semibold tracking-tight text-white">{title}</h2>
+        {subtitle && <p className="mt-1.5 text-sm leading-relaxed text-white/70">{subtitle}</p>}
+      </div>
+      {children}
+    </section>
+  )
+}
 
 /**
  * One block of settings, as a panel on the scene.
@@ -603,13 +700,38 @@ function SectionCard({
 }) {
   return (
     <Panel className="p-5 sm:p-6" labelledBy={id}>
-      <SectionHeading id={id} title={title} subtitle={subtitle} action={action} rule />
-      <div className="mt-5">{children}</div>
+      <div className="border-b border-white/15 pb-2.5">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          <h3 id={id} className="min-w-0 text-base font-semibold tracking-tight text-white">{title}</h3>
+          {action}
+        </div>
+        {subtitle && <p className="mt-1.5 text-sm leading-relaxed text-white/70">{subtitle}</p>}
+      </div>
+      {children}
     </Panel>
   )
 }
 
-function PreferenceRow({
+/**
+ * The rows of a panel, divided by one hairline each.
+ *
+ * Every setting on the page sits in one of these lists, so the dividers, the
+ * vertical rhythm and the label column are identical in every panel - which is
+ * what makes the controls line up down the whole page rather than per section.
+ */
+function Rows({ children }: { children: React.ReactNode }) {
+  return <div className="divide-y divide-white/10">{children}</div>
+}
+
+/**
+ * One setting: the label and its hint on the left, the control on the right.
+ *
+ * The control cell is flush to the right edge of the panel from `sm` up, so
+ * every field, every segmented track and every switch on the page ends at the
+ * same x. Below `sm` the control drops under its label rather than fighting it
+ * for the line.
+ */
+function Row({
   label, labelFor, hint, children,
 }: {
   label: string
@@ -619,35 +741,16 @@ function PreferenceRow({
   children: React.ReactNode
 }) {
   return (
-    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-      <div className="min-w-0">
+    <div className="flex flex-col gap-2.5 py-4 first:pt-5 last:pb-0 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
+      <div className="min-w-0 sm:max-w-[26rem]">
         {labelFor ? (
           <label htmlFor={labelFor} className="block text-sm font-medium text-white">{label}</label>
         ) : (
           <p className="text-sm font-medium text-white">{label}</p>
         )}
-        {hint && <p className="mt-0.5 text-xs text-white/65">{hint}</p>}
+        {hint && <p className="mt-1 text-xs leading-relaxed text-white/60">{hint}</p>}
       </div>
-      <div className="flex-shrink-0">{children}</div>
-    </div>
-  )
-}
-
-function ToggleRow({
-  label, hint, checked, onChange,
-}: {
-  label: string
-  hint?: string
-  checked: boolean
-  onChange: (v: boolean) => void
-}) {
-  return (
-    <div className="flex items-center justify-between gap-3">
-      <div className="min-w-0">
-        <p className="text-sm font-medium text-white">{label}</p>
-        {hint && <p className="mt-0.5 text-xs text-white/65">{hint}</p>}
-      </div>
-      <Switch checked={checked} onCheckedChange={onChange} aria-label={label} className={SCENE_SWITCH} />
+      <div className="flex flex-shrink-0 items-center sm:justify-end">{children}</div>
     </div>
   )
 }
@@ -679,6 +782,15 @@ function SegmentedControl({
   )
 }
 
+/**
+ * The native select, dressed for the scene.
+ *
+ * `appearance-none` strips the browser's own arrow, so the control has to draw
+ * one back: without it the field reads as a line of text on a dark plate and
+ * nothing says it opens a list. The marker used to be a teal check, which
+ * implied "saved" on a control that had confirmed nothing. The spinner while
+ * the options are still loading is unchanged, and so is every option it lists.
+ */
 function NativeSelect({
   value, onChange, options, groups, disabled, fallbackLabel, ariaLabel,
 }: {
@@ -691,14 +803,14 @@ function NativeSelect({
   ariaLabel?: string
 }) {
   return (
-    <div className="relative">
+    <div className="relative w-full sm:w-60">
       <select
         value={value}
         disabled={disabled}
         aria-label={ariaLabel}
         onChange={(e) => onChange(e.target.value)}
         style={{ colorScheme: "dark" }}
-        className={`w-full appearance-none py-2 pl-3 pr-9 sm:w-60 ${SCENE_FIELD}`}
+        className={`${CONTROL_H} w-full cursor-pointer appearance-none pl-3 pr-9 ${SCENE_FIELD}`}
       >
         {disabled && fallbackLabel ? (
           <option value="">{fallbackLabel}</option>
@@ -719,7 +831,7 @@ function NativeSelect({
       {disabled ? (
         <Loader2 size={14} aria-hidden className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-white/60" />
       ) : (
-        <Check size={14} aria-hidden className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2" style={{ color: "#2DD4BF" }} />
+        <ChevronDown size={14} aria-hidden className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-white/70" />
       )}
     </div>
   )

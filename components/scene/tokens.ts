@@ -128,13 +128,27 @@ export const CTA_QUIET =
 /**
  * The content gutter on a page that shows the rail.
  *
- * The left inset clears the rail's resting width (64px) with room to breathe;
- * the rail widens on hover OVER the content rather than pushing it, so this
- * value never has to change. SceneShell applies it for you - reach for the
- * constant only when a page opts out (`gutter="none"`) to lay out full-bleed
- * sections itself.
+ * The left inset clears the rail at its OPEN width (176px), not at its resting
+ * width. It used to clear only the resting 64px, on the reasoning that a rail
+ * which floats costs the page nothing - but the moment someone's pointer
+ * brushed the left edge the rail swelled to 224px and put a blurred film over
+ * the first 128px of every panel and every heading, with the copy still faintly
+ * showing through it. Content half-visible under a blur does not read as depth,
+ * it reads as a rendering fault, which is exactly the complaint.
+ *
+ * So the rail's column is reserved rather than borrowed: 192px at `lg` and
+ * 208px at `xl`, which is the open rail plus the same 16-32px of breathing room
+ * the old value left beside the closed one. The rail still opens on hover and
+ * on focus and still moves no content, but it now opens into the left scrim
+ * instead of over the page.
+ *
+ * Change this and the rail's `hover:w-*`/`focus-within:w-*` in SceneRail.tsx
+ * together - the gap between them IS the fix.
+ *
+ * SceneShell applies it for you - reach for the constant only when a page opts
+ * out (`gutter="none"`) to lay out full-bleed sections itself.
  */
-export const SCENE_X = "px-5 sm:px-8 lg:pl-24 lg:pr-10 xl:pl-28 xl:pr-16"
+export const SCENE_X = "px-5 sm:px-8 lg:pl-48 lg:pr-10 xl:pl-52 xl:pr-16"
 
 /**
  * The gutter on a page with no rail. Symmetrical, and wider than a reading
@@ -145,6 +159,37 @@ export const SCENE_X_EDGE = "px-5 sm:px-8 lg:px-14 xl:px-20"
 
 /** One vertical rhythm for a section below the fold. */
 export const SECTION_Y = "py-[clamp(3.5rem,6vw,6rem)]"
+
+/* -- The rail -------------------------------------------------- */
+
+/**
+ * The rail's ground once it is open.
+ *
+ * A film of white over a blur is the right surface for a 64px strip standing in
+ * the left scrim: the sky and the land keep running under it and it costs the
+ * picture nothing. It is the wrong surface for an open panel. Anything still
+ * showing through a piece of navigation reads as a fault rather than as depth,
+ * and on the handful of routes that set their own gutter the open rail can
+ * still land on content.
+ *
+ * Open, the rail is therefore the page's own ground - the same #0B1220
+ * SceneShell paints behind the landscape (SCENE_BG). Written out rather than
+ * spliced in from the constant because Tailwind reads class names as literal
+ * text and never generates a class built from a variable.
+ */
+export const RAIL_OPEN = "bg-[#0B1220]"
+
+/**
+ * The left inset that clears the rail at its OPEN width, for a page that opts
+ * out of `SCENE_X` because it owns its own space.
+ *
+ * `SCENE_X` pads all four sides, which is the wrong shape for a full-bleed page
+ * like the reader: there the room runs to every edge and only the one column
+ * the rail could cover is inset. Both live here so the rail's open width is
+ * stated in one place instead of being copied into a route and left behind the
+ * next time it moves. Literal class text, for the same reason as RAIL_OPEN.
+ */
+export const RAIL_COLUMN = "lg:pl-44 xl:pl-[11.5rem]"
 
 /* -- Scrims ---------------------------------------------------- */
 

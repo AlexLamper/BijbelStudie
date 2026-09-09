@@ -10,7 +10,8 @@ import StudyMaterialsSection from '../../components/study/StudyMaterialsSection'
 import AiAssistantWidget from '../../components/study/AiAssistantWidget';
 import { BookOpen, CheckCircle, ChevronLeft, ChevronRight, X, Trophy, MessageCircle } from 'lucide-react';
 import { toast } from '../../hooks/use-toast';
-import { EYEBROW, PLATE, TEAL_DEEP } from '../../components/scene/tokens';
+import { TEAL_DEEP, TEAL_ON_DARK } from '../../components/scene/tokens';
+import { RAIL_COLUMN, READING_ROOM, ROOM_HEIGHT } from './room';
 
 const COMPLETED_KEY = 'bijbelstudie_completed_studies';
 
@@ -88,22 +89,26 @@ function CompletionOverlay({ study, onClose }: { study: ActiveStudy; onClose: ()
       style={{ backgroundColor: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(6px)' }}
     >
       <div className="bg-white dark:bg-card rounded-2xl shadow-2xl max-w-sm w-full p-8 text-center border border-border animate-in fade-in zoom-in-95 duration-200">
+        {/* The overlay is inside the room's `dark` scope, so its card is the
+            navy panel and #0D9488 - a brand fill meant for a white page -
+            measures 4.5:1 on it at best. TEAL_ON_DARK is the same swatch's
+            on-dark value and measures 9.0:1. */}
         <div
           className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center"
-          style={{ backgroundColor: 'rgba(13,148,136,0.10)' }}
+          style={{ backgroundColor: 'rgba(45,212,191,0.10)' }}
         >
-          <Trophy size={38} style={{ color: '#0D9488' }} />
+          <Trophy size={38} style={{ color: TEAL_ON_DARK }} />
         </div>
         <h2 className="text-2xl font-bold text-foreground mb-2">Studie voltooid!</h2>
         <p className="text-sm text-muted-foreground mb-1">
           Je hebt alle <span className="font-semibold text-foreground">{study.lessons.length} lessen</span> afgerond van
         </p>
-        <p className="text-base font-bold mt-1 mb-6" style={{ color: '#0D9488' }}>
+        <p className="text-base font-bold mt-1 mb-6" style={{ color: TEAL_ON_DARK }}>
           &ldquo;{study.studyTitle}&rdquo;
         </p>
         <div className="flex items-center gap-2 justify-center mb-7">
           {study.lessons.map((_, i) => (
-            <span key={i} className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: '#0D9488' }} />
+            <span key={i} className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: TEAL_ON_DARK }} />
           ))}
         </div>
         <button
@@ -153,8 +158,11 @@ function MiniStudyBar({
     <div className="flex-shrink-0 border-t-2 border-teal-300 dark:border-teal-700 bg-teal-50 dark:bg-teal-950/50">
       {/* Row 1: meta + dismiss */}
       <div className="flex items-center gap-1.5 px-3 pt-2 pb-1">
+        {/* The one inline colour in this bar, so it is the one the `dark` scope
+            cannot correct: #0F766E on the dark teal band is barely visible.
+            TEAL_ON_DARK reads at 8:1 there. */}
         <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded"
-          style={{ backgroundColor: 'rgba(13,148,136,0.15)', color: '#0F766E' }}>
+          style={{ backgroundColor: 'rgba(45,212,191,0.12)', color: TEAL_ON_DARK }}>
           <BookOpen size={9} /> Studie
         </span>
         <span className="text-[11px] font-semibold text-teal-900 dark:text-teal-100 truncate" title={study.studyTitle}>
@@ -409,71 +417,82 @@ function StudyPageInner() {
      * minutes, and a landscape sliding underneath the verse they are following
      * is the one thing atmosphere must never do. The passage and the study
      * materials keep their own scroll containers, exactly as before, and the
-     * scene stays where it is - still, at the edges of a lit frame.
+     * scene stays where it is.
      *
-     * The height is spelled out because there is no `h-full` chain to inherit
-     * any more: the header is 3.5rem, and below `lg` the rail is a sticky strip
-     * of pills that takes another 3rem of flow before the content starts.
-     * `dvh`, so a phone's collapsing address bar cannot cut the frame off - the
-     * same unit app/studie/layout.tsx uses for the same reason.
+     * What changed: the room no longer sits IN the scene, it IS the scene. No
+     * outer padding, no rounded plate, no shadow, no gutter of landscape around
+     * a white card - the ground runs from the underside of the navbar to all
+     * four edges, in the scene's own colour, and the rail floats on top of it
+     * the way it floats on every other converted screen. See `./room`, which
+     * holds both the ground and the height so `loading.tsx` can stream into an
+     * identical frame.
      */
-    <div className="flex h-[calc(100dvh-6.5rem)] flex-col font-inter pt-1 pb-2 sm:px-6 sm:pb-4 lg:h-[calc(100dvh-3.5rem)] lg:pl-24 lg:pr-10 lg:pt-5 lg:pb-5 xl:pl-28 xl:pr-16">
+    <div className={`dark relative flex ${ROOM_HEIGHT} w-full min-w-0 flex-col overflow-hidden font-inter text-foreground`} style={READING_ROOM}>
       {showCompletionOverlay && activeStudy && (
         <CompletionOverlay study={activeStudy} onClose={handleCloseOverlay} />
       )}
 
-      <div className="flex flex-none items-center px-4 pb-1 sm:px-0">
-        <h1 className={EYEBROW}>Lezen</h1>
-      </div>
-
       {/*
-       * The frame. A lit plate on the landscape (PLATE), clipping its own
-       * corners, so the reader's surface is the SAME white-page-in-light /
-       * dark-page-in-dark surface it has always been: not one line of the
-       * passage sits on the scene, and its contrast, measure, type size and
-       * line height are untouched. The scene lives in the margin around it.
+       * The page's heading, kept for the document outline and for a screen
+       * reader, and taken off the screen: it was an eyebrow over the frame that
+       * cost a line of vertical space and repeated what the rail's active item
+       * and the chapter selector both already say. On a screen whose entire
+       * job is the number of verses that fit, that line is measure.
        */}
-      <div className={`relative flex min-h-0 flex-1 flex-col overflow-hidden border border-white/15 ${PLATE}`}>
+      <h1 className="sr-only">Lezen</h1>
 
-      {/* Mobile pane switcher - only below lg; desktop/landscape keeps the split */}
-      <div className="lg:hidden flex-none flex items-stretch border-b border-gray-200 dark:border-border bg-gray-50 dark:bg-card">
+      {/* Mobile pane switcher - only below lg; desktop/landscape keeps the split.
+          Recessed rather than lifted (`bg-black/25`, the scene's own scrim
+          value), so the passage stays the lightest thing in the room. */}
+      <div className="lg:hidden flex-none flex items-stretch border-b border-white/10 bg-black/25">
         <button
           onClick={() => setMobileView('bible')}
           aria-pressed={mobileView === 'bible'}
           className={[
-            'flex-1 flex items-center justify-center gap-1.5 h-12 text-sm font-semibold relative transition-colors',
+            'flex-1 flex items-center justify-center gap-1.5 h-12 text-sm font-semibold relative outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#2DD4BF]',
             mobileView === 'bible'
-              ? 'text-[#0D9488] bg-[rgba(13,148,136,0.07)] dark:bg-[rgba(13,148,136,0.12)]'
-              : 'text-gray-500 dark:text-muted-foreground hover:text-gray-700 dark:hover:text-foreground',
+              ? 'text-[#2DD4BF] bg-[rgba(45,212,191,0.10)]'
+              : 'text-white/60 hover:text-white hover:bg-white/[0.06]',
           ].join(' ')}
         >
           <BookOpen size={16} /> Bijbel
           {mobileView === 'bible' && (
-            <span className="absolute bottom-0 left-4 right-4 h-0.5 rounded-full bg-[#0D9488]" />
+            <span className="absolute bottom-0 left-4 right-4 h-0.5 rounded-full bg-[#2DD4BF]" />
           )}
         </button>
         <button
           onClick={() => setMobileView('materials')}
           aria-pressed={mobileView === 'materials'}
           className={[
-            'flex-1 flex items-center justify-center gap-1.5 h-12 text-sm font-semibold relative transition-colors',
+            'flex-1 flex items-center justify-center gap-1.5 h-12 text-sm font-semibold relative outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#2DD4BF]',
             mobileView === 'materials'
-              ? 'text-[#0D9488] bg-[rgba(13,148,136,0.07)] dark:bg-[rgba(13,148,136,0.12)]'
-              : 'text-gray-500 dark:text-muted-foreground hover:text-gray-700 dark:hover:text-foreground',
+              ? 'text-[#2DD4BF] bg-[rgba(45,212,191,0.10)]'
+              : 'text-white/60 hover:text-white hover:bg-white/[0.06]',
           ].join(' ')}
         >
           <MessageCircle size={16} /> Studie
           {mobileView === 'materials' && (
-            <span className="absolute bottom-0 left-4 right-4 h-0.5 rounded-full bg-[#0D9488]" />
+            <span className="absolute bottom-0 left-4 right-4 h-0.5 rounded-full bg-[#2DD4BF]" />
           )}
         </button>
       </div>
 
       <div className="flex flex-col lg:flex-row flex-1 min-h-0 w-full overflow-hidden">
+        {/*
+         * RAIL_COLUMN is the ONLY inset left on this page, and it is not
+         * margin - it is the space the rail occupies when it opens. See
+         * `./room`, which explains why this route reserves it itself instead of
+         * taking `SCENE_X`, and what has to move with it.
+         *
+         * The split leans left by half that column (`calc(50% ± 5.5rem)`) so
+         * the reserved strip comes out of the page rather than out of the
+         * passage: the scripture keeps the measure it had when the frame was
+         * inset and the two panes were an even half each.
+         */}
         <div
           data-tour="bible-text"
           className={[
-            'h-full w-full lg:w-1/2 lg:flex-none min-h-0 min-w-0 overflow-hidden border-r border-border',
+            `h-full w-full lg:w-[calc(50%_+_5.5rem)] lg:flex-none min-h-0 min-w-0 overflow-hidden lg:border-r lg:border-white/10 ${RAIL_COLUMN}`,
             mobileView === 'bible' ? 'block' : 'hidden',
             'lg:block',
           ].join(' ')}
@@ -505,7 +524,7 @@ function StudyPageInner() {
         <div
           data-tour="commentary"
           className={[
-            'h-full w-full lg:w-1/2 lg:flex-none min-h-0 min-w-0 overflow-hidden',
+            'h-full w-full lg:w-[calc(50%_-_5.5rem)] lg:flex-none min-h-0 min-w-0 overflow-hidden',
             mobileView === 'materials' ? 'block' : 'hidden',
             'lg:block',
           ].join(' ')}
@@ -528,7 +547,6 @@ function StudyPageInner() {
             onAiQuestionConsumed={handleAiQuestionConsumed}
           />
         </div>
-      </div>
       </div>
 
       {/* Hide the floating widget whenever the AI tab itself is visible:

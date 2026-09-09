@@ -54,8 +54,15 @@ const LEDGER_LINK =
  * The content set: greeting, streak and week, level and XP, the 66 books, the
  * recent notes and the recommended studies. The resume panel and the daily
  * verse card that used to sit in the work column are gone - the one action in
- * the sky already resumes the reading, and the verse card is drawn for a white
- * page.
+ * the sky already carries the reader onward, and the verse card is drawn for a
+ * white page.
+ *
+ * That one action goes to the guided study (`/studie`), not to free reading.
+ * The dashboard is where someone decides what to do with the next twenty
+ * minutes, and the answer the product wants is "the study you are in" - so the
+ * pill hands off to the dispatcher and lets it work out which study that is.
+ * Reading is still one hover away on the rail, and the reading-shaped links on
+ * this page still point at /lezen.
  *
  * The window itself - the root, the fixed scene and its scrims, the navbar, the
  * rail and the content gutter - is components/scene/SceneShell.tsx, which every
@@ -73,7 +80,26 @@ export default function DashboardPage() {
   const d = useDashboardData()
   const tree = useTreeSummary()
 
-  const nextHref = d.lastRead ? readHref(d.lastRead.book, d.lastRead.chapter, d.lastRead.version) : "/studie"
+  /**
+   * The one action in the sky goes to the guided study, not to free reading.
+   *
+   * `/studie` is a dispatcher (app/studie/page.tsx): with no query it resolves
+   * the reader's newest active enrolment server-side and redirects into
+   * /studie/[studyId]/[day], and falls back to /studies when there is none. So
+   * the dashboard needs to know nothing about enrolments - no extra fetch, no
+   * endpoint, no waiting. Never hand it `?book=`/`?chapter=`: that is a reading
+   * intent and the dispatcher forwards it straight to /lezen, which is exactly
+   * the behaviour this replaced.
+   */
+  const studyHref = "/studie"
+
+  /**
+   * The reading destination, for the links that really are about reading: back
+   * to the last chapter, or the reader's own default when there is no last one.
+   */
+  const readingHref = d.lastRead
+    ? readHref(d.lastRead.book, d.lastRead.chapter, d.lastRead.version)
+    : "/lezen"
   const dayWord = (n: number) => (n === 1 ? "dag" : "dagen")
   const level = d.level?.level ?? tree.level
   const xpInto = d.level?.xpIntoLevel ?? 0
@@ -157,17 +183,19 @@ export default function DashboardPage() {
           </div>
 
           <div className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-3">
-            {d.loading ? (
-              <SceneSkeleton className="h-14 w-64 rounded-full" />
-            ) : (
-              <Link
-                href={nextHref}
-                className="press group inline-flex items-center gap-3 rounded-full bg-white px-7 py-4 text-base font-semibold text-gray-900 no-underline shadow-xl shadow-black/30 outline-none transition-colors hover:bg-white/90 focus-visible:ring-2 focus-visible:ring-[#0D9488]"
-              >
-                {d.lastRead ? `Verder in ${d.lastRead.book} ${d.lastRead.chapter}` : "Begin met lezen"}
-                <ArrowRight size={18} className="transition-transform group-hover:translate-x-0.5" />
-              </Link>
-            )}
+            {/* No skeleton and no branch any more: the destination and the words
+                are both fixed, so the page's one action is clickable in the
+                first frame instead of waiting on a fetch it no longer needs.
+                The wording has to be true whether the dispatcher lands on a
+                running study or on the list to pick one, so it says neither
+                "verder" nor "begin". */}
+            <Link
+              href={studyHref}
+              className="press group inline-flex items-center gap-3 rounded-full bg-white px-7 py-4 text-base font-semibold text-gray-900 no-underline shadow-xl shadow-black/30 outline-none transition-colors hover:bg-white/90 focus-visible:ring-2 focus-visible:ring-[#0D9488]"
+            >
+              Aan de slag met je studie
+              <ArrowRight size={18} className="transition-transform group-hover:translate-x-0.5" />
+            </Link>
             {/* The second accent, and the last one on this screen: the quiet
                 action beside the white pill. */}
             <Link
@@ -325,19 +353,37 @@ export default function DashboardPage() {
         </aside>
 
         {/* --- The work --------------------------------------------- */}
-        <div className="min-w-0 space-y-5">
+        {/* `flex flex-col gap-5` rather than `space-y-5` on purpose. Tailwind's
+            space utility keys off the `hidden` ATTRIBUTE (`> :not([hidden]) ~
+            :not([hidden])`), and the billing slot is hidden with `display:none`
+            via `empty:hidden` - so on the usual screen, where there is no
+            notice, the books card still inherited 1.25rem of top margin from a
+            slot that draws nothing, and started 20px below the reader panel
+            beside it. A flex gap is not created for a `display:none` child, so
+            the two panels now start on exactly the same line, and a notice that
+            IS shown still gets the same 20px it always had. */}
+        <div className="flex min-w-0 flex-col gap-5">
           <div className="empty:hidden">
             <BillingNotices />
           </div>
 
-          {/* "Verder waar je was" stood here and is gone: the one action in the
-              sky already says exactly this, in the same words and to the same
-              chapter, and a panel repeating it a screen further down was the
-              page asking twice. "Tekst van de dag" is gone too - its card is
-              drawn for a white page and never sat right on the landscape. */}
+          {/* "Verder waar je was" stood here and is gone: a panel repeating the
+              sky's one action a screen further down was the page asking twice.
+              "Tekst van de dag" is gone too - its card is drawn for a white page
+              and never sat right on the landscape. */}
 
-          {/* Je weg door de Bijbel */}
-          <section className={`p-6 ${PANEL}`} aria-labelledby="diepte-weg">
+          {/* Je weg door de Bijbel.
+              The card the reader panel is measured against. It cannot simply
+              stretch to that panel's height: the panel is `self-start` so it
+              can be sticky, which takes it out of the row's stretch, and no
+              sibling can read a sticky element's height in CSS. So the card
+              carries a floor of its own at `lg` - about the height the reader
+              panel settles at - and spends it on the field rather than on air:
+              the two testaments are `flex-1`, so the slack goes into the
+              squares' own breathing room instead of collecting as one dead gap
+              above the legend. Below `lg` the columns stack, there is nothing
+              to line up with, and the floor is not applied. */}
+          <section className={`flex flex-col p-6 lg:min-h-[33rem] ${PANEL}`} aria-labelledby="diepte-weg">
             <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
               <h2 id="diepte-weg" className="text-base font-semibold text-white">Je weg door de Bijbel</h2>
               {d.loading ? (
@@ -429,8 +475,10 @@ export default function DashboardPage() {
             ) : d.recentNotes.length === 0 ? (
               <p className="mt-4 text-sm text-white/70">
                 Nog geen notities.{" "}
+                {/* Reading-shaped, so it keeps going to the reader even though
+                    the hero above it now goes to the study flow. */}
                 <Link
-                  href={nextHref}
+                  href={readingHref}
                   className="font-semibold no-underline hover:underline"
                   style={{ color: TEAL_ON_DARK }}
                 >
@@ -550,11 +598,21 @@ function BookField({
   onHover: (book: string | null) => void
 }) {
   return (
-    <div className="mt-4">
+    // `flex-1` is what lets the card reach the reader panel's foot without a
+    // hole in it: the two fields share whatever height the card's `lg:min-h`
+    // hands them, and each centres its own rows in its share. With no floor -
+    // every width below `lg` - there is no free space to hand out and the block
+    // is exactly as tall as its content, as before.
+    <div className="mt-4 flex flex-1 flex-col justify-center">
       <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/55">
         {label} <span className="font-normal normal-case tabular-nums">({books.length} boeken)</span>
       </p>
-      <div className="flex flex-wrap gap-[3px]">
+      {/* auto-fill, not auto-fit: the last row's squares keep their track and
+          stay left-aligned under the row above instead of stretching across the
+          full width. The minimum track grows with the screen, so a square is a
+          20px chip on a phone and a 44px tile on a desktop - which is also the
+          first time this control clears a 24px touch target. */}
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(1.25rem,1fr))] gap-[3px] lg:grid-cols-[repeat(auto-fill,minmax(2.5rem,1fr))] lg:gap-1 2xl:grid-cols-[repeat(auto-fill,minmax(3.25rem,1fr))]">
         {books.map(book => {
           const ratio = loading ? 0 : ratioOf(book)
           const isCurrent = !loading && current === book
@@ -568,12 +626,10 @@ function BookField({
               onMouseLeave={() => onHover(null)}
               onFocus={() => onHover(book)}
               onBlur={() => onHover(null)}
-              className={`relative block flex-shrink-0 rounded-sm no-underline transition-transform duration-100 hover:z-10 hover:scale-125 ${
+              className={`relative block aspect-square w-full rounded-sm no-underline transition-transform duration-100 hover:z-10 hover:scale-110 lg:rounded-md ${
                 loading ? "skeleton-pulse" : ""
               }`}
               style={{
-                width: 18,
-                height: 18,
                 backgroundColor: fieldColor(ratio),
                 outline: hovered === book || isCurrent ? "2px solid #2DD4BF" : "none",
                 outlineOffset: 1,

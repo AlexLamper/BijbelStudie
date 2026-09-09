@@ -6,6 +6,8 @@ import { useReducedMotion } from 'framer-motion';
 import { ArrowRight, Award, NotebookPen, Trophy } from 'lucide-react';
 import { badgeDescription, badgeLabel } from '../../../lib/badgeCatalog';
 import LessonTreeMoment from '../../levensboom/LessonTreeMoment';
+import { INK, INK_FAINT, INK_MUTED, SURFACE } from './lesson-layout';
+import { TEAL, TEAL_DEEP, TEAL_ON_DARK } from '../../scene/tokens';
 
 /**
  * The reward palette, in the roles components/scene/tokens.ts defines.
@@ -15,17 +17,16 @@ import LessonTreeMoment from '../../levensboom/LessonTreeMoment';
  * changes is which shade plays which part. TEAL and AMBER stay the fills that
  * carry no type - the ring stroke, a dot. Anything with white type on it drops
  * to the deep end of the same swatch (white on #0D9488 is 3.74:1, on #0F766E
- * 5.5:1; white on #D97706 is 3.2:1, on #B45309 5.9:1). And the brand AS type
- * has to move with the theme, because this card is light in one and dark in the
- * other - hence class pairs rather than values, since an inline `style` cannot
- * answer dark mode.
+ * 5.5:1; white on #D97706 is 3.2:1, on #B45309 5.9:1).
+ *
+ * The class pairs are gone: this card no longer flips with the reader's theme,
+ * because the window it lands in does not either. Teal AS type is #2DD4BF
+ * (10.1:1 on the night ground) and amber as type #FBBF24 (11.3:1) - the shades
+ * that were the dark half of each pair.
  */
-const TEAL = '#0D9488';
 const AMBER = '#D97706';
-const TEAL_DEEP = '#0F766E';
 const AMBER_DEEP = '#B45309';
-const INK_TEAL = 'text-[#0F766E] dark:text-[#2DD4BF]';
-const INK_AMBER = 'text-[#B45309] dark:text-[#FBBF24]';
+const AMBER_ON_DARK = '#FBBF24';
 const FOCUS_RING = 'outline-none focus-visible:ring-2 focus-visible:ring-white';
 
 export interface CompletionSummary {
@@ -102,7 +103,7 @@ function ProgressRing({
   done,
   total,
   accent,
-  inkClass,
+  ink,
   animate,
 }: {
   pct: number;
@@ -110,8 +111,8 @@ function ProgressRing({
   total: number;
   /** The stroke. A fill with no type on it, so it stays the plain brand. */
   accent: string;
-  /** The figure inside it, which is type and therefore theme-dependent. */
-  inkClass: string;
+  /** The figure inside it, which is type and so takes the on-dark shade. */
+  ink: string;
   animate: boolean;
 }) {
   const radius = 50;
@@ -138,7 +139,7 @@ function ProgressRing({
           r={radius}
           fill="none"
           strokeWidth="8"
-          className="stroke-gray-200 dark:stroke-secondary"
+          className="stroke-white/15"
         />
         <circle
           cx="60"
@@ -154,10 +155,13 @@ function ProgressRing({
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className={`text-[26px] font-extrabold leading-none tabular-nums ${inkClass}`}>
+        <span
+          className="text-[26px] font-extrabold leading-none tabular-nums"
+          style={{ color: ink }}
+        >
           {pct}%
         </span>
-        <span className="mt-1 text-[11px] font-semibold tabular-nums text-gray-600 dark:text-muted-foreground">
+        <span className={`mt-1 text-[11px] font-semibold tabular-nums ${INK_FAINT}`}>
           {done}/{total} lessen
         </span>
       </div>
@@ -172,21 +176,22 @@ function ProgressRing({
 function Stat({
   value,
   label,
-  accentClass,
+  accentInk,
 }: {
   value: string;
   label: string;
-  /** A class pair, not a colour: this figure is type and the card has two themes. */
-  accentClass?: string;
+  /** The figure's ink, when it is one of the reward accents. */
+  accentInk?: string;
 }) {
   return (
-    <div className="rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-card px-3 py-3 text-center">
+    <div className={`${SURFACE} px-3 py-3 text-center`}>
       <p
-        className={`text-[18px] font-bold leading-none tabular-nums truncate ${accentClass ?? ''}`}
+        className={`text-[18px] font-bold leading-none tabular-nums truncate ${accentInk ? '' : INK}`}
+        style={accentInk ? { color: accentInk } : undefined}
       >
         {value}
       </p>
-      <p className="mt-1.5 text-[11px] text-gray-600 dark:text-muted-foreground leading-snug truncate">
+      <p className={`mt-1.5 text-[11px] leading-snug truncate ${INK_FAINT}`}>
         {label}
       </p>
     </div>
@@ -206,11 +211,13 @@ function RewardChip({
   return (
     <span
       className="inline-flex items-center gap-2 rounded-full border px-3 py-1.5"
-      style={{ borderColor: 'rgba(180,83,9,0.40)', backgroundColor: 'rgba(217,119,6,0.08)' }}
+      style={{ borderColor: 'rgba(251,191,36,0.40)', backgroundColor: 'rgba(217,119,6,0.14)' }}
     >
-      <Icon size={13} className={`flex-none ${INK_AMBER}`} />
-      <span className={`text-[12px] font-bold ${INK_AMBER}`}>{label}</span>
-      <span className="text-[11.5px] text-gray-600 dark:text-muted-foreground">{detail}</span>
+      <Icon size={13} className="flex-none" style={{ color: AMBER_ON_DARK }} />
+      <span className="text-[12px] font-bold" style={{ color: AMBER_ON_DARK }}>
+        {label}
+      </span>
+      <span className={`text-[11.5px] ${INK_FAINT}`}>{detail}</span>
     </span>
   );
 }
@@ -279,7 +286,7 @@ export default function LessonCompleteCard({
   // button carries white type, and the eyebrow IS type.
   const accent = finished ? AMBER : TEAL;
   const accentSolid = finished ? AMBER_DEEP : TEAL_DEEP;
-  const accentInk = finished ? INK_AMBER : INK_TEAL;
+  const accentInk = finished ? AMBER_ON_DARK : TEAL_ON_DARK;
   const hasQuiz = quizScore !== null && quizTotal !== null && quizTotal > 0;
   const done = Math.min(lessonsCompleted, lessonsTotal);
   const pct = lessonsTotal > 0 ? Math.round((done / lessonsTotal) * 100) : 0;
@@ -301,19 +308,22 @@ export default function LessonCompleteCard({
                 done={done}
                 total={lessonsTotal}
                 accent={accent}
-                inkClass={accentInk}
+                ink={accentInk}
                 animate={!reduceMotion}
               />
             }
           />
 
-          <p className={`mt-4 text-[11px] font-bold uppercase tracking-[0.14em] ${accentInk}`}>
+          <p
+            className="mt-4 text-[11px] font-bold uppercase tracking-[0.14em]"
+            style={{ color: accentInk }}
+          >
             {finished ? 'Studie afgerond' : `Les ${lessonDay} van ${lessonsTotal} afgerond`}
           </p>
-          <h1 className="mt-1 text-xl sm:text-2xl font-bold text-foreground leading-tight text-balance">
+          <h1 className={`mt-1 text-xl sm:text-2xl font-bold leading-tight text-balance ${INK}`}>
             {finished ? studyTitle : lessonTitle}
           </h1>
-          <p className="mt-1.5 text-[13px] text-gray-600 dark:text-muted-foreground">
+          <p className={`mt-1.5 text-[13px] ${INK_MUTED}`}>
             {finished
               ? `Alle ${lessonsTotal} lessen zijn af. Sterk volgehouden.`
               : `${studyTitle} · ${passageReference}`}
@@ -342,12 +352,12 @@ export default function LessonCompleteCard({
           <Stat
             value={summary.xpAwarded > 0 ? `+${xp}` : '0'}
             label="XP verdiend"
-            accentClass={INK_TEAL}
+            accentInk={TEAL_ON_DARK}
           />
           <Stat
             value={`${done}/${lessonsTotal}`}
             label={`${pct}% van de studie`}
-            accentClass={accentInk}
+            accentInk={accentInk}
           />
           {hasQuiz ? (
             <Stat value={`${quizScore}/${quizTotal}`} label={scoreLabel(quizScore, quizTotal)} />
@@ -360,9 +370,9 @@ export default function LessonCompleteCard({
         {summary.noteId && (
           <Link
             href="/notities"
-            className="mt-4 flex items-center gap-2 rounded-md text-[12.5px] no-underline text-gray-600 dark:text-muted-foreground hover:text-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-[#0F766E] dark:focus-visible:ring-[#2DD4BF]"
+            className={`mt-4 flex items-center gap-2 rounded-md text-[12.5px] no-underline ${INK_MUTED} hover:text-white transition-colors ${FOCUS_RING}`}
           >
-            <NotebookPen size={14} className={`flex-none ${INK_TEAL}`} />
+            <NotebookPen size={14} className="flex-none" style={{ color: TEAL_ON_DARK }} />
             Je reflectie is bewaard als notitie
             <ArrowRight size={13} className="flex-none" />
           </Link>
@@ -371,19 +381,22 @@ export default function LessonCompleteCard({
         {nextLesson && !finished && (
           <div
             className="mt-4 flex items-center gap-3 rounded-xl border px-3 py-2.5"
-            style={{ borderColor: 'rgba(13,148,136,0.35)' }}
+            style={{ borderColor: 'rgba(45,212,191,0.35)' }}
           >
             <span
-              className={`h-8 w-8 flex-none rounded-lg flex items-center justify-center text-[12.5px] font-bold ${INK_TEAL}`}
-              style={{ backgroundColor: 'rgba(13,148,136,0.12)' }}
+              className="h-8 w-8 flex-none rounded-lg flex items-center justify-center text-[12.5px] font-bold"
+              style={{ backgroundColor: 'rgba(45,212,191,0.16)', color: TEAL_ON_DARK }}
             >
               {nextLesson.day}
             </span>
             <span className="min-w-0 flex-1">
-              <span className={`block text-[10px] font-bold uppercase tracking-[0.14em] ${INK_TEAL}`}>
+              <span
+                className="block text-[10px] font-bold uppercase tracking-[0.14em]"
+                style={{ color: TEAL_ON_DARK }}
+              >
                 Hierna
               </span>
-              <span className="block text-[13px] font-semibold text-foreground truncate">
+              <span className={`block text-[13px] font-semibold truncate ${INK}`}>
                 {nextLesson.title} · {nextLesson.reference}
               </span>
             </span>
@@ -412,7 +425,7 @@ export default function LessonCompleteCard({
 
           <Link
             href={`/studies/${studyId}`}
-            className="press inline-flex items-center justify-center px-4 h-11 rounded-xl text-sm font-medium border border-gray-200 dark:border-border bg-white dark:bg-card text-foreground no-underline hover:bg-gray-50 dark:hover:bg-secondary outline-none focus-visible:ring-2 focus-visible:ring-[#0F766E] dark:focus-visible:ring-[#2DD4BF]"
+            className={`press inline-flex items-center justify-center px-4 h-11 rounded-xl text-sm font-medium border border-white/20 bg-white/10 ${INK} no-underline hover:bg-white/20 ${FOCUS_RING}`}
           >
             Overzicht
           </Link>

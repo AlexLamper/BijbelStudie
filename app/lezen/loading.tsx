@@ -1,36 +1,45 @@
 import { SkeletonBlock, SkeletonChapter } from "../../components/ui/skeletons"
-import { EYEBROW, PLATE } from "../../components/scene/tokens"
+import { RAIL_COLUMN, READING_ROOM, ROOM_HEIGHT } from "./room"
 
 /**
  * Shown while the route segment streams in, so a navigation lands on the page's
  * own shape instead of an empty frame. It unmounts as soon as the page
  * component mounts - nothing here holds it open.
  *
- * It streams into the layout's SceneShell, so it wears the same frame the
- * reader does: the same height maths (3.5rem of navbar, plus 3rem of pill strip
- * below `lg`), the same lit plate, the same edge-to-edge treatment on a phone.
- * The skeletons themselves stay the light-page ones - they sit INSIDE the
- * plate, not on the landscape.
+ * It streams into the layout's SceneShell and wears the reading room itself:
+ * the same height maths, the same `dark` scope, the same ground and the same
+ * palette variables, imported from `./room` rather than copied, so the frame
+ * cannot drift from the one the page renders a moment later. There is no plate
+ * and no gutter to draw - the room already runs to all four edges.
+ *
+ * The skeletons inherit the room's tokens, so `dark:bg-secondary` resolves to
+ * the navy #222B3A and reads as a shape on the ground rather than disappearing
+ * into it.
  */
 export default function LezenLoading() {
   return (
-    <div className="flex h-[calc(100dvh-6.5rem)] flex-col pt-1 pb-2 sm:px-6 sm:pb-4 lg:h-[calc(100dvh-3.5rem)] lg:pl-24 lg:pr-10 lg:pt-5 lg:pb-5 xl:pl-28 xl:pr-16">
-      <div className="flex flex-none items-center px-4 pb-1 sm:px-0">
-        <span className={EYEBROW}>Lezen</span>
-      </div>
-
+    <div
+      className={`dark relative flex ${ROOM_HEIGHT} w-full min-w-0 flex-col overflow-hidden text-foreground`}
+      style={READING_ROOM}
+    >
+      {/* The same two nested boxes the page builds: the outer one reserves the
+          rail's column, the inner one carries the pane's own padding. Sharing
+          RAIL_COLUMN rather than restating a number is what keeps the skeleton
+          from jumping when the page lands on top of it. */}
       <div
-        className={`relative flex min-h-0 flex-1 flex-col overflow-hidden border border-white/15 ${PLATE}`}
+        className={`flex min-h-0 flex-1 flex-col ${RAIL_COLUMN}`}
         role="status"
         aria-label="Bijbel laden"
       >
-        <div className="h-14 flex-none flex items-center gap-3 px-3 border-b border-gray-200 dark:border-border bg-gray-50 dark:bg-card">
+        {/* The toolbar band, at the height and the recessed value the real one
+            uses. */}
+        <div className="h-14 flex-none flex items-center gap-3 px-3 border-b border-white/10 bg-black/25">
           <SkeletonBlock className="h-8 w-8 rounded-lg" />
           <SkeletonBlock className="h-8 w-44 rounded-md" />
           <SkeletonBlock className="h-8 w-28 rounded-md" />
         </div>
 
-        <div className="flex-1 min-h-0 overflow-hidden bg-white dark:bg-background px-4 sm:px-6 pt-4">
+        <div className="flex-1 min-h-0 overflow-hidden px-4 sm:px-6 pt-4">
           <SkeletonChapter verses={7} />
         </div>
       </div>

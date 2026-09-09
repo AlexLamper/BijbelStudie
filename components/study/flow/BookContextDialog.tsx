@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AlertCircle, X } from 'lucide-react';
 
+import { FOCUS_RING, INK, INK_FAINT, INK_MUTED, PANEL_SOLID, RULE } from './lesson-layout';
 import { formatSummaryText } from '../HistoricalContext';
 import { getPreferenceClasses, getPreferenceStyles } from '../../../lib/preferenceClasses';
 import type { ReadingPreferences } from '../../../hooks/useReadingPreferences';
@@ -87,7 +88,7 @@ export default function BookContextDialog({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-6"
+      className="dark fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-6"
       // The scene's ground, like every other dim in the flow.
       style={{ backgroundColor: 'rgba(11,18,32,0.55)' }}
       onClick={onClose}
@@ -97,18 +98,18 @@ export default function BookContextDialog({
         aria-modal="true"
         aria-label={`Context van ${book}`}
         onClick={(event) => event.stopPropagation()}
-        className="w-full sm:max-w-2xl h-[85vh] sm:h-[78vh] flex flex-col bg-white dark:bg-card rounded-t-2xl sm:rounded-2xl border border-gray-200 dark:border-white/10 shadow-[0_40px_80px_-32px_rgba(0,0,0,0.85)]"
+        className={`w-full sm:max-w-2xl h-[85vh] sm:h-[78vh] flex flex-col ${PANEL_SOLID} rounded-t-2xl sm:rounded-2xl shadow-[0_40px_80px_-32px_rgba(0,0,0,0.85)]`}
       >
-        <header className="flex-none flex items-center justify-between px-5 h-14 border-b border-gray-200 dark:border-border">
+        <header className={`flex-none flex items-center justify-between px-5 h-14 border-b ${RULE}`}>
           {/* Titled in words; an info mark beside "Context van ..." adds nothing. */}
           <div className="flex items-center gap-2 min-w-0">
-            <h2 className="text-sm font-bold text-foreground truncate">Context van {book}</h2>
+            <h2 className={`text-sm font-bold truncate ${INK}`}>Context van {book}</h2>
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Sluiten"
-            className="h-8 w-8 flex-none inline-flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-secondary text-muted-foreground hover:text-foreground outline-none focus-visible:ring-2 focus-visible:ring-[#0F766E] dark:focus-visible:ring-[#2DD4BF]"
+            className={`h-8 w-8 flex-none inline-flex items-center justify-center rounded-md hover:bg-white/10 ${INK_FAINT} hover:text-white ${FOCUS_RING}`}
           >
             <X size={16} />
           </button>
@@ -120,24 +121,24 @@ export default function BookContextDialog({
               {[100, 92, 96, 80, 90, 74, 88, 62, 95, 70].map((width, index) => (
                 <div
                   key={index}
-                  className="h-3.5 rounded animate-pulse bg-gray-100 dark:bg-secondary"
+                  className="h-3.5 rounded animate-pulse bg-white/10"
                   style={{ width: `${width}%` }}
                 />
               ))}
             </div>
           ) : error ? (
             <div className="py-10 text-center">
-              <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-3" />
-              <p className="text-sm text-red-500">{error}</p>
+              <AlertCircle className="h-8 w-8 text-red-400 mx-auto mb-3" />
+              <p className="text-sm text-red-400">{error}</p>
             </div>
           ) : summary ? (
             <div
-              className={`text-gray-700 dark:text-foreground max-w-none ${getPreferenceClasses(preferences)}`}
+              className={`${INK_MUTED} max-w-none ${getPreferenceClasses(preferences)}`}
               style={getPreferenceStyles(preferences)}
               dangerouslySetInnerHTML={{ __html: formatSummaryText(summary) }}
             />
           ) : (
-            <p className="text-gray-600 dark:text-muted-foreground italic text-sm">
+            <p className={`${INK_FAINT} italic text-sm`}>
               Geen algemene informatie beschikbaar voor dit boek.
             </p>
           )}

@@ -3,10 +3,28 @@
 import { SceneSkeleton } from '../../scene/pieces';
 import type { Stage } from '../../../lib/levensboom/stages';
 import type { LevensboomPayload } from '../../../lib/levensboom/summary';
-import { PANEL, TEAL_DEEP, TEAL_ON_DARK } from '../../scene/tokens';
+import { TEAL_DEEP, TEAL_ON_DARK } from '../../scene/tokens';
 
 /**
- * The block under the stage: where you are, in one look.
+ * The shared PANEL, one step deeper - for the same reason StudioTiles carries
+ * its own tile.
+ *
+ * This block floats on the reader's own tree rather than on the fixed dusk
+ * landscape the other scene pages have, and that sky follows their clock: it
+ * runs to #DFF3F7 through the afternoon. On `bg-black/40` over that, the
+ * `text-white/70` line under the stage name measures about 3.9:1; on
+ * `bg-black/55` it measures 5.5:1. At night the extra black costs the picture
+ * nothing.
+ */
+const STUDIO_PANEL = 'rounded-2xl border border-white/20 bg-black/55 backdrop-blur-md';
+
+/**
+ * Where you are, in one look - at the foot of the studio's reading column, with
+ * the reader's own tree standing behind it.
+ *
+ * It carries the stage name and the level, which is why the studio's masthead
+ * no longer repeats them: on a page whose whole background is the tree, one
+ * block says where the reader stands and everything else is the picture.
  *
  * The old strip was one line of small type ("nog 177 XP -> niveau 6"), which
  * says how far there is to go but never where you stand. This says both: the
@@ -44,7 +62,7 @@ export default function LevelProgress({
   const nextStage = stage.nextLevel && stage.nextName ? { name: stage.nextName, level: stage.nextLevel } : null;
 
   return (
-    <section aria-label="Jouw voortgang" className={`${PANEL} p-4 sm:p-5 ${className ?? ''}`}>
+    <section aria-label="Jouw voortgang" className={`${STUDIO_PANEL} p-4 sm:p-5 ${className ?? ''}`}>
       <div className="flex items-center gap-4">
         <div
           className="flex h-16 w-16 flex-shrink-0 flex-col items-center justify-center gap-0.5 rounded-2xl text-white ring-1 ring-white/20"
@@ -139,7 +157,7 @@ export function LevelProgressSkeleton({ className }: { className?: string }) {
     <div
       role="status"
       aria-label="Voortgang laden"
-      className={`${PANEL} p-4 sm:p-5 ${className ?? ''}`}
+      className={`${STUDIO_PANEL} p-4 sm:p-5 ${className ?? ''}`}
     >
       <div className="flex items-center gap-4">
         <SceneSkeleton className="h-16 w-16 flex-shrink-0 rounded-2xl" />

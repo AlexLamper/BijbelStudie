@@ -237,10 +237,19 @@ export default function ChapterViewer({
                     lineHeightClass,
                     letterSpacingClass,
                   )}>
+                    {/* The verse number is pinned rather than left on
+                        `--muted-foreground`. This viewer is /lezen's only, and
+                        /lezen now reads on the scene's navy ground: the muted
+                        token lands at 8.1:1 there, while the number measured
+                        10.3:1 on the white page it used to sit on. A
+                        superscript this small may not lose contrast in the
+                        move, so it gets its own value - #BAC4D2, 10.7:1 - a
+                        clear step below the passage's 18.1:1 but above what it
+                        replaced. */}
                     {prefs.showVerseNumbers && (
                       <sup className={cn(
                         "font-semibold mr-1",
-                        isHighlighted ? "text-teal-600 dark:text-teal-400" : "text-gray-700 dark:text-muted-foreground"
+                        isHighlighted ? "text-teal-600 dark:text-teal-400" : "text-gray-700 dark:text-[#BAC4D2]"
                       )}>
                         {verseNumber}
                       </sup>
@@ -261,8 +270,11 @@ export default function ChapterViewer({
                     />
                     <button
                       onClick={() => handleVerseClick(verseNumber, text)}
-                      className="bg-[#0D9488] hover:bg-[#0f766e] text-white p-1.5 shadow-[0_2px_4px_-1px_rgba(0,0,0,0.1)]"
-                      title="Add note to this verse"
+                      // #0F766E, not #0D9488: a white glyph on the lighter
+                      // brand fill measures 3.74:1. Same swatch, one step down
+                      // - the value PassageReader already uses for this button.
+                      className="bg-[#0F766E] hover:bg-[#115E59] text-white p-1.5 rounded-sm shadow-[0_2px_4px_-1px_rgba(0,0,0,0.1)] outline-none focus-visible:ring-2 focus-visible:ring-white"
+                      title={`Notitie bij vers ${verseNumber}`}
                     >
                       <Plus className="h-3 w-3" />
                     </button>
@@ -272,8 +284,14 @@ export default function ChapterViewer({
               })}
             </div>
 
+            {/* The licensing line. `getBibleAttribution` returns it verbatim
+                and nothing here may reword, truncate or wrap it - the NBG51
+                licence is an exact string. It was #9CA3AF, which measures
+                2.5:1 on white; a required copyright notice has to be readable,
+                so the light value is #4B5563 (7.5:1), matching PassageReader,
+                and on the room's navy ground the muted token measures 8.1:1. */}
             {getBibleAttribution(version) && (
-              <p className="mt-4 pt-3 border-t border-gray-100 dark:border-border text-[11px] leading-snug text-gray-400 dark:text-muted-foreground">
+              <p className="mt-4 pt-3 border-t border-gray-100 dark:border-border text-[11px] leading-snug text-gray-600 dark:text-muted-foreground">
                 {getBibleAttribution(version)}
               </p>
             )}

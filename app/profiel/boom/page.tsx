@@ -1,29 +1,30 @@
 import type { Metadata } from 'next';
 import { generatePageMetadata } from '../../../lib/pageMetadata';
 import LevensboomStudio from '../../../components/levensboom/studio/LevensboomStudio';
-import SceneShell from '../../../components/scene/SceneShell';
-import { SCENE_TREE, sceneSvg } from '../../../components/scene/scene-svg';
 
 export const metadata: Metadata = generatePageMetadata('profileTree');
 
 /**
- * The studio, on the scene - with the scene deliberately still.
+ * The studio, where the reader's own tree is the page.
  *
- * This is the one signed-in page where the reader's live tree IS the content:
- * StudioStage already mounts a full-size animated TreeCanvas, and every tile in
- * the picking column draws the tree again. A page may mount exactly one
- * animated canvas (components/scene/README.md), so the backdrop stays on its
- * default `static` mode and is given NO `gateId` - which by design never mounts
- * a canvas at all. What is behind the studio is the landscape rendered to an
- * SVG string on the server: in the first paint, costing nothing per frame.
+ * This route used to mount SceneShell with a still, server-rendered SVG behind
+ * a studio that drew the reader's live tree inside a card - a generic tree
+ * painted across the whole background with the real one boxed on top of it.
+ * Everywhere else the landscape is atmosphere; here the tree is the content, so
+ * there is now exactly one of them and it fills the viewport.
  *
- * `header` and `rail` are on because this route is signed-in only and the
- * layout no longer draws either.
+ * The shell that would normally come from SceneShell is assembled inside
+ * LevensboomStudio instead, out of the same parts (StudioStage draws the
+ * picture and the scrims, then `<Header variant="scene" />` and `<SceneRail />`
+ * straight from components/scene). It has to be: SceneBackdrop can draw the
+ * server SVG or the stored tree, and neither of those repaints as the reader
+ * previews a species from the tile grid, which is the whole point of a studio.
+ * Nothing in components/scene was changed for this.
+ *
+ * That leaves the route with no scene work of its own, so it stays a server
+ * component that renders one client component - and the SVG the old version
+ * rendered on every request is gone.
  */
 export default function LevensboomPage() {
-  return (
-    <SceneShell svg={sceneSvg()} {...SCENE_TREE} header rail>
-      <LevensboomStudio />
-    </SceneShell>
-  );
+  return <LevensboomStudio />;
 }

@@ -10,14 +10,8 @@ import { ChapterNotes } from '../ChapterNotes';
 import BookContextDialog from './BookContextDialog';
 import type { ReadingPreferences } from '../../../hooks/useReadingPreferences';
 
-/** The underline bar under the active tab: a fill that carries no type. */
-const TEAL = '#0D9488';
-/** Any solid fill with white type or a white glyph on it. */
-const TEAL_DEEP = '#0F766E';
-/** Teal as type, in the shade each theme can read. */
-const INK_TEAL = 'text-[#0F766E] dark:text-[#2DD4BF]';
-const FOCUS_RING =
-  'outline-none focus-visible:ring-2 focus-visible:ring-[#0F766E] dark:focus-visible:ring-[#2DD4BF]';
+import { FOCUS_RING, INK, INK_FAINT, INK_MUTED, RULE } from './lesson-layout';
+import { SCENE_BG, TEAL, TEAL_DEEP, TEAL_ON_DARK } from '../../scene/tokens';
 
 export interface DepthContentProps {
   body?: string[];
@@ -79,6 +73,15 @@ const PANELS: { key: PanelKey; label: string; icon: typeof Images; blurb: string
  * The commentary source is resolved server-side: an explicit study choice, then
  * the reader's own reading-preference, then Matthew Henry (see lib/studyFlow
  * resolveCommentaryId).
+ *
+ * WHY THIS STEP IS STILL A HALF AND NOT A 64ch COLUMN WITH A 252px MARGIN.
+ * Ontwerp B's shape is already here in substance - a reading column with what
+ * supports it standing beside rather than underneath - but the proportions have
+ * to stay 50/50, because the AI dock's `half` layout pins itself to
+ * `left-1/2 right-0` of this box and lands exactly on the divider, replacing the
+ * supporting column. Narrowing the right column to a margin would leave the dock
+ * covering the commentary it is talking about. The layout gave way; the
+ * behaviour did not.
  */
 export default function StepDepth({
   book,
@@ -130,7 +133,9 @@ export default function StepDepth({
        a phone would give each of them about 200px, which is worse than either. */
     <div className="h-full overflow-y-auto lg:overflow-hidden lg:flex lg:flex-row lg:min-h-0">
       {/* Left: the commentary, edge to edge. */}
-      <div className="lg:w-1/2 lg:flex-none min-w-0 lg:min-h-0 relative border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-border">
+      <div
+        className={`lg:w-1/2 lg:flex-none min-w-0 lg:min-h-0 relative border-b lg:border-b-0 lg:border-r ${RULE}`}
+      >
         <div className="lg:h-full lg:min-h-0">
           <CommentaryComponent
             book={book}
@@ -141,15 +146,18 @@ export default function StepDepth({
           />
         </div>
 
-        {/* Fade at the bottom, so it is obvious the column continues. */}
+        {/* Fade at the bottom, so it is obvious the column continues. The
+            gradient is the window's own ground rather than `from-background`,
+            which is a theme token and would end in the wrong black. */}
         <div
           aria-hidden
-          className="hidden lg:block pointer-events-none absolute bottom-0 left-0 right-0 h-14 bg-gradient-to-t from-white dark:from-background to-transparent"
+          className="hidden lg:block pointer-events-none absolute bottom-0 left-0 right-0 h-14"
+          style={{ backgroundImage: `linear-gradient(to top, ${SCENE_BG}, rgba(11,18,32,0))` }}
         />
       </div>
 
       {/* Right: everything that supports the reading. */}
-      <aside className="lg:w-1/2 lg:flex-none min-w-0 lg:min-h-0 flex flex-col bg-gray-50/60 dark:bg-card/40">
+      <aside className="lg:w-1/2 lg:flex-none min-w-0 lg:min-h-0 flex flex-col bg-black/25">
         {/* The book's background, as a row rather than a button that looked like
             a form field. It answers "who wrote this, when, and why", so it says
             that instead of "Algemene info". */}
@@ -157,31 +165,31 @@ export default function StepDepth({
           type="button"
           onClick={() => setContextOpen(true)}
           data-track="study_book_context"
-          className={`group flex-none flex items-center gap-3 px-4 sm:px-5 py-3 text-left border-b border-gray-200 dark:border-border bg-white dark:bg-card transition-colors hover:bg-gray-50 dark:hover:bg-secondary ${FOCUS_RING}`}
+          className={`group flex-none flex items-center gap-3 px-4 sm:px-5 py-3 text-left border-b ${RULE} transition-colors hover:bg-white/10 ${FOCUS_RING}`}
         >
           <span
             className="h-8 w-8 flex-none rounded-lg flex items-center justify-center"
-            style={{ backgroundColor: 'rgba(13,148,136,0.10)' }}
+            style={{ backgroundColor: 'rgba(45,212,191,0.14)' }}
           >
-            <Landmark size={15} className={INK_TEAL} />
+            <Landmark size={15} style={{ color: TEAL_ON_DARK }} />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block text-[13px] font-semibold text-foreground truncate">
+            <span className={`block text-[13px] font-semibold truncate ${INK}`}>
               Achtergrond bij {book}
             </span>
-            <span className="block text-[11.5px] text-gray-600 dark:text-muted-foreground truncate">
+            <span className={`block text-[11.5px] truncate ${INK_FAINT}`}>
               Wie het schreef, wanneer en waarom
             </span>
           </span>
           <ChevronRight
             size={15}
-            className="flex-none text-gray-400 transition-transform duration-200 group-hover:translate-x-0.5"
+            className={`flex-none ${INK_FAINT} transition-transform duration-200 group-hover:translate-x-0.5`}
           />
         </button>
 
         {/* Underlined tabs, not pills in a tray. The active one carries the
             brand colour and the bar; the row below spells out what it shows. */}
-        <div className="flex-none border-b border-gray-200 dark:border-border bg-white dark:bg-card">
+        <div className={`flex-none border-b ${RULE}`}>
           <div className="flex px-2 sm:px-3">
             {PANELS.map(({ key, label, icon: Icon }) => {
               const isActive = panel === key;
@@ -194,10 +202,9 @@ export default function StepDepth({
                   className={[
                     'relative inline-flex items-center justify-center gap-1.5 px-3 sm:px-4 h-11 text-[12.5px] font-semibold transition-colors min-w-0',
                     FOCUS_RING,
-                    isActive
-                      ? INK_TEAL
-                      : 'text-gray-600 dark:text-muted-foreground hover:text-foreground',
+                    isActive ? '' : `${INK_FAINT} hover:text-white`,
                   ].join(' ')}
+                  style={isActive ? { color: TEAL_ON_DARK } : undefined}
                 >
                   <Icon size={14} className="flex-none" />
                   <span className="truncate">{label}</span>
@@ -212,7 +219,7 @@ export default function StepDepth({
           </div>
         </div>
 
-        <p className="flex-none px-4 sm:px-5 py-2 text-[11.5px] text-gray-600 dark:text-muted-foreground border-b border-gray-200 dark:border-border">
+        <p className={`flex-none px-4 sm:px-5 py-2 text-[11.5px] ${INK_FAINT} border-b ${RULE}`}>
           {active.blurb}
         </p>
 
@@ -221,7 +228,7 @@ export default function StepDepth({
             (showMedia ? (
               <GeoImages book={book} chapter={chapter} variant="panel" fallbackToBook />
             ) : (
-              <p className="text-[12.5px] text-gray-600 dark:text-muted-foreground">
+              <p className={`text-[12.5px] ${INK_MUTED}`}>
                 Bij dit gedeelte hoort geen plaats of kaart.
               </p>
             ))}
@@ -238,7 +245,7 @@ export default function StepDepth({
             It hands off to the same assistant the header opens, so the answer
             lands in the conversation that travels with the lesson. */}
         {onAskAi && (
-          <div className="flex-none border-t border-gray-200 dark:border-border p-3 bg-white dark:bg-card">
+          <div className={`flex-none border-t ${RULE} p-3`}>
             <div className="flex gap-2">
               <input
                 id="depth-ai"
@@ -252,7 +259,7 @@ export default function StepDepth({
                 }}
                 aria-label="Vraag het de AI-assistent"
                 placeholder={`Vraag iets over ${book} ${chapter}...`}
-                className={`flex-1 min-w-0 h-10 px-3 rounded-lg border border-gray-200 dark:border-border bg-white dark:bg-background text-sm text-foreground placeholder:text-gray-500 dark:placeholder:text-muted-foreground ${FOCUS_RING}`}
+                className={`flex-1 min-w-0 h-10 px-3 rounded-lg border border-white/20 bg-black/40 text-sm text-white placeholder:text-white/45 ${FOCUS_RING}`}
               />
               <button
                 type="button"

@@ -16,7 +16,7 @@ Read this before converting a page. It is short on purpose.
 | `tokens.ts` | Every colour, surface, gutter and scrim class. Plain strings, no imports — a **server component may import it**. |
 | `useSceneDepth.ts` | The scroll engine. `SceneShell` runs it; **you never call it**. |
 | `SceneBackdrop.tsx` | The fixed picture + the four scrims. `SceneShell` renders it; you only choose its mode. |
-| `SceneRail.tsx` | The sidebar replacement: a glass rail that floats, widens on hover/focus, and becomes a pill strip below `lg`. |
+| `SceneRail.tsx` | The sidebar replacement: a rail that rests at 64px, widens to 176px on hover/focus **into the gutter `SCENE_X` reserves for it, never over the content**, and becomes a pill strip below `lg`. |
 | `SceneShell.tsx` | **What a page uses.** |
 | `pieces.tsx` | `Panel`, `SectionHeading`, `SceneSkeleton`, `GlassStat`, `Total`, `WeekStrip`. No `"use client"` — usable from a server component. |
 | `scene-svg.ts` | `sceneSvg()` and `SCENE_TREE`: the public scene, rendered to an SVG string **on the server**. Never import this from a client component. |
@@ -180,7 +180,10 @@ children: React.ReactNode
 ```
 
 `gutter="none"` gives an unpadded content layer for a page that wants full-bleed
-sections; apply `SCENE_X` (or `SCENE_X_EDGE`) per section yourself.
+sections; apply `SCENE_X` (or `SCENE_X_EDGE`) per section yourself — **the
+constant, never its current value copied out as literal classes**. `SCENE_X`'s
+left inset is what keeps the open rail off the page, so a page holding a stale
+copy of it is a page the rail opens on top of.
 
 ---
 

@@ -4,15 +4,25 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { ArrowLeft, Check, RotateCcw, X } from 'lucide-react';
 
-/** Fills and keylines that carry no type. */
-const TEAL = '#0D9488';
-/** Any solid fill with a white letter or glyph on it. */
-const TEAL_DEEP = '#0F766E';
-/** Teal as type, in the shade each theme can read. */
-const INK_TEAL = 'text-[#0F766E] dark:text-[#2DD4BF]';
-const FOCUS_RING =
-  'outline-none focus-visible:ring-2 focus-visible:ring-[#0F766E] dark:focus-visible:ring-[#2DD4BF]';
+import LessonLayout, {
+  FOCUS_RING,
+  INK,
+  INK_FAINT,
+  INK_MUTED,
+  Marginal,
+  SURFACE,
+} from './lesson-layout';
+import { EYEBROW, TEAL, TEAL_DEEP, TEAL_ON_DARK } from '../../scene/tokens';
+
+/**
+ * Wrong, on the night ground.
+ *
+ * #DC2626 is the fill under the white cross; as TYPE or as a keyline on this
+ * window it is too dark to read, so #F87171 (6.8:1 on #0B1220) carries the
+ * outline of a wrong answer. Same swatch, the end the ground can hold.
+ */
 const RED = '#DC2626';
+const RED_ON_DARK = '#F87171';
 const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
 interface Question {
@@ -70,12 +80,18 @@ export default function StepQuiz({
   previousScore,
   previousTotal,
   onAnswered,
+  eyebrow,
+  passageReference,
+  reflectionQuestion,
 }: {
   studyId: string;
   lessonDay: number;
   previousScore: number | null;
   previousTotal: number | null;
   onAnswered: (score: number, total: number) => void;
+  eyebrow?: string;
+  passageReference?: string;
+  reflectionQuestion?: string | null;
 }) {
   const reduceMotion = useReducedMotion();
 
@@ -254,36 +270,53 @@ export default function StepQuiz({
     setFinishedEarlier(false);
   }, []);
 
+  /** The margin, identical whatever state the quiz is in. */
+  const aside =
+    passageReference || reflectionQuestion ? (
+      <Marginal label="Deze les">
+        <dl className="space-y-2">
+          {passageReference ? (
+            <div>
+              <dt className={`font-semibold ${INK}`}>Gedeelte</dt>
+              <dd className="tabular-nums">{passageReference}</dd>
+            </div>
+          ) : null}
+          {reflectionQuestion ? (
+            <div>
+              <dt className={`font-semibold ${INK}`}>Vraag</dt>
+              <dd className="italic">{reflectionQuestion}</dd>
+            </div>
+          ) : null}
+        </dl>
+      </Marginal>
+    ) : null;
+
   if (questions === null) {
     return (
-      <div className="h-full overflow-y-auto">
-        <div
-          className="max-w-2xl mx-auto px-6 sm:px-10 py-10 space-y-3"
-          role="status"
-          aria-label="Quiz laden"
-        >
-          <div className="h-6 w-32 rounded-lg skeleton-pulse bg-gray-100 dark:bg-secondary" />
-          <div className="h-40 rounded-2xl skeleton-pulse bg-gray-100 dark:bg-secondary" />
+      <LessonLayout eyebrow={eyebrow ?? 'Toetsing'} heading="Wat bleef er hangen?" aside={aside}>
+        <div className="mt-6 space-y-3" role="status" aria-label="Quiz laden">
+          <div className="h-6 w-32 rounded-lg skeleton-pulse bg-white/10" />
+          <div className="h-40 rounded-2xl skeleton-pulse bg-white/10" />
         </div>
-      </div>
+      </LessonLayout>
     );
   }
 
   // No questions for this passage. A complete, calm ending - not an error.
   if (questions.length === 0) {
     return (
-      <div className="h-full overflow-y-auto">
-        {/* Typographic, not iconographic: a question mark in a tinted disc is
-            decoration, and the heading already says what this is. */}
-        <div className="max-w-2xl mx-auto px-6 sm:px-10 py-12 text-center">
-          <h2 className="text-lg font-bold text-foreground mb-1.5">Geen quiz voor dit gedeelte</h2>
-          <p className="text-sm text-gray-600 dark:text-muted-foreground max-w-sm mx-auto">
-            {unavailable === 'UNAVAILABLE'
-              ? 'De quizvragen zijn nu even niet op te halen. Je kunt de les gewoon afronden.'
-              : 'Voor dit bijbelgedeelte zijn nog geen vragen beschikbaar. Rond de les af om verder te gaan.'}
-          </p>
-        </div>
-      </div>
+      // Typographic, not iconographic: a question mark in a tinted disc is
+      // decoration, and the heading already says what this is.
+      <LessonLayout
+        eyebrow={eyebrow ?? 'Toetsing'}
+        heading="Geen quiz voor dit gedeelte"
+        aside={aside}
+        lead={
+          unavailable === 'UNAVAILABLE'
+            ? 'De quizvragen zijn nu even niet op te halen. Je kunt de les gewoon afronden.'
+            : 'Voor dit bijbelgedeelte zijn nog geen vragen beschikbaar. Rond de les af om verder te gaan.'
+        }
+      />
     );
   }
 
@@ -295,13 +328,13 @@ export default function StepQuiz({
   const variants = reduceMotion ? calmVariants : cardVariants;
 
   return (
-    <div className="h-full overflow-y-auto">
-      <div className="mx-auto w-full max-w-2xl px-5 sm:px-10 py-8 sm:py-12">
+    <LessonLayout eyebrow={eyebrow ?? 'Toetsing'} heading="Wat bleef er hangen?" aside={aside}>
+      <div className="mt-6">
         {/* Where you are, in one line and one row of dots. During review the
             dots turn into the result, so the score is readable at a glance
             before any explanation is. */}
-        <div className="flex items-center justify-between gap-4 mb-5">
-          <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-gray-600 dark:text-muted-foreground">
+        <div className="flex items-center justify-between gap-4 mb-3">
+          <p className={EYEBROW}>
             {reviewing
               ? finishedEarlier && !graded
                 ? 'Eerder gemaakt'
@@ -309,7 +342,7 @@ export default function StepQuiz({
               : `Vraag ${index + 1} van ${questions.length}`}
           </p>
           {reviewing && score !== null && total !== null && (
-            <p className={`text-[13px] font-bold ${INK_TEAL}`}>
+            <p className="text-[13px] font-bold" style={{ color: TEAL_ON_DARK }}>
               {score} van {total} goed
             </p>
           )}
@@ -321,7 +354,7 @@ export default function StepQuiz({
             const isHere = entryIndex === index;
             const answered = !!chosen[entry.id];
 
-            let background = 'rgba(148,163,184,0.35)';
+            let background = 'rgba(255,255,255,0.18)';
             if (entryResult) background = entryResult.correct ? TEAL : RED;
             else if (answered || entryIndex < index) background = TEAL;
 
@@ -352,7 +385,7 @@ export default function StepQuiz({
             exit="exit"
             transition={{ duration: reduceMotion ? 0.14 : 0.3, ease: [0.16, 1, 0.3, 1] }}
           >
-            <h2 className="text-xl sm:text-2xl font-bold text-foreground leading-snug mb-6">
+            <h2 className={`text-xl sm:text-2xl font-bold leading-snug mb-6 ${INK}`}>
               {question.text}
             </h2>
 
@@ -362,13 +395,21 @@ export default function StepQuiz({
                 const isCorrectOne = result?.correctAnswerId === answer.id;
                 const isWrongPick = !!result && isPicked && !result.correct;
 
+                // Deeper washes than the light card carried: 7% teal is a
+                // visible tint on white and nothing at all on #0B1220.
                 let frame: React.CSSProperties | undefined;
                 if (isCorrectOne) {
-                  frame = { borderColor: TEAL, backgroundColor: 'rgba(13,148,136,0.07)' };
+                  frame = {
+                    borderColor: TEAL_ON_DARK,
+                    backgroundColor: 'rgba(45,212,191,0.14)',
+                  };
                 } else if (isWrongPick) {
-                  frame = { borderColor: RED, backgroundColor: 'rgba(220,38,38,0.06)' };
+                  frame = { borderColor: RED_ON_DARK, backgroundColor: 'rgba(248,113,113,0.12)' };
                 } else if (isPicked) {
-                  frame = { borderColor: TEAL, backgroundColor: 'rgba(13,148,136,0.06)' };
+                  frame = {
+                    borderColor: TEAL_ON_DARK,
+                    backgroundColor: 'rgba(45,212,191,0.10)',
+                  };
                 }
 
                 return (
@@ -381,10 +422,10 @@ export default function StepQuiz({
                     className={[
                       'w-full flex items-center gap-3.5 rounded-xl border p-3.5 sm:p-4 text-left transition-all duration-200',
                       FOCUS_RING,
-                      !frame ? 'border-gray-200 dark:border-border' : '',
+                      !frame ? 'border-white/20' : '',
                       reviewing || advancing
                         ? 'cursor-default'
-                        : 'press hover:border-gray-300 dark:hover:border-muted-foreground/40 hover:bg-gray-50 dark:hover:bg-secondary',
+                        : 'press hover:border-white/35 hover:bg-white/10',
                     ].join(' ')}
                     style={frame}
                   >
@@ -394,7 +435,7 @@ export default function StepQuiz({
                         'h-8 w-8 flex-none rounded-lg border flex items-center justify-center text-[12px] font-bold transition-colors',
                         isPicked || isCorrectOne
                           ? 'border-transparent text-white'
-                          : 'border-gray-200 dark:border-border text-gray-600 dark:text-muted-foreground',
+                          : `border-white/20 ${INK_FAINT}`,
                       ].join(' ')}
                       // TEAL_DEEP under the white letter; the frame around the
                       // option stays the lighter brand, which carries no type.
@@ -414,7 +455,7 @@ export default function StepQuiz({
                         (LETTERS[answerIndex] ?? answerIndex + 1)
                       )}
                     </span>
-                    <span className="text-[14.5px] text-foreground leading-snug">{answer.text}</span>
+                    <span className={`text-[14.5px] leading-snug ${INK}`}>{answer.text}</span>
                   </button>
                 );
               })}
@@ -422,12 +463,10 @@ export default function StepQuiz({
 
             {/* Released only after grading - an explanation gives the answer away. */}
             {result?.explanation && (
-              <div className="mt-5 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50/70 dark:bg-card/60 p-4">
-                <p className="text-[13.5px] text-gray-700 dark:text-muted-foreground leading-relaxed">
-                  {result.explanation}
-                </p>
+              <div className={`mt-5 ${SURFACE} p-4`}>
+                <p className={`text-[13.5px] leading-relaxed ${INK_MUTED}`}>{result.explanation}</p>
                 {question.bibleReference && (
-                  <p className={`mt-1.5 text-[12px] font-semibold ${INK_TEAL}`}>
+                  <p className="mt-1.5 text-[12px] font-semibold" style={{ color: TEAL_ON_DARK }}>
                     {question.bibleReference}
                   </p>
                 )}
@@ -447,17 +486,13 @@ export default function StepQuiz({
               FOCUS_RING,
               index === 0
                 ? 'text-transparent pointer-events-none'
-                : 'text-gray-600 dark:text-muted-foreground hover:bg-gray-100 dark:hover:bg-secondary hover:text-foreground',
+                : `${INK_FAINT} hover:bg-white/10 hover:text-white`,
             ].join(' ')}
           >
             <ArrowLeft size={14} /> Vorige
           </button>
 
-          {submitting && (
-            <span className="text-[13px] text-gray-600 dark:text-muted-foreground">
-              Nakijken...
-            </span>
-          )}
+          {submitting && <span className={`text-[13px] ${INK_FAINT}`}>Nakijken...</span>}
 
           {reviewing && index < questions.length - 1 && (
             <button
@@ -478,7 +513,7 @@ export default function StepQuiz({
               type="button"
               onClick={retry}
               data-track="study_quiz_retry"
-              className={`press inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-gray-200 dark:border-border text-[13px] font-semibold text-foreground hover:bg-gray-50 dark:hover:bg-secondary ${FOCUS_RING}`}
+              className={`press inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-white/20 text-[13px] font-semibold ${INK} hover:bg-white/10 ${FOCUS_RING}`}
             >
               <RotateCcw size={14} /> Opnieuw proberen
             </button>
@@ -486,13 +521,13 @@ export default function StepQuiz({
         </div>
 
         {reviewing && (
-          <p className="mt-4 text-[13px] text-gray-600 dark:text-muted-foreground">
+          <p className={`mt-4 text-[13px] ${INK_MUTED}`}>
             {finishedEarlier && !graded
               ? 'Je hebt deze quiz eerder gemaakt. Doe hem opnieuw voor de uitleg bij elk antwoord, of rond de les af.'
               : 'Je mag de les afronden, ook als niet alles goed was.'}
           </p>
         )}
       </div>
-    </div>
+    </LessonLayout>
   );
 }

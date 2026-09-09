@@ -16,7 +16,13 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * The reading room: the shared scene, with the reader itself in a lit frame.
+ * The reading room: the shared scene, with the reader set INTO it.
+ *
+ * The room was briefly a lit plate floating on the landscape with a gutter of
+ * scene around it, which read as a white card with margins rather than as a
+ * place. It is now the scene's own ground, edge to edge - see `./room`. The
+ * layout below is unchanged by that; it is written down here because the two
+ * are read together.
  *
  * The shell is assembled HERE rather than in the page, for two reasons that
  * only apply to this route:
@@ -37,9 +43,11 @@ export async function generateMetadata(): Promise<Metadata> {
  * ProgressTreeScene mounts a TreeCanvas that a fixed, full-bleed layer can
  * never scroll out of view to stop.
  *
- * `gutter="none"`: the reader owns its own horizontal padding, because below
- * `sm` the frame has to run edge to edge. A 20px margin on a phone is measure
- * taken away from the passage, which on this page is the whole task.
+ * `gutter="none"`: the reader has no horizontal padding at all, at any width -
+ * the room runs edge to edge and the rail floats over it, with only the
+ * scripture column inset far enough to clear the rail's resting width. A
+ * margin here is measure taken away from the passage, which on this page is
+ * the whole task.
  *
  * The old `h-screen overflow-hidden` wrapper with the Header and the AppSidebar
  * inside it is gone - the shell draws its own navbar and its own rail, and a
