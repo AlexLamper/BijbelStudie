@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import {
   ArrowLeft, Search, ShieldCheck, Sparkles, MoreVertical,
-  Trash2, ShieldOff, ShieldPlus, Crown, UserX, X, Users as UsersIcon,
+  Trash2, ShieldOff, ShieldPlus, UserX, X, Users as UsersIcon,
   AlertTriangle, RefreshCw, Apple, Smartphone,
 } from "lucide-react"
 import {
@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger, DropdownMenuSeparator,
 } from "../../../components/ui/dropdown-menu"
 import { Input } from "../../../components/ui/input"
+import { ProBadge } from "../../../components/ui/ProBadge"
 
 interface AdminUser {
   _id: string
@@ -289,10 +290,7 @@ export default function AdminUsersPage() {
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-1.5 flex-wrap">
                               {u.isPro ? (
-                                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-                                  style={{ backgroundColor: "rgba(217,119,6,0.1)", color: "#D97706" }}>
-                                  <Crown size={9} /> PRO
-                                </span>
+                                <ProBadge size="xs" className="text-[10px]" />
                               ) : (
                                 <span className="inline-flex items-center text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-gray-100 dark:bg-secondary text-muted-foreground">
                                   GRATIS

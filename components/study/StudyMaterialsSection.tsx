@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { MessageCircle, Users, Info, Languages, Sparkles } from 'lucide-react';
 import TabComponent from './TabComponent';
+import { ProBadge } from '../ui/ProBadge';
 
 import { ReadingPreferences } from '../../hooks/useReadingPreferences';
 
@@ -78,11 +79,7 @@ export default function StudyMaterialsSection({
               >
                 <Icon size={13} className="flex-shrink-0" />
                 <span className="leading-tight truncate max-w-full">{label}</span>
-                {isPro && (
-                  <span className="hidden sm:inline text-[9px] font-semibold px-1.5 py-0.5 rounded-full leading-none bg-[rgba(13,148,136,0.10)] dark:bg-[rgba(13,148,136,0.18)] text-[#0D9488] dark:text-teal-400">
-                    Pro
-                  </span>
-                )}
+                {isPro && <ProBadge size="xs" className="hidden leading-none sm:inline-flex" />}
                 {active && (
                   <span className="absolute bottom-0 left-1.5 right-1.5 h-0.5 rounded-full bg-[#0D9488]" />
                 )}

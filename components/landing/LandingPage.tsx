@@ -14,6 +14,7 @@ import HeroLevensboom from "./HeroLevensboom"
 import LevensboomGroeiDemo from "./LevensboomGroeiDemo"
 import StudyFlowDemo, { type DemoLesson } from "./StudyFlowDemo"
 import CountUp from "./CountUp"
+import { ProBadge } from "../ui/ProBadge"
 import { renderTreeSvg } from "../../lib/levensboom/svg"
 import { STAGES } from "../../lib/levensboom/stages"
 import { CATALOG } from "../../lib/levensboom/catalog"
@@ -496,16 +497,14 @@ function Hero() {
 /* ─── Bibles & Commentaries ──────────────────────────────────── */
 /** The access pill on a library row. Two states only: free, or part of Pro. */
 function AccessPill({ free }: { free: boolean }) {
+  if (!free) return <ProBadge />
+
   return (
     <span
       className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full whitespace-nowrap"
-      style={
-        free
-          ? { backgroundColor: T.tealLight, color: T.tealDeep }
-          : { backgroundColor: "#F3F4F6", color: T.muted, border: `1px solid ${T.border}` }
-      }
+      style={{ backgroundColor: T.tealLight, color: T.tealDeep }}
     >
-      {free ? "Gratis" : "Pro"}
+      Gratis
     </span>
   )
 }

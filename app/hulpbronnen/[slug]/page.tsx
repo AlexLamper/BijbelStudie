@@ -12,6 +12,7 @@ import Reader from "./Reader";
 import { buildMetadata } from "../../../lib/pageMetadata";
 import { JsonLd } from "../../../components/seo/JsonLd";
 import { Breadcrumbs } from "../../../components/content/ContentShell";
+import { ProBadge } from "../../../components/ui/ProBadge";
 import { absoluteUrl } from "../../../lib/seo/constants";
 import {
   graph,
@@ -136,12 +137,7 @@ export default async function LibraryReaderPage({ params }: PageProps) {
               style={{ backgroundColor: cat.tint, color: cat.color }}>
               {cat.label}
             </span>
-            {item.isPro && (
-              <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
-                style={{ backgroundColor: "rgba(217,119,6,0.1)", color: "#D97706" }}>
-                <Sparkles className="h-2.5 w-2.5" /> Pro
-              </span>
-            )}
+            {item.isPro && <ProBadge />}
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-foreground leading-tight mb-1">

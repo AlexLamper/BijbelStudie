@@ -1,7 +1,8 @@
 "use client"
 
-import { ArrowRight, CheckCircle, Loader2, Sparkles, Shield, CreditCard, RefreshCw } from "lucide-react"
+import { ArrowRight, CheckCircle, Loader2, Shield, CreditCard, RefreshCw } from "lucide-react"
 import { SkeletonPage } from "../../components/ui/skeletons"
+import { ProBadge } from "../../components/ui/ProBadge"
 import { useSession } from "next-auth/react"
 import { useState, useEffect, useCallback, Suspense } from "react"
 import { useToast } from "../../hooks/use-toast"
@@ -302,11 +303,7 @@ function SubscribePageInner() {
 
         {/* Hero */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-4"
-            style={{ backgroundColor: "rgba(13,148,136,0.08)", color: TEAL_TEXT }}>
-            <Sparkles size={12} />
-            BijbelStudie Pro
-          </div>
+          <ProBadge size="md" label="BijbelStudie Pro" className="mb-4" />
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-3 leading-tight">
             Alles wat je nodig hebt<br />voor serieuze bijbelstudie.
           </h1>

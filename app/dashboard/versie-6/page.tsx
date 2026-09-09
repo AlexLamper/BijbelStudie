@@ -1,8 +1,8 @@
 import type { Metadata } from "next"
-import DashboardOverzicht from "../../../components/dashboard/variants/DashboardOverzicht"
+import DashboardBoekenplank from "../../../components/dashboard/variants/DashboardBoekenplank"
 
 /**
- * Design candidate 2 of 10 for the dashboard, "Overzicht". Behind the same
+ * Design candidate 6 of 10 for the dashboard, "Boekenplank". Behind the same
  * auth as /dashboard (middleware protects the prefix); kept out of the index
  * so a review URL never leaks into search. See components/dashboard/variants.
  */
@@ -11,6 +11,6 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-export default function DashboardVersie2Page() {
-  return <DashboardOverzicht />
+export default function DashboardVersie6Page() {
+  return <DashboardBoekenplank />
 }

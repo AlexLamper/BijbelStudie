@@ -7,6 +7,7 @@ import { useLevensboom, fracOf } from '../../../hooks/useLevensboom';
 import { itemsOfKind, itemKey, unlockLabel, type AvatarChoice, type ItemKind } from '../../../lib/levensboom/catalog';
 import LevelUpDialog from '../LevelUpDialog';
 import StudioStage from './StudioStage';
+import LevelProgress from './LevelProgress';
 import { ItemGrid, KIND_TITLES, type TilePick } from './StudioTiles';
 import GroeiTab from './GroeiTab';
 import { SkeletonPage } from '../../ui/skeletons';
@@ -75,7 +76,6 @@ export default function LevensboomStudio() {
   }
 
   const frac = fracOf(data);
-  const remaining = Math.max(0, data.xpForNextLevel - data.xpIntoLevel);
 
   const onPick = async ({ item, locked }: TilePick) => {
     const kind = item.kind;
@@ -99,12 +99,6 @@ export default function LevensboomStudio() {
       });
     }
   };
-
-  const nextTarget = tree.nextUnlock
-    ? { label: tree.nextUnlock.name, level: tree.nextUnlock.level }
-    : tree.stage.nextLevel
-      ? { label: tree.stage.nextName ?? '', level: tree.stage.nextLevel }
-      : null;
 
   const share = async () => {
     if (!tree.publicProfile) {
@@ -181,24 +175,16 @@ export default function LevensboomStudio() {
                 />
               )}
 
-              {/* The progress strip: one line, not a card. */}
-              <div className="mt-4 flex items-center gap-3 px-1">
-                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-black/10 dark:bg-white/10">
-                  <div
-                    className="h-full rounded-full transition-all"
-                    style={{ width: `${data.progressPercentage}%`, backgroundColor: TEAL }}
-                  />
-                </div>
-                <p className="flex-shrink-0 text-xs tabular-nums text-muted-foreground">
-                  nog {remaining} XP → niveau {data.level + 1}
-                  {nextTarget && nextTarget.level === data.level + 1 ? ` · ${nextTarget.label}` : ''}
-                </p>
-              </div>
-              {nextTarget && nextTarget.level > data.level + 1 && (
-                <p className="mt-1 px-1 text-[11px] text-muted-foreground">
-                  Volgende ontgrendeling: {nextTarget.label} op niveau {nextTarget.level}.
-                </p>
-              )}
+              {/* Where the reader stands: level, bar, and what is coming. */}
+              <LevelProgress
+                className="mt-4"
+                level={data.level}
+                xpIntoLevel={data.xpIntoLevel}
+                xpForNextLevel={data.xpForNextLevel}
+                progressPercentage={data.progressPercentage}
+                stage={tree.stage}
+                nextUnlock={tree.nextUnlock}
+              />
 
               {notice && (
                 <div

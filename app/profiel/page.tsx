@@ -14,6 +14,7 @@ import LevelCard from "../../components/profile/LevelCard"
 import TreeAvatar from "../../components/levensboom/TreeAvatar"
 import { SkeletonPage } from "../../components/ui/skeletons"
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
+import { ProBadge } from "../../components/ui/ProBadge"
 
 const TEAL = "#0D9488"
 
@@ -195,14 +196,7 @@ export default function ProfilePage() {
                 <ShieldCheck size={11} /> Admin
               </span>
             )}
-            {user.subscribed && (
-              <span
-                className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-full"
-                style={{ backgroundColor: "rgba(217,119,6,0.1)", color: "#D97706" }}
-              >
-                <Crown size={11} /> Pro
-              </span>
-            )}
+            {user.subscribed && <ProBadge size="md" />}
           </div>
         </div>
       </div>
@@ -404,13 +398,17 @@ export default function ProfilePage() {
               <div className="p-5">
                 {user.subscribed || user.isAdmin ? (
                   <div className="space-y-3">
-                    <span
-                      className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full"
-                      style={{ backgroundColor: "rgba(13,148,136,0.1)", color: TEAL }}
-                    >
-                      <Sparkles size={11} />
-                      {user.isAdmin ? "Admin toegang" : "Pro actief"}
-                    </span>
+                    {user.isAdmin ? (
+                      <span
+                        className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full"
+                        style={{ backgroundColor: "rgba(13,148,136,0.1)", color: TEAL }}
+                      >
+                        <Sparkles size={11} />
+                        Admin toegang
+                      </span>
+                    ) : (
+                      <ProBadge size="md" label="Pro actief" />
+                    )}
                     <p className="text-xs text-muted-foreground leading-relaxed">
                       {user.isAdmin
                         ? "Als admin heb je toegang tot alle Pro-functies."

@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import React, { useEffect, useState } from "react"
 import { useStudyStyle } from "../providers/study-style-provider"
+import { ProBadge } from "../ui/ProBadge"
 
 /**
  * The nav as someone who wants to be guided sees it - and the order the menu
@@ -280,9 +281,7 @@ function ProCTA() {
             >
               <Sparkles size={12} className="text-white" />
             </div>
-            <span className="text-[11px] font-extrabold uppercase tracking-widest" style={{ color: "#0F766E" }}>
-              Pro
-            </span>
+            <ProBadge />
           </div>
 
           <p className="text-[12.5px] font-bold leading-snug text-gray-900 dark:text-foreground mb-2">

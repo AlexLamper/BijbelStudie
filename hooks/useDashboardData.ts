@@ -8,7 +8,7 @@ import type { DailyVerse } from "../components/dashboard/DailyVerseCard"
 /**
  * Everything the dashboard shows, fetched once and derived in one place.
  *
- * The three design variants under /dashboard/versie-* read from this hook so
+ * The design variants under /dashboard/versie-* read from this hook so
  * they differ in layout only, never in numbers. The endpoints and the parsing
  * are the ones `app/dashboard/page.tsx` uses - the current dashboard is left
  * untouched on purpose so it can be compared against the variants.

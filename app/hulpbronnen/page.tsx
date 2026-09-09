@@ -3,12 +3,13 @@
 import Link from "next/link"
 import { useMemo, useState } from "react"
 import {
-  BookOpen, Search, ArrowRight, Sparkles, ExternalLink,
+  BookOpen, Search, ArrowRight, ExternalLink,
   Library as LibraryIcon, ShieldCheck, Filter,
 } from "lucide-react"
 import { LIBRARY, CATEGORIES, getCategoryMeta, type LibraryItem, type LibraryCategory } from "./library"
 import { JsonLd } from "../../components/seo/JsonLd"
 import { Breadcrumbs } from "../../components/content/ContentShell"
+import { ProBadge } from "../../components/ui/ProBadge"
 import { absoluteUrl } from "../../lib/seo/constants"
 import {
   graph,
@@ -252,12 +253,7 @@ function BookCard({ item }: { item: LibraryItem }) {
           style={{ backgroundColor: cat.tint, color: cat.color }}>
           {cat.label}
         </span>
-        {item.isPro && (
-          <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
-            style={{ backgroundColor: "rgba(217,119,6,0.1)", color: "#D97706" }}>
-            <Sparkles className="h-2.5 w-2.5" /> Pro
-          </span>
-        )}
+        {item.isPro && <ProBadge />}
       </div>
 
       {/* Title */}

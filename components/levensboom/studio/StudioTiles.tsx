@@ -2,6 +2,7 @@
 
 import { Check, Lock } from 'lucide-react';
 import TreeCanvas from '../TreeCanvas';
+import { ProBadge } from '../../ui/ProBadge';
 import { ringColors } from '../../../lib/levensboom/ring';
 import { itemKey, unlockLabel, type AvatarChoice, type CatalogItem, type ItemKind } from '../../../lib/levensboom/catalog';
 
@@ -139,11 +140,7 @@ function ItemTile({
             Nieuw
           </span>
         )}
-        {pro && (
-          <span className="absolute bottom-2 right-2 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white" style={{ background: 'linear-gradient(135deg, #F6D77A, #B8860B)' }}>
-            Pro
-          </span>
-        )}
+        {pro && <ProBadge className="absolute bottom-2 right-2" />}
       </div>
       <div className="px-3 py-2.5">
         <p className="text-sm font-semibold text-foreground">{item.name}</p>

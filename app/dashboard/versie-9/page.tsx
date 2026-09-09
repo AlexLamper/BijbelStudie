@@ -1,8 +1,8 @@
 import type { Metadata } from "next"
-import DashboardReis from "../../../components/dashboard/variants/DashboardReis"
+import DashboardRust from "../../../components/dashboard/variants/DashboardRust"
 
 /**
- * Design candidate 3 of 10 for the dashboard, "Reis". Behind the same auth as
+ * Design candidate 9 of 10 for the dashboard, "Rust". Behind the same auth as
  * /dashboard (middleware protects the prefix); kept out of the index so a
  * review URL never leaks into search. See components/dashboard/variants.
  */
@@ -11,6 +11,6 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-export default function DashboardVersie3Page() {
-  return <DashboardReis />
+export default function DashboardVersie9Page() {
+  return <DashboardRust />
 }

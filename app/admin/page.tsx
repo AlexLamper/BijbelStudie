@@ -7,6 +7,7 @@ import {
   TrendingUp, ArrowRight, Flame, Euro, Settings2, RefreshCw,
 } from "lucide-react"
 import BillingHealthCard, { type BillingStats } from "../../components/admin/BillingHealthCard"
+import { ProBadge } from "../../components/ui/ProBadge"
 
 /**
  * Every figure is nullable because /api/admin/stats degrades per query: one
@@ -406,10 +407,7 @@ export default function AdminDashboardPage() {
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5">
                           <p className="text-xs font-semibold text-foreground truncate">{u.name || "Naamloos"}</p>
-                          {u.subscribed && (
-                            <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold"
-                              style={{ backgroundColor: "rgba(217,119,6,0.1)", color: "#D97706" }}>PRO</span>
-                          )}
+                          {u.subscribed && <ProBadge size="xs" />}
                           {u.isAdmin && (
                             <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold"
                               style={{ backgroundColor: "rgba(13,148,136,0.1)", color: TEAL }}>ADMIN</span>
