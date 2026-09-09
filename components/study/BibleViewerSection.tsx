@@ -7,6 +7,7 @@ import BibleSelector from './BibleSelector';
 import EmptyState from './EmptyState';
 import { ReadingPreferencesMenu } from './ReadingPreferencesMenu';
 import { ReadingPreferences } from '../../hooks/useReadingPreferences';
+import { SCENE_BG, SCENE_BG_RGB } from '../scene/tokens';
 
 interface BibleViewerSectionProps {
   selectedBook: string;
@@ -149,11 +150,15 @@ export default function BibleViewerSection({
           )}
         </div>
         {/* The fade that says there is more below. It has to end on the exact
-            colour of the ground it stands on, and the ground is now the scene's
-            own #0B1220 rather than a theme surface - `from-background` would
-            paint the token, which nested panes may already have shifted. */}
-        <div className="absolute bottom-0 left-0 right-0 h-10 pointer-events-none z-10
-          bg-gradient-to-t from-[#0B1220] to-transparent" />
+            colour of the ground it stands on, so it comes from SCENE_BG rather
+            than from a theme token a nested pane may already have shifted - and
+            it fades to the same colour at zero alpha rather than to the
+            `transparent` keyword, which is transparent BLACK and fades through
+            soot on the way. */}
+        <div
+          className="absolute bottom-0 left-0 right-0 h-10 pointer-events-none z-10"
+          style={{ backgroundImage: `linear-gradient(to top, ${SCENE_BG}, rgba(${SCENE_BG_RGB},0))` }}
+        />
       </div>
 
       {bottomBar}

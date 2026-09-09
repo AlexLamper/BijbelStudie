@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AlertCircle, X } from 'lucide-react';
 
-import { FOCUS_RING, INK, INK_FAINT, INK_MUTED, PANEL_SOLID, RULE } from './lesson-layout';
+import { FOCUS_RING, INK, INK_FAINT, INK_MUTED, PANEL_SOLID, RULE, scrim } from './lesson-layout';
 import { formatSummaryText } from '../HistoricalContext';
 import { getPreferenceClasses, getPreferenceStyles } from '../../../lib/preferenceClasses';
 import type { ReadingPreferences } from '../../../hooks/useReadingPreferences';
@@ -90,7 +90,7 @@ export default function BookContextDialog({
     <div
       className="dark fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-6"
       // The scene's ground, like every other dim in the flow.
-      style={{ backgroundColor: 'rgba(11,18,32,0.55)' }}
+      style={{ backgroundColor: scrim(0.55) }}
       onClick={onClose}
     >
       <div

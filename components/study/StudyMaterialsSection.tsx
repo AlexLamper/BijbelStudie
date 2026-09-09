@@ -6,6 +6,7 @@ import TabComponent from './TabComponent';
 import { ProBadge } from '../ui/ProBadge';
 
 import { ReadingPreferences } from '../../hooks/useReadingPreferences';
+import { SCENE_BG, SCENE_BG_RGB } from '../scene/tokens';
 
 interface StudyMaterialsSectionProps {
   selectedBook: string;
@@ -114,8 +115,12 @@ export default function StudyMaterialsSection({
           aiQuestion={aiQuestion}
           onAiQuestionConsumed={onAiQuestionConsumed}
         />
-        <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none z-10
-          bg-gradient-to-t from-[#0B1220] to-transparent" />
+        {/* The same fade the passage pane draws, from the same token and to the
+            same colour at zero alpha - see BibleViewerSection. */}
+        <div
+          className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none z-10"
+          style={{ backgroundImage: `linear-gradient(to top, ${SCENE_BG}, rgba(${SCENE_BG_RGB},0))` }}
+        />
       </div>
     </section>
   );

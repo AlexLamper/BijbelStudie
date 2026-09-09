@@ -122,18 +122,17 @@ export default function DashboardPage() {
         aria-labelledby="diepte-titel"
         className="flex min-h-[calc(100vh-3.5rem)] flex-col justify-between pb-32 pt-5"
       >
-        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
+        {/* The date, alone. There used to be a "Huidig dashboard" link opposite
+            it - the last survivor of the design bake-off's switcher, pointing
+            at the page it was already on. With it gone the row is a single
+            item, so it is left-aligned against the greeting below rather than
+            spaced apart from nothing. */}
+        <div>
           {d.dateLabel ? (
             <p className="text-sm text-white/80">{d.dateLabel}</p>
           ) : (
             <SceneSkeleton className="h-3.5 w-36" />
           )}
-          <Link
-            href="/dashboard"
-            className="text-xs font-medium text-white/60 no-underline transition-colors hover:text-white"
-          >
-            Huidig dashboard
-          </Link>
         </div>
 
         <div className="scene-sky max-w-[46rem]">
@@ -160,7 +159,7 @@ export default function DashboardPage() {
             {tree.wilting
               ? `Je boom heeft ${tree.daysSinceActive} ${dayWord(tree.daysSinceActive)} geen water gehad. Eén hoofdstuk is genoeg.`
               : d.readToday
-                ? "Je hebt vandaag al gelezen. Alles hierna is winst."
+                ? "Je hebt vandaag al gelezen. Wat je nu leest, is extra."
                 : "Eén hoofdstuk vandaag houdt je boom in leven."}
           </p>
 

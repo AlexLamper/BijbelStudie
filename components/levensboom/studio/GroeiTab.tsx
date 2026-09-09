@@ -3,7 +3,7 @@
 import { STAGES } from '../../../lib/levensboom/stages';
 import { allFruits, TRAIT_LABELS, TRAIT_LEVELS } from '../../../lib/levensboom/traits';
 import { CATALOG, unlockLabel } from '../../../lib/levensboom/catalog';
-import { PANEL_DEEP, TEAL_DEEP, TEAL_ON_DARK } from '../../scene/tokens';
+import { PANEL_DEEP, SCENE_BG, TEAL_DEEP, TEAL_ON_DARK } from '../../scene/tokens';
 
 /**
  * The Groei tab: where the tree is on its way, and what each stage brings.
@@ -53,10 +53,10 @@ export default function GroeiTab({
           return (
             <li key={stage.id} className="relative pb-6 last:pb-0">
               <span
-                className="absolute -left-[27px] top-1 inline-flex h-4 w-4 items-center justify-center rounded-full border-2 bg-[#0B1220]"
+                className="absolute -left-[27px] top-1 inline-flex h-4 w-4 items-center justify-center rounded-full border-2"
                 style={{
                   borderColor: reached ? TEAL_ON_DARK : 'rgba(255,255,255,0.3)',
-                  backgroundColor: current ? TEAL_ON_DARK : undefined,
+                  backgroundColor: current ? TEAL_ON_DARK : SCENE_BG,
                 }}
                 aria-hidden
               />

@@ -13,7 +13,7 @@ import GroeiTab from './GroeiTab';
 import { Header } from '../../layout/header';
 import SceneRail from '../../scene/SceneRail';
 import { Panel, SceneSkeleton } from '../../scene/pieces';
-import { CTA_BRAND, EYEBROW, SCENE_X, TEAL_DEEP, TEAL_ON_DARK } from '../../scene/tokens';
+import { CTA_BRAND, EYEBROW, SCENE_BG, SCENE_X, TEAL_DEEP, TEAL_ON_DARK } from '../../scene/tokens';
 
 type Tab = ItemKind | 'groei';
 const TABS: { id: Tab; label: string }[] = [
@@ -219,7 +219,7 @@ export default function LevensboomStudio() {
   // mounts, in the same order: the mobile rail is a sticky strip and has to
   // come before the content in the flow.
   const shell = (children: React.ReactNode, stage: React.ReactNode) => (
-    <div style={SETTLED_DEPTH} className="relative min-h-[100svh] w-full min-w-0 bg-[#0B1220]">
+    <div style={{ ...SETTLED_DEPTH, backgroundColor: SCENE_BG }} className="relative min-h-[100svh] w-full min-w-0">
       {stage}
       <Header variant="scene" />
       <SceneRail />

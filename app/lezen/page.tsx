@@ -11,7 +11,7 @@ import AiAssistantWidget from '../../components/study/AiAssistantWidget';
 import { BookOpen, CheckCircle, ChevronLeft, ChevronRight, X, Trophy, MessageCircle } from 'lucide-react';
 import { toast } from '../../hooks/use-toast';
 import { TEAL_DEEP, TEAL_ON_DARK } from '../../components/scene/tokens';
-import { RAIL_COLUMN, READING_ROOM, ROOM_HEIGHT } from './room';
+import { RAIL_GUTTER, READING_ROOM, ROOM_HEIGHT } from './room';
 
 const COMPLETED_KEY = 'bijbelstudie_completed_studies';
 
@@ -90,9 +90,9 @@ function CompletionOverlay({ study, onClose }: { study: ActiveStudy; onClose: ()
     >
       <div className="bg-white dark:bg-card rounded-2xl shadow-2xl max-w-sm w-full p-8 text-center border border-border animate-in fade-in zoom-in-95 duration-200">
         {/* The overlay is inside the room's `dark` scope, so its card is the
-            navy panel and #0D9488 - a brand fill meant for a white page -
-            measures 4.5:1 on it at best. TEAL_ON_DARK is the same swatch's
-            on-dark value and measures 9.0:1. */}
+            scene's own panel and #0D9488 - a brand fill meant for a white page
+            - measures about 4.3:1 on it. TEAL_ON_DARK is the same swatch's
+            on-dark value and measures 8.6:1 there. */}
         <div
           className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center"
           style={{ backgroundColor: 'rgba(45,212,191,0.10)' }}
@@ -479,20 +479,20 @@ function StudyPageInner() {
 
       <div className="flex flex-col lg:flex-row flex-1 min-h-0 w-full overflow-hidden">
         {/*
-         * RAIL_COLUMN is the ONLY inset left on this page, and it is not
-         * margin - it is the space the rail occupies when it opens. See
-         * `./room`, which explains why this route reserves it itself instead of
-         * taking `SCENE_X`, and what has to move with it.
+         * RAIL_GUTTER is the ONLY inset left on this page, and it is not
+         * margin - it is the strip the rail stands in. See `./room`, which
+         * explains why this route sets it itself instead of taking `SCENE_X`,
+         * and what has to move with it.
          *
-         * The split leans left by half that column (`calc(50% ± 5.5rem)`) so
-         * the reserved strip comes out of the page rather than out of the
-         * passage: the scripture keeps the measure it had when the frame was
-         * inset and the two panes were an even half each.
+         * The split leans left by half that strip (`calc(50% ± 3rem)`) so the
+         * inset comes out of the page rather than out of the passage: the
+         * scripture keeps the measure it would have if the two panes were an
+         * even half each.
          */}
         <div
           data-tour="bible-text"
           className={[
-            `h-full w-full lg:w-[calc(50%_+_5.5rem)] lg:flex-none min-h-0 min-w-0 overflow-hidden lg:border-r lg:border-white/10 ${RAIL_COLUMN}`,
+            `h-full w-full lg:w-[calc(50%_+_3rem)] lg:flex-none min-h-0 min-w-0 overflow-hidden lg:border-r lg:border-white/10 ${RAIL_GUTTER}`,
             mobileView === 'bible' ? 'block' : 'hidden',
             'lg:block',
           ].join(' ')}
@@ -524,7 +524,7 @@ function StudyPageInner() {
         <div
           data-tour="commentary"
           className={[
-            'h-full w-full lg:w-[calc(50%_-_5.5rem)] lg:flex-none min-h-0 min-w-0 overflow-hidden',
+            'h-full w-full lg:w-[calc(50%_-_3rem)] lg:flex-none min-h-0 min-w-0 overflow-hidden',
             mobileView === 'materials' ? 'block' : 'hidden',
             'lg:block',
           ].join(' ')}

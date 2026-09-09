@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import AiAssistant from '../AiAssistant';
-import { FOCUS_RING, INK, INK_FAINT, PANEL_FLAT, RULE } from './lesson-layout';
+import { FOCUS_RING, INK, INK_FAINT, PANEL_FLAT, RULE, scrim } from './lesson-layout';
 import type { StepKey } from '../../../lib/studyFlow';
 
 /** Step-specific starters, replacing the assistant's generic ones. */
@@ -147,7 +147,7 @@ export default function AiDock({
       {open && (
         <div
           className="fixed inset-0 z-40 lg:hidden"
-          style={{ backgroundColor: 'rgba(11,18,32,0.55)' }}
+          style={{ backgroundColor: scrim(0.55) }}
           onClick={() => onOpenChange(false)}
           aria-hidden
         />

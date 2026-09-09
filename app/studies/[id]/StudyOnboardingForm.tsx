@@ -17,6 +17,7 @@ import {
   CTA_QUIET,
   EYEBROW,
   PANEL_DEEP,
+  SCENE_BG,
   TEAL_DEEP,
   TEAL_ON_DARK,
 } from '../../../components/scene/tokens';
@@ -365,7 +366,8 @@ export default function StudySetupProvider({
                   id="translation"
                   value={translation}
                   onChange={(event) => setTranslation(event.target.value)}
-                  className="w-full rounded-lg border border-white/20 bg-[#0B1220] px-3 py-2.5 text-sm text-white outline-none focus-visible:ring-2 focus-visible:ring-white"
+                  className="w-full rounded-lg border border-white/20 px-3 py-2.5 text-sm text-white outline-none focus-visible:ring-2 focus-visible:ring-white"
+                  style={{ backgroundColor: SCENE_BG }}
                 >
                   {/* Two groups, not one flat list. `optgroup` is used rather
                       than a fake disabled `<option>` separator because it is the
@@ -378,18 +380,18 @@ export default function StudySetupProvider({
                       not inherit the control's, and unset it can land as dark
                       text on a dark list. */}
                   {dutchTranslations.length > 0 && (
-                    <optgroup label="Nederlandse vertalingen" style={{ backgroundColor: '#0B1220', color: '#fff' }}>
+                    <optgroup label="Nederlandse vertalingen" style={{ backgroundColor: SCENE_BG, color: '#fff' }}>
                       {dutchTranslations.map((option) => (
-                        <option key={option.id} value={option.id} style={{ backgroundColor: '#0B1220', color: '#fff' }}>
+                        <option key={option.id} value={option.id} style={{ backgroundColor: SCENE_BG, color: '#fff' }}>
                           {option.name}
                         </option>
                       ))}
                     </optgroup>
                   )}
                   {otherTranslations.length > 0 && (
-                    <optgroup label="Overige vertalingen" style={{ backgroundColor: '#0B1220', color: '#fff' }}>
+                    <optgroup label="Overige vertalingen" style={{ backgroundColor: SCENE_BG, color: '#fff' }}>
                       {otherTranslations.map((option) => (
-                        <option key={option.id} value={option.id} style={{ backgroundColor: '#0B1220', color: '#fff' }}>
+                        <option key={option.id} value={option.id} style={{ backgroundColor: SCENE_BG, color: '#fff' }}>
                           {option.name}
                         </option>
                       ))}

@@ -43,10 +43,56 @@ export const TEAL_DEEP = "#0F766E"
 export const TEAL_ON_DARK = "#2DD4BF"
 
 /**
- * The page's own ground colour, behind the scene. Deep navy rather than black,
- * so the frame before the landscape arrives already belongs to the picture.
+ * The page's own ground colour, behind the scene - and on the two screens that
+ * deliberately have NO landscape (/lezen and the /studie window) the whole
+ * screen.
+ *
+ * It used to be #0B1220, a cold near-black navy. Behind a landscape that is
+ * almost invisible, which is why it passed on the dashboard; on a reading
+ * screen it is everything you look at for twenty minutes, and it read as a
+ * different product from the slate-and-teal the rest of the app is built in.
+ *
+ * #081A1D is the same weight of dark in a different family: hue 189 instead of
+ * 222, so it sits between slate-900 and teal-950 rather than in blue, and it
+ * shares its hue with the accents that land on it (#2DD4BF, the #0D9488 brand,
+ * the focus ring) instead of arguing with them.
+ *
+ * It is a fraction lighter than the navy it replaces, and everything measured
+ * against the old value still clears its number:
+ *
+ *   #FFFFFF (scripture, headings)        18.5:1
+ *   #BFC9CC (verse numbers)              11.0:1
+ *   #A6B2B5 (captions, the attribution)   8.5:1
+ *   #2DD4BF (accents, never a fill)       9.7:1
+ *
+ * Change it HERE and nowhere else. Tailwind reads class names as literal text,
+ * so a class built from this constant is a class it never generates - a page
+ * that needs the colour sets it through `style`, or uses SCENE_ROOM below.
  */
-export const SCENE_BG = "#0B1220"
+export const SCENE_BG = "#081A1D"
+
+/**
+ * The same colour as bare channels, for the one thing `style` cannot express
+ * with a hex: a gradient that has to fade to nothing without going grey.
+ * `rgba(${SCENE_BG_RGB}, 0)` is transparent AND the right hue; the keyword
+ * `transparent` is transparent black and fades through soot.
+ */
+export const SCENE_BG_RGB = "8, 26, 29"
+
+/**
+ * The still wash that lights the /studie window's SURROUND.
+ *
+ * One layer, no animation, nothing to wait for - the light the window is
+ * standing in, so the frame belongs to a world rather than to grey app chrome.
+ *
+ * It goes under a frame and never under a column of type. A wash of this
+ * strength costs white about two points of contrast where it is strongest, so a
+ * reading screen (`backdrop="none"`, /lezen, the inside of the window) gets the
+ * bare ground and nothing else - which is also what "calm and still" means. All
+ * the figures above are measured on that bare colour.
+ */
+export const SCENE_WASH =
+  `radial-gradient(120% 90% at 8% 0%, rgba(45,212,191,0.10) 0%, rgba(13,148,136,0.05) 32%, rgba(${SCENE_BG_RGB},0) 68%)`
 
 /* -- Type ------------------------------------------------------ */
 
@@ -128,27 +174,34 @@ export const CTA_QUIET =
 /**
  * The content gutter on a page that shows the rail.
  *
- * The left inset clears the rail at its OPEN width (176px), not at its resting
- * width. It used to clear only the resting 64px, on the reasoning that a rail
- * which floats costs the page nothing - but the moment someone's pointer
- * brushed the left edge the rail swelled to 224px and put a blurred film over
- * the first 128px of every panel and every heading, with the copy still faintly
- * showing through it. Content half-visible under a blur does not read as depth,
- * it reads as a rendering fault, which is exactly the complaint.
+ * THREE NUMBERS HAVE TO AGREE, AND THEY ARE ALL IN THIS SECTION: the rail's
+ * resting width (RAIL_REST, 64px), the rail's open width (RAIL_WIDE, 96px at
+ * `lg` and 112px at `xl`), and this gutter. The rule that ties them together:
  *
- * So the rail's column is reserved rather than borrowed: 192px at `lg` and
- * 208px at `xl`, which is the open rail plus the same 16-32px of breathing room
- * the old value left beside the closed one. The rail still opens on hover and
- * on focus and still moves no content, but it now opens into the left scrim
- * instead of over the page.
+ *     RAIL_REST  <  RAIL_WIDE  <=  the gutter
  *
- * Change this and the rail's `hover:w-*`/`focus-within:w-*` in SceneRail.tsx
- * together - the gap between them IS the fix.
+ * which is what lets the rail float over the page - reserving nothing beyond
+ * the strip it already occupies - while making it impossible for it to cover a
+ * glyph, at rest or open.
+ *
+ * The history, because both mistakes are easy to make again. The rail first
+ * opened to 176px over a 96px gutter, as a film of white over a blur: it put
+ * 80px of translucent panel over every heading with the copy ghosting through,
+ * which reads as a broken render rather than as depth. The cure was worse: the
+ * gutter was widened to 192/208px to RESERVE the open rail, which pushed every
+ * page's content a fifth of the way across the screen and left /lezen a dead
+ * band beside the rail.
+ *
+ * Neither was necessary. The ghosting was an opacity problem - fixed by
+ * RAIL_OPEN, the opaque ground the rail now paints while it is open - and the
+ * overlap is a width problem, fixed by opening into the gutter instead of past
+ * it. The rail carries its labels under the icons rather than beside them,
+ * which is what makes 96px enough.
  *
  * SceneShell applies it for you - reach for the constant only when a page opts
  * out (`gutter="none"`) to lay out full-bleed sections itself.
  */
-export const SCENE_X = "px-5 sm:px-8 lg:pl-48 lg:pr-10 xl:pl-52 xl:pr-16"
+export const SCENE_X = "px-5 sm:px-8 lg:pl-24 lg:pr-10 xl:pl-28 xl:pr-16"
 
 /**
  * The gutter on a page with no rail. Symmetrical, and wider than a reading
@@ -168,28 +221,111 @@ export const SECTION_Y = "py-[clamp(3.5rem,6vw,6rem)]"
  * A film of white over a blur is the right surface for a 64px strip standing in
  * the left scrim: the sky and the land keep running under it and it costs the
  * picture nothing. It is the wrong surface for an open panel. Anything still
- * showing through a piece of navigation reads as a fault rather than as depth,
- * and on the handful of routes that set their own gutter the open rail can
- * still land on content.
+ * showing through a piece of navigation reads as a fault rather than as depth.
  *
- * Open, the rail is therefore the page's own ground - the same #0B1220
- * SceneShell paints behind the landscape (SCENE_BG). Written out rather than
- * spliced in from the constant because Tailwind reads class names as literal
- * text and never generates a class built from a variable.
+ * Open, the rail is therefore the page's own ground - the same SCENE_BG the
+ * shell paints behind the landscape. Written out rather than spliced in from
+ * the constant because Tailwind reads class names as literal text and never
+ * generates a class built from a variable: if SCENE_BG moves, this moves with
+ * it by hand.
  */
-export const RAIL_OPEN = "bg-[#0B1220]"
+export const RAIL_OPEN = "bg-[#081A1D]"
+
+/** The rail at rest: a 64px strip of glass standing in the left scrim. */
+export const RAIL_REST = "w-16"
 
 /**
- * The left inset that clears the rail at its OPEN width, for a page that opts
- * out of `SCENE_X` because it owns its own space.
+ * The rail open, on hover and on keyboard focus.
+ *
+ * Exactly the gutter, never a pixel more - see SCENE_X for why that is the
+ * whole fix. 96px at `lg` and 112px at `xl` is enough for an icon with its
+ * label set under it, which is the trade that buys the page its width back.
+ */
+export const RAIL_WIDE = "hover:w-24 focus-within:w-24 xl:hover:w-28 xl:focus-within:w-28"
+
+/**
+ * The left inset alone, for a page that opts out of `SCENE_X` because it owns
+ * its own space.
  *
  * `SCENE_X` pads all four sides, which is the wrong shape for a full-bleed page
  * like the reader: there the room runs to every edge and only the one column
- * the rail could cover is inset. Both live here so the rail's open width is
- * stated in one place instead of being copied into a route and left behind the
- * next time it moves. Literal class text, for the same reason as RAIL_OPEN.
+ * the rail stands in is inset. The two live together so the number is stated
+ * once instead of being copied into a route and left behind the next time it
+ * moves. Literal class text, for the same reason as RAIL_OPEN.
  */
-export const RAIL_COLUMN = "lg:pl-44 xl:pl-[11.5rem]"
+export const RAIL_GUTTER = "lg:pl-24 xl:pl-28"
+
+/* -- The room -------------------------------------------------- */
+
+/**
+ * The palette a screen wears when it has NO landscape behind it: /lezen and the
+ * /studie window.
+ *
+ * Both of those screens host components that were drawn for a white page - the
+ * chapter viewer, the commentary, the grondtekst, the notes, the assistant -
+ * and forking every one of them is not an option. Two mechanisms do the whole
+ * job instead, and neither costs a byte of JavaScript:
+ *
+ *  1. `dark` on the frame. Tailwind's dark mode is class-based, so scoping the
+ *     class there flips every theme token in the subtree to its light-on-dark
+ *     value - the same trick `Header variant="scene"` and `StudyRail` use. That
+ *     is what stops a reader in the light theme from getting a white box.
+ *  2. These variables. `dark` alone lands on the app's neutral near-black
+ *     (#171717), which is a grey panel, not a place. Re-pointing the tokens at
+ *     the scene's own ground makes every surface the shared components already
+ *     paint - `dark:bg-background`, `dark:bg-card`, `dark:border-border` - part
+ *     of the same picture, without editing one of them.
+ *
+ * The numbers are chosen against the ground they actually land on, because
+ * legibility is the whole task on these two screens and atmosphere loses every
+ * tie:
+ *
+ *   --foreground        #FFFFFF on #081A1D = 18.5:1  (scripture, commentary)
+ *   --muted-foreground  #A6B3B5 on #081A1D =  8.6:1  (captions, attribution)
+ *   --card              #172427, so #FFFFFF on a panel = 15.9:1
+ *   --secondary         #223235, so a control's label   = 13.3:1
+ *   --ring              #2BD4BD, the focus outline globals.css draws
+ *
+ * The ink is a literal white rather than the #F9FAFB it used to be, which is
+ * the one the rest of the scene already writes in (`text-white` everywhere in
+ * `pieces.tsx` and the lesson flow). One white, one ground, one world.
+ *
+ * `colorScheme: dark` is not decoration: both screens use native `<select>`
+ * elements, and without it the browser paints their popup lists - and the
+ * scrollbars - in the light scheme over a night room.
+ *
+ * Typed as a plain string map rather than as `CSSProperties` so this file keeps
+ * its promise of importing nothing; a consumer casts it at the `style` prop.
+ */
+export const SCENE_ROOM: Record<string, string> = {
+  colorScheme: "dark",
+  "--background": "189 57% 7.2%",
+  "--foreground": "0 0% 100%",
+  "--card": "189 26% 12%",
+  "--card-foreground": "0 0% 100%",
+  "--popover": "189 26% 12%",
+  "--popover-foreground": "0 0% 100%",
+  "--muted": "189 26% 12%",
+  "--muted-foreground": "189 9% 68%",
+  "--secondary": "189 22% 17%",
+  "--secondary-foreground": "0 0% 96%",
+  "--accent": "189 22% 19%",
+  "--accent-foreground": "0 0% 100%",
+  "--border": "189 16% 25%",
+  "--input": "189 16% 25%",
+  "--ring": "172 66% 50%",
+}
+
+/**
+ * The two inks the reading screens pin rather than leave on a token, because a
+ * superscript and a required copyright notice are the two places where "one
+ * step quieter" must not become "one step unreadable".
+ *
+ * #BFC9CC measures 11.0:1 on the ground and #A6B3B5 measures 8.6:1 - a clear
+ * step below the passage's 18.5:1 and well above the 4.5:1 floor.
+ */
+export const VERSE_NUMBER_INK = "#BFC9CC"
+export const ATTRIBUTION_INK = "#A6B3B5"
 
 /* -- Scrims ---------------------------------------------------- */
 

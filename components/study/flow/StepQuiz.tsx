@@ -18,7 +18,7 @@ import { EYEBROW, TEAL, TEAL_DEEP, TEAL_ON_DARK } from '../../scene/tokens';
  * Wrong, on the night ground.
  *
  * #DC2626 is the fill under the white cross; as TYPE or as a keyline on this
- * window it is too dark to read, so #F87171 (6.8:1 on #0B1220) carries the
+ * window it is too dark to read, so #F87171 (6.7:1 on the scene ground) carries the
  * outline of a wrong answer. Same swatch, the end the ground can hold.
  */
 const RED = '#DC2626';
@@ -396,7 +396,7 @@ export default function StepQuiz({
                 const isWrongPick = !!result && isPicked && !result.correct;
 
                 // Deeper washes than the light card carried: 7% teal is a
-                // visible tint on white and nothing at all on #0B1220.
+                // visible tint on white and nothing at all on the scene ground.
                 let frame: React.CSSProperties | undefined;
                 if (isCorrectOne) {
                   frame = {

@@ -1,5 +1,5 @@
 import { SceneSkeleton } from '../../../components/scene/pieces';
-import { SCENE_X } from '../../../components/scene/tokens';
+import { SCENE_BG, SCENE_X } from '../../../components/scene/tokens';
 
 /**
  * The studio's own shape while the route segment streams in.
@@ -11,15 +11,16 @@ import { SCENE_X } from '../../../components/scene/tokens';
  * progress block and the tile grid do not move when the real tree and its
  * numbers land.
  *
- * It stands on the scene's own ground (`#0B1220`, written out because Tailwind
- * reads class names as literal text), so the frame before the tree arrives
+ * It stands on the scene's own ground (`SCENE_BG`, set through `style` because
+ * Tailwind never generates a class built from a constant), so the frame before
+ * the tree arrives
  * already belongs to the picture instead of flashing a white page. There is
  * deliberately no picture here at all: the only tree this route draws is the
  * reader's own, and it cannot be drawn until their data has arrived.
  */
 export default function BoomLoading() {
   return (
-    <div role="status" aria-label="Je boom laden" className="min-h-[100svh] w-full bg-[#0B1220]">
+    <div role="status" aria-label="Je boom laden" className="min-h-[100svh] w-full" style={{ backgroundColor: SCENE_BG }}>
       <div className={`${SCENE_X} pt-14`}>
         <div className="lg:grid lg:h-[calc(100svh-3.5rem)] lg:grid-cols-[17rem_minmax(0,1fr)_21rem] lg:gap-8 2xl:grid-cols-[21rem_minmax(0,1fr)_25rem]">
           {/* The reading column: the way back and the share pill, the heading,

@@ -16,7 +16,7 @@ Read this before converting a page. It is short on purpose.
 | `tokens.ts` | Every colour, surface, gutter and scrim class. Plain strings, no imports — a **server component may import it**. |
 | `useSceneDepth.ts` | The scroll engine. `SceneShell` runs it; **you never call it**. |
 | `SceneBackdrop.tsx` | The fixed picture + the four scrims. `SceneShell` renders it; you only choose its mode. |
-| `SceneRail.tsx` | The sidebar replacement: a rail that rests at 64px, widens to 176px on hover/focus **into the gutter `SCENE_X` reserves for it, never over the content**, and becomes a pill strip below `lg`. |
+| `SceneRail.tsx` | The sidebar replacement: a rail that rests at 64px, widens **into its own gutter** (96px at `lg`, 112px at `xl`) on hover/focus and becomes a pill strip below `lg`. |
 | `SceneShell.tsx` | **What a page uses.** |
 | `pieces.tsx` | `Panel`, `SectionHeading`, `SceneSkeleton`, `GlassStat`, `Total`, `WeekStrip`. No `"use client"` — usable from a server component. |
 | `scene-svg.ts` | `sceneSvg()` and `SCENE_TREE`: the public scene, rendered to an SVG string **on the server**. Never import this from a client component. |
@@ -137,17 +137,54 @@ choices: an accent marks the one thing on a screen that has earned it.
 
 Colour, in one line each:
 
+- `SCENE_BG` `#081A1D` — **the ground, and the only place it is written down.**
+  A very dark teal-leaning slate: hue 189, between slate-900 and teal-950, so it
+  shares its family with the accents that land on it instead of arguing with
+  them. It replaced `#0B1220`, a cold navy that was invisible behind a landscape
+  and was the whole screen on the two pages that have none. White on it measures
+  18.5:1. Tailwind cannot build a class from a constant, so a page that needs the
+  colour sets it through `style` — never a fresh `bg-[#…]`.
 - `TEAL` `#0D9488` — brand fill, for bars, dots and rings that carry no type.
 - `TEAL_DEEP` `#0F766E` — **any solid fill under white type.** White on `#0D9488`
   measures 3.74:1 and fails; on `#0F766E` it is 5.5:1.
-- `TEAL_ON_DARK` `#2DD4BF` — accents and type on the scene. Never a fill under
-  white type.
+- `TEAL_ON_DARK` `#2DD4BF` — accents and type on the scene (9.9:1 on the ground).
+  Never a fill under white type.
+- `VERSE_NUMBER_INK` `#BFC9CC` (11.0:1) and `ATTRIBUTION_INK` `#A6B3B5` (8.6:1) —
+  the two inks the reading screens pin rather than leave on a token, because a
+  superscript and a required copyright notice are where "one step quieter" must
+  not become "one step unreadable".
 
 Everything else is a literal white or black. **Never a theme token on a scene
 page**: a token flips with the reader's light/dark setting and the landscape
 does not.
 
 ---
+
+## The background rule — read this before converting anything
+
+**The bar shows what the page stands on.** The scene navbar is transparent with
+its own scoped `dark`, so it shows whatever is behind it. A page therefore has
+to be one of exactly two things, and it says which through `backdrop`:
+
+| the page | `backdrop` | what the shell does |
+| --- | --- | --- |
+| has a landscape | `"static"` / `"reader"` | the picture runs full-bleed from the very top, the bar stays transparent over it, and the top scrims keep the bar legible over a bright sky |
+| has no landscape | `"none"` | the shell paints the flat ground (`SCENE_BG`) across the whole viewport, bar included, and draws **no** scrim and **no** wash — a reading screen's type sits straight on this colour, and every contrast figure is measured on it |
+
+The third case is a bug, and it is the one that shipped: a picture behind the
+bar and a page that paints its own opaque ground under it. On `/lezen` that put
+a landscape in the top 3.5rem and flat ground everywhere else, meeting at a hard
+line — two designs stitched at a seam, for a picture nobody could see any of.
+
+So: **if a route's content covers the landscape, it takes `backdrop="none"`.**
+That is every reading screen. `/studie` satisfies the rule by having no app bar
+at all.
+
+Both reading screens then wear `SCENE_ROOM` (tokens.ts) inside a scoped `dark`:
+one object that re-points `--background`, `--card`, `--border` and the rest at
+the scene's ground, so every shared component drawn for a white page — the
+chapter viewer, the commentary, the grondtekst, the notes, the assistant —
+lands on the night without being forked. Use it; never invent a second dark.
 
 ## The two rules
 
@@ -180,10 +217,18 @@ children: React.ReactNode
 ```
 
 `gutter="none"` gives an unpadded content layer for a page that wants full-bleed
-sections; apply `SCENE_X` (or `SCENE_X_EDGE`) per section yourself — **the
-constant, never its current value copied out as literal classes**. `SCENE_X`'s
-left inset is what keeps the open rail off the page, so a page holding a stale
-copy of it is a page the rail opens on top of.
+sections; apply `SCENE_X` (or `SCENE_X_EDGE`, or `RAIL_GUTTER` for the left inset
+alone) per section yourself — **the constant, never its current value copied out
+as literal classes**.
+
+**The rail's three numbers have to agree**, and they all live together in
+`tokens.ts`: `RAIL_REST` (64px) < `RAIL_WIDE` (96px at `lg`, 112px at `xl`) ≤ the
+gutter (`SCENE_X`'s left inset, `RAIL_GUTTER`). That is what lets the rail float
+— reserving nothing beyond the strip it already stands in — while making it
+impossible for it to cover a glyph, open or shut. Both previous versions broke
+one side of it: a 176px open rail over a 96px gutter ghosted over every heading,
+and reserving 192/208px for it pushed every page's content a fifth of the way
+across the screen. Move one of the three and you move all three.
 
 ---
 
@@ -198,7 +243,17 @@ copy of it is a page the rail opens on top of.
   `components/dashboard/ProgressTree.tsx`. Do not move or delete that file.
 - `components/dashboard/DailyVerseCard.tsx` is drawn for a white page. It is no
   longer on the dashboard for exactly that reason. If you put it on a scene
-  page, it goes on a `PLATE` — never bare and never on a `PANEL`.
+  page, it goes on a `PLATE` — never bare and never on a `PANEL`. `PLATE` is for
+  a component you are not going to fork; it is **not** a way to make something
+  important stand out. The lesson window tried that with the scripture and the
+  result read as a white page dropped into a night frame.
+- **Tailwind silently drops an opacity modifier that is not on its scale.** The
+  scale is 0, 5, 10 … 95, 100. `text-white/78` generates *nothing at all*, the
+  element inherits the already-computed `color` from `<body>` — near-black,
+  because `color` does not re-resolve inside a scoped `dark` — and you get black
+  type on a black tile. That was the "Straks de vraag is not visible" bug, and it
+  took every marginal note in the lesson flow with it. A one-off goes in square
+  brackets (`text-white/[0.78]`), which is an arbitrary value and always emitted.
 - `BADGE_STYLES` in `lib/data/curated-studies.ts` gives all four study types the
   same teal chip, and white on it measures 3.7:1. It carries no information the
   word itself does not. Set the type as quiet uppercase type instead.

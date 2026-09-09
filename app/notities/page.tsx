@@ -14,7 +14,7 @@ import {
 import { EditNoteModal } from "../../components/study/EditNoteModal"
 import SceneShell from "../../components/scene/SceneShell"
 import { SectionHeading } from "../../components/scene/pieces"
-import { CTA_PRIMARY, EYEBROW, SCENE_X, TEAL_ON_DARK, TILE } from "../../components/scene/tokens"
+import { CTA_PRIMARY, EYEBROW, SCENE_BG, SCENE_X, TEAL_ON_DARK, TILE } from "../../components/scene/tokens"
 
 interface Note {
   _id: string
@@ -186,7 +186,8 @@ export default function NotesPage() {
       <div
         role="status"
         aria-label="Notities laden"
-        className={`min-h-screen w-full min-w-0 bg-[#0B1220] pt-6 ${SCENE_X}`}
+        className={`min-h-screen w-full min-w-0 pt-6 ${SCENE_X}`}
+        style={{ backgroundColor: SCENE_BG }}
       >
         <div className="max-w-[40rem] space-y-4">
           <div className="h-3 w-24 rounded bg-white/15" />

@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../lib/authOptions";
 import SessionProvider from "../../components/providers/SessionProvider";
 import { StudyRail } from "../../components/layout/app-sidebar";
-import { SCENE_BG } from "../../components/scene/tokens";
+import { SCENE_BG, SCENE_ROOM, SCENE_WASH } from "../../components/scene/tokens";
 import { generatePageMetadata } from "../../lib/pageMetadata";
 
 import { cookies } from "next/headers";
@@ -50,15 +50,19 @@ export async function generateMetadata(): Promise<Metadata> {
  *      `window.scrollY`, and this route is `h-[100dvh] overflow-hidden` on
  *      purpose - a fixed frame with one scrolling body inside it. Nothing the
  *      scene animates would ever move.
- *   3. It already owns the metaphor. A window on a dark ground IS the scene
- *      vocabulary's light `PLATE`: a lit object laid on the landscape, which
- *      is where the scene design says the eye should go first.
+ *   3. It already owns the metaphor. A window inset on a ground, with a ring
+ *      and a shadow, is an object standing in a world - the same thing the
+ *      scene says with a landscape, said with light instead of a picture. What
+ *      separates the window from the ground is elevation, NOT a second colour:
+ *      both are `SCENE_BG`.
  *
  * So the scene lives at the EDGES. The ground is the scene's own ground colour
- * (`SCENE_BG`, #0B1220 - the same literal `SceneShell` paints), lifted by one
- * still wash so the border of the window belongs to a world rather than to a
- * grey app chrome. No canvas, no image, no second animated layer, nothing for
- * the reader to wait on: the lesson is in the HTML and the ground is a colour.
+ * (`SCENE_BG`) lifted by the scene's own still wash (`SCENE_WASH`), so the
+ * border of the window belongs to a world rather than to a grey app chrome. No
+ * canvas, no image, no second animated layer, nothing for the reader to wait
+ * on: the lesson is in the HTML and the ground is a colour. This route has no
+ * app bar at all, so THE ONE BACKGROUND RULE in SceneShell.tsx is satisfied by
+ * construction - there is no picture anywhere on it and therefore no seam.
  *
  * AND THE INSIDE BELONGS TO THAT WORLD TOO.
  *
@@ -67,17 +71,19 @@ export async function generateMetadata(): Promise<Metadata> {
  * light mode that produced a white document dropped into a night frame - the one
  * screen in the product that had not joined the redesign.
  *
- * `dark` fixes that in one place. It is the same trick `Header variant="scene"`
- * and the rail below already use: it scopes every theme token inside the window
- * to its light-on-dark end, so the flow's own surfaces AND the shared components
- * it hosts (the commentary, the grondtekst, the notes, the assistant) all land
- * on the night without any of them being forked. `colorScheme` goes with it, so
- * the browser's own furniture - select popups, scrollbars, the caret in the
- * reflection box - is drawn dark rather than being the one light thing left.
+ * `dark` plus `SCENE_ROOM` fixes that in one place, and it is the same pair
+ * /lezen wears - see the note on SCENE_ROOM in components/scene/tokens.ts.
+ * `dark` scopes every theme token inside the window to its light-on-dark end;
+ * the variables then re-point those tokens from the app's neutral near-black at
+ * the scene's own ground, which is the difference between a grey panel and a
+ * place. Together they carry the flow's own surfaces AND the shared components
+ * it hosts - the commentary, the grondtekst, the notes, the assistant - onto
+ * the night without one of them being forked.
  *
- * The single exception is deliberate: the passage itself sits on the scene's
- * light `PLATE` (see StepWord), which is what the scene vocabulary reserves for
- * the thing that has to be read for twenty minutes.
+ * There is no exception any more. The passage used to sit on the scene's light
+ * `PLATE` as "the one lit object"; a white page inside a night window is a
+ * second design however well argued, and the lesson now reads on the same
+ * ground as everything around it, at a better contrast than the plate gave it.
  */
 export default async function StudyLayout({
   children,
@@ -105,10 +111,7 @@ export default async function StudyLayout({
       <span
         aria-hidden
         className="pointer-events-none absolute inset-0 z-0"
-        style={{
-          background:
-            'radial-gradient(120% 90% at 8% 0%, rgba(45,212,191,0.10) 0%, rgba(13,148,136,0.05) 32%, rgba(11,18,32,0) 68%)',
-        }}
+        style={{ backgroundImage: SCENE_WASH }}
       />
 
       <SessionProvider session={session}>
@@ -116,9 +119,12 @@ export default async function StudyLayout({
             token, the same trick `Header variant="scene"` uses: the rail is
             standing on the night ground beside the window, so a white column
             there would be the one thing on screen that had not joined the
-            scene. `contents` keeps the wrapper out of the flex layout, so the
-            rail is still the flex item it was. */}
-        <div className="dark contents">
+            scene. SCENE_ROOM goes with it - `dark` alone would land the rail's
+            `dark:bg-card` on the app's neutral #212121, a grey column beside a
+            teal-slate window. Custom properties inherit straight through
+            `display: contents`, which keeps the wrapper out of the flex layout
+            so the rail is still the flex item it was. */}
+        <div className="dark contents" style={SCENE_ROOM as React.CSSProperties}>
           <StudyRail />
         </div>
 
@@ -134,12 +140,14 @@ export default async function StudyLayout({
               boxed in a hairline, and a ring costs no layout the way a border
               does.
 
-              `dark` and `color-scheme: dark` are what make the INSIDE the same
-              world as the outside in both themes - see the note above the
-              component. */}
+              `dark` and SCENE_ROOM are what make the INSIDE the same world as
+              the outside in both themes - see the note above the component.
+              The window is the ground colour too: what separates it from what
+              it is standing on is the ring and the shadow, not a second
+              colour. */}
           <div
             className="dark h-full w-full overflow-hidden md:rounded-2xl md:ring-1 md:ring-white/10 shadow-none md:shadow-[0_40px_80px_-32px_rgba(0,0,0,0.85)]"
-            style={{ backgroundColor: SCENE_BG, colorScheme: 'dark' }}
+            style={{ ...SCENE_ROOM, backgroundColor: SCENE_BG } as React.CSSProperties}
           >
             {children}
           </div>

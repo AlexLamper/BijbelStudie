@@ -8,7 +8,7 @@ import {
   Settings, ShieldCheck, StickyNote, User,
 } from "lucide-react"
 import { useStudyStyle } from "../providers/study-style-provider"
-import { RAIL_OPEN, TEAL_ON_DARK } from "./tokens"
+import { RAIL_OPEN, RAIL_REST, RAIL_WIDE, TEAL_ON_DARK } from "./tokens"
 
 /**
  * The sidebar, solved for a full-bleed scene.
@@ -31,17 +31,23 @@ import { RAIL_OPEN, TEAL_ON_DARK } from "./tokens"
  *    top of the page the rail is barely there, over the panels it is a defined
  *    edge. Opacity only, so it costs nothing.
  *
- * What changed after the first round of use, and why:
+ * What changed after two rounds of use, and why:
  *
- *  - It no longer opens over the page. "Floats and costs the page nothing" was
- *    true only while it was shut; open, it put 128px of blurred film over every
- *    heading and every panel, with the copy still ghosting through - which does
- *    not read as depth, it reads as a broken render. `SCENE_X` now reserves the
- *    rail's OPEN width, so it opens into the left scrim. The two numbers have to
- *    move together: open width here, gutter there.
- *  - Open, it is opaque. Nothing may show through navigation, and a couple of
- *    routes still set their own gutter, where the open rail can land on content
- *    however wide this one is.
+ *  - Open, it is opaque (RAIL_OPEN). It used to widen to 176px as a film of
+ *    white over a blur, laid across every heading with the copy still ghosting
+ *    through - which does not read as depth, it reads as a broken render.
+ *  - It opens INTO its own gutter and never past it. The answer to the ghosting
+ *    was briefly to reserve the open width in `SCENE_X`, which pushed every
+ *    page's content a fifth of the way across the screen. It costs the page
+ *    nothing again: RAIL_REST is 64px, RAIL_WIDE is 96px at `lg` and 112px at
+ *    `xl`, and the gutter is exactly those last two numbers. The rail can be
+ *    over the scrim or over its own gutter and nowhere else, so it cannot cover
+ *    a glyph at any width, open or shut.
+ *  - What buys that: the label sits UNDER the icon rather than beside it. A
+ *    label beside an 18px glyph needs about 150px; under it, 96px is generous.
+ *    Nothing else about the interaction moved - hover and `focus-within` both
+ *    open it, every item is still a link in tab order, and the full label is
+ *    still on `title` for a pointer that never opens it.
  *  - The right-hand hairline is permanent instead of veil-driven. At the top of
  *    a page the rail had no edge at all, which is half of why it read as a smear
  *    over the page rather than as a rail beside it.
@@ -98,11 +104,14 @@ function useNav(): NavItem[] {
 /* ── The rail, lg and up ─────────────────────────────────────── */
 
 /**
- * One row of the rail: the icon always, the label only once the rail is open.
+ * One row of the rail: the icon always, the label under it once the rail is
+ * open.
  *
- * `pl-[15px]` is not arbitrary - 8px of list padding plus 15 plus half of an
- * 18px glyph puts the icon exactly on the centre line of the rail at its
- * resting width of 64px, so nothing shifts sideways as the labels arrive.
+ * The row is centred rather than left-inset, so the icons ride the rail's own
+ * centre line and stay centred as it widens. The label is a collapsed line that
+ * grows to its 14px and fades in together, which keeps the whole open state one
+ * gesture; `truncate` plus the `title` above means a long word can never push
+ * the row wider than the gutter, which is the one thing this rail may not do.
  */
 function RailItem({ item, active }: { item: NavItem; active: boolean }) {
   const Icon = item.icon
@@ -112,7 +121,7 @@ function RailItem({ item, active }: { item: NavItem; active: boolean }) {
         href={item.url}
         title={item.title}
         aria-current={active ? "page" : undefined}
-        className={`relative flex h-10 items-center gap-3.5 rounded-lg pl-[15px] no-underline outline-none transition-colors focus-visible:ring-2 focus-visible:ring-white/70 ${
+        className={`relative flex min-h-10 w-full flex-col items-center justify-center rounded-lg px-1 py-2 no-underline outline-none transition-colors focus-visible:ring-2 focus-visible:ring-white/70 ${
           active ? "bg-white/15 font-semibold text-white" : "font-normal text-white/70 hover:bg-white/10 hover:text-white"
         }`}
       >
@@ -120,7 +129,7 @@ function RailItem({ item, active }: { item: NavItem; active: boolean }) {
           <span aria-hidden className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full" style={{ backgroundColor: TEAL_ON_DARK }} />
         )}
         <Icon size={18} className="flex-shrink-0" style={active ? { color: TEAL_ON_DARK } : undefined} />
-        <span className="-translate-x-1 whitespace-nowrap text-[13.5px] opacity-0 transition-[opacity,transform] duration-200 motion-reduce:transition-none group-hover/rail:translate-x-0 group-hover/rail:opacity-100 group-focus-within/rail:translate-x-0 group-focus-within/rail:opacity-100">
+        <span className="block max-h-0 w-full truncate text-center text-[10.5px] leading-[1.3] opacity-0 transition-[max-height,opacity,margin] duration-200 motion-reduce:transition-none group-hover/rail:mt-1 group-hover/rail:max-h-4 group-hover/rail:opacity-100 group-focus-within/rail:mt-1 group-focus-within/rail:max-h-4 group-focus-within/rail:opacity-100">
           {item.title}
         </span>
       </Link>
@@ -156,7 +165,7 @@ export default function SceneRail() {
     <>
       <nav
         aria-label="Hoofdnavigatie"
-        className="group/rail fixed bottom-0 left-0 top-14 z-40 hidden w-16 flex-col overflow-hidden transition-[width] duration-300 ease-out motion-reduce:transition-none hover:w-44 focus-within:w-44 lg:flex"
+        className={`group/rail fixed bottom-0 left-0 top-14 z-40 hidden flex-col overflow-hidden transition-[width] duration-300 ease-out motion-reduce:transition-none lg:flex ${RAIL_REST} ${RAIL_WIDE}`}
       >
         <span aria-hidden className="pointer-events-none absolute inset-0 bg-white/[0.07] backdrop-blur-md" />
         <span
@@ -173,7 +182,12 @@ export default function SceneRail() {
         />
         <span aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-px bg-white/20" />
 
-        <div className="relative flex h-full min-h-0 flex-col p-2">
+        {/* `overflow-y-auto`: the rows grow by a line each when the labels
+            arrive, and on a short laptop the eight of them can outrun the
+            viewport. Scrolling is the only answer that keeps every item
+            reachable - squashing them would put the bottom three out of reach
+            of both the pointer and the tab key. */}
+        <div className="relative flex h-full min-h-0 flex-col overflow-y-auto overscroll-contain px-1.5 py-2">
           <ul className="m-0 flex flex-col gap-0.5 p-0">
             {nav.map(item => (
               <RailItem key={item.url} item={item} active={isActive(item.url)} />

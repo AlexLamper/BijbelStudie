@@ -3,8 +3,13 @@
 import React from 'react';
 
 import PassageReader from './PassageReader';
-import LessonLayout, { FOCUS_RING, INK_FAINT, INK_MUTED, Marginal } from './lesson-layout';
-import { PLATE } from '../../scene/tokens';
+import LessonLayout, {
+  FOCUS_RING,
+  INK_FAINT,
+  INK_MUTED,
+  Marginal,
+  READING_SURFACE,
+} from './lesson-layout';
 import { ReadingPreferencesMenu } from '../ReadingPreferencesMenu';
 import SpeakButton from '../SpeakButton';
 import { SpokenTextScope } from '../SpokenText';
@@ -82,12 +87,13 @@ function TranslationPicker({
  * rendered, and the verses that ARE rendered are not tinted. Everything on this
  * step is the text the lesson asked you to read.
  *
- * THE ONE LIT OBJECT. The passage sits on the scene's light `PLATE` while the
- * window around it is night, and it is the only plate in the whole flow. That is
- * not decoration: scripture is what this screen exists to show, a plate is where
- * the scene design says the eye should go first, and the pale verse highlights,
- * the note popover and the per-verse controls are all drawn for white paper. The
- * plate does not follow the theme any more than the rest of the window does.
+ * THE PASSAGE STANDS ON THE GROUND. It used to sit on the scene's light `PLATE`
+ * as the one lit object in a night window - a white page dropped into a dark
+ * frame, with the margin notes beside it on the dark and the commentary a step
+ * darker again. It reads as one screen now: same ground as the window, same
+ * white ink as /lezen, separated from the heading by a hairline and by air
+ * rather than by a colour. Contrast went up, not down - white on the ground is
+ * 18.5:1 where the plate gave the same type 18.1:1.
  *
  * What supports the reading - the leeswijzer, the translation, the type
  * controls, the question that is coming - stands in the margin beside the text
@@ -200,7 +206,7 @@ export default function StepWord({
           </p>
         ) : null}
 
-        <section className={`${PLATE} mt-5 px-6 sm:px-9 py-8 sm:py-9`}>
+        <section className={`${READING_SURFACE} mt-6`}>
           <PassageReader
             book={book}
             chapter={chapter}

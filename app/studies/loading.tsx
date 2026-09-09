@@ -1,5 +1,5 @@
 import { SceneSkeleton } from "../../components/scene/pieces"
-import { SCENE_X_EDGE, TILE } from "../../components/scene/tokens"
+import { SCENE_BG, SCENE_X_EDGE, TILE } from "../../components/scene/tokens"
 
 /**
  * Shown while the route segment streams in, so a navigation lands on the page's
@@ -8,14 +8,15 @@ import { SCENE_X_EDGE, TILE } from "../../components/scene/tokens"
  *
  * It is the scene's ground rather than a white page: /studies is now a
  * full-bleed landscape, and a light card grid in front of it flashed a white
- * screen on every navigation into the route. `bg-[#0B1220]` is written out
- * rather than built from SCENE_BG because Tailwind reads class names as
- * literal text and never generates one spliced in from a constant.
+ * screen on every navigation into the route. The ground comes from SCENE_BG
+ * through `style`, because Tailwind never generates a class built from a
+ * constant.
  */
 export default function StudiesLoading() {
   return (
     <div
-      className={`min-h-screen w-full bg-[#0B1220] pb-20 pt-16 ${SCENE_X_EDGE}`}
+      className={`min-h-screen w-full pb-20 pt-16 ${SCENE_X_EDGE}`}
+      style={{ backgroundColor: SCENE_BG }}
       role="status"
       aria-label="Studies laden"
     >

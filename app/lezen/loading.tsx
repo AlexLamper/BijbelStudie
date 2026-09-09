@@ -1,5 +1,5 @@
 import { SkeletonBlock, SkeletonChapter } from "../../components/ui/skeletons"
-import { RAIL_COLUMN, READING_ROOM, ROOM_HEIGHT } from "./room"
+import { RAIL_GUTTER, READING_ROOM, ROOM_HEIGHT } from "./room"
 
 /**
  * Shown while the route segment streams in, so a navigation lands on the page's
@@ -22,12 +22,12 @@ export default function LezenLoading() {
       className={`dark relative flex ${ROOM_HEIGHT} w-full min-w-0 flex-col overflow-hidden text-foreground`}
       style={READING_ROOM}
     >
-      {/* The same two nested boxes the page builds: the outer one reserves the
-          rail's column, the inner one carries the pane's own padding. Sharing
-          RAIL_COLUMN rather than restating a number is what keeps the skeleton
-          from jumping when the page lands on top of it. */}
+      {/* The same two nested boxes the page builds: the outer one clears the
+          strip the rail stands in, the inner one carries the pane's own
+          padding. Sharing RAIL_GUTTER rather than restating a number is what
+          keeps the skeleton from jumping when the page lands on top of it. */}
       <div
-        className={`flex min-h-0 flex-1 flex-col ${RAIL_COLUMN}`}
+        className={`flex min-h-0 flex-1 flex-col ${RAIL_GUTTER}`}
         role="status"
         aria-label="Bijbel laden"
       >

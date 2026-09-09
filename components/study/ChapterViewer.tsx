@@ -9,6 +9,7 @@ import { getBibleAttribution } from '../../lib/bible-attribution';
 import SpeakButton from './SpeakButton';
 import { SpokenText, SpokenTextScope } from './SpokenText';
 import VerseMarkers from './VerseMarkers';
+import { VERSE_NUMBER_INK } from '../scene/tokens';
 
 type Props = {
   version: string | null;
@@ -239,18 +240,23 @@ export default function ChapterViewer({
                   )}>
                     {/* The verse number is pinned rather than left on
                         `--muted-foreground`. This viewer is /lezen's only, and
-                        /lezen now reads on the scene's navy ground: the muted
-                        token lands at 8.1:1 there, while the number measured
-                        10.3:1 on the white page it used to sit on. A
-                        superscript this small may not lose contrast in the
-                        move, so it gets its own value - #BAC4D2, 10.7:1 - a
-                        clear step below the passage's 18.1:1 but above what it
-                        replaced. */}
+                        /lezen reads on the scene's own ground: the muted token
+                        lands at 8.6:1 there, while the number measured 10.3:1
+                        on the white page it used to sit on. A superscript this
+                        small may not lose contrast in the move, so it gets
+                        VERSE_NUMBER_INK - #BFC9CC, 11.0:1 - a clear step below
+                        the passage's 18.5:1 and above what it replaced. It is
+                        an inline colour rather than a `dark:` class so it
+                        cannot be undone by a parent that has already fixed the
+                        computed `color`. */}
                     {prefs.showVerseNumbers && (
-                      <sup className={cn(
-                        "font-semibold mr-1",
-                        isHighlighted ? "text-teal-600 dark:text-teal-400" : "text-gray-700 dark:text-[#BAC4D2]"
-                      )}>
+                      <sup
+                        className={cn(
+                          "font-semibold mr-1",
+                          isHighlighted && "text-teal-600 dark:text-teal-400"
+                        )}
+                        style={isHighlighted ? undefined : { color: VERSE_NUMBER_INK }}
+                      >
                         {verseNumber}
                       </sup>
                     )}
@@ -288,8 +294,7 @@ export default function ChapterViewer({
                 and nothing here may reword, truncate or wrap it - the NBG51
                 licence is an exact string. It was #9CA3AF, which measures
                 2.5:1 on white; a required copyright notice has to be readable,
-                so the light value is #4B5563 (7.5:1), matching PassageReader,
-                and on the room's navy ground the muted token measures 8.1:1. */}
+                so on the room's ground it is the muted token, 8.6:1. */}
             {getBibleAttribution(version) && (
               <p className="mt-4 pt-3 border-t border-gray-100 dark:border-border text-[11px] leading-snug text-gray-600 dark:text-muted-foreground">
                 {getBibleAttribution(version)}

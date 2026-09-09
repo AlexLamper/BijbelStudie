@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
 
-import { FOCUS_RING, INK, INK_MUTED, PANEL_SOLID } from './lesson-layout';
+import { FOCUS_RING, INK, INK_MUTED, PANEL_SOLID, scrim } from './lesson-layout';
 import { TEAL_DEEP } from '../../scene/tokens';
 
 /**
@@ -135,7 +135,7 @@ export default function StudyExitGuard({ enabled }: { enabled: boolean }) {
       className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-6"
       // The scene's own ground rather than a neutral black, so the dim belongs
       // to the world the window is standing in.
-      style={{ backgroundColor: 'rgba(11,18,32,0.55)' }}
+      style={{ backgroundColor: scrim(0.55) }}
       onClick={stay}
     >
       <div

@@ -11,7 +11,7 @@ import BookContextDialog from './BookContextDialog';
 import type { ReadingPreferences } from '../../../hooks/useReadingPreferences';
 
 import { FOCUS_RING, INK, INK_FAINT, INK_MUTED, RULE } from './lesson-layout';
-import { SCENE_BG, TEAL, TEAL_DEEP, TEAL_ON_DARK } from '../../scene/tokens';
+import { SCENE_BG, SCENE_BG_RGB, TEAL, TEAL_DEEP, TEAL_ON_DARK } from '../../scene/tokens';
 
 export interface DepthContentProps {
   body?: string[];
@@ -152,12 +152,15 @@ export default function StepDepth({
         <div
           aria-hidden
           className="hidden lg:block pointer-events-none absolute bottom-0 left-0 right-0 h-14"
-          style={{ backgroundImage: `linear-gradient(to top, ${SCENE_BG}, rgba(11,18,32,0))` }}
+          style={{ backgroundImage: `linear-gradient(to top, ${SCENE_BG}, rgba(${SCENE_BG_RGB},0))` }}
         />
       </div>
 
-      {/* Right: everything that supports the reading. */}
-      <aside className="lg:w-1/2 lg:flex-none min-w-0 lg:min-h-0 flex flex-col bg-black/25">
+      {/* Right: everything that supports the reading. A 2% lift rather than the
+          `bg-black/25` it used to carry: the divider already says where the
+          commentary stops, and a darker rectangle beside a lighter one made the
+          step two colours instead of one surface with two halves. */}
+      <aside className="lg:w-1/2 lg:flex-none min-w-0 lg:min-h-0 flex flex-col bg-white/[0.02]">
         {/* The book's background, as a row rather than a button that looked like
             a form field. It answers "who wrote this, when, and why", so it says
             that instead of "Algemene info". */}
@@ -259,7 +262,7 @@ export default function StepDepth({
                 }}
                 aria-label="Vraag het de AI-assistent"
                 placeholder={`Vraag iets over ${book} ${chapter}...`}
-                className={`flex-1 min-w-0 h-10 px-3 rounded-lg border border-white/20 bg-black/40 text-sm text-white placeholder:text-white/45 ${FOCUS_RING}`}
+                className={`flex-1 min-w-0 h-10 px-3 rounded-lg border border-white/20 bg-white/10 text-sm text-white placeholder:text-white/55 ${FOCUS_RING}`}
               />
               <button
                 type="button"

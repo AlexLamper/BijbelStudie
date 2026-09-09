@@ -9,8 +9,9 @@ import { TEAL_ON_DARK } from '../../scene/tokens';
 /**
  * The recovery notice's amber, on the night ground.
  *
- * #D97706 as small type on #0B1220 measures 5.9:1, so on this window the amber
- * can be the brand shade itself rather than the deep end the light card needed
+ * #D97706 as small type on the scene ground measures 5.8:1, so on this window
+ * the amber can be the brand shade itself rather than the deep end the light
+ * card needed
  * (there it was 3.4:1 and failed); the deep end is kept for the fill under the
  * white button label, where white on #B45309 is 5.9:1.
  */
@@ -219,9 +220,10 @@ export default function StepReflection({
         </div>
       )}
 
-      {/* The writing surface stays part of the night: this is the reader's own
-          sentence, not scripture, and white on the window ground measures
-          about 19:1. The one light plate in the flow is the passage. */}
+      {/* The writing surface is the same 6% lift every other input in the flow
+          wears, not a hole cut in the ground: white in it measures 13.5:1 and
+          the placeholder 5.2:1. There are no plates left anywhere in the
+          window - the passage stands on this ground too. */}
       <label htmlFor="study-reflection" className={`mt-6 block text-[10px] font-bold uppercase tracking-[0.16em] ${INK_FAINT}`}>
         Jouw aantekening
       </label>
@@ -234,7 +236,7 @@ export default function StepReflection({
         maxLength={MAX_CHARS}
         placeholder={reflection.placeholder ?? 'Schrijf hier je antwoord...'}
         aria-label="Je reflectie"
-        className={`mt-1.5 w-full rounded-xl border border-white/20 bg-black/40 p-4 text-[15px] leading-relaxed text-white placeholder:text-white/45 resize-y ${FOCUS_RING}`}
+        className={`mt-1.5 w-full rounded-xl border border-white/20 bg-white/[0.06] p-4 text-[15px] leading-relaxed text-white placeholder:text-white/55 resize-y ${FOCUS_RING}`}
       />
 
       <div className={`mt-2 flex items-center justify-between text-xs ${INK_FAINT}`}>

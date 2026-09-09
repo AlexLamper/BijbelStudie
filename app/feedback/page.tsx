@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation"
 import { Star, Loader2, CheckCircle2, AlertCircle } from "lucide-react"
 import SceneShell from "../../components/scene/SceneShell"
 import { Panel, SectionHeading } from "../../components/scene/pieces"
-import { EYEBROW, TEAL_DEEP, TEAL_ON_DARK, TILE } from "../../components/scene/tokens"
+import { EYEBROW, SCENE_BG, TEAL_DEEP, TEAL_ON_DARK, TILE } from "../../components/scene/tokens"
 
 type Category = "bug" | "feature" | "praise" | "other"
 
@@ -151,7 +151,7 @@ export default function FeedbackPage() {
                         backgroundColor: isActive ? TEAL_ON_DARK : "transparent",
                       }}
                     >
-                      {isActive && <span className="h-1.5 w-1.5 rounded-full bg-[#0B1220]" />}
+                      {isActive && <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: SCENE_BG }} />}
                     </span>
                     <span className="min-w-0">
                       <span className="block text-sm font-semibold leading-tight text-white">{c.label}</span>

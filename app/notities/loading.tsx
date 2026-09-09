@@ -1,4 +1,4 @@
-import { SCENE_X, TILE } from "../../components/scene/tokens"
+import { SCENE_BG, SCENE_X, TILE } from "../../components/scene/tokens"
 
 /**
  * Shown while the route segment streams in, so a navigation lands on the page's
@@ -15,7 +15,8 @@ export default function NotitiesLoading() {
     <div
       role="status"
       aria-label="Notities laden"
-      className={`min-h-screen w-full min-w-0 bg-[#0B1220] pt-6 ${SCENE_X}`}
+      className={`min-h-screen w-full min-w-0 pt-6 ${SCENE_X}`}
+      style={{ backgroundColor: SCENE_BG }}
     >
       {/* the sky: eyebrow, heading, one line of copy, the one action */}
       <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-6 pb-10">

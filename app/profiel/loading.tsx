@@ -1,19 +1,20 @@
 import { SceneSkeleton } from "../../components/scene/pieces"
-import { SCENE_X } from "../../components/scene/tokens"
+import { SCENE_BG, SCENE_X } from "../../components/scene/tokens"
 
 /**
  * Shown while the route segment streams in, so a navigation lands on the page's
  * own shape instead of an empty frame. It unmounts as soon as the page
  * component mounts - nothing here holds it open.
  *
- * It stands on the scene's own ground (`#0B1220`, written out because Tailwind
- * reads class names as literal text) with white-on-dark blocks, so the frame
+ * It stands on the scene's own ground (`SCENE_BG`, set through `style` because
+ * Tailwind never generates a class built from a constant) with white-on-dark
+ * blocks, so the frame
  * before the landscape arrives already belongs to the picture rather than
  * flashing a white page at the reader.
  */
 export default function ProfielLoading() {
   return (
-    <div role="status" aria-label="Profiel laden" className="min-h-screen w-full bg-[#0B1220]">
+    <div role="status" aria-label="Profiel laden" className="min-h-screen w-full" style={{ backgroundColor: SCENE_BG }}>
       <div className={`${SCENE_X} pb-20 pt-24`}>
         <div className="max-w-[46rem] space-y-4">
           <SceneSkeleton className="h-3 w-24" />

@@ -7,7 +7,7 @@
  * a landscape running behind a table of accounts is actively hostile to that.
  *
  * So admin keeps the world and gives up the picture. `DATA_PANEL` is a
- * near-opaque plate in the shell's own ground colour (#0B1220): the scene is
+ * near-opaque plate in the shell's own ground colour (SCENE_BG): the scene is
  * still there at the edges of the page and behind the heading, but the moment
  * a figure or a row appears it sits on something the reader can trust. That is
  * a deliberate departure from PANEL/PANEL_DEEP in components/scene/tokens.ts,
@@ -17,6 +17,11 @@
  * theme token flips with the reader's light/dark setting and the landscape does
  * not. The teal values are NOT restated here - import them from
  * components/scene/tokens.ts.
+ *
+ * `8, 26, 29` in the two plate values IS `SCENE_BG`. Tailwind reads class names
+ * as literal text and never generates a class built from a constant, so this is
+ * the one place the ground is written out - and it moves by hand the day
+ * SCENE_BG moves.
  *
  * No imports and no "use client": plain strings.
  */
@@ -30,13 +35,13 @@
  * left the world it belongs to.
  */
 export const DATA_PANEL =
-  "rounded-2xl bg-[rgba(11,18,32,0.92)] ring-1 ring-white/15 shadow-[0_24px_60px_-32px_rgba(0,0,0,0.9)]"
+  "rounded-2xl bg-[rgba(8,26,29,0.92)] ring-1 ring-white/15 shadow-[0_24px_60px_-32px_rgba(0,0,0,0.9)]"
 
 /**
  * The lighter plate, for a figure that only has to hold two lines - a KPI, a
  * counter. Still opaque enough that a number never sits on moving colour.
  */
-export const DATA_TILE = "rounded-xl bg-[rgba(11,18,32,0.82)] ring-1 ring-white/15"
+export const DATA_TILE = "rounded-xl bg-[rgba(8,26,29,0.82)] ring-1 ring-white/15"
 
 /**
  * An inset block INSIDE a DATA_PANEL - a mini stat, a webhook readout. A film

@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 
 import StudyStepRail, { STEP_LABELS } from './StudyStepRail';
-import { FOCUS_RING, INK, INK_FAINT, INK_MUTED, RULE } from './lesson-layout';
+import { FOCUS_RING, INK, INK_FAINT, INK_MUTED, RULE, scrim } from './lesson-layout';
 import { EYEBROW, PANEL_DEEP, SCENE_BG, TEAL_DEEP, TEAL_ON_DARK } from '../../scene/tokens';
 import StepIntro from './StepIntro';
 import StepWord from './StepWord';
@@ -48,7 +48,7 @@ import {
  * Every colour on this screen now comes from that file. The window no longer
  * answers the reader's light/dark setting, so teal as TYPE no longer needs a
  * class pair either: the ground under it is the scene's night in both themes,
- * and TEAL_ON_DARK (#2DD4BF, 10.1:1 on #0B1220) is the one legible shade there.
+ * and TEAL_ON_DARK (#2DD4BF, 9.9:1 on the ground) is the one legible shade there.
  * TEAL stays the fill that carries no type - the rail's bar, a dot, a check -
  * and TEAL_DEEP any solid fill with white type on it.
  */
@@ -839,7 +839,7 @@ export default function StudyFlowShell({
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15 }}
-                style={{ backgroundColor: 'rgba(11,18,32,0.35)' }}
+                style={{ backgroundColor: scrim(0.35) }}
               />
               <motion.div
                 role="dialog"

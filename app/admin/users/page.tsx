@@ -15,7 +15,7 @@ import { Input } from "../../../components/ui/input"
 import { ProBadge } from "../../../components/ui/ProBadge"
 import SceneShell from "../../../components/scene/SceneShell"
 import { SceneSkeleton, SectionHeading } from "../../../components/scene/pieces"
-import { EYEBROW, TEAL_DEEP, TEAL_ON_DARK } from "../../../components/scene/tokens"
+import { EYEBROW, SCENE_BG_RGB, TEAL_DEEP, TEAL_ON_DARK } from "../../../components/scene/tokens"
 import {
   ADMIN_CHIP,
   ADMIN_CHIP_ACTIVE,
@@ -460,7 +460,7 @@ export default function AdminUsersPage() {
             style={
               toast.type === "ok"
                 ? {
-                    backgroundColor: "rgba(11,18,32,0.96)",
+                    backgroundColor: `rgba(${SCENE_BG_RGB},0.96)`,
                     color: "#FFFFFF",
                     boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.18), 0 18px 40px -18px rgba(0,0,0,0.9)",
                   }

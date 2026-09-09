@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useMemo } from 'react';
 import { buildPalette } from '../../lib/levensboom/palette';
-import { SCENE_BG } from '../scene/tokens';
+import { SCENE_BG, SCENE_BG_RGB } from '../scene/tokens';
 
 /**
  * Deferred, because it cannot paint any sooner than this anyway: the canvas is
@@ -18,11 +18,11 @@ import { SCENE_BG } from '../scene/tokens';
 const TreeCanvas = dynamic(() => import('../levensboom/TreeCanvas'), { ssr: false });
 
 /**
- * `SCENE_BG` (#0B1220) as rgba, so the washes over the tree fade to exactly the
- * ground the immersive shell paints. Written out rather than derived, because
- * these are CSS gradient strings.
+ * `SCENE_BG` as rgba, so the washes over the tree fade to exactly the ground
+ * the immersive shell paints. Built from the token's own channels rather than
+ * written out, so the two can never drift.
  */
-const GROUND = 'rgba(11,18,32,';
+const GROUND = `rgba(${SCENE_BG_RGB},`;
 
 /*
  * The falloff.

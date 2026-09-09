@@ -1,4 +1,4 @@
-import { SCENE_X, TILE } from "../../components/scene/tokens";
+import { SCENE_BG, SCENE_X, TILE } from "../../components/scene/tokens";
 
 /**
  * Shown while the route segment streams in, so a navigation lands on the page's
@@ -15,7 +15,8 @@ export default function DashboardLoading() {
     <div
       role="status"
       aria-label="Dashboard laden"
-      className={`min-h-screen w-full min-w-0 bg-[#0B1220] pt-5 ${SCENE_X}`}
+      className={`min-h-screen w-full min-w-0 pt-5 ${SCENE_X}`}
+      style={{ backgroundColor: SCENE_BG }}
     >
       <div className="flex min-h-[calc(100vh-3.5rem)] flex-col justify-between pb-32">
         <div className="h-3.5 w-36 rounded bg-white/15" />

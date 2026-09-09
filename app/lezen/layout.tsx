@@ -4,7 +4,6 @@ import { authOptions } from "../../lib/authOptions";
 import SessionProvider from "../../components/providers/SessionProvider";
 import { SidebarProvider } from "../../components/ui/sidebar";
 import SceneShell from "../../components/scene/SceneShell";
-import { SCENE_TREE, sceneSvg } from "../../components/scene/scene-svg";
 import { cookies } from "next/headers";
 import { cookieName, fallbackLng } from "../i18n/settings";
 import { generatePageMetadata } from "../../lib/pageMetadata";
@@ -24,24 +23,23 @@ export async function generateMetadata(): Promise<Metadata> {
  * layout below is unchanged by that; it is written down here because the two
  * are read together.
  *
- * The shell is assembled HERE rather than in the page, for two reasons that
- * only apply to this route:
+ * The shell is assembled HERE rather than in the page so that
+ * app/lezen/loading.tsx streams into the same frame instead of into an empty
+ * dark screen.
  *
- *  - The backdrop is the server-rendered SVG (`sceneSvg()`), and
- *    components/scene/scene-svg.ts imports the tree generator, which has no
- *    business in a browser bundle - it may only be called from a server
- *    component. app/lezen/page.tsx is "use client", so the layout is the one
- *    place on this route that can draw the picture. /abonnement does the same.
- *  - app/lezen/loading.tsx then streams into the same frame instead of an empty
- *    dark screen.
+ * `backdrop="none"`, and that is the whole of the navbar fix on this route. The
+ * shell's bar is transparent, so it shows what is behind it; this page paints
+ * an opaque room from the underside of that bar to all four edges. With a
+ * landscape behind the shell you therefore got a photograph in the bar and flat
+ * ground everywhere else, meeting at a hard line - a picture nobody could see
+ * any of, paid for with the seam. With no picture the shell paints its flat
+ * ground across the whole viewport, the room lets it through, the bar shows
+ * exactly that, and bar and page are one surface. See THE ONE BACKGROUND RULE
+ * in components/scene/SceneShell.tsx.
  *
- * No `gateId`, deliberately. Naming a gate is what lets SceneBackdrop upgrade
- * the still SVG to a live canvas; without one there is no canvas on this route
- * at any point. /lezen is the heaviest route in the app and the one someone
- * sits on for twenty minutes, so it gets the picture and none of the loop -
- * and for the same reason it is `static` rather than `reader`, whose
- * ProgressTreeScene mounts a TreeCanvas that a fixed, full-bleed layer can
- * never scroll out of view to stop.
+ * It also takes the tree generator, the server SVG and the canvas gate off the
+ * heaviest route in the app - which is the route someone sits on for twenty
+ * minutes, and the one that must never have anything moving behind the text.
  *
  * `gutter="none"`: the reader has no horizontal padding at all, at any width -
  * the room runs edge to edge and the rail floats over it, with only the
@@ -70,7 +68,7 @@ export default async function ReadLayout({
   return (
     <SessionProvider session={session}>
       <SidebarProvider>
-        <SceneShell svg={sceneSvg()} {...SCENE_TREE} header rail gutter="none">
+        <SceneShell backdrop="none" header rail gutter="none">
           {children}
         </SceneShell>
       </SidebarProvider>

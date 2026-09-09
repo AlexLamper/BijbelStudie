@@ -1,5 +1,5 @@
 import { SkeletonBlock } from "../../components/ui/skeletons"
-import { PANEL, SCENE_X, SKEL } from "../../components/scene/tokens"
+import { PANEL, SCENE_BG, SCENE_X, SKEL } from "../../components/scene/tokens"
 
 /**
  * Shown while the route segment streams in, so a navigation lands on the page's
@@ -7,9 +7,9 @@ import { PANEL, SCENE_X, SKEL } from "../../components/scene/tokens"
  * component mounts - nothing here holds it open.
  *
  * The layout is providers only, so this renders on the bare page: it draws the
- * scene's own ground colour itself (`#0B1220`, SCENE_BG, written out because
- * Tailwind reads class names as literal text and never generates a class it
- * only ever sees spliced in from a constant) and dresses its blocks in the
+ * scene's own ground colour itself (`SCENE_BG`, set through `style` because
+ * Tailwind never generates a class built from a constant) and dresses its
+ * blocks in the
  * scene's skeleton tint rather than the theme's, which is invisible on a dark
  * ground in dark mode.
  *
@@ -25,7 +25,8 @@ export default function InstellingenLoading() {
     <div
       role="status"
       aria-label="Instellingen laden"
-      className={`min-h-screen w-full bg-[#0B1220] pb-20 pt-24 ${SCENE_X}`}
+      className={`min-h-screen w-full pb-20 pt-24 ${SCENE_X}`}
+      style={{ backgroundColor: SCENE_BG }}
     >
       {/* The sky */}
       <div className="max-w-[46rem] space-y-3">
