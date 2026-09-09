@@ -1,15 +1,69 @@
+import {
+  CTA_BRAND as SCENE_CTA_BRAND,
+  CTA_PRIMARY as SCENE_CTA_PRIMARY,
+  CTA_QUIET as SCENE_CTA_QUIET,
+  PANEL as SCENE_PANEL,
+  SCENE_X_EDGE,
+  SECTION_Y as SCENE_SECTION_Y,
+  TEAL as SCENE_TEAL,
+  TEAL_DEEP as SCENE_TEAL_DEEP,
+  TEAL_ON_DARK as SCENE_TEAL_ON_DARK,
+  TILE as SCENE_TILE,
+} from "../../scene/tokens"
+
 /**
  * The small parts the /proeflanding experiment is assembled from.
  *
- * Same rule as the dashboard candidate this page takes its language from
- * (components/dashboard/scene/pieces.tsx): everything here is drawn to
- * sit ON a landscape, so every colour is a literal white or black and never a
- * theme token. A token flips with the visitor's theme; the thing underneath
- * these is a picture, and it does not.
+ * The colours, the surfaces and the calls to action are not defined here any
+ * more: they come from components/scene/tokens.ts, where the scene design
+ * system lives. This file re-exports them under the names the page already
+ * uses, so there is one import site to fix if that vocabulary moves, and adds
+ * only what is genuinely local to a marketing page - the scrim, the section
+ * heading and the figures on the horizon.
+ *
+ * The rule those tokens encode still governs everything here: every surface on
+ * this page sits ON a landscape, so every colour is a literal white or black
+ * and never a theme token. A token flips with the visitor's light/dark setting;
+ * the picture underneath does not.
  *
  * No "use client" - nothing in this file holds state, so it renders on the
- * server and the marketing copy inside it is in the served HTML.
+ * server and the marketing copy inside it is in the served HTML. tokens.ts is
+ * plain strings with no imports of its own, so reading from it pulls no client
+ * module into this graph.
  */
+
+export const TEAL = SCENE_TEAL
+export const TEAL_DEEP = SCENE_TEAL_DEEP
+export const TEAL_ON_DARK = SCENE_TEAL_ON_DARK
+
+/**
+ * One surface for everything below the hero: `bg-black/40` behind a blur, the
+ * dashboard's tile unchanged.
+ *
+ * The page used to carry two more. A `bg-black/80` panel for the long ledgers,
+ * and a light `#F9FAFB` plate under the two demos that are drawn for a white
+ * page. Both are gone: a light rectangle laid over a night landscape reads as a
+ * hole punched in the picture, and the content that needed the heavier panel -
+ * an eight-row library, a plan matrix, a twelve-question accordion - is not on
+ * the page any more either.
+ */
+export const PANEL = SCENE_PANEL
+export const TILE = SCENE_TILE
+
+/** One vertical rhythm for every section below the fold. */
+export const SECTION_Y = SCENE_SECTION_Y
+
+/**
+ * The full-bleed gutter, for the two things that run edge to edge: the navbar
+ * and the first screen. No `max-width` and no `mx-auto` - the copy is capped at
+ * its own reading measure and anchored to the left scrim instead, so a wide
+ * monitor gets more landscape rather than more margin.
+ */
+export const EDGE_X = SCENE_X_EDGE
+
+export const CTA_PRIMARY = SCENE_CTA_PRIMARY
+export const CTA_BRAND = SCENE_CTA_BRAND
+export const CTA_QUIET = SCENE_CTA_QUIET
 
 /**
  * The element whose visibility decides whether the live canvas runs behind the
@@ -18,72 +72,22 @@
  */
 export const HERO_GATE_ID = "proefland-scene-gate"
 
-/** Brand teal, hardcoded. Fills that carry no type: bars, dots, rings. */
-export const TEAL = "#0D9488"
 /**
- * The brand one step down, for a solid button that carries white type. White on
- * #0D9488 measures 3.74:1 and does not clear 4.5:1 at button-label size; on
- * #0F766E it measures 5.5:1. This is the same value the live landing page's
- * buttons already use (`bg-teal-700`), so nothing about the brand shifts.
+ * The container the sections below the hero sit in.
+ *
+ * Narrower than the live landing page's shell on purpose: there is no ledger
+ * and no three-column carousel left to carry, and four short sections read
+ * better at one measure than spread across a wide monitor.
  */
-export const TEAL_DEEP = "#0F766E"
-/** The same brand on a dark ground, as the dashboard's dark branch uses it. */
-export const TEAL_ON_DARK = "#2DD4BF"
+export const SHELL = "mx-auto w-full max-w-5xl px-5 sm:px-6 lg:px-8"
 
 /**
- * The container the reading sections sit in, matching the live landing page's
- * shell exactly so the two pages are comparable side by side. Below the fold a
- * measure is a kindness; above it, it is a box.
+ * The eyebrow, one step brighter than the scene system's default.
+ *
+ * The dashboard's eyebrows sit inside a panel; every eyebrow on this page sits
+ * on the picture itself, on a scrim, where `text-white/60` is thin.
  */
-export const SHELL = "mx-auto w-full max-w-6xl xl:max-w-[76rem] px-5 sm:px-6 lg:px-8"
-
-/**
- * The full-bleed gutter, for the two things that must run edge to edge: the
- * navbar and the first screen. No `max-width` and no `mx-auto` - the copy is
- * capped at its own reading measure and anchored to the left scrim instead, so
- * a wide monitor gets more landscape rather than more margin. The navbar shares
- * it so the wordmark lines up with the headline underneath it.
- */
-export const EDGE_X = "px-5 sm:px-8 lg:px-14 xl:px-20"
-
-/** One vertical rhythm for every section below the fold. */
-export const SECTION_Y = "py-[clamp(3.5rem,6vw,6rem)]"
-
 export const EYEBROW = "text-[11px] font-semibold uppercase tracking-[0.14em] text-white/80"
-
-/**
- * A working panel: dark enough to read a paragraph on, translucent enough that
- * the landscape is still visibly the thing underneath.
- *
- * The promoted dashboard has since unified its panel with its tile at
- * `bg-black/40`. That holds there, where a panel carries a label and a number;
- * this page's panels carry a ledger of eight sources, a plan comparison and a
- * twelve-question accordion, and the veil that protects them is 0 for a
- * reduced-motion visitor by design (see useSceneScroll). At black/80 the copy
- * clears 12:1 no matter what is behind it. If the lighter glass is wanted here
- * too, this one line is the whole change: `PANEL = TILE`.
- */
-export const PANEL = "rounded-2xl bg-black/80 ring-1 ring-white/10 backdrop-blur-md"
-
-/** Smoked glass, for the figures that break the fold. A frosted *white* tile
- *  over a bright horizon measures around 2.8:1 for white type; turning the same
- *  tile dark keeps the landscape running through it and puts the figures back
- *  above 4.5:1. */
-export const TILE = "rounded-2xl border border-white/20 bg-black/40 backdrop-blur-md"
-
-/**
- * The light plate.
- *
- * The two live demos on this page (the lesson player and the growth demo) are
- * the product itself, and both are drawn for a white page: their captions,
- * sliders and chips are #4B5563 on white and would fail outright on a dark
- * panel. Rather than fork them, they are laid on the scene as lit objects -
- * the same move the accepted dashboard makes with the daily-verse card. It also
- * puts the two things that prove the product works in the only light surfaces
- * on the page, which is where the eye goes first.
- */
-export const PLATE =
-  "rounded-3xl bg-[#F9FAFB] ring-1 ring-black/5 shadow-[0_40px_80px_-32px_rgba(0,0,0,0.85)]"
 
 export const TYPE = {
   h1: "clamp(2.25rem, 1.35rem + 2.6vw, 4rem)",
@@ -190,24 +194,3 @@ export function GlassStat({
     </div>
   )
 }
-
-/* ── Calls to action ──────────────────────────────────────────── */
-
-/**
- * The primary action on the scene: white, because white on a photograph is the
- * only fill that is guaranteed to separate from whatever is behind it. The
- * focus ring is brand teal, which reads against the white pill.
- */
-export const CTA_PRIMARY =
-  "press group inline-flex items-center justify-center gap-2 rounded-full bg-white px-7 py-4 text-base font-semibold text-gray-900 no-underline shadow-xl shadow-black/40 outline-none transition-colors hover:bg-white/90 focus-visible:ring-2 focus-visible:ring-[#0D9488] focus-visible:ring-offset-2 focus-visible:ring-offset-black"
-
-/** The same action inside a panel, where the brand fill has a dark ground to
- *  sit on. Callers set `backgroundColor: TEAL_DEEP`; the hover is teal-800. The
- *  ring flips to white, which is the only thing that reads on the fill. */
-export const CTA_BRAND =
-  "press inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white no-underline outline-none transition-colors hover:bg-[#115E59] focus-visible:ring-2 focus-visible:ring-white"
-
-/** A quiet second action: type only, underlined on hover, with a real focus
- *  ring rather than a removed outline. */
-export const CTA_QUIET =
-  "inline-flex items-center gap-1.5 rounded-md text-sm font-semibold text-white/85 no-underline underline-offset-4 outline-none transition-colors hover:text-white hover:underline focus-visible:ring-2 focus-visible:ring-white"

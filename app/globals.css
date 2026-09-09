@@ -279,3 +279,28 @@ html.is-stuck .nav-shadow {
 @media (prefers-reduced-motion: no-preference) {
   .skeleton-pulse { animation: skeleton-pulse 1.6s ease-in-out infinite; }
 }
+
+/* ─── The scene's travelling layers ─────────────────────────────
+   Two classes for the two layers that move over a fixed, full-bleed scene, fed
+   by the custom properties components/scene/useSceneDepth.ts publishes on the
+   page root. `.scene-sky` is the screen of copy set straight into the
+   landscape; `.scene-horizon` is whatever breaks the fold under it, trailing
+   the sky at a third of the distance - which is what reads as depth rather
+   than as one block moving.
+
+   Classes rather than inline styles so reduced motion is answered in CSS: this
+   block opts IN to motion, so a reader who asked for less gets no transform,
+   no opacity change and no `will-change` at all, and a page never needs to
+   branch on a hook to arrange that. */
+@media (prefers-reduced-motion: no-preference) {
+  .scene-sky {
+    transform: translate3d(0, calc(var(--lift, 0) * -56px), 0);
+    opacity: var(--fade, 1);
+    will-change: transform, opacity;
+  }
+
+  .scene-horizon {
+    transform: translate3d(0, calc(var(--lift, 0) * -18px), 0);
+    will-change: transform;
+  }
+}
