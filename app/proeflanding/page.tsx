@@ -1,14 +1,12 @@
 import type { Metadata } from "next"
 import { Footer } from "../../components/landing/footer"
 import { LANDING_SEED, SCENE_LEVEL, sceneSvg } from "../../components/landing/proef/content"
-import { GrowthSection, LessonSection } from "../../components/landing/proef/DemoSections"
 import HeroStage from "../../components/landing/proef/HeroStage"
 import {
   ClosingSection,
-  FaqSection,
-  LibrarySection,
+  LessonSection,
+  OverviewSection,
   PricingSection,
-  StudiesSection,
 } from "../../components/landing/proef/PageSections"
 import SceneShell from "../../components/landing/proef/SceneShell"
 
@@ -18,7 +16,7 @@ import SceneShell from "../../components/landing/proef/SceneShell"
  * The live landing page at app/page.tsx is untouched and keeps working exactly
  * as it does today; this route stages the same product in the visual language
  * of the dashboard design that was just accepted and promoted onto /dashboard
- * (components/dashboard/scene/): one fixed,
+ * (components/scene/): one fixed,
  * full-bleed scene that never moves, content travelling over it in layers,
  * literal scrims doing the contrast work, dark glass panels, and #2DD4BF as the
  * accent on dark against #0D9488 as the brand fill.
@@ -50,14 +48,18 @@ export const dynamic = "force-static"
 export default function ProeflandingPage() {
   return (
     <SceneShell sceneSvg={sceneSvg()} seed={LANDING_SEED} level={SCENE_LEVEL}>
+      {/* Four short sections under the hero, and then the footer. The scene is
+          the design: everything here is either type on it behind a scrim or one
+          panel of the same dark glass the dashboard uses. The library ledger,
+          the study cards, the plan matrix, the FAQ accordion and both live
+          demos were cut - a landing page owes a visitor what this is, a few
+          things that are concretely true, the price and one way in. The rest is
+          one click away on the pages that exist for it. */}
       <main>
         <HeroStage />
+        <OverviewSection />
         <LessonSection />
-        <GrowthSection />
-        <StudiesSection />
-        <LibrarySection />
         <PricingSection />
-        <FaqSection />
         <ClosingSection />
       </main>
       {/* The footer is the one solid ground on the page: the scene runs behind

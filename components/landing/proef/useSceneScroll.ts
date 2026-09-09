@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react"
 /**
  * The scroll engine for the /proeflanding experiment.
  *
- * Deliberately a copy of components/dashboard/scene/useDepthScroll.ts
+ * Deliberately a copy of components/scene/useSceneDepth.ts
  * rather than an import: the two experiments are separate and must be able to
  * drift apart (or be deleted) without touching each other. The mechanism is
  * identical, and so are the three numbers it publishes as CSS custom
@@ -31,9 +31,11 @@ import { useEffect, useRef, useState } from "react"
  * `prefers-reduced-motion` writes `--veil: 1`, because that page's working
  * panels start almost at the top and the veil is what makes them readable.
  * Here the veil is atmosphere only - every piece of copy on this page sits
- * either inside an opaque panel or on its own literal scrim - so the settled
- * state leaves the landscape at full strength (`--veil: 0`) instead of handing
- * a reduced-motion visitor a permanently dimmed picture.
+ * either on the dark glass panel (`bg-black/40` behind a blur, which carries
+ * white type at 4.5:1 over a noon sky and this page never shows one: its scene
+ * is fixed at dusk) or on its own literal scrim - so the settled state leaves
+ * the landscape at full strength (`--veil: 0`) instead of handing a
+ * reduced-motion visitor a permanently dimmed picture.
  */
 
 /** The scene navbar is h-14, like components/layout/header.tsx. */

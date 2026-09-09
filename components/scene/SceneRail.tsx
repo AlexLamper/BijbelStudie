@@ -7,7 +7,8 @@ import {
   BookMarked, BookOpen, LayoutDashboard, MessageSquareText,
   Settings, ShieldCheck, StickyNote, User,
 } from "lucide-react"
-import { useStudyStyle } from "../../providers/study-style-provider"
+import { useStudyStyle } from "../providers/study-style-provider"
+import { TEAL_ON_DARK } from "./tokens"
 
 /**
  * The sidebar, solved for a full-bleed scene.
@@ -37,8 +38,6 @@ import { useStudyStyle } from "../../providers/study-style-provider"
  * The items and the links are the real ones, read off app-sidebar.tsx, in the
  * order that file's `useStudyStyle` puts them in.
  */
-
-const TEAL_ON_DARK = "#2DD4BF"
 
 interface NavItem {
   title: string

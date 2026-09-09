@@ -17,18 +17,20 @@ import { EDGE_X, TEAL_DEEP } from "./pieces"
  * straight through it. components/layout/header.tsx cannot be used either - it
  * returns null without a session, and a landing page has none.
  *
- * Destinations are the shipped landing page's, unchanged: the progress
- * section, the prices and the FAQ, with Inloggen and Gratis beginnen on the
- * right. Both calls to action point at /inloggen, exactly as they do today.
+ * Destinations are the three sections that are actually on the page, with
+ * Inloggen and Gratis beginnen on the right. Both calls to action point at
+ * /inloggen, exactly as they do today.
  *
  * Sticky rather than fixed, at h-14, so the hero's `min-h-[calc(100vh-3.5rem)]`
  * fills precisely the rest of the first screen.
  */
 
+/** The progress section and the FAQ this bar used to point at were cut from the
+ *  page; a nav link to an anchor that is not in the document is a dead link. */
 const LINKS = [
-  { href: "#voortgang", label: "Voortgang" },
+  { href: "#wat-het-is", label: "Wat het is" },
+  { href: "#in-actie", label: "Zo werkt het" },
   { href: "#prijzen", label: "Prijzen" },
-  { href: "#faq", label: "FAQ" },
 ]
 
 export default function SceneNavbar() {

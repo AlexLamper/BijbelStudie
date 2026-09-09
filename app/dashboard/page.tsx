@@ -3,10 +3,8 @@
 import { useState } from "react"
 import Link from "next/link"
 import { ArrowRight, Clock } from "lucide-react"
-import { Header } from "../../components/layout/header"
 import { CHAPTER_COUNTS } from "../../lib/data/bible-chapter-counts"
-import { BADGE_STYLES, curatedStudies } from "../../lib/data/curated-studies"
-import { versionAbbreviation } from "../../lib/dailyVerseStore"
+import { curatedStudies } from "../../lib/data/curated-studies"
 import {
   NT_BOOKS,
   OT_BOOKS,
@@ -15,21 +13,25 @@ import {
   useDashboardData,
 } from "../../hooks/useDashboardData"
 import BillingNotices from "../../components/pricing/BillingNotices"
-import DailyVerseCard from "../../components/dashboard/DailyVerseCard"
-import { ProgressTreeScene, useTreeSummary } from "../../components/dashboard/ProgressTree"
-import { SkeletonBlock } from "../../components/ui/skeletons"
-import SceneRail from "../../components/dashboard/scene/SceneRail"
-import { useDepthScroll } from "../../components/dashboard/scene/useDepthScroll"
-import {
-  EYEBROW,
-  GlassStat,
-  PANEL,
-  SKEL,
-  TEAL,
-  TEAL_ON_DARK,
-  Total,
-  WeekStrip,
-} from "../../components/dashboard/scene/pieces"
+import { useTreeSummary } from "../../components/dashboard/ProgressTree"
+import SceneShell from "../../components/scene/SceneShell"
+import { GlassStat, SceneSkeleton, SectionHeading, Total, WeekStrip } from "../../components/scene/pieces"
+import { EYEBROW, PANEL, TEAL_ON_DARK } from "../../components/scene/tokens"
+
+/**
+ * A row in one of the two ledgers at the bottom of the work column.
+ *
+ * Two columns from `sm` up - a margin and the line itself - and one stacked
+ * column below it, where 8.5rem of margin would leave nothing for the words.
+ */
+const LEDGER_ROW = "sm:grid sm:grid-cols-[8.5rem_minmax(0,1fr)] sm:items-baseline sm:gap-x-5"
+
+/**
+ * The same row as a link. It bleeds two pixels past the column so the hover
+ * wash reads as a row rather than as a box drawn around the type.
+ */
+const LEDGER_LINK =
+  "-mx-2 block rounded-lg px-2 no-underline outline-none transition-colors hover:bg-white/[0.06] focus-visible:ring-2 focus-visible:ring-white"
 
 /**
  * The dashboard.
@@ -49,22 +51,27 @@ import {
  *                     carries the standing figures, and the work on the right,
  *                     which is the only thing that scrolls
  *
- * The content set is the live dashboard's, whole: greeting, resume, daily
- * verse, streak and week, level and XP, notes, the 66 books, the studies and
- * the quick links.
+ * The content set: greeting, streak and week, level and XP, the 66 books, the
+ * recent notes and the recommended studies. The resume panel and the daily
+ * verse card that used to sit in the work column are gone - the one action in
+ * the sky already resumes the reading, and the verse card is drawn for a white
+ * page.
+ *
+ * The window itself - the root, the fixed scene and its scrims, the navbar, the
+ * rail and the content gutter - is components/scene/SceneShell.tsx, which every
+ * immersive page in the app now shares. This page brings only its three layers.
  *
  * Chrome: the real navbar, imported unchanged. The sidebar is the piece that
- * had to give - see components/dashboard/scene/SceneRail.tsx.
+ * had to give - see components/scene/SceneRail.tsx.
  *
  * Motion: one passive, rAF-throttled scroll listener publishing three CSS
- * variables (see useDepthScroll.ts). Every consumer of them touches `transform`
- * or `opacity` and nothing else, and `prefers-reduced-motion` gets the settled
- * state with no scroll effects at all.
+ * variables (see components/scene/useSceneDepth.ts). Every consumer of them
+ * touches `transform` or `opacity` and nothing else, and `prefers-reduced-
+ * motion` gets the settled state with no scroll effects at all.
  */
 export default function DashboardPage() {
   const d = useDashboardData()
   const tree = useTreeSummary()
-  const { rootRef, reducedMotion } = useDepthScroll()
 
   const nextHref = d.lastRead ? readHref(d.lastRead.book, d.lastRead.chapter, d.lastRead.version) : "/studie"
   const dayWord = (n: number) => (n === 1 ? "dag" : "dagen")
@@ -78,78 +85,22 @@ export default function DashboardPage() {
 
   const [hoveredBook, setHoveredBook] = useState<string | null>(null)
 
-  /** Seeded here so the first paint is defined; the hook drives them after that. */
-  const sceneVars: React.CSSProperties & Record<string, string> = {
-    "--lift": "0",
-    "--fade": "1",
-    "--veil": reducedMotion ? "1" : "0",
-  }
-
-  /** The sky layer recedes; the horizon numbers trail it at a third of the distance. */
-  const skyMotion: React.CSSProperties = reducedMotion
-    ? {}
-    : {
-        transform: "translate3d(0, calc(var(--lift, 0) * -56px), 0)",
-        opacity: "var(--fade, 1)",
-        willChange: "transform, opacity",
-      }
-  const horizonMotion: React.CSSProperties = reducedMotion
-    ? {}
-    : { transform: "translate3d(0, calc(var(--lift, 0) * -18px), 0)", willChange: "transform" }
-
   return (
-    // `w-full min-w-0` is load-bearing: SidebarProvider wraps this page in a
-    // `flex` row, and a flex child without them is sized to its content rather
-    // than to the viewport - which is what cut the navbar and the panels short
-    // of the right edge.
-    <div ref={rootRef} style={sceneVars} className="relative min-h-screen w-full min-w-0 bg-[#0B1220]">
-      {/* -- The scene. Fixed, full-bleed, never moves. Runs from the very
-             top of the viewport, so it is behind the navbar too. -------- */}
-      <div className="pointer-events-none fixed inset-0 z-0">
-        <ProgressTreeScene />
-        {/* A constant floor of dark, so the copy is legible from the first
-            frame - including the frame in which the scene is still its own
-            loading skeleton and therefore pale grey. */}
-        <span aria-hidden className="absolute inset-0 bg-black/25" />
-        {/* The left scrim carries the rail and the greeting ... */}
-        <span
-          aria-hidden
-          className="absolute inset-y-0 left-0 w-[min(46rem,78%)] bg-gradient-to-r from-black/85 via-black/45 to-transparent"
-        />
-        {/* ... the bottom one carries the numbers that break the fold. */}
-        <span aria-hidden className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/85 to-transparent" />
-        {/* The veil: the scene goes deep as the working panels arrive. */}
-        <span aria-hidden className="absolute inset-0 bg-black/55" style={{ opacity: "var(--veil, 0)" }} />
-      </div>
-
-      {/* The real navbar, in its scene variant: transparent, hairline in
-          white, own dark scope. The landscape runs straight through it, which
-          is what makes the experience cover the whole screen. */}
-      <Header variant="scene" />
-      {/* A permanent band of dark under the top edge so the bar's own title and
-          controls stay legible over a noon sky, deepening as the page scrolls. */}
-      <span
-        aria-hidden
-        className="pointer-events-none fixed inset-x-0 top-0 z-40 h-24 bg-gradient-to-b from-black/55 via-black/25 to-transparent"
-      />
-      <span
-        aria-hidden
-        className="pointer-events-none fixed inset-x-0 top-14 z-40 h-8 bg-gradient-to-b from-black/45 to-transparent"
-        style={{ opacity: "var(--veil, 0)" }}
-      />
-
-      <SceneRail />
-
+    // The reader's OWN tree is the scene here, so `backdrop="reader"`; every
+    // page with no session guaranteed uses the static one instead. The shell
+    // owns the root, the scene, the scrims, the navbar, the rail and the
+    // gutter - see components/scene/README.md.
+    <SceneShell backdrop="reader" header rail>
       {/* -- Layer 1: the sky ------------------------------------------ */}
       <section
         aria-labelledby="diepte-titel"
-        className="relative z-10 flex min-h-[calc(100vh-3.5rem)] flex-col justify-between px-5 pb-32 pt-5 sm:px-8 lg:pl-24 lg:pr-10 xl:pl-28 xl:pr-16"
+        className="flex min-h-[calc(100vh-3.5rem)] flex-col justify-between pb-32 pt-5"
       >
         <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
           {d.dateLabel ? (
             <p className="text-sm text-white/80">{d.dateLabel}</p>
           ) : (
-            <SkeletonBlock className={`h-3.5 w-36 ${SKEL}`} />
+            <SceneSkeleton className="h-3.5 w-36" />
           )}
           <Link
             href="/dashboard"
@@ -159,8 +110,12 @@ export default function DashboardPage() {
           </Link>
         </div>
 
-        <div className="max-w-[46rem]" style={skyMotion}>
-          <p className={EYEBROW}>
+        <div className="scene-sky max-w-[46rem]">
+          {/* The one line of colour up here. It is the reader's own standing -
+              the stage their tree is in - so it is the thing on this screen
+              that has earned an accent; everything else stays white on the
+              landscape. */}
+          <p className={EYEBROW} style={{ color: TEAL_ON_DARK }}>
             {tree.hasTree && tree.stageName ? `${tree.stageName} - niveau ${level}` : `Niveau ${level}`}
           </p>
 
@@ -173,7 +128,7 @@ export default function DashboardPage() {
           >
             {d.greeting ? <span className="content-in">{d.greeting}</span> : <span className="sr-only">Dashboard</span>}
           </h1>
-          {!d.greeting && <SkeletonBlock className={`mt-3 h-14 w-[26rem] max-w-full ${SKEL}`} />}
+          {!d.greeting && <SceneSkeleton className="mt-3 h-14 w-[26rem] max-w-full" />}
 
           <p className="mt-4 max-w-[34rem] text-base leading-relaxed text-white/85 sm:text-lg">
             {tree.wilting
@@ -203,7 +158,7 @@ export default function DashboardPage() {
 
           <div className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-3">
             {d.loading ? (
-              <SkeletonBlock className={`h-14 w-64 rounded-full ${SKEL}`} />
+              <SceneSkeleton className="h-14 w-64 rounded-full" />
             ) : (
               <Link
                 href={nextHref}
@@ -213,9 +168,12 @@ export default function DashboardPage() {
                 <ArrowRight size={18} className="transition-transform group-hover:translate-x-0.5" />
               </Link>
             )}
+            {/* The second accent, and the last one on this screen: the quiet
+                action beside the white pill. */}
             <Link
               href="/profiel/boom"
-              className="text-sm font-semibold text-white/85 no-underline underline-offset-4 hover:text-white hover:underline"
+              className="text-sm font-semibold no-underline underline-offset-4 hover:underline"
+              style={{ color: TEAL_ON_DARK }}
             >
               Bekijk je boom →
             </Link>
@@ -227,10 +185,7 @@ export default function DashboardPage() {
       </section>
 
       {/* -- Layer 2: the horizon -------------------------------------- */}
-      <div
-        className="relative z-10 -mt-24 px-5 sm:px-8 lg:pl-24 lg:pr-10 xl:pl-28 xl:pr-16"
-        style={horizonMotion}
-      >
+      <div className="scene-horizon -mt-24">
         <dl className="stagger-in grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
           <GlassStat
             label="Reeks"
@@ -259,7 +214,7 @@ export default function DashboardPage() {
       </div>
 
       {/* -- Layer 3: the desk - version 10's two panels ---------------- */}
-      <div className="relative z-10 grid w-full grid-cols-1 gap-6 px-5 pb-20 pt-14 sm:px-8 lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-8 lg:pl-24 lg:pr-10 xl:pl-28 xl:pr-16">
+      <div className="grid w-full grid-cols-1 gap-6 pb-20 pt-14 lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-8">
 
         {/* --- The reader ------------------------------------------- */}
         {/* Sticks the moment it reaches the navbar. Capped to the viewport and
@@ -283,7 +238,7 @@ export default function DashboardPage() {
                 {d.dateLabel ? (
                   <p className="mt-1 truncate text-xs text-white/65">{d.firstName} · {d.dateLabel}</p>
                 ) : (
-                  <SkeletonBlock className={`mt-2 h-3 w-32 ${SKEL}`} />
+                  <SceneSkeleton className="mt-2 h-3 w-32" />
                 )}
               </div>
             </div>
@@ -301,7 +256,7 @@ export default function DashboardPage() {
                 />
               </div>
               {tree.loading ? (
-                <SkeletonBlock className={`mt-2 h-3 w-40 ${SKEL}`} />
+                <SceneSkeleton className="mt-2 h-3 w-40" />
               ) : (
                 <p className="content-in mt-2 text-xs tabular-nums text-white/70">
                   {tree.wilting
@@ -375,49 +330,18 @@ export default function DashboardPage() {
             <BillingNotices />
           </div>
 
-          {/* Verder waar je was */}
-          {d.loading ? (
-            <SkeletonBlock className={`h-36 w-full rounded-2xl ${SKEL}`} />
-          ) : (
-            <section
-              className={`content-in flex flex-wrap items-end justify-between gap-4 p-6 ${PANEL}`}
-              aria-labelledby="diepte-verder"
-            >
-              <div className="min-w-0">
-                <h2 id="diepte-verder" className={EYEBROW} style={{ color: TEAL_ON_DARK }}>
-                  {d.lastRead ? "Verder waar je was" : "Begin vandaag"}
-                </h2>
-                <p className="mt-2 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-                  {d.lastRead ? `${d.lastRead.book} ${d.lastRead.chapter}` : "Start je bijbelstudie"}
-                </p>
-                <p className="mt-1 text-sm text-white/70">
-                  {d.lastRead
-                    ? `Hoofdstuk ${d.lastRead.chapter}${versionAbbreviation(d.lastRead.version) ? ` · ${versionAbbreviation(d.lastRead.version)}` : ""}`
-                    : "Lees dag voor dag door de Bijbel."}
-                </p>
-              </div>
-              <Link
-                href={nextHref}
-                className="press inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white no-underline outline-none transition-colors hover:bg-[#0F766E] focus-visible:ring-2 focus-visible:ring-white"
-                style={{ backgroundColor: TEAL }}
-              >
-                {d.lastRead ? "Verder lezen" : "Begin met lezen"}
-                <ArrowRight size={14} />
-              </Link>
-            </section>
-          )}
-
-          {/* Tekst van de dag */}
-          <div className="[&>div]:rounded-2xl">
-            <DailyVerseCard verse={d.verse} loading={d.verseLoading} />
-          </div>
+          {/* "Verder waar je was" stood here and is gone: the one action in the
+              sky already says exactly this, in the same words and to the same
+              chapter, and a panel repeating it a screen further down was the
+              page asking twice. "Tekst van de dag" is gone too - its card is
+              drawn for a white page and never sat right on the landscape. */}
 
           {/* Je weg door de Bijbel */}
           <section className={`p-6 ${PANEL}`} aria-labelledby="diepte-weg">
             <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
               <h2 id="diepte-weg" className="text-base font-semibold text-white">Je weg door de Bijbel</h2>
               {d.loading ? (
-                <SkeletonBlock className={`h-3 w-40 ${SKEL}`} />
+                <SceneSkeleton className="h-3 w-40" />
               ) : (
                 <p className="text-xs tabular-nums text-white/65">
                   {d.chaptersRead} van {TOTAL_CHAPTERS} hoofdstukken · {readPct}%
@@ -472,24 +396,33 @@ export default function DashboardPage() {
             </div>
           </section>
 
-          {/* Recente notities */}
-          <section className={`p-6 ${PANEL}`} aria-labelledby="diepte-notities">
-            <div className="flex items-baseline justify-between gap-3">
-              <h2 id="diepte-notities" className="text-base font-semibold text-white">Recente notities</h2>
-              <Link
-                href="/notities"
-                className="text-xs font-semibold no-underline hover:underline"
-                style={{ color: TEAL_ON_DARK }}
-              >
-                Alle notities
-              </Link>
-            </div>
+          {/* Recente notities.
+              No panel. A note is a line the reader wrote, so it is set as one:
+              the reference stands in the margin the way it does in a printed
+              bible, the words run beside it, and a hairline separates them.
+              Boxing four of these in glass was what made them look like
+              somebody else's content. */}
+          <section aria-labelledby="diepte-notities" className="pt-2">
+            <SectionHeading
+              id="diepte-notities"
+              title="Recente notities"
+              rule
+              action={
+                <Link
+                  href="/notities"
+                  className="text-xs font-semibold no-underline hover:underline"
+                  style={{ color: TEAL_ON_DARK }}
+                >
+                  Alle notities
+                </Link>
+              }
+            />
             {d.loading ? (
-              <div className="mt-4 space-y-4">
+              <div className="divide-y divide-white/10">
                 {[1, 2, 3].map(i => (
-                  <div key={i} className="space-y-2">
-                    <SkeletonBlock className={`h-3 w-1/4 ${SKEL}`} />
-                    <SkeletonBlock className={`h-3.5 w-full ${SKEL}`} />
+                  <div key={i} className={`py-3.5 ${LEDGER_ROW}`}>
+                    <SceneSkeleton className="h-3 w-24" />
+                    <SceneSkeleton className="mt-1.5 h-3.5 w-full sm:mt-0" />
                   </div>
                 ))}
               </div>
@@ -505,16 +438,19 @@ export default function DashboardPage() {
                 </Link>
               </p>
             ) : (
-              <ul className="stagger-in mt-2 divide-y divide-white/10">
+              <ul className="stagger-in m-0 divide-y divide-white/10 p-0">
                 {d.recentNotes.map(note => (
-                  <li key={note._id}>
-                    <Link href={readHref(note.book, note.chapter)} className="group block py-3 no-underline">
-                      <p className="text-xs font-semibold" style={{ color: TEAL_ON_DARK }}>
+                  <li key={note._id} className="list-none">
+                    <Link
+                      href={readHref(note.book, note.chapter)}
+                      className={`group py-3.5 ${LEDGER_ROW} ${LEDGER_LINK}`}
+                    >
+                      <span className="truncate text-xs font-semibold tabular-nums" style={{ color: TEAL_ON_DARK }}>
                         {note.book} {note.chapter}{note.verse ? `:${note.verse}` : ""}
-                      </p>
-                      <p className="mt-0.5 line-clamp-2 text-sm leading-relaxed text-white/75 group-hover:text-white">
+                      </span>
+                      <span className="mt-1 line-clamp-2 text-sm leading-relaxed text-white/75 transition-colors group-hover:text-white sm:mt-0">
                         {note.noteText}
-                      </p>
+                      </span>
                     </Link>
                   </li>
                 ))}
@@ -522,53 +458,47 @@ export default function DashboardPage() {
             )}
           </section>
 
-          {/* Aanbevolen studies */}
-          <section className={`p-6 ${PANEL}`} aria-labelledby="diepte-studies">
-            <div className="flex items-baseline justify-between gap-3">
-              <h2 id="diepte-studies" className="text-base font-semibold text-white">Aanbevolen studies</h2>
-              <Link
-                href="/studies"
-                className="text-xs font-semibold no-underline hover:underline"
-                style={{ color: TEAL_ON_DARK }}
-              >
-                Bekijk alle
-              </Link>
-            </div>
-            <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {curatedStudies.slice(0, 4).map(study => {
-                const badge = BADGE_STYLES[study.type]
-                return (
-                  <li key={study.id}>
-                    <Link
-                      href={`/studies/${study.id}`}
-                      className="group flex h-full flex-col rounded-xl bg-white/[0.06] p-4 no-underline outline-none ring-1 ring-white/10 transition-colors hover:bg-white/[0.12] focus-visible:ring-2 focus-visible:ring-white"
-                    >
-                      <span className="flex items-center gap-2">
-                        <span
-                          className="rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider"
-                          style={{ backgroundColor: badge.bg, color: badge.color }}
-                        >
-                          {study.type}
-                        </span>
-                        <span className="flex items-center gap-1 text-[11px] tabular-nums text-white/65">
-                          <Clock size={10} aria-hidden /> {study.durationLabel}
-                        </span>
+          {/* Aanbevolen studies.
+              The same four studies and the same links, read as a bill of fare
+              instead of four boxes: what kind of study it is and how long it
+              takes sit in the margin, and the title does the work. The teal
+              chip is gone - all four types carried the same colour, so it
+              said nothing the word did not, and white on it measured 3.7:1. */}
+          <section aria-labelledby="diepte-studies" className="pt-2">
+            <SectionHeading
+              id="diepte-studies"
+              title="Aanbevolen studies"
+              rule
+              action={
+                <Link
+                  href="/studies"
+                  className="text-xs font-semibold no-underline hover:underline"
+                  style={{ color: TEAL_ON_DARK }}
+                >
+                  Bekijk alle
+                </Link>
+              }
+            />
+            <ul className="stagger-in m-0 divide-y divide-white/10 p-0">
+              {curatedStudies.slice(0, 4).map(study => (
+                <li key={study.id} className="list-none">
+                  <Link href={`/studies/${study.id}`} className={`group py-3.5 ${LEDGER_ROW} ${LEDGER_LINK}`}>
+                    <span className="flex items-baseline gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-white/55 sm:flex-col sm:gap-1">
+                      <span className="truncate">{study.type}</span>
+                      <span className="flex items-center gap-1 font-medium normal-case tracking-normal tabular-nums text-white/45">
+                        {/* The clock names the number as a duration; it is not decoration. */}
+                        <Clock size={10} aria-hidden /> {study.durationLabel}
                       </span>
-                      <span className="mt-2.5 text-[15px] font-semibold leading-snug text-white">{study.title}</span>
-                      <span className="mt-1 line-clamp-2 flex-1 text-sm leading-relaxed text-white/70">
+                    </span>
+                    <span className="mt-1.5 sm:mt-0">
+                      <span className="block text-[15px] font-semibold leading-snug text-white">{study.title}</span>
+                      <span className="mt-1 line-clamp-2 text-sm leading-relaxed text-white/70 transition-colors group-hover:text-white/90">
                         {study.description}
                       </span>
-                      <span
-                        className="mt-3 flex items-center gap-1 text-xs font-semibold"
-                        style={{ color: TEAL_ON_DARK }}
-                      >
-                        Bekijk studie
-                        <ArrowRight size={12} className="transition-transform group-hover:translate-x-0.5" />
-                      </span>
-                    </Link>
-                  </li>
-                )
-              })}
+                    </span>
+                  </Link>
+                </li>
+              ))}
             </ul>
           </section>
 
@@ -578,7 +508,7 @@ export default function DashboardPage() {
 
         </div>
       </div>
-    </div>
+    </SceneShell>
   )
 }
 
