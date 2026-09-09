@@ -3,8 +3,7 @@
 import { useState } from "react"
 import { Play } from "lucide-react"
 import { OnboardingModal } from "../onboarding/onboarding-modal"
-
-const TEAL = "#0D9488"
+import { TEAL_ON_DARK } from "../scene/tokens"
 
 /**
  * Replay the first-run flow without making an account for it.
@@ -33,12 +32,14 @@ export default function OnboardingPreviewButton() {
           setRunId(id => id + 1)
           setRunning(true)
         }}
-        className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-gray-700 transition-colors hover:bg-gray-50 dark:text-foreground dark:hover:bg-secondary"
+        className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-white/85 outline-none transition-colors hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white"
       >
-        <Play size={14} style={{ color: TEAL, flexShrink: 0 }} aria-hidden />
+        {/* The one icon here identifies the control - this button plays
+            something back. It is not decoration. */}
+        <Play size={14} style={{ color: TEAL_ON_DARK, flexShrink: 0 }} aria-hidden />
         <span className="min-w-0 flex-1">
           Onboarding afspelen
-          <span className="mt-0.5 block text-xs text-gray-500 dark:text-muted-foreground">
+          <span className="mt-0.5 block text-xs text-white/60">
             Niets wordt opgeslagen
           </span>
         </span>

@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import {
   BadgeCheck,
@@ -17,6 +17,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip"
 import { cn } from "../../lib/utils"
 import { BADGE_META } from "../../lib/badgeCatalog"
+import { TEAL } from "../scene/tokens"
 import type { LucideIcon } from "lucide-react"
 
 interface BadgeInfo {
@@ -54,35 +55,55 @@ interface UserBadgesProps {
   earned: string[]
 }
 
+/**
+ * The badge wall, on the scene.
+ *
+ * Earned is the brand fill; not-yet-earned is a film of white with the icon
+ * dropped back, so the grid reads as one set with two states rather than as
+ * two designs. Every colour is literal - the panel behind this is dark in both
+ * themes, so a token would be wrong half the time. The old `bg-brand` class is
+ * gone: the project hardcodes the brand inline.
+ *
+ * Each badge is a real button so the tooltip is reachable by keyboard, and it
+ * carries its name and its state as its accessible name - the icon alone says
+ * neither.
+ */
 export default function UserBadges({ earned }: UserBadgesProps) {
   return (
     <TooltipProvider>
-      <div className="grid grid-cols-5 gap-4">
+      <ul className="m-0 grid list-none grid-cols-5 gap-3 p-0 sm:grid-cols-6 lg:grid-cols-8">
         {badges.map((b) => {
           const IconComponent = b.icon
+          const has = earned.includes(b.id)
+          const label = BADGE_META[b.id]?.label ?? b.id
           return (
-            <Tooltip key={b.id}>
-              <TooltipTrigger asChild>
-                <div
-                  className={cn(
-                    "p-2 rounded-lg border flex items-center justify-center cursor-pointer hover:shadow-md transition-shadow",
-                    earned.includes(b.id)
-                      ? "bg-brand text-white border-teal-600 dark:bg-[#e0e0e0] dark:text-black dark:border-[#e0e0e0]"
-                      : "bg-gray-100 dark:bg-background text-gray-400 dark:text-gray-600 opacity-50 border-border"
-                  )}
-                >
-                  <IconComponent className="w-5 h-5" />
-                </div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <span className="font-semibold">{BADGE_META[b.id]?.label ?? b.id}</span>
-                {" · "}
-                {BADGE_META[b.id]?.description ?? ""}
-              </TooltipContent>
-            </Tooltip>
+            <li key={b.id}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    aria-label={`${label} — ${has ? "verdiend" : "nog niet verdiend"}`}
+                    className={cn(
+                      "flex aspect-square w-full items-center justify-center rounded-xl outline-none transition-colors focus-visible:ring-2 focus-visible:ring-white",
+                      has
+                        ? "text-white ring-1 ring-white/25"
+                        : "bg-white/[0.06] text-white/35 ring-1 ring-white/15 hover:bg-white/10",
+                    )}
+                    style={has ? { backgroundColor: TEAL } : undefined}
+                  >
+                    <IconComponent className="h-5 w-5" aria-hidden />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <span className="font-semibold">{label}</span>
+                  {" · "}
+                  {BADGE_META[b.id]?.description ?? ""}
+                </TooltipContent>
+              </Tooltip>
+            </li>
           )
         })}
-      </div>
+      </ul>
     </TooltipProvider>
   )
 }

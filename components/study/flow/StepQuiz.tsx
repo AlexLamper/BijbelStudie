@@ -2,9 +2,16 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { ArrowLeft, Check, HelpCircle, RotateCcw, X } from 'lucide-react';
+import { ArrowLeft, Check, RotateCcw, X } from 'lucide-react';
 
+/** Fills and keylines that carry no type. */
 const TEAL = '#0D9488';
+/** Any solid fill with a white letter or glyph on it. */
+const TEAL_DEEP = '#0F766E';
+/** Teal as type, in the shade each theme can read. */
+const INK_TEAL = 'text-[#0F766E] dark:text-[#2DD4BF]';
+const FOCUS_RING =
+  'outline-none focus-visible:ring-2 focus-visible:ring-[#0F766E] dark:focus-visible:ring-[#2DD4BF]';
 const RED = '#DC2626';
 const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
@@ -266,15 +273,11 @@ export default function StepQuiz({
   if (questions.length === 0) {
     return (
       <div className="h-full overflow-y-auto">
+        {/* Typographic, not iconographic: a question mark in a tinted disc is
+            decoration, and the heading already says what this is. */}
         <div className="max-w-2xl mx-auto px-6 sm:px-10 py-12 text-center">
-          <div
-            className="mx-auto mb-4 h-12 w-12 rounded-full flex items-center justify-center"
-            style={{ backgroundColor: 'rgba(13,148,136,0.1)' }}
-          >
-            <HelpCircle size={20} style={{ color: TEAL }} />
-          </div>
           <h2 className="text-lg font-bold text-foreground mb-1.5">Geen quiz voor dit gedeelte</h2>
-          <p className="text-sm text-gray-500 dark:text-muted-foreground max-w-sm mx-auto">
+          <p className="text-sm text-gray-600 dark:text-muted-foreground max-w-sm mx-auto">
             {unavailable === 'UNAVAILABLE'
               ? 'De quizvragen zijn nu even niet op te halen. Je kunt de les gewoon afronden.'
               : 'Voor dit bijbelgedeelte zijn nog geen vragen beschikbaar. Rond de les af om verder te gaan.'}
@@ -298,7 +301,7 @@ export default function StepQuiz({
             dots turn into the result, so the score is readable at a glance
             before any explanation is. */}
         <div className="flex items-center justify-between gap-4 mb-5">
-          <p className="text-[12px] font-semibold uppercase tracking-widest text-gray-400 dark:text-muted-foreground">
+          <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-gray-600 dark:text-muted-foreground">
             {reviewing
               ? finishedEarlier && !graded
                 ? 'Eerder gemaakt'
@@ -306,7 +309,7 @@ export default function StepQuiz({
               : `Vraag ${index + 1} van ${questions.length}`}
           </p>
           {reviewing && score !== null && total !== null && (
-            <p className="text-[13px] font-bold" style={{ color: TEAL }}>
+            <p className={`text-[13px] font-bold ${INK_TEAL}`}>
               {score} van {total} goed
             </p>
           )}
@@ -332,7 +335,7 @@ export default function StepQuiz({
                   setDirection(entryIndex >= index ? 1 : -1);
                   setIndex(entryIndex);
                 }}
-                className="flex-1 h-1.5 rounded-full transition-all"
+                className={`flex-1 h-1.5 rounded-full transition-all ${FOCUS_RING}`}
                 style={{ background, opacity: isHere ? 1 : 0.55 }}
               />
             );
@@ -377,6 +380,7 @@ export default function StepQuiz({
                     aria-pressed={isPicked}
                     className={[
                       'w-full flex items-center gap-3.5 rounded-xl border p-3.5 sm:p-4 text-left transition-all duration-200',
+                      FOCUS_RING,
                       !frame ? 'border-gray-200 dark:border-border' : '',
                       reviewing || advancing
                         ? 'cursor-default'
@@ -390,13 +394,15 @@ export default function StepQuiz({
                         'h-8 w-8 flex-none rounded-lg border flex items-center justify-center text-[12px] font-bold transition-colors',
                         isPicked || isCorrectOne
                           ? 'border-transparent text-white'
-                          : 'border-gray-200 dark:border-border text-gray-400 dark:text-muted-foreground',
+                          : 'border-gray-200 dark:border-border text-gray-600 dark:text-muted-foreground',
                       ].join(' ')}
+                      // TEAL_DEEP under the white letter; the frame around the
+                      // option stays the lighter brand, which carries no type.
                       style={
                         isWrongPick
                           ? { backgroundColor: RED }
                           : isCorrectOne || isPicked
-                            ? { backgroundColor: TEAL }
+                            ? { backgroundColor: TEAL_DEEP }
                             : undefined
                       }
                     >
@@ -416,12 +422,12 @@ export default function StepQuiz({
 
             {/* Released only after grading - an explanation gives the answer away. */}
             {result?.explanation && (
-              <div className="mt-5 rounded-xl border border-gray-200 dark:border-border bg-gray-50/70 dark:bg-card/60 p-4">
-                <p className="text-[13.5px] text-gray-600 dark:text-muted-foreground leading-relaxed">
+              <div className="mt-5 rounded-xl border border-gray-200 dark:border-white/10 bg-gray-50/70 dark:bg-card/60 p-4">
+                <p className="text-[13.5px] text-gray-700 dark:text-muted-foreground leading-relaxed">
                   {result.explanation}
                 </p>
                 {question.bibleReference && (
-                  <p className="mt-1.5 text-[12px] font-semibold" style={{ color: TEAL }}>
+                  <p className={`mt-1.5 text-[12px] font-semibold ${INK_TEAL}`}>
                     {question.bibleReference}
                   </p>
                 )}
@@ -438,16 +444,17 @@ export default function StepQuiz({
             disabled={index === 0}
             className={[
               'press inline-flex items-center gap-1.5 h-9 px-3 rounded-lg text-[13px] font-medium transition-colors',
+              FOCUS_RING,
               index === 0
                 ? 'text-transparent pointer-events-none'
-                : 'text-gray-500 dark:text-muted-foreground hover:bg-gray-100 dark:hover:bg-secondary hover:text-foreground',
+                : 'text-gray-600 dark:text-muted-foreground hover:bg-gray-100 dark:hover:bg-secondary hover:text-foreground',
             ].join(' ')}
           >
             <ArrowLeft size={14} /> Vorige
           </button>
 
           {submitting && (
-            <span className="text-[13px] text-gray-500 dark:text-muted-foreground">
+            <span className="text-[13px] text-gray-600 dark:text-muted-foreground">
               Nakijken...
             </span>
           )}
@@ -459,8 +466,8 @@ export default function StepQuiz({
                 setDirection(1);
                 setIndex((current) => current + 1);
               }}
-              className="press inline-flex items-center gap-1.5 h-9 px-4 rounded-lg text-[13px] font-semibold text-white"
-              style={{ backgroundColor: TEAL }}
+              className="press inline-flex items-center gap-1.5 h-9 px-4 rounded-lg text-[13px] font-semibold text-white transition-opacity hover:opacity-90 outline-none focus-visible:ring-2 focus-visible:ring-white"
+              style={{ backgroundColor: TEAL_DEEP }}
             >
               Volgende vraag
             </button>
@@ -471,7 +478,7 @@ export default function StepQuiz({
               type="button"
               onClick={retry}
               data-track="study_quiz_retry"
-              className="press inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-gray-200 dark:border-border text-[13px] font-semibold text-foreground hover:bg-gray-50 dark:hover:bg-secondary"
+              className={`press inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-gray-200 dark:border-border text-[13px] font-semibold text-foreground hover:bg-gray-50 dark:hover:bg-secondary ${FOCUS_RING}`}
             >
               <RotateCcw size={14} /> Opnieuw proberen
             </button>
@@ -479,7 +486,7 @@ export default function StepQuiz({
         </div>
 
         {reviewing && (
-          <p className="mt-4 text-[13px] text-gray-500 dark:text-muted-foreground">
+          <p className="mt-4 text-[13px] text-gray-600 dark:text-muted-foreground">
             {finishedEarlier && !graded
               ? 'Je hebt deze quiz eerder gemaakt. Doe hem opnieuw voor de uitleg bij elk antwoord, of rond de les af.'
               : 'Je mag de les afronden, ook als niet alles goed was.'}

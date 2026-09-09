@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { BookOpen } from 'lucide-react';
 
 import PassageReader from './PassageReader';
 import { ReadingPreferencesMenu } from '../ReadingPreferencesMenu';
@@ -9,7 +8,11 @@ import SpeakButton from '../SpeakButton';
 import { SpokenTextScope } from '../SpokenText';
 import type { ReadingPreferences } from '../../../hooks/useReadingPreferences';
 
-const TEAL = '#0D9488';
+/** Teal as type, in the shade each theme can actually read. */
+const INK_TEAL = 'text-[#0F766E] dark:text-[#2DD4BF]';
+/** The one focus ring the whole flow uses. */
+const FOCUS_RING =
+  'outline-none focus-visible:ring-2 focus-visible:ring-[#0F766E] dark:focus-visible:ring-[#2DD4BF]';
 
 /** Group headings for the translation picker, Dutch first. */
 const LANGUAGE_LABELS: Record<string, string> = {
@@ -59,8 +62,7 @@ function TranslationPicker({
         onChange={(event) => onChange(event.target.value)}
         title="Bijbelvertaling"
         data-track="study_word_version"
-        className="h-8 max-w-[170px] cursor-pointer rounded-md border border-gray-200 dark:border-border bg-white dark:bg-card pl-2.5 pr-2 text-[12.5px] font-medium text-foreground outline-none transition-colors hover:bg-gray-50 dark:hover:bg-secondary focus-visible:ring-2"
-        style={{ ['--tw-ring-color' as string]: 'rgba(13,148,136,0.35)' }}
+        className={`h-8 max-w-[170px] cursor-pointer rounded-md border border-gray-200 dark:border-border bg-white dark:bg-card pl-2.5 pr-2 text-[12.5px] font-medium text-foreground transition-colors hover:bg-gray-50 dark:hover:bg-secondary ${FOCUS_RING}`}
       >
         {languages.map((language) => (
           <optgroup key={language} label={LANGUAGE_LABELS[language] ?? 'Overige vertalingen'}>
@@ -130,17 +132,16 @@ export default function StepWord({
           <header className="mb-6 sm:mb-8">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
-                <p
-                  className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest mb-1"
-                  style={{ color: TEAL }}
-                >
-                  <BookOpen size={13} /> Lees eerst het bijbelgedeelte
+                {/* The eyebrow says what to do; a book icon beside it says the
+                    same thing again in a picture, so it is gone. */}
+                <p className={`text-[11px] font-bold uppercase tracking-[0.14em] mb-1 ${INK_TEAL}`}>
+                  Lees eerst het bijbelgedeelte
                 </p>
                 <h1 className="text-2xl sm:text-3xl font-bold text-foreground leading-tight">
                   {reference}
                 </h1>
                 {readingCue && (
-                  <p className="mt-2 text-[15px] text-gray-500 dark:text-muted-foreground leading-relaxed">
+                  <p className="mt-2 text-[15px] text-gray-600 dark:text-muted-foreground leading-relaxed">
                     {readingCue}
                   </p>
                 )}
@@ -186,7 +187,10 @@ export default function StepWord({
             </div>
           </header>
 
-          <section className="rounded-2xl border border-gray-200 dark:border-border bg-white dark:bg-card px-6 sm:px-10 xl:px-14 py-8 sm:py-10">
+          {/* The reading surface, and the one thing on this screen that was
+              already right. It stays an opaque plate in both themes - the scene
+              is at the window's edges, never behind scripture. */}
+          <section className="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-card px-6 sm:px-10 xl:px-14 py-8 sm:py-10 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
             <PassageReader
               book={book}
               chapter={chapter}
@@ -197,7 +201,7 @@ export default function StepWord({
             />
           </section>
 
-          <p className="mt-4 text-xs text-gray-400 dark:text-muted-foreground">
+          <p className="mt-4 text-xs text-gray-600 dark:text-muted-foreground">
             Klik op een vers om er een notitie bij te maken.
           </p>
         </div>

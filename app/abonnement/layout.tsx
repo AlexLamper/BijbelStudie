@@ -1,9 +1,7 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../lib/authOptions";
 import SessionProvider from "../../components/providers/SessionProvider";
-import { Header } from "../../components/layout/header";
-import { AppSidebar } from "../../components/layout/app-sidebar";
 import { SidebarProvider } from "../../components/ui/sidebar";
 import { cookies } from "next/headers";
 import { cookieName, fallbackLng } from "../i18n/settings";
@@ -13,6 +11,8 @@ import { JsonLd } from "../../components/seo/JsonLd";
 import { PLANS } from "../../lib/pricing";
 import { absoluteUrl, BASE_URL, ORG_ID } from "../../lib/seo/constants";
 import { graph, webPageNode, breadcrumbNode } from "../../lib/seo/structuredData";
+import SceneShell from "../../components/scene/SceneShell";
+import { SCENE_TREE, sceneSvg } from "../../components/scene/scene-svg";
 
 export async function generateMetadata(): Promise<Metadata> {
   const cookieStore = await cookies();
@@ -82,8 +82,27 @@ function pricingGraph() {
   );
 }
 
-
-
+/**
+ * Providers, the pricing graph, and the scene - no chrome of its own.
+ *
+ * The shell lives here rather than in the page because the page is a client
+ * component and `scene-svg.ts` pulls in the tree generator, which has no
+ * business in a browser bundle: rendered here on the server, the landscape is
+ * in the HTML of the first paint and is what crawlers get. `backdrop` therefore
+ * stays "static" - this route is reachable signed OUT (the page sends a visitor
+ * with no account into /registreren and resumes the chosen plan afterwards), so
+ * the reader-tree backdrop, which needs a guaranteed session, is not an option.
+ *
+ * The navbar and the rail both read the session and `components/layout/header`
+ * pushes an unauthenticated visitor to the sign-in page, which would hijack a
+ * pricing page mid-decision. They are shown only when the server already has a
+ * session, which `SessionProvider` then seeds so the client never sees a
+ * moment of "unauthenticated".
+ *
+ * The old `h-screen overflow-hidden` wrapper is gone: the depth engine in
+ * components/scene/useSceneDepth.ts measures `window.scrollY`, so the DOCUMENT
+ * has to be what scrolls.
+ */
 export default async function SubscribeLayout({
   children,
 }: Readonly<{
@@ -95,24 +114,28 @@ export default async function SubscribeLayout({
   // any client-side check on those fields read undefined on this route, and a
   // Pro user rendered as not-Pro.
   const session = await getServerSession(authOptions);
+  const signedIn = Boolean(session?.user);
 
   return (
-    <div className="antialiased bg-background h-screen flex flex-col overflow-hidden">
+    <>
       <JsonLd data={pricingGraph()} />
       <SessionProvider session={session}>
         <SidebarProvider>
-          <AppSidebar />
-          <div className="flex flex-col flex-1 min-h-0 w-full">
-            <Header />
-            <div className="flex-1 min-h-0 overflow-y-auto">
-              {children}
-            </div>
-          </div>
+          {/* `gateId` names the hero: the still SVG upgrades to the live canvas
+              only while that screen is on view, and the loop stops past it. The
+              "Je bent al Pro" branch has no such element, and SceneBackdrop
+              leaves the SVG alone when the gate is not on the page. */}
+          <SceneShell
+            svg={sceneSvg()}
+            {...SCENE_TREE}
+            gateId="abonnement-hero"
+            header={signedIn}
+            rail={signedIn}
+          >
+            {children}
+          </SceneShell>
         </SidebarProvider>
       </SessionProvider>
-    </div>
+    </>
   );
 }
-
-
-

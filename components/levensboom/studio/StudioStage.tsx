@@ -4,8 +4,7 @@ import TreeCanvas from '../TreeCanvas';
 import { ringColors } from '../../../lib/levensboom/ring';
 import type { AvatarChoice } from '../../../lib/levensboom/catalog';
 import type { Stage } from '../../../lib/levensboom/stages';
-
-const TEAL = '#0D9488';
+import { TEAL_DEEP } from '../../scene/tokens';
 
 /**
  * The live stage: the tree in its scene, with the stage name and level in the
@@ -14,6 +13,11 @@ const TEAL = '#0D9488';
  *
  * Fills whatever box the parent gives it - the studio hands it a 16:10 box on
  * a phone and most of the viewport height on a laptop.
+ *
+ * This is the ONE animated canvas /profiel/boom is allowed (see
+ * components/scene/README.md), which is why the route's backdrop is the still
+ * server-rendered SVG. The level pill uses TEAL_DEEP rather than the brand
+ * fill: it carries white type, and white on #0D9488 measures 3.74:1.
  */
 export default function StudioStage({
   seed,
@@ -69,17 +73,17 @@ export default function StudioStage({
         <div className="pointer-events-none absolute bottom-4 left-4 flex items-center gap-2">
           <span
             className="rounded-full px-3 py-1.5 text-sm font-bold text-white shadow"
-            style={{ backgroundColor: gold ? ring.stroke : TEAL }}
+            style={{ backgroundColor: gold ? ring.stroke : TEAL_DEEP }}
           >
             Niveau {level}
           </span>
-          <span className="rounded-full bg-black/45 px-3 py-1.5 text-sm font-semibold text-white backdrop-blur">
+          <span className="rounded-full bg-black/55 px-3 py-1.5 text-sm font-semibold text-white backdrop-blur">
             {stage.name}
           </span>
         </div>
 
         {wilting && (
-          <div className="pointer-events-none absolute right-4 top-4 rounded-full bg-black/45 px-3 py-1.5 text-xs font-medium text-white backdrop-blur">
+          <div className="pointer-events-none absolute right-4 top-4 max-w-[70%] rounded-full bg-black/60 px-3 py-1.5 text-right text-xs font-medium text-white backdrop-blur">
             {daysSinceActive} dagen niet gelezen — één sessie en hij veert op
           </div>
         )}

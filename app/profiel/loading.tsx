@@ -1,27 +1,41 @@
-import { SkeletonBlock, SkeletonNotes, SkeletonStats } from "../../components/ui/skeletons"
+import { SceneSkeleton } from "../../components/scene/pieces"
+import { SCENE_X } from "../../components/scene/tokens"
 
 /**
  * Shown while the route segment streams in, so a navigation lands on the page's
  * own shape instead of an empty frame. It unmounts as soon as the page
  * component mounts - nothing here holds it open.
+ *
+ * It stands on the scene's own ground (`#0B1220`, written out because Tailwind
+ * reads class names as literal text) with white-on-dark blocks, so the frame
+ * before the landscape arrives already belongs to the picture rather than
+ * flashing a white page at the reader.
  */
 export default function ProfielLoading() {
   return (
-    <div role="status" aria-label="Profiel laden">
-      <div className="px-6 xl:px-10 pt-7 pb-5 border-b border-border bg-background space-y-2.5">
-        <SkeletonBlock className="h-6 w-36" />
-        <SkeletonBlock className="h-3.5 w-52" />
-      </div>
-      <div className="px-6 xl:px-10 py-6 space-y-7">
-        <div className="flex items-center gap-5">
-          <SkeletonBlock className="h-20 w-20 rounded-full flex-shrink-0" />
-          <div className="space-y-2.5 flex-1 min-w-0">
-            <SkeletonBlock className="h-5 w-48" />
-            <SkeletonBlock className="h-3.5 w-64" />
+    <div role="status" aria-label="Profiel laden" className="min-h-screen w-full bg-[#0B1220]">
+      <div className={`${SCENE_X} pb-20 pt-24`}>
+        <div className="max-w-[46rem] space-y-4">
+          <SceneSkeleton className="h-3 w-24" />
+          <SceneSkeleton className="h-12 w-[22rem] max-w-full" />
+          <SceneSkeleton className="h-4 w-[26rem] max-w-full" />
+        </div>
+
+        <div className="mt-16 grid max-w-[34rem] grid-cols-2 gap-3">
+          <SceneSkeleton className="h-[5.5rem] rounded-2xl" />
+          <SceneSkeleton className="h-[5.5rem] rounded-2xl" />
+        </div>
+
+        <div className="mt-14 grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_360px] xl:gap-8">
+          <div className="space-y-6">
+            <SceneSkeleton className="h-64 rounded-2xl" />
+            <SceneSkeleton className="h-48 rounded-2xl" />
+          </div>
+          <div className="space-y-6">
+            <SceneSkeleton className="h-64 rounded-2xl" />
+            <SceneSkeleton className="h-44 rounded-2xl" />
           </div>
         </div>
-        <SkeletonStats />
-        <SkeletonNotes count={3} />
       </div>
     </div>
   )

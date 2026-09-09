@@ -1,8 +1,27 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import TreeCanvas from "../levensboom/TreeCanvas"
-import { ProgressTreeScene } from "../dashboard/ProgressTree"
+import dynamic from "next/dynamic"
+
+/**
+ * Both renderers are deferred, and that is load-bearing rather than tidy.
+ *
+ * This component is now behind every converted page, but most of those pages
+ * can never run a canvas: `static` with no gate renders only the server SVG,
+ * and a reading screen or a settings form has no tree in it at all. Imported
+ * statically, the generator, the species table and the scene painter landed in
+ * the bundle of every one of them - which is the same every-page floor that was
+ * deliberately removed from the root layout, put straight back a level lower.
+ *
+ * Nothing is lost by waiting: a canvas paints nothing until its effect runs, so
+ * the chunk is fetched at exactly the moment the element would have had
+ * something to show.
+ */
+const TreeCanvas = dynamic(() => import("../levensboom/TreeCanvas"), { ssr: false })
+const ProgressTreeScene = dynamic(
+  () => import("../dashboard/ProgressTree").then(m => m.ProgressTreeScene),
+  { ssr: false },
+)
 import { buildPalette, type Season, type TimeOfDay } from "../../lib/levensboom/palette"
 import { SCRIM_BOTTOM, SCRIM_FLOOR, SCRIM_LEFT, SCRIM_VEIL } from "./tokens"
 

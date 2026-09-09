@@ -35,6 +35,29 @@ export async function generateMetadata(): Promise<Metadata> {
  * ground: a window you are working inside rather than a page you are scrolling.
  * Below md the frame goes edge to edge - a 12px margin on a phone is lost space,
  * not atmosphere.
+ *
+ * WHERE THE SCENE IS, AND WHY IT IS NOT BEHIND THE TEXT
+ *
+ * Every other signed-in screen now sits on `components/scene`: one fixed
+ * landscape with the page travelling over it. This one deliberately does not,
+ * and there are three reasons, in order of weight.
+ *
+ *   1. Legibility. This is the only screen in the app whose whole job is a
+ *      column of scripture and a column of commentary. A picture behind either
+ *      of them buys atmosphere with the one thing that must not be spent.
+ *   2. The shell cannot mount here anyway. `useSceneDepth` measures
+ *      `window.scrollY`, and this route is `h-[100dvh] overflow-hidden` on
+ *      purpose - a fixed frame with one scrolling body inside it. Nothing the
+ *      scene animates would ever move.
+ *   3. It already owns the metaphor. A window on a dark ground IS the scene
+ *      vocabulary's light `PLATE`: a lit object laid on the landscape, which
+ *      is where the scene design says the eye should go first.
+ *
+ * So the scene lives at the EDGES. The ground is the scene's own ground colour
+ * (`SCENE_BG`, #0B1220 - the same literal `SceneShell` paints), lifted by one
+ * still wash so the border of the window belongs to a world rather than to a
+ * grey app chrome. No canvas, no image, no second animated layer, nothing for
+ * the reader to wait on: the lesson is in the HTML and the ground is a colour.
  */
 export default async function StudyLayout({
   children,
@@ -47,17 +70,46 @@ export default async function StudyLayout({
   const session = await getServerSession(authOptions);
 
   return (
-    <div className="antialiased h-[100dvh] flex overflow-hidden bg-secondary dark:bg-black">
-      <SessionProvider session={session}>
-        <StudyRail />
+    // `bg-[#0B1220]` is written out rather than built from the SCENE_BG
+    // constant: Tailwind reads class names as literal text, so a value spliced
+    // in from an import is a class it never generates.
+    <div className="antialiased relative h-[100dvh] flex overflow-hidden bg-[#0B1220]">
+      {/* The still wash. One layer, no animation, purely decorative - the light
+          the window is standing in. It sits under everything and takes no
+          pointer events, so it can never come between the reader and a
+          control. */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 z-0"
+        style={{
+          background:
+            'radial-gradient(120% 90% at 8% 0%, rgba(45,212,191,0.10) 0%, rgba(13,148,136,0.05) 32%, rgba(11,18,32,0) 68%)',
+        }}
+      />
 
-        <main className="flex-1 min-w-0 min-h-0 p-0 md:p-3">
+      <SessionProvider session={session}>
+        {/* `dark` scopes the rail to the light-on-dark end of every theme
+            token, the same trick `Header variant="scene"` uses: the rail is
+            standing on the night ground beside the window, so a white column
+            there would be the one thing on screen that had not joined the
+            scene. `contents` keeps the wrapper out of the flex layout, so the
+            rail is still the flex item it was. */}
+        <div className="dark contents">
+          <StudyRail />
+        </div>
+
+        <main className="relative z-10 flex-1 min-w-0 min-h-0 p-0 md:p-3">
           {/* overflow-hidden, not overflow-y-auto: the guided flow is a fixed
               frame - step rail on top, Vorige/Volgende at the bottom, one
               scrolling body between them. With a scrollable wrapper the whole
               frame scrolled instead, so a wheel over the footer dragged the
-              buttons off screen. */}
-          <div className="h-full w-full overflow-hidden bg-background border-0 md:border border-border md:rounded-2xl shadow-none md:shadow-[0_24px_60px_-28px_rgba(15,23,42,0.45)]">
+              buttons off screen.
+
+              A ring rather than a border, and the scene's own plate shadow: the
+              window reads as an object lit on the ground rather than a card
+              boxed in a hairline, and a ring costs no layout the way a border
+              does. */}
+          <div className="h-full w-full overflow-hidden bg-background md:rounded-2xl md:ring-1 md:ring-white/10 shadow-none md:shadow-[0_40px_80px_-32px_rgba(0,0,0,0.85)]">
             {children}
           </div>
         </main>

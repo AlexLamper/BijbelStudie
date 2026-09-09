@@ -3,6 +3,7 @@
 import React from 'react';
 import type { StepKey } from '../../../lib/studyFlow';
 
+/** The filled segment carries no type, so it stays the plain brand fill. */
 const TEAL = '#0D9488';
 
 /** Dutch labels for each step, shown under the rail on wider screens. */
@@ -60,7 +61,10 @@ export default function StudyStepRail({
             aria-label={STEP_LABELS[step]}
             title={STEP_LABELS[step]}
             className={[
-              'group flex-1 min-w-0 py-2 -my-2',
+              'group flex-1 min-w-0 py-2 -my-2 rounded-sm',
+              // A 3px bar has nowhere to show a ring, so the focus state is on
+              // the hit area rather than on the track inside it.
+              'outline-none focus-visible:ring-2 focus-visible:ring-[#0F766E] dark:focus-visible:ring-[#2DD4BF]',
               reachable ? 'cursor-pointer' : 'cursor-default',
             ].join(' ')}
           >

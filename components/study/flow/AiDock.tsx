@@ -1,11 +1,9 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Sparkles, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import AiAssistant from '../AiAssistant';
 import type { StepKey } from '../../../lib/studyFlow';
-
-const TEAL = '#0D9488';
 
 /** Step-specific starters, replacing the assistant's generic ones. */
 const STARTERS: Record<StepKey, string[]> = {
@@ -147,7 +145,7 @@ export default function AiDock({
       {/* Backdrop for the sheet only. On lg the panel sits beside the content. */}
       {open && (
         <div
-          className="fixed inset-0 z-40 bg-black/30 lg:hidden"
+          className="fixed inset-0 z-40 bg-[#0B1220]/50 lg:hidden"
           onClick={() => onOpenChange(false)}
           aria-hidden
         />
@@ -170,10 +168,12 @@ export default function AiDock({
         ].join(' ')}
       >
         <header className="flex-none flex items-center justify-between px-4 h-14 border-b border-gray-200 dark:border-border">
+          {/* No icon: the panel is titled in words, and the trigger in the flow
+              header is the one place a mark is still doing work (its label is
+              hidden below sm). */}
           <div className="flex items-center gap-2">
-            <Sparkles size={15} style={{ color: TEAL }} />
             <span className="text-sm font-bold text-foreground">AI-assistent</span>
-            <span className="text-xs text-gray-400 dark:text-muted-foreground">
+            <span className="text-xs text-gray-600 dark:text-muted-foreground">
               {book} {chapter}
             </span>
           </div>
@@ -181,7 +181,7 @@ export default function AiDock({
             type="button"
             onClick={() => onOpenChange(false)}
             aria-label="Sluiten"
-            className="h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-secondary text-muted-foreground"
+            className="h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-secondary text-muted-foreground hover:text-foreground outline-none focus-visible:ring-2 focus-visible:ring-[#0F766E] dark:focus-visible:ring-[#2DD4BF]"
           >
             <X size={16} />
           </button>

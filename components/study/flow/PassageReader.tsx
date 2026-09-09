@@ -137,7 +137,7 @@ export default function PassageReader({
 
   if (inRange.length === 0) {
     return (
-      <div className="py-16 text-center text-sm text-gray-500 dark:text-muted-foreground">
+      <div className="py-16 text-center text-sm text-gray-600 dark:text-muted-foreground">
         Geen bijbeltekst gevonden voor dit gedeelte.
       </div>
     );
@@ -167,7 +167,7 @@ export default function PassageReader({
             >
               <p className={cn('text-gray-900 dark:text-foreground', typography)}>
                 {prefs.showVerseNumbers && (
-                  <sup className="font-semibold mr-2 text-[0.62em] text-gray-400 dark:text-muted-foreground select-none">
+                  <sup className="font-semibold mr-2 text-[0.62em] text-gray-500 dark:text-muted-foreground select-none">
                     {number}
                   </sup>
                 )}
@@ -190,7 +190,9 @@ export default function PassageReader({
                 />
                 <button
                   onClick={() => setSelected({ verseNumber: String(number), text })}
-                  className="bg-[#0D9488] hover:bg-[#0f766e] text-white p-1.5 rounded-sm shadow-sm"
+                  // #0F766E, not #0D9488: a white glyph on the lighter brand
+                  // fill measures 3.74:1. Same swatch, one step down.
+                  className="bg-[#0F766E] hover:bg-[#115E59] text-white p-1.5 rounded-sm shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-white"
                   title={`Notitie bij vers ${number}`}
                 >
                   <Plus className="h-3 w-3" />
@@ -201,8 +203,13 @@ export default function PassageReader({
           })}
         </div>
 
+        {/* The licensing line. `getBibleAttribution` returns it verbatim and
+            nothing here may reword, truncate or wrap it - the NBG51 licence is
+            an exact string. It was set in #9CA3AF, which measures 2.5:1 on
+            white; a required copyright notice has to be readable, so it is
+            #4B5563 (7.5:1) on the light plate and unchanged on the dark one. */}
         {attribution && (
-          <p className="mt-8 pt-4 border-t border-gray-100 dark:border-border text-[11px] leading-snug text-gray-400 dark:text-muted-foreground">
+          <p className="mt-8 pt-4 border-t border-gray-200 dark:border-border text-[11px] leading-snug text-gray-600 dark:text-muted-foreground">
             {attribution}
           </p>
         )}

@@ -40,7 +40,22 @@ import {
   type StepKey,
 } from '../../../lib/studyFlow';
 
-const TEAL = '#0D9488';
+/**
+ * The brand, in the roles components/scene/tokens.ts defines for it.
+ *
+ * Plain #0D9488 is the fill that carries NO type - a bar, a dot, a keyline - and
+ * in this file nothing is left that qualifies, so it is not imported here at
+ * all; StudyStepRail owns the one bar. TEAL_DEEP is any solid fill with white
+ * type on it: white on #0D9488 measures 3.74:1 and fails, on #0F766E it is
+ * 5.5:1. And teal AS type has to move with the theme, because the window behind
+ * it does - #0F766E is the legible one on the light plate and #2DD4BF the
+ * legible one on the dark - so INK_TEAL is a class pair rather than a value: an
+ * inline `style` cannot answer dark mode.
+ */
+const TEAL_DEEP = '#0F766E';
+const INK_TEAL = 'text-[#0F766E] dark:text-[#2DD4BF]';
+/** One focus ring for the whole flow, so a keyboard reader is never guessing. */
+const FOCUS_RING = 'outline-none focus-visible:ring-2 focus-visible:ring-[#0F766E] dark:focus-visible:ring-[#2DD4BF]';
 
 /** localStorage key for the one-time "go full screen" offer. */
 const FULLSCREEN_HINT_KEY = 'study:fullscreen-hint';
@@ -648,7 +663,7 @@ export default function StudyFlowShell({
             href={`/studies/${lesson.study.id}`}
             aria-label="Terug naar de studie"
             title="Terug naar de studie"
-            className="h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-secondary text-muted-foreground no-underline flex-none"
+            className={`h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-secondary text-muted-foreground hover:text-foreground no-underline flex-none ${FOCUS_RING}`}
           >
             <X size={17} />
           </Link>
@@ -664,7 +679,7 @@ export default function StudyFlowShell({
                 setOutlineOpen((open) => !open);
               }}
               aria-expanded={outlineOpen}
-              className="w-full min-w-0 flex flex-col items-center rounded-md px-2 py-1 hover:bg-gray-100 dark:hover:bg-secondary transition-colors"
+              className={`w-full min-w-0 flex flex-col items-center rounded-md px-2 py-1 hover:bg-gray-100 dark:hover:bg-secondary transition-colors ${FOCUS_RING}`}
             >
               <span className="flex items-center gap-1.5 max-w-full">
                 <span className="text-xs font-semibold text-foreground truncate">
@@ -691,7 +706,7 @@ export default function StudyFlowShell({
               data-track="study_fullscreen"
               title={fullscreen ? 'Volledig scherm sluiten' : 'Volledig scherm'}
               aria-label={fullscreen ? 'Volledig scherm sluiten' : 'Volledig scherm'}
-              className="press hidden sm:inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-gray-100 hover:text-foreground dark:hover:bg-secondary"
+              className={`press hidden sm:inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-gray-100 hover:text-foreground dark:hover:bg-secondary ${FOCUS_RING}`}
             >
               {fullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
             </button>
@@ -703,7 +718,7 @@ export default function StudyFlowShell({
               data-track="study_sound"
               title={soundOn ? 'Geluid uit' : 'Geluid aan'}
               aria-label={soundOn ? 'Geluid uit' : 'Geluid aan'}
-              className="press hidden sm:inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-gray-100 hover:text-foreground dark:hover:bg-secondary"
+              className={`press hidden sm:inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-gray-100 hover:text-foreground dark:hover:bg-secondary ${FOCUS_RING}`}
             >
               {soundOn ? <Volume2 size={15} /> : <VolumeX size={15} />}
             </button>
@@ -723,6 +738,7 @@ export default function StudyFlowShell({
               aria-label="Instellingen voor deze sessie"
               className={[
                 'press inline-flex h-8 w-8 items-center justify-center rounded-lg transition-colors',
+                FOCUS_RING,
                 settingsOpen
                   ? 'bg-gray-100 text-foreground dark:bg-secondary'
                   : 'text-muted-foreground hover:bg-gray-100 hover:text-foreground dark:hover:bg-secondary',
@@ -739,13 +755,15 @@ export default function StudyFlowShell({
               title="AI-assistent"
               className={[
                 'press flex-none inline-flex items-center gap-1.5 h-8 pl-2.5 pr-3 rounded-lg text-[12px] font-semibold transition-colors border',
+                FOCUS_RING,
                 aiOpen
                   ? 'text-white border-transparent'
                   : 'border-gray-200 dark:border-border text-foreground hover:bg-gray-50 dark:hover:bg-secondary',
               ].join(' ')}
-              style={aiOpen ? { backgroundColor: TEAL } : undefined}
+              // TEAL_DEEP, not TEAL: this fill carries the white word "AI".
+              style={aiOpen ? { backgroundColor: TEAL_DEEP } : undefined}
             >
-              <Sparkles size={14} style={aiOpen ? undefined : { color: TEAL }} />
+              <Sparkles size={14} className={aiOpen ? undefined : INK_TEAL} />
               <span className="hidden sm:inline">AI</span>
             </button>
           </div>
@@ -788,7 +806,7 @@ export default function StudyFlowShell({
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15 }}
-                style={{ backgroundColor: 'rgba(2,6,23,0.18)' }}
+                style={{ backgroundColor: 'rgba(11,18,32,0.35)' }}
               />
               <motion.div
                 role="dialog"
@@ -810,9 +828,9 @@ export default function StudyFlowShell({
                     : { opacity: 0, x: '-50%', y: -8, scale: 0.97 }
                 }
                 transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                className="absolute z-50 top-full mt-1.5 left-1/2 w-[min(92vw,360px)] max-h-[min(60vh,420px)] overflow-y-auto rounded-2xl border border-gray-200 dark:border-border bg-white dark:bg-card shadow-[0_28px_70px_-24px_rgba(2,6,23,0.55)] p-1.5"
+                className="absolute z-50 top-full mt-1.5 left-1/2 w-[min(92vw,360px)] max-h-[min(60vh,420px)] overflow-y-auto rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-card shadow-[0_40px_80px_-32px_rgba(0,0,0,0.85)] p-1.5"
               >
-                <p className="px-2 py-1.5 text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-muted-foreground">
+                <p className="px-2 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-gray-600 dark:text-muted-foreground">
                   {lesson.study.title}
                 </p>
                 {lesson.outline.map((entry) => {
@@ -831,6 +849,7 @@ export default function StudyFlowShell({
                       }}
                       className={[
                         'w-full flex items-center gap-2.5 rounded-lg px-2 py-2 text-left transition-colors',
+                        FOCUS_RING,
                         reachable
                           ? 'hover:bg-gray-50 dark:hover:bg-secondary'
                           : 'opacity-50 cursor-default',
@@ -843,14 +862,17 @@ export default function StudyFlowShell({
                           entry.completed
                             ? 'border-transparent text-white'
                             : isCurrent
-                              ? 'border-transparent'
-                              : 'border-gray-200 dark:border-border text-gray-400 dark:text-muted-foreground',
+                              ? `border-transparent ${INK_TEAL}`
+                              : 'border-gray-200 dark:border-border text-gray-600 dark:text-muted-foreground',
                         ].join(' ')}
+                        // Only the fill is inline; the type on it is a class
+                        // pair, because #0F766E reads on the light window and
+                        // #2DD4BF on the dark one.
                         style={
                           entry.completed
-                            ? { backgroundColor: TEAL }
+                            ? { backgroundColor: TEAL_DEEP }
                             : isCurrent
-                              ? { backgroundColor: 'rgba(13,148,136,0.15)', color: TEAL }
+                              ? { backgroundColor: 'rgba(13,148,136,0.15)' }
                               : undefined
                         }
                       >
@@ -860,7 +882,7 @@ export default function StudyFlowShell({
                         <span className="block text-[12.5px] font-medium text-foreground truncate">
                           {entry.title}
                         </span>
-                        <span className="block text-[11px] text-gray-400 dark:text-muted-foreground truncate">
+                        <span className="block text-[11px] text-gray-600 dark:text-muted-foreground truncate">
                           {entry.reference}
                         </span>
                       </span>
@@ -971,6 +993,7 @@ export default function StudyFlowShell({
           data-track="study_step_previous"
           className={[
             'inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium border transition-colors',
+            FOCUS_RING,
             canGoBack
               ? 'bg-white dark:bg-card border-gray-300 dark:border-border text-foreground shadow-sm hover:bg-gray-50 dark:hover:bg-secondary'
               : 'bg-transparent border-transparent text-transparent pointer-events-none',
@@ -986,8 +1009,8 @@ export default function StudyFlowShell({
           onClick={() => void onNext()}
           disabled={finishing}
           data-track={isLast ? "study_lesson_complete" : "study_step_next"}
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold text-white disabled:opacity-60"
-          style={{ backgroundColor: TEAL }}
+          className="press inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60 outline-none focus-visible:ring-2 focus-visible:ring-white"
+          style={{ backgroundColor: TEAL_DEEP }}
         >
           {finishing ? 'Afronden...' : isLast ? 'Les afronden' : 'Volgende'}
           {!finishing && <ArrowRight size={15} />}
@@ -1006,8 +1029,8 @@ export default function StudyFlowShell({
             transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
             className="pointer-events-none absolute inset-x-0 bottom-20 z-40 hidden sm:flex justify-center px-4"
           >
-            <div className="pointer-events-auto flex items-center gap-3 rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card px-3.5 py-2.5 shadow-[0_18px_40px_-20px_rgba(15,23,42,0.5)]">
-              <Maximize2 size={15} className="flex-none" style={{ color: TEAL }} />
+            <div className="pointer-events-auto flex items-center gap-3 rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-card px-3.5 py-2.5 shadow-[0_40px_80px_-32px_rgba(0,0,0,0.85)]">
+              <Maximize2 size={15} className={`flex-none ${INK_TEAL}`} />
               <p className="text-[12.5px] text-foreground">
                 Studeer in volledig scherm, zonder afleiding?
               </p>
@@ -1018,8 +1041,8 @@ export default function StudyFlowShell({
                   dismissFullscreenHint();
                 }}
                 data-track="study_fullscreen_hint_accept"
-                className="press h-7 px-2.5 rounded-lg text-[12px] font-semibold text-white"
-                style={{ backgroundColor: TEAL }}
+                className="press h-7 px-2.5 rounded-lg text-[12px] font-semibold text-white outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-white"
+                style={{ backgroundColor: TEAL_DEEP }}
               >
                 Ja, graag
               </button>
@@ -1027,7 +1050,7 @@ export default function StudyFlowShell({
                 type="button"
                 onClick={dismissFullscreenHint}
                 aria-label="Sluiten"
-                className="press h-7 w-7 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:bg-gray-100 dark:hover:bg-secondary"
+                className={`press h-7 w-7 inline-flex items-center justify-center rounded-lg text-muted-foreground hover:bg-gray-100 dark:hover:bg-secondary ${FOCUS_RING}`}
               >
                 <X size={14} />
               </button>

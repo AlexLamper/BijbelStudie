@@ -1,9 +1,7 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../lib/authOptions";
 import SessionProvider from "../../components/providers/SessionProvider";
-import { Header } from "../../components/layout/header";
-import { AppSidebar } from "../../components/layout/app-sidebar";
 import { SidebarProvider } from "../../components/ui/sidebar";
 import { cookies } from "next/headers";
 import { cookieName, fallbackLng } from "../i18n/settings";
@@ -19,6 +17,32 @@ export async function generateMetadata(): Promise<Metadata> {
 // layout also wraps /studies/:id, and emitting the list page's nodes there
 // would describe /studies on a URL that is not /studies.
 
+/**
+ * Providers only - no chrome.
+ *
+ * Both screens under this layout now sit in the shared immersive shell
+ * (components/scene/SceneShell.tsx), which draws the landscape full-bleed from
+ * the very top of the viewport. Two things had to leave for that to work.
+ *
+ * The wrapper. It was `h-screen ... overflow-hidden` with the page scrolling in
+ * a box inside it, and the scene's depth engine measures `window.scrollY`.
+ * Inside such a box the landscape never moves. The DOCUMENT has to scroll -
+ * the same shape as app/dashboard/layout.tsx and app/admin/layout.tsx.
+ *
+ * The header and the sidebar. `components/layout/header.tsx` pushes an
+ * unauthenticated visitor to /api/auth/signin, and /studies and /studies/:id
+ * are public, crawlable pages that anyone may read without an account - so the
+ * chrome cannot be unconditional here. A layout can only ADD chrome, never
+ * replace what a parent rendered, and it cannot hand a prop to `children`
+ * either, so the decision belongs to the pages: each reads the session on the
+ * server and passes `header` and `rail` to SceneShell only when there is one.
+ * Signed in that is the same bar and rail as /dashboard; signed out neither is
+ * rendered at all, which is what keeps the redirect away from a public page.
+ *
+ * `SessionProvider` stays: the session it hands down is the full one from
+ * `authOptions` (isAdmin, isSubscribed, studyStyle), not NextAuth's default,
+ * and `SidebarProvider` stays because shared controls read its context.
+ */
 export default async function PlansLayout({
   children,
 }: Readonly<{
@@ -32,20 +56,8 @@ export default async function PlansLayout({
   const session = await getServerSession(authOptions);
 
   return (
-    <div className="antialiased bg-background h-screen flex flex-col overflow-hidden">
-      <SessionProvider session={session}>
-        <SidebarProvider>
-          <AppSidebar />
-          <div className="flex flex-col flex-1 min-h-0 min-w-0 w-full">
-            <Header />
-            <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
-              {children}
-            </div>
-          </div>
-        </SidebarProvider>
-      </SessionProvider>
-    </div>
+    <SessionProvider session={session}>
+      <SidebarProvider>{children}</SidebarProvider>
+    </SessionProvider>
   );
 }
-
-

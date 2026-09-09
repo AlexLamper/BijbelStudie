@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import SessionProvider from "../../components/providers/SessionProvider";
-import { Header } from "../../components/layout/header";
-import { AppSidebar } from "../../components/layout/app-sidebar";
 import { SidebarProvider } from "../../components/ui/sidebar";
 import { cookies } from "next/headers";
 import { cookieName, fallbackLng } from "../i18n/settings";
@@ -19,6 +17,25 @@ export async function generateMetadata(): Promise<Metadata> {
   return generatePageMetadata("admin", lng);
 }
 
+/**
+ * Providers and the admin guard - no chrome.
+ *
+ * The three admin screens now sit in the shared immersive shell
+ * (components/scene/SceneShell.tsx), which draws its own navbar and its own
+ * rail. A layout in the App Router can only ADD chrome, never replace what a
+ * parent rendered, so the header and the sidebar had to leave this file; the
+ * pages render `<SceneShell header rail>` themselves.
+ *
+ * Just as load-bearing: the wrapper this used to have was a fixed-height box
+ * with the page scrolling inside it, and the scene's depth engine measures
+ * `window.scrollY`. Inside such a box the landscape never moves. The DOCUMENT
+ * has to scroll, which is why this is providers only - the same shape as
+ * app/dashboard/layout.tsx.
+ *
+ * The guard itself is untouched: no session goes to /inloggen, and an account
+ * that is neither `isAdmin` in the database nor in ADMIN_EMAILS goes to
+ * /dashboard, before any admin markup is produced.
+ */
 export default async function AdminLayout({
   children,
 }: Readonly<{
@@ -39,20 +56,9 @@ export default async function AdminLayout({
     redirect("/dashboard");
   }
 
-  const cookieStore = await cookies();
-  const lng = cookieStore.get(cookieName)?.value || fallbackLng;
-
   return (
-    <div className="antialiased bg-background">
-      <SessionProvider session={session}>
-        <SidebarProvider>
-          <AppSidebar />
-          <div className="min-h-screen mx-auto w-full">
-            <Header params={{ lng }} />
-            {children}
-          </div>
-        </SidebarProvider>
-      </SessionProvider>
-    </div>
+    <SessionProvider session={session}>
+      <SidebarProvider>{children}</SidebarProvider>
+    </SessionProvider>
   );
 }
