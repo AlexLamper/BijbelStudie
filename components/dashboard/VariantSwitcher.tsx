@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation"
 /**
  * Hop between the dashboard designs under review. Text links only, so it never
  * competes with the page it sits on; the design being viewed is bold and teal.
- * At ten candidates the names no longer fit on one line, so the links are
+ * Past ten candidates the names no longer fit on one line, so the links are
  * numbers and the name is the tooltip. Remove together with the
  * /dashboard/versie-* routes once a direction is chosen.
  */
@@ -22,6 +22,11 @@ const VARIANTS = [
   { href: "/dashboard/versie-8", label: "8", name: "Paneel - donkere band met meters" },
   { href: "/dashboard/versie-9", label: "9", name: "Rust - één handeling, verder niets" },
   { href: "/dashboard/versie-10", label: "10", name: "Tweeluik - vast linkerpaneel" },
+  { href: "/dashboard/versie-11", label: "11", name: "Horizon - de boom als hele kamer" },
+  { href: "/dashboard/versie-12", label: "12", name: "Pad - één niveau als weg met haltes" },
+  { href: "/dashboard/versie-13", label: "13", name: "Sterrenkaart - 66 boeken als sterrenhemel" },
+  { href: "/dashboard/versie-14", label: "14", name: "Groeiringen - alles als ringen om de boom" },
+  { href: "/dashboard/versie-15", label: "15", name: "Boomgaard - een boom per begonnen boek" },
 ]
 
 export default function VariantSwitcher({ className = "" }: { className?: string }) {

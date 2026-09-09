@@ -1,8 +1,17 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useMemo } from 'react';
-import TreeCanvas from '../levensboom/TreeCanvas';
 import { buildPalette } from '../../lib/levensboom/palette';
+
+/**
+ * Deferred, because it cannot paint any sooner than this anyway: the canvas is
+ * blank until its effect runs, so server-rendering the element bought nothing
+ * while its module - the generator, the species table and the scene painter -
+ * sat in the sign-in and sign-up bundles ahead of the form. The slate panel
+ * and the gradients over it are still in the served HTML.
+ */
+const TreeCanvas = dynamic(() => import('../levensboom/TreeCanvas'), { ssr: false });
 
 /**
  * The dark panel's backdrop on the sign-in and sign-up pages: a levensboom at

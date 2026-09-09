@@ -7,6 +7,7 @@ import {
   TrendingUp, ArrowRight, Flame, Euro, Settings2, RefreshCw,
 } from "lucide-react"
 import BillingHealthCard, { type BillingStats } from "../../components/admin/BillingHealthCard"
+import OnboardingPreviewButton from "../../components/admin/OnboardingPreviewButton"
 import { ProBadge } from "../../components/ui/ProBadge"
 
 /**
@@ -458,6 +459,7 @@ export default function AdminDashboardPage() {
                     {label}
                   </Link>
                 ))}
+                <OnboardingPreviewButton />
               </div>
             </div>
           </div>
