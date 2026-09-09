@@ -1,14 +1,13 @@
 "use client"
 
-import { useMemo } from "react"
+import { useState } from "react"
 import Link from "next/link"
-import { ArrowRight, BookOpen, CalendarCheck2, Clock, StickyNote } from "lucide-react"
+import { ArrowRight, Clock } from "lucide-react"
 import { Header } from "../../../components/layout/header"
 import { CHAPTER_COUNTS } from "../../../lib/data/bible-chapter-counts"
 import { BADGE_STYLES, curatedStudies } from "../../../lib/data/curated-studies"
 import { versionAbbreviation } from "../../../lib/dailyVerseStore"
 import {
-  ALL_BOOKS,
   NT_BOOKS,
   OT_BOOKS,
   TOTAL_CHAPTERS,
@@ -17,13 +16,11 @@ import {
 } from "../../../hooks/useDashboardData"
 import BillingNotices from "../../../components/pricing/BillingNotices"
 import DailyVerseCard from "../../../components/dashboard/DailyVerseCard"
-import ProefdashboardSwitcher from "../../../components/dashboard/ProefdashboardSwitcher"
 import { ProgressTreeScene, useTreeSummary } from "../../../components/dashboard/ProgressTree"
 import { SkeletonBlock } from "../../../components/ui/skeletons"
 import SceneRail from "../../../components/dashboard/proef/versie-3/SceneRail"
 import { useDepthScroll } from "../../../components/dashboard/proef/versie-3/useDepthScroll"
 import {
-  BookRibbon,
   EYEBROW,
   GlassStat,
   PANEL,
@@ -79,18 +76,7 @@ export default function ProefdashboardVersie3() {
 
   const chapterCount = (book: string) => CHAPTER_COUNTS[book] ?? 1
 
-  const onTheWay = useMemo(
-    () =>
-      ALL_BOOKS.map(book => ({ book, read: d.bookReadCount(book), total: CHAPTER_COUNTS[book] ?? 1 }))
-        .filter(entry => entry.read > 0)
-        .sort((a, b) => b.read / b.total - a.read / a.total)
-        .slice(0, 4),
-    // `bookReadCount` is itself memoised on readChapters in useDashboardData,
-    // so it is the only dependency this needs; the rule cannot see that through
-    // the member access and asks for the whole object.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [d.bookReadCount],
-  )
+  const [hoveredBook, setHoveredBook] = useState<string | null>(null)
 
   /** Seeded here so the first paint is defined; the hook drives them after that. */
   const sceneVars: React.CSSProperties & Record<string, string> = {
@@ -112,9 +98,14 @@ export default function ProefdashboardVersie3() {
     : { transform: "translate3d(0, calc(var(--lift, 0) * -18px), 0)", willChange: "transform" }
 
   return (
-    <div ref={rootRef} style={sceneVars} className="relative min-h-screen bg-[#0B1220]">
-      {/* -- The scene. Fixed, full-bleed, never moves. ---------------- */}
-      <div className="pointer-events-none fixed bottom-0 left-0 right-0 top-14 z-0">
+    // `w-full min-w-0` is load-bearing: SidebarProvider wraps this page in a
+    // `flex` row, and a flex child without them is sized to its content rather
+    // than to the viewport - which is what cut the navbar and the panels short
+    // of the right edge.
+    <div ref={rootRef} style={sceneVars} className="relative min-h-screen w-full min-w-0 bg-[#0B1220]">
+      {/* -- The scene. Fixed, full-bleed, never moves. Runs from the very
+             top of the viewport, so it is behind the navbar too. -------- */}
+      <div className="pointer-events-none fixed inset-0 z-0">
         <ProgressTreeScene />
         {/* A constant floor of dark, so the copy is legible from the first
             frame - including the frame in which the scene is still its own
@@ -131,10 +122,16 @@ export default function ProefdashboardVersie3() {
         <span aria-hidden className="absolute inset-0 bg-black/55" style={{ opacity: "var(--veil, 0)" }} />
       </div>
 
-      {/* The real navbar, unchanged. */}
-      <Header />
-      {/* The shadow the navbar would grow if it were ours to change. It is not,
-          so the page grows it instead, immediately under the bar. */}
+      {/* The real navbar, in its scene variant: transparent, hairline in
+          white, own dark scope. The landscape runs straight through it, which
+          is what makes the experience cover the whole screen. */}
+      <Header variant="scene" />
+      {/* A permanent band of dark under the top edge so the bar's own title and
+          controls stay legible over a noon sky, deepening as the page scrolls. */}
+      <span
+        aria-hidden
+        className="pointer-events-none fixed inset-x-0 top-0 z-40 h-24 bg-gradient-to-b from-black/55 via-black/25 to-transparent"
+      />
       <span
         aria-hidden
         className="pointer-events-none fixed inset-x-0 top-14 z-40 h-8 bg-gradient-to-b from-black/45 to-transparent"
@@ -154,7 +151,12 @@ export default function ProefdashboardVersie3() {
           ) : (
             <SkeletonBlock className={`h-3.5 w-36 ${SKEL}`} />
           )}
-          <ProefdashboardSwitcher tone="light" />
+          <Link
+            href="/dashboard"
+            className="text-xs font-medium text-white/60 no-underline transition-colors hover:text-white"
+          >
+            Huidig dashboard
+          </Link>
         </div>
 
         <div className="max-w-[46rem]" style={skyMotion}>
@@ -229,7 +231,7 @@ export default function ProefdashboardVersie3() {
         className="relative z-10 -mt-24 px-5 sm:px-8 lg:pl-24 lg:pr-10 xl:pl-28 xl:pr-16"
         style={horizonMotion}
       >
-        <dl className="stagger-in mx-auto grid max-w-[1500px] grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
+        <dl className="stagger-in grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
           <GlassStat
             label="Reeks"
             value={d.loading ? null : `${d.streak}`}
@@ -257,7 +259,7 @@ export default function ProefdashboardVersie3() {
       </div>
 
       {/* -- Layer 3: the desk - version 10's two panels ---------------- */}
-      <div className="relative z-10 mx-auto grid w-full max-w-[1500px] grid-cols-1 gap-6 px-5 pb-20 pt-14 sm:px-8 lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-8 lg:pl-24 lg:pr-10 xl:pl-28 xl:pr-16">
+      <div className="relative z-10 grid w-full grid-cols-1 gap-6 px-5 pb-20 pt-14 sm:px-8 lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-8 lg:pl-24 lg:pr-10 xl:pl-28 xl:pr-16">
 
         {/* --- The reader ------------------------------------------- */}
         {/* Sticks the moment it reaches the navbar. Capped to the viewport and
@@ -361,43 +363,9 @@ export default function ProefdashboardVersie3() {
               </dl>
             </div>
 
-            {/* Where you were last */}
-            {(d.loading || onTheWay.length > 0) && (
-              <div className="mt-6 border-t border-white/10 pt-4">
-                <h3 className={EYEBROW}>Onderweg in</h3>
-                {d.loading ? (
-                  <div className="mt-3 space-y-2.5">
-                    {[1, 2, 3].map(i => (
-                      <SkeletonBlock key={i} className={`h-3.5 w-full ${SKEL}`} />
-                    ))}
-                  </div>
-                ) : (
-                  <ul className="mt-2.5 space-y-2">
-                    {onTheWay.map(entry => (
-                      <li key={entry.book}>
-                        <Link href={readHref(entry.book, 1)} className="group flex items-center gap-2 no-underline">
-                          <span className="min-w-0 flex-1 truncate text-xs font-medium text-white/90 group-hover:underline">
-                            {entry.book}
-                          </span>
-                          <span aria-hidden className="h-1.5 w-14 flex-shrink-0 overflow-hidden rounded-full bg-white/15">
-                            <span
-                              className="block h-full rounded-full"
-                              style={{
-                                width: `${Math.min(100, (entry.read / entry.total) * 100)}%`,
-                                backgroundColor: TEAL_ON_DARK,
-                              }}
-                            />
-                          </span>
-                          <span className="w-11 flex-shrink-0 text-right text-[10px] tabular-nums text-white/60">
-                            {entry.read}/{entry.total}
-                          </span>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            )}
+            {/* "Onderweg in" used to list the four books furthest along. The
+                field of 66 squares in the work column says the same thing more
+                clearly and for every book at once, so the list is gone. */}
           </section>
         </aside>
 
@@ -456,24 +424,52 @@ export default function ProefdashboardVersie3() {
                 </p>
               )}
             </div>
-            <BookRibbon
+            <p className="mt-1 h-4 text-xs text-white/70">
+              {hoveredBook ? (
+                <>
+                  <span className="font-semibold text-white">{hoveredBook}</span>
+                  {" · "}
+                  <span className="tabular-nums">
+                    {d.bookReadCount(hoveredBook)} van {chapterCount(hoveredBook)} hoofdstukken
+                  </span>
+                </>
+              ) : (
+                "Beweeg over een boek voor details"
+              )}
+            </p>
+
+            <BookField
               label="Oude Testament"
               books={OT_BOOKS}
               ratioOf={d.bookReadRatio}
-              countOf={d.bookReadCount}
-              totalOf={chapterCount}
               loading={d.loading}
               current={d.lastRead?.book ?? null}
+              hovered={hoveredBook}
+              onHover={setHoveredBook}
             />
-            <BookRibbon
+            <BookField
               label="Nieuwe Testament"
               books={NT_BOOKS}
               ratioOf={d.bookReadRatio}
-              countOf={d.bookReadCount}
-              totalOf={chapterCount}
               loading={d.loading}
               current={d.lastRead?.book ?? null}
+              hovered={hoveredBook}
+              onHover={setHoveredBook}
             />
+
+            <div className="mt-4 flex items-center gap-2 border-t border-white/10 pt-3 text-[11px] text-white/55">
+              <span>Niets</span>
+              <span aria-hidden className="flex gap-[3px]">
+                {[0, 0.2, 0.4, 0.7, 1].map(ratio => (
+                  <span
+                    key={ratio}
+                    className="block h-[11px] w-[11px] rounded-sm"
+                    style={{ backgroundColor: fieldColor(ratio) }}
+                  />
+                ))}
+              </span>
+              <span>Uitgelezen</span>
+            </div>
           </section>
 
           {/* Recente notities */}
@@ -576,32 +572,85 @@ export default function ProefdashboardVersie3() {
             </ul>
           </section>
 
-          {/* Snel naar */}
-          <section className={`p-6 ${PANEL}`} aria-labelledby="diepte-snel">
-            <h2 id="diepte-snel" className={EYEBROW}>Snel naar</h2>
-            <ul className="mt-3 flex flex-col gap-1">
-              {[
-                { href: "/studie", label: "Bijbelstudie", icon: BookOpen },
-                { href: "/notities", label: "Mijn notities", icon: StickyNote },
-                { href: "/studies", label: "Leesplannen", icon: CalendarCheck2 },
-              ].map(({ href, label, icon: Icon }) => (
-                <li key={href}>
-                  <Link
-                    href={href}
-                    className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-white/85 no-underline outline-none transition-colors hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white"
-                  >
-                    <Icon size={14} aria-hidden className="flex-shrink-0" style={{ color: TEAL_ON_DARK }} />
-                    {label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </section>
+          {/* "Snel naar" is gone on purpose: every one of its three links is
+              already in the rail, one hover away, and a fourth panel repeating
+              them was the clearest case of the page doing too much. */}
 
-          <div className="flex justify-center pt-2">
-            <ProefdashboardSwitcher tone="light" />
-          </div>
         </div>
+      </div>
+    </div>
+  )
+}
+
+/* -- The reading field ---------------------------------------------- */
+
+/**
+ * The five-step ramp the live dashboard already uses, restated for a dark
+ * ground: the empty square is a film of white rather than `--progress-empty`,
+ * which is tuned for a white page and disappears here.
+ */
+function fieldColor(ratio: number): string {
+  if (ratio <= 0) return "rgba(255,255,255,0.14)"
+  if (ratio < 0.25) return "rgba(45,212,191,0.30)"
+  if (ratio < 0.5) return "rgba(45,212,191,0.52)"
+  if (ratio < 1) return "rgba(45,212,191,0.76)"
+  return "#2DD4BF"
+}
+
+/**
+ * One testament as a field of squares, one per book, filled by how much of it
+ * is read - the contribution-graph shape the live dashboard uses, which reads
+ * far faster than a ribbon and gives all 66 books at once.
+ */
+function BookField({
+  label,
+  books,
+  ratioOf,
+  loading,
+  current,
+  hovered,
+  onHover,
+}: {
+  label: string
+  books: readonly string[]
+  ratioOf: (book: string) => number
+  loading: boolean
+  current: string | null
+  hovered: string | null
+  onHover: (book: string | null) => void
+}) {
+  return (
+    <div className="mt-4">
+      <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/55">
+        {label} <span className="font-normal normal-case tabular-nums">({books.length} boeken)</span>
+      </p>
+      <div className="flex flex-wrap gap-[3px]">
+        {books.map(book => {
+          const ratio = loading ? 0 : ratioOf(book)
+          const isCurrent = !loading && current === book
+          return (
+            <Link
+              key={book}
+              href={readHref(book, 1)}
+              title={book}
+              aria-label={book}
+              onMouseEnter={() => onHover(book)}
+              onMouseLeave={() => onHover(null)}
+              onFocus={() => onHover(book)}
+              onBlur={() => onHover(null)}
+              className={`relative block flex-shrink-0 rounded-sm no-underline transition-transform duration-100 hover:z-10 hover:scale-125 ${
+                loading ? "skeleton-pulse" : ""
+              }`}
+              style={{
+                width: 18,
+                height: 18,
+                backgroundColor: fieldColor(ratio),
+                outline: hovered === book || isCurrent ? "2px solid #2DD4BF" : "none",
+                outlineOffset: 1,
+              }}
+            />
+          )
+        })}
       </div>
     </div>
   )

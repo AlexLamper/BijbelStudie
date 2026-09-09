@@ -1,8 +1,6 @@
 "use client"
 
-import { useState } from "react"
-import Link from "next/link"
-import { readHref, type WeekDay } from "../../../../hooks/useDashboardData"
+import { type WeekDay } from "../../../../hooks/useDashboardData"
 import { SkeletonBlock } from "../../../ui/skeletons"
 
 /**
@@ -125,67 +123,3 @@ export function WeekStrip({ days, loading }: { days: WeekDay[]; loading: boolean
 }
 
 /* ── One testament as a ribbon of slats ──────────────────────── */
-
-/**
- * Each slat is one book, filled to the share of it already read, and it links
- * into that book. On a wide monitor all 39 fit at once, which is the point:
- * what you have and have not touched, in one glance.
- */
-export function BookRibbon({
-  label,
-  books,
-  ratioOf,
-  countOf,
-  totalOf,
-  loading,
-  current,
-}: {
-  label: string
-  books: readonly string[]
-  ratioOf: (book: string) => number
-  countOf: (book: string) => number
-  totalOf: (book: string) => number
-  loading: boolean
-  current: string | null
-}) {
-  const [hovered, setHovered] = useState<string | null>(null)
-
-  return (
-    <div className="mt-5">
-      <div className="flex items-baseline justify-between gap-3">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-white/60">{label}</p>
-        <p className="h-4 text-xs font-medium tabular-nums text-white/90">
-          {hovered ? `${hovered} — ${countOf(hovered)}/${totalOf(hovered)}` : ""}
-        </p>
-      </div>
-      <ol className="mt-2 flex gap-[3px]" aria-label={label}>
-        {books.map(book => {
-          const ratio = loading ? 0 : ratioOf(book)
-          const isCurrent = !loading && current === book
-          return (
-            <li key={book} className="flex-1">
-              <Link
-                href={readHref(book, 1)}
-                title={book}
-                aria-label={`${book}, ${loading ? 0 : countOf(book)} van ${totalOf(book)} hoofdstukken gelezen`}
-                onMouseEnter={() => setHovered(book)}
-                onMouseLeave={() => setHovered(null)}
-                onFocus={() => setHovered(book)}
-                onBlur={() => setHovered(null)}
-                className={`relative block h-11 overflow-hidden rounded-[3px] bg-white/15 no-underline outline-none transition-transform hover:scale-y-110 focus-visible:ring-2 focus-visible:ring-white ${
-                  loading ? "skeleton-pulse" : ""
-                } ${isCurrent ? "ring-2 ring-white" : ""}`}
-              >
-                <span
-                  aria-hidden
-                  className="absolute inset-x-0 bottom-0 transition-[height] duration-700 ease-out"
-                  style={{ height: `${Math.min(1, ratio) * 100}%`, backgroundColor: TEAL_ON_DARK }}
-                />
-              </Link>
-            </li>
-          )
-        })}
-      </ol>
-    </div>
-  )
-}

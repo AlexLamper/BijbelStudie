@@ -18,9 +18,9 @@ import { SidebarProvider } from "../../components/ui/sidebar";
  * context, in case a candidate reuses the real sidebar. Theme, study style,
  * prefetch and the levensboom state all come from the root layout already.
  *
- * `/proefdashboard` is in `middleware.ts` protectedRoutes, so these are behind
- * auth exactly like the real dashboard. Remove the whole folder, the middleware
- * entry and ProefdashboardSwitcher together once a direction is chosen.
+ * `/proefdashboard` is in `middleware.ts` protectedRoutes, so this is behind
+ * auth exactly like the real dashboard. Remove the folder and the middleware
+ * entry together once the design is promoted onto /dashboard itself.
  */
 export const metadata: Metadata = {
   title: "Dashboard",

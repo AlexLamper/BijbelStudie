@@ -38,9 +38,20 @@ const PAGE_TITLES: Record<string, string> = {
 interface HeaderProps {
   params?: { lng: string }
   title?: string
+  /**
+   * "scene" puts the bar ON a full-bleed background instead of on a page.
+   *
+   * The bar goes transparent with a white hairline, and carries its own `dark`
+   * scope so every theme token inside it resolves to the light-on-dark value
+   * whatever theme the reader is in - which is what a bar sitting over a night
+   * sky needs, and what the immersive dashboard asks for. Opt-in: without it
+   * nothing changes, so all twelve existing layouts keep the bar they have.
+   */
+  variant?: "default" | "scene"
 }
 
-export function Header({ title }: HeaderProps) {
+export function Header({ title, variant = "default" }: HeaderProps) {
+  const scene = variant === "scene"
   const { data: session, status } = useSession()
   const router = useRouter()
   const pathname = usePathname()
@@ -82,7 +93,7 @@ export function Header({ title }: HeaderProps) {
   }, [mounted])
 
   if (!mounted || status === "loading") {
-    return <div className="h-14 border-b border-border bg-background" />
+    return <div className={scene ? "h-14" : "h-14 border-b border-border bg-background"} />
   }
 
   if (!session) return null
@@ -94,7 +105,16 @@ export function Header({ title }: HeaderProps) {
   }
 
   return (
-    <header className="flex items-center justify-between px-4 sm:px-6 h-14 border-b border-border bg-white dark:bg-background sticky top-0 z-50">
+    <header
+      className={
+        scene
+          ? // `dark` is the whole trick: darkMode is class-based, so scoping it
+            // here flips every token inside the bar to its light-on-dark value
+            // without touching a single child className.
+            "dark sticky top-0 z-50 flex h-14 items-center justify-between border-b border-white/10 bg-transparent px-4 sm:px-6 backdrop-blur-sm"
+          : "flex items-center justify-between px-4 sm:px-6 h-14 border-b border-border bg-white dark:bg-background sticky top-0 z-50"
+      }
+    >
       {/* Left: Sidebar trigger + page title */}
       <div className="flex items-center gap-3">
         <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
