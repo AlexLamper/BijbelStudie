@@ -2,13 +2,11 @@
 
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { AlertCircle, Info, X } from 'lucide-react';
+import { AlertCircle, X } from 'lucide-react';
 
 import { formatSummaryText } from '../HistoricalContext';
 import { getPreferenceClasses, getPreferenceStyles } from '../../../lib/preferenceClasses';
 import type { ReadingPreferences } from '../../../hooks/useReadingPreferences';
-
-const TEAL = '#0D9488';
 
 /**
  * "Context van <boek>" - the same algemene info as the tab on /lezen.
@@ -90,7 +88,8 @@ export default function BookContextDialog({
   return createPortal(
     <div
       className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-6"
-      style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}
+      // The scene's ground, like every other dim in the flow.
+      style={{ backgroundColor: 'rgba(11,18,32,0.55)' }}
       onClick={onClose}
     >
       <div
@@ -98,18 +97,18 @@ export default function BookContextDialog({
         aria-modal="true"
         aria-label={`Context van ${book}`}
         onClick={(event) => event.stopPropagation()}
-        className="w-full sm:max-w-2xl h-[85vh] sm:h-[78vh] flex flex-col bg-white dark:bg-card rounded-t-2xl sm:rounded-2xl border border-gray-200 dark:border-border shadow-2xl"
+        className="w-full sm:max-w-2xl h-[85vh] sm:h-[78vh] flex flex-col bg-white dark:bg-card rounded-t-2xl sm:rounded-2xl border border-gray-200 dark:border-white/10 shadow-[0_40px_80px_-32px_rgba(0,0,0,0.85)]"
       >
         <header className="flex-none flex items-center justify-between px-5 h-14 border-b border-gray-200 dark:border-border">
+          {/* Titled in words; an info mark beside "Context van ..." adds nothing. */}
           <div className="flex items-center gap-2 min-w-0">
-            <Info size={15} style={{ color: TEAL }} className="flex-none" />
             <h2 className="text-sm font-bold text-foreground truncate">Context van {book}</h2>
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Sluiten"
-            className="h-8 w-8 flex-none inline-flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-secondary text-muted-foreground"
+            className="h-8 w-8 flex-none inline-flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-secondary text-muted-foreground hover:text-foreground outline-none focus-visible:ring-2 focus-visible:ring-[#0F766E] dark:focus-visible:ring-[#2DD4BF]"
           >
             <X size={16} />
           </button>
@@ -138,7 +137,7 @@ export default function BookContextDialog({
               dangerouslySetInnerHTML={{ __html: formatSummaryText(summary) }}
             />
           ) : (
-            <p className="text-gray-400 dark:text-muted-foreground italic text-sm">
+            <p className="text-gray-600 dark:text-muted-foreground italic text-sm">
               Geen algemene informatie beschikbaar voor dit boek.
             </p>
           )}

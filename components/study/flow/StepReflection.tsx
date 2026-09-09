@@ -1,9 +1,15 @@
 'use client';
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { PenLine, Check, CloudOff, RotateCcw } from 'lucide-react';
+import { Check, CloudOff, RotateCcw } from 'lucide-react';
 
-const TEAL = '#0D9488';
+/** Teal as type, in the shade each theme can read. */
+const INK_TEAL = 'text-[#0F766E] dark:text-[#2DD4BF]';
+/**
+ * The recovery notice's amber. #D97706 fails as small type on white (3.4:1) and
+ * under white type on a fill, so the notice uses the shade one step down.
+ */
+const AMBER_DEEP = '#B45309';
 const AUTOSAVE_DELAY_MS = 1500;
 const MAX_CHARS = 8000;
 
@@ -143,12 +149,11 @@ export default function StepReflection({
   return (
     <div className="h-full overflow-y-auto">
     <div className="max-w-2xl mx-auto px-6 sm:px-10 py-8 sm:py-10">
-      <div className="flex items-center gap-2 mb-3">
-        <PenLine size={14} style={{ color: TEAL }} />
-        <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: TEAL }}>
-          Reflectie
-        </span>
-      </div>
+      {/* The step rail above already says which step this is; the eyebrow
+          repeats it in words, and a pen icon would repeat it a third time. */}
+      <p className={`text-[11px] font-bold uppercase tracking-[0.14em] mb-3 ${INK_TEAL}`}>
+        Reflectie
+      </p>
 
       <h2 className="text-xl sm:text-2xl font-bold text-foreground leading-snug mb-4">
         {reflection.question}
@@ -159,7 +164,7 @@ export default function StepReflection({
           {reflection.prompts.map((prompt, index) => (
             <li
               key={index}
-              className="flex gap-2.5 text-sm text-gray-500 dark:text-muted-foreground leading-relaxed"
+              className="flex gap-2.5 text-sm text-gray-600 dark:text-muted-foreground leading-relaxed"
             >
               <span aria-hidden className="mt-2 h-1 w-1 rounded-full flex-none bg-current opacity-50" />
               {prompt}
@@ -171,7 +176,7 @@ export default function StepReflection({
       {recovered && (
         <div
           className="mb-4 rounded-lg border p-3 text-sm"
-          style={{ borderColor: 'rgba(217,119,6,0.35)', backgroundColor: 'rgba(217,119,6,0.07)' }}
+          style={{ borderColor: 'rgba(180,83,9,0.40)', backgroundColor: 'rgba(217,119,6,0.07)' }}
         >
           <p className="text-foreground mb-2">
             Er staat een nieuwere versie van je antwoord op dit apparaat, die niet is opgeslagen.
@@ -183,8 +188,8 @@ export default function StepReflection({
                 handleChange(recovered.text);
                 setRecovered(null);
               }}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold text-white"
-              style={{ backgroundColor: '#D97706' }}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold text-white outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-white"
+              style={{ backgroundColor: AMBER_DEEP }}
             >
               <RotateCcw size={12} /> Herstel die versie
             </button>
@@ -198,7 +203,7 @@ export default function StepReflection({
                 }
                 setRecovered(null);
               }}
-              className="px-2.5 py-1.5 rounded-md text-xs font-medium border border-border text-foreground"
+              className="px-2.5 py-1.5 rounded-md text-xs font-medium border border-border text-foreground outline-none transition-colors hover:bg-gray-50 dark:hover:bg-secondary focus-visible:ring-2 focus-visible:ring-[#0F766E] dark:focus-visible:ring-[#2DD4BF]"
             >
               Negeren
             </button>
@@ -214,15 +219,14 @@ export default function StepReflection({
         maxLength={MAX_CHARS}
         placeholder={reflection.placeholder ?? 'Schrijf hier je antwoord...'}
         aria-label="Je reflectie"
-        className="w-full rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card p-4 text-[15px] leading-relaxed text-foreground resize-y focus:outline-none focus:ring-2"
-        style={{ ['--tw-ring-color' as string]: 'rgba(13,148,136,0.35)' }}
+        className="w-full rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-card p-4 text-[15px] leading-relaxed text-foreground placeholder:text-gray-500 dark:placeholder:text-muted-foreground resize-y outline-none focus-visible:ring-2 focus-visible:ring-[#0F766E] dark:focus-visible:ring-[#2DD4BF]"
       />
 
-      <div className="mt-2 flex items-center justify-between text-xs text-gray-400 dark:text-muted-foreground">
+      <div className="mt-2 flex items-center justify-between text-xs text-gray-600 dark:text-muted-foreground">
         <span aria-live="polite">
           {saveState === 'saving' && 'Opslaan...'}
           {saveState === 'saved' && (
-            <span className="inline-flex items-center gap-1" style={{ color: TEAL }}>
+            <span className={`inline-flex items-center gap-1 ${INK_TEAL}`}>
               <Check size={12} /> Opgeslagen
             </span>
           )}
@@ -237,7 +241,7 @@ export default function StepReflection({
         </span>
       </div>
 
-      <p className="mt-3 text-xs text-gray-400 dark:text-muted-foreground">
+      <p className="mt-3 text-xs text-gray-600 dark:text-muted-foreground">
         Als je de les afrondt wordt dit bewaard als notitie, terug te vinden bij Notities.
       </p>
     </div>

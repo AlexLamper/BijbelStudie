@@ -44,6 +44,26 @@ const highlightColors = [
   { name: "orange", class: "bg-orange-200 border-orange-300", hex: "#FED7AA" },
 ];
 
+/**
+ * The note editor, opened from /notities.
+ *
+ * /notities is now an immersive scene page, and this dialog deliberately
+ * carries NO scene at all: it is an opaque plate over the landscape, on the
+ * reader's own theme. The reason is the writing itself. Everything on a scene
+ * page sits on a translucent surface with a photograph running behind it, and
+ * that is fine for reading a line and wrong for a field the reader types
+ * paragraphs into - a textarea needs one flat, unmoving ground, and the shell's
+ * `--veil` shifts under the page as it scrolls. The landscape stays outside the
+ * dialog, dimmed by the Radix overlay, and comes back the moment it closes.
+ *
+ * Practically the same conclusion from the other side: `components/ui/modal.tsx`
+ * is shared with `CreateNoteModal`, which the study flow opens over a very
+ * different screen, so this dialog's surface is not this page's to repaint.
+ * Only the accents changed here - the indigo, which belonged to nothing, is the
+ * brand teal - plus a calmer note field and the accessible names two icon-only
+ * controls were missing. Every fetch, every field and the whole save path are
+ * untouched.
+ */
 export function EditNoteModal({
   isOpen,
   onClose,
@@ -183,8 +203,11 @@ export function EditNoteModal({
       title={`${t("edit_note_title")} - ${note.verseReference}`}
     >
       <div className="space-y-6">
-        {/* Bible Verse Preview */}
-        <div className="bg-gray-50 dark:bg-muted p-4 border-l-4 border-indigo-300">
+        {/* Bible Verse Preview.
+            The rule was indigo, which belongs to no part of this product; it is
+            the brand teal now. Everything else in this dialog deliberately
+            stays on theme tokens - see the note above the component. */}
+        <div className="bg-gray-50 dark:bg-muted p-4 rounded-r-lg border-l-4" style={{ borderLeftColor: "#0D9488" }}>
           <p className="italic text-gray-700 dark:text-foreground text-sm leading-relaxed">
             &ldquo;{note.verseText}&rdquo;
           </p>
@@ -237,8 +260,9 @@ export function EditNoteModal({
                   key={color.name}
                   type="button"
                   onClick={() => setSelectedColor(color.name)}
-                  className={`w-8 h-8 rounded-full border-2 ${color.class} ${
-                    selectedColor === color.name ? "ring-2 ring-indigo-500 ring-offset-1" : ""
+                  aria-pressed={selectedColor === color.name}
+                  className={`w-8 h-8 rounded-full border-2 outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#0D9488] ${color.class} ${
+                    selectedColor === color.name ? "ring-2 ring-offset-1 ring-[#0D9488]" : ""
                   }`}
                   title={color.name}
                 />
@@ -251,13 +275,14 @@ export function EditNoteModal({
             and offering it under "Markering" promised the text would be kept. */}
         {wantsText && (
           <div>
-            <label className="block text-sm font-medium mb-2">{t("note_thoughts_label")}</label>
+            <label htmlFor="notitie-tekst" className="block text-sm font-medium mb-2">{t("note_thoughts_label")}</label>
             <Textarea
+              id="notitie-tekst"
               value={noteText}
               onChange={(e) => setNoteText(e.target.value)}
               placeholder={t("note_thoughts_placeholder")}
-              rows={4}
-              className="resize-none"
+              rows={6}
+              className="resize-none min-h-[9rem] leading-relaxed text-[15px] md:text-[15px]"
             />
           </div>
         )}
@@ -271,10 +296,11 @@ export function EditNoteModal({
                 #{tag}
                 <button
                   type="button"
+                  aria-label={`Tag ${tag} verwijderen`}
                   onClick={() => handleRemoveTag(tag)}
-                  className="text-gray-500 hover:text-gray-700"
+                  className="text-gray-500 hover:text-gray-700 rounded outline-none focus-visible:ring-2 focus-visible:ring-[#0D9488]"
                 >
-                  <X className="h-3 w-3" />
+                  <X className="h-3 w-3" aria-hidden />
                 </button>
               </Badge>
             ))}

@@ -2,6 +2,7 @@
 
 import React, { useRef, useState } from 'react';
 import { Send, Sparkles, X } from 'lucide-react';
+import { TEAL_DEEP } from '../scene/tokens';
 
 interface AiAssistantWidgetProps {
   // Called with the typed question; the parent switches to the AI tab and
@@ -56,17 +57,17 @@ export default function AiAssistantWidget({ onAsk, className = '' }: AiAssistant
         aria-hidden={!open}
       >
         <div className="p-3.5">
+          {/* No avatar glyph next to the title: it identified nothing the word
+              itself does not, and a decorative icon is not something this
+              project ships. */}
           <div className="flex items-center gap-2 mb-2.5">
-            <div className="w-7 h-7 rounded-full bg-teal-100 dark:bg-teal-900 flex items-center justify-center flex-shrink-0">
-              <Sparkles size={14} className="text-teal-700 dark:text-teal-300" />
-            </div>
             <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
               AI-assistent
             </span>
             <button
               onClick={() => setOpen(false)}
               aria-label="Sluiten"
-              className="ml-auto flex items-center justify-center w-7 h-7 rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-secondary transition-colors"
+              className="ml-auto flex items-center justify-center w-7 h-7 rounded-md text-gray-500 dark:text-gray-400 outline-none hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-secondary transition-colors focus-visible:ring-2 focus-visible:ring-[#0D9488]"
             >
               <X size={15} />
             </button>
@@ -91,7 +92,8 @@ export default function AiAssistantWidget({ onAsk, className = '' }: AiAssistant
               onClick={submit}
               disabled={input.trim().length === 0}
               aria-label="Vraag stellen"
-              className="flex-shrink-0 h-9 w-9 flex items-center justify-center rounded-md text-white bg-[#0D9488] hover:bg-[#0f766e] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="flex-shrink-0 h-9 w-9 flex items-center justify-center rounded-md text-white outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-white disabled:opacity-40 disabled:cursor-not-allowed"
+              style={{ backgroundColor: TEAL_DEEP }}
             >
               <Send size={16} />
             </button>
@@ -113,10 +115,14 @@ export default function AiAssistantWidget({ onAsk, className = '' }: AiAssistant
         className={[
           'fixed z-40 bottom-4 right-4 sm:bottom-6 sm:right-6',
           'w-12 h-12 rounded-full flex items-center justify-center',
-          'text-white bg-[#0D9488] hover:bg-[#0f766e] shadow-lg hover:shadow-xl',
+          // The fill carries a white glyph, so it is the deeper brand step
+          // (5.5:1) rather than #0D9488 (3.74:1) - see components/scene/tokens.
+          'text-white shadow-lg hover:shadow-xl hover:opacity-90',
+          'outline-none focus-visible:ring-2 focus-visible:ring-white',
           'transition-all duration-200',
           className,
         ].join(' ')}
+        style={{ backgroundColor: TEAL_DEEP }}
       >
         {open ? <X size={20} /> : <Sparkles size={20} />}
       </button>

@@ -6,7 +6,12 @@ import { Maximize2, Minimize2, Volume2, VolumeX } from 'lucide-react';
 
 import type { ReadingPreferences } from '../../../hooks/useReadingPreferences';
 
+/** The toggle track: a fill with no type on it. */
 const TEAL = '#0D9488';
+/** Teal as type or as a glyph on a pale tint. */
+const INK_TEAL = 'text-[#0F766E] dark:text-[#2DD4BF]';
+const FOCUS_RING =
+  'outline-none focus-visible:ring-2 focus-visible:ring-[#0F766E] dark:focus-visible:ring-[#2DD4BF]';
 
 /** Group headings for the translation picker, Dutch first. */
 const LANGUAGE_LABELS: Record<string, string> = {
@@ -51,7 +56,7 @@ function Segmented<T extends string>({
 }) {
   return (
     <div>
-      <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-muted-foreground">
+      <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-600 dark:text-muted-foreground">
         {label}
       </p>
       <div className="flex gap-1 rounded-lg bg-gray-100 dark:bg-secondary p-1">
@@ -65,12 +70,12 @@ function Segmented<T extends string>({
               aria-pressed={active}
               className={[
                 'flex-1 h-8 rounded-md font-semibold transition-colors',
+                FOCUS_RING,
                 sizes ? sizes[index] : 'text-[12px]',
                 active
-                  ? 'bg-white dark:bg-card shadow-sm'
-                  : 'text-gray-500 dark:text-muted-foreground hover:text-foreground',
+                  ? `bg-white dark:bg-card shadow-sm ${INK_TEAL}`
+                  : 'text-gray-600 dark:text-muted-foreground hover:text-foreground',
               ].join(' ')}
-              style={active ? { color: TEAL } : undefined}
             >
               {option.label}
             </button>
@@ -102,20 +107,20 @@ function Toggle({
       type="button"
       onClick={onToggle}
       aria-pressed={on}
-      className="w-full flex items-center gap-2.5 rounded-lg px-2 py-2 text-left transition-colors hover:bg-gray-50 dark:hover:bg-secondary"
+      className={`w-full flex items-center gap-2.5 rounded-lg px-2 py-2 text-left transition-colors hover:bg-gray-50 dark:hover:bg-secondary ${FOCUS_RING}`}
     >
       <span
         className="h-8 w-8 flex-none rounded-lg flex items-center justify-center"
         style={{ backgroundColor: on ? 'rgba(13,148,136,0.10)' : 'rgba(148,163,184,0.14)' }}
       >
-        <span style={{ color: on ? TEAL : undefined }} className={on ? '' : 'text-gray-400'}>
+        <span className={on ? INK_TEAL : 'text-gray-600 dark:text-muted-foreground'}>
           {on ? onIcon : offIcon}
         </span>
       </span>
       <span className="min-w-0 flex-1">
         <span className="block text-[13px] font-medium text-foreground">{label}</span>
         {hint && (
-          <span className="block text-[11px] text-gray-500 dark:text-muted-foreground">{hint}</span>
+          <span className="block text-[11px] text-gray-600 dark:text-muted-foreground">{hint}</span>
         )}
       </span>
       <span
@@ -206,7 +211,7 @@ export default function StudySettingsMenu({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            style={{ backgroundColor: 'rgba(2,6,23,0.18)' }}
+            style={{ backgroundColor: 'rgba(11,18,32,0.35)' }}
           />
           <motion.div
             role="dialog"
@@ -215,12 +220,12 @@ export default function StudySettingsMenu({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -8, scale: 0.97 }}
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute z-50 top-full mt-1.5 right-3 sm:right-5 w-[min(92vw,300px)] max-h-[min(70vh,520px)] overflow-y-auto rounded-2xl border border-gray-200 dark:border-border bg-white dark:bg-card shadow-[0_28px_70px_-24px_rgba(2,6,23,0.55)] p-3 space-y-3.5"
+            className="absolute z-50 top-full mt-1.5 right-3 sm:right-5 w-[min(92vw,300px)] max-h-[min(70vh,520px)] overflow-y-auto rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-card shadow-[0_40px_80px_-32px_rgba(0,0,0,0.85)] p-3 space-y-3.5"
           >
             <div>
               <label
                 htmlFor="session-translation"
-                className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-muted-foreground"
+                className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-600 dark:text-muted-foreground"
               >
                 Vertaling
               </label>
@@ -229,8 +234,7 @@ export default function StudySettingsMenu({
                 value={version}
                 onChange={(event) => onVersionChange(event.target.value)}
                 data-track="study_settings_version"
-                className="w-full h-9 cursor-pointer rounded-lg border border-gray-200 dark:border-border bg-white dark:bg-background px-2.5 text-[13px] text-foreground outline-none focus-visible:ring-2"
-                style={{ ['--tw-ring-color' as string]: 'rgba(13,148,136,0.35)' }}
+                className={`w-full h-9 cursor-pointer rounded-lg border border-gray-200 dark:border-border bg-white dark:bg-background px-2.5 text-[13px] text-foreground ${FOCUS_RING}`}
               >
                 {languages.map((language) => (
                   <optgroup
@@ -245,7 +249,7 @@ export default function StudySettingsMenu({
                   </optgroup>
                 ))}
               </select>
-              <p className="mt-1 text-[11px] text-gray-400 dark:text-muted-foreground">
+              <p className="mt-1 text-[11px] text-gray-600 dark:text-muted-foreground">
                 Alleen voor deze les. Je studie-instelling verandert niet.
               </p>
             </div>

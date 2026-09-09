@@ -6,10 +6,13 @@ import LevelUpDialog from './LevelUpDialog';
 import { useLevensboom, fracOf } from '../../hooks/useLevensboom';
 import { ringColors } from '../../lib/levensboom/ring';
 
-const TEAL = '#0D9488';
+/** The solid fill under the level badge's white type: 5.5:1, where the brand
+ *  fill itself measures 3.74:1. See components/scene/tokens.ts. */
+const TEAL_DEEP = '#0F766E';
+const TEAL_ON_DARK = '#2DD4BF';
 
 /**
- * The Levensboom *as* the profile picture, not as a card beside it.
+ * Je boom *as* the profile picture, not as a card beside it.
  *
  * The tree fills the round frame the photo used to occupy, with the XP bar bent
  * around it as a ring and the level in the corner badge - so the one thing that
@@ -20,13 +23,24 @@ const TEAL = '#0D9488';
  * state has not arrived yet: the real photo/initials avatar. XP, levels and
  * badges keep accruing either way, so the toggle stays purely visual.
  *
+ * [still] draws one frame and starts no loop. /profiel sits on the immersive
+ * shell, whose backdrop is already this reader's own tree, animated - and a
+ * page may mount exactly one animated canvas (components/scene/README.md). The
+ * ring, the level badge, the link and the celebration are untouched by it.
+ *
+ * The type under the frame is literal white rather than a theme token: this
+ * avatar now sits on the landscape, which does not flip with the reader's
+ * light/dark setting.
+ *
  * This is also the surface the level-up celebration fires from.
  */
 export default function TreeAvatar({
   size = 128,
+  still = false,
   fallback,
 }: {
   size?: number;
+  still?: boolean;
   fallback?: React.ReactNode;
 }) {
   const { data, loading, celebrate, dismissCelebration } = useLevensboom();
@@ -53,12 +67,12 @@ export default function TreeAvatar({
       <div className="flex flex-col items-center">
         <Link
           href="/profiel/boom"
-          className="group relative block no-underline"
+          className="group relative block rounded-full no-underline outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
           style={{ width: size, height: size }}
           aria-label={`Je boom, ${levensboom.stage.name.toLowerCase()} op niveau ${data.level}. Open de studio`}
         >
           <div
-            className="absolute overflow-hidden rounded-full ring-1 ring-black/5 transition-transform group-hover:scale-[1.02] dark:ring-white/10"
+            className="absolute overflow-hidden rounded-full ring-1 ring-white/20 transition-transform group-hover:scale-[1.02] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
             style={{ inset: stroke + 2 }}
           >
             <TreeCanvas
@@ -71,6 +85,7 @@ export default function TreeAvatar({
               animal={levensboom.avatar.animal}
               framing="portrait"
               reducedMotion={levensboom.reducedMotion}
+              still={still}
               className="block h-full w-full"
             />
           </div>
@@ -93,8 +108,7 @@ export default function TreeAvatar({
               cy={size / 2}
               r={radius}
               fill="none"
-              stroke={ring.track ?? 'currentColor'}
-              className={ring.track ? undefined : 'text-gray-200 dark:text-secondary'}
+              stroke={ring.track ?? 'rgba(255,255,255,0.22)'}
               strokeWidth={stroke}
             />
             <circle
@@ -110,9 +124,9 @@ export default function TreeAvatar({
           </svg>
 
           <span
-            className="absolute bottom-0 right-0 inline-flex items-center justify-center rounded-full border-2 border-white font-bold tabular-nums text-white dark:border-card"
+            className="absolute bottom-0 right-0 inline-flex items-center justify-center rounded-full border-2 border-black/40 font-bold tabular-nums text-white"
             style={{
-              backgroundColor: levensboom.avatar.ring === 'goud' ? ring.stroke : TEAL,
+              backgroundColor: levensboom.avatar.ring === 'goud' ? ring.stroke : TEAL_DEEP,
               minWidth: Math.round(size * 0.28),
               height: Math.round(size * 0.28),
               fontSize: Math.round(size * 0.13),
@@ -125,18 +139,18 @@ export default function TreeAvatar({
           </span>
         </Link>
 
-        <p className="mt-3 text-sm font-bold text-foreground">
+        <p className="mt-3 text-sm font-semibold text-white">
           {levensboom.stage.name} · niveau {data.level}
         </p>
-        <p className="mt-0.5 text-[11px] tabular-nums text-muted-foreground">
+        <p className="mt-0.5 text-[11px] tabular-nums text-white/65">
           {levensboom.wilting
             ? `${levensboom.daysSinceActive} dagen niet gelezen`
             : `nog ${remaining} XP`}
         </p>
         <Link
           href="/profiel/boom"
-          className="mt-2 text-xs font-semibold no-underline hover:underline"
-          style={{ color: TEAL }}
+          className="mt-2 rounded-md text-xs font-semibold no-underline underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-white"
+          style={{ color: TEAL_ON_DARK }}
         >
           Naar je boom →
         </Link>

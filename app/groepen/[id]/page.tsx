@@ -4,14 +4,14 @@ import { useState, useEffect, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import Link from "next/link"
-import {
-  Users, Lock, Globe, Copy, Check,
-  ArrowLeft, LogOut, BookOpen, Target,
-} from "lucide-react"
+import { Lock, Globe, Copy, Check, ArrowLeft, LogOut } from "lucide-react"
 import DiscussieTab  from "./_DiscussieTab"
 import NotitiesTab   from "./_NotitiesTab"
 import VoortgangTab  from "./_VoortgangTab"
 import LedenTab      from "./_LedenTab"
+import SceneShell from "../../../components/scene/SceneShell"
+import { Panel, SectionHeading } from "../../../components/scene/pieces"
+import { EYEBROW, TEAL_DEEP, TEAL_ON_DARK, TILE } from "../../../components/scene/tokens"
 
 /* ── Types ─────────────────────────────────────────────────────── */
 interface Member       { _id: string; name: string; image?: string }
@@ -29,14 +29,27 @@ interface Group {
 
 type Tab = "discussie" | "notities" | "voortgang" | "leden"
 
+/** A field on the landscape: quiet glass, white type, a real focus ring. */
+const SCENE_FIELD =
+  "w-full rounded-md border border-white/20 bg-black/30 px-2.5 py-1.5 text-xs text-white outline-none transition-colors placeholder:text-white/50 focus-visible:ring-2 focus-visible:ring-white"
+
 /* ── Helpers ────────────────────────────────────────────────────── */
+/**
+ * `h-${size} w-${size}` never worked: Tailwind reads class names as literal
+ * text and generates nothing for a spliced-in value, so every avatar fell back
+ * to its intrinsic size. The dimension is an inline style now.
+ */
 function Avatar({ name, size = 8 }: { name: string; size?: number }) {
   const initials = name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
+  const px = size * 4
   return (
-    <div className={`h-${size} w-${size} rounded-full flex items-center justify-center text-white font-bold flex-shrink-0`}
-      style={{ backgroundColor: "#0D9488", fontSize: size <= 7 ? 10 : 12 }}>
+    <span
+      aria-hidden
+      className="flex flex-shrink-0 items-center justify-center rounded-full font-bold text-white"
+      style={{ backgroundColor: TEAL_DEEP, height: px, width: px, fontSize: size <= 7 ? 10 : 12 }}
+    >
       {initials}
-    </div>
+    </span>
   )
 }
 
@@ -44,7 +57,7 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" })
 }
 
-/* ── Weekly Assignment sidebar card ────────────────────────────── */
+/* ── Weekly Assignment sidebar panel ───────────────────────────── */
 function AssignmentCard({
   assignment, groupId, isLeader, onUpdate,
 }: {
@@ -80,75 +93,93 @@ function AssignmentCard({
   }
 
   return (
-    <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-4">
-      <div className="flex items-center gap-2 mb-3">
-        <div className="h-7 w-7 rounded-lg flex items-center justify-center flex-shrink-0"
-          style={{ backgroundColor: "rgba(13,148,136,0.08)" }}>
-          <BookOpen size={13} style={{ color: "#0D9488" }} />
-        </div>
-        <p className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-muted-foreground">
-          Wekelijkse opdracht
-        </p>
-      </div>
+    <Panel className="p-5" labelledBy="groep-opdracht">
+      <SectionHeading id="groep-opdracht" title="Wekelijkse opdracht" />
 
       {assignment ? (
         <>
-          <p className="text-sm font-semibold text-gray-900 dark:text-foreground mb-0.5">
+          <p className="mt-3 text-sm font-semibold text-white">
             {assignment.book} {assignment.chapter}{assignment.title ? ` - ${assignment.title}` : ""}
           </p>
           {assignment.dueDate && (
-            <p className="text-xs text-gray-500 dark:text-muted-foreground mb-2">
-              Deadline: {formatDate(assignment.dueDate)}
-            </p>
+            <p className="mt-0.5 text-xs text-white/60">Deadline: {formatDate(assignment.dueDate)}</p>
           )}
           <Link
             href={`/study?book=${encodeURIComponent(assignment.book)}&chapter=${assignment.chapter}&version=statenvertaling`}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white"
-            style={{ backgroundColor: "#0D9488" }}>
+            className="press mt-3 inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold text-white no-underline outline-none transition-colors hover:bg-[#115E59] focus-visible:ring-2 focus-visible:ring-white"
+            style={{ backgroundColor: TEAL_DEEP }}>
             Lees nu
           </Link>
           {isLeader && (
-            <div className="flex items-center gap-3 mt-2">
-              <button onClick={() => setShowForm(true)} className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-foreground">Wijzigen</button>
-              <button onClick={handleDelete} className="text-xs text-red-400 hover:text-red-600">Verwijderen</button>
+            <div className="mt-3 flex items-center gap-4">
+              <button onClick={() => setShowForm(true)}
+                className="rounded text-xs font-medium text-white/60 outline-none transition-colors hover:text-white focus-visible:ring-2 focus-visible:ring-white">
+                Wijzigen
+              </button>
+              <button onClick={handleDelete}
+                className="rounded text-xs font-medium text-red-300 outline-none transition-colors hover:text-red-200 focus-visible:ring-2 focus-visible:ring-white">
+                Verwijderen
+              </button>
             </div>
           )}
         </>
       ) : (
-        <p className="text-xs text-gray-500 dark:text-muted-foreground mb-2">Geen opdracht ingesteld.</p>
+        <p className="mt-3 text-xs text-white/60">Geen opdracht ingesteld.</p>
       )}
 
       {isLeader && (!assignment || showForm) && (
-        <div className="space-y-2 mt-3 pt-3 border-t border-gray-100 dark:border-border">
-          {showForm && <p className="text-xs font-semibold text-gray-600 dark:text-muted-foreground">Nieuwe opdracht</p>}
-          <input value={book} onChange={e => setBook(e.target.value)} placeholder="Boek (bijv. Psalmen)"
-            className="w-full px-2 py-1.5 border border-gray-200 dark:border-border rounded-md text-xs bg-white dark:bg-card text-gray-900 dark:text-foreground focus:outline-none" />
-          <input type="number" value={chapter} onChange={e => setChapter(e.target.value)} placeholder="Hoofdstuk"
-            className="w-full px-2 py-1.5 border border-gray-200 dark:border-border rounded-md text-xs bg-white dark:bg-card text-gray-900 dark:text-foreground focus:outline-none" />
-          <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Titel (optioneel)"
-            className="w-full px-2 py-1.5 border border-gray-200 dark:border-border rounded-md text-xs bg-white dark:bg-card text-gray-900 dark:text-foreground focus:outline-none" />
-          <input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)}
-            className="w-full px-2 py-1.5 border border-gray-200 dark:border-border rounded-md text-xs bg-white dark:bg-card text-gray-900 dark:text-foreground focus:outline-none" />
+        <div className="mt-3 space-y-2 border-t border-white/15 pt-3">
+          {showForm && <p className="text-xs font-semibold text-white/70">Nieuwe opdracht</p>}
+          <label htmlFor="opdracht-boek" className="sr-only">Boek</label>
+          <input id="opdracht-boek" value={book} onChange={e => setBook(e.target.value)} placeholder="Boek (bijv. Psalmen)"
+            className={SCENE_FIELD} />
+          <label htmlFor="opdracht-hoofdstuk" className="sr-only">Hoofdstuk</label>
+          <input id="opdracht-hoofdstuk" type="number" value={chapter} onChange={e => setChapter(e.target.value)} placeholder="Hoofdstuk"
+            className={SCENE_FIELD} />
+          <label htmlFor="opdracht-titel" className="sr-only">Titel (optioneel)</label>
+          <input id="opdracht-titel" value={title} onChange={e => setTitle(e.target.value)} placeholder="Titel (optioneel)"
+            className={SCENE_FIELD} />
+          <label htmlFor="opdracht-deadline" className="sr-only">Deadline</label>
+          <input id="opdracht-deadline" type="date" value={dueDate} onChange={e => setDueDate(e.target.value)}
+            className={`${SCENE_FIELD} [color-scheme:dark]`} />
           <div className="flex gap-2">
             <button onClick={handleSave} disabled={saving || !book.trim() || !chapter.trim()}
-              className="flex-1 py-1.5 rounded-md text-xs font-semibold text-white disabled:opacity-50"
-              style={{ backgroundColor: "#0D9488" }}>
+              className="press flex-1 rounded-md py-1.5 text-xs font-semibold text-white outline-none transition-colors hover:bg-[#115E59] focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-50"
+              style={{ backgroundColor: TEAL_DEEP }}>
               {saving ? "..." : "Opslaan"}
             </button>
             {showForm && (
               <button onClick={() => setShowForm(false)}
-                className="px-3 py-1.5 rounded-md text-xs text-gray-500 dark:text-muted-foreground border border-gray-200 dark:border-border">
+                className="rounded-md border border-white/20 px-3 py-1.5 text-xs font-medium text-white/80 outline-none transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white">
                 Annuleren
               </button>
             )}
           </div>
         </div>
       )}
-    </div>
+    </Panel>
   )
 }
 
 /* ── Page ───────────────────────────────────────────────────────── */
+/**
+ * One group, in the shared immersive shell.
+ *
+ * The sky carries the group's name and the two things you do to a group you are
+ * in - copy the code, leave it. The horizon carries the tab bar, which is what
+ * a returning member reaches for first. The desk carries the tab itself and the
+ * standing panels beside it.
+ *
+ * The four tabs (_DiscussieTab, _NotitiesTab, _VoortgangTab, _LedenTab) are
+ * drawn for a white page. Rather than fork four files, they render inside a
+ * `dark` scope - the same trick the scene header uses - so every theme token
+ * inside them resolves to its light-on-dark value against the landscape.
+ *
+ * Nothing about the data changed: the same GET /api/groepen/[id], the same
+ * /api/user lookup for the current user's id, the same assignment POST/DELETE,
+ * the same leave POST with the same confirm wording, and the same push back to
+ * /groepen when the group cannot be read.
+ */
 export default function GroupDetailPage() {
   const params  = useParams<{ id: string }>()
   const router  = useRouter()
@@ -211,176 +242,149 @@ export default function GroupDetailPage() {
 
   if (loading) {
     return (
-      <div className="px-6 xl:px-10 py-8 space-y-4">
-        <div className="h-7 rounded bg-gray-100 dark:bg-secondary skeleton-pulse w-48" />
-        <div className="h-32 rounded-2xl bg-gray-100 dark:bg-secondary skeleton-pulse" />
-        <div className="h-10 rounded-xl bg-gray-100 dark:bg-secondary skeleton-pulse" />
-      </div>
+      <SceneShell backdrop="reader" header rail>
+        <div className="space-y-4 pb-24 pt-8" role="status" aria-label="Groep laden">
+          <div className="skeleton-pulse h-3 w-40 rounded bg-white/15" />
+          <div className="skeleton-pulse h-9 w-72 max-w-full rounded bg-white/20" />
+          <div className="skeleton-pulse h-4 w-96 max-w-full rounded bg-white/10" />
+          <div className="skeleton-pulse mt-6 h-10 w-80 max-w-full rounded-xl bg-white/10" />
+        </div>
+      </SceneShell>
     )
   }
 
   if (!group) return null
 
-
   return (
-    <div className="h-full overflow-y-auto">
-      <div className="px-6 xl:px-10 py-6 space-y-5 max-w-6xl">
+    <SceneShell backdrop="reader" header rail>
+      {/* -- The sky ---------------------------------------------------- */}
+      <section aria-labelledby="groep-titel" className="pb-10 pt-6">
+        <div className="scene-sky">
+          <Link href="/groepen"
+            className="inline-flex items-center gap-1.5 rounded-md text-xs font-semibold text-white/70 no-underline underline-offset-4 outline-none transition-colors hover:text-white hover:underline focus-visible:ring-2 focus-visible:ring-white">
+            <ArrowLeft size={12} aria-hidden /> Terug naar groepen
+          </Link>
 
-        {/* Breadcrumb */}
-        <Link href="/groepen"
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-500 dark:text-muted-foreground hover:text-gray-700 dark:hover:text-foreground transition-colors">
-          <ArrowLeft size={12} /> Terug naar groepen
-        </Link>
-
-        {/* Header card */}
-        <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-2xl p-5">
-          <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-            {/* Icon */}
-            <div className="h-12 w-12 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ backgroundColor: "rgba(13,148,136,0.08)" }}>
-              <Users size={22} style={{ color: "#0D9488" }} />
-            </div>
-
-            {/* Info */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap mb-1">
-                <h1 className="text-xl font-bold text-gray-900 dark:text-foreground">{group.name}</h1>
-                <span className="flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full"
-                  style={{
-                    backgroundColor: group.isPublic ? "rgba(34,197,94,0.1)" : "rgba(234,88,12,0.08)",
-                    color: group.isPublic ? "#16A34A" : "#EA580C",
-                  }}>
-                  {group.isPublic ? <Globe size={10} /> : <Lock size={10} />}
-                  {group.isPublic ? "Openbaar" : "Privé"}
-                </span>
-              </div>
+          <div className="mt-5 flex flex-wrap items-end justify-between gap-x-8 gap-y-5">
+            <div className="min-w-0 max-w-[42rem]">
+              <p className={`${EYEBROW} flex items-center gap-1.5`} style={{ color: TEAL_ON_DARK }}>
+                {/* Identifies who can see the group - a data type, not decoration. */}
+                {group.isPublic
+                  ? <Globe size={11} aria-hidden />
+                  : <Lock size={11} aria-hidden />}
+                {group.isPublic ? "Openbare groep" : "Privégroep"}
+              </p>
+              <h1 id="groep-titel" className="mt-2 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+                {group.name}
+              </h1>
               {group.description && (
-                <p className="text-sm text-gray-500 dark:text-muted-foreground mb-2">{group.description}</p>
+                <p className="mt-3 text-sm leading-relaxed text-white/80">{group.description}</p>
               )}
-              {/* Stats row */}
-              <div className="flex items-center gap-4 text-xs text-gray-400 dark:text-muted-foreground flex-wrap">
-                <span className="flex items-center gap-1">
-                  <Users size={11} /> {group.members.length} {group.members.length === 1 ? "lid" : "leden"}
-                </span>
-                <span>Aangemaakt {formatDate(group.createdAt)}</span>
-              </div>
+              <p className="mt-3 text-xs text-white/60">
+                {group.members.length} {group.members.length === 1 ? "lid" : "leden"}
+                <span aria-hidden> · </span>
+                Aangemaakt {formatDate(group.createdAt)}
+              </p>
             </div>
 
-            {/* Actions */}
-            <div className="flex items-center gap-2 flex-shrink-0 self-start">
+            <div className="flex flex-shrink-0 items-center gap-2">
               {group.inviteCode && (
                 <button onClick={handleCopyCode}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200 dark:border-border text-gray-600 dark:text-muted-foreground hover:bg-gray-50 dark:hover:bg-secondary transition-colors">
-                  {copied ? <Check size={12} style={{ color: "#0D9488" }} /> : <Copy size={12} />}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-white/20 bg-black/30 px-3 py-2 text-xs font-semibold text-white outline-none transition-colors hover:bg-black/50 focus-visible:ring-2 focus-visible:ring-white">
+                  {copied
+                    ? <Check size={12} aria-hidden style={{ color: TEAL_ON_DARK }} />
+                    : <Copy size={12} aria-hidden />}
                   {copied ? "Gekopieerd" : group.inviteCode}
                 </button>
               )}
               <button onClick={handleLeave} disabled={leaving}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-red-200 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors disabled:opacity-50">
-                <LogOut size={12} />
+                className="inline-flex items-center gap-1.5 rounded-lg border border-white/20 bg-black/30 px-3 py-2 text-xs font-semibold text-red-200 outline-none transition-colors hover:bg-black/50 hover:text-red-100 focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-50">
+                <LogOut size={12} aria-hidden />
                 Verlaten
               </button>
             </div>
           </div>
         </div>
+      </section>
 
-        {/* Tab bar */}
-        <div className="flex gap-1 bg-gray-100 dark:bg-secondary p-1 rounded-xl w-fit">
+      {/* -- The horizon: the tab bar ----------------------------------- */}
+      <div className="scene-horizon">
+        <div className={`flex w-fit max-w-full gap-1 overflow-x-auto p-1.5 shadow-lg shadow-black/20 ${TILE}`}>
           {TABS.map(tab => (
-            <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-              className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
-              style={{
-                backgroundColor: activeTab === tab.id ? "#fff" : "transparent",
-                color:            activeTab === tab.id ? "#0D9488" : "#6B7280",
-                boxShadow:        activeTab === tab.id ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
-              }}>
+            <button key={tab.id} onClick={() => setActiveTab(tab.id)} aria-pressed={activeTab === tab.id}
+              className={`flex-shrink-0 rounded-lg px-4 py-2 text-sm font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-white ${
+                activeTab === tab.id ? "bg-white text-gray-900" : "text-white/70 hover:text-white"
+              }`}>
               {tab.label}
             </button>
           ))}
         </div>
+      </div>
 
-        {/* Two-column layout */}
-        <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-6 items-start">
-
-          {/* Tab content */}
-          <div>
-            {activeTab === "discussie" && currentUserId && (
-              <DiscussieTab
-                groupId={params.id}
-                currentUserId={currentUserId}
-                currentUserRole={currentUserRole ?? "member"}
-                currentUserName={session?.user?.name ?? "Gebruiker"}
-              />
-            )}
-            {activeTab === "notities" && (
-              <NotitiesTab groupId={params.id} />
-            )}
-            {activeTab === "voortgang" && (
-              <VoortgangTab groupId={params.id} />
-            )}
-            {activeTab === "leden" && (
-              <LedenTab
-                group={group}
-                currentUserId={currentUserId}
-                currentUserRole={currentUserRole}
-                onGroupUpdate={fetchGroup}
-              />
-            )}
-          </div>
-
-          {/* Right sidebar */}
-          <div className="space-y-4">
-
-            {/* Group info */}
-            <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-4">
-              <p className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-muted-foreground mb-3">
-                Over deze groep
-              </p>
-              <div className="space-y-2.5">
-                <div className="flex items-center gap-2">
-                  <Avatar name={group.createdBy.name} size={6} />
-                  <div className="min-w-0">
-                    <p className="text-xs text-gray-500 dark:text-muted-foreground">Aangemaakt door</p>
-                    <p className="text-sm font-semibold text-gray-900 dark:text-foreground truncate">{group.createdBy.name}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Weekly assignment */}
-            <AssignmentCard
-              assignment={group.weeklyAssignment}
+      {/* -- The desk --------------------------------------------------- */}
+      <div className="grid grid-cols-1 items-start gap-6 pb-24 pt-12 xl:grid-cols-[minmax(0,1fr)_320px]">
+        {/* The four tabs are drawn for a white page. `dark` scopes them so every
+            theme token inside resolves to its light-on-dark value, the same way
+            the scene header does it - rather than forking four files. */}
+        <div className="dark min-w-0">
+          {activeTab === "discussie" && currentUserId && (
+            <DiscussieTab
               groupId={params.id}
-              isLeader={currentUserRole === "leader"}
-              onUpdate={fetchGroup}
+              currentUserId={currentUserId}
+              currentUserRole={currentUserRole ?? "member"}
+              currentUserName={session?.user?.name ?? "Gebruiker"}
             />
-
-            {/* Challenge (if active) */}
-            {group.challenge && new Date(group.challenge.endDate) > new Date() && (
-              <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="h-7 w-7 rounded-lg flex items-center justify-center flex-shrink-0"
-                    style={{ backgroundColor: "rgba(234,88,12,0.08)" }}>
-                    <Target size={13} style={{ color: "#EA580C" }} />
-                  </div>
-                  <p className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-muted-foreground">
-                    Groepsuitdaging
-                  </p>
-                </div>
-                <p className="text-sm font-semibold text-gray-900 dark:text-foreground mb-1">{group.challenge.title}</p>
-                <p className="text-xs text-gray-500 dark:text-muted-foreground">
-                  Doel: {group.challenge.target} {group.challenge.type === "chapters" ? "hoofdstukken" : "notities"}
-                </p>
-                <p className="text-xs text-gray-400 dark:text-muted-foreground mt-0.5">
-                  Tot {formatDate(group.challenge.endDate)}
-                </p>
-              </div>
-            )}
-
-          </div>
+          )}
+          {activeTab === "notities" && (
+            <NotitiesTab groupId={params.id} />
+          )}
+          {activeTab === "voortgang" && (
+            <VoortgangTab groupId={params.id} />
+          )}
+          {activeTab === "leden" && (
+            <LedenTab
+              group={group}
+              currentUserId={currentUserId}
+              currentUserRole={currentUserRole}
+              onGroupUpdate={fetchGroup}
+            />
+          )}
         </div>
 
+        {/* The standing panels beside it */}
+        <div className="space-y-4">
+          <Panel className="p-5" labelledBy="groep-over">
+            <SectionHeading id="groep-over" title="Over deze groep" />
+            <div className="mt-3 flex items-center gap-2.5">
+              <Avatar name={group.createdBy.name} size={6} />
+              <div className="min-w-0">
+                <p className="text-xs text-white/60">Aangemaakt door</p>
+                <p className="truncate text-sm font-semibold text-white">{group.createdBy.name}</p>
+              </div>
+            </div>
+          </Panel>
+
+          <AssignmentCard
+            assignment={group.weeklyAssignment}
+            groupId={params.id}
+            isLeader={currentUserRole === "leader"}
+            onUpdate={fetchGroup}
+          />
+
+          {group.challenge && new Date(group.challenge.endDate) > new Date() && (
+            <Panel className="p-5" labelledBy="groep-uitdaging">
+              <SectionHeading id="groep-uitdaging" title="Groepsuitdaging" />
+              <p className="mt-3 text-sm font-semibold text-white">{group.challenge.title}</p>
+              <p className="mt-0.5 text-xs text-white/70">
+                Doel: {group.challenge.target} {group.challenge.type === "chapters" ? "hoofdstukken" : "notities"}
+              </p>
+              <p className="mt-0.5 text-xs text-white/60">
+                Tot {formatDate(group.challenge.endDate)}
+              </p>
+            </Panel>
+          )}
+        </div>
       </div>
-    </div>
+    </SceneShell>
   )
 }

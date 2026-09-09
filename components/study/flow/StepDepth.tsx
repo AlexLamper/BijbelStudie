@@ -10,7 +10,14 @@ import { ChapterNotes } from '../ChapterNotes';
 import BookContextDialog from './BookContextDialog';
 import type { ReadingPreferences } from '../../../hooks/useReadingPreferences';
 
+/** The underline bar under the active tab: a fill that carries no type. */
 const TEAL = '#0D9488';
+/** Any solid fill with white type or a white glyph on it. */
+const TEAL_DEEP = '#0F766E';
+/** Teal as type, in the shade each theme can read. */
+const INK_TEAL = 'text-[#0F766E] dark:text-[#2DD4BF]';
+const FOCUS_RING =
+  'outline-none focus-visible:ring-2 focus-visible:ring-[#0F766E] dark:focus-visible:ring-[#2DD4BF]';
 
 export interface DepthContentProps {
   body?: string[];
@@ -150,19 +157,19 @@ export default function StepDepth({
           type="button"
           onClick={() => setContextOpen(true)}
           data-track="study_book_context"
-          className="group flex-none flex items-center gap-3 px-4 sm:px-5 py-3 text-left border-b border-gray-200 dark:border-border bg-white dark:bg-card transition-colors hover:bg-gray-50 dark:hover:bg-secondary"
+          className={`group flex-none flex items-center gap-3 px-4 sm:px-5 py-3 text-left border-b border-gray-200 dark:border-border bg-white dark:bg-card transition-colors hover:bg-gray-50 dark:hover:bg-secondary ${FOCUS_RING}`}
         >
           <span
             className="h-8 w-8 flex-none rounded-lg flex items-center justify-center"
             style={{ backgroundColor: 'rgba(13,148,136,0.10)' }}
           >
-            <Landmark size={15} style={{ color: TEAL }} />
+            <Landmark size={15} className={INK_TEAL} />
           </span>
           <span className="min-w-0 flex-1">
             <span className="block text-[13px] font-semibold text-foreground truncate">
               Achtergrond bij {book}
             </span>
-            <span className="block text-[11.5px] text-gray-500 dark:text-muted-foreground truncate">
+            <span className="block text-[11.5px] text-gray-600 dark:text-muted-foreground truncate">
               Wie het schreef, wanneer en waarom
             </span>
           </span>
@@ -186,9 +193,11 @@ export default function StepDepth({
                   aria-pressed={isActive}
                   className={[
                     'relative inline-flex items-center justify-center gap-1.5 px-3 sm:px-4 h-11 text-[12.5px] font-semibold transition-colors min-w-0',
-                    isActive ? '' : 'text-gray-500 dark:text-muted-foreground hover:text-foreground',
+                    FOCUS_RING,
+                    isActive
+                      ? INK_TEAL
+                      : 'text-gray-600 dark:text-muted-foreground hover:text-foreground',
                   ].join(' ')}
-                  style={isActive ? { color: TEAL } : undefined}
                 >
                   <Icon size={14} className="flex-none" />
                   <span className="truncate">{label}</span>
@@ -203,7 +212,7 @@ export default function StepDepth({
           </div>
         </div>
 
-        <p className="flex-none px-4 sm:px-5 py-2 text-[11.5px] text-gray-500 dark:text-muted-foreground border-b border-gray-200 dark:border-border">
+        <p className="flex-none px-4 sm:px-5 py-2 text-[11.5px] text-gray-600 dark:text-muted-foreground border-b border-gray-200 dark:border-border">
           {active.blurb}
         </p>
 
@@ -212,7 +221,7 @@ export default function StepDepth({
             (showMedia ? (
               <GeoImages book={book} chapter={chapter} variant="panel" fallbackToBook />
             ) : (
-              <p className="text-[12.5px] text-gray-500 dark:text-muted-foreground">
+              <p className="text-[12.5px] text-gray-600 dark:text-muted-foreground">
                 Bij dit gedeelte hoort geen plaats of kaart.
               </p>
             ))}
@@ -243,16 +252,15 @@ export default function StepDepth({
                 }}
                 aria-label="Vraag het de AI-assistent"
                 placeholder={`Vraag iets over ${book} ${chapter}...`}
-                className="flex-1 min-w-0 h-10 px-3 rounded-lg border border-gray-200 dark:border-border bg-white dark:bg-background text-sm text-foreground placeholder:text-gray-400 focus:outline-none focus:ring-2"
-                style={{ ['--tw-ring-color' as string]: 'rgba(13,148,136,0.35)' }}
+                className={`flex-1 min-w-0 h-10 px-3 rounded-lg border border-gray-200 dark:border-border bg-white dark:bg-background text-sm text-foreground placeholder:text-gray-500 dark:placeholder:text-muted-foreground ${FOCUS_RING}`}
               />
               <button
                 type="button"
                 onClick={ask}
                 disabled={!question.trim()}
                 aria-label="Vraag versturen"
-                className="press h-10 w-10 flex-none inline-flex items-center justify-center rounded-lg text-white disabled:opacity-40"
-                style={{ backgroundColor: TEAL }}
+                className="press h-10 w-10 flex-none inline-flex items-center justify-center rounded-lg text-white transition-opacity hover:opacity-90 disabled:opacity-40 outline-none focus-visible:ring-2 focus-visible:ring-white"
+                style={{ backgroundColor: TEAL_DEEP }}
               >
                 <Send size={15} />
               </button>

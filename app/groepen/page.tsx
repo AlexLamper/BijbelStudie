@@ -2,11 +2,13 @@
 
 import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
-import {
-  Users, Plus, Search, Lock, Globe, RefreshCw, AlertCircle,
-  ChevronRight, UserPlus, MessageSquare, StickyNote, CalendarCheck2,
-} from "lucide-react"
+import { Plus, Search, Lock, Globe, RefreshCw, ChevronRight, UserPlus } from "lucide-react"
 import { GroupDialog } from "./_GroupDialog"
+import SceneShell from "../../components/scene/SceneShell"
+import { SectionHeading } from "../../components/scene/pieces"
+import {
+  CTA_PRIMARY, EYEBROW, TEAL, TEAL_DEEP, TEAL_ON_DARK, TILE,
+} from "../../components/scene/tokens"
 
 interface Member { _id: string; name: string; image?: string }
 interface Group {
@@ -19,68 +21,86 @@ interface Group {
   createdAt: string
 }
 
-const IC = "#0D9488"  // teal-600, fills only
-const TEAL_TEXT = "#0F766E"  // #0D9488 is 3.7:1 on white, short of AA for small text
+/**
+ * Inside the modals the surface is still the themed dialog, so the brand fill
+ * there stays what it always was. Everything ON the landscape uses the scene's
+ * own values from components/scene/tokens.ts instead.
+ */
+const IC = TEAL                       // fills that carry no type
+const TEAL_TEXT = TEAL_DEEP           // #0D9488 is 3.7:1 on white, short of AA for small text
 const BG_TEAL = "rgba(13,148,136,0.08)"
 
-/* ── Group card ─────────────────────────────────────────────── */
-function GroupCard({ group, isMember, onJoin }: {
+/** A control on the landscape: quiet glass, white type, a real focus ring. */
+const SCENE_FIELD =
+  "w-full rounded-lg border border-white/20 bg-black/30 px-3 py-2 text-sm text-white outline-none transition-colors placeholder:text-white/50 hover:bg-black/40 focus-visible:ring-2 focus-visible:ring-white"
+
+/* ── One group, as a line in the ledger ─────────────────────────── */
+/**
+ * A group used to be a card in a four-up grid. On the landscape a grid of
+ * boxes is a box inside a box, and it read as somebody else's content; the
+ * README calls this out for exactly this shape of list. The group is a record,
+ * so it is set as one: the name and what it is on the left, who is in it and
+ * the one action on the right, a hairline between them.
+ */
+function GroupRow({ group, isMember, onJoin }: {
   group: Group
   isMember: boolean
   onJoin: (group: Group) => void
 }) {
   return (
-    <div className="bg-white dark:bg-card border border-border rounded-xl p-5 flex flex-col gap-4 hover:shadow-sm transition-shadow">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            {group.isPublic
-              ? <Globe size={13} style={{ color: IC }} />
-              : <Lock   size={13} style={{ color: "#6B7280" }} />}
-            <span className="text-xs text-muted-foreground">{group.isPublic ? "Openbaar" : "Privé"}</span>
-          </div>
-          <h3 className="font-semibold text-foreground truncate">{group.name}</h3>
-          {group.description && (
-            <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2">{group.description}</p>
+    <li className="border-b border-white/10 py-5 sm:grid sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-6">
+      <div className="min-w-0">
+        <div className="flex items-center gap-2">
+          {/* Identifies who can see the group - a data type, not decoration. */}
+          {group.isPublic
+            ? <Globe size={12} className="shrink-0 text-white/60" aria-hidden />
+            : <Lock size={12} className="shrink-0 text-white/60" aria-hidden />}
+          <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/60">
+            {group.isPublic ? "Openbaar" : "Privé"}
+          </span>
+          {isMember && (
+            <span className="text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: TEAL_ON_DARK }}>
+              · Lid
+            </span>
           )}
         </div>
-        {isMember && (
-          <span className="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
-            style={{ backgroundColor: BG_TEAL, color: IC }}>
-            Lid
-          </span>
+
+        <h3 className="mt-1 truncate text-base font-semibold text-white">{group.name}</h3>
+        {group.description && (
+          <p className="mt-0.5 line-clamp-2 text-sm leading-relaxed text-white/70">{group.description}</p>
         )}
-      </div>
 
-
-      <div className="flex items-center justify-between pt-1 border-t border-border">
-        <div className="flex items-center gap-2">
-          <div className="flex -space-x-1.5">
+        <div className="mt-2 flex items-center gap-2">
+          <div className="flex -space-x-1.5" aria-hidden>
             {group.members.slice(0, 4).map((m, i) => (
-              <div key={i} className="h-6 w-6 rounded-full border-2 border-white dark:border-card flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-                style={{ backgroundColor: IC, zIndex: 4 - i }}>
+              <span key={i}
+                className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-2 border-black/40 text-[10px] font-bold text-white"
+                style={{ backgroundColor: TEAL_DEEP, zIndex: 4 - i }}>
                 {m.userId?.name?.[0]?.toUpperCase() ?? "?"}
-              </div>
+              </span>
             ))}
           </div>
-          <span className="text-xs text-muted-foreground">{group.members.length} {group.members.length === 1 ? "lid" : "leden"}</span>
+          <span className="text-xs text-white/60">
+            {group.members.length} {group.members.length === 1 ? "lid" : "leden"}
+          </span>
         </div>
+      </div>
 
+      <div className="mt-3 flex-shrink-0 sm:mt-0">
         {isMember ? (
           <Link href={`/groepen/${group._id}`}
-            className="flex items-center gap-1 text-xs font-semibold transition-colors"
-            style={{ color: IC }}>
-            Bekijken <ChevronRight size={13} />
+            className="inline-flex items-center gap-1 rounded-md text-sm font-semibold text-white no-underline underline-offset-4 outline-none transition-colors hover:underline focus-visible:ring-2 focus-visible:ring-white">
+            Bekijken <ChevronRight size={14} aria-hidden />
           </Link>
         ) : (
           <button onClick={() => onJoin(group)}
-            className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg text-white transition-colors"
-            style={{ backgroundColor: IC }}>
-            <UserPlus size={12} /> Deelnemen
+            className="press inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold text-white outline-none transition-colors hover:bg-[#115E59] focus-visible:ring-2 focus-visible:ring-white"
+            style={{ backgroundColor: TEAL_DEEP }}>
+            <UserPlus size={12} aria-hidden /> Deelnemen
           </button>
         )}
       </div>
-    </div>
+    </li>
   )
 }
 
@@ -132,7 +152,7 @@ function JoinModal({ group, onClose, onJoined }: {
         {error && <p className="text-sm text-destructive mb-3">{error}</p>}
         <button onClick={handleJoin} disabled={loading || (!group.isPublic && code.length < 6)}
           className="press w-full py-2.5 rounded-lg text-sm font-semibold text-white transition-colors disabled:opacity-50"
-          style={{ backgroundColor: IC }}>
+          style={{ backgroundColor: TEAL_DEEP }}>
           {loading ? "Bezig..." : "Deelnemen"}
         </button>
       </div>
@@ -247,7 +267,7 @@ function CreateModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
           </button>
           <button onClick={handleCreate} disabled={loading}
             className="press flex-1 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-50 transition-colors"
-            style={{ backgroundColor: IC }}>
+            style={{ backgroundColor: TEAL_DEEP }}>
             {loading ? "Aanmaken..." : "Aanmaken"}
           </button>
         </div>
@@ -282,28 +302,44 @@ function InviteJoinBar({ onJoined }: { onJoined: () => void }) {
   }
 
   return (
-    <div className="bg-white dark:bg-card border border-border rounded-xl p-5">
-      <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">Deelnemen via uitnodigingscode</p>
-      <div className="flex gap-2">
-        <input value={code} onChange={e => setCode(e.target.value.toUpperCase())}
+    <div className="min-w-0">
+      <label htmlFor="groepen-code" className={EYEBROW}>Uitnodigingscode</label>
+      <div className="mt-2 flex gap-2">
+        <input id="groepen-code" value={code} onChange={e => setCode(e.target.value.toUpperCase())}
           placeholder="ABC123" maxLength={6}
-          className="flex-1 px-3 py-2 border border-border rounded-lg text-sm font-mono tracking-widest bg-background text-foreground focus:outline-none focus:ring-2"
-          style={{ "--tw-ring-color": IC } as React.CSSProperties}
+          className={`${SCENE_FIELD} font-mono tracking-widest`}
           onKeyDown={e => e.key === "Enter" && handleJoin()}
         />
         <button onClick={handleJoin} disabled={loading || code.length < 6}
-          className="px-4 py-2 rounded-lg text-sm font-semibold text-white disabled:opacity-50 transition-colors"
-          style={{ backgroundColor: IC }}>
+          className="press flex-shrink-0 rounded-lg px-4 py-2 text-sm font-semibold text-white outline-none transition-colors hover:bg-[#115E59] focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-50"
+          style={{ backgroundColor: TEAL_DEEP }}>
           {loading ? "..." : "Deelnemen"}
         </button>
       </div>
-      {error && <p className="text-xs text-destructive mt-2">{error}</p>}
-      {success && <p className="text-xs mt-2 font-medium" style={{ color: IC }}>Succesvol lid geworden!</p>}
+      {error && <p className="mt-2 text-xs text-red-300">{error}</p>}
+      {success && <p className="mt-2 text-xs font-medium" style={{ color: TEAL_ON_DARK }}>Succesvol lid geworden!</p>}
     </div>
   )
 }
 
 /* ── Page ─────────────────────────────────────────────────────── */
+/**
+ * Groepen, in the shared immersive shell.
+ *
+ * Three layers, the shape the dashboard uses:
+ *   1. the sky      - a short one. Someone here came to find or join a group,
+ *                     not to look at a landscape.
+ *   2. the horizon  - the two ways in: an uitnodigingscode and the search box
+ *                     with the twee tabbladen. There is no honest row of
+ *                     figures for this page, and that toolbar IS what a reader
+ *                     reaches for first.
+ *   3. the desk     - the groups, bare on the landscape as a ledger.
+ *
+ * Nothing about the data changed: the same GET /api/groepen, the same
+ * join / join-by-code / create endpoints with the same bodies, the same
+ * client-side filter, the same three empty states and the same Pro path on
+ * SUBSCRIPTION_REQUIRED.
+ */
 export default function GroepenPage() {
   const [publicGroups, setPublicGroups] = useState<Group[]>([])
   const [myGroups, setMyGroups]         = useState<Group[]>([])
@@ -365,127 +401,146 @@ export default function GroepenPage() {
         }
 
   return (
-    <div className="px-6 xl:px-10 py-8 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Bijbelstudiegroepen</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Bestudeer de Bijbel samen met anderen
-          </p>
-        </div>
-        <button onClick={() => setShowCreate(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white"
-          style={{ backgroundColor: IC }}>
-          <Plus size={16} /> Groep aanmaken
-        </button>
-      </div>
-
-      {/* Invite bar */}
-      <InviteJoinBar onJoined={loadGroups} />
-
-      {/* Search + tabs */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1 max-w-sm">
-          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Zoek groepen..."
-            className="w-full pl-9 pr-3 py-2 border border-border rounded-lg text-sm bg-white dark:bg-card text-foreground focus:outline-none focus:ring-2"
-            style={{ "--tw-ring-color": IC } as React.CSSProperties}
-          />
-        </div>
-
-        <div className="flex bg-muted p-1 rounded-lg">
-          {(["discover", "mine"] as const).map(t => (
-            <button key={t} onClick={() => setTab(t)}
-              className="px-4 py-1.5 rounded-md text-sm font-medium transition-all"
-              style={tab === t ? { backgroundColor: "white", color: "#111827", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" } : { color: "#6B7280" }}>
-              {t === "discover" ? "Ontdekken" : `Mijn groepen (${myGroups.length})`}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Group grid */}
-      {loading ? (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-48 bg-muted skeleton-pulse rounded-xl" />
-          ))}
-        </div>
-      ) : loadFailed ? (
-        <div className="content-in bg-white dark:bg-card border border-border rounded-xl p-16 text-center">
-          <div className="h-12 w-12 rounded-xl flex items-center justify-center mx-auto mb-4"
-            style={{ backgroundColor: BG_TEAL }}>
-            <AlertCircle size={22} style={{ color: IC }} />
+    <SceneShell backdrop="reader" header rail>
+      {/* -- The sky ---------------------------------------------------- */}
+      <section aria-labelledby="groepen-titel" className="pb-10 pt-6">
+        <div className="scene-sky flex flex-wrap items-end justify-between gap-x-8 gap-y-6">
+          <div className="min-w-0 max-w-[40rem]">
+            {/* One of the two accents on this screen; the other is the "Lid"
+                marker in the ledger. */}
+            <p className={EYEBROW} style={{ color: TEAL_ON_DARK }}>Groepen</p>
+            <h1 id="groepen-titel" className="mt-2 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+              Samen lezen
+            </h1>
+            <p className="mt-3 text-sm leading-relaxed text-white/80">
+              Een kleine groep leest hetzelfde gedeelte en praat er samen over door. Deelnemen is gratis.
+            </p>
           </div>
-          <h3 className="font-semibold text-foreground mb-1">Groepen konden niet worden geladen</h3>
-          <p className="text-sm text-muted-foreground mb-6">
-            Er ging iets mis bij het ophalen van de groepen. Dit betekent niet dat er geen
-            groepen zijn - probeer het opnieuw.
-          </p>
-          <button onClick={loadGroups}
-            className="press inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
-            style={{ backgroundColor: IC }}>
-            <RefreshCw size={15} /> Opnieuw proberen
+          <button onClick={() => setShowCreate(true)} className={CTA_PRIMARY}>
+            <Plus size={16} aria-hidden /> Groep aanmaken
           </button>
         </div>
-      ) : filtered.length === 0 ? (
-        <div className="content-in bg-white dark:bg-card border border-border rounded-xl p-16 text-center">
-          <div className="h-12 w-12 rounded-xl flex items-center justify-center mx-auto mb-4"
-            style={{ backgroundColor: BG_TEAL }}>
-            <Users size={22} style={{ color: IC }} />
-          </div>
-          <h3 className="font-semibold text-foreground mb-1">{empty.title}</h3>
-          <p className="text-sm text-muted-foreground mb-6">{empty.body}</p>
+      </section>
 
-          {/* The explainer and the aanmaak-CTA are onboarding, not search results:
-              showing them under "geen treffers voor <zoekterm>" buries the one
-              thing that helps there, namely zoeken op iets anders. */}
-          {!query && (
-            <>
-              <div className="mx-auto mb-6 max-w-xl border-t border-border pt-6 text-left">
-                <p className="mb-3 text-center text-sm font-semibold text-foreground">
-                  Wat is een bijbelstudiegroep?
-                </p>
-                <p className="mb-4 text-center text-sm leading-relaxed text-muted-foreground">
-                  Een kleine groep die hetzelfde bijbelgedeelte leest en er samen over doorpraat.
-                  De groepsleider zet een wekelijkse opdracht klaar, iedereen leest die en deelt
-                  wat opvalt.
-                </p>
-                <ul className="grid gap-3 sm:grid-cols-3">
-                  {[
-                    { icon: CalendarCheck2, title: "Wekelijkse opdracht", body: "Een hoofdstuk of gedeelte voor de hele groep" },
-                    { icon: MessageSquare,  title: "Bespreking",          body: "Stel vragen en reageer op elkaar" },
-                    { icon: StickyNote,     title: "Gedeelde notities",   body: "Deel wat u ontdekt met de groep" },
-                  ].map(({ icon: Icon, title, body }) => (
-                    <li key={title} className="flex flex-col gap-1">
-                      <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                        <Icon size={15} style={{ color: IC }} className="shrink-0" /> {title}
-                      </span>
-                      <span className="text-xs leading-snug text-muted-foreground">{body}</span>
-                    </li>
-                  ))}
-                </ul>
+      {/* -- The horizon: the two ways in ------------------------------- */}
+      <div className="scene-horizon">
+        <div className={`grid gap-4 p-4 shadow-lg shadow-black/20 sm:grid-cols-2 sm:gap-6 sm:p-5 ${TILE}`}>
+          <InviteJoinBar onJoined={loadGroups} />
+
+          <div className="min-w-0">
+            <label htmlFor="groepen-zoeken" className={EYEBROW}>Zoeken</label>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <div className="relative min-w-0 flex-1">
+                {/* Identifies the field, not decoration. */}
+                <Search size={15} aria-hidden className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/50" />
+                <input id="groepen-zoeken" type="search" value={search} onChange={e => setSearch(e.target.value)}
+                  placeholder="Zoek groepen..."
+                  className={`${SCENE_FIELD} pl-9`}
+                />
               </div>
-              <button onClick={() => setShowCreate(true)}
-                className="press inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
-                style={{ backgroundColor: IC }}>
-                <Plus size={15} /> Groep aanmaken
-              </button>
-            </>
-          )}
+
+              <div className="flex flex-shrink-0 gap-1 rounded-lg border border-white/20 bg-black/30 p-1">
+                {(["discover", "mine"] as const).map(t => (
+                  <button key={t} onClick={() => setTab(t)} aria-pressed={tab === t}
+                    className={`rounded-md px-3 py-1.5 text-xs font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-white ${
+                      tab === t ? "bg-white text-gray-900" : "text-white/70 hover:text-white"
+                    }`}>
+                    {t === "discover" ? "Ontdekken" : `Mijn groepen (${myGroups.length})`}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
-      ) : (
-        <div className="stagger-in grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {filtered.map(group => (
-            <GroupCard key={group._id} group={group}
-              isMember={myGroupIds.has(group._id)}
-              onJoin={setJoinTarget}
-            />
-          ))}
-        </div>
-      )}
+      </div>
+
+      {/* -- The desk: the ledger --------------------------------------- */}
+      <div className="pb-24 pt-12">
+        <SectionHeading
+          id="groepen-lijst"
+          rule
+          title={tab === "discover" ? "Openbare groepen" : "Mijn groepen"}
+          action={
+            !loading && !loadFailed && filtered.length > 0 ? (
+              <span className="text-xs tabular-nums text-white/60">
+                {filtered.length} {filtered.length === 1 ? "groep" : "groepen"}
+              </span>
+            ) : undefined
+          }
+        />
+
+        {loading ? (
+          <ul aria-label="Groepen laden" className="mt-1">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <li key={i} className="border-b border-white/10 py-5">
+                <div className="skeleton-pulse h-3 w-20 rounded bg-white/15" />
+                <div className="skeleton-pulse mt-2 h-4 w-56 max-w-full rounded bg-white/20" />
+                <div className="skeleton-pulse mt-2 h-3 w-72 max-w-full rounded bg-white/10" />
+              </li>
+            ))}
+          </ul>
+        ) : loadFailed ? (
+          <div className="content-in max-w-xl py-12">
+            <h3 className="text-base font-semibold text-white">Groepen konden niet worden geladen</h3>
+            <p className="mt-1.5 text-sm leading-relaxed text-white/70">
+              Er ging iets mis bij het ophalen van de groepen. Dit betekent niet dat er geen
+              groepen zijn - probeer het opnieuw.
+            </p>
+            <button onClick={loadGroups}
+              className="press mt-5 inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white outline-none transition-colors hover:bg-[#115E59] focus-visible:ring-2 focus-visible:ring-white"
+              style={{ backgroundColor: TEAL_DEEP }}>
+              <RefreshCw size={15} aria-hidden /> Opnieuw proberen
+            </button>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="content-in max-w-2xl py-12">
+            <h3 className="text-base font-semibold text-white">{empty.title}</h3>
+            <p className="mt-1.5 text-sm leading-relaxed text-white/70">{empty.body}</p>
+
+            {/* The explainer and the aanmaak-CTA are onboarding, not search results:
+                showing them under "geen treffers voor <zoekterm>" buries the one
+                thing that helps there, namely zoeken op iets anders. */}
+            {!query && (
+              <>
+                <div className="mt-8 border-t border-white/15 pt-6">
+                  <h4 className="text-sm font-semibold text-white">Wat is een bijbelstudiegroep?</h4>
+                  <p className="mt-2 text-sm leading-relaxed text-white/70">
+                    Een kleine groep die hetzelfde bijbelgedeelte leest en er samen over doorpraat.
+                    De groepsleider zet een wekelijkse opdracht klaar, iedereen leest die en deelt
+                    wat opvalt.
+                  </p>
+                  <dl className="mt-5 grid gap-4 sm:grid-cols-3">
+                    {[
+                      { title: "Wekelijkse opdracht", body: "Een hoofdstuk of gedeelte voor de hele groep" },
+                      { title: "Bespreking",          body: "Stel vragen en reageer op elkaar" },
+                      { title: "Gedeelde notities",   body: "Deel wat u ontdekt met de groep" },
+                    ].map(({ title, body }) => (
+                      <div key={title} className="min-w-0">
+                        <dt className="text-sm font-semibold text-white">{title}</dt>
+                        <dd className="mt-0.5 text-xs leading-snug text-white/60">{body}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+                <button onClick={() => setShowCreate(true)}
+                  className="press mt-6 inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white outline-none transition-colors hover:bg-[#115E59] focus-visible:ring-2 focus-visible:ring-white"
+                  style={{ backgroundColor: TEAL_DEEP }}>
+                  <Plus size={15} aria-hidden /> Groep aanmaken
+                </button>
+              </>
+            )}
+          </div>
+        ) : (
+          <ul className="stagger-in mt-1">
+            {filtered.map(group => (
+              <GroupRow key={group._id} group={group}
+                isMember={myGroupIds.has(group._id)}
+                onJoin={setJoinTarget}
+              />
+            ))}
+          </ul>
+        )}
+      </div>
 
       {/* Modals */}
       {joinTarget && (
@@ -496,6 +551,6 @@ export default function GroepenPage() {
         <CreateModal onClose={() => setShowCreate(false)}
           onCreated={() => { setShowCreate(false); loadGroups() }} />
       )}
-    </div>
+    </SceneShell>
   )
 }

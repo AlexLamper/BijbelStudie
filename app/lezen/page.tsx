@@ -10,6 +10,7 @@ import StudyMaterialsSection from '../../components/study/StudyMaterialsSection'
 import AiAssistantWidget from '../../components/study/AiAssistantWidget';
 import { BookOpen, CheckCircle, ChevronLeft, ChevronRight, X, Trophy, MessageCircle } from 'lucide-react';
 import { toast } from '../../hooks/use-toast';
+import { EYEBROW, PLATE, TEAL_DEEP } from '../../components/scene/tokens';
 
 const COMPLETED_KEY = 'bijbelstudie_completed_studies';
 
@@ -107,8 +108,8 @@ function CompletionOverlay({ study, onClose }: { study: ActiveStudy; onClose: ()
         </div>
         <button
           onClick={onClose}
-          className="w-full py-3 rounded-xl text-sm font-semibold text-white transition-colors hover:opacity-90"
-          style={{ backgroundColor: '#0D9488' }}
+          className="w-full py-3 rounded-xl text-sm font-semibold text-white outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-white"
+          style={{ backgroundColor: TEAL_DEEP }}
         >
           Sluiten
         </button>
@@ -203,8 +204,8 @@ function MiniStudyBar({
 
         <button
           onClick={handlePrimary}
-          className="inline-flex items-center gap-1 px-3 h-7 rounded-md text-[11px] font-semibold text-white hover:opacity-90 transition-opacity whitespace-nowrap"
-          style={{ backgroundColor: '#0D9488' }}
+          className="inline-flex items-center gap-1 px-3 h-7 rounded-md text-[11px] font-semibold text-white outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-white whitespace-nowrap"
+          style={{ backgroundColor: TEAL_DEEP }}
           title={primaryLabel}
         >
           {isLast && isDone ? <Trophy size={12} /> : <CheckCircle size={12} />}
@@ -399,10 +400,40 @@ function StudyPageInner() {
     : null;
 
   return (
-    <div className="h-full flex flex-col font-inter overflow-hidden">
+    /*
+     * The reading room is a FIXED frame on the scene, not a scrolling page.
+     *
+     * Every other converted screen lets the document scroll, which is what
+     * drives the shell's depth engine. This one deliberately does not, for the
+     * reason the whole page exists: someone sits here with a chapter for twenty
+     * minutes, and a landscape sliding underneath the verse they are following
+     * is the one thing atmosphere must never do. The passage and the study
+     * materials keep their own scroll containers, exactly as before, and the
+     * scene stays where it is - still, at the edges of a lit frame.
+     *
+     * The height is spelled out because there is no `h-full` chain to inherit
+     * any more: the header is 3.5rem, and below `lg` the rail is a sticky strip
+     * of pills that takes another 3rem of flow before the content starts.
+     * `dvh`, so a phone's collapsing address bar cannot cut the frame off - the
+     * same unit app/studie/layout.tsx uses for the same reason.
+     */
+    <div className="flex h-[calc(100dvh-6.5rem)] flex-col font-inter pt-1 pb-2 sm:px-6 sm:pb-4 lg:h-[calc(100dvh-3.5rem)] lg:pl-24 lg:pr-10 lg:pt-5 lg:pb-5 xl:pl-28 xl:pr-16">
       {showCompletionOverlay && activeStudy && (
         <CompletionOverlay study={activeStudy} onClose={handleCloseOverlay} />
       )}
+
+      <div className="flex flex-none items-center px-4 pb-1 sm:px-0">
+        <h1 className={EYEBROW}>Lezen</h1>
+      </div>
+
+      {/*
+       * The frame. A lit plate on the landscape (PLATE), clipping its own
+       * corners, so the reader's surface is the SAME white-page-in-light /
+       * dark-page-in-dark surface it has always been: not one line of the
+       * passage sits on the scene, and its contrast, measure, type size and
+       * line height are untouched. The scene lives in the margin around it.
+       */}
+      <div className={`relative flex min-h-0 flex-1 flex-col overflow-hidden border border-white/15 ${PLATE}`}>
 
       {/* Mobile pane switcher - only below lg; desktop/landscape keeps the split */}
       <div className="lg:hidden flex-none flex items-stretch border-b border-gray-200 dark:border-border bg-gray-50 dark:bg-card">
@@ -497,6 +528,7 @@ function StudyPageInner() {
             onAiQuestionConsumed={handleAiQuestionConsumed}
           />
         </div>
+      </div>
       </div>
 
       {/* Hide the floating widget whenever the AI tab itself is visible:

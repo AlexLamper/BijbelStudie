@@ -5,8 +5,7 @@ import TreeCanvas from '../TreeCanvas';
 import { ProBadge } from '../../ui/ProBadge';
 import { ringColors } from '../../../lib/levensboom/ring';
 import { itemKey, unlockLabel, type AvatarChoice, type CatalogItem, type ItemKind } from '../../../lib/levensboom/catalog';
-
-const TEAL = '#0D9488';
+import { TEAL_DEEP, TEAL_ON_DARK, TILE } from '../../scene/tokens';
 
 export type TilePick = { item: CatalogItem; locked: boolean };
 
@@ -15,6 +14,11 @@ export type TilePick = { item: CatalogItem; locked: boolean };
  * so a species tile shows *their* lean and a scene tile *their* canopy on that
  * backdrop. Lock state and rule come from the served `unlocked` list; the
  * client never decides.
+ *
+ * The tiles sit on the landscape, so they are the scene's own surface rather
+ * than white cards: literal whites throughout, and the selected marker in
+ * TEAL_DEEP because it carries a white glyph. Every thumbnail is drawn `still`
+ * - a grid of live canvases is the one thing this page cannot afford.
  */
 export function ItemGrid({
   kind,
@@ -108,7 +112,7 @@ function ItemTile({
   onPick: () => void;
 }) {
   const pro = item.unlock.kind === 'pro';
-  const outline = selected ? TEAL : previewing ? 'rgba(13,148,136,0.5)' : 'transparent';
+  const outline = selected ? TEAL_ON_DARK : previewing ? 'rgba(45,212,191,0.55)' : undefined;
 
   return (
     <button
@@ -117,34 +121,37 @@ function ItemTile({
       aria-checked={selected}
       aria-label={`${item.name}${locked ? `, vergrendeld: ${unlockLabel(item.unlock)}` : ''}`}
       onClick={onPick}
-      className="group relative flex flex-col overflow-hidden rounded-2xl border bg-white text-left transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 dark:bg-card motion-reduce:transition-none motion-reduce:hover:translate-y-0"
-      style={{ borderColor: selected || previewing ? outline : 'var(--border, #e5e7eb)', boxShadow: selected ? `0 0 0 2px ${TEAL}` : undefined }}
+      className={`group relative flex flex-col overflow-hidden text-left outline-none transition-transform hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-white motion-reduce:transition-none motion-reduce:hover:translate-y-0 ${TILE}`}
+      style={{
+        borderColor: selected || previewing ? outline : undefined,
+        boxShadow: selected ? `0 0 0 2px ${TEAL_ON_DARK}` : undefined,
+      }}
     >
       <div className={`relative w-full overflow-hidden ${kind === 'species' || kind === 'ring' ? 'aspect-square' : 'aspect-[16/10]'} ${locked ? 'opacity-70 saturate-50' : ''}`}>
         <Thumb kind={kind} item={item} seed={seed} level={level} frac={frac} health={health} avatar={avatar} />
         {locked && (
           <span className="absolute inset-0 flex items-center justify-center">
-            <span className="inline-flex items-center gap-1 rounded-full bg-black/55 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur">
+            <span className="inline-flex items-center gap-1 rounded-full bg-black/65 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur">
               <Lock size={11} aria-hidden />
               {unlockLabel(item.unlock)}
             </span>
           </span>
         )}
         {selected && !locked && (
-          <span className="absolute right-2 top-2 inline-flex h-6 w-6 items-center justify-center rounded-full text-white" style={{ backgroundColor: TEAL }}>
+          <span className="absolute right-2 top-2 inline-flex h-6 w-6 items-center justify-center rounded-full text-white ring-1 ring-white/40" style={{ backgroundColor: TEAL_DEEP }}>
             <Check size={14} aria-hidden />
           </span>
         )}
         {isNew && !selected && (
-          <span className="absolute left-2 top-2 rounded-full bg-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide dark:bg-card" style={{ color: TEAL }}>
+          <span className="absolute left-2 top-2 rounded-full bg-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide" style={{ color: TEAL_DEEP }}>
             Nieuw
           </span>
         )}
         {pro && <ProBadge className="absolute bottom-2 right-2" />}
       </div>
       <div className="px-3 py-2.5">
-        <p className="text-sm font-semibold text-foreground">{item.name}</p>
-        <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-muted-foreground">{item.blurb}</p>
+        <p className="text-sm font-semibold text-white">{item.name}</p>
+        <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-white/65">{item.blurb}</p>
       </div>
     </button>
   );
@@ -171,7 +178,7 @@ function Thumb({
   if (kind === 'ring') {
     const ring = ringColors(item.id);
     return (
-      <div className="flex h-full w-full items-center justify-center bg-gray-50 dark:bg-secondary/40">
+      <div className="flex h-full w-full items-center justify-center bg-black/30">
         <svg viewBox="0 0 100 100" className="h-3/5 w-3/5" aria-hidden>
           <defs>
             <linearGradient id={`tile-ring-${item.id}`} x1="0" y1="0" x2="1" y2="1">
@@ -179,7 +186,7 @@ function Thumb({
               <stop offset="100%" stopColor={ring.to} />
             </linearGradient>
           </defs>
-          <circle cx="50" cy="50" r="40" fill="none" stroke={ring.track ?? 'rgba(0,0,0,0.08)'} strokeWidth="9" />
+          <circle cx="50" cy="50" r="40" fill="none" stroke={ring.track ?? 'rgba(255,255,255,0.18)'} strokeWidth="9" />
           <circle cx="50" cy="50" r="40" fill="none" stroke={`url(#tile-ring-${item.id})`} strokeWidth="9" strokeLinecap="round" strokeDasharray="176 76" transform="rotate(-90 50 50)" />
         </svg>
       </div>
