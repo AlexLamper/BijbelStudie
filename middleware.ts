@@ -105,6 +105,10 @@ export async function middleware(req: NextRequest) {
   const protectedRoutes = [
     "/studie", "/lezen", "/dashboard", "/admin", "/notities",
     "/profiel", "/instellingen", "/groepen", "/feedback",
+    // Dashboard design candidates. They render a real reader's progress, so
+    // they are gated exactly like /dashboard. Additive only - a new prefix
+    // cannot shadow an existing route. Remove with app/proefdashboard.
+    "/proefdashboard",
   ];
   // Match the route itself or a path segment under it - never a bare prefix.
   // `"/studies".startsWith("/studie")` is true, so the plain prefix test sent

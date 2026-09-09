@@ -15,10 +15,9 @@ import { usePathname } from "next/navigation"
  */
 
 export const FLOW_VARIANTS = [
-  { n: 1, name: "Atlas - de studies als kaart en register" },
-  { n: 2, name: "Vensters - elke studie een uitzicht" },
-  { n: 3, name: "Weg - de hele flow als route" },
-  { n: 4, name: "Rust - typografie, bijna geen beeld" },
+  { n: "a", name: "A" },
+  { n: "b", name: "B" },
+  { n: "c", name: "C" },
 ] as const
 
 /** The study the detail and lesson screens demo when the URL names none. */
@@ -28,23 +27,23 @@ export const DEMO_DAY = 1
 type Screen = "overzicht" | "detail" | "les"
 
 /** Which of the three screens a path is, and what it is pointing at. */
-function parse(pathname: string): { variant: number; screen: Screen; study: string; day: number } | null {
-  const lesson = /^\/studie\/versie-(\d+)\/([^/]+)\/(\d+)/.exec(pathname)
+function parse(pathname: string): { variant: string; screen: Screen; study: string; day: number } | null {
+  const lesson = /^\/studie\/versie-([a-z])\/([^/]+)\/(\d+)/.exec(pathname)
   if (lesson) {
-    return { variant: Number(lesson[1]), screen: "les", study: decodeURIComponent(lesson[2]), day: Number(lesson[3]) }
+    return { variant: lesson[1], screen: "les", study: decodeURIComponent(lesson[2]), day: Number(lesson[3]) }
   }
-  const detail = /^\/studies\/versie-(\d+)\/([^/]+)/.exec(pathname)
+  const detail = /^\/studies\/versie-([a-z])\/([^/]+)/.exec(pathname)
   if (detail) {
-    return { variant: Number(detail[1]), screen: "detail", study: decodeURIComponent(detail[2]), day: DEMO_DAY }
+    return { variant: detail[1], screen: "detail", study: decodeURIComponent(detail[2]), day: DEMO_DAY }
   }
-  const overview = /^\/studies\/versie-(\d+)/.exec(pathname)
+  const overview = /^\/studies\/versie-([a-z])$/.exec(pathname)
   if (overview) {
-    return { variant: Number(overview[1]), screen: "overzicht", study: DEMO_STUDY, day: DEMO_DAY }
+    return { variant: overview[1], screen: "overzicht", study: DEMO_STUDY, day: DEMO_DAY }
   }
   return null
 }
 
-export function flowHref(variant: number, screen: Screen, study = DEMO_STUDY, day = DEMO_DAY): string {
+export function flowHref(variant: string, screen: Screen, study = DEMO_STUDY, day = DEMO_DAY): string {
   if (screen === "les") return `/studie/versie-${variant}/${encodeURIComponent(study)}/${day}`
   if (screen === "detail") return `/studies/versie-${variant}/${encodeURIComponent(study)}`
   return `/studies/versie-${variant}`
