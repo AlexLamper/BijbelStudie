@@ -117,15 +117,24 @@ export function Header({ title, variant = "default" }: HeaderProps) {
     >
       {/* Left: Sidebar trigger + page title */}
       <div className="flex items-center gap-3">
-        <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
+        {/* The trigger opens the sidebar column, and a scene screen has no
+            column to open - its rail floats and answers to hover and focus. A
+            button that visibly does nothing is worse than no button. */}
+        {!scene && <SidebarTrigger className="text-muted-foreground hover:text-foreground" />}
         <h1 className="text-base font-semibold text-foreground">{getPageTitle()}</h1>
       </div>
 
       {/* Right: Desktop controls */}
       <div className="hidden md:flex items-center gap-2">
-        <ModeToggle />
-
-        <div className="w-px h-5 bg-border mx-1" />
+        {/* A scene screen paints its own light: the page is the same night
+            landscape in either theme, so a light/dark switch on it changes
+            almost nothing the reader can see. */}
+        {!scene && (
+          <>
+            <ModeToggle />
+            <div className="w-px h-5 bg-border mx-1" />
+          </>
+        )}
 
         <div className="relative" ref={profileRef}>
           <Button
@@ -153,7 +162,10 @@ export function Header({ title, variant = "default" }: HeaderProps) {
             />
             <div className="text-sm text-left hidden lg:block">
               <p className="font-medium text-foreground leading-none">{session.user?.name}</p>
-              <p className="text-muted-foreground text-xs mt-0.5 leading-none">{session.user?.email}</p>
+              {/* `text-muted-foreground` on this line sat at roughly 3:1 - fine
+                  for a hint, too faint for an address someone reads to check
+                  which account they are in. */}
+              <p className="text-foreground/75 text-xs mt-0.5 leading-none">{session.user?.email}</p>
             </div>
             <SubscriptionBadge
               isSubscribed={isSubscribed || !!session.user?.isSubscribed}
@@ -228,9 +240,11 @@ export function Header({ title, variant = "default" }: HeaderProps) {
               transition={{ duration: 0.12 }}
               className="absolute right-0 mt-1 w-48 bg-popover border border-border rounded-lg shadow-lg py-1 z-50"
             >
-              <div className="px-3 py-2 border-b border-border">
-                <ModeToggle />
-              </div>
+              {!scene && (
+                <div className="px-3 py-2 border-b border-border">
+                  <ModeToggle />
+                </div>
+              )}
               <Button variant="ghost" className="w-full justify-start px-3 py-2 text-sm hover:bg-secondary rounded-none"
                 onClick={() => { router.push("/profiel"); setIsMenuOpen(false) }}>
                 <User className="h-4 w-4 mr-2 text-muted-foreground" /> Profiel

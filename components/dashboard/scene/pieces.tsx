@@ -1,7 +1,7 @@
 "use client"
 
-import { type WeekDay } from "../../../../hooks/useDashboardData"
-import { SkeletonBlock } from "../../../ui/skeletons"
+import { type WeekDay } from "../../../hooks/useDashboardData"
+import { SkeletonBlock } from "../../ui/skeletons"
 
 /**
  * The small parts candidate 3 is assembled from.
@@ -25,15 +25,21 @@ export const EYEBROW = "text-[11px] font-semibold uppercase tracking-[0.14em] te
  *  branch is overridden here rather than left to the token. */
 export const SKEL = "bg-white/20 dark:bg-white/20"
 
-/** A working panel: dark enough to read a paragraph on, translucent enough that
- *  the landscape is still visibly the thing underneath. */
-export const PANEL = "rounded-2xl bg-black/80 ring-1 ring-white/10 backdrop-blur-md"
-
-/** Smoked glass, for the numbers that break the fold. Version 11's frosted
- *  white tile was measured against a noon sky and lost: white-on-white/10 over
- *  a bright horizon is around 2.8:1. Turning the same tile dark keeps the
- *  landscape running through it and puts the figures back above 4.5:1. */
+/**
+ * One surface for everything that sits on the scene.
+ *
+ * The working panels used to be `bg-black/80`, which read as a hole punched in
+ * the landscape once the page had scrolled. This is the tile the four horizon
+ * numbers already used and the one to keep: dark enough that white type clears
+ * 4.5:1 over a noon sky (version 11's frosted `bg-white/10` measured about
+ * 2.8:1 there), light enough that the sky and the land keep running through it.
+ * The page's `--veil` does the rest of the contrast work as you scroll.
+ */
 export const TILE = "rounded-2xl border border-white/20 bg-black/40 backdrop-blur-md"
+
+/** Kept as a name so the page can say "panel" where it means a panel; the
+ *  surface is deliberately identical to TILE. */
+export const PANEL = TILE
 
 /* ── The four numbers on the horizon ─────────────────────────── */
 

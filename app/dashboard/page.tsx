@@ -1,534 +1,656 @@
-﻿"use client"
+"use client"
 
-import { useSession } from "next-auth/react"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import Link from "next/link"
-import {
-  BookOpen, Flame, ArrowRight, ChevronRight,
-  StickyNote, CalendarCheck2, BarChart2, Lightbulb, Clock, Sparkles,
-} from "lucide-react"
-import { curatedStudies, BADGE_STYLES } from "../../lib/data/curated-studies"
+import { ArrowRight, Clock } from "lucide-react"
+import { Header } from "../../components/layout/header"
 import { CHAPTER_COUNTS } from "../../lib/data/bible-chapter-counts"
+import { BADGE_STYLES, curatedStudies } from "../../lib/data/curated-studies"
+import { versionAbbreviation } from "../../lib/dailyVerseStore"
+import {
+  NT_BOOKS,
+  OT_BOOKS,
+  TOTAL_CHAPTERS,
+  readHref,
+  useDashboardData,
+} from "../../hooks/useDashboardData"
 import BillingNotices from "../../components/pricing/BillingNotices"
-import DailyVerseCard, { type DailyVerse as DailyVerseData } from "../../components/dashboard/DailyVerseCard"
+import DailyVerseCard from "../../components/dashboard/DailyVerseCard"
+import { ProgressTreeScene, useTreeSummary } from "../../components/dashboard/ProgressTree"
+import { SkeletonBlock } from "../../components/ui/skeletons"
+import SceneRail from "../../components/dashboard/scene/SceneRail"
+import { useDepthScroll } from "../../components/dashboard/scene/useDepthScroll"
+import {
+  EYEBROW,
+  GlassStat,
+  PANEL,
+  SKEL,
+  TEAL,
+  TEAL_ON_DARK,
+  Total,
+  WeekStrip,
+} from "../../components/dashboard/scene/pieces"
 
-/* ── Dutch Bible book names (66) ─────────────────────────── */
-const OT = [
-  "Genesis","Exodus","Leviticus","Numeri","Deuteronomium",
-  "Jozua","Richteren","Ruth","1 Samuël","2 Samuël",
-  "1 Koningen","2 Koningen","1 Kronieken","2 Kronieken","Ezra",
-  "Nehemia","Esther","Job","Psalmen","Spreuken",
-  "Prediker","Hooglied","Jesaja","Jeremia","Klaagliederen",
-  "Ezechiël","Daniël","Hosea","Joël","Amos",
-  "Obadja","Jona","Micha","Nahum","Habakuk",
-  "Zefanja","Haggaï","Zacharia","Maleachi",
-]
-const NT = [
-  "Mattheüs","Markus","Lukas","Johannes","Handelingen",
-  "Romeinen","1 Korinthe","2 Korinthe","Galaten","Efeziërs",
-  "Filippenzen","Kolossenzen","1 Thessalonicenzen","2 Thessalonicenzen","1 Timotheüs",
-  "2 Timotheüs","Titus","Filémon","Hebreeën","Jakobus",
-  "1 Petrus","2 Petrus","1 Johannes","2 Johannes","3 Johannes",
-  "Judas","Openbaring",
-]
-
-
-
-interface LastRead   { book: string; chapter: number; version: string }
-// Shape comes from the card that renders it, so the verse number and the
-// translation the daytext route sends are not dropped on the way in.
-type DailyVerse = DailyVerseData
-interface WeekDay    { label: string; count: number; heightPct: number; isToday: boolean }
-
-function getGreeting(name: string): string {
-  const h = new Date().getHours()
-  if (h >= 0 && h < 6)  return `Goedenacht, ${name}`
-  if (h < 12)            return `Goedemorgen, ${name}`
-  if (h < 18)            return `Goedemiddag, ${name}`
-  if (h < 22)            return `Goedenavond, ${name}`
-  return `Goedenacht, ${name}`
-}
-function formatDate() {
-  return new Date().toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long" })
-}
-
+/**
+ * The dashboard.
+ *
+ * The scene is fixed to the viewport and never moves. Everything else travels
+ * over it, and that travel is the whole idea: at rest the screen is almost all
+ * landscape, with the greeting, the level and the one action that matters set
+ * straight into the sky. As the reader scrolls, that sky layer lifts and gives
+ * way, the scene goes deep behind the working panels so a paragraph stays
+ * readable, and the rail tightens from a film of glass into a defined edge.
+ * The picture is never replaced - only ever moved further back.
+ *
+ * Three layers, in this order:
+ *   1. the sky      - greeting, level, XP as a line of light, the one action
+ *   2. the horizon  - four running numbers, breaking the fold on purpose
+ *   3. the desk     - version 10's two panels: a sticky reader on the left that
+ *                     carries the standing figures, and the work on the right,
+ *                     which is the only thing that scrolls
+ *
+ * The content set is the live dashboard's, whole: greeting, resume, daily
+ * verse, streak and week, level and XP, notes, the 66 books, the studies and
+ * the quick links.
+ *
+ * Chrome: the real navbar, imported unchanged. The sidebar is the piece that
+ * had to give - see components/dashboard/scene/SceneRail.tsx.
+ *
+ * Motion: one passive, rAF-throttled scroll listener publishing three CSS
+ * variables (see useDepthScroll.ts). Every consumer of them touches `transform`
+ * or `opacity` and nothing else, and `prefers-reduced-motion` gets the settled
+ * state with no scroll effects at all.
+ */
 export default function DashboardPage() {
-  const { data: session } = useSession()
+  const d = useDashboardData()
+  const tree = useTreeSummary()
+  const { rootRef, reducedMotion } = useDepthScroll()
 
-  const [lastRead, setLastRead]     = useState<LastRead | null>(null)
-  const [level, setLevel] = useState<{ level: number; xp: number; progressPercentage: number } | null>(null)
-  const [verse, setVerse]           = useState<DailyVerse | null>(null)
-  const [streak, setStreak]         = useState(0)
-  const [loading, setLoading]           = useState(true)
-  const [verseLoading, setVerseLoading] = useState(true)
-  const [notesCount, setNotesCount]     = useState(0)
-  const [weekDays, setWeekDays]         = useState<WeekDay[]>([])
-  const [weekTotal, setWeekTotal]       = useState(0)
-  const [statsLoading, setStatsLoading] = useState(true)
-  const [recentNotes, setRecentNotes]   = useState<Array<{ _id: string; book: string; chapter: number; verse?: number; noteText: string; createdAt: string }>>([])
-  const [readChapters, setReadChapters] = useState<Record<string, number[]>>({})
-  const [hoveredBook, setHoveredBook]   = useState<string | null>(null)
-  const [greetingText, setGreetingText] = useState<string>('')
+  const nextHref = d.lastRead ? readHref(d.lastRead.book, d.lastRead.chapter, d.lastRead.version) : "/studie"
+  const dayWord = (n: number) => (n === 1 ? "dag" : "dagen")
+  const level = d.level?.level ?? tree.level
+  const xpInto = d.level?.xpIntoLevel ?? 0
+  const xpFor = d.level?.xpForNextLevel ?? 100
+  const pct = Math.min(100, d.level?.progressPercentage ?? tree.progressPercentage)
+  const readPct = Math.round((d.chaptersRead / TOTAL_CHAPTERS) * 100)
 
-  // Calculate greeting on client to use the user's local timezone
-  useEffect(() => {
-    const firstName = session?.user?.name?.split(' ')[0] || 'Gebruiker'
-    setGreetingText(getGreeting(firstName))
-    // Refresh every minute so the greeting stays correct as time passes
-    const interval = setInterval(() => {
-      setGreetingText(getGreeting(session?.user?.name?.split(' ')[0] || 'Gebruiker'))
-    }, 60_000)
-    return () => clearInterval(interval)
-  }, [session])
+  const chapterCount = (book: string) => CHAPTER_COUNTS[book] ?? 1
 
-  useEffect(() => {
-    fetch("/api/user/weekly-stats")
-      .then(r => r.ok ? r.json() : null)
-      .then(d => { if (d?.days) { setWeekDays(d.days); setWeekTotal(d.totalThisWeek ?? 0) } })
-      .catch(() => {})
-      .finally(() => setStatsLoading(false))
-  }, [])
+  const [hoveredBook, setHoveredBook] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetch("/api/bible/daytext")
-      .then(r => r.ok ? r.json() : null)
-      .then(d => { if (d?.text) setVerse(d) })
-      .catch(() => {})
-      .finally(() => setVerseLoading(false))
-  }, [])
-
-  useEffect(() => {
-    Promise.all([
-      fetch("/api/user"),
-      fetch("/api/user/last-read"),
-      // Three notes are rendered and the total comes back in `pagination`, so
-      // there is no reason to transfer the other 497.
-      fetch("/api/notes?limit=3"),
-      fetch("/api/user/reading-progress"),
-      fetch("/api/v1/gamification"),
-    ])
-      .then(rs => Promise.all(rs.map(r => r.ok ? r.json() : null)))
-      .then(([ud, ld, nd, rp, gd]) => {
-        setStreak(ud?.user?.streak ?? 0)
-
-        const lr = ld?.book ? ld : ld?.lastReadChapter
-        if (lr?.book) setLastRead(lr)
-
-        if (Array.isArray(nd?.notes)) {
-          setNotesCount(nd.pagination?.totalCount ?? nd.notes.length)
-          // The endpoint already sorts by createdAt descending.
-          setRecentNotes(nd.notes.slice(0, 3))
-        }
-
-        if (rp?.readChapters) setReadChapters(rp.readChapters)
-
-        if (gd?.level) {
-          setLevel({ level: gd.level, xp: gd.xp, progressPercentage: gd.progressPercentage })
-        }
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false))
-  }, [])
-
-  function bookReadRatio(book: string): number {
-    const total = CHAPTER_COUNTS[book] ?? 1
-    const read = (readChapters[book] ?? []).length
-    return read / total
+  /** Seeded here so the first paint is defined; the hook drives them after that. */
+  const sceneVars: React.CSSProperties & Record<string, string> = {
+    "--lift": "0",
+    "--fade": "1",
+    "--veil": reducedMotion ? "1" : "0",
   }
 
-  function bookReadCount(book: string): number {
-    return (readChapters[book] ?? []).length
-  }
-
-  function progressColor(ratio: number): string {
-    if (ratio === 0) return "var(--progress-empty)"
-    if (ratio < 0.25) return "rgba(13,148,136,0.22)"
-    if (ratio < 0.50) return "rgba(13,148,136,0.45)"
-    if (ratio < 1.00) return "rgba(13,148,136,0.72)"
-    return "#0D9488"
-  }
-
-  const booksWithProgress = OT.concat(NT).filter(b => bookReadCount(b) > 0).length
-
-  const EMPTY_DAYS = ["Ma","Di","Wo","Do","Vr","Za","Zo"].map(l => ({ label: l, count: 0, heightPct: 0, isToday: false }))
-  const days = weekDays.length ? weekDays : EMPTY_DAYS
+  /** The sky layer recedes; the horizon numbers trail it at a third of the distance. */
+  const skyMotion: React.CSSProperties = reducedMotion
+    ? {}
+    : {
+        transform: "translate3d(0, calc(var(--lift, 0) * -56px), 0)",
+        opacity: "var(--fade, 1)",
+        willChange: "transform, opacity",
+      }
+  const horizonMotion: React.CSSProperties = reducedMotion
+    ? {}
+    : { transform: "translate3d(0, calc(var(--lift, 0) * -18px), 0)", willChange: "transform" }
 
   return (
-    <div className="h-full flex flex-col">
-
-      {/* ── Header ──────────────────────────────────────── */}
-      <div className="px-6 xl:px-10 pt-7 pb-5 border-b border-border bg-background flex-shrink-0">
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-foreground">{greetingText}</h1>
-            <p className="text-sm text-muted-foreground mt-0.5 capitalize">{formatDate()}</p>
-          </div>
-          {streak > 0 && (
-            <span className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full mt-1"
-              style={{ backgroundColor: "rgba(234,88,12,0.08)", color: "#EA580C" }}>
-              <Flame size={12} /> {streak} dagen
-            </span>
-          )}
-        </div>
+    // `w-full min-w-0` is load-bearing: SidebarProvider wraps this page in a
+    // `flex` row, and a flex child without them is sized to its content rather
+    // than to the viewport - which is what cut the navbar and the panels short
+    // of the right edge.
+    <div ref={rootRef} style={sceneVars} className="relative min-h-screen w-full min-w-0 bg-[#0B1220]">
+      {/* -- The scene. Fixed, full-bleed, never moves. Runs from the very
+             top of the viewport, so it is behind the navbar too. -------- */}
+      <div className="pointer-events-none fixed inset-0 z-0">
+        <ProgressTreeScene />
+        {/* A constant floor of dark, so the copy is legible from the first
+            frame - including the frame in which the scene is still its own
+            loading skeleton and therefore pale grey. */}
+        <span aria-hidden className="absolute inset-0 bg-black/25" />
+        {/* The left scrim carries the rail and the greeting ... */}
+        <span
+          aria-hidden
+          className="absolute inset-y-0 left-0 w-[min(46rem,78%)] bg-gradient-to-r from-black/85 via-black/45 to-transparent"
+        />
+        {/* ... the bottom one carries the numbers that break the fold. */}
+        <span aria-hidden className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/85 to-transparent" />
+        {/* The veil: the scene goes deep as the working panels arrive. */}
+        <span aria-hidden className="absolute inset-0 bg-black/55" style={{ opacity: "var(--veil, 0)" }} />
       </div>
 
-      {/* ── Main ────────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="px-6 xl:px-10 py-6 grid grid-cols-1 xl:grid-cols-[1fr_280px] gap-6 items-start">
+      {/* The real navbar, in its scene variant: transparent, hairline in
+          white, own dark scope. The landscape runs straight through it, which
+          is what makes the experience cover the whole screen. */}
+      <Header variant="scene" />
+      {/* A permanent band of dark under the top edge so the bar's own title and
+          controls stay legible over a noon sky, deepening as the page scrolls. */}
+      <span
+        aria-hidden
+        className="pointer-events-none fixed inset-x-0 top-0 z-40 h-24 bg-gradient-to-b from-black/55 via-black/25 to-transparent"
+      />
+      <span
+        aria-hidden
+        className="pointer-events-none fixed inset-x-0 top-14 z-40 h-8 bg-gradient-to-b from-black/45 to-transparent"
+        style={{ opacity: "var(--veil, 0)" }}
+      />
 
-          {/* ── Left column ───────────────────────────── */}
-          <div className="flex flex-col gap-5 min-w-0">
+      <SceneRail />
 
-            {/* Billing notices sit above everything: a failed payment is the one
-                message that costs money to leave unread. */}
-            <BillingNotices />
+      {/* -- Layer 1: the sky ------------------------------------------ */}
+      <section
+        aria-labelledby="diepte-titel"
+        className="relative z-10 flex min-h-[calc(100vh-3.5rem)] flex-col justify-between px-5 pb-32 pt-5 sm:px-8 lg:pl-24 lg:pr-10 xl:pl-28 xl:pr-16"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
+          {d.dateLabel ? (
+            <p className="text-sm text-white/80">{d.dateLabel}</p>
+          ) : (
+            <SkeletonBlock className={`h-3.5 w-36 ${SKEL}`} />
+          )}
+          <Link
+            href="/dashboard"
+            className="text-xs font-medium text-white/60 no-underline transition-colors hover:text-white"
+          >
+            Huidig dashboard
+          </Link>
+        </div>
 
-            {/* Hero CTA - most prominent element */}
-            <div data-tour="dashboard-hero" className="rounded-2xl p-6" style={{ background: "linear-gradient(135deg, #0D9488 0%, #0F766E 100%)" }}>
-              {loading ? (
-                <div className="flex items-center justify-between gap-6">
-                  <div className="space-y-2 flex-1">
-                    <div className="h-3 w-1/4 rounded skeleton-pulse bg-white/20" />
-                    <div className="h-7 w-1/2 rounded skeleton-pulse bg-white/20" />
-                    <div className="h-3 w-1/3 rounded skeleton-pulse bg-white/20 mt-1" />
-                  </div>
-                  <div className="h-10 w-32 rounded-xl skeleton-pulse bg-white/20 flex-shrink-0" />
-                </div>
-              ) : lastRead ? (
-                <div className="content-in flex items-center justify-between gap-6 flex-wrap">
-                  <div>
-                    <p className="text-white/70 text-xs font-semibold uppercase tracking-widest mb-1.5">
-                      Ga verder waar je gebleven was
-                    </p>
-                    <h2 className="text-2xl font-bold text-white">{lastRead.book}</h2>
-                    <p className="text-white/70 text-sm mt-0.5">Hoofdstuk {lastRead.chapter} · {lastRead.version}</p>
-                  </div>
-                  <Link
-                    href={`/lezen?book=${encodeURIComponent(lastRead.book)}&chapter=${lastRead.chapter}&version=${encodeURIComponent(lastRead.version)}`}
-                    className="press flex-shrink-0 bg-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 hover:bg-white/90 transition-colors no-underline"
-                    style={{ color: "#0D9488" }}
-                  >
-                    Doorgaan <ArrowRight size={14} />
-                  </Link>
-                </div>
-              ) : (
-                <div className="content-in flex items-center justify-between gap-6 flex-wrap">
-                  <div>
-                    <p className="text-white/70 text-xs font-semibold uppercase tracking-widest mb-1.5">
-                      Begin vandaag
-                    </p>
-                    <h2 className="text-2xl font-bold text-white">Start je bijbelstudie</h2>
-                    <p className="text-white/70 text-sm mt-0.5">Lees dag voor dag door de Bijbel.</p>
-                  </div>
-                  <Link
-                    href="/studie"
-                    className="press flex-shrink-0 bg-white px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 hover:bg-white/90 transition-colors no-underline"
-                    style={{ color: "#0D9488" }}
-                  >
-                    Begin met lezen <ArrowRight size={14} />
-                  </Link>
-                </div>
-              )}
+        <div className="max-w-[46rem]" style={skyMotion}>
+          <p className={EYEBROW}>
+            {tree.hasTree && tree.stageName ? `${tree.stageName} - niveau ${level}` : `Niveau ${level}`}
+          </p>
+
+          {/* The heading is always in the tree, so the section's label is never
+              a dangling reference and the page never lacks an h1 while the
+              name is still being resolved. */}
+          <h1
+            id="diepte-titel"
+            className="mt-3 text-4xl font-semibold leading-[1.05] tracking-tight text-white drop-shadow-sm sm:text-5xl xl:text-6xl"
+          >
+            {d.greeting ? <span className="content-in">{d.greeting}</span> : <span className="sr-only">Dashboard</span>}
+          </h1>
+          {!d.greeting && <SkeletonBlock className={`mt-3 h-14 w-[26rem] max-w-full ${SKEL}`} />}
+
+          <p className="mt-4 max-w-[34rem] text-base leading-relaxed text-white/85 sm:text-lg">
+            {tree.wilting
+              ? `Je boom heeft ${tree.daysSinceActive} ${dayWord(tree.daysSinceActive)} geen water gehad. Eén hoofdstuk is genoeg.`
+              : d.readToday
+                ? "Je hebt vandaag al gelezen. Alles hierna is winst."
+                : "Eén hoofdstuk vandaag houdt je boom in leven."}
+          </p>
+
+          {/* XP as a line of light along the horizon, not a boxed meter. */}
+          <div className="mt-8 max-w-[30rem]">
+            <div className="flex items-baseline justify-between text-xs font-medium tabular-nums text-white/75">
+              <span>Niveau {level}</span>
+              <span>{xpInto} / {xpFor} XP</span>
+              <span>Niveau {level + 1}</span>
             </div>
-
-            {/* Stats strip */}
-            <div className={`grid grid-cols-2 sm:grid-cols-4 gap-3${loading ? "" : " stagger-in"}`}>
-              {loading ? (
-                [1, 2, 3, 4].map(i => (
-                  <div key={i} className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-4">
-                    <div className="h-3 w-1/2 rounded skeleton-pulse mb-2 bg-gray-100 dark:bg-secondary" />
-                    <div className="h-6 w-1/3 rounded skeleton-pulse bg-gray-100 dark:bg-secondary" />
-                  </div>
-                ))
-              ) : [
-                { label: "Dagelijkse reeks", value: streak > 0 ? `${streak} dag${streak === 1 ? "" : "en"}` : "0 dagen", icon: Flame, color: streak > 0 ? "#EA580C" : "#9CA3AF" },
-                // Level rises from studying, not from volume - see lib/gamification.ts.
-                { label: level ? `${level.xp} XP` : "Niveau", value: `Niveau ${level?.level ?? 1}`, icon: Sparkles, color: "#0D9488" },
-                { label: "Bijbelboeken", value: `${booksWithProgress} / 66`, icon: BookOpen, color: "#0D9488" },
-                { label: "Notities geschreven", value: `${notesCount}`, icon: StickyNote, color: "#0D9488" },
-              ].map(({ label, value, icon: Icon, color }) => (
-                <div key={label} className="lift bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-4">
-                  <Icon size={14} className="mb-2" style={{ color }} />
-                  <p className="text-xl font-bold text-gray-900 dark:text-foreground">{value}</p>
-                  <p className="text-xs text-gray-400 dark:text-muted-foreground mt-0.5 leading-tight">{label}</p>
-                </div>
-              ))}
+            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/25">
+              <div
+                className="h-full rounded-full bg-white transition-[width] duration-1000 ease-out"
+                style={{
+                  width: d.loading && tree.loading ? "0%" : `${pct}%`,
+                  boxShadow: "0 0 18px rgba(255,255,255,0.85)",
+                }}
+              />
             </div>
-
-            {/* Bible books overview */}
-            <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-2xl p-5">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2.5">
-                  <div className="h-7 w-7 rounded-lg flex items-center justify-center"
-                    style={{ backgroundColor: "rgba(13,148,136,0.08)" }}>
-                    <BookOpen size={14} style={{ color: "#0D9488" }} />
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-gray-900 dark:text-foreground">Bijbelboeken</p>
-                    {!loading && (
-                      <p className="text-xs text-gray-500 dark:text-muted-foreground">
-                        {booksWithProgress} van 66 {booksWithProgress === 1 ? "boek" : "boeken"} geopend
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-muted-foreground">
-                  <span className="text-[10px] mr-0.5">Minder</span>
-                  {[0, 0.15, 0.37, 0.75, 1].map((r, i) => (
-                    <span key={i}
-                      className={`inline-block w-3 h-3 rounded-sm flex-shrink-0 ${r === 0 ? "bg-gray-200 dark:bg-gray-700" : ""}`}
-                      style={r === 0 ? undefined : { backgroundColor: progressColor(r) }}
-                    />
-                  ))}
-                  <span className="text-[10px] ml-0.5">Meer</span>
-                </div>
-              </div>
-
-              {/* Hover info line */}
-              <div className="h-5 mb-3 flex items-center">
-                {hoveredBook ? (
-                  <p className="text-xs text-gray-600 dark:text-muted-foreground">
-                    <span className="font-semibold" style={{ color: "#0D9488" }}>{hoveredBook}</span>
-                    {" - "}
-                    {bookReadCount(hoveredBook)} van {CHAPTER_COUNTS[hoveredBook] ?? "?"} hoofdstukken gelezen
-                  </p>
-                ) : (
-                  <p className="text-xs text-gray-400 dark:text-muted-foreground">
-                    Beweeg over een boek voor details
-                  </p>
-                )}
-              </div>
-
-              <div className="mb-4">
-                <p className="text-xs font-semibold uppercase tracking-wider mb-2 text-gray-400 dark:text-muted-foreground">
-                  Oude Testament <span className="font-normal normal-case">({OT.length} boeken)</span>
-                </p>
-                <div className="flex flex-wrap gap-[3px]">
-                  {OT.map(book => {
-                    const ratio = loading ? 0 : bookReadRatio(book)
-                    const isEmpty = ratio === 0
-                    return (
-                      <Link
-                        key={book}
-                        href={`/lezen?book=${encodeURIComponent(book)}&chapter=1&version=statenvertaling`}
-                        onMouseEnter={() => setHoveredBook(book)}
-                        onMouseLeave={() => setHoveredBook(null)}
-                        className={`block rounded-sm transition-all duration-100 hover:scale-110 hover:z-10 relative flex-shrink-0 ${isEmpty ? "bg-gray-200 dark:bg-gray-700" : ""}`}
-                        style={{
-                          width: 18, height: 18,
-                          backgroundColor: isEmpty ? undefined : progressColor(ratio),
-                          textDecoration: "none",
-                          outline: hoveredBook === book ? "2px solid #0D9488" : "none",
-                          outlineOffset: 1,
-                        }}
-                        title={book}
-                      />
-                    )
-                  })}
-                </div>
-              </div>
-
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider mb-2 text-gray-400 dark:text-muted-foreground">
-                  Nieuwe Testament <span className="font-normal normal-case">({NT.length} boeken)</span>
-                </p>
-                <div className="flex flex-wrap gap-[3px]">
-                  {NT.map(book => {
-                    const ratio = loading ? 0 : bookReadRatio(book)
-                    const isEmpty = ratio === 0
-                    return (
-                      <Link
-                        key={book}
-                        href={`/lezen?book=${encodeURIComponent(book)}&chapter=1&version=statenvertaling`}
-                        onMouseEnter={() => setHoveredBook(book)}
-                        onMouseLeave={() => setHoveredBook(null)}
-                        className={`block rounded-sm transition-all duration-100 hover:scale-110 hover:z-10 relative flex-shrink-0 ${isEmpty ? "bg-gray-200 dark:bg-gray-700" : ""}`}
-                        style={{
-                          width: 18, height: 18,
-                          backgroundColor: isEmpty ? undefined : progressColor(ratio),
-                          textDecoration: "none",
-                          outline: hoveredBook === book ? "2px solid #0D9488" : "none",
-                          outlineOffset: 1,
-                        }}
-                        title={book}
-                      />
-                    )
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {/* Samengestelde studies */}
-            <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-2xl p-5">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="h-7 w-7 rounded-lg flex items-center justify-center flex-shrink-0"
-                    style={{ backgroundColor: "rgba(13,148,136,0.08)" }}>
-                    <Lightbulb size={14} style={{ color: "#0D9488" }} />
-                  </div>
-                  <p className="text-sm font-bold text-gray-900 dark:text-foreground truncate">
-                    Aanbevolen studies
-                  </p>
-                </div>
-                <Link href="/studies" className="text-xs font-medium flex items-center gap-0.5 flex-shrink-0 no-underline" style={{ color: "#0D9488" }}>
-                  Bekijk alle <ChevronRight size={12} />
-                </Link>
-              </div>
-
-              <div className="flex flex-col">
-                {curatedStudies.slice(0, 5).map((study, idx) => {
-                  const badge = BADGE_STYLES[study.type]
-                  return (
-                    <Link
-                      key={study.id}
-                      href={`/studies/${study.id}`}
-                      className={[
-                        "flex items-center gap-3 py-2.5 group transition-colors no-underline -mx-1.5 px-1.5 rounded-lg hover:bg-gray-50/70 dark:hover:bg-secondary/40",
-                        idx === 0 ? "" : "border-t border-gray-100 dark:border-border/70",
-                      ].join(" ")}
-                    >
-                      <span
-                        className="flex-shrink-0 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider"
-                        style={{ backgroundColor: badge.bg, color: badge.color }}
-                      >
-                        {study.type}
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-semibold leading-tight truncate text-gray-900 dark:text-foreground">
-                          {study.title}
-                        </p>
-                        <p className="text-[11px] mt-0.5 flex items-center gap-1.5 text-gray-400 dark:text-muted-foreground">
-                          <span className="flex items-center gap-0.5"><Clock size={9} /> {study.durationLabel}</span>
-                          <span className="opacity-50">·</span>
-                          <span className="truncate">{study.startBook}</span>
-                        </p>
-                      </div>
-                      <ArrowRight size={12} className="flex-shrink-0 text-gray-300 dark:text-muted-foreground group-hover:translate-x-0.5 transition-all" style={{ color: "#0D9488" }} />
-                    </Link>
-                  )
-                })}
-              </div>
-            </div>
-
           </div>
 
-          {/* ── Right sidebar ─────────────────────────── */}
-          <div className="flex flex-col gap-4">
-
-            {/* Tekst van de dag - same layout as the app's card, see
-                components/dashboard/DailyVerseCard. */}
-            <DailyVerseCard verse={verse} loading={verseLoading} />
-
-            {/* Leesstatistieken */}
-            <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-4">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <BarChart2 size={14} style={{ color: "#0D9488" }} />
-                  <p className="text-xs font-bold text-gray-800 dark:text-foreground">Deze week</p>
-                </div>
-                {!statsLoading && (
-                  <span className="text-xs text-gray-400 dark:text-muted-foreground">
-                    {weekTotal === 0 ? "Geen activiteit" : `${weekTotal}× gelezen`}
-                  </span>
-                )}
-              </div>
-              {statsLoading ? (
-                <div className="flex items-end gap-1.5 h-16">
-                  {[40,65,30,80,55,70,45].map((h,i) => (
-                    <div key={i} className="flex-1 rounded-t-md skeleton-pulse bg-gray-100 dark:bg-secondary" style={{ height: `${h}%` }} />
-                  ))}
-                </div>
-              ) : (
-                <div className="content-in flex items-end gap-1.5 h-16">
-                  {days.map((d, i) => (
-                    <div key={i} className="flex-1 flex flex-col items-center h-full justify-end">
-                      {d.count > 0 ? (
-                        <div className="w-full rounded-t-md transition-all"
-                          style={{ height: `${Math.max(d.heightPct, 20)}%`, backgroundColor: d.isToday ? "#0D9488" : "rgba(13,148,136,0.4)" }} />
-                      ) : (
-                        <div className={`w-full rounded-t-md opacity-40 ${d.isToday ? "" : "bg-gray-200 dark:bg-secondary"}`}
-                          style={{ height: "30%", backgroundColor: d.isToday ? "rgba(13,148,136,0.25)" : undefined }} />
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-              <div className="flex justify-between mt-1.5">
-                {days.map((d, i) => (
-                  <span key={i} className="flex-1 text-center text-[10px] font-medium"
-                    style={{ color: d.isToday ? "#0D9488" : "#9CA3AF" }}>
-                    {d.label}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Recente notities */}
-            {(loading || recentNotes.length > 0) && (
-              <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <p className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-muted-foreground">
-                    Recente notities
-                  </p>
-                  <StickyNote size={14} style={{ color: "#0D9488" }} />
-                </div>
-                {loading ? (
-                  <div className="space-y-3">
-                    {[1, 2].map(i => (
-                      <div key={i} className="space-y-1.5">
-                        <div className="h-3 rounded skeleton-pulse w-2/5 bg-gray-100 dark:bg-secondary" />
-                        <div className="h-3 rounded skeleton-pulse w-full bg-gray-100 dark:bg-secondary" />
-                        <div className="h-3 rounded skeleton-pulse w-4/5 bg-gray-100 dark:bg-secondary" />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-3">
-                    {recentNotes.map(note => (
-                      <Link
-                        key={note._id}
-                        href={`/lezen?book=${encodeURIComponent(note.book)}&chapter=${note.chapter}&version=statenvertaling`}
-                        className="group block"
-                        style={{ textDecoration: "none" }}
-                      >
-                        <p className="text-xs font-semibold group-hover:opacity-80 transition-opacity" style={{ color: "#0D9488" }}>
-                          {note.book} {note.chapter}{note.verse ? `:${note.verse}` : ""}
-                        </p>
-                        <p className="text-xs text-gray-400 dark:text-muted-foreground line-clamp-2 mt-0.5 leading-relaxed">
-                          {note.noteText}
-                        </p>
-                      </Link>
-                    ))}
-                    <Link href="/notities" className="text-xs font-medium pt-0.5" style={{ color: "#0D9488" }}>
-                      Alle notities bekijken →
-                    </Link>
-                  </div>
-                )}
-              </div>
+          <div className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-3">
+            {d.loading ? (
+              <SkeletonBlock className={`h-14 w-64 rounded-full ${SKEL}`} />
+            ) : (
+              <Link
+                href={nextHref}
+                className="press group inline-flex items-center gap-3 rounded-full bg-white px-7 py-4 text-base font-semibold text-gray-900 no-underline shadow-xl shadow-black/30 outline-none transition-colors hover:bg-white/90 focus-visible:ring-2 focus-visible:ring-[#0D9488]"
+              >
+                {d.lastRead ? `Verder in ${d.lastRead.book} ${d.lastRead.chapter}` : "Begin met lezen"}
+                <ArrowRight size={18} className="transition-transform group-hover:translate-x-0.5" />
+              </Link>
             )}
-
-            {/* Snel naar */}
-            <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-4">
-              <p className="text-xs font-bold uppercase tracking-widest mb-3 text-gray-500 dark:text-muted-foreground">
-                Snel naar
-              </p>
-              <div className="flex flex-col gap-1">
-                {[
-                  { href: "/studie",  label: "Bijbelstudie",  icon: BookOpen },
-                  { href: "/notities",  label: "Mijn notities", icon: StickyNote },
-                  { href: "/studies",  label: "Leesplannen",   icon: CalendarCheck2 },
-                ].map(({ href, label, icon: Icon }) => (
-                  <Link key={href} href={href}
-                    className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors hover:bg-gray-50 dark:hover:bg-secondary text-gray-700 dark:text-foreground">
-                    <Icon size={14} style={{ color: "#0D9488", flexShrink: 0 }} />
-                    {label}
-                  </Link>
-                ))}
-              </div>
-            </div>
-
+            <Link
+              href="/profiel/boom"
+              className="text-sm font-semibold text-white/85 no-underline underline-offset-4 hover:text-white hover:underline"
+            >
+              Bekijk je boom →
+            </Link>
           </div>
         </div>
+
+        {/* Keeps the button row clear of the numbers that break the fold. */}
+        <div aria-hidden />
+      </section>
+
+      {/* -- Layer 2: the horizon -------------------------------------- */}
+      <div
+        className="relative z-10 -mt-24 px-5 sm:px-8 lg:pl-24 lg:pr-10 xl:pl-28 xl:pr-16"
+        style={horizonMotion}
+      >
+        <dl className="stagger-in grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
+          <GlassStat
+            label="Reeks"
+            value={d.loading ? null : `${d.streak}`}
+            unit={dayWord(d.streak)}
+            note={!tree.loading && tree.longestStreak > d.streak ? `langste ${tree.longestStreak}` : undefined}
+          />
+          <GlassStat
+            label="Hoofdstukken"
+            value={d.loading ? null : `${d.chaptersRead}`}
+            unit={`van ${TOTAL_CHAPTERS}`}
+            note={d.loading ? undefined : `${readPct}% van de Bijbel`}
+          />
+          <GlassStat
+            label="Boeken begonnen"
+            value={d.loading ? null : `${d.booksWithProgress}`}
+            unit="van 66"
+            note={!d.loading && d.booksCompleted > 0 ? `${d.booksCompleted} uitgelezen` : undefined}
+          />
+          <GlassStat
+            label="Notities"
+            value={d.loading ? null : `${d.notesCount}`}
+            unit={d.notesCount === 1 ? "notitie" : "notities"}
+          />
+        </dl>
+      </div>
+
+      {/* -- Layer 3: the desk - version 10's two panels ---------------- */}
+      <div className="relative z-10 grid w-full grid-cols-1 gap-6 px-5 pb-20 pt-14 sm:px-8 lg:grid-cols-[340px_minmax(0,1fr)] lg:gap-8 lg:pl-24 lg:pr-10 xl:pl-28 xl:pr-16">
+
+        {/* --- The reader ------------------------------------------- */}
+        {/* Sticks the moment it reaches the navbar. Capped to the viewport and
+            scrollable inside, so a short screen can still reach "Onderweg in"
+            instead of losing it under the fold of a sticky column. */}
+        <aside className="lg:sticky lg:top-[4.5rem] lg:max-h-[calc(100vh-6rem)] lg:self-start lg:overflow-y-auto">
+          <section className={`p-5 ${PANEL}`} aria-labelledby="diepte-voortgang">
+            <div className="flex items-center gap-3.5">
+              <span
+                aria-hidden
+                className="flex h-14 w-14 flex-shrink-0 flex-col items-center justify-center rounded-full ring-1 ring-white/25"
+                style={{ backgroundColor: "rgba(13,148,136,0.28)" }}
+              >
+                <span className="text-lg font-bold leading-none tabular-nums text-white">{level}</span>
+                <span className="mt-0.5 text-[8px] font-semibold uppercase tracking-[0.16em] text-white/70">niveau</span>
+              </span>
+              <div className="min-w-0 flex-1">
+                <h2 id="diepte-voortgang" className="truncate text-base font-semibold leading-tight text-white">
+                  Jouw voortgang
+                </h2>
+                {d.dateLabel ? (
+                  <p className="mt-1 truncate text-xs text-white/65">{d.firstName} · {d.dateLabel}</p>
+                ) : (
+                  <SkeletonBlock className={`mt-2 h-3 w-32 ${SKEL}`} />
+                )}
+              </div>
+            </div>
+
+            {/* Level and the XP still to go */}
+            <div className="mt-5">
+              <div className="flex items-baseline justify-between text-xs tabular-nums">
+                <span className="font-semibold text-white">Niveau {level}</span>
+                <span className="text-white/65">{xpInto} / {xpFor} XP</span>
+              </div>
+              <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-white/15">
+                <div
+                  className="h-full rounded-full transition-[width] duration-700 ease-out"
+                  style={{ width: d.loading && tree.loading ? "0%" : `${pct}%`, backgroundColor: TEAL_ON_DARK }}
+                />
+              </div>
+              {tree.loading ? (
+                <SkeletonBlock className={`mt-2 h-3 w-40 ${SKEL}`} />
+              ) : (
+                <p className="content-in mt-2 text-xs tabular-nums text-white/70">
+                  {tree.wilting
+                    ? `${tree.daysSinceActive} ${dayWord(tree.daysSinceActive)} niet gelezen`
+                    : `Nog ${Math.max(0, xpFor - xpInto)} XP tot niveau ${level + 1}`}
+                  {tree.nextStage ? ` · volgende fase ${tree.nextStage.name}` : ""}
+                </p>
+              )}
+              {!tree.loading && tree.nextUnlock && (
+                <p className="mt-1 text-xs text-white/60">
+                  Volgende vrijspeling: {tree.nextUnlock.name} - niveau {tree.nextUnlock.level}
+                </p>
+              )}
+              <Link
+                href="/profiel/boom"
+                className="mt-2.5 inline-block text-xs font-semibold no-underline hover:underline"
+                style={{ color: TEAL_ON_DARK }}
+              >
+                Naar je boom →
+              </Link>
+            </div>
+
+            {/* The week */}
+            <div className="mt-6 border-t border-white/10 pt-4">
+              <div className="flex items-baseline justify-between gap-2">
+                <h3 className={EYEBROW}>Deze week</h3>
+                {!d.loading && (
+                  <span className="text-[11px] tabular-nums text-white/65">
+                    {d.streak} {dayWord(d.streak)} op rij
+                  </span>
+                )}
+              </div>
+              <WeekStrip days={d.weekDays} loading={d.statsLoading} />
+              {!d.statsLoading && (
+                <p className="mt-2.5 text-xs tabular-nums text-white/60">
+                  {d.weekTotal === 0 ? "Nog geen activiteit deze week" : `${d.weekTotal} hoofdstukken deze week`}
+                </p>
+              )}
+            </div>
+
+            {/* The standing totals */}
+            <div className="mt-6 border-t border-white/10 pt-4">
+              <h3 className={`${EYEBROW} mb-3`}>Totalen</h3>
+              <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
+                <Total label="Hoofdstukken" loading={d.loading} value={`${d.chaptersRead}`} sub={`van ${TOTAL_CHAPTERS}`} />
+                <Total label="Boeken" loading={d.loading} value={`${d.booksWithProgress}`} sub="van 66 geopend" />
+                <Total
+                  label="Notities"
+                  loading={d.loading}
+                  value={`${d.notesCount}`}
+                  sub={d.notesCount === 1 ? "notitie" : "notities"}
+                />
+                <Total
+                  label="Lessen"
+                  loading={d.loading}
+                  value={`${d.studyCounts?.lessonsCompleted ?? 0}`}
+                  sub="afgerond"
+                />
+              </dl>
+            </div>
+
+            {/* "Onderweg in" used to list the four books furthest along. The
+                field of 66 squares in the work column says the same thing more
+                clearly and for every book at once, so the list is gone. */}
+          </section>
+        </aside>
+
+        {/* --- The work --------------------------------------------- */}
+        <div className="min-w-0 space-y-5">
+          <div className="empty:hidden">
+            <BillingNotices />
+          </div>
+
+          {/* Verder waar je was */}
+          {d.loading ? (
+            <SkeletonBlock className={`h-36 w-full rounded-2xl ${SKEL}`} />
+          ) : (
+            <section
+              className={`content-in flex flex-wrap items-end justify-between gap-4 p-6 ${PANEL}`}
+              aria-labelledby="diepte-verder"
+            >
+              <div className="min-w-0">
+                <h2 id="diepte-verder" className={EYEBROW} style={{ color: TEAL_ON_DARK }}>
+                  {d.lastRead ? "Verder waar je was" : "Begin vandaag"}
+                </h2>
+                <p className="mt-2 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+                  {d.lastRead ? `${d.lastRead.book} ${d.lastRead.chapter}` : "Start je bijbelstudie"}
+                </p>
+                <p className="mt-1 text-sm text-white/70">
+                  {d.lastRead
+                    ? `Hoofdstuk ${d.lastRead.chapter}${versionAbbreviation(d.lastRead.version) ? ` · ${versionAbbreviation(d.lastRead.version)}` : ""}`
+                    : "Lees dag voor dag door de Bijbel."}
+                </p>
+              </div>
+              <Link
+                href={nextHref}
+                className="press inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white no-underline outline-none transition-colors hover:bg-[#0F766E] focus-visible:ring-2 focus-visible:ring-white"
+                style={{ backgroundColor: TEAL }}
+              >
+                {d.lastRead ? "Verder lezen" : "Begin met lezen"}
+                <ArrowRight size={14} />
+              </Link>
+            </section>
+          )}
+
+          {/* Tekst van de dag */}
+          <div className="[&>div]:rounded-2xl">
+            <DailyVerseCard verse={d.verse} loading={d.verseLoading} />
+          </div>
+
+          {/* Je weg door de Bijbel */}
+          <section className={`p-6 ${PANEL}`} aria-labelledby="diepte-weg">
+            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+              <h2 id="diepte-weg" className="text-base font-semibold text-white">Je weg door de Bijbel</h2>
+              {d.loading ? (
+                <SkeletonBlock className={`h-3 w-40 ${SKEL}`} />
+              ) : (
+                <p className="text-xs tabular-nums text-white/65">
+                  {d.chaptersRead} van {TOTAL_CHAPTERS} hoofdstukken · {readPct}%
+                </p>
+              )}
+            </div>
+            <p className="mt-1 h-4 text-xs text-white/70">
+              {hoveredBook ? (
+                <>
+                  <span className="font-semibold text-white">{hoveredBook}</span>
+                  {" · "}
+                  <span className="tabular-nums">
+                    {d.bookReadCount(hoveredBook)} van {chapterCount(hoveredBook)} hoofdstukken
+                  </span>
+                </>
+              ) : (
+                "Beweeg over een boek voor details"
+              )}
+            </p>
+
+            <BookField
+              label="Oude Testament"
+              books={OT_BOOKS}
+              ratioOf={d.bookReadRatio}
+              loading={d.loading}
+              current={d.lastRead?.book ?? null}
+              hovered={hoveredBook}
+              onHover={setHoveredBook}
+            />
+            <BookField
+              label="Nieuwe Testament"
+              books={NT_BOOKS}
+              ratioOf={d.bookReadRatio}
+              loading={d.loading}
+              current={d.lastRead?.book ?? null}
+              hovered={hoveredBook}
+              onHover={setHoveredBook}
+            />
+
+            <div className="mt-4 flex items-center gap-2 border-t border-white/10 pt-3 text-[11px] text-white/55">
+              <span>Niets</span>
+              <span aria-hidden className="flex gap-[3px]">
+                {[0, 0.2, 0.4, 0.7, 1].map(ratio => (
+                  <span
+                    key={ratio}
+                    className="block h-[11px] w-[11px] rounded-sm"
+                    style={{ backgroundColor: fieldColor(ratio) }}
+                  />
+                ))}
+              </span>
+              <span>Uitgelezen</span>
+            </div>
+          </section>
+
+          {/* Recente notities */}
+          <section className={`p-6 ${PANEL}`} aria-labelledby="diepte-notities">
+            <div className="flex items-baseline justify-between gap-3">
+              <h2 id="diepte-notities" className="text-base font-semibold text-white">Recente notities</h2>
+              <Link
+                href="/notities"
+                className="text-xs font-semibold no-underline hover:underline"
+                style={{ color: TEAL_ON_DARK }}
+              >
+                Alle notities
+              </Link>
+            </div>
+            {d.loading ? (
+              <div className="mt-4 space-y-4">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="space-y-2">
+                    <SkeletonBlock className={`h-3 w-1/4 ${SKEL}`} />
+                    <SkeletonBlock className={`h-3.5 w-full ${SKEL}`} />
+                  </div>
+                ))}
+              </div>
+            ) : d.recentNotes.length === 0 ? (
+              <p className="mt-4 text-sm text-white/70">
+                Nog geen notities.{" "}
+                <Link
+                  href={nextHref}
+                  className="font-semibold no-underline hover:underline"
+                  style={{ color: TEAL_ON_DARK }}
+                >
+                  Schrijf er een tijdens het lezen
+                </Link>
+              </p>
+            ) : (
+              <ul className="stagger-in mt-2 divide-y divide-white/10">
+                {d.recentNotes.map(note => (
+                  <li key={note._id}>
+                    <Link href={readHref(note.book, note.chapter)} className="group block py-3 no-underline">
+                      <p className="text-xs font-semibold" style={{ color: TEAL_ON_DARK }}>
+                        {note.book} {note.chapter}{note.verse ? `:${note.verse}` : ""}
+                      </p>
+                      <p className="mt-0.5 line-clamp-2 text-sm leading-relaxed text-white/75 group-hover:text-white">
+                        {note.noteText}
+                      </p>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          {/* Aanbevolen studies */}
+          <section className={`p-6 ${PANEL}`} aria-labelledby="diepte-studies">
+            <div className="flex items-baseline justify-between gap-3">
+              <h2 id="diepte-studies" className="text-base font-semibold text-white">Aanbevolen studies</h2>
+              <Link
+                href="/studies"
+                className="text-xs font-semibold no-underline hover:underline"
+                style={{ color: TEAL_ON_DARK }}
+              >
+                Bekijk alle
+              </Link>
+            </div>
+            <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {curatedStudies.slice(0, 4).map(study => {
+                const badge = BADGE_STYLES[study.type]
+                return (
+                  <li key={study.id}>
+                    <Link
+                      href={`/studies/${study.id}`}
+                      className="group flex h-full flex-col rounded-xl bg-white/[0.06] p-4 no-underline outline-none ring-1 ring-white/10 transition-colors hover:bg-white/[0.12] focus-visible:ring-2 focus-visible:ring-white"
+                    >
+                      <span className="flex items-center gap-2">
+                        <span
+                          className="rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider"
+                          style={{ backgroundColor: badge.bg, color: badge.color }}
+                        >
+                          {study.type}
+                        </span>
+                        <span className="flex items-center gap-1 text-[11px] tabular-nums text-white/65">
+                          <Clock size={10} aria-hidden /> {study.durationLabel}
+                        </span>
+                      </span>
+                      <span className="mt-2.5 text-[15px] font-semibold leading-snug text-white">{study.title}</span>
+                      <span className="mt-1 line-clamp-2 flex-1 text-sm leading-relaxed text-white/70">
+                        {study.description}
+                      </span>
+                      <span
+                        className="mt-3 flex items-center gap-1 text-xs font-semibold"
+                        style={{ color: TEAL_ON_DARK }}
+                      >
+                        Bekijk studie
+                        <ArrowRight size={12} className="transition-transform group-hover:translate-x-0.5" />
+                      </span>
+                    </Link>
+                  </li>
+                )
+              })}
+            </ul>
+          </section>
+
+          {/* "Snel naar" is gone on purpose: every one of its three links is
+              already in the rail, one hover away, and a fourth panel repeating
+              them was the clearest case of the page doing too much. */}
+
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* -- The reading field ---------------------------------------------- */
+
+/**
+ * The five-step ramp the live dashboard already uses, restated for a dark
+ * ground: the empty square is a film of white rather than `--progress-empty`,
+ * which is tuned for a white page and disappears here.
+ */
+function fieldColor(ratio: number): string {
+  if (ratio <= 0) return "rgba(255,255,255,0.14)"
+  if (ratio < 0.25) return "rgba(45,212,191,0.30)"
+  if (ratio < 0.5) return "rgba(45,212,191,0.52)"
+  if (ratio < 1) return "rgba(45,212,191,0.76)"
+  return "#2DD4BF"
+}
+
+/**
+ * One testament as a field of squares, one per book, filled by how much of it
+ * is read - the contribution-graph shape the live dashboard uses, which reads
+ * far faster than a ribbon and gives all 66 books at once.
+ */
+function BookField({
+  label,
+  books,
+  ratioOf,
+  loading,
+  current,
+  hovered,
+  onHover,
+}: {
+  label: string
+  books: readonly string[]
+  ratioOf: (book: string) => number
+  loading: boolean
+  current: string | null
+  hovered: string | null
+  onHover: (book: string | null) => void
+}) {
+  return (
+    <div className="mt-4">
+      <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/55">
+        {label} <span className="font-normal normal-case tabular-nums">({books.length} boeken)</span>
+      </p>
+      <div className="flex flex-wrap gap-[3px]">
+        {books.map(book => {
+          const ratio = loading ? 0 : ratioOf(book)
+          const isCurrent = !loading && current === book
+          return (
+            <Link
+              key={book}
+              href={readHref(book, 1)}
+              title={book}
+              aria-label={book}
+              onMouseEnter={() => onHover(book)}
+              onMouseLeave={() => onHover(null)}
+              onFocus={() => onHover(book)}
+              onBlur={() => onHover(null)}
+              className={`relative block flex-shrink-0 rounded-sm no-underline transition-transform duration-100 hover:z-10 hover:scale-125 ${
+                loading ? "skeleton-pulse" : ""
+              }`}
+              style={{
+                width: 18,
+                height: 18,
+                backgroundColor: fieldColor(ratio),
+                outline: hovered === book || isCurrent ? "2px solid #2DD4BF" : "none",
+                outlineOffset: 1,
+              }}
+            />
+          )
+        })}
       </div>
     </div>
   )

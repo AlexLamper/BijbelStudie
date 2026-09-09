@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../lib/authOptions";
 import SessionProvider from "../../components/providers/SessionProvider";
-import { Header } from "../../components/layout/header";
-import { AppSidebar } from "../../components/layout/app-sidebar";
 import { SidebarProvider } from "../../components/ui/sidebar";
 
 export const metadata: Metadata = {
@@ -11,21 +9,25 @@ export const metadata: Metadata = {
   description: "Jouw persoonlijk bijbelstudie overzicht",
 };
 
+/**
+ * Providers only - no chrome.
+ *
+ * The dashboard is the one signed-in screen that owns its whole viewport: a
+ * fixed full-bleed scene with the navbar drawn transparently over it and the
+ * sidebar replaced by a rail that floats rather than taking a column out of the
+ * page. A layout in the App Router can only ADD chrome, never replace what a
+ * parent rendered, so the header and the sidebar are the page's to draw - see
+ * app/dashboard/page.tsx, which renders `<Header variant="scene" />` and
+ * `<SceneRail />` itself.
+ *
+ * `SidebarProvider` stays because the header's own controls read its context;
+ * it renders a flex row, which is why the page root carries `w-full min-w-0`.
+ */
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions);
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-background">
-      <SessionProvider session={session}>
-        <SidebarProvider>
-          <AppSidebar />
-          <div className="flex flex-col flex-1 min-h-0 w-full overflow-hidden">
-            <Header />
-            <main className="flex-1 overflow-y-auto">
-              {children}
-            </main>
-          </div>
-        </SidebarProvider>
-      </SessionProvider>
-    </div>
+    <SessionProvider session={session}>
+      <SidebarProvider>{children}</SidebarProvider>
+    </SessionProvider>
   );
 }

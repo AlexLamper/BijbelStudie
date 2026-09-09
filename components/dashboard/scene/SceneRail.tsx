@@ -7,7 +7,7 @@ import {
   BookMarked, BookOpen, LayoutDashboard, MessageSquareText,
   Settings, ShieldCheck, StickyNote, User,
 } from "lucide-react"
-import { useStudyStyle } from "../../../providers/study-style-provider"
+import { useStudyStyle } from "../../providers/study-style-provider"
 
 /**
  * The sidebar, solved for a full-bleed scene.
@@ -63,14 +63,11 @@ const BOTTOM_NAV: NavItem[] = [
 ]
 
 /**
- * This candidate lives at /proefdashboard/versie-3, so nothing in the menu is
- * literally the current path - but the page the reader is looking at IS the
- * dashboard, and the menu should say so rather than marking nothing.
- */
+ * Which item the reader is standing on. */
 function useIsActive() {
   const pathname = usePathname() ?? ""
   return (url: string) => {
-    if (url === "/dashboard") return pathname === "/dashboard" || pathname.startsWith("/proefdashboard")
+    if (url === "/dashboard") return pathname === "/dashboard"
     return pathname === url || pathname.startsWith(url + "/")
   }
 }
