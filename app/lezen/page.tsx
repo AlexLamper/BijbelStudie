@@ -484,15 +484,15 @@ function StudyPageInner() {
          * explains why this route sets it itself instead of taking `SCENE_X`,
          * and what has to move with it.
          *
-         * The split leans left by half that strip (`calc(50% ± 3rem)`) so the
-         * inset comes out of the page rather than out of the passage: the
-         * scripture keeps the measure it would have if the two panes were an
-         * even half each.
+         * The split leans left by half that strip (`calc(50% + 7rem)`, half of
+         * RAIL_GUTTER's 14rem) so the inset comes out of the page rather than
+         * out of the passage: the scripture keeps the measure it would have if
+         * the two panes were an even half each.
          */}
         <div
           data-tour="bible-text"
           className={[
-            `h-full w-full lg:w-[calc(50%_+_3rem)] lg:flex-none min-h-0 min-w-0 overflow-hidden lg:border-r lg:border-white/10 ${RAIL_GUTTER}`,
+            `h-full w-full lg:w-[calc(50%_+_7rem)] lg:flex-none min-h-0 min-w-0 overflow-hidden lg:border-r lg:border-white/10 ${RAIL_GUTTER}`,
             mobileView === 'bible' ? 'block' : 'hidden',
             'lg:block',
           ].join(' ')}

@@ -117,13 +117,11 @@ function NavLink({ url, title, icon: Icon, tourId }: { url: string; title: strin
 }
 
 /**
- * One row of the study-mode rail: icon always, label only while the rail is
- * hovered open.
+ * One row of the study-mode rail: icon and label, always both.
  *
- * The label is faded and nudged rather than `hidden`, so the text slides in with
- * the widening rail instead of appearing mid-animation in a box that is still
- * 56px wide. `whitespace-nowrap` plus the rail's `overflow-hidden` is what keeps
- * it from wrapping onto a second line while the width is in flight.
+ * `whitespace-nowrap` plus the rail's `overflow-hidden` is what keeps a label
+ * from wrapping onto a second line; the rail is sized so none of them reaches
+ * the edge in the first place.
  */
 function RailLink({ url, title, icon: Icon, tourId }: { url: string; title: string; icon: React.ElementType; tourId?: string }) {
   const pathname = usePathname()
@@ -146,9 +144,7 @@ function RailLink({ url, title, icon: Icon, tourId }: { url: string; title: stri
         ].join(" ")}
       >
         <Icon size={18} className="flex-shrink-0" />
-        <span className="text-[13.5px] whitespace-nowrap opacity-0 -translate-x-1 transition-[opacity,transform] duration-200 group-hover/rail:opacity-100 group-hover/rail:translate-x-0">
-          {title}
-        </span>
+        <span className="text-[13.5px] whitespace-nowrap">{title}</span>
       </Link>
     </li>
   )
@@ -172,35 +168,36 @@ function RailAdminLink() {
 }
 
 /**
- * Navigation for the guided study flow: a 56px icon rail that widens to the
- * full sidebar on hover.
+ * Navigation for the guided study flow: a fixed 13rem rail, every icon with its
+ * label, no hover state.
  *
- * A lesson is meant to be read, not navigated away from, so the permanent 12rem
- * column of links, the Pro card and the page chrome around it were all competing
- * with the passage. What is left is a strip of icons at the same width as the
- * navbar is tall; the whole sidebar is still one hover away and floats OVER the
- * lesson rather than pushing it sideways, so nothing reflows when it opens.
+ * A lesson is meant to be read, not navigated away from, so the Pro card and
+ * the page chrome around the full sidebar were competing with the passage. What
+ * is left is the list of links and nothing else. It used to be a 56px strip of
+ * icons that widened on hover; that was rejected ("not the expanding - just the
+ * labels"), so it now has one width and the lesson window is laid out beside
+ * it - the spacer below reserves exactly that width, so nothing ever reflows.
  *
  * The Pro card is deliberately not here. It is an advert, and this is the one
- * screen where the reader is doing the thing they came for.
+ * screen where the reader is doing the thing they came for. A guest gets the
+ * way in at the foot instead, because on this screen "save your progress" is
+ * the one thing they will want an account for.
  *
- * Desktop only. On a phone there is no hover and no room to spare; the flow's
- * own close button is the way out.
+ * Desktop only. On a phone there is no room to spare; the flow's own close
+ * button is the way out.
  */
 export function StudyRail() {
   const nav = useMainNav()
+  const { data: session } = useSession()
 
   return (
-    <div className="hidden md:block flex-none w-14">
+    <div className="hidden md:block flex-none w-52">
       <nav
         aria-label="Hoofdnavigatie"
-        // z-[60], above the study flow's header (z-50). At z-40 the rail slid
-        // out UNDER the top beam - open on the lesson body, clipped by the bar
-        // above it. Navigation that is half-covered by chrome reads as a bug.
-        className="group/rail fixed inset-y-0 left-0 z-[60] w-14 hover:w-52 overflow-hidden flex flex-col
-                   bg-white dark:bg-card border-r border-border
-                   transition-[width,box-shadow] duration-300 ease-out
-                   hover:shadow-[0_0_60px_-16px_rgba(15,23,42,0.45)]"
+        // z-[60], above the study flow's header (z-50), so a click on the rail
+        // is never swallowed by the header's dismiss layer.
+        className="fixed inset-y-0 left-0 z-[60] w-52 overflow-hidden flex flex-col
+                   bg-white dark:bg-card border-r border-border"
       >
         <Link
           href="/dashboard"
@@ -215,7 +212,7 @@ export function StudyRail() {
             className="rounded-md flex-shrink-0"
             priority
           />
-          <span className="text-[15px] font-bold tracking-tight text-gray-900 dark:text-foreground whitespace-nowrap opacity-0 -translate-x-1 transition-[opacity,transform] duration-200 group-hover/rail:opacity-100 group-hover/rail:translate-x-0">
+          <span className="text-[15px] font-bold tracking-tight text-gray-900 dark:text-foreground whitespace-nowrap">
             Bijbel<span style={{ color: LOGO_GREEN }}>Studie</span>
           </span>
         </Link>
@@ -231,8 +228,42 @@ export function StudyRail() {
           <ul className="m-0 p-0 flex flex-col gap-0.5">
             {bottomNav.map(item => <RailLink key={item.url} {...item} />)}
           </ul>
+          {!session && <GuestAccountCard compact />}
         </div>
       </nav>
+    </div>
+  )
+}
+
+/**
+ * What a guest gets where a signed-in reader gets the Pro card: the way in.
+ *
+ * Both links carry the current page as `next`, the parameter app/inloggen and
+ * app/registreren read through lib/safeRedirect, so a guest who signs in from
+ * the sidebar lands back where they were.
+ */
+function GuestAccountCard({ compact = false }: { compact?: boolean }) {
+  const pathname = usePathname() ?? "/"
+  const next = encodeURIComponent(pathname)
+
+  return (
+    <div className={compact ? "mt-2 border-t border-border px-1 pt-3" : "pt-4 px-1"}>
+      <p className="px-2 text-[11.5px] leading-snug text-gray-500 dark:text-muted-foreground">
+        Bewaar je voortgang met een gratis account.
+      </p>
+      <Link
+        href={`/inloggen?next=${next}`}
+        className="mt-2.5 flex h-9 w-full items-center justify-center rounded-lg text-[13px] font-semibold text-white no-underline transition-opacity hover:opacity-90"
+        style={{ backgroundColor: "#0D9488" }}
+      >
+        Inloggen
+      </Link>
+      <Link
+        href={`/registreren?next=${next}`}
+        className="mt-1 flex h-9 w-full items-center justify-center rounded-lg text-[13px] font-semibold text-gray-700 no-underline transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-secondary"
+      >
+        Registreren
+      </Link>
     </div>
   )
 }
@@ -251,7 +282,11 @@ function ProCTA() {
       .finally(() => setChecked(true))
   }, [session])
 
-  if (!checked || isSubscribed) return null
+  if (!checked) return null
+  // A guest cannot upgrade a subscription they do not have; what they need
+  // first is an account.
+  if (!session) return <GuestAccountCard />
+  if (isSubscribed) return null
 
   // Every line here has to be something the paywall actually enforces:
   // commentaries and grondtekst via lib/proContent.ts, the AI cap via

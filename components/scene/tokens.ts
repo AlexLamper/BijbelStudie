@@ -206,38 +206,27 @@ export const CTA_QUIET =
  *
  * The left inset is built out of two things that are added, never merged:
  *
- *     RAIL_REST (64px, and it has exactly one)  +  the page's own side margin
+ *     RAIL_W (13rem, and it has exactly one)  +  the page's own side margin
  *
  * and that second term is the SAME margin the right edge gets. So at `lg` the
- * right is 40px and the left is 64 + 40 = 104px; at `xl` the right is 64px and
- * the left is 64 + 64 = 128px. The content column is then symmetrically inset
- * in the space the rail leaves, which is what it looks like it should be.
- *
- * It used to be 80px flat - the rail plus a 16px breathing gap, sized to CLEAR
- * the rail rather than to sit evenly beside it. That is a different question
- * with a different answer: 80px is the smallest left inset that is safe, and
- * safe is not the same as square. Every overview screen (dashboard, studies,
- * notities, beheer, profiel, feedback, groepen) read as shoved against the
- * rail, because the copy started 16px after the glass on the left and 40px
- * before nothing at all on the right.
+ * right is 2.5rem and the left is 13 + 2.5 = 15.5rem; at `xl` the right is 4rem
+ * and the left is 13 + 4 = 17rem. The content column is then symmetrically
+ * inset in the space the rail leaves, which is what it looks like it should be.
  *
  * Below `lg` there is no rail - it becomes a sticky strip of pills - so the
  * gutter is plainly symmetrical and the arithmetic does not apply.
  *
- * The history, because all three mistakes are easy to make again. The rail
- * first OPENED to 176px over a 96px gutter, as a film of white over a blur: it
- * put 80px of translucent panel over every heading with the copy ghosting
- * through, which reads as a broken render rather than as depth. The cure was
- * worse: the gutter was widened to 192/208px to RESERVE the open rail, which
- * pushed every page's content a fifth of the way across the screen and left
- * /lezen a dead band beside the rail. The third try opened the rail to exactly
- * 96/112px and paid for it with the same 96/112px of gutter on every page -
- * cheaper, but still a page paying width for a panel it sees for a second.
- *
- * None of it was necessary. A rail that stays 64px wide and floats ONE label
- * out over the scene on hover costs the page its 64px, once, forever - and it
- * cannot cover a glyph, because there is no state in which it is wider than the
- * strip it stands in. See SceneRail.tsx for the label.
+ * The history, because every one of these was tried and rejected by the owner.
+ * The rail first OPENED on hover from 64px to 176px over a 96px gutter, as a
+ * film of white over a blur, ghosting over every heading. Then it opened to
+ * exactly its gutter (96/112px) with the labels under the icons. Then it stayed
+ * 64px and floated ONE label out over the scene on hover. All three made the
+ * reader hover to find out what an icon is, and the verdict was "not the
+ * expanding - just the labels". So the rail has one width, wide enough for an
+ * icon and its full Dutch label side by side, and never changes it. The page
+ * pays that width once, forever, and nothing about the rail can ever cover a
+ * glyph, because there is no state in which it is wider than the strip it
+ * stands in.
  *
  * SceneShell applies it for you - reach for the constant only when a page opts
  * out (`gutter="none"`) to lay out full-bleed sections itself. /lezen is the
@@ -245,7 +234,7 @@ export const CTA_QUIET =
  * runs to every edge on purpose, so it wants the inset that CLEARS the rail,
  * not the one that sits evenly beside it.
  */
-export const SCENE_X = "px-5 sm:px-8 lg:pl-[6.5rem] lg:pr-10 xl:pl-32 xl:pr-16"
+export const SCENE_X = "px-5 sm:px-8 lg:pl-[15.5rem] lg:pr-10 xl:pl-[17rem] xl:pr-16"
 
 /**
  * The gutter on a page with no rail. Symmetrical, and wider than a reading
@@ -260,10 +249,21 @@ export const SECTION_Y = "py-[clamp(3.5rem,6vw,6rem)]"
 /* -- The rail -------------------------------------------------- */
 
 /**
- * The rail's one and only width: a 64px strip of glass standing in the left
- * scrim. There is no second value - see SCENE_X for why that is the whole fix.
+ * The rail's one and only width: a 13rem (208px) strip of glass standing in the
+ * left scrim, with every icon AND its label on show. There is no second value -
+ * no hover width, no focus width - see SCENE_X for why that is the whole fix.
+ *
+ * 13rem is measured, not guessed: the longest label is "Instellingen", which at
+ * 13.5px medium runs about 84px; add an 18px glyph, the 12px gap between them,
+ * the row's 12px side padding on each side and the rail's own 8px padding and
+ * the row needs about 150px. 208px leaves room for a bolder weight, a wider
+ * font fallback and the Beheer item without a single label ever truncating.
+ *
+ * Written as literal class text: Tailwind reads class names as text and never
+ * generates one spliced together from a constant. SCENE_X and RAIL_GUTTER
+ * repeat the 13rem by hand, and say so.
  */
-export const RAIL_REST = "w-16"
+export const RAIL_W = "w-52"
 
 /**
  * The scene's own ground as an opaque fill: the same SCENE_BG the shell paints
@@ -273,8 +273,8 @@ export const RAIL_REST = "w-16"
  * It is named for the rail because the rail is what it was cut for - the rail
  * used to widen on hover and needed an opaque ground while it was open, since
  * anything still showing through a piece of navigation reads as a fault rather
- * than as depth. The rail no longer opens (see SceneRail.tsx), but the fill
- * outlived the state: the lesson flow's PANEL_SOLID is the same need in a
+ * than as depth. The rail no longer changes width (see SceneRail.tsx), but the
+ * fill outlived the state: the lesson flow's PANEL_SOLID is the same need in a
  * different shape, so the name stays where its consumer already points.
  *
  * Written out rather than spliced in from SCENE_BG because Tailwind reads class
@@ -282,24 +282,6 @@ export const RAIL_REST = "w-16"
  * SCENE_BG moves, this moves with it by hand.
  */
 export const RAIL_OPEN = "bg-[#0C2429]"
-
-/**
- * The floating label a single rail item shows on hover or keyboard focus.
- *
- * It is a small dark plate that hangs to the RIGHT of one icon, over the scene,
- * out of the layout entirely (`absolute`, `pointer-events-none`): the rail
- * never widens, so the label is the only thing that ever leaves the 64px strip,
- * and it leaves it for one item at a time.
- *
- * Darker than TILE (`bg-black/80` rather than `bg-black/40`) because this one
- * lands on unscrimmed picture - anywhere down the left edge, over a noon sky as
- * easily as over a hillside - and a label you have to squint at is worse than
- * no label. White on it clears 12:1 whatever is behind. The hairline and the
- * blur are TILE's, so it still reads as the same family of glass as the rail it
- * comes out of.
- */
-export const RAIL_LABEL =
-  "rounded-md border border-white/15 bg-black/80 px-2.5 py-1 text-[12px] font-medium leading-none text-white shadow-lg shadow-black/40 backdrop-blur-md"
 
 /**
  * The left inset alone, for a page that opts out of `SCENE_X` because it owns
@@ -310,10 +292,10 @@ export const RAIL_LABEL =
  * the rail stands in is inset. Literal class text, because Tailwind reads class
  * names as text and never generates one spliced together from a constant.
  *
- * This is deliberately NOT `SCENE_X`'s left inset any more, and the difference
- * is the whole point of each. 80px is the rail's 64px plus a 16px breathing gap
- * - the smallest inset that CLEARS the rail, which is what a page wants when its
- * content is meant to reach the edges. `SCENE_X` adds the page's full side
+ * This is deliberately NOT `SCENE_X`'s left inset, and the difference is the
+ * whole point of each. 14rem is the rail's 13rem (RAIL_W) plus a 1rem breathing
+ * gap - the smallest inset that CLEARS the rail, which is what a page wants when
+ * its content is meant to reach the edges. `SCENE_X` adds the page's full side
  * margin instead, so a column of panels sits evenly between the rail and the
  * right edge. A reader is the first kind of page; every overview screen is the
  * second.
@@ -321,7 +303,7 @@ export const RAIL_LABEL =
  * /lezen's split-pane lean is computed from this number (see app/lezen/page.tsx)
  * - if this moves, that moves with it.
  */
-export const RAIL_GUTTER = "lg:pl-20"
+export const RAIL_GUTTER = "lg:pl-56"
 
 /* -- The room -------------------------------------------------- */
 

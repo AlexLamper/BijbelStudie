@@ -28,9 +28,9 @@ export async function generateMetadata(): Promise<Metadata> {
  * flow's header owns the top of the screen instead, and the way out is its close
  * button.
  *
- * The sidebar is a 56px icon rail that widens on hover (see StudyRail) rather
- * than a permanent 12rem column, and it floats over the lesson instead of
- * pushing it, so opening it reflows nothing.
+ * The sidebar is the fixed 13rem StudyRail - every icon with its label, no
+ * hover state - rather than the full sidebar with its Pro card and page chrome.
+ * It has one width, so nothing about the lesson ever reflows.
  *
  * The lesson itself sits in an inset, rounded, shadowed frame on a darker
  * ground: a window you are working inside rather than a page you are scrolling.

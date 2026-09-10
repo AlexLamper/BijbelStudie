@@ -76,13 +76,18 @@ export type SceneShellProps = Omit<SceneBackdropProps, "mode" | "reducedMotion">
    */
   backdrop?: SceneBackdropProps["mode"] | "none"
   /**
-   * The real app bar, in its scene variant. Off by default, because
-   * `components/layout/header.tsx` reads the session - on a route with no
-   * SessionProvider it throws, and signed out it pushes the visitor to the
-   * sign-in page. Turn it on for a signed-in route, never on a public one.
+   * The real app bar, in its scene variant. Off by default only because a
+   * route with no SessionProvider cannot mount it (`useSession` throws there).
+   * It is safe signed OUT: a guest gets the same bar with an Inloggen button
+   * where the profile menu would be, so a public route should turn it on too.
    */
   header?: boolean
-  /** The floating nav rail. Reads the session too, so the same rule applies. */
+  /**
+   * The nav rail. Guest-aware in the same way - every item renders, the
+   * account-bound routes answer a guest with a GuestGate, and the foot of the
+   * rail offers the way in - so it belongs on public routes as much as on
+   * signed-in ones. It reads the session, so it needs the provider too.
+   */
   rail?: boolean
   /**
    * The content layer's gutter. Defaults to the rail's inset when the rail is
