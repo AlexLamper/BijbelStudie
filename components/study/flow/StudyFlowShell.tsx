@@ -59,6 +59,64 @@ const FULLSCREEN_HINT_KEY = 'study:fullscreen-hint';
 const SOUND_KEY = 'study:sound';
 
 /**
+ * Where a GUEST's lesson state lives: one localStorage entry per lesson, the
+ * same shape `StudyLessonState` has in Mongo for a signed-in reader, minus the
+ * server-only fields. It is written by the same `patch` calls that would have
+ * gone to /api/v1/study-lesson-state, so the flow itself never branches on
+ * who is reading - only the writer does.
+ *
+ * localStorage rather than sessionStorage on purpose: a guest who closes the
+ * tab after step three and comes back tomorrow should find step three, which is
+ * the whole reason the signed-in flow moved OFF sessionStorage. Nothing here is
+ * migrated to an account later (that is out of scope); when they sign up, the
+ * lesson starts clean on the server and this entry is simply never read again.
+ */
+function guestLessonKey(studyId: string, lessonDay: number) {
+  return `bijbelstudie_guest_lesson_${studyId}_${lessonDay}`;
+}
+
+interface GuestLessonState {
+  currentStep?: string;
+  stepsCompleted?: string[];
+  viewTranslation?: string | null;
+  depthPanel?: string | null;
+  reflectionText?: string;
+  completedAt?: string | null;
+}
+
+function readGuestLesson(key: string): GuestLessonState | null {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as GuestLessonState;
+    return parsed && typeof parsed === 'object' ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Applies one `patch` body to the stored guest state, the way the API would. */
+function writeGuestLesson(key: string, body: Record<string, unknown>) {
+  try {
+    const current = readGuestLesson(key) ?? {};
+    const next: GuestLessonState = { ...current };
+    if (typeof body.currentStep === 'string') next.currentStep = body.currentStep;
+    if (typeof body.completeStep === 'string') {
+      const done = new Set(current.stepsCompleted ?? []);
+      done.add(body.completeStep);
+      next.stepsCompleted = [...done];
+    }
+    if ('viewTranslation' in body) next.viewTranslation = (body.viewTranslation as string | null) ?? null;
+    if ('depthPanel' in body) next.depthPanel = (body.depthPanel as string | null) ?? null;
+    if (typeof body.reflectionText === 'string') next.reflectionText = body.reflectionText;
+    if (body.complete === true) next.completedAt = new Date().toISOString();
+    localStorage.setItem(key, JSON.stringify(next));
+  } catch {
+    /* private mode: the step still happens, it is just not remembered */
+  }
+}
+
+/**
  * The step transition: one page sliding over another, both moving at once.
  *
  * The earlier version nudged the outgoing step 56px and faded it, with
@@ -148,15 +206,32 @@ export interface LessonStatePayload {
  * The AI trigger sits in the header. It used to float above the bottom-right
  * corner, directly on top of the "Volgende" button, which made the quiz step
  * impossible to leave.
+ *
+ * GUESTS RUN THE WHOLE LESSON. SAVING IS WHERE THE ACCOUNT COMES IN.
+ *
+ * With `guest`, the page rendered this shell without a session. Everything the
+ * reader does still works - the steps, the passage, the commentary, the
+ * reflection, the transitions - and every write that would have gone to an
+ * account-bound endpoint is redirected: lesson state goes to localStorage (see
+ * `guestLessonKey`), the reading log, the last-read cursor and the streak are
+ * simply not sent (they would 401, and a console full of 401s reads as a broken
+ * app). The quiz asks the server for graded questions per reader, so for a
+ * guest it explains itself and steps aside. Finishing the lesson awards no XP
+ * and shows the "bewaar je voortgang" card instead of the reward figures - that
+ * card is the one place a guest is asked to sign in, and it carries the lesson
+ * URL as `next`.
  */
 export default function StudyFlowShell({
   lesson,
   initialState,
   initialStep,
+  guest = false,
 }: {
   lesson: LessonPayload;
   initialState: LessonStatePayload;
   initialStep: StepKey;
+  /** No session: state stays in the browser, nothing account-bound is sent. */
+  guest?: boolean;
 }) {
   const router = useRouter();
   const { preferences, updatePreferences } = useReadingPreferences();
@@ -223,9 +298,22 @@ export default function StudyFlowShell({
     lesson.passage.verseRange ? `:${lesson.passage.verseRange}` : ''
   }`;
 
-  /** One writer for every lesson-state change the flow makes. */
+  const guestKey = guestLessonKey(lesson.study.id, lesson.lesson.day);
+
+  /**
+   * One writer for every lesson-state change the flow makes.
+   *
+   * For a guest it writes the browser instead of the API and resolves to an
+   * empty object rather than `null`, so callers that read "did it save?" (the
+   * reflection's autosave) see a success - it did save, locally - and callers
+   * that read `data.completion` see nothing and fall back to the payload.
+   */
   const patch = useCallback(
     async (body: Record<string, unknown>) => {
+      if (guest) {
+        writeGuestLesson(guestKey, body);
+        return {} as Record<string, unknown>;
+      }
       const res = await fetch('/api/v1/study-lesson-state', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -238,8 +326,33 @@ export default function StudyFlowShell({
       if (!res.ok) return null;
       return res.json();
     },
-    [lesson.study.id, lesson.lesson.day],
+    [guest, guestKey, lesson.study.id, lesson.lesson.day],
   );
+
+  // A guest's resume point. The server rendered this lesson from nothing, so
+  // whatever the browser remembers is applied here, once, on mount. Declared
+  // BEFORE the URL-sync effect below on purpose: effects run in order, and this
+  // one has to see the URL as the reader arrived with it - a `?stap=` there
+  // wins, the way it does for a signed-in reader; only its absence means
+  // "resume where I left off".
+  useEffect(() => {
+    if (!guest) return;
+    const saved = readGuestLesson(guestKey);
+    if (!saved) return;
+    if (saved.stepsCompleted?.length) setCompleted(saved.stepsCompleted);
+    if (typeof saved.reflectionText === 'string') setReflectionText(saved.reflectionText);
+    if (saved.viewTranslation) setVersion(saved.viewTranslation);
+    if (saved.depthPanel) setDepthPanel(saved.depthPanel);
+    const fromUrl = new URL(window.location.href).searchParams.get('stap');
+    if (
+      !fromUrl &&
+      saved.currentStep &&
+      isStepKey(saved.currentStep) &&
+      steps.includes(saved.currentStep)
+    ) {
+      setStep(saved.currentStep);
+    }
+  }, [guest, guestKey, steps]);
 
   // Keep the URL in step with the flow, so a refresh or a shared link lands in
   // the same place. replace, not push: the browser Back button should leave the
@@ -258,18 +371,27 @@ export default function StudyFlowShell({
   // cursor on lesson 3, and /studie sent the reader back there.
   //
   // Keyed on the lesson, so it fires once per lesson rather than once per step.
+  //
+  // Not for a guest: their cursor is whatever the browser remembered, and
+  // writing `initialStep` here would overwrite it before the resume effect
+  // above could read it.
   const cursorWrittenRef = useRef<string | null>(null);
   useEffect(() => {
+    if (guest) return;
     const key = `${lesson.study.id}:${lesson.lesson.day}`;
     if (cursorWrittenRef.current === key) return;
     cursorWrittenRef.current = key;
     void patch({ currentStep: initialStep });
-  }, [patch, lesson.study.id, lesson.lesson.day, initialStep]);
+  }, [guest, patch, lesson.study.id, lesson.lesson.day, initialStep]);
 
   // The dashboard's weekly strip is backed by ReadingSession documents. The old
   // /lezen page logs these through useBibleData, but the new guided /studie flow
   // bypasses that hook; without this, studying a lesson shows as "Geen activiteit".
+  //
+  // Both writes are account-bound and would 401 for a guest, so they are not
+  // sent at all - there is no dashboard for them to show up on.
   useEffect(() => {
+    if (guest) return;
     const key = `${lesson.study.id}:${lesson.lesson.day}:${lesson.passage.book}:${lesson.passage.chapter}`;
     if (loggedActivityKeyRef.current === key) return;
     loggedActivityKeyRef.current = key;
@@ -291,7 +413,7 @@ export default function StudyFlowShell({
         awardXp: false,
       }),
     }).catch(() => {});
-  }, [lesson]);
+  }, [guest, lesson]);
 
   // Full screen is offered rather than imposed: the whole point of the flow is
   // one lesson and nothing else on the glass, and the browser will only grant it
@@ -433,10 +555,15 @@ export default function StudyFlowShell({
     // exclusively in the guided flow kept a streak of zero while the badge rules
     // in lib/gamification handed out streak30/60/90 off that same zero.
     // Fire-and-forget: a lesson must never fail to complete because of a badge.
-    void fetch('/api/streak', { method: 'POST' }).catch(() => {});
+    // A guest has no streak to advance and no session to advance it with.
+    if (!guest) void fetch('/api/streak', { method: 'POST' }).catch(() => {});
     setFinishing(false);
     if (soundOnRef.current && !reduceMotion) playComplete();
 
+    // For a guest `data` is the empty object the local writer returns, so every
+    // field below falls through to its default: no XP, no badges, and the next
+    // lesson from the payload. That is exactly the summary the save-gate card
+    // needs.
     const completion = data?.completion;
     applyXp(completion?.xp ?? null);
     setSummary({
@@ -447,7 +574,7 @@ export default function StudyFlowShell({
       noteId: completion?.noteId ?? null,
       nextLessonDay: completion?.nextLessonDay ?? lesson.nextLessonDay,
     });
-  }, [steps, step, patch, lesson.nextLessonDay, swipeSound, reduceMotion, applyXp]);
+  }, [steps, step, patch, guest, lesson.nextLessonDay, swipeSound, reduceMotion, applyXp]);
 
   const onPrevious = useCallback(() => {
     const previous = goBack(steps, step);
@@ -561,6 +688,7 @@ export default function StudyFlowShell({
           <StepQuiz
             studyId={lesson.study.id}
             lessonDay={lesson.lesson.day}
+            guest={guest}
             previousScore={quizScore}
             previousTotal={quizTotal}
             onAnswered={(score, total) => {
@@ -579,6 +707,7 @@ export default function StudyFlowShell({
     step,
     steps,
     lesson,
+    guest,
     version,
     changeVersion,
     depthPanel,
@@ -630,6 +759,8 @@ export default function StudyFlowShell({
         summary={summary}
         quizScore={quizScore}
         quizTotal={quizTotal}
+        guest={guest}
+        lessonHref={`/studie/${lesson.study.id}/${lesson.lesson.day}`}
         nextLesson={
           next ? { day: next.day, title: next.title, reference: next.reference } : null
         }

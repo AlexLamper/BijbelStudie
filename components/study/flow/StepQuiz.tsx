@@ -93,9 +93,16 @@ export default function StepQuiz({
   eyebrow,
   passageReference,
   reflectionQuestion,
+  guest = false,
 }: {
   studyId: string;
   lessonDay: number;
+  /**
+   * No session. The quiz is generated, stored and graded per reader on the
+   * server, so a guest gets an explanation instead of a 401, and the step is
+   * still a complete step they can finish the lesson from.
+   */
+  guest?: boolean;
   previousScore: number | null;
   previousTotal: number | null;
   onAnswered: (score: number, total: number) => void;
@@ -165,6 +172,15 @@ export default function StepQuiz({
   useEffect(() => {
     let cancelled = false;
 
+    // Nothing to fetch for a guest: the endpoint is account-bound and the
+    // answer would be a 401. The empty list plus the reason renders the calm
+    // "no quiz" ending below, worded for a guest.
+    if (guest) {
+      setQuestions([]);
+      setUnavailable('GUEST');
+      return;
+    }
+
     (async () => {
       try {
         const res = await fetch(
@@ -211,7 +227,7 @@ export default function StepQuiz({
     return () => {
       cancelled = true;
     };
-  }, [studyId, lessonDay]);
+  }, [studyId, lessonDay, guest]);
 
   const submit = useCallback(
     async (answers: Record<string, string>) => {
@@ -354,12 +370,16 @@ export default function StepQuiz({
       // decoration, and the heading already says what this is.
       <LessonLayout
         eyebrow={eyebrow ?? 'Toetsing'}
-        heading="Geen quiz voor dit gedeelte"
+        heading={
+          unavailable === 'GUEST' ? 'De toets hoort bij een account' : 'Geen quiz voor dit gedeelte'
+        }
         aside={aside}
         lead={
-          unavailable === 'UNAVAILABLE'
-            ? 'De quizvragen zijn nu even niet op te halen. Je kunt de les gewoon afronden.'
-            : 'Voor dit bijbelgedeelte zijn nog geen vragen beschikbaar. Rond de les af om verder te gaan.'
+          unavailable === 'GUEST'
+            ? 'De vragen worden per lezer bewaard en nagekeken, en dat vraagt een account. Je kunt de les gewoon afronden; aan het einde kun je je voortgang bewaren.'
+            : unavailable === 'UNAVAILABLE'
+              ? 'De quizvragen zijn nu even niet op te halen. Je kunt de les gewoon afronden.'
+              : 'Voor dit bijbelgedeelte zijn nog geen vragen beschikbaar. Rond de les af om verder te gaan.'
         }
       />
     );

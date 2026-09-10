@@ -265,6 +265,8 @@ export default function LessonCompleteCard({
   quizTotal,
   nextLesson,
   onContinue,
+  guest = false,
+  lessonHref,
 }: {
   studyId: string;
   studyTitle: string;
@@ -279,8 +281,198 @@ export default function LessonCompleteCard({
   quizTotal: number | null;
   nextLesson: NextLessonPreview | null;
   onContinue: () => void;
+  /**
+   * No session. Nothing was awarded and nothing was written, so the reward
+   * figures would all read zero; the card shows the save gate instead - the
+   * one moment a guest is asked for an account.
+   */
+  guest?: boolean;
+  /** This lesson's URL, carried as `next` so signing in lands back here. */
+  lessonHref?: string;
 }) {
   const reduceMotion = useReducedMotion();
+
+  if (guest) {
+    return (
+      <GuestSaveGate
+        studyId={studyId}
+        studyTitle={studyTitle}
+        lessonTitle={lessonTitle}
+        lessonDay={lessonDay}
+        lessonsTotal={lessonsTotal}
+        passageReference={passageReference}
+        nextLessonDay={summary.nextLessonDay}
+        lessonHref={lessonHref ?? `/studie/${studyId}/${lessonDay}`}
+        onContinue={onContinue}
+        animate={!reduceMotion}
+      />
+    );
+  }
+
+  return (
+    <SignedInCompletion
+      studyId={studyId}
+      studyTitle={studyTitle}
+      lessonTitle={lessonTitle}
+      lessonDay={lessonDay}
+      lessonsTotal={lessonsTotal}
+      lessonsCompleted={lessonsCompleted}
+      passageReference={passageReference}
+      minutes={minutes}
+      summary={summary}
+      quizScore={quizScore}
+      quizTotal={quizTotal}
+      nextLesson={nextLesson}
+      onContinue={onContinue}
+      reduceMotion={!!reduceMotion}
+    />
+  );
+}
+
+/**
+ * The end of a lesson for a GUEST: what they just did, and the one ask.
+ *
+ * This is the point the owner named - "only at the end, when they've completed
+ * a lesson and want to save progress, that's where they are obligated to log
+ * in". So there is no XP figure (none was awarded), no badge, no note link; the
+ * ring shows the lesson as done, and the card says plainly what an account
+ * would have kept. Registreren is primary: a guest who got this far has a
+ * lesson to save, not a password to remember. Both links carry the lesson as
+ * `next` (the parameter app/inloggen and app/registreren read).
+ *
+ * Continuing without an account stays possible, quietly - the gate is on
+ * saving, not on reading.
+ */
+function GuestSaveGate({
+  studyId,
+  studyTitle,
+  lessonTitle,
+  lessonDay,
+  lessonsTotal,
+  passageReference,
+  nextLessonDay,
+  lessonHref,
+  onContinue,
+  animate,
+}: {
+  studyId: string;
+  studyTitle: string;
+  lessonTitle: string;
+  lessonDay: number;
+  lessonsTotal: number;
+  passageReference: string;
+  nextLessonDay: number | null;
+  lessonHref: string;
+  onContinue: () => void;
+  animate: boolean;
+}) {
+  const next = encodeURIComponent(lessonHref);
+  // The one lesson just finished, as a share of the study: the ring has to
+  // show something happened, and one out of N is the honest figure.
+  const pct = lessonsTotal > 0 ? Math.round((1 / lessonsTotal) * 100) : 0;
+
+  return (
+    <div className="h-full overflow-y-auto flex flex-col justify-center">
+      <div className="mx-auto w-full max-w-xl px-5 sm:px-8 py-6">
+        <header className="text-center">
+          <ProgressRing pct={pct} done={1} total={lessonsTotal} accent={TEAL} ink={TEAL_ON_DARK} animate={animate} />
+          <p
+            className="mt-4 text-[11px] font-bold uppercase tracking-[0.14em]"
+            style={{ color: TEAL_ON_DARK }}
+          >
+            Les {lessonDay} van {lessonsTotal} afgerond
+          </p>
+          <h1 className={`mt-1 text-xl sm:text-2xl font-bold leading-tight text-balance ${INK}`}>
+            {lessonTitle}
+          </h1>
+          <p className={`mt-1.5 text-[13px] ${INK_MUTED}`}>
+            {studyTitle} · {passageReference}
+          </p>
+        </header>
+
+        <section
+          aria-labelledby="bewaar-titel"
+          className={`${SURFACE} mt-6 px-5 py-5 sm:px-6`}
+        >
+          <h2 id="bewaar-titel" className={`text-[15px] font-bold ${INK}`}>
+            Bewaar je voortgang
+          </h2>
+          <p className={`mt-1.5 text-[13.5px] leading-relaxed ${INK_MUTED}`}>
+            Je hebt deze les zonder account gedaan, dus er is nog niets bewaard. Met een gratis
+            account tellen je lessen mee, blijft je reflectie staan en groeit je boom vanaf hier.
+          </p>
+          <div className="mt-4 flex flex-col sm:flex-row gap-2">
+            <Link
+              href={`/registreren?next=${next}`}
+              data-track="guest_save_register"
+              className={`press flex-1 inline-flex items-center justify-center gap-2 h-11 rounded-xl text-sm font-semibold text-white no-underline transition-opacity hover:opacity-90 ${FOCUS_RING}`}
+              style={{ backgroundColor: TEAL_DEEP }}
+            >
+              Gratis account maken <ArrowRight size={15} />
+            </Link>
+            <Link
+              href={`/inloggen?next=${next}`}
+              data-track="guest_save_signin"
+              className={`press inline-flex items-center justify-center px-4 h-11 rounded-xl text-sm font-medium border border-white/20 bg-white/10 ${INK} no-underline hover:bg-white/20 ${FOCUS_RING}`}
+            >
+              Inloggen
+            </Link>
+          </div>
+        </section>
+
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+          {nextLessonDay != null && (
+            <button
+              type="button"
+              onClick={onContinue}
+              className={`inline-flex items-center gap-1.5 rounded-md text-[13px] font-medium ${INK_MUTED} hover:text-white transition-colors ${FOCUS_RING}`}
+            >
+              Verder met les {nextLessonDay} zonder account <ArrowRight size={13} />
+            </button>
+          )}
+          <Link
+            href={`/studies/${studyId}`}
+            className={`inline-flex items-center rounded-md text-[13px] font-medium ${INK_MUTED} no-underline hover:text-white transition-colors ${FOCUS_RING}`}
+          >
+            Overzicht
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SignedInCompletion({
+  studyId,
+  studyTitle,
+  lessonTitle,
+  lessonDay,
+  lessonsTotal,
+  lessonsCompleted,
+  passageReference,
+  minutes,
+  summary,
+  quizScore,
+  quizTotal,
+  nextLesson,
+  onContinue,
+  reduceMotion,
+}: {
+  studyId: string;
+  studyTitle: string;
+  lessonTitle: string;
+  lessonDay: number;
+  lessonsTotal: number;
+  lessonsCompleted: number;
+  passageReference: string;
+  minutes: number;
+  summary: CompletionSummary;
+  quizScore: number | null;
+  quizTotal: number | null;
+  nextLesson: NextLessonPreview | null;
+  onContinue: () => void;
+  reduceMotion: boolean;
+}) {
   const finished = summary.studyCompleted;
   // One accent, in its three roles: the ring stroke carries no type, the solid
   // button carries white type, and the eyebrow IS type.
