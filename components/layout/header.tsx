@@ -11,7 +11,45 @@ import { ModeToggle } from "../dark-mode-toggle"
 import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar"
 import { SubscriptionBadge } from "../subscription-badge"
 import Link from "next/link"
+import Image from "next/image"
 import NavTreeAvatar from "../levensboom/NavTreeAvatar"
+
+/**
+ * The same green "Studie" wears everywhere else in the wordmark (the sidebar's
+ * LOGO_GREEN, the landing navbar, the auth pages): #0F766E, the deep end of the
+ * brand swatch, so it holds up on a light bar and on the scene's dark one.
+ */
+const LOGO_GREEN = "#0F766E"
+
+/**
+ * The wordmark, on the right of the bar.
+ *
+ * The owner asked for the logo there in place of "displaying the pages": the
+ * right-hand cluster names the product, the left keeps the page title (so an
+ * unconverted page still has its h1). One component for both the signed-in and
+ * the guest bar, so the two can never drift apart.
+ */
+function Wordmark() {
+  return (
+    <Link
+      href="/dashboard"
+      aria-label="BijbelStudie"
+      className="flex items-center gap-2 no-underline"
+    >
+      <Image
+        src="/images/icon-192.png"
+        alt=""
+        width={24}
+        height={24}
+        className="rounded-md flex-shrink-0"
+        priority
+      />
+      <span className="text-[15px] font-bold tracking-tight text-foreground whitespace-nowrap">
+        Bijbel<span style={{ color: LOGO_GREEN }}>Studie</span>
+      </span>
+    </Link>
+  )
+}
 
 const PAGE_TITLES: Record<string, string> = {
   dashboard: "Dashboard",
@@ -154,10 +192,11 @@ export function Header({ title, variant = "default" }: HeaderProps) {
             <h1 className="text-base font-semibold text-foreground">{getPageTitle()}</h1>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          <Wordmark />
           {!scene && <ModeToggle />}
           <Link
-            href="/inloggen"
+            href={`/inloggen?next=${encodeURIComponent(pathname || "/")}`}
             className="inline-flex h-9 items-center rounded-md px-3 text-sm font-medium text-white no-underline transition-colors hover:opacity-90"
             style={{ backgroundColor: "#0D9488" }}
           >
@@ -199,8 +238,10 @@ export function Header({ title, variant = "default" }: HeaderProps) {
         )}
       </div>
 
-      {/* Right: Desktop controls */}
+      {/* Right: the wordmark, then the desktop controls */}
       <div className="hidden md:flex items-center gap-2">
+        <Wordmark />
+        <div className="w-px h-5 bg-border mx-1" />
         {/* A scene screen paints its own light: the page is the same night
             landscape in either theme, so a light/dark switch on it changes
             almost nothing the reader can see. */}
@@ -304,8 +345,9 @@ export function Header({ title, variant = "default" }: HeaderProps) {
         </div>
       </div>
 
-      {/* Mobile: the tree first, then the menu. */}
+      {/* Mobile: the wordmark, the tree, then the menu. */}
       <div className="md:hidden relative flex items-center gap-1" ref={menuRef}>
+        <Wordmark />
         <Link href="/profiel/boom" aria-label="Mijn voortgang" className="inline-flex items-center p-1">
           <NavTreeAvatar size={26} fallback={null} />
         </Link>

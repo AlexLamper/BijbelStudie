@@ -359,8 +359,13 @@ function Hero() {
               as an ad; a solid button with a soft teal cast under it carries the
               same emphasis without the noise. */}
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+            {/* Into the app, not the sign-up form. A visitor may start a study
+                without an account (guest mode), and is asked to sign up at the
+                end of a lesson when there is progress to save - so the primary
+                action opens the studies. The navbar's "Gratis beginnen" and the
+                closing CTA keep the account route for whoever wants it first. */}
             <Link
-              href="/inloggen"
+              href="/studies"
               data-track="hero_cta_signup"
               className="press group h-14 w-full sm:w-auto inline-flex items-center justify-center gap-2 font-semibold text-white px-7 rounded-xl bg-teal-700 hover:bg-teal-800 transition-colors"
               style={{
@@ -393,17 +398,16 @@ function Hero() {
             </a>
           </div>
 
-          {/* Guest mode (Phase 1): the app works without an account, so the
-              way in has to say so - not just imply it via a button that
-              actually leads to /inloggen. This is the only path into the app
-              that skips sign-up entirely. */}
+          {/* Guest mode: the app works without an account, so the way in has
+              to say so in words. The studies are the product's front door -
+              /lezen is one rail item away once inside. */}
           <Link
-            href="/lezen"
+            href="/studies"
             data-track="hero_cta_guest"
             className="mt-4 inline-block text-sm font-medium underline decoration-dotted underline-offset-4 transition-colors hover:no-underline"
             style={{ color: T.muted }}
           >
-            Of probeer direct de Bijbel lezen - zonder account
+            Of bekijk direct de studies - zonder account
           </Link>
 
           {/* Four counted facts under a rule. The two catalogue figures count
