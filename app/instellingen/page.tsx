@@ -11,7 +11,7 @@ import SubscriptionSection from "../../components/settings/SubscriptionSection"
 import LevensboomSection from "../../components/settings/LevensboomSection"
 import SceneShell from "../../components/scene/SceneShell"
 import { Panel } from "../../components/scene/pieces"
-import { PLATE, TEAL } from "../../components/scene/tokens"
+import { SKEL, TEAL_ON_DARK } from "../../components/scene/tokens"
 
 interface OptionItem { id: string; name: string; language?: string }
 
@@ -120,8 +120,8 @@ const FOOTNOTE = "mt-5 border-t border-white/10 pt-4 text-xs leading-relaxed tex
  * The column is grouped, and the groups are the reading order:
  *
  *   1. Lezen    - what opens by default, how the text looks, how it sounds,
- *                 closed by the light Voorbeeld plate that shows the result of
- *                 all three
+ *                 closed by the Voorbeeld panel that shows the result of all
+ *                 three
  *   2. De app   - the theme and the daily reminder
  *   3. Account  - Voortgang (je boom, the public profile) and Abonnement
  *
@@ -446,39 +446,45 @@ export default function SettingsPage() {
           </SectionCard>
 
           {/* Voorbeeld.
-              The one light surface on the page, closing the group whose three
-              panels it is the result of: the translation and the commentary from
-              the first, the typography from the second. It is drawn for a white
-              reading page, which is exactly what PLATE is for, and it now sits
-              directly under the controls it previews at every width instead of
-              at the foot of the page. Every colour inside is a literal, because
-              a theme token here would flip to white-on-white. */}
-          <section aria-labelledby="instellingen-voorbeeld" className={`overflow-hidden ${PLATE}`}>
-            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-black/10 px-5 py-4 sm:px-6">
-              <h3 id="instellingen-voorbeeld" className="text-sm font-bold text-gray-900">Voorbeeld</h3>
-              <p className="text-xs text-gray-500">Zo ziet de bijbeltekst er nu voor je uit</p>
-            </div>
+              Closes the group whose three panels it is the result of: the
+              translation and the commentary from the first, the typography from
+              the second.
 
-            <div className="grid gap-6 p-5 sm:p-6 md:grid-cols-[minmax(0,1fr)_13rem]">
+              It used to be the one light PLATE on the page - the last surface
+              still drawn for a white reading page, which is why it read as a
+              leftover next to its siblings. It is a `SectionCard` now, the same
+              component the other panels on this page use, so the surface, the
+              radius, the ring, the padding, the heading scale and the rule
+              under it are not restated here at all. The reading room it
+              previews is dark too (SCENE_BG - see components/scene/tokens.ts),
+              so the plate was also no longer showing the reader what they would
+              actually see. Every colour inside is still a literal white, never
+              a theme token: this panel is dark in both themes. */}
+          <SectionCard
+            id="instellingen-voorbeeld"
+            title="Voorbeeld"
+            subtitle="Zo ziet de bijbeltekst er nu voor je uit"
+          >
+            <div className="grid gap-6 pt-5 md:grid-cols-[minmax(0,1fr)_13rem]">
               <div className="min-w-0">
                 <div className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-white/60">
                     Johannes 3:16
                   </p>
-                  <p className="truncate text-[10px] text-gray-400">
+                  <p className="truncate text-[10px] text-white/50">
                     {activeVersion?.name}
                   </p>
                 </div>
                 {previewLoading ? (
                   <div className="space-y-1.5" role="status" aria-label="Voorbeeld laden">
-                    <div className="skeleton-pulse h-3.5 w-full rounded bg-black/10" />
-                    <div className="skeleton-pulse h-3.5 w-5/6 rounded bg-black/10" />
-                    <div className="skeleton-pulse h-3.5 w-4/5 rounded bg-black/10" />
+                    <div className={`skeleton-pulse h-3.5 w-full rounded ${SKEL}`} />
+                    <div className={`skeleton-pulse h-3.5 w-5/6 rounded ${SKEL}`} />
+                    <div className={`skeleton-pulse h-3.5 w-4/5 rounded ${SKEL}`} />
                   </div>
                 ) : (
                   <p
                     className={[
-                      "max-w-[38rem] text-gray-900 transition-all",
+                      "max-w-[38rem] text-white transition-all",
                       preferences.fontFamily === "serif" ? "font-serif" :
                         preferences.fontFamily === "mono" ? "font-mono" : "font-sans",
                       preferences.fontSize === "sm" ? "text-sm" :
@@ -491,7 +497,7 @@ export default function SettingsPage() {
                     ].join(" ")}
                   >
                     {preferences.showVerseNumbers && (
-                      <sup className="mr-1 font-semibold" style={{ color: TEAL }}>16</sup>
+                      <sup className="mr-1 font-semibold" style={{ color: TEAL_ON_DARK }}>16</sup>
                     )}
                     {previewVerse}
                   </p>
@@ -499,20 +505,20 @@ export default function SettingsPage() {
               </div>
 
               {!settingsLoading && (
-                <div className="border-t border-black/10 pt-4 md:border-l md:border-t-0 md:pl-6 md:pt-0">
-                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-500">
+                <div className="border-t border-white/10 pt-4 md:border-l md:border-l-white/10 md:border-t-0 md:pl-6 md:pt-0">
+                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-white/60">
                     Actieve standaard
                   </p>
                   <dl className="space-y-2.5 text-xs">
                     <div className="min-w-0">
-                      <dt className="text-gray-500">Vertaling</dt>
-                      <dd className="mt-0.5 truncate font-medium text-gray-900">
+                      <dt className="text-white/60">Vertaling</dt>
+                      <dd className="mt-0.5 truncate font-medium text-white">
                         {activeVersion?.name || settings.translation}
                       </dd>
                     </div>
                     <div className="min-w-0">
-                      <dt className="text-gray-500">Commentaar</dt>
-                      <dd className="mt-0.5 truncate font-medium text-gray-900">
+                      <dt className="text-white/60">Commentaar</dt>
+                      <dd className="mt-0.5 truncate font-medium text-white">
                         {activeCommentary?.name || settings.commentary}
                       </dd>
                     </div>
@@ -520,7 +526,7 @@ export default function SettingsPage() {
                 </div>
               )}
             </div>
-          </section>
+          </SectionCard>
         </Group>
 
         {/* ═══ Group 2: De app ══════════════════════════════════════ */}

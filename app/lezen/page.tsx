@@ -488,11 +488,17 @@ function StudyPageInner() {
          * inset comes out of the page rather than out of the passage: the
          * scripture keeps the measure it would have if the two panes were an
          * even half each.
+         *
+         * RAIL_GUTTER is one number again - 80px at every breakpoint, since the
+         * rail stopped widening on hover and no longer needs a gutter sized to
+         * an open state it never reaches. So the lean is one number too: half of
+         * 80px, 2.5rem, with no `xl` step. If RAIL_GUTTER ever moves again, this
+         * pair of calcs moves with it or the divider drifts off centre.
          */}
         <div
           data-tour="bible-text"
           className={[
-            `h-full w-full lg:w-[calc(50%_+_3rem)] lg:flex-none min-h-0 min-w-0 overflow-hidden lg:border-r lg:border-white/10 ${RAIL_GUTTER}`,
+            `h-full w-full lg:w-[calc(50%_+_2.5rem)] lg:flex-none min-h-0 min-w-0 overflow-hidden lg:border-r lg:border-white/10 ${RAIL_GUTTER}`,
             mobileView === 'bible' ? 'block' : 'hidden',
             'lg:block',
           ].join(' ')}
@@ -524,7 +530,7 @@ function StudyPageInner() {
         <div
           data-tour="commentary"
           className={[
-            'h-full w-full lg:w-[calc(50%_-_3rem)] lg:flex-none min-h-0 min-w-0 overflow-hidden',
+            'h-full w-full lg:w-[calc(50%_-_2.5rem)] lg:flex-none min-h-0 min-w-0 overflow-hidden',
             mobileView === 'materials' ? 'block' : 'hidden',
             'lg:block',
           ].join(' ')}

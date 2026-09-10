@@ -94,13 +94,17 @@ export default async function StudiesPage() {
         <p className={EYEBROW} style={{ color: TEAL_ON_DARK }}>
           Bijbelstudies
         </p>
+        {/* One step down from the /studies/[id] display sizes on purpose. This
+            heading sits above a catalogue, not above a single thing to decide
+            on, and every line it costs is a line of studies pushed under the
+            fold - the whole first screen has to fit a 1280x720 laptop. */}
         <h1
           id="studies-titel"
-          className="mt-3 text-4xl font-semibold leading-[1.05] tracking-tight text-white drop-shadow-sm sm:text-5xl xl:text-6xl"
+          className="mt-2 text-3xl font-semibold leading-[1.08] tracking-tight text-white drop-shadow-sm sm:text-4xl xl:text-5xl"
         >
           Wat is je volgende studie?
         </h1>
-        <p className="mt-4 max-w-[34rem] text-base leading-relaxed text-white/85 sm:text-lg">
+        <p className="mt-2.5 max-w-[40rem] text-[15px] leading-relaxed text-white/85 sm:text-base">
           Elk bijbelboek, en daarnaast studies over personen, thema&rsquo;s en losse gedeelten.
           Kies er een en lees stap voor stap door de Schrift.
         </p>

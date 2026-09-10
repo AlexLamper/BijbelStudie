@@ -2,13 +2,15 @@
 
 import { useState, Suspense } from "react"
 import Link from "next/link"
-import Image from "next/image"
 import { useRouter, useSearchParams } from "next/navigation"
 import { signIn } from "next-auth/react"
 import { Loader2, Eye, EyeOff, ArrowLeft } from "lucide-react"
 import { safeRedirect } from "../../lib/safeRedirect"
 import AuthTreeBackdrop from "../../components/auth/AuthTreeBackdrop"
 import { EYEBROW, SCENE_BG, TEAL_ON_DARK } from "../../components/scene/tokens"
+// The identical mark + halo treatment as /inloggen, imported rather than
+// duplicated so the two pages can never drift apart.
+import { BrandMark } from "../inloggen/BrandMark"
 
 /**
  * Every colour on this page is a literal - see app/inloggen/page.tsx. The page
@@ -147,7 +149,7 @@ function RegisterPageInner() {
         <div className="mx-auto w-full max-w-sm space-y-7">
           {/* Logo */}
           <div className="flex items-center gap-2.5">
-            <Image src="/images/icon-192.png" alt="BijbelStudie" width={28} height={28} className="rounded-md" priority />
+            <BrandMark />
             <span className="text-lg font-bold text-white">BijbelStudie</span>
           </div>
 

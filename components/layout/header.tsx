@@ -11,7 +11,18 @@ import { ModeToggle } from "../dark-mode-toggle"
 import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar"
 import { SubscriptionBadge } from "../subscription-badge"
 import Link from "next/link"
+import Image from "next/image"
 import NavTreeAvatar from "../levensboom/NavTreeAvatar"
+
+/**
+ * The halo behind the brand mark, copied verbatim from
+ * `app/inloggen/BrandMark.tsx`, which is the source of truth for it. Copied
+ * rather than imported because that file is colocated in a route folder and
+ * this is shared chrome; the string must stay byte-identical across the four
+ * surfaces that draw the mark on a dark ground, or they stop matching.
+ */
+const MARK_GLOW =
+  "radial-gradient(circle at 50% 50%, rgba(255,255,255,0.26) 0%, rgba(255,255,255,0.13) 42%, rgba(255,255,255,0.04) 66%, rgba(255,255,255,0) 78%)"
 
 const PAGE_TITLES: Record<string, string> = {
   dashboard: "Dashboard",
@@ -149,21 +160,64 @@ export function Header({ title, variant = "default" }: HeaderProps) {
           : "flex items-center justify-between px-4 sm:px-6 h-14 border-b border-border bg-white dark:bg-background sticky top-0 z-50"
       }
     >
-      {/* Left: Sidebar trigger + page title */}
+      {/* Left: sidebar trigger + page title, or - on a scene - the wordmark */}
       <div className="flex items-center gap-3">
         {/* The trigger opens the sidebar column, and a scene screen has no
-            column to open - its rail floats and answers to hover and focus. A
-            button that visibly does nothing is worse than no button. */}
+            column to open - its rail floats and names one icon at a time on
+            hover. A button that visibly does nothing is worse than no button. */}
         {!scene && <SidebarTrigger className="text-muted-foreground hover:text-foreground" />}
         {/*
-          On an unconverted page this bar is the only thing naming the page, so
-          it stays the h1. On a scene page the page itself opens with a real
-          heading - the greeting, the study's title, "Instellingen" - and two
-          h1s in one document is one too many. Same size and weight either way;
-          only the element changes.
+          A scene screen has no sidebar, and the sidebar is where the product
+          says its own name on every other page. That left the immersive pages
+          the only ones in the app with no mark on them at all - and what stood
+          in that corner instead was the page's name, which the page already
+          says for itself an inch lower in a real heading. So the mark takes the
+          corner and the duplicate name goes.
+
+          It is the real full-colour mark, not an inverted one. The mark is a
+          #262626 tile, and this bar is transparent over a night landscape, so
+          on its own the tile sinks into the picture and only the cross appears
+          to float. A soft halo behind it does that job instead - the same
+          MARK_GLOW the footer and the auth pages use, so all four surfaces
+          carry one treatment.
+
+          The lockup SVG is not used: its lettering is a single #262626 path
+          that no halo scaled to the mark can rescue. So the lockup is split -
+          the icon as artwork, the wordmark as white text - which is also what
+          the landing Navbar and the footer do. 26px tall, and the pair leaves
+          the tree and the menu their room at 375px.
+
+          On an unconverted page nothing moves: the sidebar is right there
+          carrying the same wordmark at the same height, a second one beside it
+          would just read as a rendering fault, and this bar is still the only
+          thing naming the page - so it keeps the name, and keeps it as the h1.
         */}
         {scene ? (
-          <p className="text-base font-semibold text-foreground">{getPageTitle()}</p>
+          <Link href="/dashboard" className="inline-flex items-center gap-2 no-underline" aria-label="BijbelStudie, naar dashboard">
+            <span className="relative inline-flex shrink-0">
+              {/* Behind the mark, never over it: the halo is first in source
+                  order and the image is given `relative` so it stacks above
+                  without a z-index. Absolute, so it overflows the 26px box by
+                  7px on every side without moving anything in the bar. */}
+              <span
+                aria-hidden
+                className="pointer-events-none absolute -inset-[7px] rounded-full"
+                style={{ background: MARK_GLOW }}
+              />
+              {/* No `rounded-*`: the tile carries its own corner radius and the
+                  corners outside it are transparent, so the halo reads through
+                  them. */}
+              <Image
+                src="/images/logo.svg"
+                alt="BijbelStudie"
+                width={26}
+                height={26}
+                className="relative h-[26px] w-[26px]"
+                priority
+              />
+            </span>
+            <span className="text-base font-bold tracking-tight text-white">BijbelStudie</span>
+          </Link>
         ) : (
           <h1 className="text-base font-semibold text-foreground">{getPageTitle()}</h1>
         )}

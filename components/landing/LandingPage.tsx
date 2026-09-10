@@ -14,7 +14,6 @@ import HeroLevensboom from "./HeroLevensboom"
 import LevensboomGroeiDemo from "./LevensboomGroeiDemo"
 import StudyFlowDemo, { type DemoLesson } from "./StudyFlowDemo"
 import CountUp from "./CountUp"
-import { ProBadge } from "../ui/ProBadge"
 import { renderTreeSvg } from "../../lib/levensboom/svg"
 import { STAGES } from "../../lib/levensboom/stages"
 import { CATALOG } from "../../lib/levensboom/catalog"
@@ -140,24 +139,6 @@ function SectionHeader({
         </p>
       )}
     </FadeUp>
-  )
-}
-
-/** The label above a group of ledger rows: eyebrow, rule, count. Not a reveal
- *  of its own - the caller wraps the whole group, so the label and its rows
- *  arrive as one movement. */
-function GroupLabel({ label, meta }: { label: string; meta: string }) {
-  return (
-    <div className="mb-5 flex items-baseline gap-3">
-      <p
-        className="text-[0.6875rem] font-bold uppercase"
-        style={{ color: T.tealText, letterSpacing: "0.16em" }}
-      >
-        {label}
-      </p>
-      <div className="h-px flex-1" style={{ backgroundColor: T.border }} />
-      <p className="text-xs font-semibold tabular-nums" style={{ color: T.muted }}>{meta}</p>
-    </div>
   )
 }
 
@@ -495,34 +476,27 @@ function Hero() {
 }
 
 /* ─── Bibles & Commentaries ──────────────────────────────────── */
-/** The access pill on a library row. Two states only: free, or part of Pro. */
-function AccessPill({ free }: { free: boolean }) {
-  if (!free) return <ProBadge />
-
-  return (
-    <span
-      className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full whitespace-nowrap"
-      style={{ backgroundColor: T.tealLight, color: T.tealDeep }}
-    >
-      Gratis
-    </span>
-  )
-}
-
 /**
  * What is actually in the library, checked against what the app serves:
  * `hooks/useBibleData.ts` for the translations and `lib/mobileAttribution.ts`
- * for the commentaries. `short` is the tab label in the mock reader below -
- * the reader's own names, cut to fit one row on a phone.
+ * for the commentaries.
+ *
+ * Nothing in here may be quoted on this page. Only the Statenvertaling is
+ * public domain; the NBG 1951 is licensed and the HSV and BasisBijbel never
+ * ship at all, so every source is named and nothing more. The commentaries are
+ * named for the same reason - KingComments may not be redistributed.
  */
 const TRANSLATIONS = [
-  { name: "Statenvertaling",    short: "Statenvertaling", year: "1637", note: "De klassieke Nederlandse vertaling",                      tag: "Standaard" },
-  { name: "NBG-vertaling",      short: "NBG 1951",        year: "1951", note: "Decennialang de kanselbijbel van de protestantse kerken", tag: "Onder licentie" },
-  { name: "De Heilige Schrift", short: "1917",            year: "1917", note: "De eerste NBG-vertaling, in de taal van haar tijd",       tag: null },
-  { name: "Canisiusbijbel",     short: "Canisius",        year: "1939", note: "Rooms-katholieke vertaling met deuterocanonieke boeken",  tag: null },
+  { name: "Statenvertaling",    year: "1637", note: "De klassieke Nederlandse vertaling" },
+  { name: "NBG-vertaling",      year: "1951", note: "Decennialang de kanselbijbel van de protestantse kerken" },
+  { name: "De Heilige Schrift", year: "1917", note: "De eerste NBG-vertaling, in de taal van haar tijd" },
+  { name: "Canisiusbijbel",     year: "1939", note: "Rooms-katholieke vertaling met deuterocanonieke boeken" },
 ]
 const ENGLISH_TRANSLATIONS = 5
 
+/** `free` is not rendered per row - four access badges next to eight names was
+ *  more furniture than information - but it is what the group's closing line
+ *  says out loud, so it stays here as the source of that claim. */
 const COMMENTARIES = [
   { name: "KingComments",        author: "Ger de Koning", note: "Eigentijds Nederlandstalig commentaar op de hele Bijbel, vers voor vers",  free: true  },
   { name: "Matthew Henry",       author: "1662-1714",     note: "Het bekendste commentaar op de hele Bijbel, in Nederlandse vertaling",     free: false },
@@ -531,92 +505,57 @@ const COMMENTARIES = [
 ]
 
 /**
- * One verse the way the reader shows it: the translation tabs, the text, the
- * commentaries underneath. Static - nothing here is a control, so the tabs are
- * spans and the active states are fixed.
- *
- * Only the Statenvertaling is quoted, because it is the one translation here
- * that is public domain. The NBG 1951 is licensed and the HSV and BasisBijbel
- * never ship at all, so none of them may ever appear as text on this page; the
- * other tabs carry a name and nothing else. The commentaries are named, not
- * quoted, for the same reason - KingComments may not be redistributed.
+ * One group in the library: an eyebrow, four named sources, one closing line.
+ * Rows are separated by space instead of by a rule - the ledger this replaced
+ * drew a border under all eight of them, which is what turned two short lists
+ * into a wall.
  */
-function ReadingPane() {
+function LibraryGroup({
+  label,
+  items,
+  footnote,
+}: {
+  label: string
+  items: { name: string; meta: string; note: string }[]
+  footnote: string
+}) {
   return (
-    <div
-      className="overflow-hidden rounded-2xl border"
-      style={{ borderColor: T.border, backgroundColor: T.card, boxShadow: SHADOW.card }}
-    >
-      <div className="flex overflow-x-auto border-b px-2" style={{ borderColor: T.border }}>
-        {TRANSLATIONS.map((translation, i) => {
-          const active = i === 0
-          return (
-            <span
-              key={translation.name}
-              className="relative inline-flex h-10 flex-none items-center whitespace-nowrap px-3 text-[12px] font-semibold"
-              style={{ color: active ? T.tealText : T.muted }}
-            >
-              {translation.short}
-              {active && (
-                <span aria-hidden className="absolute inset-x-2 -bottom-px h-[2px] rounded-full" style={{ backgroundColor: T.teal }} />
-              )}
-            </span>
-          )
-        })}
-      </div>
-
-      <div className="px-5 py-5 sm:px-7 sm:py-6">
-        <div className="flex items-baseline justify-between gap-3">
-          <p className="text-[13px] font-bold tracking-tight" style={{ color: T.text }}>Psalm 1:3</p>
-          <p className="text-[11px]" style={{ color: T.muted }}>Statenvertaling · 1637</p>
-        </div>
-        <p className="mt-3 font-serif text-[15.5px] leading-[1.75]" style={{ color: T.text }}>
-          <sup className="mr-1.5 font-sans text-[10px] font-bold" style={{ color: T.teal }}>3</sup>
-          Want hij zal zijn als een boom, geplant aan waterbeken, die zijn vrucht geeft op zijn tijd, en
-          welks blad niet afvalt; en al wat hij doet, zal wel gelukken.
-        </p>
-      </div>
-
-      <div className="border-t px-5 py-4 sm:px-7" style={{ borderColor: T.border, backgroundColor: T.light }}>
-        <p className="text-[0.625rem] font-bold uppercase" style={{ color: T.muted, letterSpacing: "0.14em" }}>
-          Commentaar bij dit vers
-        </p>
-        <div className="mt-2.5 flex flex-wrap gap-1.5">
-          {COMMENTARIES.map((commentary, i) => {
-            const active = i === 0
-            return (
-              <span
-                key={commentary.name}
-                className="rounded-full border px-2.5 py-1 text-[11px] font-semibold"
-                style={
-                  active
-                    ? { borderColor: T.teal, backgroundColor: T.teal, color: "#FFFFFF" }
-                    : { borderColor: T.border, backgroundColor: T.card, color: T.muted }
-                }
-              >
-                {commentary.name}
-              </span>
-            )
-          })}
-        </div>
-        <p className="mt-3 text-[12px] leading-relaxed" style={{ color: T.muted }}>
-          Vers voor vers uitgelegd door Ger de Koning - voor iedereen gratis en volledig te lezen.
-        </p>
-      </div>
+    <div>
+      <p
+        className="text-[0.6875rem] font-bold uppercase"
+        style={{ color: T.tealText, letterSpacing: "0.16em" }}
+      >
+        {label}
+      </p>
+      <ul className="mt-6 space-y-6">
+        {items.map(({ name, meta, note }) => (
+          <li key={name}>
+            <p className="text-[15px] font-bold leading-snug tracking-tight" style={{ color: T.text }}>
+              {name}
+              <span className="ml-2 text-xs font-semibold" style={{ color: T.muted }}>{meta}</span>
+            </p>
+            <p className="mt-1 text-[13px] leading-relaxed" style={{ color: T.muted }}>{note}</p>
+          </li>
+        ))}
+      </ul>
+      <p className="mt-6 text-xs leading-relaxed" style={{ color: T.muted }}>{footnote}</p>
     </div>
   )
 }
 
 /**
- * The library: a reading pane beside a ledger. The pane shows one verse as the
- * reader presents it; the ledger lists the sources themselves, in two groups,
- * each a name, a year and one line, with the one question people have about a
- * commentary - is it free - answered in the margin. On a laptop the pane stays
- * put while the ledger scrolls past it, so the two columns end together.
+ * The library: what you can read, in two groups, on one quiet surface.
  *
- * It replaced four "ANNO 1637" cards with teal top bars and a panel of
- * commentary rows: two kinds of furniture in one section, neither of which
- * looked like the sections around it.
+ * It replaced a mock reading pane beside a two-part ledger: four translation
+ * tabs, a quoted verse, four commentary chips, eight bordered rows, four access
+ * badges and four captions, all competing in one section - and the pane named
+ * every source the ledger next to it already named. What is left is the heading,
+ * one supporting line, the eight sources grouped and spaced, one link and the
+ * licence note. The reader's own screen is already shown by the lesson demo
+ * further up the page, so nothing is lost by not mocking it twice.
+ *
+ * Only the source names carry teal, so the section has one accent and no
+ * borders of its own beyond the section hairline.
  */
 function BibleLibrary() {
   return (
@@ -628,76 +567,40 @@ function BibleLibrary() {
           subtitle="Vier Nederlandse vertalingen naast elkaar, en bij elk vers de uitleg van vier commentaren."
         />
 
-        <div className="reveal-stagger grid gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-start lg:gap-x-14">
-          <FadeUp className="lg:sticky lg:top-24">
-            <ReadingPane />
-          </FadeUp>
-
-          <FadeUp>
-            <GroupLabel
+        <FadeUp className="mx-auto max-w-4xl">
+          <div
+            className="grid gap-y-12 rounded-3xl px-6 py-9 md:grid-cols-2 md:gap-x-16 md:px-12 md:py-12"
+            style={{ backgroundColor: T.light }}
+          >
+            <LibraryGroup
               label="Vertalingen"
-              meta={`${TRANSLATIONS.length} Nederlandse · ${ENGLISH_TRANSLATIONS} Engelse`}
+              items={TRANSLATIONS.map(({ name, year, note }) => ({ name, meta: year, note }))}
+              footnote={`Plus ${ENGLISH_TRANSLATIONS} Engelse vertalingen: King James Version, American Standard Version, World English Bible, Geneva Bible en Coverdale Bible.`}
             />
-            <ol className="border-t" style={{ borderColor: T.border }}>
-              {TRANSLATIONS.map(({ name, year, note, tag }) => (
-                <li
-                  key={name}
-                  className="grid grid-cols-[3.25rem_minmax(0,1fr)] gap-x-4 border-b py-4 sm:grid-cols-[3.25rem_minmax(0,1fr)_auto]"
-                  style={{ borderColor: T.border }}
-                >
-                  <p className="pt-0.5 text-xs font-semibold tabular-nums" style={{ color: T.muted }}>{year}</p>
-                  <div className="min-w-0">
-                    <p className="text-[15px] font-bold leading-snug tracking-tight" style={{ color: T.text }}>{name}</p>
-                    <p className="mt-1 text-[13px] leading-relaxed" style={{ color: T.muted }}>{note}</p>
-                  </div>
-                  {tag && (
-                    <p
-                      className="col-start-2 mt-1.5 text-[11px] font-semibold sm:col-start-3 sm:mt-0 sm:pt-0.5"
-                      style={{ color: tag === "Standaard" ? T.tealText : T.muted }}
-                    >
-                      {tag}
-                    </p>
-                  )}
-                </li>
-              ))}
-            </ol>
-            <p className="mt-4 text-xs leading-relaxed" style={{ color: T.muted }}>
-              Daarnaast de King James Version, American Standard Version, World English Bible,
-              Geneva Bible en Coverdale Bible - per vers naast een Nederlandse vertaling te leggen.
-            </p>
+            <LibraryGroup
+              label="Commentaren"
+              items={COMMENTARIES.map(({ name, author, note }) => ({ name, meta: author, note }))}
+              footnote="KingComments is voor iedereen gratis en volledig te lezen; de overige drie horen bij Pro."
+            />
+          </div>
 
-            <div className="mt-12">
-              <GroupLabel
-                label="Commentaren"
-                meta={`${COMMENTARIES.length} commentaren · ${COMMENTARIES.filter(c => c.free).length} gratis`}
-              />
-              <ol className="border-t" style={{ borderColor: T.border }}>
-                {COMMENTARIES.map(({ name, author, note, free }) => (
-                  <li
-                    key={name}
-                    className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 border-b py-4"
-                    style={{ borderColor: T.border }}
-                  >
-                    <div className="min-w-0">
-                      <p className="text-[15px] font-bold leading-snug tracking-tight" style={{ color: T.text }}>
-                        {name}
-                        <span className="ml-2 text-xs font-semibold tabular-nums" style={{ color: T.muted }}>{author}</span>
-                      </p>
-                      <p className="mt-1 text-[13px] leading-relaxed" style={{ color: T.muted }}>{note}</p>
-                    </div>
-                    <div className="pt-0.5">
-                      <AccessPill free={free} />
-                    </div>
-                  </li>
-                ))}
-              </ol>
-              <p className="mt-4 text-xs leading-relaxed" style={{ color: T.muted }}>
-                KingComments is voor iedereen gratis en volledig te lezen. De overige drie horen bij Pro.
-                De NBG-vertaling 1951 wordt gebruikt onder licentie van het Nederlands-Vlaams Bijbelgenootschap.
-              </p>
-            </div>
-          </FadeUp>
-        </div>
+          <p className="mt-8 text-center">
+            <Link
+              href="/inloggen"
+              data-track="landing_library_cta"
+              className="text-sm font-semibold underline underline-offset-4"
+              style={{ color: T.tealText }}
+            >
+              Gratis beginnen
+            </Link>
+          </p>
+
+          {/* Contractual, and reproduced as agreed with the Nederlands-Vlaams
+              Bijbelgenootschap. Do not reword or drop it. */}
+          <p className="mt-6 text-center text-xs leading-relaxed" style={{ color: T.muted }}>
+            De NBG-vertaling 1951 wordt gebruikt onder licentie van het Nederlands-Vlaams Bijbelgenootschap.
+          </p>
+        </FadeUp>
       </div>
     </section>
   )

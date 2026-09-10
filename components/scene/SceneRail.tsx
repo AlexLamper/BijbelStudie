@@ -8,53 +8,55 @@ import {
   Settings, ShieldCheck, StickyNote, User,
 } from "lucide-react"
 import { useStudyStyle } from "../providers/study-style-provider"
-import { RAIL_OPEN, RAIL_REST, RAIL_WIDE, TEAL_ON_DARK } from "./tokens"
+import { RAIL_LABEL, RAIL_REST, TEAL_ON_DARK } from "./tokens"
 
 /**
  * The sidebar, solved for a full-bleed scene.
  *
  * The permanent 16rem white column is the one piece of chrome that cuts the
- * landscape in half, so it is gone. What replaces it is the shape /studie
- * already uses for the same reason (`StudyRail` in components/layout/
- * app-sidebar.tsx): a narrow rail that stands IN the landscape instead of
- * taking a white column out of it, and widens to its labels on hover or
- * keyboard focus without moving a single pixel of content.
+ * landscape in half, so it is gone. What replaces it is a narrow rail that
+ * stands IN the landscape instead of taking a white column out of it - 64px of
+ * glass, the same width at every breakpoint, in every state, forever.
  *
- * Two things are different here, because here it sits on a picture rather than
- * on a white page:
+ * Two things are different from the rail /studie uses (`StudyRail` in
+ * components/layout/app-sidebar.tsx), because here it sits on a picture rather
+ * than on a white page:
  *
- *  - Closed, it is glass. The rail is a film of white over a blur, so the sky
- *    and the land keep running underneath it; the legibility comes from the
- *    page's own left scrim behind it, not from painting the rail solid.
+ *  - It is glass. The rail is a film of white over a blur, so the sky and the
+ *    land keep running underneath it; the legibility comes from the page's own
+ *    left scrim behind it, not from painting the rail solid.
  *  - It tightens as the reader scrolls. `--veil`, the same variable that darkens
  *    the scene behind the working panels, fades in the rail's dark base - at the
  *    top of the page the rail is barely there, over the panels it is a defined
  *    edge. Opacity only, so it costs nothing.
  *
- * What changed after two rounds of use, and why:
+ * HOW YOU FIND OUT WHAT AN ICON IS: ONE LABEL, NOT A WIDER RAIL.
  *
- *  - Open, it is opaque (RAIL_OPEN). It used to widen to 176px as a film of
- *    white over a blur, laid across every heading with the copy still ghosting
- *    through - which does not read as depth, it reads as a broken render.
- *  - It opens INTO its own gutter and never past it. The answer to the ghosting
- *    was briefly to reserve the open width in `SCENE_X`, which pushed every
- *    page's content a fifth of the way across the screen. It costs the page
- *    nothing again: RAIL_REST is 64px, RAIL_WIDE is 96px at `lg` and 112px at
- *    `xl`, and the gutter is exactly those last two numbers. The rail can be
- *    over the scrim or over its own gutter and nowhere else, so it cannot cover
- *    a glyph at any width, open or shut.
- *  - What buys that: the label sits UNDER the icon rather than beside it. A
- *    label beside an 18px glyph needs about 150px; under it, 96px is generous.
- *    Nothing else about the interaction moved - hover and `focus-within` both
- *    open it, every item is still a link in tab order, and the full label is
- *    still on `title` for a pointer that never opens it.
- *  - The right-hand hairline is permanent instead of veil-driven. At the top of
- *    a page the rail had no edge at all, which is half of why it read as a smear
- *    over the page rather than as a rail beside it.
+ * The rail used to widen on hover and show all eight labels at once. Three
+ * versions of that were tried and every one of them cost the page width it
+ * should not have had to pay - 176px of translucent panel ghosting over the
+ * headings; then a 192px gutter reserved for a rail the reader saw for a
+ * second; then a tighter 96/112px version of the same bargain (the whole story
+ * is in SCENE_X, in tokens.ts). The question a reader actually asks is never
+ * "what are all eight of these?" - it is "what is THIS one?".
+ *
+ * So the rail does not move. Hovering or keyboard-focusing a single item floats
+ * that item's label out to the right of its icon, over the scene: absolutely
+ * positioned and `pointer-events-none`, so it is not in the layout, pushes
+ * nothing, and cannot be hovered itself. Everything the old open state carried
+ * is still here - every item is a real link in tab order with its name on
+ * `title` and in an `sr-only` span, `aria-current` marks the page, the teal
+ * indicator marks it again in colour, and the focus ring is untouched. The
+ * label answers `focus-within` as well as `hover`, so it arrives for the tab
+ * key exactly as it does for the pointer, and `motion-reduce` drops the fade.
+ *
+ * The right-hand hairline is permanent rather than veil-driven. At the top of a
+ * page the rail had no edge at all, which is half of why it read as a smear
+ * over the page rather than as a rail beside it.
  *
  * Below `lg` there is no room for a rail and no hover to open one, so the same
  * items become a horizontally scrollable strip of pills that sticks under the
- * navbar. One list of links, two shapes.
+ * navbar. One list of links, two shapes. Unchanged by any of the above.
  *
  * The items and the links are the real ones, read off app-sidebar.tsx, in the
  * order that file's `useStudyStyle` puts them in.
@@ -104,35 +106,54 @@ function useNav(): NavItem[] {
 /* ── The rail, lg and up ─────────────────────────────────────── */
 
 /**
- * One row of the rail: the icon always, the label under it once the rail is
- * open.
+ * One row of the rail: the icon, and beside it a label that is not in the row.
  *
  * The row is centred rather than left-inset, so the icons ride the rail's own
- * centre line and stay centred as it widens. The label is a collapsed line that
- * grows to its 14px and fades in together, which keeps the whole open state one
- * gesture; `truncate` plus the `title` above means a long word can never push
- * the row wider than the gutter, which is the one thing this rail may not do.
+ * centre line. The label is a sibling of the link rather than a child of it:
+ * `absolute left-full` on the `<li>` puts it just past the rail's right edge,
+ * `pointer-events-none` keeps it from stealing the hover that summoned it, and
+ * being out of flow it can be `whitespace-nowrap` - no truncation, no ellipsis,
+ * and no length of Dutch that can push the rail wider, because nothing about
+ * the label touches the rail's box.
+ *
+ * The group is per ITEM (`group/item`), which is the entire difference from
+ * what this file used to do: one label at a time, belonging to the icon the
+ * reader is actually pointing at.
+ *
+ * The name is on the link three times over, and each one is doing a job:
+ * `sr-only` gives the link a real accessible name (an icon alone has none),
+ * `title` serves a pointer that hovers without reading the float, and the float
+ * itself is `aria-hidden` so a screen reader is not told twice.
  */
 function RailItem({ item, active }: { item: NavItem; active: boolean }) {
   const Icon = item.icon
   return (
-    <li className="list-none">
+    <li className="group/item relative list-none">
       <Link
         href={item.url}
         title={item.title}
         aria-current={active ? "page" : undefined}
-        className={`relative flex min-h-10 w-full flex-col items-center justify-center rounded-lg px-1 py-2 no-underline outline-none transition-colors focus-visible:ring-2 focus-visible:ring-white/70 ${
-          active ? "bg-white/15 font-semibold text-white" : "font-normal text-white/70 hover:bg-white/10 hover:text-white"
+        className={`relative flex min-h-10 w-full items-center justify-center rounded-lg px-1 py-2 no-underline outline-none transition-colors focus-visible:ring-2 focus-visible:ring-white/70 ${
+          active ? "bg-white/15 text-white" : "text-white/70 hover:bg-white/10 hover:text-white"
         }`}
       >
         {active && (
           <span aria-hidden className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full" style={{ backgroundColor: TEAL_ON_DARK }} />
         )}
         <Icon size={18} className="flex-shrink-0" style={active ? { color: TEAL_ON_DARK } : undefined} />
-        <span className="block max-h-0 w-full truncate text-center text-[10.5px] leading-[1.3] opacity-0 transition-[max-height,opacity,margin] duration-200 motion-reduce:transition-none group-hover/rail:mt-1 group-hover/rail:max-h-4 group-hover/rail:opacity-100 group-focus-within/rail:mt-1 group-focus-within/rail:max-h-4 group-focus-within/rail:opacity-100">
-          {item.title}
-        </span>
+        <span className="sr-only">{item.title}</span>
       </Link>
+
+      {/* The float. `-translate-x-1` -> `translate-x-0` is a 4px lean out of the
+          rail rather than a slide, so it reads as the icon naming itself and
+          not as a drawer opening; `motion-reduce` drops the movement and the
+          fade and leaves a label that is simply there or not. */}
+      <span
+        aria-hidden
+        className={`pointer-events-none absolute left-full top-1/2 z-10 ml-2 -translate-y-1/2 -translate-x-1 whitespace-nowrap opacity-0 transition-[opacity,transform] duration-150 ease-out motion-reduce:transition-none group-hover/item:translate-x-0 group-hover/item:opacity-100 group-focus-within/item:translate-x-0 group-focus-within/item:opacity-100 ${RAIL_LABEL}`}
+      >
+        {item.title}
+      </span>
     </li>
   )
 }
@@ -163,9 +184,13 @@ export default function SceneRail() {
 
   return (
     <>
+      {/* No `overflow-hidden` and no width transition: the box is 64px and stays
+          64px, and the labels have to be able to leave it. The three painted
+          layers below are all `inset-0`, so nothing but a label ever crosses
+          the edge. */}
       <nav
         aria-label="Hoofdnavigatie"
-        className={`group/rail fixed bottom-0 left-0 top-14 z-40 hidden flex-col overflow-hidden transition-[width] duration-300 ease-out motion-reduce:transition-none lg:flex ${RAIL_REST} ${RAIL_WIDE}`}
+        className={`fixed bottom-0 left-0 top-14 z-40 hidden flex-col lg:flex ${RAIL_REST}`}
       >
         <span aria-hidden className="pointer-events-none absolute inset-0 bg-white/[0.07] backdrop-blur-md" />
         <span
@@ -173,21 +198,19 @@ export default function SceneRail() {
           className="pointer-events-none absolute inset-0 bg-black/40"
           style={{ opacity: "var(--veil, 0)" }}
         />
-        {/* The opaque ground, faded in only while the rail is open. Painted over
-            the glass and the veil and under the list, so an open rail is a
-            surface rather than a filter over whatever is behind it. */}
-        <span
-          aria-hidden
-          className={`pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 motion-reduce:transition-none group-hover/rail:opacity-100 group-focus-within/rail:opacity-100 ${RAIL_OPEN}`}
-        />
         <span aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-px bg-white/20" />
 
-        {/* `overflow-y-auto`: the rows grow by a line each when the labels
-            arrive, and on a short laptop the eight of them can outrun the
-            viewport. Scrolling is the only answer that keeps every item
-            reachable - squashing them would put the bottom three out of reach
-            of both the pointer and the tab key. */}
-        <div className="relative flex h-full min-h-0 flex-col overflow-y-auto overscroll-contain px-1.5 py-2">
+        {/* Icon-only rows are 40px, so all eight fit in about 356px and the list
+            does not need to scroll on any screen wide enough to show a rail at
+            all. It is left able to, at heights where it genuinely does not fit,
+            because losing the bottom three items to a clipped column would put
+            them out of reach of the pointer AND the tab key.
+            The cost of that scroller is the labels: a box that scrolls on one
+            axis clips both, so below the breakpoint the float is cut off at the
+            rail's edge and `title` is what names the icon. That trade is the
+            right way round - 440px-tall windows are rare, unreachable
+            navigation never is. */}
+        <div className="relative flex h-full min-h-0 flex-col px-1.5 py-2 [@media(max-height:440px)]:overflow-y-auto [@media(max-height:440px)]:overscroll-contain">
           <ul className="m-0 flex flex-col gap-0.5 p-0">
             {nav.map(item => (
               <RailItem key={item.url} item={item} active={isActive(item.url)} />

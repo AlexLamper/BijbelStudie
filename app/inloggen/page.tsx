@@ -2,13 +2,13 @@
 
 import { useState, useEffect, Suspense } from "react"
 import Link from "next/link"
-import Image from "next/image"
 import { getProviders, signIn, ClientSafeProvider } from "next-auth/react"
 import { Loader2, Eye, EyeOff, ArrowLeft } from "lucide-react"
 import { useSearchParams } from "next/navigation"
 import { safeRedirect } from "../../lib/safeRedirect"
 import AuthTreeBackdrop from "../../components/auth/AuthTreeBackdrop"
 import { EYEBROW, SCENE_BG, SKEL, TEAL_ON_DARK } from "../../components/scene/tokens"
+import { BrandMark } from "./BrandMark"
 
 const GOOGLE_SVG = (
   <svg width="18" height="18" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -155,7 +155,7 @@ function SignInPageInner() {
         <div className="mx-auto w-full max-w-sm space-y-8">
           {/* Logo */}
           <div className="flex items-center gap-2.5">
-            <Image src="/images/icon-192.png" alt="BijbelStudie" width={28} height={28} className="rounded-md" priority />
+            <BrandMark />
             <span className="text-lg font-bold text-white">BijbelStudie</span>
           </div>
 

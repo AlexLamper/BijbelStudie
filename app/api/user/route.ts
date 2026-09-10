@@ -4,6 +4,7 @@ import connectMongoDB from "../../../lib/mongodb"
 import User from "../../../models/User"
 import { authOptions } from "../../../lib/authOptions"
 import { isAdminEmail } from "../../../lib/adminEmails"
+import { resolveIsPro } from "../../../lib/mobilePremium"
 
 export async function GET() {
   try {
@@ -21,9 +22,13 @@ export async function GET() {
       return NextResponse.json({ message: "User not found" }, { status: 404 })
     }
 
-    const isAdmin = user.isAdmin || isAdminEmail(session.user.email);
+    // Entitlement is resolved through the one helper the session, /api/v1/me and
+    // the settings billing-state all use, so every surface answers the same way.
+    // Reading `subscribed` on its own only ever sees Stripe, which left a
+    // RevenueCat/App Store subscriber rendered as a free account.
+    const adminByEmail = isAdminEmail(session.user.email);
     const userObj = user.toObject ? user.toObject() : { ...user };
-    if (isAdmin) userObj.subscribed = true;
+    userObj.subscribed = resolveIsPro(userObj, adminByEmail);
     return NextResponse.json({ user: userObj }, { status: 200 })
   } catch (error) {
     console.error("Error fetching user:", error)
