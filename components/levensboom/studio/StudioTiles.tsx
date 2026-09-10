@@ -129,12 +129,16 @@ function ItemTile({
   const pro = item.unlock.kind === 'pro';
   const outline = selected ? TEAL_ON_DARK : previewing ? 'rgba(45,212,191,0.55)' : undefined;
 
+  // A locked tile is still a button: tapping it previews the item on the whole
+  // landscape and opens the panel that says what it takes. `aria-disabled`
+  // tells assistive tech it cannot be chosen; the tile stays in the tab order.
   return (
     <button
       type="button"
       role="radio"
       aria-checked={selected}
-      aria-label={`${item.name}${locked ? `, vergrendeld: ${unlockLabel(item.unlock)}` : ''}`}
+      aria-disabled={locked || undefined}
+      aria-label={`${item.name}${locked ? `, vergrendeld: ${unlockLabel(item.unlock)} nodig` : ''}`}
       onClick={onPick}
       className={`group relative flex flex-col overflow-hidden text-left outline-none transition-transform hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-white motion-reduce:transition-none motion-reduce:hover:translate-y-0 ${STUDIO_TILE}`}
       style={{
@@ -142,15 +146,35 @@ function ItemTile({
         boxShadow: selected ? `0 0 0 2px ${TEAL_ON_DARK}` : undefined,
       }}
     >
-      <div className={`relative w-full overflow-hidden ${kind === 'species' || kind === 'ring' ? 'aspect-square' : 'aspect-[16/10]'} ${locked ? 'opacity-70 saturate-50' : ''}`}>
-        <Thumb kind={kind} item={item} seed={seed} level={level} frac={frac} health={health} avatar={avatar} />
+      <div className={`relative w-full overflow-hidden ${kind === 'species' || kind === 'ring' ? 'aspect-square' : 'aspect-[16/10]'}`}>
+        {/* Locked artwork is dimmed and drained so the lock reads at a glance;
+            the requirement pill sits on the picture so the reader never has to
+            tap to learn what opens it. */}
+        <div className={`h-full w-full ${locked ? 'opacity-45 saturate-[.35]' : ''}`}>
+          <Thumb kind={kind} item={item} seed={seed} level={level} frac={frac} health={health} avatar={avatar} />
+        </div>
         {locked && (
-          <span className="absolute inset-0 flex items-center justify-center">
-            <span className="inline-flex items-center gap-1 rounded-full bg-black/65 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur">
-              <Lock size={11} aria-hidden />
-              {unlockLabel(item.unlock)}
+          <>
+            <span className="absolute inset-0 bg-black/20" aria-hidden />
+            <span
+              className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-black/70 text-white ring-1 ring-white/30 backdrop-blur"
+              aria-hidden
+            >
+              <Lock size={13} />
             </span>
-          </span>
+            {/* The requirement pill. A Pro item already wears the gold ProBadge
+                below, which is the same statement in the brand's own colour. */}
+            {!pro && (
+              <span className="absolute inset-x-2 bottom-2 flex justify-start" aria-hidden>
+                <span
+                  className="inline-flex max-w-full items-center truncate rounded-full px-2.5 py-1 text-xs font-bold text-white shadow-lg shadow-black/40 ring-1 ring-white/30"
+                  style={{ backgroundColor: TEAL_DEEP }}
+                >
+                  {unlockLabel(item.unlock)}
+                </span>
+              </span>
+            )}
+          </>
         )}
         {selected && !locked && (
           <span className="absolute right-2 top-2 inline-flex h-6 w-6 items-center justify-center rounded-full text-white ring-1 ring-white/40" style={{ backgroundColor: TEAL_DEEP }}>
@@ -165,7 +189,7 @@ function ItemTile({
         {pro && <ProBadge className="absolute bottom-2 right-2" />}
       </div>
       <div className="px-3 py-2.5">
-        <p className="text-sm font-semibold text-white">{item.name}</p>
+        <p className={`text-sm font-semibold ${locked ? 'text-white/80' : 'text-white'}`}>{item.name}</p>
         <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-white/65">{item.blurb}</p>
       </div>
     </button>

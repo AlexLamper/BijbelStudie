@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import { EYEBROW, SCENE_BG_RGB, TEAL_ON_DARK } from '../../scene/tokens';
+import { EYEBROW, SCENE_BG_RGB, TEAL_ON_DARK, TILE } from '../../scene/tokens';
 
 /**
  * The shape of a lesson page, taken from the versie-b design candidate.
@@ -31,40 +31,63 @@ import { EYEBROW, SCENE_BG_RGB, TEAL_ON_DARK } from '../../scene/tokens';
  */
 
 /**
- * The tile every marginal note sits on.
+ * The tile every marginal note, quiz card and figure sits on.
  *
- * One step UP from the window's ground rather than a hole cut into it. It was
- * `TILE` minus its blur - `bg-black/40`, which on a flat ground is a darker
- * rectangle, and a screen made of darker rectangles on a dark ground is the
- * "stack of differently coloured boxes" the whole pass is against. A 4.5% film
- * of white lands on the same value the room's `--card` token paints, so a
- * marginal note, a quiz card and a shared component's panel are one surface.
+ * It is `TILE` - the SAME surface the dashboard's information cards wear -
+ * with one thing taken off it, and nothing added. A leeswijzer here and a
+ * voortgangspaneel on /dashboard are now literally one class, so the two
+ * screens cannot drift.
  *
- * No `backdrop-blur`: nothing is behind these tiles to blur - the window is a
- * flat ground, not a photograph - and a `backdrop-filter` would make every one
- * of them a containing block for the `fixed` menus and toasts that the shared
- * reading controls (SpeakButton, ReadingPreferencesMenu) render into the
- * margin.
+ * What used to be here was a local invention: a 4.5% film of white, tuned to
+ * land on the room's `--card`. That made the lesson's own surfaces a step
+ * LIGHTER than the ground and, because `--card` is a hue-189 colour, it is
+ * where the flow picked up the blue-green cast the rest of the app does not
+ * have. `bg-black/38` over the same ground has no hue of its own at all - it
+ * only takes light out - which is exactly why it is the shared card surface.
  *
- * White on it measures 16.0:1 and INK_MUTED 10.7:1.
+ * The one subtraction is `backdrop-blur-md`, and it is not cosmetic: a
+ * `backdrop-filter` makes an element a containing block for every `fixed`
+ * descendant, and these tiles host the shared reading controls (SpeakButton,
+ * ReadingPreferencesMenu) whose menus and toasts are `fixed`. There is also
+ * nothing behind them to blur - this screen is a flat ground, not a
+ * photograph - so the blur costs a bug and buys no glass.
+ *
+ * White on it measures 18.5:1 and INK_MUTED 12.0:1 - both still a step BETTER
+ * than the film of white they replace, because taking light out of the ground
+ * is the one way to make a tile that does not cost the type sitting on it.
+ * (They were 19.4:1 and 12.6:1 before SCENE_BG was lifted to #0C2429; the tile
+ * follows the ground, so it lightened with the room and kept its whole margin
+ * over the 4.5:1 floor.)
  */
-export const SURFACE = 'rounded-2xl border border-white/10 bg-white/[0.045]';
+export const SURFACE = TILE.replace(' backdrop-blur-md', '');
 
 /**
  * The heavier panel - a drawer, a dialog, the assistant.
  *
- * These stand OVER the lesson rather than in it, so they are opaque and they
- * separate by elevation: the room's own card colour, a hairline and a shadow.
- * `bg-black/80` was the old value, which made a dialog a black hole punched
- * through the window; the ring and the shadow do that job without leaving the
- * palette. Written as a literal because Tailwind never generates a class built
- * from a constant - it is SCENE_ROOM's `--card`, #172427.
+ * These stand OVER the lesson rather than in it, so unlike SURFACE they have to
+ * be genuinely opaque: half of them (the assistant in its `half` layout) cover a
+ * column of commentary with no scrim under them, and type ghosting through a
+ * panel reads as a broken render rather than as depth.
  *
- * No `backdrop-filter` here either, and for a sharper reason: these are the
+ * Opaque, then, but not a second colour. It is the scene's own ground with a
+ * hairline and a shadow, which is exactly what `RAIL_OPEN` does for the one
+ * other piece of chrome that has to cover the page - so what separates an
+ * overlay from the lesson is elevation, never a tint. It used to be #172427,
+ * the room's `--card`: a lighter blue-green box punched through a darker
+ * blue-green screen.
+ *
+ * The hex is written out rather than spliced in from SCENE_BG for the reason
+ * `RAIL_OPEN` states: Tailwind reads class names as literal text and never
+ * generates a class built from a constant. If SCENE_BG moves, this moves with
+ * it by hand - it has moved once already, from #081A1D to #0C2429 when the
+ * whole scene was lifted, and this line is one of exactly two that had to be
+ * edited by hand to follow it.
+ *
+ * No `backdrop-filter`, for SURFACE's reason and a sharper one: these are the
  * surfaces that host other people's components, and a filter traps anything
  * `fixed` inside them.
  */
-export const PANEL_SOLID = 'rounded-2xl bg-[#172427] ring-1 ring-white/10';
+export const PANEL_SOLID = 'rounded-2xl bg-[#0C2429] ring-1 ring-white/12';
 
 /** The same panel with its radius dropped, for one that sets its own corners. */
 export const PANEL_FLAT = PANEL_SOLID.replace('rounded-2xl ', '');

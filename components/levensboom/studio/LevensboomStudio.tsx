@@ -4,12 +4,13 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Link2 } from 'lucide-react';
 import { useLevensboom, fracOf } from '../../../hooks/useLevensboom';
-import { itemsOfKind, itemKey, unlockLabel, type AvatarChoice, type ItemKind } from '../../../lib/levensboom/catalog';
+import { itemsOfKind, itemKey, type AvatarChoice, type CatalogItem, type ItemKind } from '../../../lib/levensboom/catalog';
 import LevelUpDialog from '../LevelUpDialog';
 import StudioStage from './StudioStage';
 import LevelProgress, { LevelProgressSkeleton } from './LevelProgress';
 import { ItemGrid, KIND_TITLES, type TilePick } from './StudioTiles';
 import GroeiTab from './GroeiTab';
+import LockedPanel from './LockedPanel';
 import { Header } from '../../layout/header';
 import SceneRail from '../../scene/SceneRail';
 import { Panel, SceneSkeleton } from '../../scene/pieces';
@@ -110,6 +111,8 @@ export default function LevensboomStudio() {
   const { data, loading, celebrate, dismissCelebration, setAvatar, setPrefs, markItemsSeen } = useLevensboom();
   const [tab, setTab] = useState<Tab>('species');
   const [preview, setPreview] = useState<Partial<AvatarChoice>>({});
+  /** The locked item the reader tapped last; the panel under the grid explains it. */
+  const [lockedPick, setLockedPick] = useState<CatalogItem | null>(null);
   const [notice, setNotice] = useState<{ text: string; pro?: boolean } | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -142,17 +145,14 @@ export default function LevensboomStudio() {
   const onPick = async ({ item, locked }: TilePick) => {
     const kind = item.kind;
     if (locked) {
+      // Preview it on the whole landscape and open the panel that says what
+      // it takes; nothing is written.
       setPreview({ [kind]: item.id });
-      setNotice({
-        text:
-          item.unlock.kind === 'pro'
-            ? `${item.name} is er voor Pro-leden.`
-            : `${item.name}: ${unlockLabel(item.unlock)} nodig.`,
-        pro: item.unlock.kind === 'pro',
-      });
+      setLockedPick(item);
       return;
     }
     setPreview({});
+    setLockedPick(null);
     const result = await setAvatar({ [kind]: item.id } as Partial<AvatarChoice>);
     if (result.ok === false) {
       setNotice({
@@ -180,6 +180,12 @@ export default function LevensboomStudio() {
   const pickTab = (id: Tab) => {
     setTab(id);
     setPreview({});
+    setLockedPick(null);
+  };
+
+  const closeLocked = () => {
+    setPreview({});
+    setLockedPick(null);
   };
 
   /** Left and right walk the tabs, as a tablist is expected to. */
@@ -194,49 +200,60 @@ export default function LevensboomStudio() {
   };
 
   /* -- The masthead, on the landscape ---------------------------- */
-  // Rendered whatever the state of the data, so the heading and the way back
-  // never wait on the tree: text never waits on the scene. Only the h1 is set
-  // straight onto the picture - it is large enough to hold up on the top band
-  // over any sky. Every smaller label on this page sits on glass.
+  // Rendered whatever the state of the data, so the heading, the way back and
+  // the line that says what this page is never wait on the tree: text never
+  // waits on the scene. Only the h1 is set straight onto the picture - it is
+  // large enough to hold up on the top band over any sky. Every smaller label
+  // on this page sits on glass.
+  //
+  // Three rows: the way back; the title with its one line of subtext; and the
+  // actions row - the time-of-day control and "Deel link" side by side, so the
+  // share button is one of the page's controls rather than a pill floating in
+  // the corner on its own.
   const masthead = (
     <div className="pt-5">
-      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+      <div>
         <Link href="/profiel" aria-label="Terug naar profiel" className={`${GLASS_CONTROL} px-2.5 py-1.5`}>
           {/* The arrow identifies the control - it is the way back. */}
           <ArrowLeft size={14} aria-hidden />
           Profiel
         </Link>
-
-        <button type="button" onClick={() => void share()} className={`${GLASS_CONTROL} px-3 py-1.5`} disabled={!tree}>
-          {/* The chain identifies the control - it is what the button copies. */}
-          <Link2 size={14} aria-hidden />
-          {copied ? 'Link gekopieerd' : 'Deel link'}
-        </button>
       </div>
 
       <p className={`${EYEBROW} mt-5`} style={{ color: TEAL_ON_DARK }}>
         Voortgang
       </p>
       <h1 className="mt-1.5 text-4xl font-semibold tracking-tight text-white drop-shadow-sm sm:text-5xl">Je boom</h1>
-      {tree && (
-        <p className="mt-1.5 max-w-md text-sm text-white/80">
-          Je boom groeit mee met wat je leest en leert — nu {tree.stage.name.toLowerCase()}, niveau {data?.level}.
-        </p>
-      )}
+      <p className="mt-2 max-w-md text-sm leading-snug text-white/85">
+        Je boom groeit mee met wat je leest en leert. Kies hier hoe hij eruitziet
+        {tree ? (
+          <>
+            {' '}
+            — nu {tree.stage.name.toLowerCase()}, niveau {data?.level}.
+          </>
+        ) : (
+          '.'
+        )}
+      </p>
 
-      {tree && (
-        <div className="mt-4 inline-flex items-center gap-2">
+      <div
+        role="toolbar"
+        aria-label="Acties voor je boom"
+        className="mt-5 flex flex-wrap items-center justify-between gap-x-4 gap-y-2"
+      >
+        <div className="inline-flex items-center gap-2">
           <span className="text-xs font-semibold text-white/70">Tijdstip</span>
-          <div className={`inline-flex overflow-hidden rounded-lg border border-white/20 bg-black/40 backdrop-blur-md`} role="group" aria-label="Tijdstip van de boom">
+          <div className="inline-flex overflow-hidden rounded-lg border border-white/20 bg-black/40 backdrop-blur-md" role="group" aria-label="Tijdstip van de boom">
             {TIME_OF_DAY_OPTIONS.map((opt) => {
-              const active = (tree.timeOfDay ?? 'auto') === opt.id;
+              const active = (tree?.timeOfDay ?? 'auto') === opt.id;
               return (
                 <button
                   key={opt.id}
                   type="button"
                   onClick={() => void setPrefs({ timeOfDay: opt.id })}
+                  disabled={!tree}
                   aria-pressed={active}
-                  className={`px-2.5 py-1.5 text-xs font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-white ${
+                  className={`px-2.5 py-1.5 text-xs font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-white disabled:opacity-60 ${
                     active ? 'text-white' : 'text-white/65 hover:text-white'
                   }`}
                   style={active ? { backgroundColor: TEAL_DEEP } : undefined}
@@ -247,7 +264,13 @@ export default function LevensboomStudio() {
             })}
           </div>
         </div>
-      )}
+
+        <button type="button" onClick={() => void share()} className={`${GLASS_CONTROL} px-3 py-1.5`} disabled={!tree}>
+          {/* The chain identifies the control - it is what the button copies. */}
+          <Link2 size={14} aria-hidden />
+          {copied ? 'Link gekopieerd' : 'Deel link'}
+        </button>
+      </div>
     </div>
   );
 
@@ -292,7 +315,7 @@ export default function LevensboomStudio() {
           <LevelProgressSkeleton className="mt-6" />
         </>,
         <>
-          <div className={`${TAB_BAR} mt-6 flex gap-3 px-3 py-3 lg:mt-0`}>
+          <div className={`${TAB_BAR} mt-6 flex gap-3 px-3 py-3 lg:mt-5`}>
             {Array.from({ length: 5 }).map((_, i) => (
               <SceneSkeleton key={i} className="h-4 w-16" />
             ))}
@@ -389,7 +412,11 @@ export default function LevensboomStudio() {
               after the h1. */}
           <h2 className="sr-only">Je boom aanpassen</h2>
 
-          <div className={`${TAB_BAR} mt-6 lg:sticky lg:top-0 lg:z-10 lg:mt-0`}>
+          {/* `mt-6` below `lg` keeps the strip off the reading column above it;
+              `lg:mt-5` matches the masthead's `pt-5` so the strip and the way
+              back start on the same line instead of the strip hugging the
+              navbar. Sticky from `lg`, where the column scrolls inside itself. */}
+          <div className={`${TAB_BAR} mt-6 lg:sticky lg:top-0 lg:z-10 lg:mt-5`}>
             <div className="flex gap-0.5 overflow-x-auto px-1.5 pt-1.5" role="tablist" aria-label="Wat je kunt aanpassen">
               {TABS.map((t) => {
                 const active = tab === t.id;
@@ -442,6 +469,22 @@ export default function LevensboomStudio() {
               />
             )}
           </div>
+
+          {/* What a locked tile takes. Pinned to the foot of the picking column
+              - the viewport below `lg`, the scrolling column from it - so a tap
+              anywhere in the grid puts the answer on screen. Goes away the
+              moment an unlocked tile is chosen or the tab changes. */}
+          {lockedPick && lockedPick.kind === tab && (
+            <div className="sticky bottom-0 z-10 mt-4 pb-3">
+              <LockedPanel
+                item={lockedPick}
+                level={data.level}
+                xp={data.xp}
+                longestStreak={tree.longestStreak}
+                onClose={closeLocked}
+              />
+            </div>
+          )}
         </>,
       )}
 
