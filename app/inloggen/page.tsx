@@ -151,7 +151,9 @@ function SignInPageInner() {
           {/* Logo */}
           <div className="flex items-center gap-2.5">
             <Image src="/images/icon-192.png" alt="BijbelStudie" width={28} height={28} className="rounded-md" priority />
-            <span className="font-bold text-lg text-foreground">BijbelStudie</span>
+            <span className="font-bold text-lg text-foreground">
+              Bijbel<span style={{ color: "#8FD694" }}>Studie</span>
+            </span>
           </div>
 
           {/* Heading */}

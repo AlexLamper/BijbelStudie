@@ -502,7 +502,9 @@ export function OnboardingModal({ isOpen: initialIsOpen, onClose, onComplete }: 
             <div className="flex items-center justify-between gap-6 px-5 py-4 sm:px-8 sm:py-5">
               <div className="flex items-center gap-2.5">
                 <Image src="/images/icon-192.png" alt="" width={28} height={28} className="rounded-lg" />
-                <span className="text-[15px] font-bold text-foreground">BijbelStudie</span>
+                <span className="text-[15px] font-bold text-foreground">
+                  Bijbel<span style={{ color: "#8FD694" }}>Studie</span>
+                </span>
               </div>
               <div aria-hidden="true" className="flex items-center gap-1.5">
                 {Array.from({ length: TOTAL }, (_, i) => (

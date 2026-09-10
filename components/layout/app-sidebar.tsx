@@ -18,6 +18,12 @@ import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import React, { useEffect, useState } from "react"
+
+// Same green as the Levensboom stage name in the level-up dialog
+// (components/levensboom/LevelUpDialog.tsx, also the spring "leafAlt" tone in
+// lib/levensboom/palette.ts) - reused here so "Studie" in the wordmark reads
+// as the same brand green everywhere, not a second invented shade.
+const LOGO_GREEN = "#8FD694"
 import { useStudyStyle } from "../providers/study-style-provider"
 import { ProBadge } from "../ui/ProBadge"
 
@@ -210,7 +216,7 @@ export function StudyRail() {
             priority
           />
           <span className="text-[15px] font-bold tracking-tight text-gray-900 dark:text-foreground whitespace-nowrap opacity-0 -translate-x-1 transition-[opacity,transform] duration-200 group-hover/rail:opacity-100 group-hover/rail:translate-x-0">
-            BijbelStudie
+            Bijbel<span style={{ color: LOGO_GREEN }}>Studie</span>
           </span>
         </Link>
 
@@ -358,7 +364,7 @@ export function AppSidebar({ ...props }) {
             priority
           />
           <span className="text-[15px] font-bold tracking-tight text-gray-900 dark:text-foreground">
-            BijbelStudie
+            Bijbel<span style={{ color: LOGO_GREEN }}>Studie</span>
           </span>
         </Link>
       </SidebarHeader>

@@ -24,7 +24,9 @@ export function Header() {
               className="rounded-md"
               priority
             />
-            <span className="font-bold text-lg text-foreground tracking-tight">BijbelStudie</span>
+            <span className="font-bold text-lg text-foreground tracking-tight">
+              Bijbel<span style={{ color: "#8FD694" }}>Studie</span>
+            </span>
           </Link>
 
           {/* Centered nav */}

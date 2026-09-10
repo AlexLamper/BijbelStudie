@@ -56,7 +56,9 @@ export default function PrivacyPolicyPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
           <Link href="/" className="flex items-center gap-2 flex-shrink-0">
             <Image src="/images/icon-192.png" alt="" width={26} height={26} className="rounded-md" priority />
-            <span className="font-bold text-base text-gray-900">BijbelStudie</span>
+            <span className="font-bold text-base text-gray-900">
+              Bijbel<span style={{ color: "#8FD694" }}>Studie</span>
+            </span>
           </Link>
           <Link href="/"
             className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors">

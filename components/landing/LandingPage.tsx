@@ -184,7 +184,9 @@ function Navbar() {
         {/* Logo - links uitgelijnd */}
         <Link href="/" className="flex items-center gap-2 flex-shrink-0 md:justify-self-start">
           <Image src="/images/icon-192.png" alt="" width={26} height={26} className="rounded-md" priority />
-          <span className="font-bold text-base tracking-tight" style={{ color: T.text }}>BijbelStudie</span>
+          <span className="font-bold text-base tracking-tight" style={{ color: T.text }}>
+            Bijbel<span style={{ color: "#8FD694" }}>Studie</span>
+          </span>
         </Link>
 
         {/* Navigatie - exact gecentreerd. Alleen het product zelf: de
