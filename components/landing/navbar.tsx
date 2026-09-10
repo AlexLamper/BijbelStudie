@@ -25,7 +25,7 @@ export function Header() {
               priority
             />
             <span className="font-bold text-lg text-foreground tracking-tight">
-              Bijbel<span style={{ color: "#8FD694" }}>Studie</span>
+              Bijbel<span style={{ color: "#0F766E" }}>Studie</span>
             </span>
           </Link>
 

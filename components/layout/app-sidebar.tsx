@@ -23,7 +23,7 @@ import React, { useEffect, useState } from "react"
 // (components/levensboom/LevelUpDialog.tsx, also the spring "leafAlt" tone in
 // lib/levensboom/palette.ts) - reused here so "Studie" in the wordmark reads
 // as the same brand green everywhere, not a second invented shade.
-const LOGO_GREEN = "#8FD694"
+const LOGO_GREEN = "#0F766E"
 import { useStudyStyle } from "../providers/study-style-provider"
 import { ProBadge } from "../ui/ProBadge"
 

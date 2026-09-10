@@ -113,10 +113,6 @@ export function Header({ title, variant = "default" }: HeaderProps) {
   }, [session?.user?.email, mounted])
 
   useEffect(() => {
-    if (mounted && status === "unauthenticated") router.push("/api/auth/signin")
-  }, [status, router, mounted])
-
-  useEffect(() => {
     if (!mounted) return
     function handleClickOutside(event: MouseEvent) {
       if (profileRef.current && !profileRef.current.contains(event.target as Node)) setIsProfileOpen(false)
@@ -130,12 +126,46 @@ export function Header({ title, variant = "default" }: HeaderProps) {
     return <div className={scene ? "h-14" : "h-14 border-b border-border bg-background"} />
   }
 
-  if (!session) return null
-
   const getPageTitle = () => {
     if (title) return title
     const mainRoute = pathname?.split('/').filter(Boolean)[0] || 'dashboard'
     return PAGE_TITLES[mainRoute] || mainRoute.charAt(0).toUpperCase() + mainRoute.slice(1)
+  }
+
+  // Guest mode (Phase 1): /lezen and /studie render this bar for a visitor
+  // without an account. This used to push them to /api/auth/signin the moment
+  // it mounted - which made the landing page's "zonder account" link a
+  // round-trip to /inloggen. A guest gets the same bar with the way in on the
+  // right, and no profile menu, since there is no profile.
+  if (!session) {
+    return (
+      <header
+        className={
+          scene
+            ? "dark sticky top-0 z-50 flex h-14 items-center justify-between border-b border-white/10 bg-transparent px-4 sm:px-6 backdrop-blur-sm"
+            : "flex items-center justify-between px-4 sm:px-6 h-14 border-b border-border bg-white dark:bg-background sticky top-0 z-50"
+        }
+      >
+        <div className="flex items-center gap-3">
+          {!scene && <SidebarTrigger className="text-muted-foreground hover:text-foreground" />}
+          {scene ? (
+            <p className="text-base font-semibold text-foreground">{getPageTitle()}</p>
+          ) : (
+            <h1 className="text-base font-semibold text-foreground">{getPageTitle()}</h1>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          {!scene && <ModeToggle />}
+          <Link
+            href="/inloggen"
+            className="inline-flex h-9 items-center rounded-md px-3 text-sm font-medium text-white no-underline transition-colors hover:opacity-90"
+            style={{ backgroundColor: "#0D9488" }}
+          >
+            Inloggen
+          </Link>
+        </div>
+      </header>
+    )
   }
 
   return (

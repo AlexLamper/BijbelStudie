@@ -57,7 +57,7 @@ export default function PrivacyPolicyPage() {
           <Link href="/" className="flex items-center gap-2 flex-shrink-0">
             <Image src="/images/icon-192.png" alt="" width={26} height={26} className="rounded-md" priority />
             <span className="font-bold text-base text-gray-900">
-              Bijbel<span style={{ color: "#8FD694" }}>Studie</span>
+              Bijbel<span style={{ color: "#0F766E" }}>Studie</span>
             </span>
           </Link>
           <Link href="/"

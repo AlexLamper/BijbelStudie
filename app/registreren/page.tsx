@@ -149,7 +149,7 @@ function RegisterPageInner() {
           <div className="flex items-center gap-2.5">
             <Image src="/images/icon-192.png" alt="BijbelStudie" width={28} height={28} className="rounded-md" priority />
             <span className="text-lg font-bold text-white">
-              Bijbel<span style={{ color: "#8FD694" }}>Studie</span>
+              Bijbel<span style={{ color: "#0F766E" }}>Studie</span>
             </span>
           </div>
 
