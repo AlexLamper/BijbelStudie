@@ -2,8 +2,6 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../lib/authOptions";
 import SessionProvider from "../../components/providers/SessionProvider";
-import { Header } from "../../components/layout/header";
-import { AppSidebar } from "../../components/layout/app-sidebar";
 import { SidebarProvider } from "../../components/ui/sidebar";
 
 export const metadata: Metadata = {
@@ -103,6 +101,20 @@ export const metadata: Metadata = {
   },
 };
 
+/**
+ * Providers only - no chrome.
+ *
+ * /profiel and /profiel/boom are immersive scene pages now: one fixed
+ * full-bleed landscape with the page travelling over it. The depth engine in
+ * components/scene/useSceneDepth.ts measures `window.scrollY`, so the DOCUMENT
+ * has to be what scrolls - the old `h-screen overflow-hidden` wrapper with an
+ * inner `overflow-y-auto` pinned the scene in place. The header and the sidebar
+ * are gone for the same reason: a layout can only ADD chrome, and the shell
+ * draws its own navbar (`<Header variant="scene" />`) and its own floating rail
+ * instead of a sidebar column. Same shape as app/dashboard/layout.tsx.
+ *
+ * `SidebarProvider` stays because the header's own controls read its context.
+ */
 export default async function ProfileLayout({
   children,
 }: Readonly<{
@@ -116,19 +128,9 @@ export default async function ProfileLayout({
   const session = await getServerSession(authOptions);
 
   return (
-    <div className="antialiased bg-background h-screen flex flex-col overflow-hidden">
-      <SessionProvider session={session}>
-        <SidebarProvider>
-          <AppSidebar />
-          <div className="flex flex-col flex-1 min-h-0 w-full">
-            <Header />
-            <div className="flex-1 min-h-0 overflow-y-auto">
-              {children}
-            </div>
-          </div>
-        </SidebarProvider>
-      </SessionProvider>
-    </div>
+    <SessionProvider session={session}>
+      <SidebarProvider>{children}</SidebarProvider>
+    </SessionProvider>
   );
 }
 

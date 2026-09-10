@@ -1,8 +1,7 @@
 import type { Metadata } from "next"
 import { getServerSession } from "next-auth"
+import { authOptions } from "../../lib/authOptions"
 import SessionProvider from "../../components/providers/SessionProvider"
-import { Header } from "../../components/layout/header"
-import { AppSidebar } from "../../components/layout/app-sidebar"
 import { SidebarProvider } from "../../components/ui/sidebar"
 
 export const metadata: Metadata = {
@@ -10,21 +9,34 @@ export const metadata: Metadata = {
   description: "Bijbelstudie in groepsverband",
 }
 
+/**
+ * Providers only - no chrome.
+ *
+ * /groepen now sits in the shared immersive shell
+ * (components/scene/SceneShell.tsx), which draws its own navbar and its own
+ * rail. A layout in the App Router can only ADD chrome, never replace what a
+ * parent rendered, so the `Header` and the `AppSidebar` had to leave this file;
+ * the pages render `<SceneShell header rail>` themselves.
+ *
+ * Just as load-bearing: the wrapper this used to have was an `h-screen
+ * overflow-hidden` box with the page scrolling inside it, and the scene's depth
+ * engine measures `window.scrollY`. Inside such a box the landscape never
+ * moves. The DOCUMENT has to scroll, which is why this is providers only - the
+ * same shape as app/dashboard/layout.tsx and app/notities/layout.tsx.
+ *
+ * `authOptions` is passed on purpose, not left off. Without it NextAuth returns
+ * only the default session ({name, email, image}) and skips the `session`
+ * callback in lib/authOptions that attaches isAdmin, isSubscribed and
+ * studyStyle - so any client-side check on those fields reads undefined on this
+ * route, and a Pro user renders as not-Pro.
+ *
+ * `SidebarProvider` stays because the header's own controls read its context.
+ */
 export default async function GroepenLayout({ children }: { children: React.ReactNode }) {
-  const session = await getServerSession()
+  const session = await getServerSession(authOptions)
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-background">
-      <SessionProvider session={session}>
-        <SidebarProvider>
-          <AppSidebar />
-          <div className="flex flex-col flex-1 min-h-0 w-full overflow-hidden">
-            <Header />
-            <main className="flex-1 overflow-y-auto">
-              {children}
-            </main>
-          </div>
-        </SidebarProvider>
-      </SessionProvider>
-    </div>
+    <SessionProvider session={session}>
+      <SidebarProvider>{children}</SidebarProvider>
+    </SessionProvider>
   )
 }

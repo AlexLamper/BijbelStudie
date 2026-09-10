@@ -1,86 +1,85 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams, useParams } from "next/navigation";
-import { Button } from "../../components/ui/button";
 import Image from "next/image";
-import { Loader2, Eye, EyeOff } from "lucide-react";
-import { ModeToggle } from "../../components/dark-mode-toggle";
-import { SkeletonPage } from "../../components/ui/skeletons";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Loader2, Eye, EyeOff, ArrowLeft } from "lucide-react";
+import AuthTreeBackdrop from "../../components/auth/AuthTreeBackdrop";
+import { EYEBROW, PANEL_DEEP, SCENE_BG, TEAL_ON_DARK } from "../../components/scene/tokens";
 
-const translations = {
-  en: {
-    title: "Set New Password",
-    subtitle: "Enter your new password below.",
-    backButton: "Back to Sign In",
-    newPassword: "New Password",
-    confirmNewPassword: "Confirm New Password",
-    resetPassword: "Reset Password",
-    resettingPassword: "Resetting Password...",
-    rememberPassword: "Remember your password?",
-    signIn: "Sign in",
-    passwordRequirements: "Password must be at least 8 characters long",
-    resetSuccessful: "Password reset successful! Redirecting to sign in...",
-    invalidResetLink: "Invalid reset link. Please request a new password reset.",
-    errors: {
-      allFieldsRequired: "All fields are required",
-      passwordTooShort: "Password must be at least 8 characters long",
-      passwordMismatch: "Passwords do not match",
-      invalidResetLink: "Invalid reset link",
-      resetFailed: "Password reset failed. Please try again.",
-    }
-  },
-  nl: {
-    title: "Nieuw Wachtwoord Instellen",
-    subtitle: "Voer hieronder je nieuwe wachtwoord in.",
-    backButton: "Terug naar Inloggen",
-    newPassword: "Nieuw Wachtwoord",
-    confirmNewPassword: "Bevestig Nieuw Wachtwoord",
-    resetPassword: "Wachtwoord Resetten",
-    resettingPassword: "Wachtwoord Resetten...",
-    rememberPassword: "Weet je je wachtwoord weer?",
-    signIn: "Inloggen",
-    passwordRequirements: "Wachtwoord moet minimaal 8 tekens lang zijn",
-    resetSuccessful: "Wachtwoord succesvol gereset! Doorverwijzen naar inloggen...",
+/**
+ * Dutch only.
+ *
+ * This page carried an en/nl/de table keyed on `params.lng`, but the route has
+ * no `[lng]` segment - `useParams()` returns nothing for it - so `language`
+ * resolved to "en" every single time and a Dutch-only site served an English
+ * password screen. The strings are inline now, in the one language the app
+ * ships (CLAUDE.md: "UI is Dutch-only").
+ */
+const COPY = {
+  title: "Nieuw wachtwoord instellen",
+  subtitle: "Voer hieronder je nieuwe wachtwoord in.",
+  backButton: "Terug naar inloggen",
+  newPassword: "Nieuw wachtwoord",
+  confirmNewPassword: "Bevestig nieuw wachtwoord",
+  resetPassword: "Wachtwoord resetten",
+  resettingPassword: "Wachtwoord resetten...",
+  rememberPassword: "Weet je je wachtwoord weer?",
+  signIn: "Inloggen",
+  passwordRequirements: "Wachtwoord moet minimaal 8 tekens lang zijn",
+  resetSuccessful: "Wachtwoord succesvol gereset! Je wordt doorgestuurd naar inloggen...",
+  errors: {
+    allFieldsRequired: "Alle velden zijn verplicht",
+    passwordTooShort: "Wachtwoord moet minimaal 8 tekens lang zijn",
+    passwordMismatch: "Wachtwoorden komen niet overeen",
     invalidResetLink: "Ongeldige reset link. Vraag een nieuwe wachtwoord reset aan.",
-    errors: {
-      allFieldsRequired: "Alle velden zijn verplicht",
-      passwordTooShort: "Wachtwoord moet minimaal 8 tekens lang zijn",
-      passwordMismatch: "Wachtwoorden komen niet overeen",
-      invalidResetLink: "Ongeldige reset link",
-      resetFailed: "Wachtwoord reset mislukt. Probeer opnieuw.",
-    }
+    resetFailed: "Wachtwoord reset mislukt. Probeer opnieuw.",
   },
-  de: {
-    title: "Neues Passwort Festlegen",
-    subtitle: "Gib dein neues Passwort unten ein.",
-    backButton: "Zurück zur Anmeldung",
-    newPassword: "Neues Passwort",
-    confirmNewPassword: "Neues Passwort Bestätigen",
-    resetPassword: "Passwort Zurücksetzen",
-    resettingPassword: "Passwort Zurücksetzen...",
-    rememberPassword: "Erinnerst du dich an dein Passwort?",
-    signIn: "Anmelden",
-    passwordRequirements: "Passwort muss mindestens 8 Zeichen lang sein",
-    resetSuccessful: "Passwort erfolgreich zurückgesetzt! Weiterleitung zur Anmeldung...",
-    invalidResetLink: "Ungültiger Reset-Link. Bitte fordere einen neuen Passwort-Reset an.",
-    errors: {
-      allFieldsRequired: "Alle Felder sind erforderlich",
-      passwordTooShort: "Passwort muss mindestens 8 Zeichen lang sein",
-      passwordMismatch: "Passwörter stimmen nicht überein",
-      invalidResetLink: "Ungültiger Reset-Link",
-      resetFailed: "Passwort-Reset fehlgeschlagen. Bitte versuche es erneut.",
-    }
-  }
 };
 
+/** Literal colours only: this page is a landscape at night - see tokens.ts. */
+const FIELD =
+  "w-full rounded-lg border border-white/20 bg-black/30 px-3.5 py-2.5 pr-10 text-sm text-white outline-none transition-colors placeholder:text-white/40 hover:bg-black/40 focus-visible:ring-2 focus-visible:ring-white";
+const LABEL = "mb-1.5 block text-sm font-medium text-white/85";
+const QUIET_LINK =
+  "rounded font-medium text-white no-underline underline-offset-4 outline-none transition-colors hover:underline focus-visible:ring-2 focus-visible:ring-white";
+const EYE_BUTTON =
+  "absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-white/50 outline-none transition-colors hover:text-white focus-visible:ring-2 focus-visible:ring-white";
+
+/** The night, the logo and the panel every state of this page sits in. */
+function AuthFrame({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="relative min-h-screen overflow-hidden" style={{ backgroundColor: SCENE_BG }}>
+      {/* The same night as /inloggen. It sits behind everything and nothing
+          waits on it, and below `sm` it is not asked for at all - the panel
+          covers it there, so a phone never pays for the canvas chunk. */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 hidden sm:block">
+        <AuthTreeBackdrop />
+      </div>
+
+      <div className="relative z-10 min-h-screen px-5 py-16 sm:px-8">
+        <Link
+          href="/api/auth/signin"
+          className="inline-flex items-center gap-1.5 rounded text-sm text-white/70 no-underline outline-none transition-colors hover:text-white focus-visible:ring-2 focus-visible:ring-white"
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden />
+          {COPY.backButton}
+        </Link>
+
+        <div className="mx-auto mt-14 w-full max-w-md sm:mt-20">
+          <div className="mb-6 flex items-center gap-2.5">
+            <Image src="/images/icon-192.png" alt="BijbelStudie" width={28} height={28} className="rounded-md" priority />
+            <span className="text-lg font-bold text-white">BijbelStudie</span>
+          </div>
+          <div className={`p-7 ${PANEL_DEEP}`}>{children}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ResetPasswordForm() {
-  const params = useParams();
-  const lng = params.lng as string;
-  const language = (lng === "nl" ? "nl" : lng === "de" ? "de" : "en") as "en" | "nl" | "de";
-  const t = translations[language];
-  
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
@@ -97,9 +96,9 @@ function ResetPasswordForm() {
 
   useEffect(() => {
     if (!token) {
-      setError(t.errors.invalidResetLink);
+      setError(COPY.errors.invalidResetLink);
     }
-  }, [token, t.errors.invalidResetLink]);
+  }, [token]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -109,17 +108,17 @@ function ResetPasswordForm() {
 
   const validateForm = () => {
     if (!formData.password || !formData.confirmPassword) {
-      setError(t.errors.allFieldsRequired);
+      setError(COPY.errors.allFieldsRequired);
       return false;
     }
 
     if (formData.password.length < 8) {
-      setError(t.errors.passwordTooShort);
+      setError(COPY.errors.passwordTooShort);
       return false;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError(t.errors.passwordMismatch);
+      setError(COPY.errors.passwordMismatch);
       return false;
     }
 
@@ -128,9 +127,9 @@ function ResetPasswordForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!token) {
-      setError(t.errors.invalidResetLink);
+      setError(COPY.errors.invalidResetLink);
       return;
     }
 
@@ -163,11 +162,11 @@ function ResetPasswordForm() {
           router.push("/inloggen");
         }, 2000);
       } else {
-        setError(data.error || t.errors.resetFailed);
+        setError(data.error || COPY.errors.resetFailed);
       }
     } catch (error) {
       console.error("Password reset error:", error);
-      setError(t.errors.resetFailed);
+      setError(COPY.errors.resetFailed);
     } finally {
       setIsLoading(false);
     }
@@ -175,149 +174,123 @@ function ResetPasswordForm() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f6f7ff] dark:bg-gradient-to-b dark:from-[#0d0f17] dark:to-[#181b23] text-foreground px-4">
-        <div className="w-full max-w-md mx-auto bg-white dark:bg-[#23263a] rounded-2xl shadow-xl border border-gray-200 dark:border-[#23263a] p-8 text-center">
-          <div className="mb-4 p-3 bg-green-100 dark:bg-green-900/30 border border-green-400 dark:border-green-700 text-green-700 dark:text-green-300 rounded-lg">
-            {t.resetSuccessful}
-          </div>
+      <AuthFrame>
+        <p className={EYEBROW} style={{ color: TEAL_ON_DARK }}>Account</p>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white">{COPY.title}</h1>
+        <div role="status" className="mt-5 rounded-lg border border-white/20 bg-black/40 px-4 py-3 text-sm text-white">
+          {COPY.resetSuccessful}
         </div>
-      </div>
+      </AuthFrame>
     );
   }
 
   return (
-    <div>
-      {/* Top-left back button */}
-      <div className="fixed top-4 left-4 z-30">
-        <Link href="/api/auth/signin" className="flex items-center gap-2 text-gray-500 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 text-sm font-medium transition-colors">
-          <svg width="20" height="20" fill="none" viewBox="0 0 20 20" className="inline-block">
-            <path d="M12.5 16L7.5 10L12.5 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          {t.backButton}
-        </Link>
-      </div>
+    <AuthFrame>
+      <p className={EYEBROW} style={{ color: TEAL_ON_DARK }}>Account</p>
+      <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white">{COPY.title}</h1>
+      <p className="mt-2 text-sm leading-relaxed text-white/70">{COPY.subtitle}</p>
 
-      {/* Top-right theme toggle */}
-      <div className="fixed top-4 right-4 z-30">
-        <ModeToggle />
-      </div>
-
-      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-background text-[#262626] dark:text-foreground px-4">
-        <div className="w-full max-w-md mx-auto bg-white dark:bg-card rounded-lg shadow-xl border border-gray-200 dark:border-border p-8">
-          {/* Logo */}
-          <div className="flex items-center justify-center mb-8">
-            <Image
-              src="/images/logo-text.svg"
-              alt="BijbelStudie Logo"
-              width={30}
-              height={30}
-              className="object-contain w-40 h-15 mr-3 dark:invert"
-              priority
-            />
-          </div>
-
-          {/* Header */}
-          <h1 className=" text-3xl font-bold text-[#262626] dark:text-card-foreground mb-2 text-center">{t.title}</h1>
-          <p className=" text-sm text-gray-600 dark:text-muted-foreground mb-6 text-center">
-            {t.subtitle}
-          </p>
-
-          {/* Error Message */}
-          {error && (
-            <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 text-sm ">
-              {error}
-            </div>
-          )}
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Password Field */}
-            <div className="text-left">
-              <label htmlFor="password" className="block text-sm font-medium  text-[#262626] dark:text-card-foreground mb-1">
-                {t.newPassword}
-              </label>
-              <div className="relative">
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  required
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-border bg-white dark:bg-background text-[#262626] dark:text-foreground  focus:outline-none focus:border-[#798777] dark:focus:border-[#9aaa98] transition-colors"
-                  placeholder={t.newPassword}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-teal-600 dark:hover:text-[#9aaa98] transition-colors"
-                >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
-              <p className="text-xs  text-gray-500 dark:text-muted-foreground mt-1">{t.passwordRequirements}</p>
-            </div>
-
-            {/* Confirm Password Field */}
-            <div className="text-left">
-              <label htmlFor="confirmPassword" className="block text-sm font-medium  text-[#262626] dark:text-card-foreground mb-1">
-                {t.confirmNewPassword}
-              </label>
-              <div className="relative">
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
-                  required
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 dark:border-border bg-white dark:bg-background text-[#262626] dark:text-foreground  focus:outline-none focus:border-[#798777] dark:focus:border-[#9aaa98] transition-colors"
-                  placeholder={t.confirmNewPassword}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-teal-600 dark:hover:text-[#9aaa98] transition-colors"
-                >
-                  {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
-            </div>
-
-            <Button
-              type="submit"
-              disabled={isLoading || !token}
-              className="w-full py-3 bg-teal-700 hover:bg-teal-700/90 dark:bg-[#e0e0e0] dark:hover:bg-[#d0d0d0] disabled:bg-gray-400 text-white dark:text-black  font-medium text-lg transition-colors rounded-lg"
-            >
-              {isLoading ? (
-                <span className="flex items-center justify-center">
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  {t.resettingPassword}
-                </span>
-              ) : (
-                t.resetPassword
-              )}
-            </Button>
-          </form>
-
-          {/* Back to Sign In */}
-          <p className=" text-sm text-gray-600 dark:text-muted-foreground mt-6 text-center">
-            {t.rememberPassword}{" "}
-            <Link href="/api/auth/signin" className="text-teal-600 hover:text-[#6a7a68] font-medium">
-              {t.signIn}
-            </Link>
-          </p>
+      {/* Error Message */}
+      {error && (
+        <div role="alert" className="mt-5 rounded-lg border border-red-400/40 bg-red-950/40 px-4 py-3 text-sm text-red-200">
+          {error}
         </div>
-      </div>
-    </div>
+      )}
+
+      {/* Form */}
+      <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+        {/* Password Field */}
+        <div>
+          <label htmlFor="password" className={LABEL}>
+            {COPY.newPassword}
+          </label>
+          <div className="relative">
+            <input
+              id="password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              autoComplete="new-password"
+              required
+              value={formData.password}
+              onChange={handleInputChange}
+              className={FIELD}
+              placeholder="Minimaal 8 tekens"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              aria-label={showPassword ? "Wachtwoord verbergen" : "Wachtwoord tonen"}
+              className={EYE_BUTTON}
+            >
+              {showPassword ? <EyeOff size={16} aria-hidden /> : <Eye size={16} aria-hidden />}
+            </button>
+          </div>
+          <p className="mt-1.5 text-xs text-white/60">{COPY.passwordRequirements}</p>
+        </div>
+
+        {/* Confirm Password Field */}
+        <div>
+          <label htmlFor="confirmPassword" className={LABEL}>
+            {COPY.confirmNewPassword}
+          </label>
+          <div className="relative">
+            <input
+              id="confirmPassword"
+              name="confirmPassword"
+              type={showConfirmPassword ? "text" : "password"}
+              autoComplete="new-password"
+              required
+              value={formData.confirmPassword}
+              onChange={handleInputChange}
+              className={FIELD}
+              placeholder="Herhaal wachtwoord"
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              aria-label={showConfirmPassword ? "Wachtwoord verbergen" : "Wachtwoord tonen"}
+              className={EYE_BUTTON}
+            >
+              {showConfirmPassword ? <EyeOff size={16} aria-hidden /> : <Eye size={16} aria-hidden />}
+            </button>
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          disabled={isLoading || !token}
+          className="press flex w-full items-center justify-center gap-2 rounded-lg bg-white py-2.5 text-sm font-semibold text-gray-900 shadow-lg shadow-black/30 outline-none transition-colors hover:bg-white/90 focus-visible:ring-2 focus-visible:ring-[#0D9488] disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+              {COPY.resettingPassword}
+            </>
+          ) : (
+            COPY.resetPassword
+          )}
+        </button>
+      </form>
+
+      {/* Back to Sign In */}
+      <p className="mt-6 text-center text-sm text-white/70">
+        {COPY.rememberPassword}{" "}
+        <Link href="/api/auth/signin" className={QUIET_LINK}>
+          {COPY.signIn}
+        </Link>
+      </p>
+    </AuthFrame>
   );
 }
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={<SkeletonPage fullHeight />}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen" style={{ backgroundColor: SCENE_BG }} role="status" aria-label="Laden" />
+      }
+    >
       <ResetPasswordForm />
     </Suspense>
   );
 }
-

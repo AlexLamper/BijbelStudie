@@ -2,12 +2,24 @@
 
 import Link from "next/link"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import {
-  Users, ShieldCheck, Sparkles, StickyNote, BookOpen, BarChart3,
-  TrendingUp, ArrowRight, Flame, Euro, Settings2, RefreshCw, MessageSquare,
-} from "lucide-react"
+import { RefreshCw } from "lucide-react"
 import BillingHealthCard, { type BillingStats } from "../../components/admin/BillingHealthCard"
+import OnboardingPreviewButton from "../../components/admin/OnboardingPreviewButton"
 import { ProBadge } from "../../components/ui/ProBadge"
+import SceneShell from "../../components/scene/SceneShell"
+import { SceneSkeleton, SectionHeading } from "../../components/scene/pieces"
+import { EYEBROW, TEAL_DEEP, TEAL_ON_DARK } from "../../components/scene/tokens"
+import {
+  ADMIN_BUTTON,
+  DANGER,
+  DATA_INSET,
+  DATA_PANEL,
+  DATA_TILE,
+  GOOD,
+  ROW_LINE,
+  SERIES_SKY,
+  WARN,
+} from "../../components/admin/adminSurface"
 
 /**
  * Every figure is nullable because /api/admin/stats degrades per query: one
@@ -63,8 +75,6 @@ interface RecentUser {
   isAdmin: boolean
   createdAt: string
 }
-
-const TEAL = "#0D9488"
 
 function formatNumber(n: number | null | undefined): string {
   if (n == null) return "-"
@@ -123,6 +133,21 @@ function describeStatsFailure({ status, detail }: FetchResult): string {
   return `Kon statistieken niet laden (${status}).${details}`
 }
 
+/**
+ * The admin overview, in the immersive shell.
+ *
+ * The shell is the same one the dashboard uses, so a beheerder never leaves the
+ * world - but admin gets far less of the picture than any other screen, on
+ * purpose. Above the fold there is a heading and the four running figures, set
+ * into the landscape the way the dashboard's are. Below that every single thing
+ * is operational data, and it all sits on DATA_PANEL: a near-opaque plate in
+ * the shell's own ground colour. A revenue figure or a Stripe status has to be
+ * read exactly, and the landscape is not allowed to compete with it.
+ *
+ * Restyle only. Every fetch, retry, degradation path, handler and endpoint on
+ * this page is unchanged, including the two nullable-figure rules: a null
+ * renders as "-", never as 0, and `degraded` names which figures those are.
+ */
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<Stats | null>(null)
   const [insights, setInsights] = useState<InsightsResponse | null>(null)
@@ -207,350 +232,346 @@ export default function AdminDashboardPage() {
   }, [insights])
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="px-6 xl:px-10 pt-7 pb-5 border-b border-border bg-background flex-shrink-0">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-foreground">Beheer</h1>
-              <span
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold"
-                style={{ backgroundColor: "rgba(13,148,136,0.1)", color: TEAL }}
-              >
-                <ShieldCheck size={11} /> Admin
-              </span>
-            </div>
-            <p className="text-sm text-muted-foreground mt-0.5">
+    <SceneShell backdrop="reader" header rail>
+      {/* -- The sky: deliberately short ------------------------------- */}
+      {/* A full screen of landscape before the first number would be wrong
+          here: the person on this page came to read figures. One heading
+          block, then the data. */}
+      <section aria-labelledby="beheer-titel" className="pb-10 pt-6">
+        <div className="scene-sky flex flex-wrap items-end justify-between gap-x-8 gap-y-5">
+          <div className="min-w-0 max-w-[40rem]">
+            {/* The one accent up here, and it does the work the shield chip
+                used to: it says which part of the product you are standing in. */}
+            <p className={EYEBROW} style={{ color: TEAL_ON_DARK }}>
+              Admin
+            </p>
+            <h1
+              id="beheer-titel"
+              className="mt-2 text-3xl font-semibold tracking-tight text-white sm:text-4xl"
+            >
+              Beheer
+            </h1>
+            <p className="mt-3 text-sm leading-relaxed text-white/80">
               Overzicht van gebruikers, abonnementen en activiteit
               {lastUpdated && (
-                <span className="text-muted-foreground/70">
+                <span className="text-white/60">
                   {" "}· bijgewerkt {lastUpdated.toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })}
                 </span>
               )}
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleRefresh}
-              disabled={refreshing || loading}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-colors border border-border bg-white dark:bg-card hover:bg-gray-50 dark:hover:bg-secondary text-foreground disabled:opacity-60"
-            >
-              <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} /> Vernieuwen
+          <div className="flex flex-wrap items-center gap-2">
+            <button onClick={handleRefresh} disabled={refreshing || loading} className={ADMIN_BUTTON}>
+              {/* Identifies the control, not decoration. */}
+              <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} aria-hidden /> Vernieuwen
             </button>
-            <Link
-              href="/admin/users"
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium no-underline transition-colors border border-border bg-white dark:bg-card hover:bg-gray-50 dark:hover:bg-secondary text-foreground"
-            >
-              <Users size={14} /> Gebruikers
+            <Link href="/admin/users" className={ADMIN_BUTTON}>
+              Gebruikers
             </Link>
             <Link
               href="/admin/insights"
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium no-underline transition-colors text-white"
-              style={{ backgroundColor: TEAL }}
+              className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-white no-underline outline-none transition-colors hover:bg-[#115E59] focus-visible:ring-2 focus-visible:ring-white"
+              style={{ backgroundColor: TEAL_DEEP }}
             >
-              <BarChart3 size={14} /> Inzichten
+              Inzichten
             </Link>
           </div>
         </div>
+      </section>
+
+      {/* -- The horizon: the four running figures --------------------- */}
+      <div className="scene-horizon">
+        <dl className="stagger-in grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <KpiCard
+            label="Totaal gebruikers"
+            value={formatNumber(stats?.users.total)}
+            sub={stats ? `+${formatNumber(stats.users.newLast7d)} deze week` : ""}
+            loading={loading}
+          />
+          <KpiCard
+            label="Betalende abonnees"
+            value={formatNumber(stats?.users.paying)}
+            sub={
+              stats
+                ? `${formatNumber(stats.users.stripeSubscribers)} Stripe · ${formatNumber(stats.users.storeSubscribers)} store` +
+                  ((stats.users.comped ?? 0) > 0 ? ` · +${stats.users.comped} gratis` : "")
+                : ""
+            }
+            loading={loading}
+          />
+          <KpiCard
+            label="MRR (geschat)"
+            value={
+              stats?.revenue.mrrEur != null
+                ? `€ ${stats.revenue.mrrEur.toLocaleString("nl-NL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                : "-"
+            }
+            sub={stats ? `${formatNumber(stats.billing.monthlySubscribers)} p/m · ${formatNumber(stats.billing.annualSubscribers)} p/j` : ""}
+            loading={loading}
+            accent={GOOD}
+          />
+          <KpiCard
+            label="Actieve streaks"
+            value={formatNumber(stats?.users.activeStreak)}
+            sub={stats ? `Laatste 7 dagen` : ""}
+            loading={loading}
+          />
+        </dl>
       </div>
 
-      {/* Main */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="px-6 xl:px-10 py-6 grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-6 items-start">
+      {/* -- The desk: everything below here is opaque ----------------- */}
+      <div className="grid grid-cols-1 items-start gap-6 pb-20 pt-8 xl:grid-cols-[minmax(0,1fr)_320px]">
 
-          {/* Left column */}
-          <div className="flex flex-col gap-5 min-w-0">
-            {loadError && (
-              <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300">
-                {loadError}
+        {/* Left column */}
+        <div className="flex min-w-0 flex-col gap-5">
+          {loadError && (
+            <div
+              role="alert"
+              className="rounded-xl px-4 py-3 text-sm leading-relaxed"
+              style={{ backgroundColor: "rgba(248,113,113,0.16)", color: DANGER, boxShadow: "inset 0 0 0 1px rgba(248,113,113,0.35)" }}
+            >
+              {loadError}
+            </div>
+          )}
+
+          {/* Partial answer: the response came through, but the server could
+              not read some of the figures. Naming them is the difference
+              between a dash that means "nul" and a dash that means "kapot". */}
+          {degraded.length > 0 && (
+            <div
+              className="rounded-xl px-4 py-3 text-sm leading-relaxed"
+              style={{ backgroundColor: "rgba(251,191,36,0.16)", color: WARN, boxShadow: "inset 0 0 0 1px rgba(251,191,36,0.35)" }}
+            >
+              Sommige cijfers konden niet worden opgehaald en staan hieronder als &ldquo;-&rdquo;:{" "}
+              {degraded.join(", ")}. De rest van de pagina klopt wel.
+            </div>
+          )}
+
+          {/* Stripe <-> database health. Placed directly under the KPIs because
+              a paying customer without access is the most expensive thing on
+              this page to not notice. */}
+          <BillingHealthCard billing={stats?.billing} loading={loading} />
+
+          {/* Signups chart */}
+          <ChartCard
+            id="beheer-aanmeldingen"
+            title="Nieuwe gebruikers"
+            subtitle="Aanmeldingen per dag (laatste 30 dagen)"
+            chart={signupChart}
+            color={TEAL_ON_DARK}
+            loading={loading}
+          />
+
+          {/* Activity chart */}
+          <ChartCard
+            id="beheer-leessessies"
+            title="Leessessies"
+            subtitle="Activiteit per dag (laatste 30 dagen)"
+            chart={activityChart}
+            color={SERIES_SKY}
+            loading={loading}
+          />
+
+          {/* Content stats */}
+          <section className={`p-5 ${DATA_PANEL}`} aria-labelledby="beheer-content">
+            <SectionHeading
+              id="beheer-content"
+              title="Content & engagement"
+              subtitle="Door gebruikers gegenereerde data"
+            />
+            <dl className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+              <MiniStat label="Notities" value={formatNumber(stats?.content.notes)} delta={stats ? `+${stats.content.notesLast7d}` : ""} loading={loading} />
+              <MiniStat label="Leessessies" value={formatNumber(stats?.content.readingSessions)} delta={stats ? `+${stats.content.sessionsLast7d}` : ""} loading={loading} />
+              <MiniStat label="Studiegroepen" value={formatNumber(stats?.content.groups)} loading={loading} />
+              <MiniStat label="Leesplannen" value={formatNumber(stats?.content.plans)} loading={loading} />
+            </dl>
+          </section>
+        </div>
+
+        {/* Right sidebar */}
+        <div className="flex flex-col gap-4">
+
+          {/* Recent users */}
+          <section className={`p-5 ${DATA_PANEL}`} aria-labelledby="beheer-recent">
+            <SectionHeading id="beheer-recent" title="Recente aanmeldingen" rule />
+            {loading ? (
+              <div className="mt-4 space-y-3">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="space-y-1.5">
+                    <SceneSkeleton className="h-3.5 w-3/5" />
+                    <SceneSkeleton className="h-3 w-4/5" />
+                  </div>
+                ))}
+              </div>
+            ) : recent.length === 0 ? (
+              <p className="mt-4 text-xs text-white/70">Nog geen gebruikers.</p>
+            ) : (
+              <div className="mt-4 flex flex-col gap-3">
+                {recent.map(u => (
+                  <div key={u._id} className="flex min-w-0 items-center gap-3">
+                    <span
+                      aria-hidden
+                      className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white ring-1 ring-white/20"
+                      style={{ backgroundColor: "rgba(13,148,136,0.35)" }}
+                    >
+                      {(u.name || u.email).slice(0, 1).toUpperCase()}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <p className="truncate text-xs font-semibold text-white">{u.name || "Naamloos"}</p>
+                        {u.subscribed && <ProBadge size="xs" />}
+                        {u.isAdmin && (
+                          <span
+                            className="rounded-full px-1.5 py-0.5 text-[9px] font-bold"
+                            style={{ backgroundColor: "rgba(45,212,191,0.18)", color: TEAL_ON_DARK }}
+                          >
+                            ADMIN
+                          </span>
+                        )}
+                      </div>
+                      <p className="truncate text-[11px] text-white/60">{u.email}</p>
+                    </div>
+                    <p className="whitespace-nowrap text-[10px] tabular-nums text-white/55">{relativeTime(u.createdAt)}</p>
+                  </div>
+                ))}
+                <Link
+                  href="/admin/users"
+                  className="pt-0.5 text-xs font-semibold no-underline hover:underline"
+                  style={{ color: TEAL_ON_DARK }}
+                >
+                  Alle gebruikers bekijken →
+                </Link>
               </div>
             )}
+          </section>
 
-            {/* Partial answer: the response came through, but the server could
-                not read some of the figures. Naming them is the difference
-                between a dash that means "nul" and a dash that means "kapot". */}
-            {degraded.length > 0 && (
-              <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-300">
-                Sommige cijfers konden niet worden opgehaald en staan hieronder als &ldquo;-&rdquo;:{" "}
-                {degraded.join(", ")}. De rest van de pagina klopt wel.
-              </div>
-            )}
-
-            {/* KPI cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-              <KpiCard
-                label="Totaal gebruikers"
-                value={formatNumber(stats?.users.total)}
-                sub={stats ? `+${formatNumber(stats.users.newLast7d)} deze week` : ""}
-                icon={Users}
-                tint="rgba(13,148,136,0.08)"
-                color={TEAL}
-                loading={loading}
-              />
-              <KpiCard
-                label="Betalende abonnees"
-                value={formatNumber(stats?.users.paying)}
-                sub={
-                  stats
-                    ? `${formatNumber(stats.users.stripeSubscribers)} Stripe · ${formatNumber(stats.users.storeSubscribers)} store` +
-                      ((stats.users.comped ?? 0) > 0 ? ` · +${stats.users.comped} gratis` : "")
-                    : ""
-                }
-                icon={Sparkles}
-                tint="rgba(217,119,6,0.08)"
-                color="#D97706"
-                loading={loading}
-              />
-              <KpiCard
-                label="MRR (geschat)"
-                value={
-                  stats?.revenue.mrrEur != null
-                    ? `€ ${stats.revenue.mrrEur.toLocaleString("nl-NL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                    : "-"
-                }
-                sub={stats ? `${formatNumber(stats.billing.monthlySubscribers)} p/m · ${formatNumber(stats.billing.annualSubscribers)} p/j` : ""}
-                icon={Euro}
-                tint="rgba(34,197,94,0.08)"
-                color="#16A34A"
-                loading={loading}
-              />
-              <KpiCard
-                label="Actieve streaks"
-                value={formatNumber(stats?.users.activeStreak)}
-                sub={stats ? `Laatste 7 dagen` : ""}
-                icon={Flame}
-                tint="rgba(234,88,12,0.08)"
-                color="#EA580C"
-                loading={loading}
-              />
-            </div>
-
-            {/* Stripe <-> database health. Placed directly under the KPIs because
-                a paying customer without access is the most expensive thing on
-                this page to not notice. */}
-            <BillingHealthCard billing={stats?.billing} loading={loading} />
-
-            {/* Signups chart */}
-            <ChartCard
-              title="Nieuwe gebruikers"
-              subtitle="Aanmeldingen per dag (laatste 30 dagen)"
-              icon={TrendingUp}
-              chart={signupChart}
-              color={TEAL}
-              loading={loading}
-            />
-
-            {/* Activity chart */}
-            <ChartCard
-              title="Leessessies"
-              subtitle="Activiteit per dag (laatste 30 dagen)"
-              icon={BookOpen}
-              chart={activityChart}
-              color="#0EA5E9"
-              loading={loading}
-            />
-
-            {/* Content stats */}
-            <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-2xl p-5">
-              <div className="flex items-center gap-2.5 mb-4">
-                <div className="h-7 w-7 rounded-lg flex items-center justify-center"
-                  style={{ backgroundColor: "rgba(13,148,136,0.08)" }}>
-                  <StickyNote size={14} style={{ color: TEAL }} />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-gray-900 dark:text-foreground">Content & engagement</p>
-                  <p className="text-xs text-gray-500 dark:text-muted-foreground">
-                    Door gebruikers gegenereerde data
-                  </p>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <MiniStat label="Notities" value={formatNumber(stats?.content.notes)} delta={stats ? `+${stats.content.notesLast7d}` : ""} loading={loading} />
-                <MiniStat label="Leessessies" value={formatNumber(stats?.content.readingSessions)} delta={stats ? `+${stats.content.sessionsLast7d}` : ""} loading={loading} />
-                <MiniStat label="Studiegroepen" value={formatNumber(stats?.content.groups)} loading={loading} />
-                <MiniStat label="Leesplannen" value={formatNumber(stats?.content.plans)} loading={loading} />
-              </div>
-            </div>
-          </div>
-
-          {/* Right sidebar */}
-          <div className="flex flex-col gap-4">
-
-            {/* Recent users */}
-            <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-5">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-muted-foreground">
-                  Recente aanmeldingen
-                </p>
-                <Users size={14} style={{ color: TEAL }} />
-              </div>
-              {loading ? (
-                <div className="space-y-3">
-                  {[1, 2, 3, 4].map(i => (
-                    <div key={i} className="space-y-1.5">
-                      <div className="h-3.5 w-3/5 rounded animate-pulse bg-gray-100 dark:bg-secondary" />
-                      <div className="h-3 w-4/5 rounded animate-pulse bg-gray-100 dark:bg-secondary" />
-                    </div>
-                  ))}
-                </div>
-              ) : recent.length === 0 ? (
-                <p className="text-xs text-muted-foreground">Nog geen gebruikers.</p>
-              ) : (
-                <div className="flex flex-col gap-3">
-                  {recent.map(u => (
-                    <div key={u._id} className="flex items-center gap-3 min-w-0">
-                      <div className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0"
-                        style={{ backgroundColor: "rgba(13,148,136,0.1)", color: TEAL }}>
-                        {(u.name || u.email).slice(0, 1).toUpperCase()}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5">
-                          <p className="text-xs font-semibold text-foreground truncate">{u.name || "Naamloos"}</p>
-                          {u.subscribed && <ProBadge size="xs" />}
-                          {u.isAdmin && (
-                            <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold"
-                              style={{ backgroundColor: "rgba(13,148,136,0.1)", color: TEAL }}>ADMIN</span>
-                          )}
-                        </div>
-                        <p className="text-[11px] text-muted-foreground truncate">{u.email}</p>
-                      </div>
-                      <p className="text-[10px] text-muted-foreground whitespace-nowrap">{relativeTime(u.createdAt)}</p>
-                    </div>
-                  ))}
-                  <Link href="/admin/users" className="text-xs font-medium pt-0.5 flex items-center gap-0.5" style={{ color: TEAL }}>
-                    Alle gebruikers bekijken <ArrowRight size={11} />
-                  </Link>
-                </div>
-              )}
-            </div>
-
-            {/* Today's funnel */}
-            <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-5">
-              <p className="text-xs font-bold uppercase tracking-widest mb-3 text-gray-500 dark:text-muted-foreground">
-                Vandaag
-              </p>
+          {/* Today's funnel */}
+          <section className={`p-5 ${DATA_PANEL}`} aria-labelledby="beheer-vandaag">
+            <SectionHeading id="beheer-vandaag" title="Vandaag" rule />
+            <dl className="mt-1">
               <FunnelRow label="Nieuwe aanmeldingen" value={stats?.users.newLast24h} loading={loading} />
               <FunnelRow label="Nieuw in 7 dagen" value={stats?.users.newLast7d} loading={loading} />
               <FunnelRow label="Nieuw in 30 dagen" value={stats?.users.newLast30d} loading={loading} />
               <FunnelRow label="Notities deze week" value={stats?.content.notesLast7d} loading={loading} />
               <FunnelRow label="Sessies deze week" value={stats?.content.sessionsLast7d} loading={loading} last />
-            </div>
+            </dl>
+          </section>
 
-            {/* Quick actions */}
-            <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-4">
-              <p className="text-xs font-bold uppercase tracking-widest mb-3 text-gray-500 dark:text-muted-foreground">
-                Snel naar
-              </p>
-              <div className="flex flex-col gap-1">
-                {[
-                  { href: "/admin/users", label: "Gebruikersbeheer", icon: Users },
-                  { href: "/admin/insights", label: "Inzichten & analytics", icon: BarChart3 },
-                  { href: "/admin/feedback", label: "Feedback", icon: MessageSquare },
-                  { href: "/abonnement", label: "Abonnementen", icon: Sparkles },
-                  { href: "/instellingen", label: "Mijn instellingen", icon: Settings2 },
-                ].map(({ href, label, icon: Icon }) => (
-                  <Link
-                    key={href}
-                    href={href}
-                    className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors hover:bg-gray-50 dark:hover:bg-secondary text-gray-700 dark:text-foreground no-underline"
-                  >
-                    <Icon size={14} style={{ color: TEAL, flexShrink: 0 }} />
-                    {label}
-                  </Link>
-                ))}
-              </div>
+          {/* Quick actions */}
+          <section className={`p-4 ${DATA_PANEL}`} aria-labelledby="beheer-snel">
+            <SectionHeading id="beheer-snel" title="Snel naar" rule />
+            <div className="mt-2 flex flex-col gap-0.5">
+              {[
+                { href: "/admin/users", label: "Gebruikersbeheer" },
+                { href: "/admin/insights", label: "Inzichten & analytics" },
+                { href: "/admin/feedback", label: "Feedback" },
+                { href: "/abonnement", label: "Abonnementen" },
+                { href: "/instellingen", label: "Mijn instellingen" },
+              ].map(({ href, label }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className="rounded-lg px-3 py-2 text-sm text-white/85 no-underline outline-none transition-colors hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white"
+                >
+                  {label}
+                </Link>
+              ))}
+              <OnboardingPreviewButton />
             </div>
-          </div>
+          </section>
         </div>
       </div>
-    </div>
+    </SceneShell>
   )
 }
 
 /* ── Sub components ───────────────────────────────────────────── */
 
+/**
+ * One figure on the horizon.
+ *
+ * Not `GlassStat` from components/scene/pieces: that surface is deliberately
+ * translucent so the landscape runs through it, and a euro figure read against
+ * moving colour is a figure the beheerder has to check twice. Same shape, opaque
+ * plate. The tinted icon square each of these used to carry is gone - it named
+ * nothing the label did not already say.
+ */
 function KpiCard({
-  label, value, sub, icon: Icon, tint, color, loading,
+  label, value, sub, loading, accent,
 }: {
   label: string
   value: string
   sub: string
-  icon: React.ElementType
-  tint: string
-  color: string
   loading: boolean
+  /** Only for a figure whose colour carries meaning, e.g. revenue. */
+  accent?: string
 }) {
   return (
-    <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-4">
-      <div className="flex items-center justify-between mb-2">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-muted-foreground">
-          {label}
-        </p>
-        <div className="h-7 w-7 rounded-lg flex items-center justify-center" style={{ backgroundColor: tint }}>
-          <Icon size={13} style={{ color }} />
-        </div>
-      </div>
+    <div className={`px-4 py-3.5 ${DATA_TILE}`}>
+      <dt className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/60">{label}</dt>
       {loading ? (
-        <div className="space-y-2">
-          <div className="h-6 w-2/3 rounded animate-pulse bg-gray-100 dark:bg-secondary" />
-          <div className="h-3 w-1/2 rounded animate-pulse bg-gray-100 dark:bg-secondary" />
-        </div>
+        <dd className="mt-2 space-y-2">
+          <SceneSkeleton className="h-6 w-2/3" />
+          <SceneSkeleton className="h-3 w-1/2" />
+        </dd>
       ) : (
-        <>
-          <p className="text-2xl font-bold text-gray-900 dark:text-foreground leading-tight">{value}</p>
-          {sub && <p className="text-[11px] text-gray-500 dark:text-muted-foreground mt-0.5">{sub}</p>}
-        </>
+        <dd className="content-in mt-1">
+          <span
+            className="block text-2xl font-semibold leading-tight tabular-nums text-white"
+            style={accent ? { color: accent } : undefined}
+          >
+            {value}
+          </span>
+          {sub && <span className="mt-0.5 block text-[11px] tabular-nums text-white/60">{sub}</span>}
+        </dd>
       )}
     </div>
   )
 }
 
 function ChartCard({
-  title, subtitle, icon: Icon, chart, color, loading,
+  id, title, subtitle, chart, color, loading,
 }: {
+  id: string
   title: string
   subtitle: string
-  icon: React.ElementType
   chart: { data: { date: string; count: number }[]; max: number }
   color: string
   loading: boolean
 }) {
   const total = chart.data.reduce((s, d) => s + d.count, 0)
   return (
-    <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-2xl p-5">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2.5">
-          <div className="h-7 w-7 rounded-lg flex items-center justify-center"
-            style={{ backgroundColor: `${color}14` }}>
-            <Icon size={14} style={{ color }} />
-          </div>
-          <div>
-            <p className="text-sm font-bold text-gray-900 dark:text-foreground">{title}</p>
-            <p className="text-xs text-gray-500 dark:text-muted-foreground">{subtitle}</p>
-          </div>
-        </div>
-        {!loading && (
-          <p className="text-xs text-gray-500 dark:text-muted-foreground">
-            Totaal: <span className="font-semibold text-foreground">{total.toLocaleString("nl-NL")}</span>
-          </p>
-        )}
-      </div>
+    <section className={`p-5 ${DATA_PANEL}`} aria-labelledby={id}>
+      <SectionHeading
+        id={id}
+        title={title}
+        subtitle={subtitle}
+        action={
+          !loading ? (
+            <p className="text-xs text-white/65">
+              Totaal:{" "}
+              <span className="font-semibold tabular-nums text-white">{total.toLocaleString("nl-NL")}</span>
+            </p>
+          ) : undefined
+        }
+      />
       {loading ? (
-        <div className="h-32 rounded animate-pulse bg-gray-100 dark:bg-secondary" />
+        <SceneSkeleton className="mt-4 h-32 w-full rounded-lg" />
       ) : (
-        <div>
-          <div className="flex items-end gap-[3px] h-32">
+        <div className="mt-4">
+          <div className="flex h-32 items-end gap-[3px]">
             {chart.data.map((d) => {
               const pct = (d.count / chart.max) * 100
               return (
-                <div key={d.date} className="flex-1 flex flex-col justify-end h-full group relative">
+                <div key={d.date} className="group relative flex h-full flex-1 flex-col justify-end">
                   <div
                     className="w-full rounded-t-sm transition-all"
                     style={{
                       height: d.count === 0 ? "4px" : `${Math.max(pct, 4)}%`,
-                      backgroundColor: d.count === 0 ? "rgba(0,0,0,0.06)" : color,
-                      opacity: d.count === 0 ? 0.4 : 1,
+                      // An empty day has to still be visible on a dark plate;
+                      // the light-page rgba(0,0,0,0.06) disappeared entirely.
+                      backgroundColor: d.count === 0 ? "rgba(255,255,255,0.16)" : color,
+                      opacity: d.count === 0 ? 0.7 : 1,
                     }}
                     title={`${formatDate(d.date)}: ${d.count}`}
                   />
@@ -558,27 +579,33 @@ function ChartCard({
               )
             })}
           </div>
-          <div className="flex justify-between mt-2 text-[10px] text-muted-foreground">
+          <div className="mt-2 flex justify-between text-[10px] tabular-nums text-white/55">
             <span>{chart.data.length > 0 && formatDate(chart.data[0].date)}</span>
             <span>{chart.data.length > 0 && formatDate(chart.data[chart.data.length - 1].date)}</span>
           </div>
         </div>
       )}
-    </div>
+    </section>
   )
 }
 
 function MiniStat({ label, value, delta, loading }: { label: string; value: string; delta?: string; loading: boolean }) {
   return (
-    <div className="rounded-lg border border-border bg-gray-50/50 dark:bg-secondary/30 p-3">
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">{label}</p>
+    <div className={`p-3 ${DATA_INSET}`}>
+      <dt className="mb-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-white/60">{label}</dt>
       {loading ? (
-        <div className="h-5 w-2/3 rounded animate-pulse bg-gray-100 dark:bg-secondary" />
+        <dd>
+          <SceneSkeleton className="h-5 w-2/3" />
+        </dd>
       ) : (
-        <div className="flex items-baseline gap-1.5">
-          <p className="text-lg font-bold text-foreground">{value}</p>
-          {delta && <span className="text-[10px] font-medium" style={{ color: TEAL }}>{delta}</span>}
-        </div>
+        <dd className="content-in flex items-baseline gap-1.5">
+          <span className="text-lg font-semibold tabular-nums text-white">{value}</span>
+          {delta && (
+            <span className="text-[10px] font-medium tabular-nums" style={{ color: TEAL_ON_DARK }}>
+              {delta}
+            </span>
+          )}
+        </dd>
       )}
     </div>
   )
@@ -586,12 +613,14 @@ function MiniStat({ label, value, delta, loading }: { label: string; value: stri
 
 function FunnelRow({ label, value, loading, last }: { label: string; value?: number; loading: boolean; last?: boolean }) {
   return (
-    <div className={`flex items-center justify-between py-2 ${last ? "" : "border-b border-border/60"}`}>
-      <p className="text-xs text-muted-foreground">{label}</p>
+    <div className={`flex items-center justify-between gap-3 py-2 ${last ? "" : `border-b ${ROW_LINE}`}`}>
+      <dt className="text-xs text-white/70">{label}</dt>
       {loading ? (
-        <div className="h-3 w-8 rounded animate-pulse bg-gray-100 dark:bg-secondary" />
+        <dd>
+          <SceneSkeleton className="h-3 w-8" />
+        </dd>
       ) : (
-        <p className="text-sm font-semibold text-foreground">{formatNumber(value)}</p>
+        <dd className="text-sm font-semibold tabular-nums text-white">{formatNumber(value)}</dd>
       )}
     </div>
   )

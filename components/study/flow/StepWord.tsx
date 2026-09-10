@@ -1,15 +1,19 @@
 'use client';
 
 import React from 'react';
-import { BookOpen } from 'lucide-react';
 
 import PassageReader from './PassageReader';
+import LessonLayout, {
+  FOCUS_RING,
+  INK_FAINT,
+  INK_MUTED,
+  Marginal,
+  READING_SURFACE,
+} from './lesson-layout';
 import { ReadingPreferencesMenu } from '../ReadingPreferencesMenu';
 import SpeakButton from '../SpeakButton';
 import { SpokenTextScope } from '../SpokenText';
 import type { ReadingPreferences } from '../../../hooks/useReadingPreferences';
-
-const TEAL = '#0D9488';
 
 /** Group headings for the translation picker, Dutch first. */
 const LANGUAGE_LABELS: Record<string, string> = {
@@ -52,15 +56,14 @@ function TranslationPicker({
   );
 
   return (
-    <label className="relative inline-flex items-center">
+    <label className="block">
       <span className="sr-only">Bijbelvertaling</span>
       <select
         value={value ?? ''}
         onChange={(event) => onChange(event.target.value)}
         title="Bijbelvertaling"
         data-track="study_word_version"
-        className="h-8 max-w-[170px] cursor-pointer rounded-md border border-gray-200 dark:border-border bg-white dark:bg-card pl-2.5 pr-2 text-[12.5px] font-medium text-foreground outline-none transition-colors hover:bg-gray-50 dark:hover:bg-secondary focus-visible:ring-2"
-        style={{ ['--tw-ring-color' as string]: 'rgba(13,148,136,0.35)' }}
+        className={`h-9 w-full cursor-pointer rounded-lg border border-white/20 bg-white/10 px-2.5 text-[12.5px] font-medium text-white transition-colors hover:bg-white/15 ${FOCUS_RING}`}
       >
         {languages.map((language) => (
           <optgroup
@@ -88,9 +91,17 @@ function TranslationPicker({
  * rendered, and the verses that ARE rendered are not tinted. Everything on this
  * step is the text the lesson asked you to read.
  *
- * The reading preferences from /lezen are available in the header, because
- * someone who reads at 20px there does not suddenly read at 16px here - and so
- * is the translation, for the same reason.
+ * THE PASSAGE STANDS ON THE GROUND. It used to sit on the scene's light `PLATE`
+ * as the one lit object in a night window - a white page dropped into a dark
+ * frame, with the margin notes beside it on the dark and the commentary a step
+ * darker again. It reads as one screen now: same ground as the window, same
+ * white ink as /lezen, separated from the heading by a hairline and by air
+ * rather than by a colour. Contrast went up, not down - white on the ground is
+ * 18.5:1 where the plate gave the same type 18.1:1.
+ *
+ * What supports the reading - the leeswijzer, the translation, the type
+ * controls, the question that is coming - stands in the margin beside the text
+ * rather than in a toolbar above it.
  */
 export default function StepWord({
   book,
@@ -103,6 +114,8 @@ export default function StepWord({
   readingCue,
   preferences,
   onUpdatePreferences,
+  eyebrow,
+  reflectionQuestion,
 }: {
   book: string;
   chapter: number;
@@ -114,6 +127,9 @@ export default function StepWord({
   readingCue?: string | null;
   preferences?: ReadingPreferences;
   onUpdatePreferences?: (prefs: Partial<ReadingPreferences>) => void;
+  eyebrow?: string;
+  /** Shown in the margin as "Straks de vraag", so the reading has a purpose. */
+  reflectionQuestion?: string | null;
 }) {
   const reference =
     verseStart == null
@@ -122,42 +138,33 @@ export default function StepWord({
         ? `${book} ${chapter}:${verseStart}-${verseEnd}`
         : `${book} ${chapter}:${verseStart}`;
 
+  const versionName = versions.find((entry) => entry.id === version)?.name ?? version ?? '';
+
   return (
     // The scope has to sit above both halves of this step: the button that
-    // reads the whole gedeelte lives in the header here, while the words it
-    // lights up are rendered by PassageReader further down.
+    // reads the whole gedeelte lives in the margin here, while the words it
+    // lights up are rendered by PassageReader in the column.
     <SpokenTextScope>
-      <div className="h-full overflow-y-auto">
-        <div className="mx-auto w-full max-w-[1180px] px-6 sm:px-10 xl:px-14 py-8 sm:py-10">
-          {/* Left-aligned, like the text underneath it. A centred reference above
-              left-aligned prose reads as two unrelated blocks. */}
-          <header className="mb-6 sm:mb-8">
-            <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0">
-                <p
-                  className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest mb-1"
-                  style={{ color: TEAL }}
-                >
-                  <BookOpen size={13} /> Lees eerst het bijbelgedeelte
-                </p>
-                <h1 className="text-2xl sm:text-3xl font-bold text-foreground leading-tight">
-                  {reference}
-                </h1>
-                {readingCue && (
-                  <p className="mt-2 text-[15px] text-gray-500 dark:text-muted-foreground leading-relaxed">
-                    {readingCue}
-                  </p>
-                )}
-              </div>
+      <LessonLayout
+        eyebrow={eyebrow ?? 'Het Woord'}
+        heading={reference}
+        aside={
+          <>
+            {readingCue ? (
+              <Marginal label="Leeswijzer">
+                <p className="italic">{readingCue}</p>
+              </Marginal>
+            ) : null}
 
-              <div className="flex-none flex items-center gap-1.5">
-                {onVersionChange && (
-                  <TranslationPicker
-                    versions={versions}
-                    value={version}
-                    onChange={onVersionChange}
-                  />
-                )}
+            <Marginal label="Vertaling">
+              {onVersionChange && (
+                <TranslationPicker
+                  versions={versions}
+                  value={version}
+                  onChange={onVersionChange}
+                />
+              )}
+              <div className="mt-2.5 flex items-center gap-1.5">
                 <SpeakButton
                   compact
                   showSettings={false}
@@ -169,7 +176,7 @@ export default function StepWord({
                       .join(' ');
                   }}
                   label="Lees het gedeelte voor"
-                  className="border border-gray-200 dark:border-border rounded-md"
+                  className="border border-white/20 rounded-md"
                 />
                 {onUpdatePreferences && (
                   <ReadingPreferencesMenu
@@ -187,25 +194,37 @@ export default function StepWord({
                   />
                 )}
               </div>
-            </div>
-          </header>
+            </Marginal>
 
-          <section className="rounded-2xl border border-gray-200 dark:border-border bg-white dark:bg-card px-6 sm:px-10 xl:px-14 py-8 sm:py-10">
-            <PassageReader
-              book={book}
-              chapter={chapter}
-              version={version}
-              verseStart={verseStart}
-              verseEnd={verseEnd}
-              preferences={preferences}
-            />
-          </section>
-
-          <p className="mt-4 text-xs text-gray-400 dark:text-muted-foreground">
-            Klik op een vers om er een notitie bij te maken.
+            {reflectionQuestion ? (
+              <Marginal label="Straks de vraag">
+                <p className="italic">{reflectionQuestion}</p>
+              </Marginal>
+            ) : null}
+          </>
+        }
+      >
+        {versionName ? (
+          <p className={`mt-1.5 text-[11.5px] uppercase tracking-[0.14em] ${INK_FAINT}`}>
+            {versionName}
           </p>
-        </div>
-      </div>
+        ) : null}
+
+        <section className={`${READING_SURFACE} mt-6`}>
+          <PassageReader
+            book={book}
+            chapter={chapter}
+            version={version}
+            verseStart={verseStart}
+            verseEnd={verseEnd}
+            preferences={preferences}
+          />
+        </section>
+
+        <p className={`mt-3.5 text-xs ${INK_MUTED}`}>
+          Klik op een vers om er een notitie bij te maken.
+        </p>
+      </LessonLayout>
     </SpokenTextScope>
   );
 }

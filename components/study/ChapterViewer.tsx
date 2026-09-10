@@ -9,6 +9,7 @@ import { getBibleAttribution } from '../../lib/bible-attribution';
 import SpeakButton from './SpeakButton';
 import { SpokenText, SpokenTextScope } from './SpokenText';
 import VerseMarkers from './VerseMarkers';
+import { VERSE_NUMBER_INK } from '../scene/tokens';
 
 type Props = {
   version: string | null;
@@ -237,11 +238,25 @@ export default function ChapterViewer({
                     lineHeightClass,
                     letterSpacingClass,
                   )}>
+                    {/* The verse number is pinned rather than left on
+                        `--muted-foreground`. This viewer is /lezen's only, and
+                        /lezen reads on the scene's own ground: the muted token
+                        lands at 8.6:1 there, while the number measured 10.3:1
+                        on the white page it used to sit on. A superscript this
+                        small may not lose contrast in the move, so it gets
+                        VERSE_NUMBER_INK - #BFC9CC, 11.0:1 - a clear step below
+                        the passage's 18.5:1 and above what it replaced. It is
+                        an inline colour rather than a `dark:` class so it
+                        cannot be undone by a parent that has already fixed the
+                        computed `color`. */}
                     {prefs.showVerseNumbers && (
-                      <sup className={cn(
-                        "font-semibold mr-1",
-                        isHighlighted ? "text-teal-600 dark:text-teal-400" : "text-gray-700 dark:text-muted-foreground"
-                      )}>
+                      <sup
+                        className={cn(
+                          "font-semibold mr-1",
+                          isHighlighted && "text-teal-600 dark:text-teal-400"
+                        )}
+                        style={isHighlighted ? undefined : { color: VERSE_NUMBER_INK }}
+                      >
                         {verseNumber}
                       </sup>
                     )}
@@ -261,8 +276,11 @@ export default function ChapterViewer({
                     />
                     <button
                       onClick={() => handleVerseClick(verseNumber, text)}
-                      className="bg-[#0D9488] hover:bg-[#0f766e] text-white p-1.5 shadow-[0_2px_4px_-1px_rgba(0,0,0,0.1)]"
-                      title="Add note to this verse"
+                      // #0F766E, not #0D9488: a white glyph on the lighter
+                      // brand fill measures 3.74:1. Same swatch, one step down
+                      // - the value PassageReader already uses for this button.
+                      className="bg-[#0F766E] hover:bg-[#115E59] text-white p-1.5 rounded-sm shadow-[0_2px_4px_-1px_rgba(0,0,0,0.1)] outline-none focus-visible:ring-2 focus-visible:ring-white"
+                      title={`Notitie bij vers ${verseNumber}`}
                     >
                       <Plus className="h-3 w-3" />
                     </button>
@@ -272,8 +290,13 @@ export default function ChapterViewer({
               })}
             </div>
 
+            {/* The licensing line. `getBibleAttribution` returns it verbatim
+                and nothing here may reword, truncate or wrap it - the NBG51
+                licence is an exact string. It was #9CA3AF, which measures
+                2.5:1 on white; a required copyright notice has to be readable,
+                so on the room's ground it is the muted token, 8.6:1. */}
             {getBibleAttribution(version) && (
-              <p className="mt-4 pt-3 border-t border-gray-100 dark:border-border text-[11px] leading-snug text-gray-400 dark:text-muted-foreground">
+              <p className="mt-4 pt-3 border-t border-gray-100 dark:border-border text-[11px] leading-snug text-gray-600 dark:text-muted-foreground">
                 {getBibleAttribution(version)}
               </p>
             )}

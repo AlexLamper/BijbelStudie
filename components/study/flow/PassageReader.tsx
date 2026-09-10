@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { AlertCircle, Plus } from 'lucide-react';
 
-import { SkeletonChapter } from '../../ui/skeletons';
+import { ATTRIBUTION_INK, VERSE_NUMBER_INK } from '../../scene/tokens';
 import { CreateNoteModal } from '../CreateNoteModal';
 import SpeakButton from '../SpeakButton';
 import { SpokenText, SpokenTextScope } from '../SpokenText';
@@ -17,6 +17,19 @@ type VerseMap = Record<string, string>;
 
 /**
  * The passage a lesson reads - and nothing else.
+ *
+ * EVERY COLOUR HERE IS FIXED, AND FIXED FOR THE WINDOW'S OWN GROUND. The
+ * passage used to be laid on the scene's light `PLATE`; it now stands on the
+ * same ground as everything around it (see StepWord), and that ground does not
+ * flip with the reader's theme - so a `dark:` variant on anything inside would
+ * paint light type on light the moment someone switched. The shared
+ * `SkeletonChapter` is not used for the same reason; the local one below is a
+ * dark-ground skeleton.
+ *
+ * The measured contrasts on SCENE_BG: scripture 18.5:1, verse numbers 11.0:1
+ * (VERSE_NUMBER_INK), the licensing line 8.6:1 (ATTRIBUTION_INK). All three are
+ * higher than on the plate they replace, and all three are the values /lezen
+ * reads at - the two reading screens are now one screen twice.
  *
  * Two deliberate differences from `ChapterViewer`:
  *
@@ -120,8 +133,19 @@ export default function PassageReader({
 
   if (loading) {
     return (
-      <div className="py-4">
-        <SkeletonChapter verses={8} />
+      <div className="py-2 space-y-4" role="status" aria-label="Bijbeltekst laden">
+        {[100, 94, 88, 97, 82, 92, 76, 90].map((width, index) => (
+          <div key={index} className="flex gap-3">
+            <div className="h-3.5 w-5 flex-none rounded skeleton-pulse bg-white/10" />
+            <div className="flex-1 space-y-2">
+              <div className="h-3.5 rounded skeleton-pulse bg-white/10" />
+              <div
+                className="h-3.5 rounded skeleton-pulse bg-white/10"
+                style={{ width: `${width}%` }}
+              />
+            </div>
+          </div>
+        ))}
       </div>
     );
   }
@@ -129,15 +153,18 @@ export default function PassageReader({
   if (error) {
     return (
       <div className="py-16 text-center">
-        <AlertCircle className="h-9 w-9 text-red-500 mx-auto mb-4" />
-        <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        {/* #F87171 on the window's ground measures 6.6:1; the red-600/700 this
+            used to carry was drawn for a white plate and lands under 3:1 here.
+            Same pair StepQuiz uses for the same reason. */}
+        <AlertCircle className="h-9 w-9 text-red-400 mx-auto mb-4" />
+        <p className="text-sm text-red-300">{error}</p>
       </div>
     );
   }
 
   if (inRange.length === 0) {
     return (
-      <div className="py-16 text-center text-sm text-gray-500 dark:text-muted-foreground">
+      <div className="py-16 text-center text-sm text-white/80">
         Geen bijbeltekst gevonden voor dit gedeelte.
       </div>
     );
@@ -165,9 +192,15 @@ export default function PassageReader({
                   : undefined
               }
             >
-              <p className={cn('text-gray-900 dark:text-foreground', typography)}>
+              {/* Scripture is the literal white the rest of the scene writes
+                  in: 18.5:1 on the window's ground, and the same ink /lezen
+                  sets the same verses in. */}
+              <p className={`${typography} text-white`}>
                 {prefs.showVerseNumbers && (
-                  <sup className="font-semibold mr-2 text-[0.62em] text-gray-400 dark:text-muted-foreground select-none">
+                  <sup
+                    className="font-semibold mr-2 text-[0.62em] select-none"
+                    style={{ color: VERSE_NUMBER_INK }}
+                  >
                     {number}
                   </sup>
                 )}
@@ -177,6 +210,11 @@ export default function PassageReader({
                 >
                   <SpokenText text={text} />
                 </span>
+                {/* VerseMarkers paints its glyph #2DD4BF under a `dark` scope,
+                    which is what the night ground wants - 9.7:1 - and it is the
+                    same value /lezen shows the same markers in. The local
+                    override that pulled it back to #0F766E existed only because
+                    this reader used to sit on a light plate. */}
                 <VerseMarkers annotation={marks} />
               </p>
 
@@ -186,11 +224,13 @@ export default function PassageReader({
                   showSettings={false}
                   getText={() => text}
                   label={`Vers ${number} voorlezen`}
-                  className="bg-white dark:bg-card shadow-sm border border-gray-200 dark:border-border"
+                  className="shadow-sm border border-white/20"
                 />
                 <button
                   onClick={() => setSelected({ verseNumber: String(number), text })}
-                  className="bg-[#0D9488] hover:bg-[#0f766e] text-white p-1.5 rounded-sm shadow-sm"
+                  // #0F766E, not #0D9488: a white glyph on the lighter brand
+                  // fill measures 3.74:1. Same swatch, one step down.
+                  className="bg-[#0F766E] hover:bg-[#115E59] text-white p-1.5 rounded-sm shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-white"
                   title={`Notitie bij vers ${number}`}
                 >
                   <Plus className="h-3 w-3" />
@@ -201,8 +241,17 @@ export default function PassageReader({
           })}
         </div>
 
+        {/* The licensing line. `getBibleAttribution` returns it verbatim and
+            nothing here may reword, truncate or wrap it - the NBG51 licence is
+            an exact string. It is ATTRIBUTION_INK, 8.6:1 on the window's
+            ground: the same value /lezen sets the same notice in, and well
+            clear of the 4.5:1 floor, because a required copyright notice is the
+            last line on a screen that may be allowed to go quiet. */}
         {attribution && (
-          <p className="mt-8 pt-4 border-t border-gray-100 dark:border-border text-[11px] leading-snug text-gray-400 dark:text-muted-foreground">
+          <p
+            className="mt-8 pt-4 border-t border-white/10 text-[11px] leading-snug"
+            style={{ color: ATTRIBUTION_INK }}
+          >
             {attribution}
           </p>
         )}

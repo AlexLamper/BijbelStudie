@@ -2,9 +2,10 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { DoorOpen, X } from 'lucide-react';
+import { X } from 'lucide-react';
 
-const TEAL = '#0D9488';
+import { FOCUS_RING, INK, INK_MUTED, PANEL_SOLID, scrim } from './lesson-layout';
+import { TEAL_DEEP } from '../../scene/tokens';
 
 /**
  * Confirmation before leaving a lesson mid-step.
@@ -132,7 +133,9 @@ export default function StudyExitGuard({ enabled }: { enabled: boolean }) {
   return (
     <div
       className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-6"
-      style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}
+      // The scene's own ground rather than a neutral black, so the dim belongs
+      // to the world the window is standing in.
+      style={{ backgroundColor: scrim(0.55) }}
       onClick={stay}
     >
       <div
@@ -140,20 +143,16 @@ export default function StudyExitGuard({ enabled }: { enabled: boolean }) {
         aria-modal="true"
         aria-labelledby="study-exit-title"
         onClick={(event) => event.stopPropagation()}
-        className="w-full sm:max-w-md bg-white dark:bg-card rounded-t-2xl sm:rounded-2xl border border-gray-200 dark:border-border shadow-2xl"
+        className={`w-full sm:max-w-md ${PANEL_SOLID} rounded-t-2xl sm:rounded-2xl shadow-[0_40px_80px_-32px_rgba(0,0,0,0.85)]`}
       >
+        {/* No icon tile. The question is in the heading; a door beside it says
+            the same thing in a picture. */}
         <div className="flex items-start gap-3 p-5 sm:p-6">
-          <span
-            className="h-10 w-10 flex-none rounded-xl flex items-center justify-center"
-            style={{ backgroundColor: 'rgba(13,148,136,0.10)' }}
-          >
-            <DoorOpen size={18} style={{ color: TEAL }} />
-          </span>
           <div className="min-w-0 flex-1 pt-0.5">
-            <h2 id="study-exit-title" className="text-[15px] font-bold text-foreground">
+            <h2 id="study-exit-title" className={`text-[15px] font-bold ${INK}`}>
               Studie verlaten?
             </h2>
-            <p className="mt-1 text-[13px] leading-relaxed text-gray-500 dark:text-muted-foreground">
+            <p className={`mt-1 text-[13px] leading-relaxed ${INK_MUTED}`}>
               Je zit midden in een stap. Je afgeronde stappen zijn bewaard, maar een niet-opgeslagen
               reflectie of quiz gaat verloren. Wil je de studie verlaten?
             </p>
@@ -162,7 +161,7 @@ export default function StudyExitGuard({ enabled }: { enabled: boolean }) {
             type="button"
             onClick={stay}
             aria-label="Sluiten"
-            className="h-8 w-8 flex-none inline-flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-secondary text-muted-foreground"
+            className={`h-8 w-8 flex-none inline-flex items-center justify-center rounded-md hover:bg-white/10 text-white/60 hover:text-white ${FOCUS_RING}`}
           >
             <X size={16} />
           </button>
@@ -172,7 +171,7 @@ export default function StudyExitGuard({ enabled }: { enabled: boolean }) {
           <button
             type="button"
             onClick={leave}
-            className="inline-flex items-center justify-center h-10 px-4 rounded-lg text-sm font-semibold border border-gray-200 dark:border-border text-foreground hover:bg-gray-50 dark:hover:bg-secondary transition-colors"
+            className={`inline-flex items-center justify-center h-10 px-4 rounded-lg text-sm font-semibold border border-white/20 ${INK} hover:bg-white/10 transition-colors ${FOCUS_RING}`}
           >
             Studie verlaten
           </button>
@@ -180,8 +179,8 @@ export default function StudyExitGuard({ enabled }: { enabled: boolean }) {
             type="button"
             onClick={stay}
             autoFocus
-            className="inline-flex items-center justify-center h-10 px-4 rounded-lg text-sm font-semibold text-white transition-colors"
-            style={{ backgroundColor: TEAL }}
+            className="inline-flex items-center justify-center h-10 px-4 rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90 outline-none focus-visible:ring-2 focus-visible:ring-white"
+            style={{ backgroundColor: TEAL_DEEP }}
           >
             In de studie blijven
           </button>

@@ -1,8 +1,18 @@
 'use client';
 
-import TreeCanvas from './TreeCanvas';
+import dynamic from 'next/dynamic';
 import { useLevensboom, fracOf } from '../../hooks/useLevensboom';
 import { ringColors } from '../../lib/levensboom/ring';
+
+/**
+ * Deferred, because this component cannot draw before `/api/v1/gamification`
+ * answers - until it does, [fallback] is what is on screen. Statically
+ * importing it put TreeCanvas and the levensboom generator into the header,
+ * and the header is in twelve app-shell layouts, so every signed-in route
+ * parsed the whole tree renderer before it could hydrate a 28 px avatar that
+ * was not showing yet. The chunk is now fetched alongside the state it needs.
+ */
+const TreeCanvas = dynamic(() => import('./TreeCanvas'), { ssr: false });
 
 const TEAL = '#0D9488';
 

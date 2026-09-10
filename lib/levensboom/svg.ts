@@ -1,7 +1,9 @@
 import { generateTree, GROUND_Y, MIN_SCENE_HEIGHT, MIN_SCENE_WIDTH, TRUNK_X, type TreeScene } from './generate';
-import { buildPalette, type Palette, type Season, type TimeOfDay } from './palette';
+import { buildPalette, type Season, type TimeOfDay } from './palette';
 import { speciesParams } from './species';
-import { sceneSpec } from './scenes';
+// The ridge and the per-scene land live in backdrop.ts so study artwork can
+// draw the same horizon without importing the tree renderer.
+import { backdrop, f } from './backdrop';
 
 /**
  * The tree as a static SVG string. Pure and clock-free, so it can run at build
@@ -58,8 +60,6 @@ function measure(width: number, height: number, scene: TreeScene, framing: 'scen
   return { scale, originX, originY, pivotX: originX + TRUNK_X * scale, pivotY, groundTop };
 }
 
-const f = (n: number) => (Math.round(n * 100) / 100).toString();
-
 function normal(dx: number, dy: number): [number, number] {
   const length = Math.hypot(dx, dy) || 1;
   return [-dy / length, dx / length];
@@ -88,57 +88,6 @@ function branchPath(scene: TreeScene, frame: Frame): string {
       `Q${f(cx - nmx)} ${f(cy - nmy)} ${f(x0 - n0x * w0)} ${f(y0 - n0y * w0)}Z`;
   }
   return d;
-}
-
-function hillPath(width: number, baseY: number, amp: number, freq: number, phase: number, lift: number): string {
-  let d = `M0 ${f(baseY + amp * 2)}`;
-  const steps = 24;
-  for (let i = 0; i <= steps; i += 1) {
-    const x = (i / steps) * width;
-    const y = baseY - lift - amp * (0.5 + 0.5 * Math.sin((i / steps) * freq * Math.PI * 2 + phase));
-    d += `L${f(x)} ${f(y)}`;
-  }
-  return `${d}L${f(width)} ${f(baseY + amp * 2)}Z`;
-}
-
-function backdrop(palette: Palette, width: number, height: number, groundTop: number): string {
-  const spec = sceneSpec(palette.scene);
-  switch (spec.backdrop) {
-    case 'hills':
-    case 'garden':
-      return (
-        `<path d="${hillPath(width, groundTop, height * 0.09, 1.3, 0.8, height * 0.05)}" fill="${palette.farAlt}"/>` +
-        `<path d="${hillPath(width, groundTop, height * 0.06, 2.1, 2.6, 0)}" fill="${palette.far}"/>`
-      );
-    case 'dunes':
-      return (
-        `<path d="${hillPath(width, groundTop, height * 0.1, 0.9, 2.2, height * 0.03)}" fill="${palette.farAlt}"/>` +
-        `<path d="${hillPath(width, groundTop, height * 0.07, 1.4, 4.4, 0)}" fill="${palette.far}"/>`
-      );
-    case 'lake': {
-      const horizon = groundTop - height * 0.14;
-      return (
-        `<path d="${hillPath(width, horizon, height * 0.045, 1.6, 1.2, 0)}" fill="${palette.far}"/>` +
-        `<rect x="0" y="${f(horizon)}" width="${width}" height="${f(groundTop - horizon)}" fill="${palette.water ?? palette.far}"/>`
-      );
-    }
-    case 'mountain': {
-      const peaks: [number, number][] = [[-0.05, 0.12], [0.08, 0.3], [0.24, 0.42], [0.4, 0.26], [0.58, 0.48], [0.74, 0.3], [0.9, 0.38], [1.05, 0.14]];
-      let d = `M${f(-width * 0.1)} ${f(groundTop)}`;
-      for (const [px, py] of peaks) d += `L${f(px * width)} ${f(groundTop - py * height)}`;
-      d += `L${f(width * 1.1)} ${f(groundTop)}Z`;
-      return `<path d="${d}" fill="${palette.far}"/><path d="${hillPath(width, groundTop, height * 0.07, 1.1, 3.4, 0)}" fill="${palette.farAlt}"/>`;
-    }
-    case 'wall': {
-      const wallTop = groundTop - height * 0.17;
-      return `<rect x="0" y="${f(wallTop)}" width="${width}" height="${f(groundTop - wallTop)}" fill="${palette.far}"/>`;
-    }
-    case 'stars':
-      return '';
-    case 'meadow':
-    default:
-      return `<path d="${hillPath(width, groundTop, height * 0.04, 1.2, 1.1, 0)}" fill="${palette.far}" opacity="0.55"/>`;
-  }
 }
 
 export function renderTreeSvg(options: TreeSvgOptions): string {

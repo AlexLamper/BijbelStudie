@@ -7,6 +7,7 @@ import BibleSelector from './BibleSelector';
 import EmptyState from './EmptyState';
 import { ReadingPreferencesMenu } from './ReadingPreferencesMenu';
 import { ReadingPreferences } from '../../hooks/useReadingPreferences';
+import { SCENE_BG, SCENE_BG_RGB } from '../scene/tokens';
 
 interface BibleViewerSectionProps {
   selectedBook: string;
@@ -54,16 +55,27 @@ export default function BibleViewerSection({
   bottomBar,
 }: BibleViewerSectionProps) {
   return (
-    // bg-white/95 rather than opaque: lets the page's faint teal wash (see
-    // app/lezen/page.tsx) show through behind the reading pane. 95% white
-    // keeps the bible text's contrast effectively unchanged.
-    <section className="flex flex-col h-full bg-white/95 dark:bg-background/95">
+    /*
+     * Transparent, not white.
+     *
+     * This section and StudyMaterialsSection are the two panes of /lezen and of
+     * nothing else - the guided lesson reads through PassageReader, not through
+     * here. Since the reading room became the scene's own ground rather than a
+     * lit plate floating on it (see READING_ROOM in app/lezen/page.tsx), the
+     * pane must not paint a surface of its own: it lets the room show through,
+     * and the room's `dark` scope is what turns every token below into its
+     * light-on-dark value. Scripture lands at 18.1:1 on that ground.
+     */
+    <section className="flex flex-col h-full min-w-0">
 
-      {/* Toolbar */}
-      <div data-tour="bible-selector" className="h-14 flex items-center justify-between px-3 flex-none gap-2 border-b bg-gray-50 dark:bg-card border-gray-200 dark:border-border">
+      {/* Toolbar. Recessed with the scene's own scrim value rather than lifted
+          on `bg-card`, so the passage stays the lightest thing in the room; the
+          hairline is white at low alpha, the way every edge on a scene page is.
+          Controls measure 16.8:1 and their chips 13.7:1 against it. */}
+      <div data-tour="bible-selector" className="h-14 flex items-center justify-between px-3 flex-none gap-2 border-b border-white/10 bg-black/25">
         <ReadingPreferencesMenu preferences={preferences} onUpdate={onUpdatePreferences} />
 
-        <div className="w-px h-5 mx-1 bg-gray-200 dark:bg-border" />
+        <div className="w-px h-5 mx-1 bg-white/15" />
 
         {/* Previous */}
         <button
@@ -109,8 +121,10 @@ export default function BibleViewerSection({
         </button>
       </div>
 
-      {/* Content */}
-      <div className="flex-1 relative min-h-0 bg-white/95 dark:bg-background/95">
+      {/* Content. The scroll container is unchanged - same measure, same
+          padding, same `overflow-y-auto`: the room stays still and only the
+          passage moves, which is the whole reason this page does not scroll. */}
+      <div className="flex-1 relative min-h-0">
         <div className="h-full overflow-y-auto px-4 sm:px-6 pt-3 pb-36">
           {selectedBook && selectedChapter && selectedVersion ? (
             <ChapterViewer
@@ -135,8 +149,16 @@ export default function BibleViewerSection({
             />
           )}
         </div>
-        <div className="absolute bottom-0 left-0 right-0 h-10 pointer-events-none z-10
-          bg-gradient-to-t from-white/95 dark:from-background/95 to-transparent" />
+        {/* The fade that says there is more below. It has to end on the exact
+            colour of the ground it stands on, so it comes from SCENE_BG rather
+            than from a theme token a nested pane may already have shifted - and
+            it fades to the same colour at zero alpha rather than to the
+            `transparent` keyword, which is transparent BLACK and fades through
+            soot on the way. */}
+        <div
+          className="absolute bottom-0 left-0 right-0 h-10 pointer-events-none z-10"
+          style={{ backgroundImage: `linear-gradient(to top, ${SCENE_BG}, rgba(${SCENE_BG_RGB},0))` }}
+        />
       </div>
 
       {bottomBar}

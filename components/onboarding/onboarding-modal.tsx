@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { Check, BookOpen, BookMarked, Library, Sun, Moon, Monitor } from "lucide-react"
 import { useTheme } from "next-themes"
@@ -254,13 +254,39 @@ interface OnboardingModalProps {
   isOpen: boolean
   onClose: () => void
   onComplete: () => void
+  /**
+   * Walk the flow without writing anything.
+   *
+   * The real run saves in four places - the preferences POST that also sets
+   * `onboardingCompleted`, `plant()`, the study-style context and the theme -
+   * and every one of them would rewrite the account of whoever is reviewing
+   * the flow. In preview all four are suppressed and the theme is put back to
+   * what it was on the way out, so the reviewer's own account is exactly as
+   * they left it. See components/admin/OnboardingPreviewButton.tsx.
+   */
+  preview?: boolean
 }
 
-export function OnboardingModal({ isOpen: initialIsOpen, onClose, onComplete }: OnboardingModalProps) {
+export function OnboardingModal({
+  isOpen: initialIsOpen,
+  onClose,
+  onComplete,
+  preview = false,
+}: OnboardingModalProps) {
   const [open, setOpen] = useState(initialIsOpen)
   const [step, setStep] = useState(1)
-  const { setTheme } = useTheme()
+  const { setTheme, theme: activeTheme } = useTheme()
   const router = useRouter()
+
+  // The theme the reviewer arrived with, captured once so a preview run can
+  // put it back. `useRef` rather than state: reading it must never re-render,
+  // and it must not follow the choices made inside the flow.
+  const themeOnOpen = useRef<string | undefined>(undefined)
+  useEffect(() => {
+    if (preview && themeOnOpen.current === undefined && activeTheme) {
+      themeOnOpen.current = activeTheme
+    }
+  }, [preview, activeTheme])
 
   const [translations, setTranslations] = useState<Choice[] | null>(null)
   const [commentaries, setCommentaries] = useState<Choice[] | null>(null)
@@ -389,6 +415,15 @@ export function OnboardingModal({ isOpen: initialIsOpen, onClose, onComplete }: 
     if (busy) return
     setBusy(true)
     try {
+      if (preview) {
+        // Nothing is saved and nothing is planted. Hand the reviewer back the
+        // theme they came in with, since the theme step changed it live.
+        if (themeOnOpen.current) setTheme(themeOnOpen.current)
+        setOpen(false)
+        if (complete) onComplete()
+        else onClose()
+        return
+      }
       await saveAndClose()
       // Planting is the last step's own save: skipping keeps the eik.
       if (complete) await plant(species)
@@ -626,8 +661,10 @@ export function OnboardingModal({ isOpen: initialIsOpen, onClose, onComplete }: 
                             key={o.code}
                             // Same naming scheme as the rest of the app's instrumented
                             // controls - see CLICK_TARGETS in lib/analyticsRoutes.ts,
-                            // where both values are registered.
-                            data-track={o.track}
+                            // where both values are registered. A preview run is
+                            // not instrumented: an admin clicking through the flow
+                            // must not land in the onboarding funnel on /admin/insights.
+                            data-track={preview ? undefined : o.track}
                             className={cn(
                               cardClass(active),
                               "flex flex-col rounded-2xl p-5 hover:-translate-y-0.5 motion-reduce:hover:translate-y-0",

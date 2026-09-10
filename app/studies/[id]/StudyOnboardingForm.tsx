@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import {
   BookOpen,
   CalendarDays,
-  ChevronRight,
   Layers,
   Loader2,
   Play,
@@ -13,8 +12,35 @@ import {
   X,
 } from 'lucide-react';
 import type { StudyDepth, StudyRhythm } from '../../../lib/data/curated-studies';
+import {
+  CTA_PRIMARY,
+  CTA_QUIET,
+  EYEBROW,
+  PANEL_DEEP,
+  SCENE_BG,
+  TEAL_DEEP,
+  TEAL_ON_DARK,
+} from '../../../components/scene/tokens';
 
-const TEAL = '#0D9488';
+/**
+ * The dialog's save button.
+ *
+ * Written out rather than `CTA_BRAND` plus overrides: two Tailwind utilities
+ * for the same property have equal specificity, so a `py-0` next to the token's
+ * `py-3` would be settled by stylesheet order rather than by intent. The fill
+ * is still TEAL_DEEP - white on #0D9488 measures 3.74:1 and fails.
+ */
+const DIALOG_SAVE =
+  'press inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-lg text-sm font-semibold text-white outline-none transition-colors hover:bg-[#115E59] focus-visible:ring-2 focus-visible:ring-white disabled:opacity-60';
+
+/**
+ * A message the reader must not miss, on a dark ground.
+ *
+ * `text-destructive` is a theme token and flips with the reader's light/dark
+ * setting; the scene behind this dialog does not. Red-300 is the literal that
+ * clears 4.5:1 on the panel underneath it in either setting.
+ */
+const ERROR_INK = '#FCA5A5';
 
 const RHYTHMS: { value: StudyRhythm; label: string; hint: string }[] = [
   { value: 'dagelijks', label: 'Elke dag', hint: 'Eén les per dag' },
@@ -56,20 +82,18 @@ function Choice({
       onClick={onClick}
       aria-pressed={active}
       className={[
-        'text-left rounded-xl border p-3 transition-colors',
-        active
-          ? 'border-transparent'
-          : 'border-gray-200 dark:border-border hover:bg-gray-50 dark:hover:bg-secondary',
+        'rounded-xl border p-3 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-white',
+        active ? 'border-transparent' : 'border-white/20 hover:bg-white/[0.06]',
       ].join(' ')}
-      style={active ? { backgroundColor: 'rgba(13,148,136,0.08)', borderColor: TEAL }: undefined}
+      style={active ? { backgroundColor: 'rgba(255,255,255,0.12)', borderColor: TEAL_ON_DARK } : undefined}
     >
-      <span className="block text-sm font-semibold text-foreground">{label}</span>
-      <span className="block text-xs text-gray-500 dark:text-muted-foreground mt-0.5">{hint}</span>
+      <span className="block text-sm font-semibold text-white">{label}</span>
+      <span className="mt-0.5 block text-xs text-white/65">{hint}</span>
     </button>
   );
 }
 
-/** What both bars read, and the only way either of them changes anything. */
+/** What the action block reads, and the only way it changes anything. */
 interface StudySetup {
   enrolled: boolean;
   resumeHref: string;
@@ -82,7 +106,7 @@ interface StudySetup {
   translationName: string;
   busy: boolean;
   error: string | null;
-  /** The bottom bar stays quiet about an error the dialog is already showing. */
+  /** The action block stays quiet about an error the dialog is already showing. */
   settingsOpen: boolean;
   openSettings: () => void;
   /** Creates the enrollment with the current settings and opens lesson one. */
@@ -101,19 +125,12 @@ function useStudySetup(component: string) {
  * The study's settings, its dialog and the enrollment POST - held above the
  * whole page rather than inside one panel.
  *
- * This was a single right-rail component that stacked the settings, the lesson
- * list and the start button itself, because those blocks share one piece of
- * state but do not render next to each other. That trick stopped working when
- * the two controls moved into opposite bars: the settings summary now sits in
- * the header and the start/resume button in a full-width bar below both panes,
- * with the panes in between. No component can contain both without owning the
- * entire page layout.
- *
- * So the state moved up and the layout moved out. The provider renders nothing
- * of its own except the dialog - which is `fixed`, so where it sits in the tree
- * does not matter - and each bar pulls what it needs out of the context. There
- * is still exactly one copy of the settings and one POST: `start` and the
- * dialog's save button both call `submit`.
+ * The state sits up here because the controls that read it are not siblings:
+ * the start button lives in the scene's first screen and the dialog is `fixed`
+ * over everything. The provider renders nothing of its own except that dialog,
+ * so the page's layers are unaffected, and there is still exactly one copy of
+ * the settings and one POST: `start` and the dialog's save button both call
+ * `submit`.
  *
  * `children` is the whole page, handed in by a server component, so the
  * description and the lesson list stay server-rendered and crawlable. This is a
@@ -153,7 +170,7 @@ export default function StudySetupProvider({
   resumeDay: number;
   lessonsTotal: number;
   lessonsCompleted: number;
-  /** The page itself: both bars and both panes. */
+  /** The page itself: every layer of it. */
   children: React.ReactNode;
 }) {
   const router = useRouter();
@@ -248,8 +265,7 @@ export default function StudySetupProvider({
 
       {open && (
         <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-6"
-          style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-0 backdrop-blur-sm sm:items-center sm:p-6"
           onClick={() => setOpen(false)}
         >
           <div
@@ -257,28 +273,28 @@ export default function StudySetupProvider({
             aria-modal="true"
             aria-label="Studie-instellingen"
             onClick={(event) => event.stopPropagation()}
-            className="w-full sm:max-w-lg max-h-[88vh] flex flex-col bg-white dark:bg-card rounded-t-2xl sm:rounded-2xl border border-gray-200 dark:border-border shadow-2xl"
+            className={`flex max-h-[88vh] w-full flex-col rounded-t-2xl shadow-2xl sm:max-w-lg sm:rounded-2xl ${PANEL_DEEP}`}
           >
-            <header className="flex-none flex items-center justify-between px-5 h-14 border-b border-gray-200 dark:border-border">
-              <h2 className="text-sm font-bold text-foreground">
+            <header className="flex h-14 flex-none items-center justify-between border-b border-white/10 px-5">
+              <h2 className="text-sm font-semibold text-white">
                 {enrolled ? 'Je instellingen' : 'Stel je studie in'}
               </h2>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label="Sluiten"
-                className="h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-secondary text-muted-foreground"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md text-white/70 outline-none transition-colors hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white"
               >
-                <X size={16} />
+                <X size={16} aria-hidden />
               </button>
             </header>
 
-            <div className="flex-1 min-h-0 overflow-y-auto p-5 space-y-6">
+            <div className="min-h-0 flex-1 space-y-6 overflow-y-auto p-5">
               <div>
-                <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-muted-foreground mb-2.5">
-                  <CalendarDays size={13} /> Studieritme
+                <p className={`${EYEBROW} mb-2.5 flex items-center gap-1.5`}>
+                  <CalendarDays size={13} aria-hidden /> Studieritme
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                   {RHYTHMS.map((option) => (
                     <Choice
                       key={option.value}
@@ -307,12 +323,12 @@ export default function StudySetupProvider({
                             )
                           }
                           className={[
-                            'h-9 w-11 rounded-lg text-xs font-semibold border transition-colors',
+                            'h-9 w-11 rounded-lg border text-xs font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-white',
                             active
-                              ? 'text-white border-transparent'
-                              : 'border-gray-200 dark:border-border text-foreground hover:bg-gray-50 dark:hover:bg-secondary',
+                              ? 'border-transparent text-white'
+                              : 'border-white/20 text-white/80 hover:bg-white/[0.06]',
                           ].join(' ')}
-                          style={active ? { backgroundColor: TEAL } : undefined}
+                          style={active ? { backgroundColor: TEAL_DEEP } : undefined}
                         >
                           {weekday.label}
                         </button>
@@ -323,10 +339,10 @@ export default function StudySetupProvider({
               </div>
 
               <div>
-                <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-muted-foreground mb-2.5">
-                  <Layers size={13} /> Type uitleg
+                <p className={`${EYEBROW} mb-2.5 flex items-center gap-1.5`}>
+                  <Layers size={13} aria-hidden /> Type uitleg
                 </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                   {DEPTHS.map((option) => (
                     <Choice
                       key={option.value}
@@ -342,35 +358,40 @@ export default function StudySetupProvider({
               <div>
                 <label
                   htmlFor="translation"
-                  className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-muted-foreground mb-2.5"
+                  className={`${EYEBROW} mb-2.5 flex items-center gap-1.5`}
                 >
-                  <BookOpen size={13} /> Bijbelvertaling
+                  <BookOpen size={13} aria-hidden /> Bijbelvertaling
                 </label>
                 <select
                   id="translation"
                   value={translation}
                   onChange={(event) => setTranslation(event.target.value)}
-                  className="w-full rounded-lg border border-gray-200 dark:border-border bg-white dark:bg-background px-3 py-2.5 text-sm text-foreground"
+                  className="w-full rounded-lg border border-white/20 px-3 py-2.5 text-sm text-white outline-none focus-visible:ring-2 focus-visible:ring-white"
+                  style={{ backgroundColor: SCENE_BG }}
                 >
                   {/* Two groups, not one flat list. `optgroup` is used rather
                       than a fake disabled `<option>` separator because it is the
                       native construct for this: screen readers announce the
                       group, and the label cannot be selected by accident. The
                       groups are only rendered when non-empty - an empty
-                      `optgroup` still draws its label in most browsers. */}
+                      `optgroup` still draws its label in most browsers.
+
+                      The options carry their own colours: a native popup does
+                      not inherit the control's, and unset it can land as dark
+                      text on a dark list. */}
                   {dutchTranslations.length > 0 && (
-                    <optgroup label="Nederlandse vertalingen">
+                    <optgroup label="Nederlandse vertalingen" style={{ backgroundColor: SCENE_BG, color: '#fff' }}>
                       {dutchTranslations.map((option) => (
-                        <option key={option.id} value={option.id}>
+                        <option key={option.id} value={option.id} style={{ backgroundColor: SCENE_BG, color: '#fff' }}>
                           {option.name}
                         </option>
                       ))}
                     </optgroup>
                   )}
                   {otherTranslations.length > 0 && (
-                    <optgroup label="Overige vertalingen">
+                    <optgroup label="Overige vertalingen" style={{ backgroundColor: SCENE_BG, color: '#fff' }}>
                       {otherTranslations.map((option) => (
-                        <option key={option.id} value={option.id}>
+                        <option key={option.id} value={option.id} style={{ backgroundColor: SCENE_BG, color: '#fff' }}>
                           {option.name}
                         </option>
                       ))}
@@ -379,14 +400,18 @@ export default function StudySetupProvider({
                 </select>
               </div>
 
-              {error && <p className="text-sm text-destructive">{error}</p>}
+              {error && (
+                <p className="text-sm" style={{ color: ERROR_INK }}>
+                  {error}
+                </p>
+              )}
             </div>
 
-            <footer className="flex-none flex gap-2.5 p-5 border-t border-gray-200 dark:border-border">
+            <footer className="flex flex-none gap-2.5 border-t border-white/10 p-5">
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="flex-1 h-10 rounded-lg text-sm font-medium border border-gray-200 dark:border-border bg-white dark:bg-card text-foreground hover:bg-gray-50 dark:hover:bg-secondary"
+                className="h-10 flex-1 rounded-lg border border-white/25 text-sm font-medium text-white outline-none transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white"
               >
                 Annuleren
               </button>
@@ -394,10 +419,10 @@ export default function StudySetupProvider({
                 type="button"
                 onClick={() => void submit(enrolled ? 'save' : 'start')}
                 disabled={busy}
-                className="flex-1 inline-flex items-center justify-center gap-2 h-10 rounded-lg text-sm font-semibold text-white disabled:opacity-60"
-                style={{ backgroundColor: TEAL }}
+                className={DIALOG_SAVE}
+                style={{ backgroundColor: TEAL_DEEP }}
               >
-                {busy && <Loader2 size={15} className="animate-spin" />}
+                {busy && <Loader2 size={15} aria-hidden className="animate-spin" />}
                 {enrolled ? 'Opslaan' : 'Opslaan en starten'}
               </button>
             </footer>
@@ -409,16 +434,12 @@ export default function StudySetupProvider({
 }
 
 /**
- * The settings, as they sit in the header bar.
+ * The settings, as the quiet action beside the primary one.
  *
- * This replaces the three static facts that used to hold the right edge of the
- * bar - lesson count, total minutes, starting chapter - which said nothing that
- * changed and nothing you could act on. Those facts moved into the left pane;
- * the bar now carries the one thing up here that is yours and adjustable.
- *
- * Summary and entry point in one control. The rail spent a whole card on three
- * dt/dd rows plus a separate "Instellingen wijzigen" button, and a header bar
- * has room for neither: one line of values, the same dialog behind it.
+ * Summary and entry point in one control: one line of values, the dialog behind
+ * it. Below md the three values would run past the measure, so the control
+ * falls back to its own name there - the values stay on the button as its
+ * accessible name and as a tooltip either way.
  */
 export function StudySettingsButton() {
   const { rhythmLabel, depthLabel, translationName, openSettings } =
@@ -434,33 +455,27 @@ export function StudySettingsButton() {
       aria-haspopup="dialog"
       title={`Instellingen: ${summary}`}
       aria-label={`Studie-instellingen wijzigen. Nu: ${summary}`}
-      className="press flex-none inline-flex items-center gap-2 h-9 pl-2.5 pr-1.5 rounded-lg border border-gray-200 dark:border-border bg-white dark:bg-card text-gray-500 dark:text-muted-foreground transition-colors hover:text-foreground hover:bg-gray-50 dark:hover:bg-secondary hover:border-gray-300 dark:hover:border-muted-foreground/40"
+      className={CTA_QUIET}
     >
-      <Settings2 size={14} className="flex-none" style={{ color: TEAL }} />
-      {/* Below md the three values would push the title out of the bar, so the
-          control falls back to its own name there. Either way the values are on
-          the button as its accessible name and as a tooltip. */}
-      <span className="hidden md:inline max-w-[340px] truncate text-[11.5px] font-medium">
-        {summary}
-      </span>
-      <span className="md:hidden text-[11.5px] font-medium">Instellingen</span>
-      <ChevronRight size={13} className="flex-none" />
+      <Settings2 size={14} aria-hidden className="flex-none" />
+      <span className="hidden max-w-[340px] truncate md:inline">{summary}</span>
+      <span className="md:hidden">Instellingen</span>
     </button>
   );
 }
 
 /**
- * The bar along the bottom of the page: where you are, and the one way on.
+ * Where you are in this study, and the one way on.
  *
- * It spans both panes on purpose. Pinned inside the right rail it was a block
- * the width of the lesson list, competing with the lessons directly above it.
- * Full width it mirrors the h-14 header bar, and the page reads as chrome,
- * content, chrome - while still doing what pinning it was for: staying put
- * while both panes scroll.
+ * This used to be a fixed bar across the foot of a page that never scrolled.
+ * The page scrolls now - the scene's depth engine needs it to - so the action
+ * moved to where the dashboard puts its own: into the first screen, under the
+ * title, as the white pill that is the only fill guaranteed to separate from
+ * whatever the landscape is doing behind it. Same state, same handlers, same
+ * two outcomes: resume the lesson you were on, or create the enrollment.
  *
- * Laid out along the bar instead of stacked. The sentence, the meter, the count
- * and the button share one row, and the parts that only restate the meter drop
- * out as the bar narrows.
+ * The progress line is white rather than teal for the same reason: on a sky
+ * that can be noon or midnight, white is the one ink that always reads.
  */
 export function StudyActionBar() {
   const {
@@ -478,55 +493,29 @@ export function StudyActionBar() {
   const pct = lessonsTotal > 0 ? Math.round((lessonsCompleted / lessonsTotal) * 100) : 0;
 
   return (
-    <div className="flex-none h-14 border-t border-gray-200 dark:border-border bg-white dark:bg-card">
-      <div className="h-full px-3 sm:px-5 flex items-center gap-3 sm:gap-4">
-        <div className="flex-1 min-w-0 flex items-center gap-2.5 sm:gap-3.5">
-          {enrolled ? (
-            <>
-              <p className="hidden sm:block flex-none text-[12.5px] font-semibold text-foreground">
-                Je bent bezig met deze studie
-              </p>
-              <div className="h-1.5 flex-1 min-w-[56px] max-w-[200px] rounded-full bg-gray-200 dark:bg-secondary overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all duration-500"
-                  style={{ width: `${pct}%`, backgroundColor: TEAL }}
-                />
-              </div>
-              <span
-                className="flex-none text-[11.5px] font-bold tabular-nums"
-                style={{ color: TEAL }}
-              >
-                {pct}%
-              </span>
-              <span className="hidden md:block flex-none text-[11.5px] text-gray-500 dark:text-muted-foreground">
-                {lessonsCompleted} van {lessonsTotal} lessen afgerond
-              </span>
-            </>
-          ) : (
-            <>
-              <p className="flex-none text-[12.5px] font-semibold text-foreground">
-                Je bent nog niet begonnen
-              </p>
-              <span className="hidden sm:block flex-none text-[11.5px] text-gray-500 dark:text-muted-foreground">
-                {lessonsTotal} lessen
-              </span>
-            </>
-          )}
-
-          {/* Suppressed while the dialog is open - it shows the same error. */}
-          {error && !settingsOpen && (
-            <p className="min-w-0 truncate text-[11.5px] text-destructive">{error}</p>
-          )}
+    <div className="flex flex-col gap-6">
+      {enrolled && (
+        <div className="max-w-[30rem]">
+          <div className="flex items-baseline justify-between text-xs font-medium tabular-nums text-white/75">
+            <span>
+              Les {resumeDay} van {lessonsTotal}
+            </span>
+            <span>{lessonsCompleted} afgerond</span>
+            <span>{pct}%</span>
+          </div>
+          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/25">
+            <div
+              className="h-full rounded-full bg-white transition-[width] duration-700 ease-out"
+              style={{ width: `${pct}%`, boxShadow: '0 0 18px rgba(255,255,255,0.85)' }}
+            />
+          </div>
         </div>
+      )}
 
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
         {enrolled ? (
-          <a
-            href={resumeHref}
-            data-track="study_resume"
-            className="press flex-none inline-flex items-center justify-center gap-2 h-9 px-3.5 rounded-lg text-[13px] font-semibold text-white no-underline transition-opacity hover:opacity-90"
-            style={{ backgroundColor: TEAL }}
-          >
-            <Play size={14} /> Verder met les {resumeDay}
+          <a href={resumeHref} data-track="study_resume" className={CTA_PRIMARY}>
+            <Play size={16} aria-hidden /> Verder met les {resumeDay}
           </a>
         ) : (
           <button
@@ -534,14 +523,26 @@ export function StudyActionBar() {
             onClick={start}
             disabled={busy}
             data-track="study_start"
-            className="press flex-none inline-flex items-center justify-center gap-2 h-9 px-3.5 rounded-lg text-[13px] font-semibold text-white disabled:opacity-60 transition-opacity hover:opacity-90"
-            style={{ backgroundColor: TEAL }}
+            className={`${CTA_PRIMARY} disabled:opacity-60`}
           >
-            {busy ? <Loader2 size={14} className="animate-spin" /> : <Play size={14} />}
+            {busy ? (
+              <Loader2 size={16} aria-hidden className="animate-spin" />
+            ) : (
+              <Play size={16} aria-hidden />
+            )}
             Start deze studie
           </button>
         )}
+
+        <StudySettingsButton />
       </div>
+
+      {/* Suppressed while the dialog is open - it shows the same error. */}
+      {error && !settingsOpen && (
+        <p className="text-sm" style={{ color: ERROR_INK }}>
+          {error}
+        </p>
+      )}
     </div>
   );
 }

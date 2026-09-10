@@ -2,20 +2,22 @@
 
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
+import SceneShell from "../../../components/scene/SceneShell"
+import { SceneSkeleton, SectionHeading } from "../../../components/scene/pieces"
+import { EYEBROW, TEAL_DEEP, TEAL_ON_DARK } from "../../../components/scene/tokens"
 import {
-  ArrowLeft,
-  BookOpen,
-  Eye,
-  GraduationCap,
-  MousePointerClick,
-  PenLine,
-  Sparkles,
-  StickyNote,
-  Target,
-  TrendingUp,
-  Trophy,
-  Users,
-} from "lucide-react"
+  ADMIN_CHIP,
+  ADMIN_CHIP_ACTIVE,
+  DANGER,
+  DATA_PANEL,
+  DATA_TILE,
+  GOOD,
+  ROW_LINE,
+  SERIES_SKY,
+  SERIES_VIOLET,
+  TABLE_HEAD,
+  WARN,
+} from "../../../components/admin/adminSurface"
 
 interface Series { date: string; count: number }
 
@@ -55,11 +57,19 @@ interface InsightsResponse {
   }
 }
 
-const TEAL = "#0D9488"
-const AMBER = "#D97706"
-const SKY = "#0EA5E9"
-const GREEN = "#16A34A"
-const VIOLET = "#7C3AED"
+/*
+ * The five series colours, on a dark plate.
+ *
+ * The light-page set (#0D9488, #D97706, #0EA5E9, #16A34A, #7C3AED) was drawn to
+ * sit on white; three of the five drop under 3:1 on the plate these charts now
+ * live on, and a line you cannot follow is not a chart. These are the same five
+ * hues one step up - see components/admin/adminSurface.ts.
+ */
+const TEAL_SERIES = TEAL_ON_DARK
+const AMBER = WARN
+const SKY = SERIES_SKY
+const GREEN = GOOD
+const VIOLET = SERIES_VIOLET
 
 /**
  * Dutch labels for the click targets in lib/analyticsRoutes.ts.
@@ -120,6 +130,18 @@ function n(value: number | null | undefined): string {
   return value.toLocaleString("nl-NL")
 }
 
+/**
+ * Inzichten & analytics, in the immersive shell.
+ *
+ * Same shell as the dashboard, far less picture: the landscape carries the
+ * heading and the period switch, and every chart, ranking and table below it
+ * sits on a near-opaque plate. A line chart drawn over a moving sky is a chart
+ * nobody can read a value off, and reading values off it is the entire point of
+ * the screen.
+ *
+ * Restyle only: the request, the one retry, the range switch, the cancellation
+ * guard and every derived figure are exactly as they were.
+ */
 export default function AdminInsightsPage() {
   const [range, setRange] = useState<7 | 30 | 90>(30)
   const [data, setData] = useState<InsightsResponse | null>(null)
@@ -176,33 +198,40 @@ export default function AdminInsightsPage() {
   const maxClicks = Math.max(1, ...(data?.topClicks ?? []).map(c => c.count))
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="px-6 xl:px-10 pt-7 pb-5 border-b border-border bg-background flex-shrink-0">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div>
-            <Link href="/admin" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground no-underline mb-1.5">
-              <ArrowLeft size={12} /> Terug naar overzicht
+    <SceneShell backdrop="reader" header rail>
+      {/* -- The sky --------------------------------------------------- */}
+      <section aria-labelledby="inzichten-titel" className="pb-8 pt-6">
+        <div className="scene-sky flex flex-wrap items-end justify-between gap-x-8 gap-y-5">
+          <div className="min-w-0 max-w-[42rem]">
+            <Link
+              href="/admin"
+              className="text-xs font-medium text-white/70 no-underline outline-none transition-colors hover:text-white focus-visible:ring-2 focus-visible:ring-white"
+            >
+              ← Terug naar overzicht
             </Link>
-            <h1 className="text-xl font-bold text-foreground">Inzichten &amp; analytics</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
+            <p className={`${EYEBROW} mt-4`} style={{ color: TEAL_ON_DARK }}>
+              Admin
+            </p>
+            <h1
+              id="inzichten-titel"
+              className="mt-2 text-3xl font-semibold tracking-tight text-white sm:text-4xl"
+            >
+              Inzichten &amp; analytics
+            </h1>
+            <p className="mt-3 text-sm leading-relaxed text-white/80">
               Groei, gedrag en studiegebruik over de gekozen periode
             </p>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Periode">
             {([7, 30, 90] as const).map(opt => {
               const active = opt === range
               return (
                 <button
                   key={opt}
                   onClick={() => setRange(opt)}
-                  className={[
-                    "px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border",
-                    active
-                      ? "border-transparent text-white"
-                      : "border-border bg-white dark:bg-card hover:bg-gray-50 dark:hover:bg-secondary text-foreground",
-                  ].join(" ")}
-                  style={active ? { backgroundColor: TEAL } : undefined}
+                  aria-pressed={active}
+                  className={active ? ADMIN_CHIP_ACTIVE : ADMIN_CHIP}
+                  style={active ? { backgroundColor: TEAL_DEEP } : undefined}
                 >
                   {opt} dagen
                 </button>
@@ -210,276 +239,315 @@ export default function AdminInsightsPage() {
             })}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Main */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="px-6 xl:px-10 py-6 space-y-8">
+      {/* -- The desk: opaque from here down --------------------------- */}
+      <div className="space-y-10 pb-20">
 
-          {error && (
-            <div className="flex items-start justify-between gap-4 rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/20 px-4 py-3">
-              <p className="text-sm text-red-800 dark:text-red-200">
-                Inzichten konden niet worden geladen. {error}
-              </p>
-              <button
-                onClick={() => setReloadKey(k => k + 1)}
-                className="flex-none text-sm font-semibold text-red-800 dark:text-red-200 underline underline-offset-2 hover:no-underline"
-              >
-                Opnieuw proberen
-              </button>
-            </div>
-          )}
+        {error && (
+          <div
+            role="alert"
+            className="flex flex-wrap items-start justify-between gap-4 rounded-xl px-4 py-3"
+            style={{ backgroundColor: "rgba(248,113,113,0.16)", boxShadow: "inset 0 0 0 1px rgba(248,113,113,0.35)" }}
+          >
+            <p className="text-sm leading-relaxed" style={{ color: DANGER }}>
+              Inzichten konden niet worden geladen. {error}
+            </p>
+            <button
+              onClick={() => setReloadKey(k => k + 1)}
+              className="flex-none rounded-md text-sm font-semibold underline underline-offset-2 outline-none hover:no-underline focus-visible:ring-2 focus-visible:ring-white"
+              style={{ color: DANGER }}
+            >
+              Opnieuw proberen
+            </button>
+          </div>
+        )}
 
-          {/* ---- Bereik ---- */}
-          <section>
-            <SectionTitle icon={Eye} title="Bereik" subtitle="Wie de site bezocht en hoeveel pagina's zijn bekeken" />
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-              <SummaryCard label="Paginaweergaven" value={sums.views} icon={Eye} color={TEAL} loading={loading} />
-              <SummaryCard label="Unieke bezoekers" value={data?.traffic.uniqueVisitors ?? 0} icon={Users} color={SKY} loading={loading} />
-              <SummaryCard label="Weergaven ingelogd" value={data?.traffic.loggedInViews ?? 0} icon={Users} color={GREEN} loading={loading} />
-              <SummaryCard label="Weergaven uitgelogd" value={data?.traffic.loggedOutViews ?? 0} icon={Users} color={VIOLET} loading={loading} />
-            </div>
+        {/* ---- Bereik ---- */}
+        <section aria-labelledby="inzichten-bereik">
+          <SectionHeading
+            id="inzichten-bereik"
+            title="Bereik"
+            subtitle="Wie de site bezocht en hoeveel pagina's zijn bekeken"
+            rule
+          />
+          <dl className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <SummaryCard label="Paginaweergaven" value={sums.views} color={TEAL_SERIES} loading={loading} />
+            <SummaryCard label="Unieke bezoekers" value={data?.traffic.uniqueVisitors ?? 0} color={SKY} loading={loading} />
+            <SummaryCard label="Weergaven ingelogd" value={data?.traffic.loggedInViews ?? 0} color={GREEN} loading={loading} />
+            <SummaryCard label="Weergaven uitgelogd" value={data?.traffic.loggedOutViews ?? 0} color={VIOLET} loading={loading} />
+          </dl>
 
-            <div className="mt-3">
-              <LineCard
-                title="Paginaweergaven"
-                subtitle={`Per dag · ${range} dagen`}
-                series={data?.pageViews || []}
-                color={TEAL}
-                loading={loading}
-                compact
-              />
-            </div>
+          <div className="mt-3">
+            <LineCard
+              id="inzichten-paginaweergaven"
+              title="Paginaweergaven"
+              subtitle={`Per dag · ${range} dagen`}
+              series={data?.pageViews || []}
+              color={TEAL_SERIES}
+              loading={loading}
+              compact
+            />
+          </div>
 
-            <div className="mt-3 grid grid-cols-1 lg:grid-cols-2 gap-3">
-              <RankCard
-                title="Meest bezochte pagina's"
-                subtitle="Weergaven, met unieke bezoekers erachter"
-                loading={loading}
-                empty="Nog geen paginaweergaven vastgelegd."
-                rows={(data?.topPages ?? []).map(p => ({
-                  key: p.key,
-                  label: p.label,
-                  value: p.views,
-                  hint: `${n(p.visitors)} bezoekers`,
-                  ratio: p.views / maxPageViews,
-                }))}
-                color={TEAL}
-              />
-              <RankCard
-                title="Waar wordt geklikt"
-                subtitle="Geregistreerde knoppen en links"
-                loading={loading}
-                empty="Nog geen kliks vastgelegd."
-                icon={MousePointerClick}
-                rows={(data?.topClicks ?? []).map(c => ({
-                  key: c.target,
-                  label: CLICK_LABELS[c.target] ?? c.target,
-                  value: c.count,
-                  ratio: c.count / maxClicks,
-                }))}
-                color={SKY}
-              />
-            </div>
-          </section>
+          <div className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-2">
+            <RankCard
+              id="inzichten-paginas"
+              title="Meest bezochte pagina's"
+              subtitle="Weergaven, met unieke bezoekers erachter"
+              loading={loading}
+              empty="Nog geen paginaweergaven vastgelegd."
+              rows={(data?.topPages ?? []).map(p => ({
+                key: p.key,
+                label: p.label,
+                value: p.views,
+                hint: `${n(p.visitors)} bezoekers`,
+                ratio: p.views / maxPageViews,
+              }))}
+              color={TEAL_SERIES}
+            />
+            <RankCard
+              id="inzichten-kliks"
+              title="Waar wordt geklikt"
+              subtitle="Geregistreerde knoppen en links"
+              loading={loading}
+              empty="Nog geen kliks vastgelegd."
+              rows={(data?.topClicks ?? []).map(c => ({
+                key: c.target,
+                label: CLICK_LABELS[c.target] ?? c.target,
+                value: c.count,
+                ratio: c.count / maxClicks,
+              }))}
+              color={SKY}
+            />
+          </div>
+        </section>
 
-          {/* ---- Studiegebruik ---- */}
-          <section>
-            <SectionTitle icon={GraduationCap} title="Studiegebruik" subtitle="Hoeveel mensen daadwerkelijk bijbelstudie doen" />
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-              <SummaryCard label="Actieve studenten" value={data?.study.activeStudents ?? 0} icon={GraduationCap} color={TEAL} loading={loading} hint={`Raakten een les aan in ${range} dagen`} />
-              <SummaryCard label="Lopende studies" value={data?.study.enrollmentsActive ?? 0} icon={BookOpen} color={SKY} loading={loading} />
-              <SummaryCard label="Afgeronde studies" value={data?.study.enrollmentsCompleted ?? 0} icon={Trophy} color={AMBER} loading={loading} />
-              <SummaryCard label="Lessen afgerond" value={sums.lessons} icon={Target} color={GREEN} loading={loading} hint="In deze periode" />
-            </div>
+        {/* ---- Studiegebruik ---- */}
+        <section aria-labelledby="inzichten-studie">
+          <SectionHeading
+            id="inzichten-studie"
+            title="Studiegebruik"
+            subtitle="Hoeveel mensen daadwerkelijk bijbelstudie doen"
+            rule
+          />
+          <dl className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <SummaryCard label="Actieve studenten" value={data?.study.activeStudents ?? 0} color={TEAL_SERIES} loading={loading} hint={`Raakten een les aan in ${range} dagen`} />
+            <SummaryCard label="Lopende studies" value={data?.study.enrollmentsActive ?? 0} color={SKY} loading={loading} />
+            <SummaryCard label="Afgeronde studies" value={data?.study.enrollmentsCompleted ?? 0} color={AMBER} loading={loading} />
+            <SummaryCard label="Lessen afgerond" value={sums.lessons} color={GREEN} loading={loading} hint="In deze periode" />
+          </dl>
 
-            <div className="mt-3 grid grid-cols-2 lg:grid-cols-4 gap-3">
-              <SummaryCard label="Reflecties geschreven" value={data?.study.reflectionsWritten ?? 0} icon={PenLine} color={VIOLET} loading={loading} />
-              <SummaryCard label="Quizzen nagekeken" value={data?.study.quizzesGraded ?? 0} icon={Trophy} color={AMBER} loading={loading} />
-              <SummaryCard label="Quizpogingen" value={data?.study.quizAttempts ?? 0} icon={Trophy} color={AMBER} loading={loading} />
-              <SummaryCard
-                label="Gemiddelde quizscore"
-                value={data?.study.quizAccuracy ?? 0}
-                suffix="%"
-                icon={Target}
-                color={GREEN}
-                loading={loading}
-                hint={data?.study.quizAccuracy == null ? "Nog geen quizzen gemaakt" : undefined}
-              />
-            </div>
+          <dl className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <SummaryCard label="Reflecties geschreven" value={data?.study.reflectionsWritten ?? 0} color={VIOLET} loading={loading} />
+            <SummaryCard label="Quizzen nagekeken" value={data?.study.quizzesGraded ?? 0} color={AMBER} loading={loading} />
+            <SummaryCard label="Quizpogingen" value={data?.study.quizAttempts ?? 0} color={AMBER} loading={loading} />
+            <SummaryCard
+              label="Gemiddelde quizscore"
+              value={data?.study.quizAccuracy ?? 0}
+              suffix="%"
+              color={GREEN}
+              loading={loading}
+              hint={data?.study.quizAccuracy == null ? "Nog geen quizzen gemaakt" : undefined}
+            />
+          </dl>
 
-            <div className="mt-3">
-              <LineCard
-                title="Afgeronde lessen"
-                subtitle={`Per dag · ${range} dagen`}
-                series={data?.lessonsCompleted || []}
-                color={GREEN}
-                loading={loading}
-                compact
-              />
-            </div>
+          <div className="mt-3">
+            <LineCard
+              id="inzichten-lessen"
+              title="Afgeronde lessen"
+              subtitle={`Per dag · ${range} dagen`}
+              series={data?.lessonsCompleted || []}
+              color={GREEN}
+              loading={loading}
+              compact
+            />
+          </div>
 
-            <div className="mt-3 bg-white dark:bg-card border border-gray-200 dark:border-border rounded-2xl p-5">
-              <p className="text-sm font-bold text-gray-900 dark:text-foreground">Per studie</p>
-              <p className="text-xs text-gray-500 dark:text-muted-foreground mb-4">
-                Inschrijvingen, afgeronde studies en afgeronde lessen - over de hele looptijd
-              </p>
-              {loading ? (
-                <div className="h-32 rounded animate-pulse bg-gray-100 dark:bg-secondary" />
-              ) : (data?.study.perStudy.length ?? 0) === 0 ? (
-                <p className="text-sm text-muted-foreground py-6 text-center">Nog niemand ingeschreven.</p>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="text-left text-[11px] uppercase tracking-wider text-gray-400 dark:text-muted-foreground">
-                        <th className="pb-2 font-semibold">Studie</th>
-                        <th className="pb-2 font-semibold text-right">Ingeschreven</th>
-                        <th className="pb-2 font-semibold text-right">Afgerond</th>
-                        <th className="pb-2 font-semibold text-right">Lessen</th>
-                        <th className="pb-2 font-semibold text-right">Voltooiing</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100 dark:divide-border">
-                      {data!.study.perStudy.map(row => {
-                        const rate = row.enrollments > 0 ? Math.round((row.completed / row.enrollments) * 100) : 0
-                        return (
-                          <tr key={row.studyId}>
-                            <td className="py-2.5 pr-3 font-medium text-foreground">{row.title}</td>
-                            <td className="py-2.5 text-right tabular-nums text-foreground">{n(row.enrollments)}</td>
-                            <td className="py-2.5 text-right tabular-nums text-foreground">{n(row.completed)}</td>
-                            <td className="py-2.5 text-right tabular-nums text-foreground">{n(row.lessonsCompleted)}</td>
-                            <td className="py-2.5 text-right">
-                              <span className="inline-flex items-center gap-2 justify-end">
-                                <span className="h-1.5 w-16 rounded-full bg-gray-100 dark:bg-secondary overflow-hidden">
-                                  <span className="block h-full rounded-full" style={{ width: `${rate}%`, backgroundColor: TEAL }} />
-                                </span>
-                                <span className="tabular-nums text-xs text-muted-foreground w-9 text-right">{rate}%</span>
+          <div className={`mt-3 p-5 ${DATA_PANEL}`}>
+            <CardHead
+              id="inzichten-per-studie"
+              title="Per studie"
+              subtitle="Inschrijvingen, afgeronde studies en afgeronde lessen - over de hele looptijd"
+            />
+            {loading ? (
+              <SceneSkeleton className="mt-4 h-32 w-full rounded-lg" />
+            ) : (data?.study.perStudy.length ?? 0) === 0 ? (
+              <p className="py-6 text-center text-sm text-white/70">Nog niemand ingeschreven.</p>
+            ) : (
+              <div className="mt-4 overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className={`border-b ${ROW_LINE} ${TABLE_HEAD}`}>
+                      <th scope="col" className="pb-2 pr-3 font-semibold">Studie</th>
+                      <th scope="col" className="pb-2 text-right font-semibold">Ingeschreven</th>
+                      <th scope="col" className="pb-2 text-right font-semibold">Afgerond</th>
+                      <th scope="col" className="pb-2 text-right font-semibold">Lessen</th>
+                      <th scope="col" className="pb-2 text-right font-semibold">Voltooiing</th>
+                    </tr>
+                  </thead>
+                  {/* `divide-white/10`, not ROW_LINE: divide-* takes its own
+                      colour utility, and without one Tailwind falls back to the
+                      theme's border token - which flips with light/dark while
+                      this plate does not. */}
+                  <tbody className="divide-y divide-white/10">
+                    {data!.study.perStudy.map(row => {
+                      const rate = row.enrollments > 0 ? Math.round((row.completed / row.enrollments) * 100) : 0
+                      return (
+                        <tr key={row.studyId}>
+                          <td className="py-2.5 pr-3 font-medium text-white">{row.title}</td>
+                          <td className="py-2.5 text-right tabular-nums text-white/85">{n(row.enrollments)}</td>
+                          <td className="py-2.5 text-right tabular-nums text-white/85">{n(row.completed)}</td>
+                          <td className="py-2.5 text-right tabular-nums text-white/85">{n(row.lessonsCompleted)}</td>
+                          <td className="py-2.5 text-right">
+                            <span className="inline-flex items-center justify-end gap-2">
+                              <span className="h-1.5 w-16 overflow-hidden rounded-full bg-white/15">
+                                <span
+                                  className="block h-full rounded-full"
+                                  style={{ width: `${rate}%`, backgroundColor: TEAL_SERIES }}
+                                />
                               </span>
-                            </td>
-                          </tr>
-                        )
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          </section>
+                              <span className="w-9 text-right text-xs tabular-nums text-white/70">{rate}%</span>
+                            </span>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </section>
 
-          {/* ---- Groei ---- */}
-          <section>
-            <SectionTitle icon={TrendingUp} title="Groei" subtitle="Aanmeldingen, abonnementen en inhoud" />
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-              <SummaryCard label="Nieuwe gebruikers" value={sums.signups} icon={TrendingUp} color={TEAL} loading={loading} />
-              <SummaryCard label="Nieuwe Pro abonnees" value={sums.subs} icon={Sparkles} color={AMBER} loading={loading} />
-              <SummaryCard label="Notities gemaakt" value={sums.notes} icon={StickyNote} color={SKY} loading={loading} />
-              <SummaryCard label="Leessessies" value={sums.sessions} icon={BookOpen} color={GREEN} loading={loading} />
-            </div>
+        {/* ---- Groei ---- */}
+        <section aria-labelledby="inzichten-groei">
+          <SectionHeading
+            id="inzichten-groei"
+            title="Groei"
+            subtitle="Aanmeldingen, abonnementen en inhoud"
+            rule
+          />
+          <dl className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <SummaryCard label="Nieuwe gebruikers" value={sums.signups} color={TEAL_SERIES} loading={loading} />
+            <SummaryCard label="Nieuwe Pro abonnees" value={sums.subs} color={AMBER} loading={loading} />
+            <SummaryCard label="Notities gemaakt" value={sums.notes} color={SKY} loading={loading} />
+            <SummaryCard label="Leessessies" value={sums.sessions} color={GREEN} loading={loading} />
+          </dl>
 
-            <div className="mt-3 space-y-3">
+          <div className="mt-3 space-y-3">
+            <LineCard
+              id="inzichten-groei-gebruikers"
+              title="Gebruikersgroei"
+              subtitle={`Aanmeldingen per dag · ${range} dagen`}
+              series={data?.signups || []}
+              color={TEAL_SERIES}
+              loading={loading}
+            />
+            <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
               <LineCard
-                title="Gebruikersgroei"
-                subtitle={`Aanmeldingen per dag · ${range} dagen`}
-                series={data?.signups || []}
-                color={TEAL}
+                id="inzichten-conversies"
+                title="Pro conversies"
+                subtitle={`Nieuwe abonnees per dag · ${range} dagen`}
+                series={data?.newSubscribers || []}
+                color={AMBER}
                 loading={loading}
+                compact
               />
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                <LineCard
-                  title="Pro conversies"
-                  subtitle={`Nieuwe abonnees per dag · ${range} dagen`}
-                  series={data?.newSubscribers || []}
-                  color={AMBER}
-                  loading={loading}
-                  compact
-                />
-                <LineCard
-                  title="Opzeggingen"
-                  subtitle={`Per dag · ${range} dagen`}
-                  series={data?.cancellations || []}
-                  color="#DC2626"
-                  loading={loading}
-                  compact
-                />
-              </div>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                <LineCard
-                  title="Notities"
-                  subtitle={`Aangemaakt per dag · ${range} dagen`}
-                  series={data?.notes || []}
-                  color={SKY}
-                  loading={loading}
-                  compact
-                />
-                <LineCard
-                  title="Leessessies"
-                  subtitle={`Sessies per dag · ${range} dagen`}
-                  series={data?.readingSessions || []}
-                  color={GREEN}
-                  loading={loading}
-                  compact
-                />
-              </div>
+              <LineCard
+                id="inzichten-opzeggingen"
+                title="Opzeggingen"
+                subtitle={`Per dag · ${range} dagen`}
+                series={data?.cancellations || []}
+                color={DANGER}
+                loading={loading}
+                compact
+              />
             </div>
-          </section>
+            <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+              <LineCard
+                id="inzichten-notities"
+                title="Notities"
+                subtitle={`Aangemaakt per dag · ${range} dagen`}
+                series={data?.notes || []}
+                color={SKY}
+                loading={loading}
+                compact
+              />
+              <LineCard
+                id="inzichten-sessies"
+                title="Leessessies"
+                subtitle={`Sessies per dag · ${range} dagen`}
+                series={data?.readingSessions || []}
+                color={GREEN}
+                loading={loading}
+                compact
+              />
+            </div>
+          </div>
+        </section>
 
-          <p className="text-[11px] text-gray-400 dark:text-muted-foreground pb-4">
-            Paginaweergaven en kliks worden geregistreerd als vaste route- en knopnamen, zonder
-            IP-adres, muispositie of tekst. Telemetrie wordt na 400 dagen automatisch verwijderd.
-          </p>
-        </div>
+        <p className="text-[11px] leading-relaxed text-white/55">
+          Paginaweergaven en kliks worden geregistreerd als vaste route- en knopnamen, zonder
+          IP-adres, muispositie of tekst. Telemetrie wordt na 400 dagen automatisch verwijderd.
+        </p>
       </div>
-    </div>
+    </SceneShell>
   )
 }
 
-function SectionTitle({
-  icon: Icon, title, subtitle,
-}: { icon: React.ElementType; title: string; subtitle: string }) {
+/**
+ * A card's own heading, one level below the section it sits in.
+ *
+ * `SectionHeading` from components/scene/pieces always renders an h2, which is
+ * right for "Bereik" and "Groei" but would put a chart title on the same level
+ * as the section that contains it. Same type treatment, an h3.
+ */
+function CardHead({
+  id, title, subtitle, action,
+}: {
+  id: string
+  title: string
+  subtitle?: string
+  action?: React.ReactNode
+}) {
   return (
-    <div className="flex items-center gap-2.5 mb-3">
-      <span className="h-8 w-8 rounded-lg flex items-center justify-center flex-none" style={{ backgroundColor: "rgba(13,148,136,0.10)" }}>
-        <Icon size={15} style={{ color: TEAL }} />
-      </span>
-      <div>
-        <h2 className="text-base font-bold text-foreground leading-tight">{title}</h2>
-        <p className="text-xs text-muted-foreground">{subtitle}</p>
+    <div>
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <h3 id={id} className="text-sm font-semibold tracking-tight text-white">{title}</h3>
+        {action}
       </div>
+      {subtitle && <p className="mt-1 text-xs leading-relaxed text-white/65">{subtitle}</p>}
     </div>
   )
 }
 
 function SummaryCard({
-  label, value, icon: Icon, color, loading, hint, suffix,
+  label, value, color, loading, hint, suffix,
 }: {
   label: string
   value: number
-  icon: React.ElementType
   color: string
   loading: boolean
   hint?: string
   suffix?: string
 }) {
   return (
-    <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-4">
-      <div className="flex items-center justify-between mb-2">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-muted-foreground">
-          {label}
-        </p>
-        <div className="h-7 w-7 rounded-lg flex items-center justify-center flex-none" style={{ backgroundColor: `${color}14` }}>
-          <Icon size={13} style={{ color }} />
-        </div>
-      </div>
+    <div className={`p-4 ${DATA_TILE}`}>
+      <dt className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/60">
+        {label}
+      </dt>
       {loading ? (
-        <div className="h-7 w-2/3 rounded animate-pulse bg-gray-100 dark:bg-secondary" />
+        <dd className="mt-2">
+          <SceneSkeleton className="h-7 w-2/3" />
+        </dd>
       ) : (
-        <p className="text-2xl font-bold text-foreground leading-tight tabular-nums">
-          {n(value)}{suffix}
-        </p>
-      )}
-      {hint && !loading && (
-        <p className="mt-1 text-[11px] text-gray-400 dark:text-muted-foreground leading-snug">{hint}</p>
+        <dd className="content-in mt-1">
+          <span className="block text-2xl font-semibold leading-tight tabular-nums" style={{ color }}>
+            {n(value)}{suffix}
+          </span>
+          {hint && <span className="mt-1 block text-[11px] leading-snug text-white/55">{hint}</span>}
+        </dd>
       )}
     </div>
   )
@@ -491,46 +559,42 @@ function SummaryCard({
  * a pie needs the reader to compare angles.
  */
 function RankCard({
-  title, subtitle, rows, color, loading, empty, icon: Icon,
+  id, title, subtitle, rows, color, loading, empty,
 }: {
+  id: string
   title: string
   subtitle: string
   rows: { key: string; label: string; value: number; hint?: string; ratio: number }[]
   color: string
   loading: boolean
   empty: string
-  icon?: React.ElementType
 }) {
   return (
-    <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-2xl p-5">
-      <div className="flex items-center gap-2 mb-1">
-        {Icon && <Icon size={14} style={{ color }} />}
-        <p className="text-sm font-bold text-gray-900 dark:text-foreground">{title}</p>
-      </div>
-      <p className="text-xs text-gray-500 dark:text-muted-foreground mb-4">{subtitle}</p>
+    <section className={`p-5 ${DATA_PANEL}`} aria-labelledby={id}>
+      <CardHead id={id} title={title} subtitle={subtitle} />
 
       {loading ? (
-        <div className="space-y-2">
+        <div className="mt-4 space-y-2">
           {[0, 1, 2, 3, 4].map(i => (
-            <div key={i} className="h-7 rounded animate-pulse bg-gray-100 dark:bg-secondary" />
+            <SceneSkeleton key={i} className="h-7 w-full rounded-lg" />
           ))}
         </div>
       ) : rows.length === 0 ? (
-        <p className="text-sm text-muted-foreground text-center py-8">{empty}</p>
+        <p className="py-8 text-center text-sm text-white/70">{empty}</p>
       ) : (
-        <ol className="space-y-1.5 max-h-[320px] overflow-y-auto pr-1">
+        <ol className="mt-4 max-h-[320px] space-y-1.5 overflow-y-auto pr-1">
           {rows.map(row => (
-            <li key={row.key} className="relative rounded-lg overflow-hidden">
+            <li key={row.key} className="relative overflow-hidden rounded-lg">
               <span
                 aria-hidden
                 className="absolute inset-y-0 left-0 rounded-lg"
-                style={{ width: `${Math.max(row.ratio * 100, 2)}%`, backgroundColor: `${color}1F` }}
+                style={{ width: `${Math.max(row.ratio * 100, 2)}%`, backgroundColor: `${color}2E` }}
               />
               <span className="relative flex items-center justify-between gap-3 px-2.5 py-1.5">
-                <span className="text-[12.5px] font-medium text-foreground truncate">{row.label}</span>
-                <span className="flex items-center gap-2 flex-none">
+                <span className="truncate text-[12.5px] font-medium text-white/90">{row.label}</span>
+                <span className="flex flex-none items-center gap-2">
                   {row.hint && (
-                    <span className="text-[11px] text-gray-400 dark:text-muted-foreground">{row.hint}</span>
+                    <span className="text-[11px] tabular-nums text-white/55">{row.hint}</span>
                   )}
                   <span className="text-[12.5px] font-bold tabular-nums" style={{ color }}>
                     {n(row.value)}
@@ -541,13 +605,14 @@ function RankCard({
           ))}
         </ol>
       )}
-    </div>
+    </section>
   )
 }
 
 function LineCard({
-  title, subtitle, series, color, loading, compact = false,
+  id, title, subtitle, series, color, loading, compact = false,
 }: {
+  id: string
   title: string
   subtitle: string
   series: Series[]
@@ -587,36 +652,48 @@ function LineCard({
   const gradientId = `grad-${title.replace(/[^a-z]/gi, "")}-${color.replace("#", "")}`
 
   return (
-    <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-2xl p-5">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <p className="text-sm font-bold text-gray-900 dark:text-foreground">{title}</p>
-          <p className="text-xs text-gray-500 dark:text-muted-foreground">{subtitle}</p>
-        </div>
-        {!loading && series.length > 0 && (
-          <p className="text-lg font-bold tabular-nums" style={{ color }}>
-            {n(series.reduce((a, b) => a + b.count, 0))}
-          </p>
-        )}
-      </div>
+    <section className={`p-5 ${DATA_PANEL}`} aria-labelledby={id}>
+      <CardHead
+        id={id}
+        title={title}
+        subtitle={subtitle}
+        action={
+          !loading && series.length > 0 ? (
+            <p className="text-lg font-semibold tabular-nums" style={{ color }}>
+              {n(series.reduce((a, b) => a + b.count, 0))}
+            </p>
+          ) : undefined
+        }
+      />
       {loading ? (
-        <div className="h-[140px] rounded animate-pulse bg-gray-100 dark:bg-secondary" />
+        <SceneSkeleton className="mt-4 h-[140px] w-full rounded-lg" />
       ) : series.length === 0 ? (
-        <p className="text-sm text-muted-foreground text-center py-10">Geen data.</p>
+        <p className="py-10 text-center text-sm text-white/70">Geen data.</p>
       ) : (
-        <div className="w-full overflow-x-auto">
+        <div className="mt-4 w-full overflow-x-auto">
           <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" className="w-full" style={{ height }}>
             <defs>
               <linearGradient id={gradientId} x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stopColor={color} stopOpacity="0.25" />
+                <stop offset="0%" stopColor={color} stopOpacity="0.28" />
                 <stop offset="100%" stopColor={color} stopOpacity="0" />
               </linearGradient>
             </defs>
             <g transform={`translate(${padding.left} ${padding.top})`}>
               {yTicks.map((t, i) => (
                 <g key={i}>
-                  <line x1={0} x2={innerW} y1={t.y} y2={t.y} stroke="currentColor" className="text-border" strokeWidth="1" strokeDasharray={i === yTicks.length - 1 ? "0" : "3 4"} />
-                  <text x={-6} y={t.y + 3} fontSize="9" textAnchor="end" className="fill-muted-foreground">
+                  {/* Literal whites: `text-border` is a theme token and would
+                      flip with the reader's light/dark setting while this plate
+                      stays dark either way. */}
+                  <line
+                    x1={0}
+                    x2={innerW}
+                    y1={t.y}
+                    y2={t.y}
+                    stroke="rgba(255,255,255,0.16)"
+                    strokeWidth="1"
+                    strokeDasharray={i === yTicks.length - 1 ? "0" : "3 4"}
+                  />
+                  <text x={-6} y={t.y + 3} fontSize="9" textAnchor="end" fill="rgba(255,255,255,0.6)">
                     {t.value}
                   </text>
                 </g>
@@ -632,7 +709,7 @@ function LineCard({
                 const p = points[i]
                 if (!p) return null
                 return (
-                  <text key={i} x={p.x} y={innerH + 14} fontSize="9" textAnchor="middle" className="fill-muted-foreground">
+                  <text key={i} x={p.x} y={innerH + 14} fontSize="9" textAnchor="middle" fill="rgba(255,255,255,0.6)">
                     {formatDate(p.d)}
                   </text>
                 )
@@ -641,6 +718,6 @@ function LineCard({
           </svg>
         </div>
       )}
-    </div>
+    </section>
   )
 }

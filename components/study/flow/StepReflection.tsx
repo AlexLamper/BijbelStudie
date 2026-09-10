@@ -1,9 +1,22 @@
 'use client';
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { PenLine, Check, CloudOff, RotateCcw } from 'lucide-react';
+import { Check, CloudOff, RotateCcw } from 'lucide-react';
 
-const TEAL = '#0D9488';
+import LessonLayout, { FOCUS_RING, INK, INK_FAINT, INK_MUTED, Marginal } from './lesson-layout';
+import { TEAL_ON_DARK } from '../../scene/tokens';
+
+/**
+ * The recovery notice's amber, on the night ground.
+ *
+ * #D97706 as small type on the scene ground measures 5.8:1, so on this window
+ * the amber can be the brand shade itself rather than the deep end the light
+ * card needed
+ * (there it was 3.4:1 and failed); the deep end is kept for the fill under the
+ * white button label, where white on #B45309 is 5.9:1.
+ */
+const AMBER = '#D97706';
+const AMBER_DEEP = '#B45309';
 const AUTOSAVE_DELAY_MS = 1500;
 const MAX_CHARS = 8000;
 
@@ -55,6 +68,8 @@ export default function StepReflection({
   initialText,
   serverUpdatedAt,
   onSave,
+  eyebrow,
+  passageReference,
 }: {
   studyId: string;
   lessonDay: number;
@@ -62,6 +77,8 @@ export default function StepReflection({
   initialText: string;
   serverUpdatedAt: string | null;
   onSave: (text: string) => Promise<boolean>;
+  eyebrow?: string;
+  passageReference?: string;
 }) {
   const [text, setText] = useState(initialText);
   const [saveState, setSaveState] = useState<SaveState>('idle');
@@ -141,39 +158,36 @@ export default function StepReflection({
   }, [persist]);
 
   return (
-    <div className="h-full overflow-y-auto">
-    <div className="max-w-2xl mx-auto px-6 sm:px-10 py-8 sm:py-10">
-      <div className="flex items-center gap-2 mb-3">
-        <PenLine size={14} style={{ color: TEAL }} />
-        <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: TEAL }}>
-          Reflectie
-        </span>
-      </div>
+    <LessonLayout
+      eyebrow={eyebrow ?? 'Reflectie'}
+      heading={reflection.question}
+      headingClassName="max-w-[30ch]"
+      aside={
+        <>
+          {reflection.prompts && reflection.prompts.length > 0 ? (
+            <Marginal label="Als je vastloopt">
+              <ul className="space-y-2">
+                {reflection.prompts.map((prompt, index) => (
+                  <li key={index}>{prompt}</li>
+                ))}
+              </ul>
+            </Marginal>
+          ) : null}
 
-      <h2 className="text-xl sm:text-2xl font-bold text-foreground leading-snug mb-4">
-        {reflection.question}
-      </h2>
-
-      {reflection.prompts && reflection.prompts.length > 0 && (
-        <ul className="mb-5 space-y-1.5">
-          {reflection.prompts.map((prompt, index) => (
-            <li
-              key={index}
-              className="flex gap-2.5 text-sm text-gray-500 dark:text-muted-foreground leading-relaxed"
-            >
-              <span aria-hidden className="mt-2 h-1 w-1 rounded-full flex-none bg-current opacity-50" />
-              {prompt}
-            </li>
-          ))}
-        </ul>
-      )}
-
+          {passageReference ? (
+            <Marginal label="Gelezen">
+              <p className="tabular-nums">{passageReference}</p>
+            </Marginal>
+          ) : null}
+        </>
+      }
+    >
       {recovered && (
         <div
-          className="mb-4 rounded-lg border p-3 text-sm"
-          style={{ borderColor: 'rgba(217,119,6,0.35)', backgroundColor: 'rgba(217,119,6,0.07)' }}
+          className="mt-5 rounded-lg border p-3 text-sm"
+          style={{ borderColor: 'rgba(217,119,6,0.45)', backgroundColor: 'rgba(217,119,6,0.10)' }}
         >
-          <p className="text-foreground mb-2">
+          <p className={`mb-2 ${INK}`}>
             Er staat een nieuwere versie van je antwoord op dit apparaat, die niet is opgeslagen.
           </p>
           <div className="flex gap-2">
@@ -183,8 +197,8 @@ export default function StepReflection({
                 handleChange(recovered.text);
                 setRecovered(null);
               }}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold text-white"
-              style={{ backgroundColor: '#D97706' }}
+              className="press inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold text-white outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-white"
+              style={{ backgroundColor: AMBER_DEEP }}
             >
               <RotateCcw size={12} /> Herstel die versie
             </button>
@@ -198,7 +212,7 @@ export default function StepReflection({
                 }
                 setRecovered(null);
               }}
-              className="px-2.5 py-1.5 rounded-md text-xs font-medium border border-border text-foreground"
+              className={`px-2.5 py-1.5 rounded-md text-xs font-medium border border-white/25 ${INK} transition-colors hover:bg-white/10 ${FOCUS_RING}`}
             >
               Negeren
             </button>
@@ -206,7 +220,15 @@ export default function StepReflection({
         </div>
       )}
 
+      {/* The writing surface is the same 6% lift every other input in the flow
+          wears, not a hole cut in the ground: white in it measures 13.5:1 and
+          the placeholder 5.2:1. There are no plates left anywhere in the
+          window - the passage stands on this ground too. */}
+      <label htmlFor="study-reflection" className={`mt-6 block text-[10px] font-bold uppercase tracking-[0.16em] ${INK_FAINT}`}>
+        Jouw aantekening
+      </label>
       <textarea
+        id="study-reflection"
         value={text}
         onChange={(event) => handleChange(event.target.value)}
         onBlur={() => void persist(latest.current)}
@@ -214,33 +236,31 @@ export default function StepReflection({
         maxLength={MAX_CHARS}
         placeholder={reflection.placeholder ?? 'Schrijf hier je antwoord...'}
         aria-label="Je reflectie"
-        className="w-full rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-card p-4 text-[15px] leading-relaxed text-foreground resize-y focus:outline-none focus:ring-2"
-        style={{ ['--tw-ring-color' as string]: 'rgba(13,148,136,0.35)' }}
+        className={`mt-1.5 w-full rounded-xl border border-white/20 bg-white/[0.06] p-4 text-[15px] leading-relaxed text-white placeholder:text-white/55 resize-y ${FOCUS_RING}`}
       />
 
-      <div className="mt-2 flex items-center justify-between text-xs text-gray-400 dark:text-muted-foreground">
+      <div className={`mt-2 flex items-center justify-between text-xs ${INK_FAINT}`}>
         <span aria-live="polite">
           {saveState === 'saving' && 'Opslaan...'}
           {saveState === 'saved' && (
-            <span className="inline-flex items-center gap-1" style={{ color: TEAL }}>
+            <span className="inline-flex items-center gap-1" style={{ color: TEAL_ON_DARK }}>
               <Check size={12} /> Opgeslagen
             </span>
           )}
           {saveState === 'error' && (
-            <span className="inline-flex items-center gap-1 text-destructive">
+            <span className="inline-flex items-center gap-1" style={{ color: AMBER }}>
               <CloudOff size={12} /> Niet opgeslagen - je tekst staat nog op dit apparaat
             </span>
           )}
         </span>
-        <span>
+        <span className="tabular-nums">
           {text.length}/{MAX_CHARS}
         </span>
       </div>
 
-      <p className="mt-3 text-xs text-gray-400 dark:text-muted-foreground">
+      <p className={`mt-3 text-xs ${INK_MUTED}`}>
         Als je de les afrondt wordt dit bewaard als notitie, terug te vinden bij Notities.
       </p>
-    </div>
-    </div>
+    </LessonLayout>
   );
 }
