@@ -355,10 +355,18 @@ export default function StudiesBrowser({ children }: { children: React.ReactNode
   return (
     <>
       {/* -- Layer 1: the sky ------------------------------------------ */}
+      {/* Deliberately NOT a full screen tall, unlike the sky on /studies/[id].
+          A detail page holds one decision and can spend a screen framing it; a
+          catalogue's job is to show studies, and a `min-h-[100vh-3.5rem]` block
+          with `pb-32` under it meant a reader had to scroll before the first
+          study existed. The heading, the search and the tabs now cost what they
+          measure, so on a 1280x720 laptop the topic grid and the top of the
+          featured row are already on screen. The scene classes stay: the parallax
+          is what makes this a sky, not the height. */}
       <section
         id="studies-hero"
         aria-labelledby="studies-titel"
-        className="flex min-h-[calc(100vh-3.5rem)] flex-col justify-between pb-32 pt-5"
+        className="flex min-h-[calc(100vh-3.5rem)] flex-col justify-between pb-32 pt-5 sm:pt-7"
       >
         {/* The header row - the same top line the dashboard spends on the
             date. Here it carries the category filters, right-aligned, on a
@@ -378,7 +386,7 @@ export default function StudiesBrowser({ children }: { children: React.ReactNode
           {/* The search sits with the heading rather than in a toolbar: it is
               the fastest way through seventy-seven studies and the reader who
               already knows what they want should not have to scroll to it. */}
-          <div className="relative mt-8 w-full max-w-[26rem]">
+          <div className="relative mt-6 w-full max-w-[26rem]">
             <Search
               size={16}
               aria-hidden
@@ -390,12 +398,12 @@ export default function StudiesBrowser({ children }: { children: React.ReactNode
               onChange={event => setQuery(event.target.value)}
               placeholder="Zoek een bijbelboek, persoon of thema"
               aria-label="Zoek een studie"
-              className="h-12 w-full rounded-full border border-white/25 bg-black/40 pl-10 pr-4 text-sm text-white placeholder:text-white/50 outline-none backdrop-blur-md transition-colors focus-visible:border-white/50 focus-visible:ring-2 focus-visible:ring-white"
+              className="h-11 w-full rounded-full border border-white/25 bg-black/40 pl-10 pr-4 text-sm text-white placeholder:text-white/50 outline-none backdrop-blur-md transition-colors focus-visible:border-white/50 focus-visible:ring-2 focus-visible:ring-white"
             />
           </div>
 
           {searchResults === null && (
-            <div className="mt-5 flex flex-wrap gap-2">
+            <div className="mt-4 flex flex-wrap gap-2">
               {TABS.map(item => {
                 const active = item.value === tab
                 return (
@@ -426,7 +434,7 @@ export default function StudiesBrowser({ children }: { children: React.ReactNode
       {searchResults !== null ? (
         /* A search replaces the page: the reader already told you what they
            want, so the browsing aids are noise. */
-        <section aria-labelledby="studies-zoek" className="-mt-20 pb-24">
+        <section aria-labelledby="studies-zoek" className="pb-24 pt-2">
           <SectionHeading
             id="studies-zoek"
             eyebrow="Zoekresultaten"
@@ -466,7 +474,7 @@ export default function StudiesBrowser({ children }: { children: React.ReactNode
                       onClick={() => setCategory(active ? null : key)}
                       data-track={`study_topic_${key}`}
                       aria-pressed={active}
-                      className={`press px-5 py-4 text-left shadow-lg shadow-black/20 outline-none transition-colors hover:bg-black/55 focus-visible:ring-2 focus-visible:ring-white ${PANEL}`}
+                      className={`press px-5 py-3.5 text-left shadow-lg shadow-black/20 outline-none transition-colors hover:bg-black/55 focus-visible:ring-2 focus-visible:ring-white ${PANEL}`}
                       /* Inline rather than a second `bg-*` class: two Tailwind
                          utilities for the same property have equal specificity,
                          so which one won would depend on stylesheet order. */
@@ -491,16 +499,16 @@ export default function StudiesBrowser({ children }: { children: React.ReactNode
           )}
 
           {/* -- Layer 3: the desk ------------------------------------- */}
-          <div className={showFurniture ? 'pb-24 pt-14' : 'pb-24 pt-4'}>
+          <div className={showFurniture ? 'pb-24 pt-6' : 'pb-24 pt-4'}>
             {showFurniture && FEATURED.length > 0 && (
-              <section aria-labelledby="studies-uitgelicht" className="pb-10">
+              <section aria-labelledby="studies-uitgelicht" className="pb-8">
                 <SectionHeading
                   id="studies-uitgelicht"
                   title="Uitgelicht"
                   subtitle="Studies met een geschreven inleiding, om mee te beginnen."
                   rule
                 />
-                <div className="mt-4 flex gap-4 overflow-x-auto pb-2">
+                <div className="mt-3 flex gap-4 overflow-x-auto pb-2">
                   {FEATURED.map(entry => (
                     <Link
                       key={entry.study.id}
@@ -537,7 +545,7 @@ export default function StudiesBrowser({ children }: { children: React.ReactNode
             )}
 
             {showFurniture && (
-              <div className="flex flex-wrap gap-2 pb-8">
+              <div className="flex flex-wrap gap-2 pb-6">
                 {KINDS.map(item => {
                   const active = item.value === kind
                   return (

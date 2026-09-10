@@ -200,13 +200,19 @@ export default function ProfilePage() {
           ) : (
             <p className="text-sm text-white/80">Lid sinds {memberSince}</p>
           )}
+          {/* No Pro badge here. The navbar draws one for the account it is
+              signed in as (components/layout/header.tsx), and this row sits
+              directly under it at the same right edge - two identical gold
+              pills stacked on top of each other read as a rendering fault. The
+              Pro state on THIS page belongs to the Abonnement panel below,
+              where it is labelled ("Pro actief") and stands next to what it
+              means. The Admin pill stays: nothing else on the page says it. */}
           <div className="flex items-center gap-2">
             {user?.isAdmin && (
               <span className="rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-semibold text-white ring-1 ring-white/25">
                 Admin
               </span>
             )}
-            {user?.subscribed && <ProBadge size="md" />}
           </div>
         </div>
 

@@ -16,7 +16,6 @@ import SceneShell from '../../../components/scene/SceneShell';
 import { SCENE_TREE, sceneSvg } from '../../../components/scene/scene-svg';
 import { GlassStat, Panel, SectionHeading } from '../../../components/scene/pieces';
 import { EYEBROW, TEAL_ON_DARK } from '../../../components/scene/tokens';
-import StudyArtwork from '../StudyArtwork';
 import StudySetupProvider, { StudyActionBar } from './StudyOnboardingForm';
 import LessonList from './LessonList';
 
@@ -91,7 +90,13 @@ const TYPE_LABEL: Record<string, string> = {
  *
  *   the sky      what this study is, and the one action - start or resume
  *   the horizon  the four facts you weigh: lessons, time, books, progress
- *   the desk     the study's own view, the pitch, the reading plan, the lessons
+ *   the desk     the pitch, the reading plan, the lessons
+ *
+ * There is no cover picture on the desk any more. The landscape behind the page
+ * is already this study's view; a drawn horizon in the column repeated it a size
+ * smaller and cost a screen of text. `StudyArtwork` is untouched - it still
+ * draws the /studies rows and featured cards - and `study.image` still goes out
+ * verbatim over /api/v1/studies to the shipped app.
  *
  * `backdrop="static"` with the server-rendered SVG, because there is no
  * guaranteed session here; `gateId` points at the hero so the live canvas only
@@ -288,17 +293,12 @@ export default async function StudyDetailPage({ params }: PageProps) {
         {/* -- Layer 3: the desk --------------------------------------- */}
         <div className="grid w-full grid-cols-1 gap-6 pb-24 pt-14 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-8">
           <div className="min-w-0 space-y-6">
-            {/* The study's own view: a sky, a horizon and a band of land drawn
-                from the study id, so the same study always looks the same.
-                Composed at the ratio it is drawn at rather than cropped out of
-                a 16:6 banner - see app/studies/StudyArtwork.tsx. */}
-            <StudyArtwork
-              id={study.id}
-              kind={study.type}
-              ratio={24 / 7}
-              className="aspect-[24/7] w-full rounded-2xl"
-            />
-
+            {/* No cover picture here. The scene behind the page IS this study's
+                view; a second drawn horizon in the column repeated it at a
+                smaller size and pushed the text down a screen. StudyArtwork
+                still draws the catalogue rows and the featured cards on
+                /studies, and `study.image` is still served verbatim to the app
+                by /api/v1/studies - neither may be removed for this. */}
             {about.length > 0 && (
               <Panel className="p-6" labelledBy="studie-over">
                 <SectionHeading id="studie-over" title="Waar gaat deze studie over?" />

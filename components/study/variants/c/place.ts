@@ -180,11 +180,16 @@ export function placeCss(scopeId: string, palette: Palette): string {
     `#${scopeId}{${vars(light)}}`,
     `.dark #${scopeId}{${vars(dark)}}`,
 
-    // The reading ground: the theme's own background with the study's colour
-    // laid over it at 6%. Two paint layers rather than one mixed hex, because
-    // the background is itself an hsl() custom property and only the browser
-    // knows what it resolves to.
-    `#${scopeId}.pc-ground,#${scopeId} .pc-ground{background-color:hsl(var(--background));background-image:linear-gradient(0deg,var(--pc-wash),var(--pc-wash))}`,
+    // The reading ground: the theme's own background, and NOTHING else.
+    //
+    // It used to carry the study's colour over it at 6%. That is the one place
+    // an accent must never go - it made every C lesson a faintly blue-green (or
+    // amber, or violet) screen depending on which study you had opened, where
+    // ontwerpen A and B stand on the plain `bg-background` the rest of the app
+    // stands on. The study's ink still owns the eyebrow, the rules, the row
+    // hover and the focus ring; it no longer owns the ground under the
+    // scripture.
+    `#${scopeId}.pc-ground,#${scopeId} .pc-ground{background-color:hsl(var(--background))}`,
 
     `#${scopeId} .pc-ink{color:var(--pc-ink)}`,
     `#${scopeId} .pc-rule{background-color:var(--pc-rule)}`,

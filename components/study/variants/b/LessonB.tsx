@@ -7,6 +7,7 @@ import { Check, X } from 'lucide-react';
 import type { StudyType } from '../../../../lib/data/curated-studies';
 import { studyArtFor } from '../../../../lib/studyArt';
 import type { StepKey } from '../../../../lib/studyFlow';
+import { SURFACE } from '../../flow/lesson-layout';
 import StudyFlowVariantSwitcher from '../../StudyFlowVariantSwitcher';
 import { Horizon, ON_ART, ON_ART_FAINT, sceneName, scrimFor, StudyTint, TEAL } from './art';
 import PassageColumn from './PassageColumn';
@@ -79,10 +80,17 @@ export interface LessonBDemo {
   note: string;
 }
 
-/** Wat de tekst ondersteunt: in de marge, als getint paneel. */
+/**
+ * Wat de tekst ondersteunt: in de marge.
+ *
+ * Geen getint paneel meer, maar `SURFACE` - dezelfde informatiekaart als in de
+ * begeleide flow en op het dashboard, zodat de varianten en de echte les één
+ * oppervlak delen. De inkt van de studie blijft accent (opschrift, hover,
+ * focus) en is geen vlak meer.
+ */
 function Marginal({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="b-wash b-edge rounded-xl border p-3.5">
+    <div className={`${SURFACE} p-3.5`}>
       <p className="b-ink text-[9.5px] font-bold uppercase tracking-[0.16em]">{label}</p>
       <div className="mt-1.5 text-[12.5px] leading-[1.6] text-gray-600 dark:text-muted-foreground">
         {children}

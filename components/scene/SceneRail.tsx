@@ -129,7 +129,7 @@ function useAccountHrefs() {
 function RailItem({ item, active }: { item: NavItem; active: boolean }) {
   const Icon = item.icon
   return (
-    <li className="list-none">
+    <li className="group/item relative list-none">
       <Link
         href={item.url}
         aria-current={active ? "page" : undefined}

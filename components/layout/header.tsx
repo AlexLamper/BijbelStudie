@@ -218,18 +218,19 @@ export function Header({ title, variant = "default" }: HeaderProps) {
           : "flex items-center justify-between px-4 sm:px-6 h-14 border-b border-border bg-white dark:bg-background sticky top-0 z-50"
       }
     >
-      {/* Left: Sidebar trigger + page title */}
+      {/* Left: sidebar trigger + page title, or - on a scene - the wordmark */}
       <div className="flex items-center gap-3">
         {/* The trigger opens the sidebar column, and a scene screen has no
-            column to open - its rail floats and answers to hover and focus. A
-            button that visibly does nothing is worse than no button. */}
+            column to open - its rail floats and names one icon at a time on
+            hover. A button that visibly does nothing is worse than no button. */}
         {!scene && <SidebarTrigger className="text-muted-foreground hover:text-foreground" />}
         {/*
-          On an unconverted page this bar is the only thing naming the page, so
-          it stays the h1. On a scene page the page itself opens with a real
-          heading - the greeting, the study's title, "Instellingen" - and two
-          h1s in one document is one too many. Same size and weight either way;
-          only the element changes.
+          The mark sits on the RIGHT of this bar (see `Wordmark`), where the
+          owner asked for it. So the left keeps the page's name. On a scene page
+          the page opens with a real heading of its own, and two h1s in one
+          document is one too many - same size and weight, only the element
+          changes. An unconverted page has nothing else naming it, so there the
+          name stays the h1.
         */}
         {scene ? (
           <p className="text-base font-semibold text-foreground">{getPageTitle()}</p>

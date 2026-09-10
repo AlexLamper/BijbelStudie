@@ -32,7 +32,14 @@ const GHOST_BUTTON =
 const ROW = "flex flex-col gap-2.5 py-4 first:pt-5 last:pb-0 sm:flex-row sm:items-start sm:justify-between sm:gap-8"
 
 interface BillingState {
+  /** ENTITLED, from any channel - Stripe, an app store, or an admin grant. */
   subscribed: boolean
+  /** Which channel entitles them. Only "stripe" is billable from the website. */
+  source: "stripe" | "apple" | "google" | "admin" | null
+  /** Billed by us through Stripe. The portal, pause and cancel need this. */
+  stripeSubscribed: boolean
+  /** When an app-store entitlement lapses, if the store told us. */
+  storeExpiresAt: string | null
   status: string | null
   interval: "monthly" | "annual" | null
   currentPeriodEnd: string | null
@@ -40,6 +47,12 @@ interface BillingState {
   hasBillingIssue: boolean
   isPaused: boolean
   pausedUntil: string | null
+}
+
+/** What to call the store an entitlement came from, in Dutch. */
+const STORE_LABEL: Record<"apple" | "google", string> = {
+  apple: "de App Store",
+  google: "Google Play",
 }
 
 const REASONS: { value: string; label: string }[] = [
@@ -74,6 +87,16 @@ function formatDate(value: string | null): string {
  * the wording has ever moved when it was restyled: the billed label, the
  * effective monthly figure and the saving are all derived there, where the EU
  * price-indication rules are answered once.
+ *
+ * What this panel calls "subscribed" is the ENTITLEMENT, not the Stripe flag.
+ * /api/subscription/billing-state used to answer with the raw `subscribed`
+ * field, which only Stripe writes, so a reader who bought Pro in the app
+ * (RevenueCat -> `storePremium`) or an admin/comped account was told here that
+ * they had no active subscription while the navbar badge, /profiel and every
+ * paywall in the app read them as Pro. The route resolves it with
+ * `resolveIsPro` now - the same helper lib/authOptions and /api/v1/me use - and
+ * reports the channel in `source`, which is what the branch below keys the
+ * Stripe-only controls off.
  *
  * The layout pass that grouped /instellingen changed three things here and
  * nothing else: the plan and its date read as a labelled list in that page's
@@ -188,6 +211,39 @@ export function SubscriptionSection() {
         >
           Bekijk Pro <ArrowRight size={13} aria-hidden />
         </a>
+      </div>
+    )
+  }
+
+  /* Pro, but not through us.
+     `subscribed` above is the entitlement; everything below this point is the
+     Stripe subscription we bill, pause and cancel. An account that is Pro
+     through an app store or an admin grant has none of that, so it gets the
+     facts and no controls it cannot use - offering the Stripe portal to an App
+     Store subscriber opens a customer record with no subscription in it, and
+     "Abonnement opzeggen" would cancel nothing while looking like it had.
+     Gated on `stripeSubscribed`, not on `source`: an account that somehow has
+     both must keep its exit from the one it actually pays for. */
+  if (!state.stripeSubscribed) {
+    const store = state.source === "apple" || state.source === "google" ? state.source : null
+
+    return (
+      <div className="content-in pt-5">
+        <p className="text-sm font-semibold text-white">
+          {store
+            ? `BijbelStudie Pro · via ${STORE_LABEL[store]}`
+            : "BijbelStudie Pro · via je account"}
+        </p>
+        <p className="mt-1.5 text-sm leading-relaxed text-white/75">
+          {store
+            ? `Je Pro-toegang komt uit je aankoop in de app. Verlengen, wijzigen en opzeggen doe je daarom in ${STORE_LABEL[store]}, niet hier.`
+            : "Je hebt volledige toegang tot alle Pro-functies. Er is geen betaald abonnement aan dit account gekoppeld, dus er wordt ook niets afgeschreven."}
+        </p>
+        {store && state.storeExpiresAt && (
+          <p className="mt-1.5 text-xs text-white/70">
+            Loopt door tot {formatDate(state.storeExpiresAt)}
+          </p>
+        )}
       </div>
     )
   }

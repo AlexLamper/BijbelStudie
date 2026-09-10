@@ -223,14 +223,12 @@ sections; apply `SCENE_X` (or `SCENE_X_EDGE`, or `RAIL_GUTTER` for the left inse
 alone) per section yourself — **the constant, never its current value copied out
 as literal classes**.
 
-**The rail's three numbers have to agree**, and they all live together in
-`tokens.ts`: `RAIL_REST` (64px) < `RAIL_WIDE` (96px at `lg`, 112px at `xl`) ≤ the
-gutter (`SCENE_X`'s left inset, `RAIL_GUTTER`). That is what lets the rail float
-— reserving nothing beyond the strip it already stands in — while making it
-impossible for it to cover a glyph, open or shut. Both previous versions broke
-one side of it: a 176px open rail over a 96px gutter ghosted over every heading,
-and reserving 192/208px for it pushed every page's content a fifth of the way
-across the screen. Move one of the three and you move all three.
+**The rail's two numbers have to agree**, and they live together in
+`tokens.ts`: `RAIL_W` (13rem, icon and label always visible, no hover state) ≤
+the gutter (`SCENE_X`'s left inset, or `RAIL_GUTTER` for a page such as `/lezen`
+that wants its content flush against the rail). The rail is a fixed column, so
+the gutter reserves exactly its width and nothing can ever sit under it. Move
+one and you move the other.
 
 ---
 

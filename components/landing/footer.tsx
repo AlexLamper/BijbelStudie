@@ -33,20 +33,36 @@ export function Footer() {
 
           {/* Brand column */}
           <div className="space-y-4">
-            {/* The app icon is a #262626 tile with a white cross; on this
-                #1F2937 footer the tile disappeared and only the cross was left
-                floating. The dark-mode wordmark is the inverted mark (light
-                tile, dark cross, light lettering), drawn for exactly this
-                ground, so it replaces icon + text together. 273x60 source,
-                shown at 26px tall. */}
-            <Link href="/" className="inline-flex items-center" aria-label="BijbelStudie">
+            {/* The full-colour mark, lifted off the ground by a halo instead of
+                being swapped for an inverted asset.
+
+                What was here was `Logo-text-dark-mode.svg`: the inverted
+                lockup (light tile, dark cross, light lettering) drawn for this
+                #1F2937 ground, because the real mark is a #262626 tile that
+                sits at almost the same value as the footer and disappears into
+                it. The mark is now the real one and the halo does that job.
+
+                The light-mode lockup is deliberately NOT used here. Its
+                lettering is one #262626 path, which is 1.09:1 on #1F2937 -
+                invisible - and a halo scaled to the 26px mark cannot fix 92px
+                of dark type beside it. So the lockup is split the way the
+                header already splits it: the icon as artwork, the wordmark as
+                white text. Same link, same 26px height. */}
+            <Link href="/" className="inline-flex items-center gap-2" aria-label="BijbelStudie">
+              {/* No halo behind the mark (removed at the owner's request: the
+                  tile is a rounded square with one rounder corner, and a
+                  circular glow read as a mismatch). No `rounded-*` either -
+                  the tile carries its own corner radius. */}
               <Image
-                src="/images/Logo-text-dark-mode.svg"
+                src="/images/logo.svg"
                 alt="BijbelStudie"
-                width={118}
+                width={26}
                 height={26}
-                className="h-[26px] w-auto"
+                className="h-[26px] w-[26px]"
               />
+              <span className="text-base font-bold tracking-tight text-white">
+                Bijbel<span style={{ color: "#0F766E" }}>Studie</span>
+              </span>
             </Link>
             <p className="max-w-xs text-sm leading-relaxed" style={{ color: FOOTER_MUTED }}>
               Online bijbelstudie platform voor serieuze bijbelstudenten. Gratis beginnen, altijd.

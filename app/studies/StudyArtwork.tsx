@@ -12,8 +12,9 @@ import { studyArtFor, studyHorizon, type StudyArtKind } from '../../lib/studyArt
  * must never draw anything of its own.
  *
  * No `"use client"`: nothing here holds state, so the same component renders
- * inside the server-rendered study page (where it is the largest thing on the
- * screen and must be in the first paint) and inside the client catalogue.
+ * from a server component and from the client catalogue alike. Its callers are
+ * the /studies list rows and the featured cards; the study detail page draws no
+ * picture of its own - the scene behind it is that study's view.
  *
  * `ratio` is the point. The picture is COMPOSED at the ratio it will be drawn
  * at rather than authored at 16:6 and then `object-cover`-cropped into a 96x64

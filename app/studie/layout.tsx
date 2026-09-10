@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../lib/authOptions";
 import SessionProvider from "../../components/providers/SessionProvider";
 import { StudyRail } from "../../components/layout/app-sidebar";
-import { SCENE_BG, SCENE_ROOM, SCENE_WASH } from "../../components/scene/tokens";
+import { SCENE_BG, SCENE_ROOM } from "../../components/scene/tokens";
 import { generatePageMetadata } from "../../lib/pageMetadata";
 
 import { cookies } from "next/headers";
@@ -32,10 +32,21 @@ export async function generateMetadata(): Promise<Metadata> {
  * hover state - rather than the full sidebar with its Pro card and page chrome.
  * It has one width, so nothing about the lesson ever reflows.
  *
- * The lesson itself sits in an inset, rounded, shadowed frame on a darker
- * ground: a window you are working inside rather than a page you are scrolling.
- * Below md the frame goes edge to edge - a 12px margin on a phone is lost space,
- * not atmosphere.
+ * THE LESSON IS FULL-BLEED. IT IS NOT A CARD.
+ *
+ * It used to sit in an inset, rounded, shadowed frame on a darker ground - a
+ * window you were working inside. The metaphor was good and the geometry was
+ * not: a 12px ring of dead ground, two rounded corners and a drop shadow around
+ * the one screen in the app that is nothing but a column of scripture and a
+ * column of commentary. On a laptop that is a measurable slice of the reading
+ * height spent on a frame, and on a phone the frame was already switched off,
+ * so the screen it produced was the one people actually liked.
+ *
+ * So there is no frame at every width now: no outer padding, no radius, no ring,
+ * no shadow. The flow owns the viewport from edge to edge and from the top of
+ * the header to the bottom of the Vorige/Volgende bar, beside the rail. The
+ * reading measure still lives where it belongs - on the column inside
+ * `LessonLayout`, not on a box around the whole screen.
  *
  * WHERE THE SCENE IS, AND WHY IT IS NOT BEHIND THE TEXT
  *
@@ -50,19 +61,23 @@ export async function generateMetadata(): Promise<Metadata> {
  *      `window.scrollY`, and this route is `h-[100dvh] overflow-hidden` on
  *      purpose - a fixed frame with one scrolling body inside it. Nothing the
  *      scene animates would ever move.
- *   3. It already owns the metaphor. A window inset on a ground, with a ring
- *      and a shadow, is an object standing in a world - the same thing the
- *      scene says with a landscape, said with light instead of a picture. What
- *      separates the window from the ground is elevation, NOT a second colour:
- *      both are `SCENE_BG`.
+ *   3. There is nothing left for a picture to stand behind. With the frame gone
+ *      the lesson IS the viewport; a landscape would be entirely covered by the
+ *      first paragraph of it.
  *
- * So the scene lives at the EDGES. The ground is the scene's own ground colour
- * (`SCENE_BG`) lifted by the scene's own still wash (`SCENE_WASH`), so the
- * border of the window belongs to a world rather than to a grey app chrome. No
- * canvas, no image, no second animated layer, nothing for the reader to wait
- * on: the lesson is in the HTML and the ground is a colour. This route has no
- * app bar at all, so THE ONE BACKGROUND RULE in SceneShell.tsx is satisfied by
- * construction - there is no picture anywhere on it and therefore no seam.
+ * So the ground is the scene's own ground colour (`SCENE_BG`) and nothing else.
+ * The teal `SCENE_WASH` that used to light the window's surround went with the
+ * surround: it existed to give a 12px border of ground somewhere to belong, and
+ * once there is no border it is a brand-coloured gradient laid under a screen of
+ * reading - the one thing the scene's own note on it says never to do. Brand
+ * teal is an accent here (the eyebrow, the primary action, the active step),
+ * never the ground.
+ *
+ * No canvas, no image, no gradient, no second animated layer, nothing for the
+ * reader to wait on: the lesson is in the HTML and the ground is a colour. This
+ * route has no app bar at all, so THE ONE BACKGROUND RULE in SceneShell.tsx is
+ * satisfied by construction - there is no picture anywhere on it and therefore
+ * no seam.
  *
  * AND THE INSIDE BELONGS TO THAT WORLD TOO.
  *
@@ -104,15 +119,12 @@ export default async function StudyLayout({
       className="antialiased relative h-[100dvh] flex overflow-hidden"
       style={{ backgroundColor: SCENE_BG }}
     >
-      {/* The still wash. One layer, no animation, purely decorative - the light
-          the window is standing in. It sits under everything and takes no
-          pointer events, so it can never come between the reader and a
-          control. */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-0 z-0"
-        style={{ backgroundImage: SCENE_WASH }}
-      />
+      {/* No wash layer, and no gradient of any kind. See the note above the
+          component: the teal wash lit a window surround that no longer exists,
+          and a brand-coloured gradient under a column of scripture is a page
+          ground wearing an accent colour. One flat ground, and the type sits
+          straight on it - which is also the ground every contrast figure in
+          components/scene/tokens.ts is measured against. */}
 
       <SessionProvider session={session}>
         {/* `dark` scopes the rail to the light-on-dark end of every theme
@@ -128,25 +140,25 @@ export default async function StudyLayout({
           <StudyRail />
         </div>
 
-        <main className="relative z-10 flex-1 min-w-0 min-h-0 p-0 md:p-3">
+        {/* No padding at any width. The lesson runs to the edge of what is left
+            of the viewport once the rail has taken its strip - see THE LESSON IS
+            FULL-BLEED above. */}
+        <main className="relative z-10 flex-1 min-w-0 min-h-0">
           {/* overflow-hidden, not overflow-y-auto: the guided flow is a fixed
               frame - step rail on top, Vorige/Volgende at the bottom, one
               scrolling body between them. With a scrollable wrapper the whole
               frame scrolled instead, so a wheel over the footer dragged the
               buttons off screen.
 
-              A ring rather than a border, and the scene's own plate shadow: the
-              window reads as an object lit on the ground rather than a card
-              boxed in a hairline, and a ring costs no layout the way a border
-              does.
+              No radius, no ring, no shadow: there is no card here any more, so
+              there is nothing for a corner or an edge highlight to describe.
 
-              `dark` and SCENE_ROOM are what make the INSIDE the same world as
-              the outside in both themes - see the note above the component.
-              The window is the ground colour too: what separates it from what
-              it is standing on is the ring and the shadow, not a second
-              colour. */}
+              `dark` and SCENE_ROOM are what keep this screen the same world as
+              the rest of the app in BOTH themes - see the note above the
+              component. Without them a reader on the light setting gets a white
+              document where every other signed-in screen is a night one. */}
           <div
-            className="dark h-full w-full overflow-hidden md:rounded-2xl md:ring-1 md:ring-white/10 shadow-none md:shadow-[0_40px_80px_-32px_rgba(0,0,0,0.85)]"
+            className="dark h-full w-full overflow-hidden"
             style={{ ...SCENE_ROOM, backgroundColor: SCENE_BG } as React.CSSProperties}
           >
             {children}

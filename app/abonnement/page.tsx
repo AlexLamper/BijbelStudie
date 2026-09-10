@@ -207,6 +207,16 @@ function SubscribePageInner() {
 
     async function checkSubscription() {
       if (!session) { setChecking(false); return }
+      // The session already carries the resolved entitlement: lib/authOptions
+      // sets `isSubscribed` with `resolveIsPro`, which is Stripe OR an app
+      // store purchase OR an admin grant. /api/user reports only `subscribed`
+      // (Stripe, plus a forced true for admins), so on its own it offered a
+      // checkout page to someone who had already bought Pro in the app.
+      if (session.user?.isSubscribed) {
+        setIsSubscribed(true)
+        setChecking(false)
+        return
+      }
       try {
         const r = await fetch("/api/user")
         if (r.ok) {
@@ -314,13 +324,24 @@ function SubscribePageInner() {
         className="flex min-h-[calc(100vh-3.5rem)] flex-col justify-center pb-24"
       >
         <div className="scene-sky max-w-[40rem]">
-          <CheckCircle className="h-9 w-9" aria-hidden style={{ color: TEAL_ON_DARK }} />
-          <h1
-            id="abonnement-pro-titel"
-            className="mt-5 text-4xl font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl"
-          >
-            Je bent al Pro
-          </h1>
+          {/* The mark belongs NEXT to the words it confirms, not floating on
+              its own line above them: one row, the heading on the left, the
+              check on the right edge of the measure, both on the same centre
+              line. `min-w-0` lets the heading wrap at 375px instead of pushing
+              the mark off the row, and the mark never shrinks. */}
+          <div className="flex items-center justify-between gap-4 sm:gap-6">
+            <h1
+              id="abonnement-pro-titel"
+              className="min-w-0 text-4xl font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl"
+            >
+              Je bent al Pro
+            </h1>
+            <CheckCircle
+              className="h-9 w-9 flex-shrink-0 sm:h-11 sm:w-11"
+              aria-hidden
+              style={{ color: TEAL_ON_DARK }}
+            />
+          </div>
           <p className="mt-4 max-w-[32rem] text-base leading-relaxed text-white/85">
             Bedankt voor je steun. Je hebt volledige toegang tot alle functies.
           </p>

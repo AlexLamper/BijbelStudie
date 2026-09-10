@@ -12,10 +12,13 @@ import { SCENE_BG, SCENE_X, TILE } from "../../components/scene/tokens"
  * through `style`, because Tailwind never generates a class built from a
  * constant.
  *
- * The gutter is SCENE_X - the rail's inset - because the page shows the rail;
- * the edge gutter it used before put the skeleton under the rail and let it
- * jump sideways when the page landed. The four tiles are drawn below `lg`
- * only, as on the page.
+ * The gutter is `SCENE_X`, the WITH-rail one. It used to be `SCENE_X_EDGE`,
+ * whose left inset at `lg` is narrower than the rail itself - so the skeleton
+ * spent its whole life tucked under the rail and then jumped right when the
+ * page arrived. Now the rail renders for guests too, so there is no signed-out
+ * case to be wrong about: the skeleton lands exactly where the page does. The
+ * four tiles are drawn below `lg` only, as on the page (the filter row takes
+ * their place above it).
  */
 export default function StudiesLoading() {
   return (

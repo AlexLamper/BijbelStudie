@@ -7,6 +7,7 @@ import { Check, X } from 'lucide-react';
 import type { StudyType } from '../../../../lib/data/curated-studies';
 import { studyArtFor, type StudyArtKind } from '../../../../lib/studyArt';
 import type { StepKey } from '../../../../lib/studyFlow';
+import { SURFACE } from '../../flow/lesson-layout';
 import HorizonArt from './HorizonArt';
 import PassageProse from './PassageProse';
 import ReviewStrip from './ReviewStrip';
@@ -84,10 +85,18 @@ export interface TrouwLessonDemo {
   note: string;
 }
 
-/** Een blok in de marge: getint vlak, opschrift in de inkt van de studie. */
+/**
+ * Een blok in de marge.
+ *
+ * Het vlak is niet langer getint: het is `SURFACE`, precies dezelfde
+ * informatiekaart die de begeleide flow en het dashboard gebruiken, zodat de
+ * drie ontwerpvarianten en de echte les niet uit elkaar lopen. De inkt van de
+ * studie blijft waar hij accent is - het opschrift, de haarlijn, de hover, de
+ * focusring - en verdwijnt als vlak onder de tekst.
+ */
 function Marginal({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <section className="va-wash va-edge rounded-xl border p-4">
+    <section className={`${SURFACE} p-4`}>
       <h2 className="text-[10.5px] font-bold uppercase tracking-[0.16em] va-ink">{label}</h2>
       <div className="mt-2 text-[12.5px] leading-[1.65] text-gray-600 dark:text-muted-foreground">
         {children}
