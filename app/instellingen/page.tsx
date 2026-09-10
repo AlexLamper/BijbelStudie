@@ -112,12 +112,23 @@ const FOOTNOTE = "mt-5 border-t border-white/10 pt-4 text-xs leading-relaxed tex
 /**
  * /instellingen, on the scene.
  *
- * This is a form surface, so it is laid out as one: a short sky, then a single
- * measured column of panels - never a second column - so that every panel is
- * the same width, every row is divided by the same hairline, and every control
- * ends at the same right edge.
+ * This is a form surface, so it is laid out as one: a short sky, then the
+ * panels, grouped, with every row divided by the same hairline and every
+ * control ending at the right edge of its own panel.
  *
- * The column is grouped, and the groups are the reading order:
+ * THE DESK SPANS THE WHOLE CONTENT WIDTH - THE SAME WIDTH /dashboard USES.
+ *
+ * It was a single column capped at 56rem, "so a wide monitor gets more
+ * landscape rather than wider rows", and on a wide monitor that read as the
+ * page using only its left half. The cap is gone: the desk runs from the
+ * shell's gutter to the shell's gutter, exactly as the dashboard's does. Rows
+ * of controls should not be a metre wide either, so from `xl` each group lays
+ * its panels two abreast. The groups happen to divide evenly - four, two and
+ * two - so no row is left with a hole in it, and the Voorbeeld plate closes the
+ * first group as the fourth tile. Below `xl` the panels stack in one column,
+ * full width, as before.
+ *
+ * The groups are the reading order:
  *
  *   1. Lezen    - what opens by default, how the text looks, how it sounds,
  *                 closed by the light Voorbeeld plate that shows the result of
@@ -253,9 +264,9 @@ export default function SettingsPage() {
       </section>
 
       {/* -- Layer 2: the desk ----------------------------------------- */}
-      {/* One measured column, about as wide as /profiel's work column, so a wide
-          monitor gets more landscape rather than wider rows. */}
-      <div className="max-w-[56rem] space-y-14 pb-24">
+      {/* Full content width - the gutter is the shell's, the same as the
+          dashboard's. Each Group lays its panels two abreast from `xl`. */}
+      <div className="w-full space-y-14 pb-24">
 
         {/* ═══ Group 1: Lezen ═══════════════════════════════════════ */}
         <Group
@@ -449,10 +460,11 @@ export default function SettingsPage() {
               The one light surface on the page, closing the group whose three
               panels it is the result of: the translation and the commentary from
               the first, the typography from the second. It is drawn for a white
-              reading page, which is exactly what PLATE is for, and it now sits
-              directly under the controls it previews at every width instead of
-              at the foot of the page. Every colour inside is a literal, because
-              a theme token here would flip to white-on-white. */}
+              reading page, which is exactly what PLATE is for, and it sits with
+              the controls it previews at every width instead of at the foot of
+              the page: fourth in the group's grid, which from `xl` is directly
+              under Leesvoorkeuren. Every colour inside is a literal, because a
+              theme token here would flip to white-on-white. */}
           <section aria-labelledby="instellingen-voorbeeld" className={`overflow-hidden ${PLATE}`}>
             <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-black/10 px-5 py-4 sm:px-6">
               <h3 id="instellingen-voorbeeld" className="text-sm font-bold text-gray-900">Voorbeeld</h3>
@@ -662,6 +674,10 @@ export default function SettingsPage() {
  * exactly that block's vocabulary (title, optional subtitle, hairline rule),
  * with the group as the h2 and the panel below it as an h3. Nothing about the
  * type, the spacing or the rule is new.
+ *
+ * The panels sit in a grid: one column up to `xl`, two from there. `items-start`
+ * so a short panel beside a tall one keeps its own height instead of being
+ * stretched into a glass box with a hole at the bottom.
  */
 function Group({
   id, title, subtitle, children,
@@ -672,12 +688,14 @@ function Group({
   children: React.ReactNode
 }) {
   return (
-    <section aria-labelledby={id} className="space-y-6">
+    <section aria-labelledby={id}>
       <div className="border-b border-white/15 pb-3">
         <h2 id={id} className="text-xl font-semibold tracking-tight text-white">{title}</h2>
         {subtitle && <p className="mt-1.5 text-sm leading-relaxed text-white/70">{subtitle}</p>}
       </div>
-      {children}
+      <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2 xl:items-start">
+        {children}
+      </div>
     </section>
   )
 }
