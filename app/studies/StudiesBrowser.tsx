@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Clock, Search } from 'lucide-react'
+import { ArrowRight, BookOpen, Clock, Scroll, Search, Tag, Users } from 'lucide-react'
 import type { CuratedStudy } from '../../lib/data/curated-studies'
 import { CATALOGUE_ENTRIES } from '../../lib/bookStudies'
 import { SectionHeading } from '../../components/scene/pieces'
@@ -29,6 +29,19 @@ const CATEGORY_LABELS: Record<Category, string> = {
   nt: 'Nieuwe Testament',
   personen: 'Personen',
   themas: "Thema's",
+}
+
+/**
+ * One glyph per category, for the compact filter row on a wide screen. Each
+ * names the kind of thing the filter selects - a scroll for the old covenant,
+ * an open book for the new, people, a tag - so the row can be read at a glance
+ * at 36px tall. They identify a control; they are not decoration.
+ */
+const CATEGORY_ICONS: Record<Category, React.ElementType> = {
+  ot: Scroll,
+  nt: BookOpen,
+  personen: Users,
+  themas: Tag,
 }
 
 /** The kind pill row. `null` is "Alle"; the rest are study `type` values. */
@@ -187,6 +200,59 @@ function StudyRow({ entry, status }: { entry: Entry; status: Status }) {
 }
 
 /**
+ * The four category filters as one compact segmented row: icon and label,
+ * 36px tall, in the top-right corner of the page on a wide screen.
+ *
+ * The same four filters used to be four glass tiles the width of the page, each
+ * carrying its count in 30px type - a second hero under the hero. The owner
+ * wanted them "in the top-right corner, much smaller", so on `lg` and up they
+ * are this row and the tiles are not drawn; below `lg` the tiles stay, because
+ * a phone has no corner to tuck a row of four labels into. Same state, same
+ * handler, same `data-track` names: one filter, two shapes.
+ *
+ * Active is white type on white fill, the way every selected pill on the scene
+ * is (the tabs in the sky, the SEG_ON of /instellingen). The count sits after
+ * the label in quieter type; it is the one figure the tiles carried that a
+ * reader actually used.
+ */
+function CategorySegments({
+  category,
+  onPick,
+}: {
+  category: Category | null
+  onPick: (next: Category | null) => void
+}) {
+  return (
+    <div
+      role="group"
+      aria-label="Waar wil je lezen?"
+      className="inline-flex h-9 items-center gap-0.5 rounded-full border border-white/20 bg-black/40 p-1 backdrop-blur-md"
+    >
+      {(Object.keys(CATEGORY_LABELS) as Category[]).map(key => {
+        const active = category === key
+        const Icon = CATEGORY_ICONS[key]
+        return (
+          <button
+            key={key}
+            type="button"
+            onClick={() => onPick(active ? null : key)}
+            data-track={`study_topic_${key}`}
+            aria-pressed={active}
+            className={`press flex h-7 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-xs font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-white ${
+              active ? 'bg-white text-gray-900' : 'text-white/75 hover:bg-white/10 hover:text-white'
+            }`}
+          >
+            <Icon size={13} aria-hidden className="flex-shrink-0" />
+            {CATEGORY_LABELS[key]}
+            <span className={`tabular-nums ${active ? 'text-gray-500' : 'text-white/45'}`}>{COUNTS[key]}</span>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+/**
  * Everything on /studies that answers to a click.
  *
  * The page itself is a server component: it renders the scene, the JSON-LD and
@@ -292,8 +358,20 @@ export default function StudiesBrowser({ children }: { children: React.ReactNode
       <section
         id="studies-hero"
         aria-labelledby="studies-titel"
-        className="flex min-h-[calc(100vh-3.5rem)] flex-col justify-center pb-32 pt-10"
+        className="flex min-h-[calc(100vh-3.5rem)] flex-col justify-between pb-32 pt-5"
       >
+        {/* The header row - the same top line the dashboard spends on the
+            date. Here it carries the category filters, right-aligned, on a
+            wide screen only; below `lg` the row is empty and takes its 36px so
+            the heading below sits at the same height either way. */}
+        <div className="flex min-h-9 items-center justify-end">
+          {showFurniture && (
+            <div className="hidden lg:block">
+              <CategorySegments category={category} onPick={setCategory} />
+            </div>
+          )}
+        </div>
+
         <div className="scene-sky w-full max-w-[46rem]">
           {children}
 
@@ -340,6 +418,9 @@ export default function StudiesBrowser({ children }: { children: React.ReactNode
             </div>
           )}
         </div>
+
+        {/* Keeps the heading centred between the header row and the fold. */}
+        <div aria-hidden />
       </section>
 
       {searchResults !== null ? (
@@ -368,8 +449,10 @@ export default function StudiesBrowser({ children }: { children: React.ReactNode
       ) : (
         <>
           {/* -- Layer 2: the horizon ---------------------------------- */}
+          {/* The four tiles, below `lg` only: on a wide screen the same four
+              filters are the compact row in the header (CategorySegments). */}
           {showFurniture && (
-            <section aria-labelledby="studies-onderdelen" className="scene-horizon -mt-24">
+            <section aria-labelledby="studies-onderdelen" className="scene-horizon -mt-24 lg:hidden">
               <h2 id="studies-onderdelen" className={EYEBROW}>
                 Waar wil je lezen?
               </h2>

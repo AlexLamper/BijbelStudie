@@ -1,5 +1,5 @@
 import { SceneSkeleton } from "../../components/scene/pieces"
-import { SCENE_BG, SCENE_X_EDGE, TILE } from "../../components/scene/tokens"
+import { SCENE_BG, SCENE_X, TILE } from "../../components/scene/tokens"
 
 /**
  * Shown while the route segment streams in, so a navigation lands on the page's
@@ -11,11 +11,16 @@ import { SCENE_BG, SCENE_X_EDGE, TILE } from "../../components/scene/tokens"
  * screen on every navigation into the route. The ground comes from SCENE_BG
  * through `style`, because Tailwind never generates a class built from a
  * constant.
+ *
+ * The gutter is SCENE_X - the rail's inset - because the page shows the rail;
+ * the edge gutter it used before put the skeleton under the rail and let it
+ * jump sideways when the page landed. The four tiles are drawn below `lg`
+ * only, as on the page.
  */
 export default function StudiesLoading() {
   return (
     <div
-      className={`min-h-screen w-full pb-20 pt-16 ${SCENE_X_EDGE}`}
+      className={`min-h-screen w-full pb-20 pt-16 ${SCENE_X}`}
       style={{ backgroundColor: SCENE_BG }}
       role="status"
       aria-label="Studies laden"
@@ -27,7 +32,7 @@ export default function StudiesLoading() {
         <SceneSkeleton className="h-12 w-full max-w-[26rem] rounded-full" />
       </div>
 
-      <div className="mt-14 grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
+      <div className="mt-14 grid grid-cols-2 gap-3 lg:hidden">
         {[0, 1, 2, 3].map(index => (
           <div key={index} className={`px-5 py-4 ${TILE}`}>
             <SceneSkeleton className="h-3 w-20" />

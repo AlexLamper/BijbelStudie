@@ -1,3 +1,5 @@
+import { getServerSession } from 'next-auth'
+import { authOptions } from '../../lib/authOptions'
 import { curatedStudies } from '../../lib/data/curated-studies'
 import { JsonLd } from '../../components/seo/JsonLd'
 import { absoluteUrl } from '../../lib/seo/constants'
@@ -60,12 +62,16 @@ const STUDIES_GRAPH = (() => {
  * renders the tree to a string with the levensboom generator, which has no
  * business in a browser bundle and must never be imported from a client module.
  *
- * The backdrop is the STATIC one. This page is public - there is no session to
- * draw a reader's own tree from, and `backdrop="reader"` signed out falls back
- * to a level disc, which is not a landscape. No `gateId` either, and that is
- * deliberate: without one the shell keeps the still SVG and never mounts a
- * canvas, which is the right call on a screen that already draws seventy-seven
- * generated pictures of its own.
+ * THE BACKDROP IS THE DASHBOARD'S. Signed in, this is `backdrop="reader"` - the
+ * reader's own tree, at the visitor's own hour, exactly what /dashboard shows -
+ * because the owner's verdict on the page was "the visuals change on the
+ * studies page vs the dashboard - use the SAME". The two are one click apart on
+ * the rail, and a different tree in a different light at a different hour read
+ * as a different product. Signed out there is no tree to draw and reader mode
+ * falls back to a level disc, which is not a landscape, so a guest gets the
+ * public oak as before: the static SVG, no `gateId`, so the shell keeps the
+ * still picture and never mounts a canvas on a screen that already draws
+ * seventy-seven generated pictures of its own.
  *
  * Everything that answers to a click lives in StudiesBrowser; the heading is
  * handed to it as children so it stays server-rendered inside the sky layer.
@@ -79,8 +85,18 @@ const STUDIES_GRAPH = (() => {
  * a guest is using the app, not a preview of it.
  */
 export default async function StudiesPage() {
+  // `authOptions` is required: without it the session callback that attaches
+  // isAdmin/isSubscribed is skipped. Only the presence of a session is read
+  // here - the tree itself comes from the provider the root layout mounts.
+  const session = await getServerSession(authOptions)
+  const signedIn = Boolean(session?.user?.email)
+
+  const shell = signedIn
+    ? ({ backdrop: 'reader' } as const)
+    : ({ svg: sceneSvg(), ...SCENE_TREE } as const)
+
   return (
-    <SceneShell svg={sceneSvg()} {...SCENE_TREE} header rail>
+    <SceneShell {...shell} header rail>
       <JsonLd data={STUDIES_GRAPH} />
 
       <StudiesBrowser>
