@@ -194,8 +194,14 @@ export function ProgressTreeDisc({
 /**
  * The tree as a landscape. Fills its parent: give the parent a size or an
  * aspect ratio and `overflow-hidden` with the radius you want.
+ *
+ * `still` draws the same picture and never animates it, whatever the reader's
+ * own motion preference says. It is for the one place the tree stands behind a
+ * column of scripture (SceneBackdrop's muted mode on /lezen), where a swaying
+ * branch under the verse someone is following is the one thing atmosphere must
+ * never do.
  */
-export function ProgressTreeScene({ className = "" }: { className?: string }) {
+export function ProgressTreeScene({ className = "", still = false }: { className?: string; still?: boolean }) {
   const { data, loading } = useLevensboom()
 
   if (loading) {
@@ -229,6 +235,7 @@ export function ProgressTreeScene({ className = "" }: { className?: string }) {
       animal={tree.avatar.animal}
       framing="scene"
       reducedMotion={tree.reducedMotion}
+      still={still}
       className={`block h-full w-full ${className}`}
       ariaLabel={`Je boom, ${tree.stage.name.toLowerCase()} op niveau ${data.level}`}
     />

@@ -63,8 +63,16 @@ import { sceneVars, useSceneDepth } from "./useSceneDepth"
  *                                  ground the page is standing on.
  *
  * What is NOT allowed is the third case: a picture behind the bar and a page
- * that paints over it. If a route's content covers the landscape (the reader,
- * and any screen that owns its own opaque ground), it takes `backdrop="none"`.
+ * that paints over it. If a route's content covers the landscape (any screen
+ * that owns its own opaque ground), it takes `backdrop="none"`.
+ *
+ * `muted` is a dial on the first case, not a third one. The reader (/lezen)
+ * wants the same picture the dashboard has, but faint and still, behind panes
+ * that let the ground through - so it is a page WITH a picture, drawn quietly,
+ * and the bar shows exactly that quiet picture. The shell draws no top scrims
+ * over it: a muted picture never gets bright enough to need them, and a band
+ * of dark under the bar on a screen that does not scroll would be the seam all
+ * over again. See SceneBackdrop.tsx for what muted does to the picture.
  */
 
 export type SceneShellProps = Omit<SceneBackdropProps, "mode" | "reducedMotion"> & {
@@ -114,6 +122,7 @@ export default function SceneShell({
   season,
   timeOfDay,
   gateId,
+  muted = false,
   header = false,
   rail = false,
   gutter,
@@ -126,6 +135,9 @@ export default function SceneShell({
     gutter === "none" ? "" : gutter === "edge" ? SCENE_X_EDGE : gutter === "rail" ? SCENE_X : rail ? SCENE_X : SCENE_X_EDGE
 
   const hasPicture = backdrop !== "none"
+  // The top scrims belong to a full-strength picture only - see the note on
+  // `muted` at the top of this file.
+  const topScrims = hasPicture && !muted
 
   return (
     // `w-full min-w-0` is load-bearing: several signed-in layouts wrap the page
@@ -155,6 +167,7 @@ export default function SceneShell({
           timeOfDay={timeOfDay}
           gateId={gateId}
           reducedMotion={reducedMotion}
+          muted={muted}
         />
       ) : null}
       {/* No picture means no layer at all: the root's flat ground IS the page,
@@ -176,7 +189,7 @@ export default function SceneShell({
           stay legible over a noon sky, deepening as the page scrolls. Only over
           a picture: on a flat ground it would be a smudge under the bar and the
           seam all over again. */}
-      {hasPicture && (
+      {topScrims && (
         <>
           <span aria-hidden className={SCRIM_TOP} />
           <span aria-hidden className={SCRIM_TOP_VEIL} style={{ opacity: "var(--veil, 0)" }} />

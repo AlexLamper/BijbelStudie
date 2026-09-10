@@ -170,6 +170,7 @@ to be one of exactly two things, and it says which through `backdrop`:
 | --- | --- | --- |
 | has a landscape | `"static"` / `"reader"` | the picture runs full-bleed from the very top, the bar stays transparent over it, and the top scrims keep the bar legible over a bright sky |
 | has no landscape | `"none"` | the shell paints the flat ground (`SCENE_BG`) across the whole viewport, bar included, and draws **no** scrim and **no** wash — a reading screen's type sits straight on this colour, and every contrast figure is measured on it |
+| has a landscape, quietly | `"static"` / `"reader"` **+ `muted`** | the same picture, drawn faint and still with the ground's own colour laid back over it and none of the scrims — for a reading screen whose panes let the ground through (`/lezen`). The numbers and the contrast they leave are at `MUTED_PICTURE_OPACITY` in tokens.ts |
 
 The third case is a bug, and it is the one that shipped: a picture behind the
 bar and a page that paints its own opaque ground under it. On `/lezen` that put
@@ -177,8 +178,9 @@ a landscape in the top 3.5rem and flat ground everywhere else, meeting at a hard
 line — two designs stitched at a seam, for a picture nobody could see any of.
 
 So: **if a route's content covers the landscape, it takes `backdrop="none"`.**
-That is every reading screen. `/studie` satisfies the rule by having no app bar
-at all.
+`/studie` satisfies the rule by having no app bar at all. `/lezen` does not
+cover the landscape any more — its panes are transparent — so it takes the
+muted picture instead.
 
 Both reading screens then wear `SCENE_ROOM` (tokens.ts) inside a scoped `dark`:
 one object that re-points `--background`, `--card`, `--border` and the rest at

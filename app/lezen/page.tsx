@@ -421,11 +421,11 @@ function StudyPageInner() {
      *
      * What changed: the room no longer sits IN the scene, it IS the scene. No
      * outer padding, no rounded plate, no shadow, no gutter of landscape around
-     * a white card - the ground runs from the underside of the navbar to all
-     * four edges, in the scene's own colour, and the rail floats on top of it
-     * the way it floats on every other converted screen. See `./room`, which
-     * holds both the ground and the height so `loading.tsx` can stream into an
-     * identical frame.
+     * a white card - the room runs from the underside of the navbar to all four
+     * edges, transparent, over the shell's muted picture (see ../layout.tsx),
+     * and the rail stands on it the way it stands on every other converted
+     * screen. See `./room`, which holds both the palette and the height so
+     * `loading.tsx` can stream into an identical frame.
      */
     <div className={`dark relative flex ${ROOM_HEIGHT} w-full min-w-0 flex-col overflow-hidden font-inter text-foreground`} style={READING_ROOM}>
       {showCompletionOverlay && activeStudy && (
@@ -480,19 +480,23 @@ function StudyPageInner() {
       <div className="flex flex-col lg:flex-row flex-1 min-h-0 w-full overflow-hidden">
         {/*
          * RAIL_GUTTER is the ONLY inset left on this page, and it is not
-         * margin - it is the strip the rail stands in. See `./room`, which
+         * margin - it is the strip the rail stands in, exactly 13rem wide, so
+         * the pane's left edge is the rail's right edge. See `./room`, which
          * explains why this route sets it itself instead of taking `SCENE_X`,
          * and what has to move with it.
          *
-         * The split leans left by half that strip (`calc(50% + 7rem)`, half of
-         * RAIL_GUTTER's 14rem) so the inset comes out of the page rather than
-         * out of the passage: the scripture keeps the measure it would have if
-         * the two panes were an even half each.
+         * The split leans left by half that strip (`calc(50% + 6.5rem)`, half
+         * of RAIL_GUTTER's 13rem) so the inset comes out of the page rather
+         * than out of the passage: the two panes each get an even half of the
+         * width that is left beside the rail, and the two widths sum to exactly
+         * 100%. (At the old 14rem they were 50%+7rem and 50%-3rem, which sums
+         * to 100%+4rem - the materials pane ran 4rem past the right edge and was
+         * clipped there.)
          */}
         <div
           data-tour="bible-text"
           className={[
-            `h-full w-full lg:w-[calc(50%_+_7rem)] lg:flex-none min-h-0 min-w-0 overflow-hidden lg:border-r lg:border-white/10 ${RAIL_GUTTER}`,
+            `h-full w-full lg:w-[calc(50%_+_6.5rem)] lg:flex-none min-h-0 min-w-0 overflow-hidden lg:border-r lg:border-white/10 ${RAIL_GUTTER}`,
             mobileView === 'bible' ? 'block' : 'hidden',
             'lg:block',
           ].join(' ')}
@@ -524,7 +528,7 @@ function StudyPageInner() {
         <div
           data-tour="commentary"
           className={[
-            'h-full w-full lg:w-[calc(50%_-_3rem)] lg:flex-none min-h-0 min-w-0 overflow-hidden',
+            'h-full w-full lg:w-[calc(50%_-_6.5rem)] lg:flex-none min-h-0 min-w-0 overflow-hidden',
             mobileView === 'materials' ? 'block' : 'hidden',
             'lg:block',
           ].join(' ')}

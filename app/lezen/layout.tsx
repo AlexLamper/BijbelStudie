@@ -4,6 +4,7 @@ import { authOptions } from "../../lib/authOptions";
 import SessionProvider from "../../components/providers/SessionProvider";
 import { SidebarProvider } from "../../components/ui/sidebar";
 import SceneShell from "../../components/scene/SceneShell";
+import { SCENE_TREE, sceneSvg } from "../../components/scene/scene-svg";
 import { cookies } from "next/headers";
 import { cookieName, fallbackLng } from "../i18n/settings";
 import { generatePageMetadata } from "../../lib/pageMetadata";
@@ -27,25 +28,40 @@ export async function generateMetadata(): Promise<Metadata> {
  * app/lezen/loading.tsx streams into the same frame instead of into an empty
  * dark screen.
  *
- * `backdrop="none"`, and that is the whole of the navbar fix on this route. The
- * shell's bar is transparent, so it shows what is behind it; this page paints
- * an opaque room from the underside of that bar to all four edges. With a
- * landscape behind the shell you therefore got a photograph in the bar and flat
- * ground everywhere else, meeting at a hard line - a picture nobody could see
- * any of, paid for with the seam. With no picture the shell paints its flat
- * ground across the whole viewport, the room lets it through, the bar shows
- * exactly that, and bar and page are one surface. See THE ONE BACKGROUND RULE
- * in components/scene/SceneShell.tsx.
+ * THE BACKDROP IS THE DASHBOARD'S, MUTED.
  *
- * It also takes the tree generator, the server SVG and the canvas gate off the
- * heaviest route in the app - which is the route someone sits on for twenty
- * minutes, and the one that must never have anything moving behind the text.
+ * The owner's brief, in order: the room used to be a lit plate on the landscape
+ * (a card with margins); then it was the bare ground with no picture at all
+ * (`backdrop="none"`), which read as a different product from the dashboard a
+ * click away; and the verdict on that was "still use the dashboard background,
+ * but VERY subtle - a real background, not obvious, must not hinder reading".
+ * So the shell now draws exactly the picture /dashboard draws - the reader's
+ * own tree, or the public oak for a guest - through SceneBackdrop's `muted`
+ * dial: faint, still, with the ground's own colour laid back over it and none
+ * of the scrolling page's scrims. The room paints nothing of its own and lets
+ * that through, so the transparent bar and the page still stand on one surface
+ * and THE ONE BACKGROUND RULE in components/scene/SceneShell.tsx still holds:
+ * this is a page WITH a picture, drawn quietly. The contrast the type keeps is
+ * worked out at MUTED_PICTURE_OPACITY in components/scene/tokens.ts (white
+ * stays above 8.6:1 on the brightest pixel the palette can produce, and at
+ * 16:1 almost everywhere).
+ *
+ * Nothing moves behind the text. Muted asks the reader's tree to stand still
+ * and never wakes the static tree's canvas - this is the route someone sits on
+ * for twenty minutes, and a branch swaying under the verse they are following
+ * is the one thing atmosphere must never do here.
+ *
+ * `backdrop="reader"` needs a session; a guest gets the static oak instead
+ * (signed out, reader mode falls back to a level disc, which is not a
+ * landscape). Both go through the same `muted`, so the two look the same
+ * apart from which tree it is.
  *
  * `gutter="none"`: the reader has no horizontal padding at all, at any width -
- * the room runs edge to edge and the rail floats over it, with only the
- * scripture column inset far enough to clear the rail's resting width. A
- * margin here is measure taken away from the passage, which on this page is
- * the whole task.
+ * the room runs edge to edge and the rail stands on it, with only the scripture
+ * column inset by exactly the rail's own width (RAIL_GUTTER), so the pane's
+ * left edge sits on the rail's right edge with nothing between them. A margin
+ * here is measure taken away from the passage, which on this page is the whole
+ * task.
  *
  * The old `h-screen overflow-hidden` wrapper with the Header and the AppSidebar
  * inside it is gone - the shell draws its own navbar and its own rail, and a
@@ -64,13 +80,20 @@ export default async function ReadLayout({
   children: React.ReactNode;
 }>) {
   const session = await getServerSession(authOptions);
+  const signedIn = Boolean(session?.user?.email);
 
   return (
     <SessionProvider session={session}>
       <SidebarProvider>
-        <SceneShell backdrop="none" header rail gutter="none">
-          {children}
-        </SceneShell>
+        {signedIn ? (
+          <SceneShell backdrop="reader" muted header rail gutter="none">
+            {children}
+          </SceneShell>
+        ) : (
+          <SceneShell svg={sceneSvg()} {...SCENE_TREE} muted header rail gutter="none">
+            {children}
+          </SceneShell>
+        )}
       </SidebarProvider>
     </SessionProvider>
   );

@@ -43,9 +43,9 @@ export const TEAL_DEEP = "#0F766E"
 export const TEAL_ON_DARK = "#2DD4BF"
 
 /**
- * The page's own ground colour, behind the scene - and on the two screens that
- * deliberately have NO landscape (/lezen and the /studie window) the whole
- * screen.
+ * The page's own ground colour, behind the scene - and on the screens that
+ * deliberately have NO landscape (the /studie window) or only a muted one
+ * (/lezen, see SceneBackdrop's `muted`) very nearly the whole screen.
  *
  * The hue was settled first and has not moved since: 189, so the ground sits
  * between slate-900 and teal-950 rather than in blue, and shares its family
@@ -105,9 +105,10 @@ export const SCENE_BG_RGB = "12, 36, 41"
  *
  * It goes under a frame and never under a column of type. A wash of this
  * strength costs white about two points of contrast where it is strongest, so a
- * reading screen (`backdrop="none"`, /lezen, the inside of the window) gets the
- * bare ground and nothing else - which is also what "calm and still" means. All
- * the figures above are measured on that bare colour.
+ * reading screen (`backdrop="none"`, the inside of the window) gets the bare
+ * ground and nothing else - which is also what "calm and still" means. All the
+ * figures above are measured on that bare colour. (/lezen is the one reading
+ * screen with a picture, and its own figures are at MUTED_PICTURE_OPACITY.)
  */
 export const SCENE_WASH =
   `radial-gradient(120% 90% at 8% 0%, rgba(45,212,191,0.10) 0%, rgba(13,148,136,0.05) 32%, rgba(${SCENE_BG_RGB},0) 68%)`
@@ -231,8 +232,8 @@ export const CTA_QUIET =
  * SceneShell applies it for you - reach for the constant only when a page opts
  * out (`gutter="none"`) to lay out full-bleed sections itself. /lezen is the
  * one page that does, and it stays on the bare RAIL_GUTTER below: the reader
- * runs to every edge on purpose, so it wants the inset that CLEARS the rail,
- * not the one that sits evenly beside it.
+ * runs to every edge on purpose, so it wants the inset that is exactly the
+ * rail's own width and nothing more - the pane starts where the rail stops.
  */
 export const SCENE_X = "px-5 sm:px-8 lg:pl-[15.5rem] lg:pr-10 xl:pl-[17rem] xl:pr-16"
 
@@ -293,17 +294,19 @@ export const RAIL_OPEN = "bg-[#0C2429]"
  * names as text and never generates one spliced together from a constant.
  *
  * This is deliberately NOT `SCENE_X`'s left inset, and the difference is the
- * whole point of each. 14rem is the rail's 13rem (RAIL_W) plus a 1rem breathing
- * gap - the smallest inset that CLEARS the rail, which is what a page wants when
- * its content is meant to reach the edges. `SCENE_X` adds the page's full side
- * margin instead, so a column of panels sits evenly between the rail and the
- * right edge. A reader is the first kind of page; every overview screen is the
- * second.
+ * whole point of each. 13rem is the rail's own width (RAIL_W) and NOTHING else:
+ * the reading pane's left edge sits exactly on the rail's right edge, with no
+ * gap between them. It was 14rem for a while - the rail plus a 1rem "breathing"
+ * gap - and the owner's verdict was that the strip of ground between the rail
+ * and the pane read as wasted width on the one screen where width is the whole
+ * task. `SCENE_X` adds the page's full side margin instead, so a column of
+ * panels sits evenly between the rail and the right edge. A reader is the first
+ * kind of page; every overview screen is the second.
  *
  * /lezen's split-pane lean is computed from this number (see app/lezen/page.tsx)
  * - if this moves, that moves with it.
  */
-export const RAIL_GUTTER = "lg:pl-56"
+export const RAIL_GUTTER = "lg:pl-52"
 
 /* -- The room -------------------------------------------------- */
 
@@ -440,3 +443,35 @@ export const SCRIM_TOP =
 /** The same band, deepening as the page scrolls. */
 export const SCRIM_TOP_VEIL =
   "pointer-events-none fixed inset-x-0 top-14 z-40 h-8 bg-gradient-to-b from-black/42 to-transparent"
+
+/* -- The muted backdrop ---------------------------------------- */
+
+/*
+ * /lezen wants the dashboard's landscape behind the chapter - the same tree,
+ * the same scene - but as a presence rather than a picture: "very subtle, a
+ * real background, not obvious, must not hinder reading". Two numbers do it,
+ * and they are one sum, so move them together or not at all.
+ *
+ * The picture is drawn at MUTED_PICTURE_OPACITY over the bare ground, and then
+ * MUTED_SCRIM - the ground's own colour at partial alpha - is laid over it, so
+ * whatever the landscape does it is pulled back towards SCENE_BG rather than
+ * towards black (a black scrim turns a dusk sky to soot; the ground's own hue
+ * turns it to a deeper dusk). The landscape's effective weight in the final
+ * pixel is 0.30 x (1 - 0.30) = 0.21 - about a quarter of what the dashboard
+ * shows once its own black/22 floor is counted, which is the range asked for.
+ *
+ * What that costs the type, measured on the worst pixel the palette can draw
+ * (a near-white band of dusk sky, #FFF0D0): the ground there becomes about
+ * #3F4F4C and white measures 8.6:1 on it. A bright ochre sky lands at 10:1,
+ * and everywhere the picture is land, water or trunk the ground stays within a
+ * step of SCENE_BG and white keeps its 16:1. The floor for this screen is 7:1,
+ * so the picture can never be turned up past 0.30 without recomputing this.
+ * None of the standard scrims are drawn in this mode: they are the depth of a
+ * page that scrolls, and this one does not.
+ */
+
+/** How much of the landscape survives, before the scrim. */
+export const MUTED_PICTURE_OPACITY = 0.3
+
+/** The ground's own colour, laid back over the faint picture. */
+export const MUTED_SCRIM = `rgba(${SCENE_BG_RGB}, 0.3)`

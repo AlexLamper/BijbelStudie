@@ -18,13 +18,15 @@ import { SCENE_ROOM } from "../../components/scene/tokens"
  * treatment for exactly the same reason and the two must not drift. Read the
  * note there for the reasoning and the contrast figures.
  *
- * The room paints no background of its own. The shell it streams into is on
- * `backdrop="none"`, so it is already painting the ground across the whole
- * viewport, navbar included, and the room letting that through is what makes
- * the bar and the page one surface instead of two designs meeting at a line.
- * There is deliberately no wash and no gradient anywhere on this screen: it is
- * the one someone sits on for twenty minutes, and a still ground is both the
- * calmest and the highest-contrast thing to put under a chapter.
+ * The room paints no background of its own. The shell it streams into draws
+ * the dashboard's picture behind it, MUTED (see ../layout.tsx and
+ * SceneBackdrop's `muted`): the ground colour with the reader's own tree faint
+ * and still inside it, across the whole viewport, navbar included. The room
+ * letting that through is what makes the bar and the page one surface instead
+ * of two designs meeting at a line. There is no wash, no gradient and nothing
+ * moving anywhere on this screen: it is the one someone sits on for twenty
+ * minutes, and the muted picture is tuned in tokens.ts so white type never
+ * drops below 8.6:1 on it and stays at 16:1 almost everywhere.
  */
 export const READING_ROOM = { ...SCENE_ROOM, backgroundColor: "transparent" } as CSSProperties
 
@@ -46,14 +48,16 @@ export const ROOM_HEIGHT = "h-[calc(100dvh-6.5rem)] lg:h-[calc(100dvh-3.5rem)]"
  * `gutter="none"` in the layout, and the room runs to every edge.
  *
  * What the room still owes the rail is the ONE inset that is not decoration.
- * The rail is `fixed left-0` and rests at 64px, so the scripture column - and
- * only the scripture column - clears it; the room's ground runs on underneath,
- * which is what keeps it one continuous surface rather than a margin.
+ * The rail is `fixed left-0` and is RAIL_W (13rem) wide, so the scripture
+ * column - and only the scripture column - starts exactly where it stops; the
+ * room's ground runs on underneath, which is what keeps it one continuous
+ * surface rather than a margin.
  *
- * The inset was briefly 176px, the rail's OPEN width, which left a dead band of
- * nothing beside the rail and took the width the passage is here for. The rail
- * now opens into this same 96/112px rather than past it, so the inset is the
- * resting clearance again and the number is stated once, beside the rail's own
- * two widths, in components/scene/tokens.ts.
+ * The inset has been every number the rail has been: 176px when the rail
+ * opened on hover, 96/112px when it rested narrow, and 14rem - the rail plus a
+ * 1rem gap - when the rail first became a fixed 13rem column. That last gap is
+ * what the owner saw as "spacing between the sidebar and the content", so it
+ * is gone: the inset IS the rail's width, stated once in
+ * components/scene/tokens.ts beside RAIL_W.
  */
 export { RAIL_GUTTER } from "../../components/scene/tokens"

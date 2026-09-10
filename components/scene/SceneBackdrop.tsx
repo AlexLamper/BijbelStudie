@@ -23,7 +23,14 @@ const ProgressTreeScene = dynamic(
   { ssr: false },
 )
 import { buildPalette, type Season, type TimeOfDay } from "../../lib/levensboom/palette"
-import { SCRIM_BOTTOM, SCRIM_FLOOR, SCRIM_LEFT, SCRIM_VEIL } from "./tokens"
+import {
+  MUTED_PICTURE_OPACITY,
+  MUTED_SCRIM,
+  SCRIM_BOTTOM,
+  SCRIM_FLOOR,
+  SCRIM_LEFT,
+  SCRIM_VEIL,
+} from "./tokens"
 
 /**
  * The picture, and the scrims that make it safe to read on.
@@ -55,6 +62,18 @@ import { SCRIM_BOTTOM, SCRIM_FLOOR, SCRIM_LEFT, SCRIM_VEIL } from "./tokens"
  * element is on screen; past it the static SVG comes back and the loop stops.
  * No `gateId` means no canvas at all, which is a perfectly good page. Reduced
  * motion never mounts one.
+ *
+ * And one dial, `muted`, for the reading screen. /lezen wants the same picture
+ * the dashboard shows - the reader's own tree, or the public oak for a guest -
+ * but as a presence behind the chapter rather than a landscape in front of it.
+ * Muted, the picture is drawn faint and the ground's own colour is laid back
+ * over it (the two numbers and the contrast they leave the type are worked out
+ * at MUTED_PICTURE_OPACITY in tokens.ts); none of the four scrims are drawn,
+ * because they are the depth of a page that scrolls and this one does not; and
+ * nothing in it ever moves, in either mode, for anyone - a reader's own tree is
+ * asked to stand still and the static tree never wakes its canvas. A page whose
+ * content covers the picture entirely still takes SceneShell's
+ * `backdrop="none"`; muted is for a page whose content lets the ground through.
  */
 
 /** How long after the gate comes into view before the canvas may mount. Long
@@ -79,6 +98,11 @@ export type SceneBackdropProps = {
   /** id of the element whose visibility decides whether the canvas runs. */
   gateId?: string
   reducedMotion?: boolean
+  /**
+   * The faint, still version for a reading screen: see the note at the top of
+   * this file. Draws no scrims and never animates.
+   */
+  muted?: boolean
 }
 
 export default function SceneBackdrop({
@@ -94,41 +118,62 @@ export default function SceneBackdrop({
   timeOfDay = "dusk",
   gateId,
   reducedMotion = false,
+  muted = false,
 }: SceneBackdropProps) {
+  const picture =
+    mode === "reader" ? (
+      <ProgressTreeScene still={muted} />
+    ) : (
+      <StaticScene
+        svg={svg}
+        seed={seed}
+        level={level}
+        frac={frac}
+        species={species}
+        scene={scene}
+        animal={animal}
+        season={season}
+        timeOfDay={timeOfDay}
+        gateId={gateId}
+        // Muted never wakes the canvas: the SVG the server drew is the whole
+        // picture, and it is already still.
+        reducedMotion={reducedMotion || muted}
+      />
+    )
+
   return (
     // `aria-hidden` on the whole layer in static mode: it is a picture behind
     // text and the page already says in words what it shows. In reader mode the
     // tree is the reader's own and describes itself, so the layer stays in the
     // tree and ProgressTreeScene's own label is what gets read.
     <div aria-hidden={mode === "static" || undefined} className="pointer-events-none fixed inset-0 z-0">
-      {mode === "reader" ? (
-        <ProgressTreeScene />
+      {muted ? (
+        <>
+          {/* The picture, faint. Opacity on a wrapper rather than on the canvas
+              so the two modes are muted by the same number. */}
+          <div className="absolute inset-0" style={{ opacity: MUTED_PICTURE_OPACITY }}>
+            {picture}
+          </div>
+          {/* The ground's own colour laid back over it - the only scrim in this
+              mode. Its hue is what keeps a dusk sky a dusk rather than soot. */}
+          <span aria-hidden className="absolute inset-0" style={{ backgroundColor: MUTED_SCRIM }} />
+        </>
       ) : (
-        <StaticScene
-          svg={svg}
-          seed={seed}
-          level={level}
-          frac={frac}
-          species={species}
-          scene={scene}
-          animal={animal}
-          season={season}
-          timeOfDay={timeOfDay}
-          gateId={gateId}
-          reducedMotion={reducedMotion}
-        />
-      )}
+        <>
+          {picture}
 
-      {/* A constant floor of dark, so the copy is legible from the first frame
-          - including the frame in which the scene is still its own loading
-          skeleton and therefore pale grey. */}
-      <span aria-hidden className={SCRIM_FLOOR} />
-      {/* The left scrim carries the rail and the heading ... */}
-      <span aria-hidden className={SCRIM_LEFT} />
-      {/* ... the bottom one carries whatever breaks the fold. */}
-      <span aria-hidden className={SCRIM_BOTTOM} />
-      {/* The veil: the scene goes deep as the working panels arrive. */}
-      <span aria-hidden className={SCRIM_VEIL} style={{ opacity: "var(--veil, 0)" }} />
+          {/* A constant floor of dark, so the copy is legible from the first frame
+              - including the frame in which the scene is still its own loading
+              skeleton and therefore pale grey. */}
+          <span aria-hidden className={SCRIM_FLOOR} />
+          {/* The left scrim carries the rail and the heading ... */}
+          <span aria-hidden className={SCRIM_LEFT} />
+          {/* ... the bottom one carries whatever breaks the fold. */}
+          <span aria-hidden className={SCRIM_BOTTOM} />
+          {/* The veil: the scene goes deep as the working panels arrive. */}
+          <span aria-hidden className={SCRIM_VEIL} style={{ opacity: "var(--veil, 0)" }} />
+        </>
+      )}
     </div>
   )
 }

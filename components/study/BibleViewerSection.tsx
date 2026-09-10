@@ -61,10 +61,13 @@ export default function BibleViewerSection({
      * This section and StudyMaterialsSection are the two panes of /lezen and of
      * nothing else - the guided lesson reads through PassageReader, not through
      * here. Since the reading room became the scene's own ground rather than a
-     * lit plate floating on it (see READING_ROOM in app/lezen/page.tsx), the
-     * pane must not paint a surface of its own: it lets the room show through,
-     * and the room's `dark` scope is what turns every token below into its
-     * light-on-dark value. Scripture lands at 18.1:1 on that ground.
+     * lit plate floating on it (see READING_ROOM in app/lezen/room.ts), the
+     * pane must not paint a surface of its own: it lets the room - and the
+     * shell's muted picture behind it - show through, and the room's `dark`
+     * scope is what turns every token below into its light-on-dark value.
+     * Scripture lands at 16:1 on the bare ground and never below 8.6:1 on the
+     * brightest pixel the muted picture can put behind it (tokens.ts,
+     * MUTED_PICTURE_OPACITY).
      */
     <section className="flex flex-col h-full min-w-0">
 

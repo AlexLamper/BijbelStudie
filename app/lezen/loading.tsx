@@ -6,11 +6,12 @@ import { RAIL_GUTTER, READING_ROOM, ROOM_HEIGHT } from "./room"
  * own shape instead of an empty frame. It unmounts as soon as the page
  * component mounts - nothing here holds it open.
  *
- * It streams into the layout's SceneShell and wears the reading room itself:
- * the same height maths, the same `dark` scope, the same ground and the same
- * palette variables, imported from `./room` rather than copied, so the frame
- * cannot drift from the one the page renders a moment later. There is no plate
- * and no gutter to draw - the room already runs to all four edges.
+ * It streams into the layout's SceneShell - muted picture included, since the
+ * layout draws it - and wears the reading room itself: the same height maths,
+ * the same `dark` scope and the same palette variables, imported from `./room`
+ * rather than copied, so the frame cannot drift from the one the page renders a
+ * moment later. There is no plate and no gutter to draw - the room already runs
+ * to all four edges.
  *
  * The skeletons inherit the room's tokens, so `dark:bg-secondary` resolves to
  * the navy #222B3A and reads as a shape on the ground rather than disappearing
