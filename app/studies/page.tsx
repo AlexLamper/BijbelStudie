@@ -164,14 +164,10 @@ const FEATURED: Entry[] = ENTRIES.filter(
 const BANNER_ICON = (type: CuratedStudy['type']) =>
   type === 'Persoon' ? User : type === 'Gedeelte' ? Quote : type === 'Boek' ? BookOpen : Lightbulb
 
-/** A stable hue per study id, used for the gradient panel behind (or instead of)
- * a study's art: a deterministic two-stop gradient, the type icon, and the
- * title's initial - unique enough to tell studies apart at a glance. */
-function hueOf(id: string): number {
-  let hash = 0
-  for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) | 0
-  return Math.abs(hash) % 360
-}
+/** The panel behind (or instead of) a study's art. Same brand-teal gradient
+ * as the dashboard's hero card (app/dashboard/page.tsx) - the app's visual
+ * treatment stays one thing across pages, not a different hue per study. */
+const BANNER_GRADIENT = 'linear-gradient(135deg, #0D9488 0%, #0F766E 100%)'
 
 // ---------------------------------------------------------------------------
 
@@ -189,15 +185,12 @@ function Banner({
   showLetter?: boolean
 }) {
   const Icon = BANNER_ICON(entry.study.type)
-  const hue = hueOf(entry.study.id)
   const authored = art && Boolean(entry.study.image)
 
   return (
     <div
       className={`relative flex items-center justify-center overflow-hidden ${className}`}
-      style={{
-        backgroundImage: `linear-gradient(135deg, hsl(${hue} 45% 32%), hsl(${(hue + 40) % 360} 55% 18%))`,
-      }}
+      style={{ backgroundImage: BANNER_GRADIENT }}
     >
       {authored && (
         // eslint-disable-next-line @next/next/no-img-element
@@ -422,12 +415,43 @@ export default function StudiesPage() {
       <JsonLd data={STUDIES_GRAPH} />
 
       <div className="w-full px-5 sm:px-8 xl:px-10 py-6">
-        {/* Header */}
-        <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-foreground">
-            Wat is je volgende studie?
-          </h1>
-          {searchField}
+        {/* Header. On desktop the category filters ride along on the far
+            right as a compact control, not a hero section - see the
+            "Topic filter" block below, which is the lg+ counterpart to the
+            full-size topic grid shown to smaller screens. */}
+        <header className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between lg:justify-start lg:gap-4">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-foreground">
+              Wat is je volgende studie?
+            </h1>
+            {searchField}
+          </div>
+
+          {showFurniture && (
+            <div className="hidden lg:flex flex-none items-center gap-1.5">
+              {(Object.keys(CATEGORY_LABELS) as Category[]).map(key => {
+                const Icon = CATEGORY_ICON[key]
+                const active = category === key
+                return (
+                  <button
+                    key={key}
+                    onClick={() => setCategory(active ? null : key)}
+                    data-track={`study_topic_${key}`}
+                    className="flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[12px] font-medium transition-colors"
+                    style={{
+                      borderColor: active ? TEAL : 'rgb(229 231 235)',
+                      backgroundColor: active ? 'rgba(13,148,136,0.08)' : 'transparent',
+                      color: active ? '#0f766e' : 'rgb(75 85 99)',
+                    }}
+                    title={`${CATEGORY_LABELS[key]} (${COUNTS[key]})`}
+                  >
+                    <Icon size={13} style={{ color: active ? TEAL : undefined }} aria-hidden />
+                    <span>{CATEGORY_LABELS[key]}</span>
+                  </button>
+                )
+              })}
+            </div>
+          )}
         </header>
 
         {searchResults !== null ? (
@@ -503,8 +527,10 @@ export default function StudiesPage() {
                   </section>
                 )}
 
-                {/* Topic grid */}
-                <section className="mt-8">
+                {/* Topic grid - the large, tappable version for phones and
+                    tablets. Desktop gets the compact filter row in the
+                    header instead (see above), so this hides at lg+. */}
+                <section className="mt-8 lg:hidden">
                   <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-muted-foreground">
                     Waar wil je lezen?
                   </p>
