@@ -8,6 +8,16 @@ const TEAL = '#0D9488';
 const RED = '#DC2626';
 const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
+/** Reason chips for "Nee" on the per-question signal - the complete diagnostic
+ * vocabulary for a multiple-choice question (FEEDBACK_PLAN.md section 3.2). */
+const REASON_CHIPS: { key: string; label: string }[] = [
+  { key: 'too_hard', label: 'Te moeilijk' },
+  { key: 'unclear', label: 'Onduidelijk' },
+  { key: 'multiple_correct', label: 'Meerdere goede antwoorden' },
+  { key: 'not_related', label: 'Niet gerelateerd aan de tekst' },
+  { key: 'wrong_answer', label: 'Fout antwoord' },
+];
+
 interface Question {
   id: string;
   text: string;
@@ -70,6 +80,41 @@ export default function StepQuiz({
   previousTotal: number | null;
   onAnswered: (score: number, total: number) => void;
 }) {
+  /**
+   * The per-question "was deze vraag duidelijk?" micro-signal
+   * (FEEDBACK_PLAN.md section 3.2, T2a). One tap, no modal, no eligibility
+   * engine - that is phase 2. Tracked per question id so a reader cannot
+   * double-submit by paging back and forth in review.
+   */
+  const [signalSent, setSignalSent] = useState<Record<string, boolean>>({});
+  const [signalOpenReasonFor, setSignalOpenReasonFor] = useState<string | null>(null);
+  const [signalSending, setSignalSending] = useState<string | null>(null);
+
+  const sendQuizSignal = useCallback(
+    async (questionId: string, clear: boolean, reasonTag: string | null, answeredCorrectly: boolean | null) => {
+      setSignalSending(questionId);
+      try {
+        await fetch('/api/feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            touchpoint: 'quiz_question_review',
+            quizQuestionId: questionId,
+            studyId,
+            lessonDay,
+            answeredCorrectly,
+            clear,
+            reasonTag: reasonTag ?? undefined,
+          }),
+        }).catch(() => {});
+      } finally {
+        setSignalSent((prev) => ({ ...prev, [questionId]: true }));
+        setSignalOpenReasonFor(null);
+        setSignalSending(null);
+      }
+    },
+    [studyId, lessonDay],
+  );
   const reduceMotion = useReducedMotion();
 
   const [questions, setQuestions] = useState<Question[] | null>(null);
@@ -424,6 +469,51 @@ export default function StepQuiz({
                   <p className="mt-1.5 text-[12px] font-semibold" style={{ color: TEAL }}>
                     {question.bibleReference}
                   </p>
+                )}
+              </div>
+            )}
+
+            {/* The micro-signal - only once graded this session, so there is a
+                fresh `result` to attach `answeredCorrectly` to. */}
+            {result && (
+              <div className="mt-4 flex items-center justify-end gap-2.5 flex-wrap">
+                {signalSent[question.id] ? (
+                  <p className="text-[12px] text-gray-400 dark:text-muted-foreground">Bedankt voor je reactie</p>
+                ) : signalOpenReasonFor === question.id ? (
+                  <div className="flex items-center gap-1.5 flex-wrap justify-end">
+                    <span className="text-[12px] text-gray-500 dark:text-muted-foreground mr-1">Wat klopte er niet?</span>
+                    {REASON_CHIPS.map((chip) => (
+                      <button
+                        key={chip.key}
+                        type="button"
+                        disabled={signalSending === question.id}
+                        onClick={() => void sendQuizSignal(question.id, false, chip.key, result.correct)}
+                        className="press h-7 px-2.5 rounded-full border border-gray-200 dark:border-border text-[11.5px] text-gray-600 dark:text-muted-foreground hover:bg-gray-50 dark:hover:bg-secondary"
+                      >
+                        {chip.label}
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <>
+                    <span className="text-[12px] text-gray-500 dark:text-muted-foreground">Was deze vraag duidelijk?</span>
+                    <button
+                      type="button"
+                      disabled={signalSending === question.id}
+                      onClick={() => void sendQuizSignal(question.id, true, null, result.correct)}
+                      className="press h-7 px-3 rounded-full border border-gray-200 dark:border-border text-[11.5px] font-semibold text-gray-700 dark:text-foreground hover:bg-gray-50 dark:hover:bg-secondary"
+                    >
+                      Ja
+                    </button>
+                    <button
+                      type="button"
+                      disabled={signalSending === question.id}
+                      onClick={() => setSignalOpenReasonFor(question.id)}
+                      className="press h-7 px-3 rounded-full border border-gray-200 dark:border-border text-[11.5px] font-semibold text-gray-700 dark:text-foreground hover:bg-gray-50 dark:hover:bg-secondary"
+                    >
+                      Nee
+                    </button>
+                  </>
                 )}
               </div>
             )}

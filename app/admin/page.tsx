@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import {
   Users, ShieldCheck, Sparkles, StickyNote, BookOpen, BarChart3,
-  TrendingUp, ArrowRight, Flame, Euro, Settings2, RefreshCw,
+  TrendingUp, ArrowRight, Flame, Euro, Settings2, RefreshCw, MessageSquare,
 } from "lucide-react"
 import BillingHealthCard, { type BillingStats } from "../../components/admin/BillingHealthCard"
 import { ProBadge } from "../../components/ui/ProBadge"
@@ -446,6 +446,7 @@ export default function AdminDashboardPage() {
                 {[
                   { href: "/admin/users", label: "Gebruikersbeheer", icon: Users },
                   { href: "/admin/insights", label: "Inzichten & analytics", icon: BarChart3 },
+                  { href: "/admin/feedback", label: "Feedback", icon: MessageSquare },
                   { href: "/abonnement", label: "Abonnementen", icon: Sparkles },
                   { href: "/instellingen", label: "Mijn instellingen", icon: Settings2 },
                 ].map(({ href, label, icon: Icon }) => (

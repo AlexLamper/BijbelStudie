@@ -9,6 +9,22 @@ import { clientIp, consume } from "../../../lib/rateLimit"
 const ALLOWED_CATEGORIES = new Set(["bug", "feature", "praise", "other"])
 
 /**
+ * The quiz per-question micro-signal (`StepQuiz`'s review view). The only
+ * client-chosen `touchpoint` this route accepts today - every other value in
+ * `models/Feedback.js`'s enum is reserved for a server-computed prompt that
+ * does not exist yet, so anything else silently falls back to "unprompted".
+ */
+const QUIZ_TOUCHPOINT = "quiz_question_review"
+
+const REASON_LABELS: Record<string, string> = {
+  too_hard: "Te moeilijk",
+  unclear: "Onduidelijk",
+  multiple_correct: "Meerdere goede antwoorden",
+  not_related: "Niet gerelateerd aan de tekst",
+  wrong_answer: "Fout antwoord",
+}
+
+/**
  * The unprompted feedback form (`/feedback`).
  *
  * This route used to accept `name` and `email` straight from the request body
@@ -84,26 +100,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true })
   }
 
-  const message = stripControlChars(
-    typeof body.message === "string" ? body.message.trim() : "",
-  )
-  if (!message || message.length < MIN_MESSAGE_LENGTH) {
-    return NextResponse.json({ error: "Bericht is te kort" }, { status: 400 })
-  }
-  if (message.length > MAX_MESSAGE_LENGTH) {
-    return NextResponse.json(
-      { error: `Bericht is te lang (max ${MAX_MESSAGE_LENGTH} tekens)` },
-      { status: 400 },
-    )
-  }
-
-  const categoryRaw = typeof body.category === "string" ? body.category : "other"
-  const category = ALLOWED_CATEGORIES.has(categoryRaw) ? categoryRaw : "other"
-  const rating =
-    typeof body.rating === "number" && body.rating >= 1 && body.rating <= 5
-      ? Math.round(body.rating)
-      : undefined
-  const page = typeof body.page === "string" ? body.page.slice(0, 200) : ""
+  const touchpointRaw = typeof body.touchpoint === "string" ? body.touchpoint : null
+  const isQuizSignal = touchpointRaw === QUIZ_TOUCHPOINT
 
   await connectMongoDB()
 
@@ -133,6 +131,84 @@ export async function POST(request: Request) {
   } catch {
     // An anonymous submission is still worth having.
   }
+
+  // The per-question quiz signal is a one-tap answer, not a form: it has its
+  // own shape, its own (short) synthesised message, and - because it is tied
+  // to a specific answer the reader just gave - it requires a signed-in
+  // caller. There is no anonymous path for a prompted response (section 4.5
+  // of FEEDBACK_PLAN.md).
+  if (isQuizSignal) {
+    if (!userId) {
+      return NextResponse.json({ error: "Niet ingelogd" }, { status: 401 })
+    }
+
+    const clear = body.clear === true
+    const reasonKeyRaw = typeof body.reasonTag === "string" ? body.reasonTag : null
+    const reasonTag = reasonKeyRaw && REASON_LABELS[reasonKeyRaw] ? reasonKeyRaw : null
+
+    const quizQuestionId =
+      typeof body.quizQuestionId === "string" ? body.quizQuestionId.slice(0, 200) : null
+    const quizId = typeof body.quizId === "string" ? body.quizId.slice(0, 200) : null
+    const studyId = typeof body.studyId === "string" ? body.studyId.slice(0, 200) : null
+    const lessonDay =
+      typeof body.lessonDay === "number" && Number.isFinite(body.lessonDay)
+        ? Math.trunc(body.lessonDay)
+        : null
+    const answeredCorrectly = typeof body.answeredCorrectly === "boolean" ? body.answeredCorrectly : null
+
+    if (!quizQuestionId) {
+      return NextResponse.json({ error: "quizQuestionId is verplicht" }, { status: 400 })
+    }
+
+    const message = clear
+      ? "Quizvraag duidelijk"
+      : `Quizvraag niet duidelijk${reasonTag ? ` (${REASON_LABELS[reasonTag]})` : ""}`
+
+    const answers: { key: string; value: string }[] = [{ key: "clear", value: clear ? "ja" : "nee" }]
+    if (!clear && reasonTag) answers.push({ key: "reasonTag", value: reasonTag })
+
+    await Feedback.create({
+      userId,
+      name,
+      email,
+      category: "other",
+      message,
+      page: "",
+      touchpoint: QUIZ_TOUCHPOINT,
+      answers,
+      context: {
+        quizId,
+        quizQuestionId,
+        studyId,
+        lessonDay,
+        answeredCorrectly,
+        platform: "web",
+      },
+    })
+
+    return NextResponse.json({ ok: true })
+  }
+
+  const message = stripControlChars(
+    typeof body.message === "string" ? body.message.trim() : "",
+  )
+  if (!message || message.length < MIN_MESSAGE_LENGTH) {
+    return NextResponse.json({ error: "Bericht is te kort" }, { status: 400 })
+  }
+  if (message.length > MAX_MESSAGE_LENGTH) {
+    return NextResponse.json(
+      { error: `Bericht is te lang (max ${MAX_MESSAGE_LENGTH} tekens)` },
+      { status: 400 },
+    )
+  }
+
+  const categoryRaw = typeof body.category === "string" ? body.category : "other"
+  const category = ALLOWED_CATEGORIES.has(categoryRaw) ? categoryRaw : "other"
+  const rating =
+    typeof body.rating === "number" && body.rating >= 1 && body.rating <= 5
+      ? Math.round(body.rating)
+      : undefined
+  const page = typeof body.page === "string" ? body.page.slice(0, 200) : ""
 
   // Only when there is no account behind the submission does a self-reported
   // reply address get stored, and then under names that say what it is.
