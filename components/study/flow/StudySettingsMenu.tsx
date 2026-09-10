@@ -236,9 +236,14 @@ export default function StudySettingsMenu({
                   <optgroup
                     key={language}
                     label={LANGUAGE_LABELS[language] ?? 'Overige vertalingen'}
+                    style={{ color: '#0f172a', backgroundColor: '#fff' }}
                   >
                     {groups.get(language)!.map((option) => (
-                      <option key={option.id} value={option.id}>
+                      <option
+                        key={option.id}
+                        value={option.id}
+                        style={{ color: '#0f172a', backgroundColor: '#fff' }}
+                      >
                         {option.name}
                       </option>
                     ))}

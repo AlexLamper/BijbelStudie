@@ -63,9 +63,13 @@ function TranslationPicker({
         style={{ ['--tw-ring-color' as string]: 'rgba(13,148,136,0.35)' }}
       >
         {languages.map((language) => (
-          <optgroup key={language} label={LANGUAGE_LABELS[language] ?? 'Overige vertalingen'}>
+          <optgroup
+            key={language}
+            label={LANGUAGE_LABELS[language] ?? 'Overige vertalingen'}
+            style={{ color: '#0f172a', backgroundColor: '#fff' }}
+          >
             {groups.get(language)!.map((option) => (
-              <option key={option.id} value={option.id}>
+              <option key={option.id} value={option.id} style={{ color: '#0f172a', backgroundColor: '#fff' }}>
                 {option.name}
               </option>
             ))}
