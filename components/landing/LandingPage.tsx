@@ -4,6 +4,7 @@ import { ArrowRight, Check } from "lucide-react"
 import { Footer } from "./footer"
 import { FAQItem } from "./FAQItem"
 import { ScrollEffects } from "./ScrollEffects"
+import { LandingSeenMarker } from "./LandingSeenMarker"
 import { StudyDiscovery } from "./StudyDiscovery"
 import { HOME_FAQS } from "../../lib/content/homeFaq"
 import { opstandingLessons } from "../../lib/data/study-lessons/opstanding"
@@ -389,6 +390,19 @@ function Hero() {
               </span>
             </a>
           </div>
+
+          {/* Guest mode (Phase 1): the app works without an account, so the
+              way in has to say so - not just imply it via a button that
+              actually leads to /inloggen. This is the only path into the app
+              that skips sign-up entirely. */}
+          <Link
+            href="/lezen"
+            data-track="hero_cta_guest"
+            className="mt-4 inline-block text-sm font-medium underline decoration-dotted underline-offset-4 transition-colors hover:no-underline"
+            style={{ color: T.muted }}
+          >
+            Of probeer direct de Bijbel lezen - zonder account
+          </Link>
 
           {/* Four counted facts under a rule. The two catalogue figures count
               up the first time they scroll into view; the server renders the
@@ -1104,6 +1118,7 @@ export default function LandingPage() {
           sentinel answers that with an observer instead of a scroll listener
           running a React state update on every frame. */}
       <div id="landing-top-sentinel" aria-hidden className="absolute left-0 top-0 h-px w-px" />
+      <LandingSeenMarker />
       <ScrollEffects />
       <Navbar />
       <main>

@@ -12,6 +12,13 @@ export const config = {
   ],
 };
 
+// Set client-side (see components/landing/LandingPage.tsx) once a guest
+// leaves "/" for the app. Not httpOnly: the landing page itself needs to set
+// it from the browser at the moment of navigation, and it carries no
+// sensitive data - tampering with it only ever skips a marketing page, never
+// grants access to anything gated.
+export const GUEST_SEEN_LANDING_COOKIE = "bs_seen_landing";
+
 const SESSION_COOKIES = [
   "next-auth.session-token",
   "__Secure-next-auth.session-token",
@@ -98,12 +105,29 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
+  // Guest mode (Phase 1 MVP): a visitor who has already seen the landing page
+  // once (marked by GUEST_SEEN_LANDING_COOKIE, set client-side when they leave
+  // "/" for the app) skips straight past the marketing page on repeat visits -
+  // there is no session yet, so the `session && pathname === "/"` redirect
+  // above never fires for them.
+  if (!session && pathname === "/" && req.cookies.get(GUEST_SEEN_LANDING_COOKIE)?.value === "1") {
+    return NextResponse.redirect(new URL("/lezen", req.url));
+  }
+
   // Dutch route names. The old English entries (/study, /notes, /plans, ...) no
   // longer prefix-matched anything after the rename, so those pages were open.
   // /studies and /hulpbronnen stay public on purpose: they are the crawlable
   // SEO surface (pro content inside /hulpbronnen/:slug is gated server-side).
+  //
+  // /studie and /lezen are deliberately NOT in this list (Phase 1 guest mode):
+  // reading is fully client-side against static /data/*.json, and every
+  // account-bound action underneath it (AI chat, TTS, study-progress writes,
+  // guided-study enrollment) already gates itself server-side via
+  // requireUser()/getServerSession() in its own route or page - so an
+  // anonymous visitor gets the reading/study *shell* here and hits a real
+  // 401 or an /inloggen redirect only where an account is actually needed.
   const protectedRoutes = [
-    "/studie", "/lezen", "/dashboard", "/admin", "/notities",
+    "/dashboard", "/admin", "/notities",
     "/profiel", "/instellingen", "/groepen", "/feedback",
   ];
   // Match the route itself or a path segment under it - never a bare prefix.
