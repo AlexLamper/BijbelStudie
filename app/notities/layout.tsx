@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../lib/authOptions";
 import SessionProvider from "../../components/providers/SessionProvider";
 import { SidebarProvider } from "../../components/ui/sidebar";
+import GuestGateScene from "../../components/auth/GuestGateScene";
 import { cookies } from "next/headers";
 import { cookieName, fallbackLng } from "../i18n/settings";
 import { generatePageMetadata } from "../../lib/pageMetadata";
@@ -42,6 +43,18 @@ interface NotesLayoutProps {
  */
 export default async function NotesLayout({ children }: NotesLayoutProps) {
   const session = await getServerSession(authOptions);
+
+  // Signed out: the GuestGate in the same chrome, instead of the middleware
+  // bouncing the visitor to "/" (see components/auth/GuestGate.tsx).
+  if (!session?.user?.email) {
+    return (
+      <GuestGateScene
+        title="Notities"
+        description="Bij elk vers kun je een persoonlijke notitie maken. Hier staan ze bij elkaar: doorzoekbaar, per bijbelboek, en gekoppeld aan de tekst waar ze bij horen."
+        next="/notities"
+      />
+    );
+  }
 
   return (
     <SessionProvider session={session}>

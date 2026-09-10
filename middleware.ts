@@ -111,25 +111,29 @@ export async function middleware(req: NextRequest) {
   // there is no session yet, so the `session && pathname === "/"` redirect
   // above never fires for them.
   if (!session && pathname === "/" && req.cookies.get(GUEST_SEEN_LANDING_COOKIE)?.value === "1") {
-    return NextResponse.redirect(new URL("/lezen", req.url));
+    return NextResponse.redirect(new URL("/studies", req.url));
   }
 
-  // Dutch route names. The old English entries (/study, /notes, /plans, ...) no
-  // longer prefix-matched anything after the rename, so those pages were open.
-  // /studies and /hulpbronnen stay public on purpose: they are the crawlable
-  // SEO surface (pro content inside /hulpbronnen/:slug is gated server-side).
+  // Only /admin is closed at the edge. Everything else is open to a guest:
   //
-  // /studie and /lezen are deliberately NOT in this list (Phase 1 guest mode):
-  // reading is fully client-side against static /data/*.json, and every
-  // account-bound action underneath it (AI chat, TTS, study-progress writes,
-  // guided-study enrollment) already gates itself server-side via
-  // requireUser()/getServerSession() in its own route or page - so an
-  // anonymous visitor gets the reading/study *shell* here and hits a real
-  // 401 or an /inloggen redirect only where an account is actually needed.
-  const protectedRoutes = [
-    "/dashboard", "/admin", "/notities",
-    "/profiel", "/instellingen", "/groepen", "/feedback",
-  ];
+  //  - /studies and /hulpbronnen are the crawlable SEO surface (pro content
+  //    inside /hulpbronnen/:slug is gated server-side).
+  //  - /studie and /lezen are the guest-mode shell: reading is client-side
+  //    against static /data/*.json, a lesson can be stepped through without an
+  //    account, and every account-bound WRITE underneath (AI chat, TTS,
+  //    study-progress, enrollment) gates itself with requireUser() in its own
+  //    API route.
+  //  - /dashboard, /notities, /profiel, /instellingen, /groepen and /feedback
+  //    used to be listed here and 307'd a guest to "/", which made every one of
+  //    those links in the rail a dead end. Each of their LAYOUTS now reads the
+  //    session itself and renders components/auth/GuestGate.tsx for a guest,
+  //    so the page component never mounts without a session. Do not add a
+  //    route back here without removing that guard, or the guard will never be
+  //    reached; do not remove a guard without adding the route back here.
+  //
+  // The old English entries (/study, /notes, /plans, ...) are long gone: after
+  // the rename they prefix-matched nothing.
+  const protectedRoutes = ["/admin"];
   // Match the route itself or a path segment under it - never a bare prefix.
   // `"/studies".startsWith("/studie")` is true, so the plain prefix test sent
   // every anonymous visitor (and Googlebot) on /studies back to "/", which is

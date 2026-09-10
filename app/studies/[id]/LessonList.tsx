@@ -50,14 +50,22 @@ export default function LessonList({
   completedDays,
   currentDay,
   enrolled,
+  guest = false,
 }: {
   studyId: string;
   lessons: LessonRow[];
   completedDays: number[];
   currentDay: number | null;
   enrolled: boolean;
+  /**
+   * No session. A guest is never enrolled, but may open any lesson: the lesson
+   * page renders without an account and only asks for one when it is time to
+   * save. So the rows open rather than lock.
+   */
+  guest?: boolean;
 }) {
   const router = useRouter();
+  const canOpen = enrolled || guest;
   const [expanded, setExpanded] = useState<number | null>(currentDay);
 
   const done = useMemo(() => new Set(completedDays), [completedDays]);
@@ -169,7 +177,7 @@ export default function LessonList({
                         <p className="mb-2.5 text-[12px] leading-relaxed text-white/70">
                           {lesson.focus}
                         </p>
-                        {enrolled ? (
+                        {canOpen ? (
                           <button
                             type="button"
                             onClick={() => router.push(`/studie/${studyId}/${lesson.day}`)}

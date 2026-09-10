@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../lib/authOptions";
 import SessionProvider from "../../components/providers/SessionProvider";
 import { SidebarProvider } from "../../components/ui/sidebar";
+import GuestGateScene from "../../components/auth/GuestGateScene";
 
 export const metadata: Metadata = {
   title: {
@@ -126,6 +127,20 @@ export default async function ProfileLayout({
   // any client-side check on those fields read undefined on this route, and a
   // Pro user rendered as not-Pro.
   const session = await getServerSession(authOptions);
+
+  // Signed out: the GuestGate in the same chrome, instead of the middleware
+  // bouncing the visitor to "/" (see components/auth/GuestGate.tsx). This
+  // covers /profiel/boom too, which is the reader's own tree and has no guest
+  // shape - the public one lives at /gebruiker/[id].
+  if (!session?.user?.email) {
+    return (
+      <GuestGateScene
+        title="Profiel"
+        description="Je profiel toont je voortgang: je boom, je niveau, je badges en je studiestatistieken. Hier stel je ook in hoe je heet en of anderen je boom mogen zien."
+        next="/profiel"
+      />
+    );
+  }
 
   return (
     <SessionProvider session={session}>

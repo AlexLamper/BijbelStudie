@@ -96,6 +96,8 @@ function Choice({
 /** What the action block reads, and the only way it changes anything. */
 interface StudySetup {
   enrolled: boolean;
+  /** No session. Starting opens lesson one directly; nothing is written. */
+  guest: boolean;
   resumeHref: string;
   resumeDay: number;
   lessonsTotal: number;
@@ -154,6 +156,7 @@ export default function StudySetupProvider({
   suggestedRhythm,
   suggestedDepth,
   enrolled,
+  guest = false,
   resumeHref,
   resumeDay,
   lessonsTotal,
@@ -166,6 +169,13 @@ export default function StudySetupProvider({
   suggestedRhythm: StudyRhythm;
   suggestedDepth: StudyDepth;
   enrolled: boolean;
+  /**
+   * The visitor has no account. A guest may run a study - the lesson page
+   * renders without a session and keeps its state in the browser - so `start`
+   * goes straight to lesson one instead of POSTing an enrollment that would
+   * only 401. Saving progress is the moment the lesson asks them to sign in.
+   */
+  guest?: boolean;
   resumeHref: string;
   resumeDay: number;
   lessonsTotal: number;
@@ -201,6 +211,18 @@ export default function StudySetupProvider({
   const depthLabel = DEPTHS.find((option) => option.value === depth)?.label ?? '';
 
   async function submit(mode: 'start' | 'save') {
+    // Nothing to save for a guest: no enrollment exists and the API would
+    // refuse to create one. The chosen translation travels in the URL so the
+    // lesson opens in it; rhythm and depth are account settings and wait.
+    if (guest) {
+      setOpen(false);
+      const params = new URLSearchParams();
+      if (translation && translation !== defaultTranslation) params.set('vertaling', translation);
+      const query = params.toString();
+      router.push(`/studie/${studyId}/1${query ? `?${query}` : ''}`);
+      return;
+    }
+
     setBusy(true);
     setError(null);
     try {
@@ -247,6 +269,7 @@ export default function StudySetupProvider({
     <SetupContext.Provider
       value={{
         enrolled,
+        guest,
         resumeHref,
         resumeDay,
         lessonsTotal,
@@ -480,6 +503,7 @@ export function StudySettingsButton() {
 export function StudyActionBar() {
   const {
     enrolled,
+    guest,
     resumeHref,
     resumeDay,
     lessonsTotal,
@@ -536,6 +560,15 @@ export function StudyActionBar() {
 
         <StudySettingsButton />
       </div>
+
+      {/* A guest is told up front where the account comes in, so the ask at
+          the end of the lesson is expected rather than a wall. */}
+      {guest && (
+        <p className="max-w-[30rem] text-sm leading-relaxed text-white/70">
+          Je kunt deze studie zonder account beginnen. Aan het einde van de les kun je een
+          gratis account maken om je voortgang te bewaren.
+        </p>
+      )}
 
       {/* Suppressed while the dialog is open - it shows the same error. */}
       {error && !settingsOpen && (

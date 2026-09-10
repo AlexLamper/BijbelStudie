@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../lib/authOptions";
 import SessionProvider from "../../components/providers/SessionProvider";
 import { SidebarProvider } from "../../components/ui/sidebar";
+import GuestGateScene from "../../components/auth/GuestGateScene";
 import { cookies } from "next/headers";
 import { cookieName, fallbackLng } from "../i18n/settings";
 import { generatePageMetadata } from "../../lib/pageMetadata";
@@ -38,6 +39,18 @@ export default async function SettingsLayout({
   // any client-side check on those fields read undefined on this route, and a
   // Pro user rendered as not-Pro.
   const session = await getServerSession(authOptions);
+
+  // Signed out: the GuestGate in the same chrome, instead of the middleware
+  // bouncing the visitor to "/" (see components/auth/GuestGate.tsx).
+  if (!session?.user?.email) {
+    return (
+      <GuestGateScene
+        title="Instellingen"
+        description="Hier kies je je standaardvertaling en commentaar, je herinneringen en je abonnement. Die keuzes horen bij je account, zodat elke les en elk hoofdstuk ze al kent."
+        next="/instellingen"
+      />
+    );
+  }
 
   return (
     <SessionProvider session={session}>

@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../lib/authOptions";
 import SessionProvider from "../../components/providers/SessionProvider";
 import { SidebarProvider } from "../../components/ui/sidebar";
+import GuestGateScene from "../../components/auth/GuestGateScene";
 
 export const metadata: Metadata = {
   title: "Feedback | BijbelStudie",
@@ -33,6 +34,18 @@ export default async function FeedbackLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const session = await getServerSession(authOptions);
+
+  // Signed out: the GuestGate in the same chrome, instead of the middleware
+  // bouncing the visitor to "/" (see components/auth/GuestGate.tsx).
+  if (!session?.user?.email) {
+    return (
+      <GuestGateScene
+        title="Feedback"
+        description="Vertel ons wat werkt en wat niet. Feedback hoort bij je account, zodat we kunnen reageren en jij kunt zien wat ermee gebeurd is."
+        next="/feedback"
+      />
+    );
+  }
 
   return (
     <SessionProvider session={session}>

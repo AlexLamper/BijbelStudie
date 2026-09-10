@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "../../lib/authOptions"
 import SessionProvider from "../../components/providers/SessionProvider"
 import { SidebarProvider } from "../../components/ui/sidebar"
+import GuestGateScene from "../../components/auth/GuestGateScene"
 
 export const metadata: Metadata = {
   title: "Groepen",
@@ -34,6 +35,17 @@ export const metadata: Metadata = {
  */
 export default async function GroepenLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions)
+  // Signed out: the GuestGate in the same chrome, instead of the middleware
+  // bouncing the visitor to "/" (see components/auth/GuestGate.tsx).
+  if (!session?.user?.email) {
+    return (
+      <GuestGateScene
+        title="Groepen"
+        description="In een groep studeer je samen: een studie, gedeelde voortgang en ruimte om notities met elkaar te delen."
+        next="/groepen"
+      />
+    )
+  }
   return (
     <SessionProvider session={session}>
       <SidebarProvider>{children}</SidebarProvider>

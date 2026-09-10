@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../lib/authOptions";
 import SessionProvider from "../../components/providers/SessionProvider";
 import { SidebarProvider } from "../../components/ui/sidebar";
+import GuestGateScene from "../../components/auth/GuestGateScene";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -22,9 +23,23 @@ export const metadata: Metadata = {
  *
  * `SidebarProvider` stays because the header's own controls read its context;
  * it renders a flex row, which is why the page root carries `w-full min-w-0`.
+ *
+ * Signed out, the route is no longer bounced to "/" by the middleware: the
+ * layout answers with the GuestGate in the same scene chrome, so the Dashboard
+ * link in the rail leads somewhere for a guest too. The page itself never
+ * renders without a session.
  */
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions);
+  if (!session?.user?.email) {
+    return (
+      <GuestGateScene
+        title="Dashboard"
+        description="Je dashboard laat zien waar je gebleven bent: je leesstreak, je voortgang per studie, de tekst van de dag en de hoofdstukken die je al las."
+        next="/dashboard"
+      />
+    );
+  }
   return (
     <SessionProvider session={session}>
       <SidebarProvider>{children}</SidebarProvider>

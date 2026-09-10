@@ -108,12 +108,12 @@ export default async function StudyDetailPage({ params }: PageProps) {
 
   const session = await getServerSession(authOptions);
   /**
-   * Whether this page gets the app's chrome, decided here rather than inside
-   * the bar. `components/layout/header.tsx` pushes an unauthenticated visitor
-   * to /api/auth/signin the moment it mounts, and SceneRail links to seven
-   * signed-in routes - so on a public page neither may be RENDERED at all, not
-   * merely hidden. Signed in it is the same header and rail as /dashboard;
-   * signed out (and to a crawler) the page has no chrome and no redirect.
+   * Signed in or not decides how the study STARTS, not whether the page has
+   * chrome. The header and the rail render for everyone (both are guest-aware
+   * now - see components/auth/GuestGate.tsx). A guest may open any lesson and
+   * step through it; only saving progress at the end asks for an account, so
+   * the start button for a guest goes straight to lesson one instead of
+   * creating an enrollment, and the lesson rows open rather than lock.
    */
   const signedIn = Boolean(session?.user?.email);
 
@@ -213,18 +213,13 @@ export default async function StudyDetailPage({ params }: PageProps) {
       suggestedRhythm={(settings.rhythm as never) ?? study.suggestedRhythm ?? 'dagelijks'}
       suggestedDepth={(settings.depth as never) ?? study.suggestedDepth ?? 'kort'}
       enrolled={enrolled}
+      guest={!signedIn}
       resumeHref={resumeHref}
       resumeDay={resumeDay}
       lessonsTotal={lessonsTotal}
       lessonsCompleted={lessonsDone}
     >
-      <SceneShell
-        svg={sceneSvg()}
-        {...SCENE_TREE}
-        gateId="studie-hero"
-        header={signedIn}
-        rail={signedIn}
-      >
+      <SceneShell svg={sceneSvg()} {...SCENE_TREE} gateId="studie-hero" header rail>
         {/* -- Layer 1: the sky ---------------------------------------- */}
         <section
           id="studie-hero"
@@ -344,9 +339,7 @@ export default async function StudyDetailPage({ params }: PageProps) {
 
           {/* The lessons. Sticks once it reaches the top and scrolls inside
               itself, so a twelve-lesson book study never runs the column past
-              the end of the page. `top-[4.5rem]` clears the sticky h-14 navbar
-              a signed-in reader has; signed out there is no bar and the extra
-              inch is simply air. */}
+              the end of the page. `top-[4.5rem]` clears the sticky h-14 navbar. */}
           <aside className="min-w-0 lg:sticky lg:top-[4.5rem] lg:max-h-[calc(100vh-6rem)] lg:self-start lg:overflow-y-auto">
             <LessonList
               studyId={study.id}
@@ -362,6 +355,7 @@ export default async function StudyDetailPage({ params }: PageProps) {
               completedDays={completedDays}
               currentDay={enrolled ? resumeDay : null}
               enrolled={enrolled}
+              guest={!signedIn}
             />
           </aside>
         </div>

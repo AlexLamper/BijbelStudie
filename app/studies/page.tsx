@@ -1,5 +1,3 @@
-import { getServerSession } from 'next-auth'
-import { authOptions } from '../../lib/authOptions'
 import { curatedStudies } from '../../lib/data/curated-studies'
 import { JsonLd } from '../../components/seo/JsonLd'
 import { absoluteUrl } from '../../lib/seo/constants'
@@ -72,22 +70,17 @@ const STUDIES_GRAPH = (() => {
  * Everything that answers to a click lives in StudiesBrowser; the heading is
  * handed to it as children so it stays server-rendered inside the sky layer.
  *
- * The chrome is conditional, and that condition is decided HERE, on the server,
- * rather than inside the bar. `components/layout/header.tsx` pushes an
- * unauthenticated visitor to /api/auth/signin the moment it mounts, and
- * SceneRail links to seven signed-in routes - so on a public page neither may
- * be RENDERED at all, not merely hidden. With a session they are the same
- * header and the same rail as /dashboard; without one a visitor (and a crawler)
- * gets the signed-out page with no chrome and no redirect. Reading the session
- * costs nothing new: this route is already dynamic, because the layout's own
- * `generateMetadata` and `getServerSession` both read cookies.
+ * The chrome is unconditional. It used to be rendered only with a session,
+ * because the header bounced a guest to the sign-in page and the rail linked to
+ * routes the middleware bounced to "/". Neither is true any more: the bar shows
+ * a guest an Inloggen button, and every rail item leads somewhere for a guest
+ * (components/auth/GuestGate.tsx). So this page - the first thing a signed-out
+ * visitor sees - wears the same frame as the signed-in app, which is the point:
+ * a guest is using the app, not a preview of it.
  */
 export default async function StudiesPage() {
-  const session = await getServerSession(authOptions)
-  const signedIn = Boolean(session?.user?.email)
-
   return (
-    <SceneShell svg={sceneSvg()} {...SCENE_TREE} header={signedIn} rail={signedIn}>
+    <SceneShell svg={sceneSvg()} {...SCENE_TREE} header rail>
       <JsonLd data={STUDIES_GRAPH} />
 
       <StudiesBrowser>

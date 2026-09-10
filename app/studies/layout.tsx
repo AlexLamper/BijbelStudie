@@ -29,15 +29,12 @@ export async function generateMetadata(): Promise<Metadata> {
  * Inside such a box the landscape never moves. The DOCUMENT has to scroll -
  * the same shape as app/dashboard/layout.tsx and app/admin/layout.tsx.
  *
- * The header and the sidebar. `components/layout/header.tsx` pushes an
- * unauthenticated visitor to /api/auth/signin, and /studies and /studies/:id
- * are public, crawlable pages that anyone may read without an account - so the
- * chrome cannot be unconditional here. A layout can only ADD chrome, never
- * replace what a parent rendered, and it cannot hand a prop to `children`
- * either, so the decision belongs to the pages: each reads the session on the
- * server and passes `header` and `rail` to SceneShell only when there is one.
- * Signed in that is the same bar and rail as /dashboard; signed out neither is
- * rendered at all, which is what keeps the redirect away from a public page.
+ * The header and the sidebar. Both pages render them through SceneShell, and
+ * they render them for everyone: the bar shows a guest an Inloggen button
+ * where the profile menu would be, and the rail is guest-aware (every item
+ * leads somewhere, see components/auth/GuestGate.tsx). They live in the pages
+ * rather than here because a layout can only ADD chrome and this one wraps two
+ * different scenes.
  *
  * `SessionProvider` stays: the session it hands down is the full one from
  * `authOptions` (isAdmin, isSubscribed, studyStyle), not NextAuth's default,
