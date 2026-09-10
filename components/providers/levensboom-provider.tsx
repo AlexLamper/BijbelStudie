@@ -26,6 +26,13 @@ const CACHE_PREFIX = 'levensboom:v2:';
 
 export type SaveResult = { ok: true } | { ok: false; error: string; label?: string };
 
+/** Display preferences a surface may patch; `timeOfDay` is the payload's own union, not a loose string. */
+export type LevensboomPrefsPatch = {
+  reducedMotion?: boolean;
+  disabled?: boolean;
+  timeOfDay?: LevensboomPayload['timeOfDay'];
+};
+
 export type LevensboomContextValue = {
   enabled: boolean;
   data: GamificationSummary | null;
@@ -35,7 +42,7 @@ export type LevensboomContextValue = {
   refresh: () => Promise<void>;
   applyXp: (grant: GrantResult | null | undefined) => void;
   dismissCelebration: () => Promise<void>;
-  setPrefs: (prefs: { reducedMotion?: boolean; disabled?: boolean; timeOfDay?: string }) => Promise<void>;
+  setPrefs: (prefs: LevensboomPrefsPatch) => Promise<void>;
   /** The studio's write. Optimistic; rolls back and reports the rule on a 403. */
   setAvatar: (patch: Partial<AvatarChoice>) => Promise<SaveResult>;
   /** Onboarding's "Planten": species plus the planted marker. */
@@ -236,7 +243,7 @@ export function LevensboomProvider({
   }, [celebrate, update]);
 
   const setPrefs = useCallback(
-    async (prefs: { reducedMotion?: boolean; disabled?: boolean; timeOfDay?: string }) => {
+    async (prefs: LevensboomPrefsPatch) => {
       update((current) => ({ ...current, levensboom: { ...current.levensboom, ...prefs } }));
       try {
         await fetch('/api/v1/gamification/seen', {
