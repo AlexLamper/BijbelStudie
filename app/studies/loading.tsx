@@ -1,5 +1,5 @@
 import { SceneSkeleton } from "../../components/scene/pieces"
-import { SCENE_BG, SCENE_X_EDGE, TILE } from "../../components/scene/tokens"
+import { SCENE_BG, SCENE_X, TILE } from "../../components/scene/tokens"
 
 /**
  * Shown while the route segment streams in, so a navigation lands on the page's
@@ -11,11 +11,19 @@ import { SCENE_BG, SCENE_X_EDGE, TILE } from "../../components/scene/tokens"
  * screen on every navigation into the route. The ground comes from SCENE_BG
  * through `style`, because Tailwind never generates a class built from a
  * constant.
+ *
+ * The gutter is `SCENE_X`, the WITH-rail one, even though this file cannot know
+ * whether the reader is signed in. It used to be `SCENE_X_EDGE`, whose 56px left
+ * inset at `lg` is narrower than the rail's own 64px - so for every signed-in
+ * reader, which is nearly all of them, the skeleton spent its whole life tucked
+ * under the rail and then jumped 48px right when the page arrived. Signed out
+ * this is a little wide for one frame; signed in it now lands exactly where the
+ * page does, which is the case worth being right about.
  */
 export default function StudiesLoading() {
   return (
     <div
-      className={`min-h-screen w-full pb-20 pt-16 ${SCENE_X_EDGE}`}
+      className={`min-h-screen w-full pb-20 pt-16 ${SCENE_X}`}
       style={{ backgroundColor: SCENE_BG }}
       role="status"
       aria-label="Studies laden"

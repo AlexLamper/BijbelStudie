@@ -27,7 +27,7 @@ const FOOTER_MUTED = "#9CA3AF"
  *
  * Unchanged for the lighter #1F2937 ground it lands on here. White at 0.26 over
  * #1F2937 resolves to #59616B, which is 2.45:1 against the #262626 tile (on the
- * auth pages' #102E33 the same stop gives 2.03:1), so the mark is if anything
+ * auth pages' #0C2429 the same stop gives 2.03:1), so the mark is if anything
  * better separated here. Turning the centre stop up only starts a white blob.
  */
 const MARK_GLOW =

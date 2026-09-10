@@ -42,7 +42,7 @@ import { EYEBROW, SCENE_BG_RGB, TEAL_ON_DARK, TILE } from '../../scene/tokens';
  * land on the room's `--card`. That made the lesson's own surfaces a step
  * LIGHTER than the ground and, because `--card` is a hue-189 colour, it is
  * where the flow picked up the blue-green cast the rest of the app does not
- * have. `bg-black/35` over the same ground has no hue of its own at all - it
+ * have. `bg-black/38` over the same ground has no hue of its own at all - it
  * only takes light out - which is exactly why it is the shared card surface.
  *
  * The one subtraction is `backdrop-blur-md`, and it is not cosmetic: a
@@ -52,12 +52,12 @@ import { EYEBROW, SCENE_BG_RGB, TEAL_ON_DARK, TILE } from '../../scene/tokens';
  * nothing behind them to blur - this screen is a flat ground, not a
  * photograph - so the blur costs a bug and buys no glass.
  *
- * White on it measures 17.2:1 and INK_MUTED 11.3:1 - both still a step BETTER
+ * White on it measures 18.5:1 and INK_MUTED 12.0:1 - both still a step BETTER
  * than the film of white they replace, because taking light out of the ground
  * is the one way to make a tile that does not cost the type sitting on it.
- * (Those were 19.4:1 and 12.6:1 before SCENE_BG was lifted to #102E33; the
- * tile follows the ground, so it lightened by the same amount the room did and
- * kept its whole margin over the 4.5:1 floor.)
+ * (They were 19.4:1 and 12.6:1 before SCENE_BG was lifted to #0C2429; the tile
+ * follows the ground, so it lightened with the room and kept its whole margin
+ * over the 4.5:1 floor.)
  */
 export const SURFACE = TILE.replace(' backdrop-blur-md', '');
 
@@ -79,7 +79,7 @@ export const SURFACE = TILE.replace(' backdrop-blur-md', '');
  * The hex is written out rather than spliced in from SCENE_BG for the reason
  * `RAIL_OPEN` states: Tailwind reads class names as literal text and never
  * generates a class built from a constant. If SCENE_BG moves, this moves with
- * it by hand - it has moved once already, from #081A1D to #102E33 when the
+ * it by hand - it has moved once already, from #081A1D to #0C2429 when the
  * whole scene was lifted, and this line is one of exactly two that had to be
  * edited by hand to follow it.
  *
@@ -87,7 +87,7 @@ export const SURFACE = TILE.replace(' backdrop-blur-md', '');
  * surfaces that host other people's components, and a filter traps anything
  * `fixed` inside them.
  */
-export const PANEL_SOLID = 'rounded-2xl bg-[#102E33] ring-1 ring-white/15';
+export const PANEL_SOLID = 'rounded-2xl bg-[#0C2429] ring-1 ring-white/12';
 
 /** The same panel with its radius dropped, for one that sets its own corners. */
 export const PANEL_FLAT = PANEL_SOLID.replace('rounded-2xl ', '');

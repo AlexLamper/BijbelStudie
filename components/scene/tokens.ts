@@ -61,18 +61,25 @@ export const TEAL_ON_DARK = "#2DD4BF"
  * window have no picture at all, and there this colour IS the screen for
  * twenty minutes at a time. It read as heavy - not as night, as unlit.
  *
- * #102E33 is the same hue and the same family, roughly two and a half times the
- * luminance: still unmistakably a dark room, but a room with light in it. Every
- * ink that lands on it keeps a wide margin over the 4.5:1 floor -
+ * #0C2429 is the same hue and the same family at about 1.7x the luminance: a
+ * room with some light in it, still unmistakably night. Every ink that lands on
+ * it keeps a wide margin over the 4.5:1 floor -
  *
- *   #FFFFFF (scripture, headings)        14.4:1   (was 17.8)
- *   #BFC9CC (verse numbers)               8.5:1   (was 11.0)
- *   #A6B3B5 (captions, the attribution)   6.6:1   (was  8.6)
- *   #2DD4BF (accents, never a fill)       7.7:1   (was  9.7)
+ *   #FFFFFF (scripture, headings)        16.2:1   (was 17.8)
+ *   #BFC9CC (verse numbers)               9.6:1   (was 11.0)
+ *   #A6B3B5 (captions, the attribution)   7.5:1   (was  8.6)
+ *   #2DD4BF (accents, never a fill)       8.7:1   (was  9.7)
  *
- * The whole "make it lighter" pass is these numbers plus the scrims at the foot
- * of this file. Nothing else needed touching, because every surface in the app
- * either reads this constant or is a black/white alpha over it.
+ * IT WENT TOO FAR ONCE - #102E33, 2.6x - AND THAT IS THE USEFUL PART.
+ *
+ * At that value nothing failed a contrast check and the screens still looked
+ * wrong: lifting the ground and lightening the scrims in the same pass took the
+ * atmosphere out with the murk, and the pages stopped reading as a place and
+ * started reading as flat dark chrome. The lesson is that the ground and the
+ * scrims are not two dials for one quality. The ground decides whether a
+ * reading screen is comfortable; the SCRIMS decide whether the app has any
+ * depth. Lighten the ground, keep the scrims - see the scrim section at the
+ * foot of this file, where the same mistake is recorded from the other side.
  *
  * Change it HERE and nowhere else. Tailwind reads class names as literal text,
  * so a class built from this constant is a class it never generates - a page
@@ -80,7 +87,7 @@ export const TEAL_ON_DARK = "#2DD4BF"
  * two places that must repeat the hex by hand are RAIL_OPEN in this file and
  * PANEL_SOLID in components/study/flow/lesson-layout.tsx; both say so.
  */
-export const SCENE_BG = "#102E33"
+export const SCENE_BG = "#0C2429"
 
 /**
  * The same colour as bare channels, for the one thing `style` cannot express
@@ -88,7 +95,7 @@ export const SCENE_BG = "#102E33"
  * `rgba(${SCENE_BG_RGB}, 0)` is transparent AND the right hue; the keyword
  * `transparent` is transparent black and fades through soot.
  */
-export const SCENE_BG_RGB = "16, 46, 51"
+export const SCENE_BG_RGB = "12, 36, 41"
 
 /**
  * The still wash that lights the /studie window's SURROUND.
@@ -108,7 +115,7 @@ export const SCENE_WASH =
 /* -- Type ------------------------------------------------------ */
 
 /** The small capitalised label above a heading or a figure. */
-export const EYEBROW = "text-[11px] font-semibold uppercase tracking-[0.14em] text-white/70"
+export const EYEBROW = "text-[11px] font-semibold uppercase tracking-[0.14em] text-white/65"
 
 /**
  * Skeletons on these surfaces. The shared `SkeletonBlock` carries
@@ -137,7 +144,7 @@ export const SKEL = "bg-white/20 dark:bg-white/20"
  * same pass, each by "just a little", is exactly how this lands at 3.5:1 and
  * fails - so if either number moves again, recompute the product, not the part.
  */
-export const TILE = "rounded-2xl border border-white/25 bg-black/35 backdrop-blur-md"
+export const TILE = "rounded-2xl border border-white/22 bg-black/38 backdrop-blur-md"
 
 /**
  * Kept as a separate name so a page can say "panel" where it means a panel;
@@ -152,7 +159,7 @@ export const PANEL = TILE
  * seeing the picture behind it. White type clears 12:1 on this whatever is
  * underneath. Use it sparingly: three in a row and the scene is gone.
  */
-export const PANEL_DEEP = "rounded-2xl bg-black/70 ring-1 ring-white/15 backdrop-blur-md"
+export const PANEL_DEEP = "rounded-2xl bg-black/75 ring-1 ring-white/12 backdrop-blur-md"
 
 /**
  * The light plate.
@@ -195,14 +202,27 @@ export const CTA_QUIET =
 /**
  * The content gutter on a page that shows the rail.
  *
- * TWO NUMBERS HAVE TO AGREE, AND THEY ARE BOTH IN THIS SECTION: the rail's
- * width (RAIL_REST, 64px - it has exactly one) and this gutter. The rule:
+ * THE RAIL IS NOT THE MARGIN. THE MARGIN GOES BESIDE IT.
  *
- *     RAIL_REST  <  the gutter
+ * The left inset is built out of two things that are added, never merged:
  *
- * 80px, so the rail's 64px of glass and a 16px breathing gap before the first
- * glyph. That is the whole arithmetic, and it stays that simple because the
- * rail no longer changes size.
+ *     RAIL_REST (64px, and it has exactly one)  +  the page's own side margin
+ *
+ * and that second term is the SAME margin the right edge gets. So at `lg` the
+ * right is 40px and the left is 64 + 40 = 104px; at `xl` the right is 64px and
+ * the left is 64 + 64 = 128px. The content column is then symmetrically inset
+ * in the space the rail leaves, which is what it looks like it should be.
+ *
+ * It used to be 80px flat - the rail plus a 16px breathing gap, sized to CLEAR
+ * the rail rather than to sit evenly beside it. That is a different question
+ * with a different answer: 80px is the smallest left inset that is safe, and
+ * safe is not the same as square. Every overview screen (dashboard, studies,
+ * notities, beheer, profiel, feedback, groepen) read as shoved against the
+ * rail, because the copy started 16px after the glass on the left and 40px
+ * before nothing at all on the right.
+ *
+ * Below `lg` there is no rail - it becomes a sticky strip of pills - so the
+ * gutter is plainly symmetrical and the arithmetic does not apply.
  *
  * The history, because all three mistakes are easy to make again. The rail
  * first OPENED to 176px over a 96px gutter, as a film of white over a blur: it
@@ -215,14 +235,17 @@ export const CTA_QUIET =
  * cheaper, but still a page paying width for a panel it sees for a second.
  *
  * None of it was necessary. A rail that stays 64px wide and floats ONE label
- * out over the scene on hover costs the page 80px, once, forever - and it
+ * out over the scene on hover costs the page its 64px, once, forever - and it
  * cannot cover a glyph, because there is no state in which it is wider than the
  * strip it stands in. See SceneRail.tsx for the label.
  *
  * SceneShell applies it for you - reach for the constant only when a page opts
- * out (`gutter="none"`) to lay out full-bleed sections itself.
+ * out (`gutter="none"`) to lay out full-bleed sections itself. /lezen is the
+ * one page that does, and it stays on the bare RAIL_GUTTER below: the reader
+ * runs to every edge on purpose, so it wants the inset that CLEARS the rail,
+ * not the one that sits evenly beside it.
  */
-export const SCENE_X = "px-5 sm:px-8 lg:pl-20 lg:pr-10 xl:pr-16"
+export const SCENE_X = "px-5 sm:px-8 lg:pl-[6.5rem] lg:pr-10 xl:pl-32 xl:pr-16"
 
 /**
  * The gutter on a page with no rail. Symmetrical, and wider than a reading
@@ -258,7 +281,7 @@ export const RAIL_REST = "w-16"
  * names as literal text and never generates a class built from a variable: if
  * SCENE_BG moves, this moves with it by hand.
  */
-export const RAIL_OPEN = "bg-[#102E33]"
+export const RAIL_OPEN = "bg-[#0C2429]"
 
 /**
  * The floating label a single rail item shows on hover or keyboard focus.
@@ -284,10 +307,19 @@ export const RAIL_LABEL =
  *
  * `SCENE_X` pads all four sides, which is the wrong shape for a full-bleed page
  * like the reader: there the room runs to every edge and only the one column
- * the rail stands in is inset. The two live together so the number is stated
- * once instead of being copied into a route and left behind the next time it
- * moves. Literal class text, because Tailwind reads class names as text and
- * never generates one spliced together from a constant.
+ * the rail stands in is inset. Literal class text, because Tailwind reads class
+ * names as text and never generates one spliced together from a constant.
+ *
+ * This is deliberately NOT `SCENE_X`'s left inset any more, and the difference
+ * is the whole point of each. 80px is the rail's 64px plus a 16px breathing gap
+ * - the smallest inset that CLEARS the rail, which is what a page wants when its
+ * content is meant to reach the edges. `SCENE_X` adds the page's full side
+ * margin instead, so a column of panels sits evenly between the rail and the
+ * right edge. A reader is the first kind of page; every overview screen is the
+ * second.
+ *
+ * /lezen's split-pane lean is computed from this number (see app/lezen/page.tsx)
+ * - if this moves, that moves with it.
  */
 export const RAIL_GUTTER = "lg:pl-20"
 
@@ -316,18 +348,19 @@ export const RAIL_GUTTER = "lg:pl-20"
  * legibility is the whole task on these two screens and atmosphere loses every
  * tie:
  *
- *   --foreground        #FFFFFF on #102E33 = 14.4:1  (scripture, commentary)
- *   --muted-foreground  #A6B3B5 on #102E33 =  6.6:1  (captions, attribution)
- *   --card              #253A3C, so #FFFFFF on a panel = 12.2:1
- *   --secondary         #314649, so a control's label   =  9.9:1
+ *   --foreground        #FFFFFF on #0C2429 = 16.2:1  (scripture, commentary)
+ *   --muted-foreground  #A6B3B5 on #0C2429 =  7.5:1  (captions, attribution)
+ *   --card              #1E3033, so #FFFFFF on a panel = 13.8:1
+ *   --secondary         #2A3E41, so a control's label   = 11.4:1
  *   --ring              #2BD4BD, the focus outline globals.css draws
  *
- * These all moved together when SCENE_BG was lifted from #081A1D to #102E33,
- * and they have to: --card is the panel that sits ON the ground, so if the
- * ground rises past it the panels invert and every card on the reading screens
- * becomes a hole instead of a surface. The order is the invariant, not the
- * numbers - background < card < secondary < accent < border - and the lightness
- * steps here (13 / 19 / 24 / 27 / 34) keep it with room between each pair.
+ * These all move whenever SCENE_BG moves, and they have to: --card is the panel
+ * that sits ON the ground, so if the ground ever rises past it the panels invert
+ * and every card on the reading screens becomes a hole instead of a surface.
+ * (It came within one point of that once, at --background 13% under a --card of
+ * 12%.) The order is the invariant, not the numbers - background < card <
+ * secondary < accent < border - and the lightness steps here (10 / 16 / 21 / 24
+ * / 30) keep it with room between each pair.
  *
  * The ink is a literal white rather than the #F9FAFB it used to be, which is
  * the one the rest of the scene already writes in (`text-white` everywhere in
@@ -342,20 +375,20 @@ export const RAIL_GUTTER = "lg:pl-20"
  */
 export const SCENE_ROOM: Record<string, string> = {
   colorScheme: "dark",
-  "--background": "189 52% 13%",
+  "--background": "189 55% 10.4%",
   "--foreground": "0 0% 100%",
-  "--card": "189 24% 19%",
+  "--card": "189 26% 16%",
   "--card-foreground": "0 0% 100%",
-  "--popover": "189 24% 19%",
+  "--popover": "189 26% 16%",
   "--popover-foreground": "0 0% 100%",
-  "--muted": "189 24% 19%",
-  "--muted-foreground": "189 9% 72%",
-  "--secondary": "189 20% 24%",
+  "--muted": "189 26% 16%",
+  "--muted-foreground": "189 9% 70%",
+  "--secondary": "189 22% 21%",
   "--secondary-foreground": "0 0% 96%",
-  "--accent": "189 20% 27%",
+  "--accent": "189 22% 24%",
   "--accent-foreground": "0 0% 100%",
-  "--border": "189 15% 34%",
-  "--input": "189 15% 34%",
+  "--border": "189 16% 30%",
+  "--input": "189 16% 30%",
   "--ring": "172 66% 50%",
 }
 
@@ -380,40 +413,48 @@ export const ATTRIBUTION_INK = "#A6B3B5"
  * SCRIM_VEIL and SCRIM_TOP_VEIL are driven by `--veil` and need
  * `style={{ opacity: "var(--veil, 0)" }}` from whoever renders them.
  *
- * HOW LIGHT THESE ARE ALLOWED TO GET.
+ * THESE ARE THE DEPTH. THEY ARE NOT THE BRIGHTNESS DIAL.
  *
- * These are the layers that decide whether a page reads as a landscape or as a
- * dark slab, and every one of them came down in the "make it lighter" pass -
- * the floor from 25 to 20, both directional washes from 85 to 72, the veil from
- * 55 to 42, the top band from 55 to 48. That is where the lift is felt: the
- * picture keeps more of its own light at every scroll position, and the app
- * stops going nearly black the moment the working panels arrive.
+ * This is the vignette - the dark that pools at the left edge and under the
+ * fold and gathers behind the working panels. It is what makes a page read as a
+ * landscape someone is standing in rather than as flat dark chrome.
  *
- * What holds them down is the type that sits ON them, and it is not the same
- * type in each case. The floor is the one with a real ceiling, because TILE's
- * fill multiplies with it - see the note on TILE, and move the two together or
- * not at all. The two washes carry a heading and a primary action, both large,
- * so they have more slack. The veil is pure atmosphere: nothing reads directly
- * on it that is not already inside a panel of its own.
+ * It was cut hard once, in a pass meant to make the app lighter: floor 25 -> 20,
+ * both washes 85 -> 72, the veil 55 -> 42, the top band 55 -> 48. Nothing failed
+ * a contrast check and the result was still wrong - the atmosphere went out with
+ * the murk and the pages flattened. The ground had ALSO been lifted in the same
+ * pass, and that was the actual fix; these layers were paying for a problem they
+ * did not cause.
+ *
+ * So they are back near where they were, a shade off it: floor 22, the washes
+ * 80, the veil 50, the top band 52. If a screen ever reads as too dark again,
+ * move SCENE_BG and leave this section alone. That is the whole rule.
+ *
+ * What holds them down from the other side is the type that sits ON them, and it
+ * is not the same type in each case. The floor is the one with a real ceiling,
+ * because TILE's fill multiplies with it - see the note on TILE, and move the
+ * two together or not at all. The two washes carry a heading and a primary
+ * action, both large, so they have more slack. The veil is pure atmosphere:
+ * nothing reads directly on it that is not already inside a panel of its own.
  */
 
 /** A constant floor of dark over the whole picture, so copy is legible from the first frame. */
-export const SCRIM_FLOOR = "absolute inset-0 bg-black/20"
+export const SCRIM_FLOOR = "absolute inset-0 bg-black/22"
 
 /** The left wash, which carries the rail, the heading and the primary action. */
 export const SCRIM_LEFT =
-  "absolute inset-y-0 left-0 w-[min(46rem,78%)] bg-gradient-to-r from-black/72 via-black/38 to-transparent"
+  "absolute inset-y-0 left-0 w-[min(46rem,78%)] bg-gradient-to-r from-black/80 via-black/42 to-transparent"
 
 /** The bottom wash, which carries whatever breaks the fold. */
-export const SCRIM_BOTTOM = "absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/72 to-transparent"
+export const SCRIM_BOTTOM = "absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/80 to-transparent"
 
 /** The veil: the scene goes deep as the working panels arrive. */
-export const SCRIM_VEIL = "absolute inset-0 bg-black/42"
+export const SCRIM_VEIL = "absolute inset-0 bg-black/50"
 
 /** A permanent band of dark under the top edge, so a bar over a noon sky stays legible. */
 export const SCRIM_TOP =
-  "pointer-events-none fixed inset-x-0 top-0 z-40 h-24 bg-gradient-to-b from-black/48 via-black/22 to-transparent"
+  "pointer-events-none fixed inset-x-0 top-0 z-40 h-24 bg-gradient-to-b from-black/52 via-black/24 to-transparent"
 
 /** The same band, deepening as the page scrolls. */
 export const SCRIM_TOP_VEIL =
-  "pointer-events-none fixed inset-x-0 top-14 z-40 h-8 bg-gradient-to-b from-black/38 to-transparent"
+  "pointer-events-none fixed inset-x-0 top-14 z-40 h-8 bg-gradient-to-b from-black/42 to-transparent"

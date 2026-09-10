@@ -11,8 +11,8 @@ import Image from "next/image"
  * tile off the ground.
  *
  * Lifting the ground did not solve it and could not: SCENE_BG went from #081A1D
- * to #102E33, which moved it from a hair darker than the tile to a hair
- * lighter - 1.06:1 either way. The mark and the ground are near-identical
+ * to #0C2429, which moved it from a hair darker than the tile to a hair
+ * lighter - under 1.1:1 either way. The mark and the ground are near-identical
  * values in the same hue, so nothing but a layer between them separates the
  * two, whichever side of the tile the ground sits on.
  *
