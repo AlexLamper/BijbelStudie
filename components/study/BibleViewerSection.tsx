@@ -54,7 +54,10 @@ export default function BibleViewerSection({
   bottomBar,
 }: BibleViewerSectionProps) {
   return (
-    <section className="flex flex-col h-full bg-white dark:bg-background">
+    // bg-white/95 rather than opaque: lets the page's faint teal wash (see
+    // app/lezen/page.tsx) show through behind the reading pane. 95% white
+    // keeps the bible text's contrast effectively unchanged.
+    <section className="flex flex-col h-full bg-white/95 dark:bg-background/95">
 
       {/* Toolbar */}
       <div data-tour="bible-selector" className="h-14 flex items-center justify-between px-3 flex-none gap-2 border-b bg-gray-50 dark:bg-card border-gray-200 dark:border-border">
@@ -107,7 +110,7 @@ export default function BibleViewerSection({
       </div>
 
       {/* Content */}
-      <div className="flex-1 relative min-h-0 bg-white dark:bg-background">
+      <div className="flex-1 relative min-h-0 bg-white/95 dark:bg-background/95">
         <div className="h-full overflow-y-auto px-4 sm:px-6 pt-3 pb-36">
           {selectedBook && selectedChapter && selectedVersion ? (
             <ChapterViewer
@@ -133,7 +136,7 @@ export default function BibleViewerSection({
           )}
         </div>
         <div className="absolute bottom-0 left-0 right-0 h-10 pointer-events-none z-10
-          bg-gradient-to-t from-white dark:from-background to-transparent" />
+          bg-gradient-to-t from-white/95 dark:from-background/95 to-transparent" />
       </div>
 
       {bottomBar}

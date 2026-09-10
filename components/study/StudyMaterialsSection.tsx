@@ -57,7 +57,9 @@ export default function StudyMaterialsSection({
   ];
 
   return (
-    <section className="flex flex-col h-full min-w-0 overflow-hidden bg-white dark:bg-background">
+    // bg-white/95 rather than opaque: lets the page's faint teal wash (see
+    // app/lezen/page.tsx) show through, matching BibleViewerSection.
+    <section className="flex flex-col h-full min-w-0 overflow-hidden bg-white/95 dark:bg-background/95">
 
       {/* Tab bar */}
       <div className="h-14 flex items-center px-1 flex-none border-b bg-gray-50 dark:bg-card border-gray-200 dark:border-border">
@@ -90,7 +92,7 @@ export default function StudyMaterialsSection({
       </div>
 
       {/* Content */}
-      <div className="flex-1 min-h-0 min-w-0 overflow-hidden flex flex-col relative bg-white dark:bg-background">
+      <div className="flex-1 min-h-0 min-w-0 overflow-hidden flex flex-col relative bg-white/95 dark:bg-background/95">
         <TabComponent
           selectedBook={selectedBook}
           selectedChapter={selectedChapter}
@@ -109,7 +111,7 @@ export default function StudyMaterialsSection({
           onAiQuestionConsumed={onAiQuestionConsumed}
         />
         <div className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none z-10
-          bg-gradient-to-t from-white dark:from-background to-transparent" />
+          bg-gradient-to-t from-white/95 dark:from-background/95 to-transparent" />
       </div>
     </section>
   );

@@ -399,7 +399,17 @@ function StudyPageInner() {
     : null;
 
   return (
-    <div className="h-full flex flex-col font-inter overflow-hidden">
+    <div
+      className="h-full flex flex-col font-inter overflow-hidden"
+      // Same brand-teal gradient the dashboard hero card and the /studies
+      // banners use (see app/dashboard/page.tsx and app/studies/page.tsx), so
+      // the app reads as one visual system here too - but at a fraction of
+      // the opacity, as a wash behind the panes rather than a filled card.
+      // BibleViewerSection/StudyMaterialsSection let it show through by
+      // sitting at bg-white/95 (dark:bg-background/95) instead of fully
+      // opaque, which keeps the bible text's contrast effectively untouched.
+      style={{ backgroundImage: 'linear-gradient(135deg, rgba(13,148,136,0.05) 0%, rgba(15,118,110,0.05) 100%)' }}
+    >
       {showCompletionOverlay && activeStudy && (
         <CompletionOverlay study={activeStudy} onClose={handleCloseOverlay} />
       )}
