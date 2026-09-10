@@ -35,7 +35,7 @@ export type LevensboomContextValue = {
   refresh: () => Promise<void>;
   applyXp: (grant: GrantResult | null | undefined) => void;
   dismissCelebration: () => Promise<void>;
-  setPrefs: (prefs: { reducedMotion?: boolean; disabled?: boolean }) => Promise<void>;
+  setPrefs: (prefs: { reducedMotion?: boolean; disabled?: boolean; timeOfDay?: string }) => Promise<void>;
   /** The studio's write. Optimistic; rolls back and reports the rule on a 403. */
   setAvatar: (patch: Partial<AvatarChoice>) => Promise<SaveResult>;
   /** Onboarding's "Planten": species plus the planted marker. */
@@ -236,7 +236,7 @@ export function LevensboomProvider({
   }, [celebrate, update]);
 
   const setPrefs = useCallback(
-    async (prefs: { reducedMotion?: boolean; disabled?: boolean }) => {
+    async (prefs: { reducedMotion?: boolean; disabled?: boolean; timeOfDay?: string }) => {
       update((current) => ({ ...current, levensboom: { ...current.levensboom, ...prefs } }));
       try {
         await fetch('/api/v1/gamification/seen', {

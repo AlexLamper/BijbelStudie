@@ -31,6 +31,7 @@ export type LevensboomPrefs = {
   lastSeenAt?: Date | null;
   reducedMotion?: boolean | null;
   disabled?: boolean | null;
+  timeOfDay?: string | null;
   species?: string | null;
   scene?: string | null;
   animal?: string | null;
@@ -54,6 +55,8 @@ export type LevensboomPayload = {
   nextTrait: { trait: TreeTrait; level: number; label: string } | null;
   reducedMotion: boolean;
   disabled: boolean;
+  /** 'auto' follows the device clock; any other value pins the scene's time of day. */
+  timeOfDay: 'auto' | 'dawn' | 'day' | 'dusk' | 'night';
   stage: Stage;
   /** What is stored. May name items the account is not entitled to right now. */
   chosen: AvatarChoice;
@@ -114,6 +117,9 @@ export function buildLevensboomPayload(input: {
     nextTrait: next ? { ...next, label: TRAIT_LABELS[next.trait] } : null,
     reducedMotion: Boolean(prefs?.reducedMotion),
     disabled: Boolean(prefs?.disabled),
+    timeOfDay: (['dawn', 'day', 'dusk', 'night'] as const).includes(prefs?.timeOfDay as 'dawn' | 'day' | 'dusk' | 'night')
+      ? (prefs!.timeOfDay as 'dawn' | 'day' | 'dusk' | 'night')
+      : 'auto',
     stage: stageForLevel(level),
     chosen,
     avatar: resolveAvatar(chosen, unlocked),

@@ -35,6 +35,10 @@ const UserSchema = new mongoose.Schema(
       lastSeenAt: { type: Date },
       reducedMotion: { type: Boolean, default: false },
       disabled: { type: Boolean, default: false },
+      // Display preference only (never a generator input): locks the scene's
+      // time-of-day instead of following the device clock. 'auto' keeps the
+      // existing clock-based behaviour.
+      timeOfDay: { type: String, enum: ['auto', 'dawn', 'day', 'dusk', 'night'], default: 'auto' },
       // The studio choice (LEVENSBOOM_AVATAR_PLAN.md). Ids from
       // lib/levensboom/catalog.ts; whether the account may *use* an id is
       // re-derived on every read, never stored, so a lapsed Pro item falls

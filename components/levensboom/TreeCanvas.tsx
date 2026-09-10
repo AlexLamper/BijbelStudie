@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { GROUND_Y, MIN_SCENE_HEIGHT, MIN_SCENE_WIDTH, TRUNK_X, type TreeScene } from '../../lib/levensboom/generate';
 import { cachedTree } from '../../lib/levensboom/sceneCache';
-import { mix, paletteForNow, type Palette } from '../../lib/levensboom/palette';
+import { mix, paletteForNow, type Palette, type TimeOfDay } from '../../lib/levensboom/palette';
 import { seededRng } from '../../lib/levensboom/rng';
 import { speciesParams, type LeafShape, type SpeciesId } from '../../lib/levensboom/species';
 import { sceneSpec, type SceneId } from '../../lib/levensboom/scenes';
@@ -62,6 +62,8 @@ export type TreeCanvasProps = {
   className?: string;
   /** Overrides the device clock. Only the level-up dialog uses this (night). */
   palette?: Palette;
+  /** Pins the scene's time of day instead of following the device clock. A display preference. */
+  timeOfDay?: TimeOfDay | 'auto' | null;
   /** Adds the rising column of light motes the level-up sequence calls for. */
   celebration?: boolean;
   /** Index of a fruit to swell with a soft bloom, when a level-up unlocked one. */
@@ -914,6 +916,7 @@ export default function TreeCanvas({
   still: stillProp = false,
   className,
   palette: paletteOverride,
+  timeOfDay = 'auto',
   celebration = false,
   bloomFruit = null,
   ariaLabel,
@@ -927,9 +930,10 @@ export default function TreeCanvas({
 
   // The device clock only ever touches colour, so it is read once per mount
   // rather than being threaded through the generator.
+  const fixedTimeOfDay = timeOfDay && timeOfDay !== 'auto' ? timeOfDay : null;
   const palette = useMemo(
-    () => paletteOverride ?? paletteForNow(health, new Date(), { scene: sceneId, species }),
-    [paletteOverride, health, sceneId, species],
+    () => paletteOverride ?? paletteForNow(health, new Date(), { scene: sceneId, species, timeOfDay: fixedTimeOfDay }),
+    [paletteOverride, health, sceneId, species, fixedTimeOfDay],
   );
 
   const decor = useMemo(() => buildDecor(seed), [seed]);

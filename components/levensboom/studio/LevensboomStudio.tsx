@@ -14,6 +14,13 @@ import { SkeletonPage } from '../../ui/skeletons';
 
 const TEAL = '#0D9488';
 
+const TIME_OF_DAY_OPTIONS: { id: 'auto' | 'dawn' | 'day' | 'dusk' | 'night'; label: string }[] = [
+  { id: 'auto', label: 'Automatisch' },
+  { id: 'day', label: 'Dag' },
+  { id: 'dusk', label: 'Avond' },
+  { id: 'night', label: 'Nacht' },
+];
+
 type Tab = ItemKind | 'groei';
 const TABS: { id: Tab; label: string }[] = [
   { id: 'species', label: 'Boomsoort' },
@@ -128,21 +135,46 @@ export default function LevensboomStudio() {
         <div className="min-w-0 flex-1">
           <h1 className="text-xl font-bold text-foreground">Mijn voortgang</h1>
           <p className="mt-0.5 truncate text-sm text-muted-foreground">
-            {tree.stage.name} · niveau {data.level}
+            Je boom groeit mee met wat je leest en leert — nu {tree.stage.name.toLowerCase()}, niveau {data.level}.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => void share()}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted"
-        >
-          <Link2 size={14} aria-hidden />
-          {copied ? 'Link gekopieerd' : 'Deel link'}
-        </button>
       </div>
 
       <div className="flex-1 overflow-y-auto">
         <div className="px-5 pb-12 lg:px-8">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card px-4 py-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-muted-foreground">Tijdstip</span>
+              <div className="inline-flex overflow-hidden rounded-lg border border-border" role="group" aria-label="Tijdstip van de boom">
+                {TIME_OF_DAY_OPTIONS.map((opt) => {
+                  const active = (tree.timeOfDay ?? 'auto') === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => void setPrefs({ timeOfDay: opt.id })}
+                      aria-pressed={active}
+                      className={`px-2.5 py-1.5 text-xs font-semibold transition-colors ${
+                        active ? 'text-white' : 'bg-card text-muted-foreground hover:bg-muted'
+                      }`}
+                      style={active ? { backgroundColor: TEAL } : undefined}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => void share()}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted"
+            >
+              <Link2 size={14} aria-hidden />
+              {copied ? 'Link gekopieerd' : 'Deel link'}
+            </button>
+          </div>
+
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1.25fr)_minmax(340px,0.75fr)] xl:grid-cols-[minmax(0,1.4fr)_minmax(400px,0.6fr)] lg:items-start">
             {/* The stage column: pinned while the tiles scroll. */}
             <div className="lg:sticky lg:top-0 lg:self-start">
@@ -171,6 +203,7 @@ export default function LevensboomStudio() {
                   reducedMotion={tree.reducedMotion}
                   wilting={tree.wilting}
                   daysSinceActive={tree.daysSinceActive}
+                  timeOfDay={tree.timeOfDay}
                   className="aspect-[16/10] w-full lg:aspect-auto lg:h-[min(62vh,640px)]"
                 />
               )}
@@ -203,7 +236,7 @@ export default function LevensboomStudio() {
             </div>
 
             {/* The picking column. */}
-            <div className="min-w-0">
+            <div className="mt-6 min-w-0 lg:mt-0">
               <div className="flex gap-1 overflow-x-auto border-b border-black/10 dark:border-white/10" role="tablist">
                 {TABS.map((t) => {
                   const active = tab === t.id;

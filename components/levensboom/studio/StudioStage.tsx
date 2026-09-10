@@ -25,6 +25,7 @@ export default function StudioStage({
   reducedMotion,
   wilting,
   daysSinceActive,
+  timeOfDay,
   className,
 }: {
   seed: string;
@@ -36,6 +37,8 @@ export default function StudioStage({
   reducedMotion: boolean;
   wilting: boolean;
   daysSinceActive: number;
+  /** 'auto' follows the device clock; anything else pins the scene's time of day. */
+  timeOfDay?: string;
   className?: string;
 }) {
   const ring = ringColors(avatar.ring);
@@ -62,6 +65,7 @@ export default function StudioStage({
           animal={avatar.animal}
           framing="scene"
           reducedMotion={reducedMotion}
+          timeOfDay={timeOfDay as 'auto' | 'dawn' | 'day' | 'dusk' | 'night' | undefined}
           className="absolute inset-0 block h-full w-full"
           ariaLabel={`Je boom: ${stage.name.toLowerCase()} op niveau ${level}`}
         />

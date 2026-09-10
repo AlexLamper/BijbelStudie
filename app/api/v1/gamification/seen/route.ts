@@ -30,6 +30,7 @@ export async function POST(req: Request) {
       level?: unknown;
       reducedMotion?: unknown;
       disabled?: unknown;
+      timeOfDay?: unknown;
     };
 
     await connectMongoDB();
@@ -58,6 +59,9 @@ export async function POST(req: Request) {
     if (typeof body.disabled === 'boolean') {
       update['levensboom.disabled'] = body.disabled;
     }
+    if (typeof body.timeOfDay === 'string' && ['auto', 'dawn', 'day', 'dusk', 'night'].includes(body.timeOfDay)) {
+      update['levensboom.timeOfDay'] = body.timeOfDay;
+    }
 
     if (Object.keys(update).length > 0) {
       // A targeted update, not `save()`: models/User.js documents at length why
@@ -73,6 +77,9 @@ export async function POST(req: Request) {
       disabled:
         (update['levensboom.disabled'] as boolean | undefined) ??
         Boolean(user.levensboom?.disabled),
+      timeOfDay:
+        (update['levensboom.timeOfDay'] as string | undefined) ??
+        (user.levensboom?.timeOfDay ?? 'auto'),
     });
   } catch (error) {
     return handleV1Error(error);

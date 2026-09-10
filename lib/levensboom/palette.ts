@@ -105,6 +105,8 @@ export function timeOfDayForHour(hour: number): TimeOfDay {
 export type PaletteOptions = {
   scene?: SceneId | string | null;
   species?: SpeciesId | string | null;
+  /** Pins the time of day instead of deriving it from the clock. Display only. */
+  timeOfDay?: TimeOfDay | null;
 };
 
 export function buildPalette(
@@ -172,5 +174,5 @@ export function buildPalette(
 
 /** The palette for "now" on whatever device is asking. */
 export function paletteForNow(health = 1, now: Date = new Date(), options: PaletteOptions = {}): Palette {
-  return buildPalette(seasonForMonth(now.getMonth()), timeOfDayForHour(now.getHours()), health, options);
+  return buildPalette(seasonForMonth(now.getMonth()), options.timeOfDay ?? timeOfDayForHour(now.getHours()), health, options);
 }
