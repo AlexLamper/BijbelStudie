@@ -22,6 +22,23 @@ export const STEP_ORDER = ['intro', 'word', 'depth', 'reflection', 'quiz'] as co
 
 export type StepKey = (typeof STEP_ORDER)[number];
 
+/**
+ * Dutch labels for each step.
+ *
+ * Here rather than beside the rail that renders them, because server code needs
+ * them too: lib/feedbackPrompts.ts builds the "which step do you skip" question
+ * out of these, and a prompt naming a step the flow does not have would be
+ * worse than no prompt. The rail re-exports them so its own importers are
+ * unaffected.
+ */
+export const STEP_LABELS: Record<StepKey, string> = {
+  intro: 'Intro',
+  word: 'Het Woord',
+  depth: 'Verdieping',
+  reflection: 'Reflectie',
+  quiz: 'Toetsing',
+};
+
 /** What a resume cursor can point at. `done` means the lesson is finished. */
 export type CursorStep = StepKey | 'done';
 

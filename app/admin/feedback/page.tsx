@@ -24,6 +24,16 @@ interface FeedbackRow {
   createdAt: string
 }
 
+/** One study/lesson row of view 2: where the prompted answers came from. */
+interface LessonRow {
+  studyId: string
+  lessonDay: number | null
+  total: number
+  prompts: Record<string, number>
+  choices: Record<string, number>
+  lastAt: string
+}
+
 interface FeedbackResponse {
   feedback: FeedbackRow[]
   total: number
@@ -71,6 +81,13 @@ export default function AdminFeedbackPage() {
   const [categoryFilter, setCategoryFilter] = useState("")
   const [touchpointFilter, setTouchpointFilter] = useState("")
   const [pendingId, setPendingId] = useState<string | null>(null)
+  /**
+   * View 2: the same answers grouped per lesson. The list says what people
+   * wrote; this says where. Loaded once, not per filter - it is a rollup of
+   * everything, and re-running an aggregation on every dropdown change would
+   * spend CPU to show the same numbers.
+   */
+  const [lessonRows, setLessonRows] = useState<LessonRow[]>([])
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -99,6 +116,15 @@ export default function AdminFeedbackPage() {
   useEffect(() => {
     void load()
   }, [load])
+
+  useEffect(() => {
+    fetch("/api/admin/feedback/by-lesson", { cache: "no-store", credentials: "include" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (Array.isArray(data?.rows)) setLessonRows(data.rows)
+      })
+      .catch(() => {})
+  }, [])
 
   const setStatus = useCallback(async (id: string, status: string) => {
     setPendingId(id)
@@ -186,6 +212,52 @@ export default function AdminFeedbackPage() {
       </div>
 
       <div className="flex-1 overflow-y-auto px-6 xl:px-10 py-6">
+        {lessonRows.length > 0 && (
+          <section className="mb-6 rounded-xl border border-border bg-white dark:bg-card">
+            <div className="border-b border-border px-4 py-3">
+              <h2 className="text-sm font-bold text-foreground">Per les</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Waar de antwoorden vandaan komen. Veel &quot;nee&quot; op &quot;ging deze quiz over wat
+                je net gelezen had&quot; betekent dat de quizkoppeling van die les niet klopt.
+              </p>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="text-left text-muted-foreground">
+                    <th className="px-4 py-2 font-semibold">Studie</th>
+                    <th className="px-4 py-2 font-semibold">Les</th>
+                    <th className="px-4 py-2 font-semibold tabular-nums">Antwoorden</th>
+                    <th className="px-4 py-2 font-semibold">Vragen</th>
+                    <th className="px-4 py-2 font-semibold">Keuzes</th>
+                    <th className="px-4 py-2 font-semibold">Laatste</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {lessonRows.map((row) => (
+                    <tr key={`${row.studyId}-${row.lessonDay ?? "x"}`} className="border-t border-border">
+                      <td className="px-4 py-2 font-medium text-foreground">{row.studyId}</td>
+                      <td className="px-4 py-2 tabular-nums text-foreground">{row.lessonDay ?? "-"}</td>
+                      <td className="px-4 py-2 tabular-nums text-foreground">{row.total}</td>
+                      <td className="px-4 py-2 text-muted-foreground">
+                        {Object.entries(row.prompts)
+                          .map(([id, n]) => `${id} (${n})`)
+                          .join(", ")}
+                      </td>
+                      <td className="px-4 py-2 text-muted-foreground">
+                        {Object.entries(row.choices)
+                          .map(([key, n]) => `${key} (${n})`)
+                          .join(", ") || "-"}
+                      </td>
+                      <td className="px-4 py-2 text-muted-foreground">{formatDate(row.lastAt)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
+
         {error && (
           <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300 mb-4">
             {error}

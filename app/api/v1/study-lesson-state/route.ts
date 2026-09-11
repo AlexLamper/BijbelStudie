@@ -20,6 +20,8 @@ import {
 } from '../../../../lib/studyEnrollmentService';
 import { promoteReflectionToNote, recordLessonCompletion } from '../../../../lib/studyCompletion';
 import { upsertLessonState } from '../../../../lib/lessonStateWrite';
+import { nextPrompt } from '../../../../lib/feedbackService';
+import type { SerialisedPrompt } from '../../../../lib/feedbackPrompts';
 
 export const dynamic = 'force-dynamic';
 
@@ -185,6 +187,7 @@ export async function PATCH(req: Request) {
 
     let completion: Awaited<ReturnType<typeof recordLessonCompletion>> | null = null;
     let noteId: string | null = null;
+    let feedbackPrompt: SerialisedPrompt | null = null;
 
     if (body.complete === true) {
       const content = getLessonContent(studyId, lessonDay);
@@ -280,6 +283,36 @@ export async function PATCH(req: Request) {
         }
       }
 
+      /**
+       * One short question, on the screen best placed to ask it.
+       *
+       * It rides along on this response rather than costing the reward screen
+       * a round trip of its own (FEEDBACK_PLAN.md section 4.4). Conditions,
+       * narrowest first:
+       *
+       * - the completion was actually recorded, so a repeat finish never asks
+       * - lesson 2 or lesson 7, never lesson 1 (the honeymoon answer is
+       *   worthless and the first reward screen must be clean) and never the
+       *   last lesson (that screen is a celebration)
+       * - the reader is inside the fatigue budget and the sampling bucket,
+       *   which is what `nextPrompt` decides
+       *
+       * It never throws outward: a question is the most optional thing on this
+       * screen, and the reader keeps what they earned regardless.
+       */
+      const askable = completion.recorded && !completion.studyCompleted;
+      if (askable && (lessonDay === 2 || lessonDay === 7)) {
+        try {
+          feedbackPrompt = await nextPrompt({
+            userId: auth.id,
+            touchpoint: 'study_lesson_complete',
+            context: { studyId, lessonDay },
+          });
+        } catch (error) {
+          console.error('[study-lesson-state] feedback prompt failed:', error);
+        }
+      }
+
       // Same reasoning: the enrollment cursor is derived state. It recounts the
       // ledger every time it runs, so a skipped sync is repaired by the next
       // lesson - whereas a throw here would hand the reader an error for a
@@ -322,6 +355,7 @@ export async function PATCH(req: Request) {
             nextLessonDay: nextLessonDay(study, lessonDay),
           }
         : null,
+      feedbackPrompt,
     });
   } catch (error) {
     return handleV1Error(error);

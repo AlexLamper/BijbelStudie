@@ -6,6 +6,8 @@ import { X } from 'lucide-react';
 
 import { FOCUS_RING, INK, INK_MUTED, PANEL_SOLID, scrim } from './lesson-layout';
 import { TEAL_DEEP } from '../../scene/tokens';
+import PromptCard from '../../feedback/PromptCard';
+import type { SerialisedPrompt } from '../../../lib/feedbackPrompts';
 
 /**
  * Confirmation before leaving a lesson mid-step.
@@ -23,9 +25,28 @@ import { TEAL_DEEP } from '../../scene/tokens';
  * plain buttons, not links, so they are never caught here: moving around inside
  * the study is not "leaving".
  */
-export default function StudyExitGuard({ enabled }: { enabled: boolean }) {
+export default function StudyExitGuard({
+  enabled,
+  studyId,
+  lessonDay,
+  guest = false,
+}: {
+  enabled: boolean;
+  studyId?: string;
+  lessonDay?: number;
+  /** A guest has no account to attribute an answer to, so P1 is not offered. */
+  guest?: boolean;
+}) {
   const router = useRouter();
   const [pending, setPending] = useState<string | null>(null);
+  /**
+   * P1 - "waarom stop je hier?", optional, inside the dialog the reader has
+   * already opened (FEEDBACK_PLAN.md section 3.4). Requested only when the
+   * dialog actually opens, never on mount: a reader who finishes the lesson
+   * normally must not cost a request for a question they will never see.
+   */
+  const [exitPrompt, setExitPrompt] = useState<SerialisedPrompt | null>(null);
+  const askedRef = useRef(false);
   // Set just before we navigate on the reader's behalf, so our own push does
   // not trip the click handler again.
   const bypassRef = useRef(false);
@@ -33,6 +54,21 @@ export default function StudyExitGuard({ enabled }: { enabled: boolean }) {
   enabledRef.current = enabled;
 
   const currentPath = () => window.location.pathname;
+
+  // Asked once, when the reader has decided to leave.
+  useEffect(() => {
+    if (guest || !pending || askedRef.current) return;
+    askedRef.current = true;
+    const params = new URLSearchParams({ touchpoint: 'study_abandoned' });
+    if (studyId) params.set('studyId', studyId);
+    if (lessonDay != null) params.set('day', String(lessonDay));
+    fetch(`/api/feedback/next?${params.toString()}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.prompt) setExitPrompt(data.prompt as SerialisedPrompt);
+      })
+      .catch(() => {});
+  }, [guest, pending, studyId, lessonDay]);
 
   // --- In-app link clicks ------------------------------------------------
   useEffect(() => {
@@ -166,6 +202,15 @@ export default function StudyExitGuard({ enabled }: { enabled: boolean }) {
             <X size={16} />
           </button>
         </div>
+
+        {exitPrompt && (
+          <div className="px-5 sm:px-6">
+            <PromptCard
+              prompt={exitPrompt}
+              context={{ studyId: studyId ?? null, lessonDay: lessonDay ?? null, path: '/studie' }}
+            />
+          </div>
+        )}
 
         <div className="flex flex-col-reverse sm:flex-row gap-2 sm:justify-end px-5 sm:px-6 pb-5 sm:pb-6">
           <button

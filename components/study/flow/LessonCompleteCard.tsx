@@ -8,6 +8,8 @@ import { badgeDescription, badgeLabel } from '../../../lib/badgeCatalog';
 import LessonTreeMoment from '../../levensboom/LessonTreeMoment';
 import { INK, INK_FAINT, INK_MUTED, SURFACE } from './lesson-layout';
 import { TEAL, TEAL_DEEP, TEAL_ON_DARK } from '../../scene/tokens';
+import PromptCard from '../../feedback/PromptCard';
+import type { SerialisedPrompt } from '../../../lib/feedbackPrompts';
 
 /**
  * The reward palette, in the roles components/scene/tokens.ts defines.
@@ -267,6 +269,7 @@ export default function LessonCompleteCard({
   onContinue,
   guest = false,
   lessonHref,
+  feedbackPrompt,
 }: {
   studyId: string;
   studyTitle: string;
@@ -289,6 +292,12 @@ export default function LessonCompleteCard({
   guest?: boolean;
   /** This lesson's URL, carried as `next` so signing in lands back here. */
   lessonHref?: string;
+  /**
+   * One short question, decided server-side and carried on the completion
+   * response (app/api/v1/study-lesson-state). Null on all but a small
+   * fraction of completions - see lib/feedbackEligibility.ts.
+   */
+  feedbackPrompt?: SerialisedPrompt | null;
 }) {
   const reduceMotion = useReducedMotion();
 
@@ -325,6 +334,7 @@ export default function LessonCompleteCard({
       nextLesson={nextLesson}
       onContinue={onContinue}
       reduceMotion={!!reduceMotion}
+      feedbackPrompt={feedbackPrompt ?? null}
     />
   );
 }
@@ -457,6 +467,7 @@ function SignedInCompletion({
   nextLesson,
   onContinue,
   reduceMotion,
+  feedbackPrompt,
 }: {
   studyId: string;
   studyTitle: string;
@@ -472,6 +483,7 @@ function SignedInCompletion({
   nextLesson: NextLessonPreview | null;
   onContinue: () => void;
   reduceMotion: boolean;
+  feedbackPrompt: SerialisedPrompt | null;
 }) {
   const finished = summary.studyCompleted;
   // One accent, in its three roles: the ring stroke carries no type, the solid
@@ -593,6 +605,17 @@ function SignedInCompletion({
               </span>
             </span>
           </div>
+        )}
+
+        {/* The one short question, when there is one. Below the reward and the
+            "Hierna" card, above the CTA row, so "Verder met les N" stays the
+            dominant element - the reader must always be able to leave without
+            touching this. See FEEDBACK_PLAN.md section 3.1. */}
+        {feedbackPrompt && (
+          <PromptCard
+            prompt={feedbackPrompt}
+            context={{ studyId, lessonDay, path: `/studie/${studyId}/${lessonDay}` }}
+          />
         )}
 
         <div className="mt-4 flex flex-col sm:flex-row gap-2">

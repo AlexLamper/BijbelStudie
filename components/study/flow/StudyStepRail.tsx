@@ -5,16 +5,11 @@ import { Check } from 'lucide-react';
 
 import { TEAL, TEAL_ON_DARK } from '../../scene/tokens';
 import { FOCUS_RING, INK_FAINT, RULE } from './lesson-layout';
-import type { StepKey } from '../../../lib/studyFlow';
+import { STEP_LABELS, type StepKey } from '../../../lib/studyFlow';
 
-/** Dutch labels for each step. */
-export const STEP_LABELS: Record<StepKey, string> = {
-  intro: 'Intro',
-  word: 'Het Woord',
-  depth: 'Verdieping',
-  reflection: 'Reflectie',
-  quiz: 'Toetsing',
-};
+// The labels moved to lib/studyFlow.ts so server code can read them too; they
+// are re-exported here because this is where the rest of the flow imports them.
+export { STEP_LABELS };
 
 /**
  * Where you are in the lesson, in the two shapes this screen needs.

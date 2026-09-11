@@ -28,6 +28,7 @@ import StepDepth from './StepDepth';
 import StepReflection from './StepReflection';
 import StepQuiz from './StepQuiz';
 import LessonCompleteCard, { type CompletionSummary } from './LessonCompleteCard';
+import type { SerialisedPrompt } from '../../../lib/feedbackPrompts';
 import { useLevensboom } from '../../../hooks/useLevensboom';
 import AiDock from './AiDock';
 import StudyExitGuard from './StudyExitGuard';
@@ -204,6 +205,14 @@ export default function StudyFlowShell({
   const [quizScore, setQuizScore] = useState<number | null>(initialState.quiz.score);
   const [quizTotal, setQuizTotal] = useState<number | null>(initialState.quiz.total);
   const [summary, setSummary] = useState<CompletionSummary | null>(null);
+  /**
+   * The one short question the server decided to ask on this completion, if
+   * any. It arrives with the completion response rather than being fetched, so
+   * the reward screen costs no extra round trip - see FEEDBACK_PLAN.md 4.4.
+   * Null for a guest (there is nobody to ask) and on all but a small fraction
+   * of completions.
+   */
+  const [feedbackPrompt, setFeedbackPrompt] = useState<SerialisedPrompt | null>(null);
   // The Levensboom applies the grant at once, so the navbar and the tree on
   // the completion card move without waiting for a refetch.
   const { applyXp } = useLevensboom();
@@ -534,6 +543,7 @@ export default function StudyFlowShell({
       noteId: completion?.noteId ?? null,
       nextLessonDay: completion?.nextLessonDay ?? lesson.nextLessonDay,
     });
+    setFeedbackPrompt((data?.feedbackPrompt as SerialisedPrompt | undefined) ?? null);
   }, [steps, step, patch, guest, lesson.nextLessonDay, swipeSound, reduceMotion, applyXp]);
 
   const onPrevious = useCallback(() => {
@@ -721,6 +731,7 @@ export default function StudyFlowShell({
         quizTotal={quizTotal}
         guest={guest}
         lessonHref={`/studie/${lesson.study.id}/${lesson.lesson.day}`}
+        feedbackPrompt={feedbackPrompt}
         nextLesson={
           next ? { day: next.day, title: next.title, reference: next.reference } : null
         }
@@ -750,7 +761,12 @@ export default function StudyFlowShell({
     <div className="relative h-full flex flex-col" style={{ backgroundColor: SCENE_BG }}>
       {/* Asks before an in-app link, a refresh or the Back button pulls the
           reader out of a lesson they are partway through. */}
-      <StudyExitGuard enabled={!finishing} />
+      <StudyExitGuard
+        enabled={!finishing}
+        studyId={lesson.study.id}
+        lessonDay={lesson.lesson.day}
+        guest={guest}
+      />
 
       {/* `relative` is the navigator panel's anchor - centred on the header, which
           is the window, rather than on the flexible middle column between two

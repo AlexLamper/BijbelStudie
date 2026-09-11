@@ -120,6 +120,102 @@ export async function adminFeedbackPayload(filters: AdminFeedbackFilters): Promi
   };
 }
 
+/**
+ * View 2 of the read-out (FEEDBACK_PLAN.md section 4.7): the prompted answers,
+ * rolled up per study and lesson.
+ *
+ * The list view answers "what did people say"; this answers "where". A lesson
+ * with four "minst duidelijk" answers is a lesson to rewrite, and a lesson with
+ * a run of "nee" on the quiz-match question has the wrong quiz slugs in
+ * lib/data/study-lessons - which is a five-minute fix that is invisible in a
+ * flat list.
+ *
+ * One aggregation, grouped in Mongo rather than in Node: the collection is
+ * small today but this is the query that grows with every answer, and Active
+ * CPU on Vercel is a standing constraint.
+ */
+export type AdminFeedbackByLesson = {
+  status: number;
+  body:
+    | { error: string }
+    | {
+        rows: {
+          studyId: string;
+          lessonDay: number | null;
+          total: number;
+          /** Answer counts per prompt, e.g. { t2b_quiz_match: 3 }. */
+          prompts: Record<string, number>;
+          /** For a choice question, how the options fell, e.g. { nee: 2 }. */
+          choices: Record<string, number>;
+          lastAt: string;
+        }[];
+      };
+};
+
+export async function adminFeedbackByLesson(limit?: string | null): Promise<AdminFeedbackByLesson> {
+  const cap = Math.min(Math.max(Number(limit) || 100, 1), 500);
+  await connectMongoDB();
+
+  const rows = await Feedback.aggregate<{
+    _id: { studyId: string | null; lessonDay: number | null };
+    total: number;
+    prompts: string[];
+    choices: string[];
+    lastAt: Date;
+  }>([
+    { $match: { touchpoint: { $ne: "unprompted" }, "context.studyId": { $ne: null } } },
+    {
+      $group: {
+        _id: { studyId: "$context.studyId", lessonDay: "$context.lessonDay" },
+        total: { $sum: 1 },
+        prompts: { $push: "$promptId" },
+        // Only the chosen option, never the free text: this rollup is counts,
+        // and the words themselves are read one at a time in the list view.
+        choices: {
+          $push: {
+            $let: {
+              vars: {
+                keuze: {
+                  $first: {
+                    $filter: { input: { $ifNull: ["$answers", []] }, cond: { $eq: ["$$this.key", "keuze"] } },
+                  },
+                },
+              },
+              in: "$$keuze.value",
+            },
+          },
+        },
+        lastAt: { $max: "$createdAt" },
+      },
+    },
+    { $sort: { total: -1, lastAt: -1 } },
+    { $limit: cap },
+  ]);
+
+  const tally = (values: (string | null | undefined)[]) => {
+    const out: Record<string, number> = {};
+    for (const value of values) {
+      if (!value) continue;
+      out[value] = (out[value] ?? 0) + 1;
+    }
+    return out;
+  };
+
+  return {
+    status: 200,
+    body: {
+      rows: rows.map((row) => ({
+        studyId: row._id.studyId ?? "onbekend",
+        lessonDay: row._id.lessonDay ?? null,
+        total: row.total,
+        prompts: tally(row.prompts),
+        choices: tally(row.choices),
+        lastAt: row.lastAt ? new Date(row.lastAt).toISOString() : "",
+      })),
+    },
+  };
+}
+
 export async function adminFeedbackUpdateStatus(id: string, status: string): Promise<{ status: number; body: { ok: true } | { error: string } }> {
   if (!(STATUSES as readonly string[]).includes(status)) {
     return { status: 400, body: { error: "Ongeldige status" } };

@@ -13,6 +13,8 @@ import LessonLayout, {
   SURFACE,
 } from './lesson-layout';
 import { EYEBROW, TEAL, TEAL_DEEP, TEAL_ON_DARK } from '../../scene/tokens';
+import PromptCard from '../../feedback/PromptCard';
+import type { SerialisedPrompt } from '../../../lib/feedbackPrompts';
 
 /**
  * Wrong, on the night ground.
@@ -164,6 +166,18 @@ export default function StepQuiz({
    */
   const [finishedEarlier, setFinishedEarlier] = useState(false);
 
+  /**
+   * T2b - one question after the quiz, asked at most once and only when the
+   * fatigue budget allows it (FEEDBACK_PLAN.md 3.2). "Ging deze quiz over wat
+   * je net gelezen had?" is the reader's-side check on the passage matching in
+   * lib/data/study-lessons: a run of "Nee" on one lesson means that lesson's
+   * quiz slugs are wrong, which is a five-minute fix nobody would otherwise
+   * find. Requested only once the reader has walked the whole review, because
+   * asking before they have seen the questions asks them to guess.
+   */
+  const [quizPrompt, setQuizPrompt] = useState<SerialisedPrompt | null>(null);
+  const [quizPromptAsked, setQuizPromptAsked] = useState(false);
+
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(1);
   /** Set between picking an answer and the card moving on, to freeze the card. */
@@ -262,6 +276,23 @@ export default function StepQuiz({
     },
     [questions, studyId, lessonDay, onAnswered],
   );
+
+  // Asked once the reader has reached the end of the review, and only for a
+  // signed-in reader: there is nobody to attribute a guest's answer to, and
+  // /api/feedback/next would answer 401.
+  useEffect(() => {
+    if (guest || quizPromptAsked) return;
+    if (!graded || !questions || index < questions.length - 1) return;
+    setQuizPromptAsked(true);
+    fetch(
+      `/api/feedback/next?touchpoint=quiz_complete&studyId=${encodeURIComponent(studyId)}&day=${lessonDay}&path=/studie`,
+    )
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.prompt) setQuizPrompt(data.prompt as SerialisedPrompt);
+      })
+      .catch(() => {});
+  }, [guest, quizPromptAsked, graded, questions, index, studyId, lessonDay]);
 
   /**
    * Pick an answer, then move on by itself.
@@ -390,6 +421,7 @@ export default function StepQuiz({
   const result = gradedById.get(question.id);
   const picked = chosen[question.id];
   const reviewing = !!graded || finishedEarlier;
+
   const variants = reduceMotion ? calmVariants : cardVariants;
 
   return (
@@ -629,6 +661,13 @@ export default function StepQuiz({
             </button>
           )}
         </div>
+
+        {quizPrompt && (
+          <PromptCard
+            prompt={quizPrompt}
+            context={{ studyId, lessonDay, stepKey: 'quiz', path: `/studie/${studyId}/${lessonDay}` }}
+          />
+        )}
 
         {reviewing && (
           <p className={`mt-4 text-[13px] ${INK_MUTED}`}>
