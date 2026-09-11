@@ -175,6 +175,8 @@ export const CLICK_TARGETS = [
   'sidebar_instellingen',
   'sidebar_feedback',
   'sidebar_pro_cta',
+  /** Leaves the web app for the iPhone app - see lib/appStore.ts. */
+  'sidebar_appstore',
   // Studies
   'study_card',
   'study_start',

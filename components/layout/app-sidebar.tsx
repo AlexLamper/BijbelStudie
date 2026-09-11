@@ -12,7 +12,7 @@ import {
 import {
   LayoutDashboard, BookOpen, BookMarked,
   StickyNote, User, Settings, Sparkles, ShieldCheck,
-  ArrowRight, Check, MessageSquareText,
+  ArrowRight, ArrowUpRight, Check, MessageSquareText,
 } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
@@ -24,6 +24,7 @@ import React, { useEffect, useState } from "react"
 // lib/levensboom/palette.ts) - reused here so "Studie" in the wordmark reads
 // as the same brand green everywhere, not a second invented shade.
 const LOGO_GREEN = "#0F766E"
+import { APP_STORE_URL } from "../../lib/appStore"
 import { useStudyStyle } from "../providers/study-style-provider"
 import { ProBadge } from "../ui/ProBadge"
 
@@ -228,10 +229,38 @@ export function StudyRail() {
           <ul className="m-0 p-0 flex flex-col gap-0.5">
             {bottomNav.map(item => <RailLink key={item.url} {...item} />)}
           </ul>
+          <AppStoreLink />
           {!session && <GuestAccountCard compact />}
         </div>
       </nav>
     </div>
+  )
+}
+
+/**
+ * The one place the web app points at the iPhone app.
+ *
+ * Text, no decorative icon: the Apple mark would be the only logo in a rail of
+ * function icons, and the words already say what it is. It sits under the
+ * footer nav rather than in it, because it leaves the product instead of
+ * navigating inside it.
+ *
+ * `data-track` is read by the delegated listener in
+ * components/providers/AnalyticsTracker.tsx; `sidebar_appstore` is registered
+ * in lib/analyticsRoutes.ts, without which the click is dropped.
+ */
+function AppStoreLink() {
+  return (
+    <a
+      href={APP_STORE_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      data-track="sidebar_appstore"
+      className="mt-2 flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[11.5px] font-medium leading-snug text-gray-500 no-underline transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-muted-foreground dark:hover:bg-secondary dark:hover:text-foreground"
+    >
+      Ook als iPhone-app
+      <ArrowUpRight className="h-3 w-3 flex-shrink-0" aria-hidden />
+    </a>
   )
 }
 
@@ -418,6 +447,7 @@ export function AppSidebar({ ...props }) {
         <ul className="m-0 p-0 flex flex-col gap-0.5">
           {bottomNav.map(item => <NavLink key={item.url} {...item} />)}
         </ul>
+        <AppStoreLink />
       </SidebarFooter>
 
       <SidebarRail />

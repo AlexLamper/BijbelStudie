@@ -7,6 +7,7 @@ import { ScrollEffects } from "./ScrollEffects"
 import { LandingSeenMarker } from "./LandingSeenMarker"
 import { StudyDiscovery } from "./StudyDiscovery"
 import { HOME_FAQS } from "../../lib/content/homeFaq"
+import { APP_STORE_URL } from "../../lib/appStore"
 import { opstandingLessons } from "../../lib/data/study-lessons/opstanding"
 import { ALL_STUDIES } from "../../lib/bookStudies"
 import { PLANS, euro } from "../../lib/pricing"
@@ -204,9 +205,6 @@ function Navbar() {
     </header>
   )
 }
-
-/** Live on the App Store since August 2026. */
-const APP_STORE_URL = "https://apps.apple.com/us/app/bijbelstudie-lees-leer/id6800668187"
 
 /** Apple's mark. Inlined rather than an <img>: it is one path and must stay crisp. */
 function AppleLogo({ className }: { className?: string }) {

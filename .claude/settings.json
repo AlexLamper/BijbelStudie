@@ -21,7 +21,13 @@
       "Read(scripts/*.mybible)",
       "Read(.env)",
       "Read(.env.local)",
-      "Read(.env.local.bak-prestripe)"
+      "Read(.env.local.bak-prestripe)",
+      "Read(.env.production)",
+      "Read(.env.production.local)",
+      "Bash(git push*)",
+      "Bash(mongosh*)",
+      "Bash(npm run dev*)",
+      "Bash(next dev*)"
     ]
   }
 }
