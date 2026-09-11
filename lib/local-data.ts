@@ -1,4 +1,4 @@
-import { getBookNameVariants, getBookNameFromNumber, CANONICAL_NL, BIBLE_BOOKS_ORDER, normalizeBookName } from './book-mapping';
+import { getBookNameVariants, getBookNameFromNumber, BIBLE_BOOKS_ORDER, normalizeBookName } from './book-mapping';
 import { headers } from 'next/headers';
 
 // Interfaces
@@ -316,10 +316,6 @@ export async function getBooks(version: string) {
             return a.localeCompare(b);
         });
 
-         // Translate to Dutch if version is HSV
-        if (version.toLowerCase() === 'hsv') {
-            return books.map(book => CANONICAL_NL[book] || book);
-        }
         return books;
     }
 
@@ -377,11 +373,6 @@ export async function getBooks(version: string) {
         if (bIndex !== -1) return 1;
         return a.localeCompare(b);
     });
-
-    // Translate to Dutch if version is HSV
-    if (version.toLowerCase() === 'hsv') {
-        return books.map(book => CANONICAL_NL[book] || book);
-    }
 
     return books;
 }

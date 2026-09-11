@@ -90,6 +90,34 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  experimental: {
+    // Icon and primitive barrels: an `import { X } from "lucide-react"` pulls
+    // the whole barrel into the module graph, which is thousands of modules
+    // per route in dev and a bigger client chunk in production. This rewrites
+    // each named import to its own deep import at build time. Next already
+    // does this for a handful of well-known packages; these are the ones this
+    // app uses that are not on that list, plus the two that are, so the set is
+    // explicit and survives a Next upgrade.
+    optimizePackageImports: [
+      "lucide-react",
+      "react-icons",
+      "framer-motion",
+      "@radix-ui/react-accordion",
+      "@radix-ui/react-avatar",
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-dropdown-menu",
+      "@radix-ui/react-label",
+      "@radix-ui/react-progress",
+      "@radix-ui/react-scroll-area",
+      "@radix-ui/react-select",
+      "@radix-ui/react-separator",
+      "@radix-ui/react-slot",
+      "@radix-ui/react-switch",
+      "@radix-ui/react-tabs",
+      "@radix-ui/react-toast",
+      "@radix-ui/react-tooltip",
+    ],
+  },
   images: {
     // AVIF first, WebP as fallback. Images are the largest LCP element on the
     // landing page and the study cards.

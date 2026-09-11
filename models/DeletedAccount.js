@@ -10,8 +10,12 @@ import mongoose from "mongoose";
  * copy. Both delete paths (lib/adminUsers.ts and app/api/v1/account) call
  * lib/accountArchive.ts first and refuse to delete when archiving fails.
  *
- * Restore with `node scripts/recover-account.mjs`. Rows are meant to be kept
- * for at least 30 days; there is no automatic purge yet, on purpose.
+ * Restore with `node scripts/recover-account.mjs`. Rows are kept for 90 days
+ * (the retention the privacy policy promises) and removed by
+ * `node scripts/purge-deleted-accounts.mjs`, which is read-only unless
+ * --write. There is deliberately no TTL index: MongoDB would drop these
+ * copies unattended, and an archive row is the only thing standing between a
+ * wrong deletion and permanent data loss.
  */
 const DeletedAccountSchema = new mongoose.Schema(
   {

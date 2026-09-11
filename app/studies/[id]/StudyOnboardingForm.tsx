@@ -241,7 +241,7 @@ export default function StudySetupProvider({
       });
 
       if (res.status === 401) {
-        router.push(`/inloggen?callbackUrl=${encodeURIComponent(`/studies/${studyId}`)}`);
+        router.push(`/inloggen?next=${encodeURIComponent(`/studies/${studyId}`)}`);
         return;
       }
       if (!res.ok) {
