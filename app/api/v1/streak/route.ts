@@ -3,17 +3,12 @@ import { corsPreflight, handleV1Error, jsonV1 } from '../../../../lib/apiV1';
 import connectMongoDB from '../../../../lib/mongodb';
 import User from '../../../../models/User';
 import { grantXp } from '../../../../lib/gamification';
+import { advanceStreak, startOfDay } from '../../../../lib/streak';
 
 export const dynamic = 'force-dynamic';
 
 export async function OPTIONS() {
   return corsPreflight();
-}
-
-function startOfDay(date: Date) {
-  const d = new Date(date);
-  d.setHours(0, 0, 0, 0);
-  return d;
 }
 
 export async function GET(req: Request) {
@@ -44,58 +39,49 @@ export async function POST(req: Request) {
     const user = await User.findById(auth.id);
     if (!user) return jsonV1({ error: 'NOT_FOUND' }, { status: 404 });
 
-    const today = startOfDay(new Date());
-    const last = user.lastStreakDate ? startOfDay(user.lastStreakDate) : null;
-
-    let newStreak = user.streak ?? 0;
-    let newFreezes = user.freezeCount ?? 0;
-    let newDate = user.lastStreakDate;
+    const move = advanceStreak(
+      {
+        streak: user.streak,
+        freezeCount: user.freezeCount,
+        lastStreakDate: user.lastStreakDate,
+      },
+      { isPro: auth.isPro },
+    );
     const newBadges = [...(user.badges ?? [])];
 
-    if (!last || today.getTime() !== last.getTime()) {
-      const gapDays = last ? (today.getTime() - last.getTime()) / 86400000 : null;
-
-      if (gapDays === 1) {
-        newStreak += 1;
-      } else if (gapDays !== null && gapDays > 1) {
-        if (newFreezes > 0 && auth.isPro) {
-          newFreezes -= 1;
-        } else {
-          newStreak = 1;
-        }
-      } else {
-        newStreak = 1;
-      }
-
-      if (newStreak % 5 === 0) newFreezes += 1;
-      newDate = today;
+    const set: Record<string, unknown> = {
+      streak: move.streak,
+      freezeCount: move.freezeCount,
+      lastStreakDate: move.lastStreakDate,
+    };
+    // What the reader lost, kept for the return-visit prompt. Only the break
+    // itself writes it, so a later read cannot overwrite the number with 1.
+    if (move.brokenFrom !== null) {
+      set.lostStreak = move.brokenFrom;
+      set.lostStreakAt = startOfDay(new Date());
     }
-
-    const advanced = String(newDate) !== String(user.lastStreakDate);
 
     const updated = await User.findByIdAndUpdate(
       user._id,
       {
-        $set: {
-          streak: newStreak,
-          freezeCount: newFreezes,
-          lastStreakDate: newDate,
-        },
+        $set: set,
         // The record the streak-gated Levensboom items read: it only ever grows.
-        $max: { longestStreak: newStreak },
+        $max: { longestStreak: move.streak },
       },
       { new: true },
     );
 
     // Badge evaluation moved to lib/gamification.ts so both streak routes and
     // every other XP source agree on what has been earned.
-    const xp = advanced ? await grantXp(auth.id, 'streak_day', { isPro: auth.isPro }) : null;
+    const xp = move.advanced ? await grantXp(auth.id, 'streak_day', { isPro: auth.isPro }) : null;
 
     return jsonV1({
       streak: updated.streak,
       freezes: updated.freezeCount,
       badges: xp ? [...new Set([...newBadges, ...xp.newBadges])] : (updated.badges ?? []),
       xp,
+      brokenFrom: move.brokenFrom,
+      freezeUsed: move.freezeUsed,
     });
   } catch (error) {
     return handleV1Error(error);

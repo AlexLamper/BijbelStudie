@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react"
 import { useSession } from "next-auth/react"
 import { CHAPTER_COUNTS } from "../lib/data/bible-chapter-counts"
 import type { DailyVerse } from "../components/dashboard/DailyVerseCard"
+import { pendingStreakLoss, type StreakLoss } from "../lib/streak"
 
 /**
  * Everything the dashboard shows, fetched once and derived in one place.
@@ -57,6 +58,7 @@ export interface RecentNote {
 /** Lessons, studies and plans, from the same gamification call that carries the level. */
 export interface StudyCounts { lessonsCompleted: number; studiesCompleted: number; plansActive: number }
 export type { DailyVerse }
+export type { StreakLoss }
 
 export const EMPTY_WEEK: WeekDay[] = ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"].map(label => ({
   label, count: 0, heightPct: 0, isToday: false,
@@ -99,6 +101,17 @@ export function useDashboardData() {
   const [verse, setVerse] = useState<DailyVerse | null>(null)
   const [streak, setStreak] = useState(0)
   const [lastStreakDate, setLastStreakDate] = useState<string | null>(null)
+  /**
+   * A run that ended, once, if it ended recently and was worth mourning.
+   *
+   * Announced in the line under the greeting rather than in a card or a dialog:
+   * a reader who has just lost a fourteen-day streak does not need a second
+   * screen about it, they need the one sentence that says a new run starts with
+   * one chapter. Posting /api/v1/streak/seen right away is what keeps it to
+   * once - the marker lives on the account, so the phone does not get its own
+   * turn at the same bad news.
+   */
+  const [streakLoss, setStreakLoss] = useState<StreakLoss | null>(null)
   const [loading, setLoading] = useState(true)
   const [verseLoading, setVerseLoading] = useState(true)
   const [notesCount, setNotesCount] = useState(0)
@@ -153,6 +166,12 @@ export function useDashboardData() {
       .then(([ud, ld, nd, rp, gd]) => {
         setStreak(ud?.user?.streak ?? 0)
         setLastStreakDate(ud?.user?.lastStreakDate ?? null)
+
+        const loss = ud?.user ? pendingStreakLoss(ud.user) : null
+        if (loss) {
+          setStreakLoss(loss)
+          void fetch("/api/v1/streak/seen", { method: "POST" }).catch(() => {})
+        }
 
         const lr = ld?.book ? ld : ld?.lastReadChapter
         if (lr?.book) setLastRead({ book: lr.book, chapter: lr.chapter, version: lr.version })
@@ -209,7 +228,7 @@ export function useDashboardData() {
     // identity and time
     firstName, greeting, dateLabel,
     // raw
-    lastRead, level, studyCounts, verse, streak, notesCount, recentNotes, readChapters,
+    lastRead, level, studyCounts, verse, streak, streakLoss, notesCount, recentNotes, readChapters,
     weekDays: days, weekTotal,
     // loading flags, one per fetch group, as on the current dashboard
     loading, verseLoading, statsLoading,

@@ -18,6 +18,14 @@ const UserSchema = new mongoose.Schema(
     longestStreak: { type: Number, default: 0 },
     lastStreakDate: { type: Date },
     freezeCount: { type: Number, default: 0 },
+    // The run that most recently ENDED, and when. Written by lib/streak.ts via
+    // both streak routes, read by the return-visit prompt on the dashboard:
+    // once `streak` restarts at 1 the number the reader remembers is gone, and
+    // "je reeks van 14 dagen is gestopt" only means something if we kept it.
+    // `lostStreakSeenAt` is what stops the prompt appearing twice.
+    lostStreak: { type: Number, default: 0 },
+    lostStreakAt: { type: Date, default: null },
+    lostStreakSeenAt: { type: Date, default: null },
     badges: { type: [String], default: [] },
     // Experience and level. XP is awarded by lib/gamification.ts, which weights
     // a studied passage far above a read one on purpose: the point of the app

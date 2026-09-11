@@ -4,12 +4,7 @@ import { authOptions } from "../../../lib/authOptions"
 import connectMongoDB from "../../../lib/mongodb"
 import User from "../../../models/User"
 import { grantXp } from "../../../lib/gamification"
-
-function startOfDay(date: Date) {
-  const d = new Date(date)
-  d.setHours(0,0,0,0)
-  return d
-}
+import { advanceStreak, startOfDay } from "../../../lib/streak"
 
 export async function GET() {
   const session = await getServerSession(authOptions)
@@ -42,52 +37,46 @@ export async function POST(request: Request) {
   const url = new URL(request.url)
   const test = url.searchParams.get("test") === "true" && process.env.NODE_ENV !== "production"
 
-  const today = startOfDay(new Date())
-  const last = user.lastStreakDate ? startOfDay(user.lastStreakDate) : null
-  let newStreak = user.streak
-  let newFreezes = user.freezeCount
-  let newDate = user.lastStreakDate
-  const newBadges = [...user.badges]
-
-  if (test) {
-    newStreak += 1
-    newDate = today
-  } else if (!last || today.getTime() !== last.getTime()) {
-    if (last && (today.getTime() - last.getTime()) / 86400000 === 1) {
-      newStreak += 1
-    } else if (last && (today.getTime() - last.getTime()) / 86400000 > 1) {
-      if (newFreezes > 0 && user.subscribed) {
-        newFreezes -= 1
-      } else {
-        newStreak = 1
+  // The rules themselves live in lib/streak.ts, shared with /api/v1/streak so
+  // the website and the app cannot disagree about a reader's streak.
+  const testStreak = (user.streak ?? 0) + 1
+  const move = test
+    ? {
+        streak: testStreak,
+        freezeCount: (user.freezeCount ?? 0) + (testStreak % 5 === 0 ? 1 : 0),
+        lastStreakDate: startOfDay(new Date()),
+        advanced: true,
+        brokenFrom: null as number | null,
+        freezeUsed: false,
       }
-    } else {
-      newStreak = 1
-    }
+    : advanceStreak(
+        {
+          streak: user.streak,
+          freezeCount: user.freezeCount,
+          lastStreakDate: user.lastStreakDate,
+        },
+        { isPro: Boolean(user.subscribed) },
+      )
 
-    if (newStreak % 5 === 0) {
-      newFreezes += 1
-    }
+  const newBadges = [...(user.badges ?? [])]
 
-    newDate = today
+  const set: Record<string, unknown> = {
+    streak: move.streak,
+    freezeCount: move.freezeCount,
+    lastStreakDate: move.lastStreakDate,
   }
-
-  if (newStreak % 5 === 0 && test) {
-    newFreezes += 1
+  // What the reader lost, kept for the return-visit prompt on the dashboard.
+  if (move.brokenFrom !== null) {
+    set.lostStreak = move.brokenFrom
+    set.lostStreakAt = startOfDay(new Date())
   }
-
-  const advanced = String(newDate) !== String(user.lastStreakDate)
 
   const updated = await User.findOneAndUpdate(
     { _id: user._id },
     {
-      $set: {
-        streak: newStreak,
-        freezeCount: newFreezes,
-        lastStreakDate: newDate,
-      },
+      $set: set,
       // The record the streak-gated Levensboom items read: it only ever grows.
-      $max: { longestStreak: newStreak },
+      $max: { longestStreak: move.streak },
     },
     { new: true }
   )
@@ -96,7 +85,7 @@ export async function POST(request: Request) {
   // whole set at once, which also fixes the old `else if` chain that could
   // only ever grant one badge per call - a user crossing two thresholds
   // together silently lost the lower one.
-  const xp = advanced
+  const xp = move.advanced
     ? await grantXp(String(user._id), "streak_day", { isPro: Boolean(user.subscribed) })
     : null
 
@@ -106,6 +95,8 @@ export async function POST(request: Request) {
       freezes: updated.freezeCount,
       badges: xp ? [...new Set([...newBadges, ...xp.newBadges])] : newBadges,
       xp,
+      brokenFrom: move.brokenFrom,
+      freezeUsed: move.freezeUsed,
     },
     { status: 200 }
   )

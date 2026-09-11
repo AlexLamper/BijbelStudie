@@ -155,12 +155,20 @@ export default function DashboardPage() {
           </h1>
           {!d.greeting && <SceneSkeleton className="mt-3 h-14 w-[26rem] max-w-full" />}
 
+          {/* The one piece of bad news this page will deliver, and only once:
+              a run that ended. It takes the place of the standing line rather
+              than adding a card - the reader who lost a fourteen-day streak
+              needs the sentence that says how to start a new one, not a second
+              surface about the old one. `useDashboardData` marks it seen the
+              moment it hands it over. */}
           <p className="mt-4 max-w-[34rem] text-base leading-relaxed text-white/85 sm:text-lg">
-            {tree.wilting
-              ? `Je boom heeft ${tree.daysSinceActive} ${dayWord(tree.daysSinceActive)} geen water gehad. Eén hoofdstuk is genoeg.`
-              : d.readToday
-                ? "Je hebt vandaag al gelezen. Wat je nu leest, is extra."
-                : "Eén hoofdstuk vandaag houdt je boom in leven."}
+            {d.streakLoss
+              ? `Je reeks van ${d.streakLoss.days} dagen is gestopt. Eén hoofdstuk vandaag begint een nieuwe.`
+              : tree.wilting
+                ? `Je boom heeft ${tree.daysSinceActive} ${dayWord(tree.daysSinceActive)} geen water gehad. Eén hoofdstuk is genoeg.`
+                : d.readToday
+                  ? "Je hebt vandaag al gelezen. Wat je nu leest, is extra."
+                  : "Eén hoofdstuk vandaag houdt je boom in leven."}
           </p>
 
           {/* XP as a line of light along the horizon, not a boxed meter. */}
