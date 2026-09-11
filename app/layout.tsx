@@ -12,6 +12,7 @@ import { PrefetchProvider } from "../components/providers/prefetch-provider";
 import { StudyStyleProvider } from "../components/providers/study-style-provider";
 import { LevensboomProvider } from "../components/providers/levensboom-provider";
 import AnalyticsTracker from "../components/providers/AnalyticsTracker";
+import GuestProgressMigration from "../components/auth/GuestProgressMigration";
 import { JsonLd } from "../components/seo/JsonLd";
 import EnvironmentBanner from "../components/layout/EnvironmentBanner";
 import {
@@ -219,6 +220,11 @@ export default async function RootLayout({
                 </div>
                 {session?.user && (
                   <>
+                    {/* Everything the reader did as a guest, replayed onto the
+                        account they just made. Renders nothing and fetches
+                        nothing when this browser has no guest lessons - see
+                        components/auth/GuestProgressMigration.tsx. */}
+                    <GuestProgressMigration />
                     <OnboardingWrapper shouldShow={!session.user.onboardingCompleted} />
                     {/* Numbered first-time tour: launches after a tiny delay if
                         localStorage flag isn't set. Won't fight the OnboardingModal

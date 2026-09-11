@@ -153,6 +153,18 @@ export const CLICK_TARGETS = [
   'hero_cta_learn_more',
   'nav_signin',
   'nav_register',
+  // Guest funnel. A guest can use the whole product without an account, so the
+  // two places that ask for one are the funnel: the GuestGate card on an
+  // account-bound page, and the save gate at the end of a lesson they just ran.
+  // Without these four the click is dropped by /api/analytics (the event
+  // allowlist rejects an unknown target), which left the guest-to-signup rate
+  // unmeasurable - the one number that says whether guest mode works.
+  'guest_gate_register',
+  'guest_gate_signin',
+  'guest_save_register',
+  'guest_save_signin',
+  /** "Kijk eerst rond" on the landing hero: chose to stay a guest. */
+  'hero_cta_guest',
   // Navigation
   'sidebar_dashboard',
   'sidebar_lezen',

@@ -41,6 +41,7 @@ import {
   stepPosition,
   type StepKey,
 } from '../../../lib/studyFlow';
+import { guestLessonKey, readGuestLesson, writeGuestLesson } from '../../../lib/guestLessons';
 
 /**
  * The brand, in the roles components/scene/tokens.ts defines for it.
@@ -67,54 +68,13 @@ const SOUND_KEY = 'study:sound';
  *
  * localStorage rather than sessionStorage on purpose: a guest who closes the
  * tab after step three and comes back tomorrow should find step three, which is
- * the whole reason the signed-in flow moved OFF sessionStorage. Nothing here is
- * migrated to an account later (that is out of scope); when they sign up, the
- * lesson starts clean on the server and this entry is simply never read again.
+ * the whole reason the signed-in flow moved OFF sessionStorage.
+ *
+ * The store itself lives in lib/guestLessons.ts, because signing in has to read
+ * these same entries back and replay them onto the new account
+ * (components/auth/GuestProgressMigration.tsx). Key format is part of that
+ * contract - do not change it in one place only.
  */
-function guestLessonKey(studyId: string, lessonDay: number) {
-  return `bijbelstudie_guest_lesson_${studyId}_${lessonDay}`;
-}
-
-interface GuestLessonState {
-  currentStep?: string;
-  stepsCompleted?: string[];
-  viewTranslation?: string | null;
-  depthPanel?: string | null;
-  reflectionText?: string;
-  completedAt?: string | null;
-}
-
-function readGuestLesson(key: string): GuestLessonState | null {
-  try {
-    const raw = localStorage.getItem(key);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as GuestLessonState;
-    return parsed && typeof parsed === 'object' ? parsed : null;
-  } catch {
-    return null;
-  }
-}
-
-/** Applies one `patch` body to the stored guest state, the way the API would. */
-function writeGuestLesson(key: string, body: Record<string, unknown>) {
-  try {
-    const current = readGuestLesson(key) ?? {};
-    const next: GuestLessonState = { ...current };
-    if (typeof body.currentStep === 'string') next.currentStep = body.currentStep;
-    if (typeof body.completeStep === 'string') {
-      const done = new Set(current.stepsCompleted ?? []);
-      done.add(body.completeStep);
-      next.stepsCompleted = [...done];
-    }
-    if ('viewTranslation' in body) next.viewTranslation = (body.viewTranslation as string | null) ?? null;
-    if ('depthPanel' in body) next.depthPanel = (body.depthPanel as string | null) ?? null;
-    if (typeof body.reflectionText === 'string') next.reflectionText = body.reflectionText;
-    if (body.complete === true) next.completedAt = new Date().toISOString();
-    localStorage.setItem(key, JSON.stringify(next));
-  } catch {
-    /* private mode: the step still happens, it is just not remembered */
-  }
-}
 
 /**
  * The step transition: one page sliding over another, both moving at once.
