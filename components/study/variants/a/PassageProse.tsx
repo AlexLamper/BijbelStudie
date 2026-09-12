@@ -16,7 +16,7 @@ type VerseMap = Record<string, string>;
  * zou op een ontwerpvoorbeeld een echte notitie in de database van de
  * beoordelaar zetten. Dit scherm mag niets schrijven. Wat hier verder gebeurt
  * is hetzelfde: één GET naar /api/bible/chapter, en de verzen van de les eruit
- * gesneden in de browser — er wordt op de server geen bijbeldata aangeraakt.
+ * gesneden in de browser - er wordt op de server geen bijbeldata aangeraakt.
  *
  * Alle drie de toestanden zijn echt: laden, mislukt (met opnieuw proberen) en
  * leeg. Bij zesenzestig gegenereerde boekstudies is "dit hoofdstuk bestaat niet

@@ -22,7 +22,7 @@ export default function ReviewStrip({ sticky = true }: { sticky?: boolean }) {
     >
       <StudyFlowVariantSwitcher />
       <p className="text-[11px] leading-none text-gray-400 dark:text-muted-foreground">
-        Ontwerpvoorbeeld — voortgang is voorbeelddata en wordt niet opgeslagen.
+        Ontwerpvoorbeeld - voortgang is voorbeelddata en wordt niet opgeslagen.
       </p>
     </div>
   );

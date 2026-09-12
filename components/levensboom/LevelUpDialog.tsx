@@ -112,7 +112,7 @@ export default function LevelUpDialog({
   }, [onClose]);
 
   const line = fruit
-    ? `De ${fruit.name.toLowerCase()} hangt nu aan je boom — een vrucht van de Geest, ${fruit.reference}.`
+    ? `De ${fruit.name.toLowerCase()} hangt nu aan je boom - een vrucht van de Geest, ${fruit.reference}.`
     : newStage
       ? `${newStage.blurb} Je boom is nu een ${newStage.name.toLowerCase()}.`
       : trait
@@ -156,7 +156,7 @@ export default function LevelUpDialog({
           </p>
           <h2 className="mt-2 text-2xl font-bold text-white">
             Niveau {level}
-            {fruit ? ` — ${fruit.name}` : ''}
+            {fruit ? ` - ${fruit.name}` : ''}
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-white/70">{line}</p>
 

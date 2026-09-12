@@ -211,7 +211,7 @@ export default function StudyPlateB({ study, kind, translationName, enrolment }:
               {finished
                 ? `Je deed alle ${total} lessen van deze studie.`
                 : currentLesson
-                  ? `Les ${currentDay} — ${currentLesson.title}`
+                  ? `Les ${currentDay} - ${currentLesson.title}`
                   : 'Deze studie heeft nog geen lessen.'}
             </p>
             {enrolment ? (
@@ -284,7 +284,7 @@ export default function StudyPlateB({ study, kind, translationName, enrolment }:
               <p className="text-[12.5px] leading-relaxed text-foreground/80">
                 Elke les loopt dezelfde route: eerst de context, dan het gedeelte zelf, dan de
                 aantekening, dan je eigen antwoord en tot slot een korte toetsing. Je kunt op elk
-                moment stoppen — de les onthoudt waar je gebleven was.
+                moment stoppen - de les onthoudt waar je gebleven was.
               </p>
             </div>
           </div>

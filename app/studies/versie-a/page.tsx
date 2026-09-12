@@ -6,7 +6,7 @@ import TrouwCatalogue, {
 } from '../../../components/study/variants/a/TrouwCatalogue';
 
 /**
- * Ontwerp A — "trouw" — scherm 1 van 3: de catalogus.
+ * Ontwerp A - "trouw" - scherm 1 van 3: de catalogus.
  *
  * EEN BEOORDELINGS-URL. Er wordt geen database, geen sessie en geen
  * inschrijving gelezen: alles op dit scherm komt uit `CATALOGUE_ENTRIES` plus de
@@ -17,7 +17,7 @@ import TrouwCatalogue, {
  * concurreren is precies de splitsing waar /studies/[id] al tegen beschermt.
  */
 export const metadata: Metadata = {
-  title: 'Studies — ontwerp A (trouw)',
+  title: 'Studies - ontwerp A (trouw)',
   robots: { index: false, follow: false },
 };
 
@@ -26,8 +26,8 @@ export const metadata: Metadata = {
  *
  * De echte pagina vult dit uit `/api/v1/study-enrollments` en
  * `/api/v1/study-progress`. Hier staat het vast, zodat de catalogus met alle
- * drie de toestanden tegelijk beoordeeld kan worden — onaangeroerd, onderweg,
- * afgerond — en dat is precies wat een schermafbeelding van een leeg account
+ * drie de toestanden tegelijk beoordeeld kan worden - onaangeroerd, onderweg,
+ * afgerond - en dat is precies wat een schermafbeelding van een leeg account
  * nooit laat zien.
  */
 const DEMO: DemoProgress = {

@@ -132,14 +132,25 @@ export function Pill({
   tone?: "neutral" | "gold" | "warn";
   className?: string;
 }) {
+  /* The quiet half of the Pro pair. This chip stands in a row next to the
+     streak and member-since pills, so it keeps their exact metrics and earns
+     its status from colour alone - the loud gold plate (ProBadge,
+     --grad-pro-badge) appears once per screen, in the Abonnement card.
+     Champagne with a real gold edge rather than the near-white wash it was:
+     --pro-pill-ink holds 9.05:1 on the darkest stop, and the border finally
+     reads as a border at 2.0:1 on white instead of 1.4:1. */
   if (tone === "gold") {
     return (
       <span
-        className={`inline-flex items-center rounded-full border px-3 py-[6px] text-[12.5px] font-bold ${className}`}
+        className={`inline-flex items-center whitespace-nowrap rounded-full border px-3 py-[6px] text-[12.5px] font-bold ${className}`}
         style={{
           backgroundImage: "var(--grad-pro-pill)",
           borderColor: "var(--pro-pill-border)",
           color: "var(--pro-pill-ink)",
+          // A hair of light along the top edge, so the chip reads as a surface
+          // and not as a printed swatch. Cheaper than a shadow, which TOKENS.md
+          // reserves for the FAB, the streak badge and the search field.
+          boxShadow: "inset 0 1px 0 rgba(255,255,255,.7)",
         }}
       >
         {label}

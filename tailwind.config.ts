@@ -77,8 +77,9 @@ export default {
         teal: { DEFAULT: "#0D9488", dark: "#0F766E", soft: "#CCFBF1", faint: "#F0FDFA", tint: "#E6F5F1", bright: "#5EEAD4" },
         ink: { DEFAULT: "#111827", body: "#374151", muted: "#6B7280", faint: "#9CA3AF" },
         line: { DEFAULT: "#E5E7EB", strong: "#D1D5DB", soft: "#F3F4F6" },
-        // Never white on gold: white on #CA9A16 is 2.6:1. Every gold surface
-        // takes `gold-ink`.
+        // Never white on gold: white on #CA9A16 is 2.6:1, `gold-ink` on it is
+        // 5.0:1. Every gold surface takes `gold-ink`. `gold-badge` is the other
+        // direction - gold ON white, 6.1:1.
         gold: { DEFAULT: "#CA9A16", ink: "#422E04", badge: "#7A5E08" },
         success: { DEFAULT: "#047857", fill: "#059669" },
         warn: { DEFAULT: "#EA580C", wash: "#FFF7ED" },
@@ -87,8 +88,10 @@ export default {
         panel: { dark: "#152229" },
         heat: { 0: "#E5E7EB", 1: "#CCFBF1", 2: "#99D9CE", 3: "#4FB3A4", 4: "#0D9488" },
         bar: { empty: "#E5E7EB", read: "#9FD8CD", today: "#0F766E" },
-        // Values TOKENS.md gives inside a gradient row or a page paragraph.
-        pro: { pill: "#E6D2A0", ink: "#4A3506", badge: "#D9B95E", soft: "#FEF6E0" },
+        // The two Pro edges and the admin-table ground. Mirrors --pro-* in
+        // app/globals.css; `badge` is the deep gold rim shared with the avatar
+        // ring, not a lighter halo around the plate.
+        pro: { pill: "#D5B36A", ink: "#4A3506", badge: "#926C10", soft: "#FAEECB" },
         sunken: "#F9FAFB",
         highlight: "#FEF3C7",
         badgering: { DEFAULT: "#7C3AED", wash: "#F5F3FF" },
@@ -123,8 +126,10 @@ export default {
         verse: "linear-gradient(#4B3A63 0%,#7E5E6E 45%,#C88463 100%)",
         banner: "linear-gradient(135deg,#0F766E,#0F172A)",
         sky: "radial-gradient(circle at 50% 28%,#CFE9F2,#A9D7E4 70%)",
-        "pro-pill": "linear-gradient(135deg,#F4DFA4,#FFFDF6)",
-        "pro-badge": "linear-gradient(135deg,#CA9A16,#F2D98C 70%,#FFFBEF)",
+        // Top-down, not 135deg: a badge is ~20px tall, so a vertical ramp reads
+        // as metal lit from above where a diagonal one reads as a smudge.
+        "pro-pill": "linear-gradient(180deg,#FCF3D8,#F4E2AC)",
+        "pro-badge": "linear-gradient(180deg,#F7E6B6 0%,#E0B54A 8%,#F1D88F 40%,#C69512 100%)",
         "tree-scene": "linear-gradient(#243A4A 0%,#3C5A60 42%,#5E7A63 74%,#2F4A3A 100%)",
       },
       borderRadius: {

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Search } from 'lucide-react'
 import type { CuratedStudy } from '../../lib/data/curated-studies'
-import { CATALOGUE_ENTRIES } from '../../lib/bookStudies'
+import { CATALOGUE_ENTRIES, isBookStudyId } from '../../lib/bookStudies'
 import { Card, Chip, SectionHeading, StudyCard, ListRow } from '../../components/kit/primitives'
 import StudyArtwork from './StudyArtwork'
 
@@ -13,8 +13,8 @@ const COMPLETED_KEY = 'bijbelstudie_completed_studies'
 // ---------------------------------------------------------------------------
 // The study catalogue (design_handoff_web/PAGES.md §2): one column at full
 // width - a 440 px search field, the kind filters as pills, the study you are
-// in, a row of four cards, and then every study as a list row down to the foot
-// of the page.
+// in, two rows of four cards, and then every study as a list row down to the
+// foot of the page.
 //
 // The data layer below is the one this screen already had: the same
 // localStorage key, the same two endpoints, the same `statusFor`. Nothing was
@@ -79,10 +79,37 @@ const ENTRIES: Entry[] = CATALOGUE_ENTRIES.map(
   }),
 )
 
-/** The four cards: the hand-authored studies, the ones with a written intro. */
+/**
+ * How many studies "Uitgelicht" puts on screen.
+ *
+ * Two rows of four. The design measures the CARD (four columns, image height
+ * 88) and not how many there are, so a second row buys eight openings into the
+ * catalogue for the price of one row of height and leaves that measurement -
+ * and the grid's rhythm - untouched. A third row would start eating the list
+ * card below, which is the part that has to keep scrolling.
+ *
+ * This is the only place the number is written down: the grid renders the whole
+ * array and the heading counts the same array, so what you see and what the
+ * label claims cannot drift apart - not even if the catalogue ever holds fewer
+ * studies than the cap.
+ */
+const FEATURED_COUNT = 8
+
+/**
+ * The featured cards: the HAND-AUTHORED studies, in catalogue order.
+ *
+ * The rule used to be "has a written intro", which sounded curated and was not:
+ * `generateBookStudy` gives every one of the sixty-six generated book studies an
+ * `about` from the book's own summary, so the filter passed on all seventy-seven
+ * entries and the row was simply the first few of the Old Testament. At four
+ * cards that read as a sampler; at eight it read as "the start of Genesis".
+ *
+ * `isBookStudyId` is the one honest test for "somebody wrote this on purpose" -
+ * it is the same check app/studies/[id]/page.tsx uses to decide indexability.
+ */
 const FEATURED: Entry[] = ENTRIES.filter(
-  entry => entry.study.type !== 'Boek' || (entry.study.about?.length ?? 0) > 0,
-).slice(0, 8)
+  entry => !isBookStudyId(entry.study.id),
+).slice(0, FEATURED_COUNT)
 
 export default function StudiesBrowser() {
   const [kind, setKind] = useState<CuratedStudy['type'] | null>(null)
@@ -254,15 +281,19 @@ export default function StudiesBrowser() {
       {searchResults === null && FEATURED.length > 0 && (
         <>
           {/* "Nieuw deze maand" in the design. Nothing in the catalogue records
-              when a study was published, so the row keeps its shape and its
+              when a study was published, so the block keeps its shape and its
               honest name: the studies with a written introduction. */}
           <SectionHeading
             title="Uitgelicht"
             action={{ label: `Alle ${FEATURED.length}`, href: '/bijbelboeken' }}
             className="flex-none"
           />
+          {/* Four columns at image height 88, as the design measures it; the
+              eight entries simply wrap into a second row. `flex-none` keeps
+              both rows at full height so the list card below takes what is
+              left and does the scrolling. */}
           <div className="grid flex-none grid-cols-4 gap-4">
-            {FEATURED.slice(0, 4).map(entry => (
+            {FEATURED.map(entry => (
               <StudyCard
                 key={entry.study.id}
                 href={`/studies/${entry.study.id}`}

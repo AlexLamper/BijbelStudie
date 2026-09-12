@@ -1,11 +1,12 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useSession, getSession } from "next-auth/react"
+import { useSession, getSession, signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Check, Loader2, Lock, Pencil, X } from "lucide-react"
-import UserBadges, { BadgeRings, BADGE_TOTAL } from "../../components/profile/badges"
+import { Check, Loader2, LogOut, Pencil, X } from "lucide-react"
+import { BadgesDialog, BadgeRings, BADGE_TOTAL } from "../../components/profile/badges"
+import ActivityFeed, { type ActivityFilter } from "../../components/profile/ActivityFeed"
 import AppShell from "../../components/shell/AppShell"
 import TreeAvatar from "../../components/kit/TreeAvatar"
 import Tabs from "../../components/kit/Tabs"
@@ -47,8 +48,10 @@ type Status = "idle" | "saving" | "success" | "error"
  * four figures this page can actually stand behind. Say the word and the two
  * fetches can be added.
  *
- * THE ACTIVITY CARD has no feed behind it either - nothing on the web records
- * an activity stream - so it keeps its shape and says so.
+ * THE ACTIVITY CARD has no activity stream behind it - nothing on the web
+ * records one - so it shows the nearest real thing: the reader's own notes and
+ * markings, from the same GET /api/notes the /notities page reads. That one
+ * extra request lives in `components/profile/ActivityFeed`, not here.
  */
 export default function ProfilePage() {
   const { update: updateSession } = useSession()
@@ -65,7 +68,7 @@ export default function ProfilePage() {
   const [draftBio, setDraftBio] = useState("")
   const [nameStatus, setNameStatus] = useState<Status>("idle")
   const [bioStatus, setBioStatus] = useState<Status>("idle")
-  const [activityTab, setActivityTab] = useState("all")
+  const [activityTab, setActivityTab] = useState<ActivityFilter>("all")
   const [badgesOpen, setBadgesOpen] = useState(false)
 
   useEffect(() => { setMounted(true) }, [])
@@ -296,10 +299,10 @@ export default function ProfilePage() {
 
           {/* The four figures this page can stand behind without a new fetch. */}
           <div className="flex flex-none gap-[13px]">
-            <StatCard className="flex-1" label="Leesreeks" value={waiting ? "—" : streak} />
-            <StatCard className="flex-1" label="Badges" value={waiting ? "—" : `${badgeCount}/${BADGE_TOTAL}`} />
-            <StatCard className="flex-1" label="Lessen afgerond" value={levensboom ? levensboom.lessonsCompleted : "—"} />
-            <StatCard className="flex-1" label="Studies afgerond" value={levensboom ? levensboom.studiesCompleted : "—"} />
+            <StatCard className="flex-1" label="Leesreeks" value={waiting ? "-" : streak} />
+            <StatCard className="flex-1" label="Badges" value={waiting ? "-" : `${badgeCount}/${BADGE_TOTAL}`} />
+            <StatCard className="flex-1" label="Lessen afgerond" value={levensboom ? levensboom.lessonsCompleted : "-"} />
+            <StatCard className="flex-1" label="Studies afgerond" value={levensboom ? levensboom.studiesCompleted : "-"} />
           </div>
 
           {/* Activity */}
@@ -312,22 +315,11 @@ export default function ProfilePage() {
                   { value: "notes", label: "Notities" },
                 ]}
                 value={activityTab}
-                onChange={setActivityTab}
+                onChange={value => setActivityTab(value as ActivityFilter)}
               />
             </div>
-            <div className="flex flex-1 flex-col items-start justify-center gap-2 px-[18px] py-10">
-              <p className="text-[13.5px] text-ink-body">
-                Er is nog geen activiteitenoverzicht op de webversie.
-              </p>
-              <p className="flex items-center gap-[7px] text-[11.5px] text-ink-faint">
-                <Lock size={12} aria-hidden /> Alleen jij
-              </p>
-              <Link
-                href="/notities"
-                className="mt-2 text-[13px] font-semibold text-teal no-underline hover:text-teal-dark"
-              >
-                Bekijk je notities →
-              </Link>
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              <ActivityFeed filter={activityTab} name={user?.name} />
             </div>
           </Card>
 
@@ -358,35 +350,34 @@ export default function ProfilePage() {
             </div>
           </Card>
 
-          {/* Badges */}
-          <Card className="flex-none p-[15px]">
-            <div className="flex items-baseline gap-2">
+          {/* Badges. The whole card is the control - the ring row is what it
+              looks like at rest, the cabinet opens over the page. */}
+          <button
+            type="button"
+            onClick={() => setBadgesOpen(true)}
+            aria-haspopup="dialog"
+            className="flex-none rounded-card border border-line bg-white p-[15px] text-left transition-colors hover:border-line-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal"
+          >
+            {/* Spans throughout - a button may only hold phrasing content, and
+                the card's rows are layout, not structure. */}
+            <span className="flex items-baseline gap-2">
               <span className="flex-1 text-[14.5px] font-bold text-ink">Badges</span>
               <span className="text-[21px] font-bold text-ink tabular-nums">{badgeCount}</span>
               <span className="text-[12.5px] text-ink-faint">van {BADGE_TOTAL}</span>
-            </div>
-            <div className="mt-3 h-px bg-line" />
-            <div className="mt-[15px]">
+            </span>
+            <span className="mt-3 block h-px bg-line" />
+            <span className="mt-[15px] block">
               <BadgeRings earned={earnedBadges} />
-            </div>
-            <div className="mt-[15px] flex items-center">
+            </span>
+            <span className="mt-[15px] flex items-center">
               <span className="flex-1 text-[12.5px] text-ink-body">
                 {badgeCount === 0 ? "Nog geen badge verdiend" : `${BADGE_TOTAL - badgeCount} nog te verdienen`}
               </span>
-              <button
-                type="button"
-                onClick={() => setBadgesOpen(v => !v)}
-                className="text-[12.5px] font-semibold text-teal hover:text-teal-dark"
-              >
-                {badgesOpen ? "Verbergen" : "Alle badges →"}
-              </button>
-            </div>
-            {badgesOpen && (
-              <div className="mt-3">
-                <UserBadges earned={earnedBadges} />
-              </div>
-            )}
-          </Card>
+              {/* A span, not a button: the card around it is already the button
+                  and HTML has no nesting for that. */}
+              <span className="text-[12.5px] font-semibold text-teal">Alle badges →</span>
+            </span>
+          </button>
 
           {/* Abonnement */}
           <Card className="flex-none p-[15px]">
@@ -441,9 +432,9 @@ export default function ProfilePage() {
             <div className="text-[14.5px] font-bold text-ink">Account</div>
             <div className="mt-3 h-px bg-line" />
             <div className="mt-[6px]">
-              <InfoLine label="Lid sinds" value={memberSince ?? "—"} />
-              <InfoLine label="Dagelijkse reeks" value={waiting ? "—" : `${streak} ${dayWord(streak)}`} />
-              <InfoLine label="Badges verdiend" value={waiting ? "—" : `${badgeCount}`} last />
+              <InfoLine label="Lid sinds" value={memberSince ?? "-"} />
+              <InfoLine label="Dagelijkse reeks" value={waiting ? "-" : `${streak} ${dayWord(streak)}`} />
+              <InfoLine label="Badges verdiend" value={waiting ? "-" : `${badgeCount}`} last />
             </div>
             {levensboom && (
               <div className="mt-3">
@@ -453,9 +444,23 @@ export default function ProfilePage() {
                 </p>
               </div>
             )}
+
+            {/* Uitloggen is the one thing TOKENS.md hands `danger` to besides a
+                negative delta. Quiet - a full-width row, no fill - because it is
+                the last thing in the card, not the point of it. */}
+            <div className="mt-[13px] h-px bg-line" />
+            <button
+              type="button"
+              onClick={() => signOut({ callbackUrl: "/" })}
+              className="mt-[10px] flex h-9 w-full items-center justify-center gap-2 rounded-btn text-[13px] font-semibold text-danger transition-colors hover:bg-line-soft"
+            >
+              <LogOut size={15} aria-hidden /> Uitloggen
+            </button>
           </Card>
         </aside>
       </div>
+
+      <BadgesDialog open={badgesOpen} onClose={() => setBadgesOpen(false)} earned={earnedBadges} />
     </AppShell>
   )
 }

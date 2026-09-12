@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { Heart, Share2, MoreHorizontal, BookOpen, History } from "lucide-react"
 import {
@@ -15,6 +15,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog"
+import { ProgressTreeScene } from "./ProgressTree"
+import { useLevensboom } from "../../hooks/useLevensboom"
 import {
   dailyVersePhoto,
   dayLabel,
@@ -29,6 +31,15 @@ import {
 } from "../../lib/dailyVerseStore"
 
 const TEAL = "#0D9488"
+
+/**
+ * Half of the heart's beat: it swells for this long and settles back over the
+ * same interval, so the whole thing is 260 ms - the far end of the 120-260 ms
+ * the rest of the vocabulary works in (app/globals.css, "Arrival and
+ * micro-interaction vocabulary"). One number, read by both the timer that ends
+ * the beat and the transition that draws it.
+ */
+const BEAT_MS = 130
 
 export type DailyVerse = {
   text: string
@@ -67,11 +78,18 @@ export default function DailyVerseCard({
   loading: boolean
 }) {
   const [liked, setLiked] = useState(false)
+  const [beating, setBeating] = useState(false)
+  const beatTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [history, setHistory] = useState<StoredVerse[]>([])
   const [historyOpen, setHistoryOpen] = useState(false)
   const [shareNote, setShareNote] = useState<string | null>(null)
 
   const version = versionAbbreviation(verse?.version)
+
+  // Whether there is a tree to draw at all. `disabled` is the reader's own
+  // "verberg mijn boom" setting, and it has to be honoured here too.
+  const { data: levensboom } = useLevensboom()
+  const hasTree = Boolean(levensboom?.levensboom && !levensboom.levensboom.disabled)
 
   // Read the archive after mount, never during render: localStorage does not
   // exist on the server, and touching it in the render pass would make the
@@ -128,10 +146,24 @@ export default function DailyVerseCard({
     }
   }
 
+  // A beat left running past unmount would set state on a gone component.
+  useEffect(() => () => {
+    if (beatTimer.current) clearTimeout(beatTimer.current)
+  }, [])
+
   function handleLike() {
     if (!verse) return
     const next = toggleLike(verse.reference)
-    setLiked(next.includes(verse.reference))
+    const nowLiked = next.includes(verse.reference)
+    setLiked(nowLiked)
+
+    // The beat plays on the way in only. Taking a verse back out of the
+    // favourites is a correction, and a flourish on it would be celebrating
+    // the wrong half of the toggle.
+    if (!nowLiked) return
+    if (beatTimer.current) clearTimeout(beatTimer.current)
+    setBeating(true)
+    beatTimer.current = setTimeout(() => setBeating(false), BEAT_MS)
   }
 
   const chapterHref = verse
@@ -142,21 +174,43 @@ export default function DailyVerseCard({
 
   return (
     <div className="relative flex h-[218px] min-w-0 flex-none flex-col overflow-hidden rounded-card">
-      {/* The photograph, and the wash that makes text legible over it. A flat
-          layer guarantees contrast over a bright sky; the gradient keeps the
-          eyebrow and the action row readable over a light patch at either
-          edge. Both are copied from the app's _PhotoScrim.
+      {/* THE PICTURE IS THE READER'S OWN TREE.
+          `ProgressTreeScene` draws the landscape they built in the studio -
+          their species, their scene, their animal, at their level - which is
+          the same picture /profiel/boom and the navbar avatar show, from the
+          provider the root layout already mounts. So it costs no request.
 
-          The handoff draws a mauve-to-amber gradient with two hills here. That
-          is a placeholder for server imagery, like every other gradient plate
-          in the prototype (design_handoff_web/RULES.md §4) - the real picture
-          is one of the 76 curated landscapes, so the structure and the
-          measurements below are the design's and the illustration is not. */}
+          `still`: one frame, no loop. A landscape moving behind the verse is
+          the one thing atmosphere must not do on a screen someone is reading,
+          and it is the rule the reading room follows for the same reason.
+
+          The curated photograph stays underneath as the ground: it is what a
+          reader with no tree yet, or one who switched the tree off, keeps - and
+          it is what fills the card in the beat before the provider answers.
+          The handoff's mauve-to-amber gradient with two hills was a placeholder
+          for exactly this (design_handoff_web/RULES.md §4) - the structure and
+          the measurements below are the design's, the illustration is not.
+
+          Either way the same two scrims go over it: a flat layer that
+          guarantees contrast over a bright sky, and a gradient that keeps the
+          eyebrow and the action row readable over a light patch at either edge.
+          Both are copied from the app's _PhotoScrim. */}
       <div
         aria-hidden
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: `url(${photo})` }}
       />
+      {hasTree && (
+        // Over the photograph rather than instead of it, and faded in: the
+        // provider answers a beat after the first paint, and a hard cut from
+        // one landscape to another reads as a glitch.
+        <div
+          aria-hidden
+          className="absolute inset-0 motion-safe:animate-fade-in"
+        >
+          <ProgressTreeScene still className="h-full w-full" />
+        </div>
+      )}
       <div
         aria-hidden
         className="absolute inset-0"
@@ -199,7 +253,22 @@ export default function DailyVerseCard({
             onClick={handleLike}
             disabled={!verse}
           >
-            <Heart size={19} fill={liked ? "currentColor" : "none"} />
+            {/* The moment of the tap: the heart swells and settles on the same
+                ease-out curve `.content-in` uses, and that is all - what liked
+                LOOKS like is still the fill.
+
+                A transition between two states rather than a keyframe, because
+                app/globals.css owns the keyframes and this one is needed in a
+                single place. The scale is the half that carries `motion-safe:`,
+                so a reader who asked for less motion never gets a transform at
+                all and the transition below has nothing to draw - the same
+                opt-in the rest of the vocabulary uses. */}
+            <span
+              className={`block ${beating ? "motion-safe:scale-[1.32]" : "motion-safe:scale-100"}`}
+              style={{ transition: `transform ${BEAT_MS}ms cubic-bezier(0.16, 1, 0.3, 1)` }}
+            >
+              <Heart size={19} fill={liked ? "currentColor" : "none"} />
+            </span>
           </RoundAction>
 
           <RoundAction label="Delen" onClick={handleShare} disabled={!verse}>

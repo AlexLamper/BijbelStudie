@@ -396,7 +396,7 @@ export default function OverviewC({ demo }: { demo: DemoProgress }) {
             </h1>
             <p className="mt-2 max-w-xl text-[14px] leading-relaxed text-gray-500 dark:text-muted-foreground">
               Elke studie heeft een eigen landschap: het uitzicht, het licht en het jaargetijde horen
-              bij het boek dat je gaat lezen. Van hieraf zie je ze alle op afstand — je loopt er pas
+              bij het boek dat je gaat lezen. Van hieraf zie je ze alle op afstand - je loopt er pas
               naar binnen als je er een opent.
             </p>
           </div>

@@ -113,7 +113,7 @@ export default function GroeiTab({
           ))}
         </ul>
         <p className="mt-3 text-[11px] leading-relaxed text-white/65">
-          {xp} XP totaal. Blijf je een tijd weg, dan hangt je boom er slap bij — hij gaat nooit dood en
+          {xp} XP totaal. Blijf je een tijd weg, dan hangt je boom er slap bij - hij gaat nooit dood en
           herstelt na één sessie.
         </p>
       </details>
@@ -121,7 +121,7 @@ export default function GroeiTab({
       <p className="text-xs italic leading-relaxed text-white/70">
         &ldquo;Want hij zal zijn als een boom, geplant aan waterbeken, die zijn vrucht geeft op zijn
         tijd.&rdquo;
-        <span className="not-italic"> — Psalm 1:3</span>
+        <span className="not-italic"> - Psalm 1:3</span>
       </p>
     </div>
   );

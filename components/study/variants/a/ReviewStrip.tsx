@@ -5,7 +5,7 @@ import StudyFlowVariantSwitcher from '../../StudyFlowVariantSwitcher';
 /**
  * De regel die zegt: dit is een ontwerp in beoordeling.
  *
- * Met opzet buiten het ontwerp gehouden — kaartachtergrond, gedempte tekst,
+ * Met opzet buiten het ontwerp gehouden - kaartachtergrond, gedempte tekst,
  * eigen rand. Alles eronder is het voorstel; deze regel is het meubilair van de
  * beoordelaar. Hij draagt ook de enige eerlijke disclaimer die de drie schermen
  * nodig hebben (de voortgang is verzonnen), zodat geen enkele knop zich apart
@@ -23,7 +23,7 @@ export default function ReviewStrip({ sticky = true }: { sticky?: boolean }) {
     >
       <StudyFlowVariantSwitcher />
       <p className="text-[11px] leading-none text-gray-400 dark:text-muted-foreground">
-        Ontwerpvoorbeeld — voortgang is voorbeelddata en wordt niet opgeslagen.
+        Ontwerpvoorbeeld - voortgang is voorbeelddata en wordt niet opgeslagen.
       </p>
     </div>
   );

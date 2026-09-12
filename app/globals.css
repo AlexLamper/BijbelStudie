@@ -124,6 +124,11 @@
   --warn:#EA580C;
   --danger:#DC2626;
 
+  /* Gold is the one warm accent in a slate-and-teal system, so it is spent
+     sparingly and never on a large surface. The three names below are the flat
+     ones from TOKENS.md and keep their values: --gold is the plate, --gold-ink
+     the only ink allowed on it (5.01:1), --gold-badge the gold that goes ON
+     white (6.12:1). The DEPTH lives in the two Pro gradients further down. */
   --gold:#CA9A16;
   --gold-ink:#422E04;
   --gold-badge:#7A5E08;
@@ -133,8 +138,23 @@
   --grad-verse:linear-gradient(#4B3A63 0%,#7E5E6E 45%,#C88463 100%);
   --grad-banner:linear-gradient(135deg,#0F766E,#0F172A);
   --grad-sky:radial-gradient(circle at 50% 28%,#CFE9F2,#A9D7E4 70%);
-  --grad-pro-pill:linear-gradient(135deg,#F4DFA4,#FFFDF6);
-  --grad-pro-badge:linear-gradient(135deg,#CA9A16,#F2D98C 70%,#FFFBEF);
+  /* The two Pro surfaces. Both run top-down rather than at 135deg: a badge is
+     20 px tall and a diagonal sweep across it just reads as a smudge, while a
+     vertical ramp reads as an object lit from above - which is the whole trick
+     for making gold look struck instead of filled.
+
+     --grad-pro-pill is the QUIET half: the "Pro actief" chip that stands in a
+     row beside the streak and member-since pills, so it may not outweigh them.
+     Champagne with body - the old #FFFDF6 end was white and half the chip
+     dissolved into the card.
+
+     --grad-pro-badge is the LOUD half, used once per screen. Four stops, in the
+     order a metal edge actually catches light: a 1 px specular line at the very
+     top, the roll-off just under it, the broad highlight band, then the long
+     fall to the shadow foot. The foot stops at #C69512 because that is as dark
+     as gold can go while --gold-ink still clears 4.5:1 on it (4.75:1). */
+  --grad-pro-pill:linear-gradient(180deg,#FCF3D8,#F4E2AC);
+  --grad-pro-badge:linear-gradient(180deg,#F7E6B6 0%,#E0B54A 8%,#F1D88F 40%,#C69512 100%);
   --grad-tree-scene:linear-gradient(#243A4A 0%,#3C5A60 42%,#5E7A63 74%,#2F4A3A 100%);
 
   --heat-0:#E5E7EB;
@@ -165,12 +185,19 @@
 
   /* Values TOKENS.md states inside a gradient row or a page paragraph rather
      than in the colour table. Named here so the rule "no hex outside this
-     block" can actually hold - every one of them is quoted from the handoff,
-     none is invented. */
-  --pro-pill-border:#E6D2A0;   /* Pro-pill border   (TOKENS.md, gradients)   */
+     block" can actually hold.
+
+     The three Pro edges are deliberately DEEPER than the handoff's first pass.
+     A gold plate ringed by a lighter gold (#D9B95E on #CA9A16) reads as a glow,
+     not as an edge, and that soft halo is most of why the badge looked cheap.
+     Depth on a small warm object comes from a border of the SAME hue, a couple
+     of steps darker than the fill it holds. #926C10 is that step; it is the
+     same deep gold the avatar ring falls to in lib/levensboom/ring.ts, so the
+     Pro label and the Pro cosmetic are visibly cut from one metal. */
+  --pro-pill-border:#D5B36A;   /* edge of the quiet chip, 2.0:1 on white     */
   --pro-pill-ink:#4A3506;      /* Pro-pill ink      (TOKENS.md, gradients)   */
-  --pro-badge-border:#D9B95E;  /* Pro-badge border  (TOKENS.md, gradients)   */
-  --pro-soft:#FEF6E0;          /* Pro pill in the admin table (PAGES.md §5)  */
+  --pro-badge-border:#926C10;  /* edge of the gold plate, 4.8:1 on white     */
+  --pro-soft:#FAEECB;          /* Pro pill in the admin table (PAGES.md §5)  */
   --warn-wash:#FFF7ED;         /* streak pill ground (PAGES.md §6)           */
   --badge-ring:#7C3AED;        /* badge rings        (PAGES.md §6)           */
   --badge-wash:#F5F3FF;        /* badge ring fill    (PAGES.md §6)           */

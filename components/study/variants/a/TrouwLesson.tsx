@@ -14,7 +14,7 @@ import ReviewStrip from './ReviewStrip';
 import { ON_ART, ON_ART_FAINT, ON_ART_MUTED, SCRIM_STRIP, TEAL, tintCss } from './tint';
 
 /**
- * Ontwerp A — "trouw" — scherm 3 van 3: één les.
+ * Ontwerp A - "trouw" - scherm 3 van 3: één les.
  *
  * Het oordeel was hier het scherpst: de LAYOUT van ontwerp 1 ("Atlas"), de
  * STYLING van ontwerp 2 ("Vensters"). Dus:
@@ -32,8 +32,8 @@ import { ON_ART, ON_ART_FAINT, ON_ART_MUTED, SCRIM_STRIP, TEAL, tintCss } from '
  * /api/bible/chapter; alle voortgang op dit scherm is verzonnen demostand uit
  * de pagina, en er wordt niets teruggeschreven.
  *
- * Het scherm erft app/studie/layout.tsx — geen appbalk, de 56px hover-rail, het
- * ingezette afgeronde kader — want de flow is een venster, geen appschil.
+ * Het scherm erft app/studie/layout.tsx - geen appbalk, de 56px hover-rail, het
+ * ingezette afgeronde kader - want de flow is een venster, geen appschil.
  */
 
 const SCOPE = 'va-lesson';
@@ -424,7 +424,7 @@ export default function TrouwLesson({
                   {next ? (
                     <Marginal label="Hierna">
                       <p className="font-semibold text-gray-800 dark:text-foreground">
-                        Les {next.day} — {next.title}
+                        Les {next.day} - {next.title}
                       </p>
                       <p className="mt-0.5 tabular-nums">{next.reference}</p>
                     </Marginal>
@@ -724,7 +724,7 @@ export default function TrouwLesson({
         </div>
       </div>
 
-      {/* Voet. Twee richtingen en waar je bent — verder niets. */}
+      {/* Voet. Twee richtingen en waar je bent - verder niets. */}
       <footer className="flex-none border-t border-gray-200 dark:border-border">
         <div className="flex h-16 items-center justify-between gap-3 px-3 sm:px-5">
           <button
@@ -737,7 +737,7 @@ export default function TrouwLesson({
           </button>
 
           <p className="hidden text-[12px] tabular-nums text-gray-400 dark:text-muted-foreground sm:block">
-            {closed ? 'Afronding' : `${STEP_LABEL[step]} — stap ${position} van ${steps.length}`}
+            {closed ? 'Afronding' : `${STEP_LABEL[step]} - stap ${position} van ${steps.length}`}
           </p>
 
           {closed ? (

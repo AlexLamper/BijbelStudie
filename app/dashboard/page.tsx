@@ -173,25 +173,38 @@ export default function DashboardPage() {
 
         {/* ── The rail ─────────────────────────────────────────────── */}
         <aside className="flex w-[320px] flex-none flex-col gap-4">
-          {/* Je boom */}
-          <Card className="flex flex-none items-center gap-[15px] p-[18px]">
-            <TreeAvatar size={64} ring={3} level={level} levelStyle="gold" />
-            <div className="min-w-0 flex-1">
-              <div className="truncate text-[15px] font-bold text-ink">
-                {tree.stageName ? `${tree.stageName} · niveau ${level}` : `Niveau ${level}`}
+          {/* Je boom.
+              PAGES.md §1 puts "Bekijken →" at the far right of the avatar row,
+              but in a 320 px card that row leaves the title about 110 px:
+              "Jonge boom · niveau 5" needs ~170 px at Inter 700 · 15, so every
+              stage name was being cut down to "Jonge boom · ….". The bar and
+              the link drop to a row of their own, which hands the title the
+              full 205 px - enough for the longest one there is, "Eeuwenoude
+              boom · niveau 16" - and leaves the card the same height whether
+              the title takes one line or two, because the 64 px disc sets it.
+              The whole card is the link now: it has only ever had the one
+              destination, and that is a larger target than four words. */}
+          <Link href="/profiel/boom" className="group block flex-none no-underline">
+            <Card className="p-[18px] transition-colors group-hover:border-line-strong">
+              <div className="flex items-center gap-[15px]">
+                <TreeAvatar size={64} ring={3} level={level} levelStyle="gold" />
+                <div className="min-w-0 flex-1">
+                  <div className="text-[15px] font-bold leading-[1.3] text-ink">
+                    {tree.stageName ? `${tree.stageName} · niveau ${level}` : `Niveau ${level}`}
+                  </div>
+                  <div className="mt-[3px] text-[12.5px] text-ink-faint">
+                    nog {remainingXp} XP tot niveau {level + 1}
+                  </div>
+                </div>
               </div>
-              <div className="mt-[3px] text-[12.5px] text-ink-faint">
-                nog {remainingXp} XP tot niveau {level + 1}
+              <div className="mt-[13px] flex items-center gap-3">
+                <ProgressBar value={pct} height={6} className="flex-1" />
+                <span className="flex-none whitespace-nowrap text-[13px] font-semibold text-teal group-hover:text-teal-dark">
+                  Bekijken →
+                </span>
               </div>
-              <ProgressBar value={pct} height={6} className="mt-[10px]" />
-            </div>
-            <Link
-              href="/profiel/boom"
-              className="flex-none whitespace-nowrap text-[13px] font-semibold text-teal no-underline hover:text-teal-dark"
-            >
-              Bekijken →
-            </Link>
-          </Card>
+            </Card>
+          </Link>
 
           {/* Deze week */}
           <Card className="flex-none p-[18px]">

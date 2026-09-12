@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { id } = await params;
   const study = findAnyStudy(id);
   return {
-    title: `${study ? study.title : 'Studie'} — ontwerp B (Dichter)`,
+    title: `${study ? study.title : 'Studie'} - ontwerp B (Dichter)`,
     robots: { index: false, follow: false },
   };
 }

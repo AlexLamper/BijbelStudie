@@ -11,10 +11,10 @@ import ReviewStrip from './ReviewStrip';
 import { ON_ART, ON_ART_FAINT, SCRIM_BAND, TEAL, tintCss } from './tint';
 
 /**
- * Ontwerp A — "trouw" — scherm 2 van 3: de studie zelf.
+ * Ontwerp A - "trouw" - scherm 2 van 3: de studie zelf.
  *
  * Het oordeel over deze pagina was: ontwerp 1 en 2 combineren, en de banner van
- * ontwerp 2 moest véél kleiner — die nam ruimte in die hij niet nodig had. Dus:
+ * ontwerp 2 moest véél kleiner - die nam ruimte in die hij niet nodig had. Dus:
  *
  *  - De STRUCTUUR is die van ontwerp 1 ("Atlas"): eerst een smalle band, dan het
  *    titelblok, dan de ene volgende stap, dan de tekst in een gemeten kolom met
@@ -29,7 +29,7 @@ import { ON_ART, ON_ART_FAINT, SCRIM_BAND, TEAL, tintCss } from './tint';
  *
  * Server component. Geen state, geen fetch, geen database: alles hier is
  * statische studiegegevens plus de demostand die de pagina meegeeft. De band is
- * inline SVG en met opzet de LCP — hij verft mee met de HTML, zonder te wachten
+ * inline SVG en met opzet de LCP - hij verft mee met de HTML, zonder te wachten
  * op hydratie of op een afbeeldingsverzoek. Nergens een canvas.
  */
 
@@ -62,7 +62,7 @@ export interface TrouwEnrolment {
 
 export interface TrouwPlateProps {
   study: CuratedStudy;
-  /** "Wet", "Evangelie", "Persoon" — het woord waaronder het register de studie zet. */
+  /** "Wet", "Evangelie", "Persoon" - het woord waaronder het register de studie zet. */
   kind: string;
   /** De naam van de vertaling waarin de studie opent. */
   translationName: string;
@@ -126,7 +126,7 @@ export default function TrouwPlate({ study, kind, translationName, enrolment }: 
   const currentDay = enrolment?.currentDay ?? study.lessons[0]?.day ?? 1;
   const currentLesson = study.lessons.find((lesson) => lesson.day === currentDay);
 
-  /** De beschrijving, hooguit drie alinea's — daarna leest niemand meer door. */
+  /** De beschrijving, hooguit drie alinea's - daarna leest niemand meer door. */
   const prose = (study.about && study.about.length > 0 ? study.about : [study.description]).slice(0, 3);
 
   const actionLabel = finished
@@ -209,7 +209,7 @@ export default function TrouwPlate({ study, kind, translationName, enrolment }: 
               {finished
                 ? `Je deed alle ${total} lessen van deze studie.`
                 : currentLesson
-                  ? `Les ${currentDay} — ${currentLesson.title}`
+                  ? `Les ${currentDay} - ${currentLesson.title}`
                   : 'Deze studie heeft nog geen lessen.'}
             </p>
             {enrolment && !finished && (
@@ -275,7 +275,7 @@ export default function TrouwPlate({ study, kind, translationName, enrolment }: 
             <div className="va-wash va-edge mt-8 rounded-xl border p-4">
               <p className="text-[13px] leading-relaxed text-foreground/80">
                 Elke les loopt dezelfde route: eerst de context, dan het gedeelte zelf, dan de uitleg,
-                dan je eigen antwoord en tot slot een korte toetsing. Je kunt op elk moment stoppen —
+                dan je eigen antwoord en tot slot een korte toetsing. Je kunt op elk moment stoppen -
                 de les onthoudt waar je gebleven was.
               </p>
             </div>
@@ -392,7 +392,7 @@ export default function TrouwPlate({ study, kind, translationName, enrolment }: 
                           {isDone ? <span className="sr-only">Afgerond.</span> : null}
                         </span>
                         {/* De vraag van de les staat alleen bij de les die aan de
-                            beurt is — bij honderdvijftig hoofdstukken zou een
+                            beurt is - bij honderdvijftig hoofdstukken zou een
                             tweede regel per rij het register onleesbaar maken. */}
                         {isCurrent ? (
                           <span className="mt-0.5 block max-w-[62ch] text-[12.5px] leading-snug text-gray-500 dark:text-muted-foreground">

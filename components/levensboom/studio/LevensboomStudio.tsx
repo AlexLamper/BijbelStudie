@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Link2 } from 'lucide-react';
 import { useLevensboom, fracOf } from '../../../hooks/useLevensboom';
@@ -60,7 +60,7 @@ export default function LevensboomStudio() {
   const { data, loading, celebrate, dismissCelebration, setAvatar, setPrefs, markItemsSeen } = useLevensboom();
   const [tab, setTab] = useState<Tab>('species');
   const [preview, setPreview] = useState<Partial<AvatarChoice>>({});
-  /** The locked item the reader tapped last; the panel under the grid explains it. */
+  /** The locked item the reader tapped last; the card over the scene explains it. */
   const [lockedPick, setLockedPick] = useState<CatalogItem | null>(null);
   const [notice, setNotice] = useState<{ text: string; pro?: boolean } | null>(null);
   const [copied, setCopied] = useState(false);
@@ -69,6 +69,19 @@ export default function LevensboomStudio() {
   const unlocked = useMemo(() => new Set(tree?.unlocked ?? []), [tree?.unlocked]);
   const seen = useMemo(() => new Set(tree?.seenItems ?? []), [tree?.seenItems]);
   const draw: AvatarChoice | null = tree ? { ...tree.avatar, ...preview } : null;
+
+  /**
+   * Put the scene back. Closing the locked card and dropping its preview are one
+   * act, never two: leaving the preview up would show the reader a tree wearing
+   * something they have not got.
+   *
+   * `useCallback` so the timer below can depend on it without restarting on
+   * every render.
+   */
+  const closeLocked = useCallback(() => {
+    setPreview({});
+    setLockedPick(null);
+  }, []);
 
   // The "Nieuw" dots of the tab on screen are cleared once the reader has had
   // a moment to see them.
@@ -89,12 +102,22 @@ export default function LevensboomStudio() {
     return () => window.clearTimeout(id);
   }, [notice]);
 
+  // The locked card is an answer to a tap, not a mode the reader has to leave:
+  // it goes away on its own, a little slower than a notice because there is a
+  // rule and a bar to read. Tapping a different locked tile hands this a new
+  // item and starts the clock again; tabbing away closes it through pickTab.
+  useEffect(() => {
+    if (!lockedPick) return;
+    const id = window.setTimeout(closeLocked, 6000);
+    return () => window.clearTimeout(id);
+  }, [lockedPick, closeLocked]);
+
   const frac = data ? fracOf(data) : 0;
 
   const onPick = async ({ item, locked }: TilePick) => {
     const kind = item.kind;
     if (locked) {
-      // Preview it on the whole landscape and open the panel that says what
+      // Preview it on the whole landscape and open the card that says what
       // it takes; nothing is written.
       setPreview({ [kind]: item.id });
       setLockedPick(item);
@@ -132,11 +155,6 @@ export default function LevensboomStudio() {
     setLockedPick(null);
   };
 
-  const closeLocked = () => {
-    setPreview({});
-    setLockedPick(null);
-  };
-
   /** Left and right walk the tabs, as a tablist is expected to. */
   const onTabKey = (event: React.KeyboardEvent<HTMLButtonElement>) => {
     const step = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0;
@@ -147,6 +165,36 @@ export default function LevensboomStudio() {
     pickTab(next.id);
     window.setTimeout(() => document.getElementById(tabId(next.id))?.focus(), 0);
   };
+
+  /**
+   * What a locked tile takes, as a card over the scene.
+   *
+   * It used to be pinned to the foot of the picking column, under the grid it
+   * was talking about and half over the last row of tiles. It belongs on the
+   * scene: tapping a locked tile previews the item on the landscape, so the
+   * answer should stand next to the thing it is explaining - "Je ziet hem
+   * alvast op de achtergrond" only makes sense there.
+   *
+   * It rides in the notice stack rather than in a corner of its own, and that is
+   * measured, not lazy. The scene is `flex-1` beside a fixed 446px panel, so on
+   * a 1280px screen it is about 638px wide; a 352px card at the bottom right
+   * would sit on top of the 352px level card at the bottom left. This stack is
+   * the one place on the scene that cannot collide with anything, because it is
+   * a flex column that grows downwards from a single anchor. `ml-auto` keeps it
+   * against the panel edge, a hand's width from the tile that opened it, while
+   * the notices stay in the heading's column.
+   */
+  const lockedCard =
+    data && tree && lockedPick && lockedPick.kind === tab ? (
+      <LockedPanel
+        item={lockedPick}
+        level={data.level}
+        xp={data.xp}
+        longestStreak={tree.longestStreak}
+        onClose={closeLocked}
+        className="ml-auto w-[352px] max-w-full"
+      />
+    ) : null;
 
   /* -- The scene ------------------------------------------------- */
   const scene = (
@@ -247,15 +295,16 @@ export default function LevensboomStudio() {
         </div>
       )}
 
-      {/* Notices sit over the scene, under the heading. */}
-      {(notice || (tree && tree.wilting) || (tree && tree.disabled)) && (
+      {/* Notices sit over the scene, under the heading; the locked card joins
+          them at the foot of the same stack. */}
+      {(notice || lockedCard || (tree && tree.wilting) || (tree && tree.disabled)) && (
         <div className="absolute left-[26px] right-[26px] top-[170px] z-10 flex flex-col gap-2">
           {tree?.wilting && (
             <p
               className="max-w-[420px] rounded-[10px] px-3 py-2 text-[12px] font-medium text-white"
               style={{ backgroundColor: 'var(--panel-card)', border: '1px solid var(--panel-border)' }}
             >
-              {tree.daysSinceActive} dagen niet gelezen — één sessie en hij veert op
+              {tree.daysSinceActive} dagen niet gelezen - één sessie en hij veert op
             </p>
           )}
           {tree?.disabled && (
@@ -265,12 +314,15 @@ export default function LevensboomStudio() {
             >
               <p className="text-[13.5px] font-semibold text-white">Je boom staat uit</p>
               <p className="mt-1 text-[12px] leading-relaxed text-white/75">
-                Je XP, niveau en badges lopen gewoon door — alleen de boom wordt niet getoond.
+                Je XP, niveau en badges lopen gewoon door - alleen de boom wordt niet getoond.
               </p>
               <button
                 type="button"
                 onClick={() => void setPrefs({ disabled: false })}
-                className="mt-3 inline-flex h-9 items-center rounded-btn bg-teal px-4 text-[13px] font-semibold text-white transition-opacity hover:opacity-90"
+                // teal-dark, not teal: this fill carries white type, and white on #0D9488
+                // is 3.74:1. It also has to match the two fills in LockedPanel, which
+                // sits a few pixels away on the same dark panel.
+                className="mt-3 inline-flex h-9 items-center rounded-btn bg-teal-dark px-4 text-[13px] font-semibold text-white transition-opacity hover:opacity-90"
               >
                 Boom weer tonen
               </button>
@@ -293,6 +345,7 @@ export default function LevensboomStudio() {
               )}
             </div>
           )}
+          {lockedCard}
         </div>
       )}
     </div>
@@ -408,20 +461,6 @@ export default function LevensboomStudio() {
             seenItems={seen}
             onPick={(pick) => void onPick(pick)}
           />
-        )}
-
-        {/* What a locked tile takes. Pinned to the foot of the panel, so a tap
-            anywhere in the grid puts the answer on screen. */}
-        {data && tree && lockedPick && lockedPick.kind === tab && (
-          <div className="sticky bottom-0 z-10 mt-4 pb-1">
-            <LockedPanel
-              item={lockedPick}
-              level={data.level}
-              xp={data.xp}
-              longestStreak={tree.longestStreak}
-              onClose={closeLocked}
-            />
-          </div>
         )}
       </div>
     </aside>

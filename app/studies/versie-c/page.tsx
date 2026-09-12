@@ -16,7 +16,7 @@ import ReviewStrip from '../../../components/study/variants/c/ReviewStrip';
  * here while every real study URL still resolves to the real page.
  */
 export const metadata: Metadata = {
-  title: 'Studies — ontwerp C (Doorlopend)',
+  title: 'Studies - ontwerp C (Doorlopend)',
   robots: { index: false, follow: false },
 };
 

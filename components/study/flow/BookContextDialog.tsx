@@ -88,8 +88,12 @@ export default function BookContextDialog({
 
   return createPortal(
     <div
-      className="dark fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-6"
-      // The scene's ground, like every other dim in the flow.
+      className="fixed inset-0 z-[80] flex items-end justify-center p-0 sm:items-center sm:p-6"
+      // Neutral ink at 55%, like every other dim in the flow. No scoped `dark`
+      // here any more: it pinned the whole dialog to the night palette, which is
+      // why it kept the old styling on the light lesson. The `--les-*` variables
+      // are declared on `:root`, so a portal into document.body inherits exactly
+      // the palette the lesson is in.
       style={{ backgroundColor: scrim(0.55) }}
       onClick={onClose}
     >
@@ -98,12 +102,12 @@ export default function BookContextDialog({
         aria-modal="true"
         aria-label={`Context van ${book}`}
         onClick={(event) => event.stopPropagation()}
-        className={`w-full sm:max-w-2xl h-[85vh] sm:h-[78vh] flex flex-col ${PANEL_SOLID} rounded-t-2xl sm:rounded-2xl shadow-[0_40px_80px_-32px_rgba(0,0,0,0.85)]`}
+        className={`flex h-[85vh] w-full flex-col rounded-t-2xl sm:h-[78vh] sm:max-w-2xl sm:rounded-2xl ${PANEL_SOLID}`}
       >
-        <header className={`flex-none flex items-center justify-between px-5 h-14 border-b ${RULE}`}>
+        <header className={`flex h-14 flex-none items-center justify-between border-b px-5 ${RULE}`}>
           {/* Titled in words; an info mark beside "Context van ..." adds nothing. */}
           <div className="flex items-center gap-2 min-w-0">
-            <h2 className={`text-sm font-bold truncate ${INK}`}>Context van {book}</h2>
+            <h2 className={`truncate text-[14.5px] font-bold ${INK}`}>Context van {book}</h2>
           </div>
           <button
             type="button"
@@ -115,7 +119,7 @@ export default function BookContextDialog({
           </button>
         </header>
 
-        <div className="flex-1 min-h-0 overflow-y-auto px-5 sm:px-7 py-5">
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-7">
           {loading ? (
             <div className="space-y-3" aria-hidden>
               {[100, 92, 96, 80, 90, 74, 88, 62, 95, 70].map((width, index) => (
@@ -128,17 +132,17 @@ export default function BookContextDialog({
             </div>
           ) : error ? (
             <div className="py-10 text-center">
-              <AlertCircle className="h-8 w-8 text-red-400 mx-auto mb-3" />
-              <p className="text-sm text-red-400">{error}</p>
+              <AlertCircle className="mx-auto mb-3 h-8 w-8 text-danger" />
+              <p className="text-[13.5px] text-danger">{error}</p>
             </div>
           ) : summary ? (
             <div
-              className={`${INK_MUTED} max-w-none ${getPreferenceClasses(preferences)}`}
+              className={`max-w-none text-[14.5px] leading-[1.75] ${INK_MUTED} ${getPreferenceClasses(preferences)}`}
               style={getPreferenceStyles(preferences)}
               dangerouslySetInnerHTML={{ __html: formatSummaryText(summary) }}
             />
           ) : (
-            <p className={`${INK_FAINT} italic text-sm`}>
+            <p className={`text-[13.5px] italic ${INK_FAINT}`}>
               Geen algemene informatie beschikbaar voor dit boek.
             </p>
           )}

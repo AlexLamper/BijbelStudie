@@ -150,7 +150,8 @@ function describeStatsFailure({ status, detail }: FetchResult): string {
  * THREE THINGS THE DESIGN DRAWS ARE NOT WIRED, because doing so would mean a new
  * fetch or a new endpoint:
  *   - "Recente feedback" would need /api/admin/feedback, which this page does
- *     not call; the slot keeps the recent sign-ups it already has.
+ *     not call; the slot holds the subscription breakdown instead, built from
+ *     the stats response that is already fetched.
  *   - The table's filter field and its subscription select narrow the rows that
  *     are loaded, client-side. Full search lives on /admin/users.
  *   - "Gebruiker toevoegen" has no endpoint at all (admin tooling can only
@@ -294,9 +295,16 @@ export default function AdminDashboardPage() {
             className="flex-1"
             label="MRR"
             value={
-              stats?.revenue.mrrEur != null
-                ? `€ ${stats.revenue.mrrEur.toLocaleString("nl-NL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                : "-"
+              // The only figure in this row that is money, in the same green the
+              // rest of the page keeps for a gain. A missing MRR stays a plain
+              // dash: an unknown amount is not a good number, so it is not green.
+              stats?.revenue.mrrEur != null ? (
+                <span className="text-success">
+                  {`€ ${stats.revenue.mrrEur.toLocaleString("nl-NL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                </span>
+              ) : (
+                "-"
+              )
             }
           />
           <StatCard className="flex-1" label="Betalende gebruikers" value={formatNumber(stats?.users.paying)} />
@@ -415,7 +423,7 @@ export default function AdminDashboardPage() {
                     </span>
                   </div>
                   <div className="text-[12.5px] text-ink-faint tabular-nums">
-                    {u.streak ? `${u.streak} dagen reeks` : "—"}
+                    {u.streak ? `${u.streak} dagen reeks` : "-"}
                   </div>
                 </div>
               )
@@ -425,34 +433,48 @@ export default function AdminDashboardPage() {
 
         {/* ── The two cards under it: siblings, never nested ────────── */}
         <div className="flex flex-none gap-4">
+          {/* The slot the design fills with "Recente feedback". Recent sign-ups
+              stood here, but the table above already lists the newest accounts
+              and the "Nieuwe gebruikers" chart already counts them. The one
+              question nothing else on this page answers is where the MRR at the
+              top comes from: Stripe, the app stores and hand-granted access are
+              three different stories behind one amount, and only this card
+              tells them apart. */}
           <Card className="min-w-0 flex-1 p-[17px]">
-            <div className="flex items-center">
-              <h2 className="flex-1 text-[14.5px] font-bold text-ink">Recente aanmeldingen</h2>
-              <Link href="/admin/users" className="text-[12.5px] font-semibold text-teal no-underline hover:text-teal-dark">
-                Alles bekijken
-              </Link>
+            <div className="flex items-center gap-3">
+              <h2 className="flex-1 text-[14.5px] font-bold text-ink">Abonnementen uitgesplitst</h2>
+              {!loading && stats?.users.premiumPercent != null && (
+                <span className="text-[12px] text-ink-faint tabular-nums">
+                  {stats.users.premiumPercent.toLocaleString("nl-NL", { maximumFractionDigits: 1 })} % van alle accounts betaalt
+                </span>
+              )}
             </div>
-            {loading ? (
-              <div className="mt-3 space-y-3">
-                {[1, 2, 3].map(i => <Skeleton key={i} className="h-8 w-full" />)}
-              </div>
-            ) : recent.length === 0 ? (
-              <p className="mt-3 text-[12.5px] text-ink-muted">Nog geen gebruikers.</p>
-            ) : (
-              recent.slice(0, 3).map(u => (
-                <div key={u._id} className="flex gap-[11px] border-t border-line-soft py-3">
-                  <span className="flex h-[30px] w-[30px] flex-none items-center justify-center rounded-full bg-line-soft text-[12px] font-semibold text-ink-muted">
-                    {(u.name || u.email).slice(0, 1).toUpperCase()}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[13px] leading-[1.5] text-ink-body">
-                      <span className="font-semibold text-ink">{u.name || "Naamloos"}</span> — {u.email}
-                    </p>
-                    <p className="mt-[3px] text-[11px] text-ink-faint">{relativeTime(u.createdAt)}</p>
-                  </div>
-                </div>
-              ))
-            )}
+            <p className="mt-1 text-[12.5px] text-ink-muted">Waar de betalende gebruikers vandaan komen</p>
+
+            {/* The three ways an account has Pro. The first two are `users.paying`
+                split by channel; the third is access nobody pays for, which is
+                why it is reported here and kept out of every money figure. */}
+            <dl className="mt-3 grid grid-cols-3 gap-[13px]">
+              <MiniStat label="Via Stripe" value={formatNumber(stats?.users.stripeSubscribers)} loading={loading} />
+              <MiniStat label="Via de app" value={formatNumber(stats?.users.storeSubscribers)} loading={loading} />
+              <MiniStat label="Gratis toegang" value={formatNumber(stats?.users.comped)} loading={loading} />
+            </dl>
+
+            {/* The interval counts come from the Stripe filter only, never from
+                the app stores, so the label says so - otherwise month + year
+                reads as if it should add up to every paying account. */}
+            <dl className="mt-[14px]">
+              <FunnelRow label="Stripe: maandelijks" value={stats?.billing.monthlySubscribers} loading={loading} />
+              <FunnelRow label="Stripe: jaarlijks" value={stats?.billing.annualSubscribers} loading={loading} />
+              {/* Shown only when it is not zero: a Stripe subscriber whose interval
+                  was never recorded is priced as monthly in the MRR above, so any
+                  count here is a data gap worth chasing. A row that permanently
+                  reads "0" is noise. */}
+              {(stats?.billing.unknownInterval ?? 0) > 0 && (
+                <FunnelRow label="Stripe: termijn onbekend" value={stats?.billing.unknownInterval} loading={loading} />
+              )}
+              <FunnelRow label="Beheerders" value={stats?.users.admins} loading={loading} last />
+            </dl>
           </Card>
 
           <Card className="w-[340px] flex-none p-[14px]">

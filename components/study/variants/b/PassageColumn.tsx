@@ -121,7 +121,7 @@ export default function PassageColumn({
   if (inRange.length === 0) {
     return (
       <p className="py-10 text-center text-[13.5px] text-gray-500 dark:text-muted-foreground">
-        Geen bijbeltekst gevonden voor dit gedeelte. Kies hiernaast een andere vertaling — niet elke
+        Geen bijbeltekst gevonden voor dit gedeelte. Kies hiernaast een andere vertaling - niet elke
         vertaling heeft elk boek.
       </p>
     );

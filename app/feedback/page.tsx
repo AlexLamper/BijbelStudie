@@ -1,9 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useSession } from "next-auth/react"
 import { Star, Loader2, CheckCircle2, AlertCircle, Check } from "lucide-react"
 import AppShell from "../../components/shell/AppShell"
 import { Card } from "../../components/kit/primitives"
@@ -64,7 +62,6 @@ type Status = "idle" | "sending" | "success" | "error"
  */
 export default function FeedbackPage() {
   const pathname = usePathname()
-  const { data: session } = useSession()
   const [category, setCategory] = useState<Category>("feature")
   const [rating, setRating] = useState<number>(0)
   const [hoverRating, setHoverRating] = useState<number>(0)
@@ -103,7 +100,7 @@ export default function FeedbackPage() {
     const body = [
       subject.trim(),
       message.trim(),
-      sendDevice && typeof navigator !== "undefined" ? `— ${navigator.userAgent}` : "",
+      sendDevice && typeof navigator !== "undefined" ? `- ${navigator.userAgent}` : "",
     ]
       .filter(Boolean)
       .join("\n\n")
@@ -155,14 +152,14 @@ export default function FeedbackPage() {
           <Card className="p-[22px]">
             <h2 className="text-[19px] font-bold tracking-[-0.2px] text-ink">Wat kan er beter?</h2>
             <p className="mt-[6px] max-w-[520px] text-[13.5px] leading-[1.6] text-ink-muted">
-              Alles wordt gelezen. Vertel gerust wat er misgaat of wat je mist — hoe concreter, hoe beter.
+              Alles wordt gelezen. Vertel gerust wat er misgaat of wat je mist - hoe concreter, hoe beter.
             </p>
 
             {/* Rating */}
             <div className="mt-[18px] flex items-center gap-[18px] rounded-[12px] border border-line bg-sunken px-[18px] py-[15px]">
               <div className="min-w-0 flex-1">
                 <p className="text-[14.5px] font-semibold text-ink">Hoe beoordeel je BijbelStudie?</p>
-                <p className="mt-[3px] text-[12px] text-ink-faint">Optioneel — één tik</p>
+                <p className="mt-[3px] text-[12px] text-ink-faint">Optioneel - één tik</p>
               </div>
               <div className="flex gap-[5px]">
                 {[1, 2, 3, 4, 5].map((n) => {
@@ -295,9 +292,13 @@ export default function FeedbackPage() {
                   "Versturen"
                 )}
               </button>
-              {session?.user?.email && (
-                <p className="text-[12.5px] text-ink-faint">Je krijgt antwoord op {session.user.email}</p>
-              )}
+              {/* The design's line beside the button (PAGES.md §9.7) used to print
+                  the reader's own address back at them, which tells them nothing
+                  they did not already know - and `app/feedback/layout.tsx` gates
+                  guests, so there is always an account address behind a
+                  submission anyway. What is worth knowing is which sender the
+                  answer arrives from; hence the address, not the session. */}
+              <p className="text-[12.5px] text-ink-faint">Je krijgt antwoord van info@bijbelstudie.io</p>
             </div>
           </Card>
         </form>
@@ -329,12 +330,18 @@ export default function FeedbackPage() {
             <p className="mt-[6px] text-[13px] leading-[1.6] text-ink-muted">
               Voor vragen over je abonnement of account gaat mailen sneller.
             </p>
-            <Link
-              href="/contact"
+            {/* Straight to the mail client rather than to /contact: that page
+                sits in the marketing chrome (landing Header + Footer) and its
+                whole content is this same address, so for a reader already
+                inside the app shell it was a jump out of the chrome to read one
+                line. The address also stands as selectable text beside the
+                Versturen button, for anyone with no mail handler. */}
+            <a
+              href="mailto:info@bijbelstudie.io"
               className="mt-3 flex h-[38px] items-center justify-center rounded-[9px] border border-line text-[13px] font-semibold text-ink-body no-underline transition-colors hover:bg-line-soft"
             >
               Mail het team
-            </Link>
+            </a>
           </Card>
         </aside>
       </div>

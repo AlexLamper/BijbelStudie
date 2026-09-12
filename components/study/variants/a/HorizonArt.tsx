@@ -7,7 +7,7 @@ import { rgba } from './tint';
  * Het uitzicht van één studie: een lucht, een gezaaide horizon, een aardband,
  * en wat de aanroeper op het glas zet.
  *
- * De geometrie komt volledig uit `lib/studyArt.ts` — dit bestand tekent alleen.
+ * De geometrie komt volledig uit `lib/studyArt.ts` - dit bestand tekent alleen.
  * Geen hooks en geen 'use client', zodat dezelfde component in een server
  * component staat (de band op het studiescherm, dat daar de LCP is) én in de
  * client-catalogus. Er beweegt niets: een banner die beweegt is decoratie, en
@@ -15,7 +15,7 @@ import { rgba } from './tint';
  *
  * `preserveAspectRatio="none"` is het punt. De horizon wordt gecomponeerd op de
  * verhouding waarop hij ook getekend wordt (`ratio`), in plaats van uit een
- * 16:6-tekening gesneden te worden — dat laatste gooit in een lijstweergave een
+ * 16:6-tekening gesneden te worden - dat laatste gooit in een lijstweergave een
  * derde van de plaat weg.
  *
  * Het beeld is overal `aria-hidden`. Een uitzicht zegt niets wat een lezer
@@ -46,7 +46,7 @@ export default function HorizonArt({
   const groundPct = (horizon.groundTop / height) * 100;
 
   /**
-   * De stand van zon of maan. Afgeleid van de gezaaide `phase` van de studie —
+   * De stand van zon of maan. Afgeleid van de gezaaide `phase` van de studie -
    * dus stabiel per studie en klokvrij, net als de rest van het beeld. Geen
    * nieuwe random: `lib/studyArt.ts` verbiedt dat, en terecht.
    */
@@ -80,7 +80,7 @@ export default function HorizonArt({
           <circle>: met preserveAspectRatio="none" zou een cirkel in een strook
           van 12:1 een uitgerekte ellips worden. De straal uit studyHorizon is
           relatief aan de hoogte, dus hij wordt hier alleen naar een zichtbaar
-          formaat geschaald — de plaatsing blijft exact wat de module zei. */}
+          formaat geschaald - de plaatsing blijft exact wat de module zei. */}
       {!quiet &&
         horizon.stars.map((star, index) => (
           <span

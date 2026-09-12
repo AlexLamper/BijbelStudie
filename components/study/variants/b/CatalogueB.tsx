@@ -358,7 +358,7 @@ export default function CatalogueB({ demo }: { demo: DemoProgress }) {
             </h1>
             <p className="mt-1.5 max-w-2xl text-[13.5px] leading-relaxed text-gray-500 dark:text-muted-foreground">
               Elke studie heeft een eigen uitzicht. Het landschap hoort bij de soort studie, het licht
-              en het seizoen liggen vast bij de studie zelf — zo herken je een studie aan zijn kleur
+              en het seizoen liggen vast bij de studie zelf - zo herken je een studie aan zijn kleur
               voordat je de titel leest.
             </p>
           </div>

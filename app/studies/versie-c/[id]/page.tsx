@@ -71,7 +71,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { id } = await params;
   const study = findAnyStudy(id);
   return {
-    title: `${study ? study.title : 'Studie'} — ontwerp C (Doorlopend)`,
+    title: `${study ? study.title : 'Studie'} - ontwerp C (Doorlopend)`,
     robots: { index: false, follow: false },
   };
 }
@@ -256,7 +256,7 @@ export default async function DoorlopendStudyPage({ params }: PageProps) {
               {finished
                 ? `Je deed alle ${total} lessen van deze studie.`
                 : currentLesson
-                  ? `Les ${currentDay} — ${currentLesson.title}`
+                  ? `Les ${currentDay} - ${currentLesson.title}`
                   : 'Deze studie heeft nog geen lessen.'}
             </p>
           </div>
@@ -317,7 +317,7 @@ export default async function DoorlopendStudyPage({ params }: PageProps) {
                 <p className="text-[13px] leading-relaxed text-foreground/80">
                   Elke les loopt dezelfde route: eerst de context, dan het gedeelte zelf, dan de
                   uitleg, dan je eigen antwoord en tot slot een korte toetsing. Je kunt op elk moment
-                  stoppen — de les onthoudt waar je gebleven was.
+                  stoppen - de les onthoudt waar je gebleven was.
                 </p>
               </div>
             </div>

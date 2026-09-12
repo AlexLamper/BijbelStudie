@@ -8,12 +8,12 @@ import TrouwPlate, {
 } from '../../../../components/study/variants/a/TrouwPlate';
 
 /**
- * Ontwerp A — "trouw" — scherm 2 van 3: de studie zelf.
+ * Ontwerp A - "trouw" - scherm 2 van 3: de studie zelf.
  *
  * EEN BEOORDELINGS-URL, en een server component zonder database erin. De echte
  * /studies/[id] leest de sessie, de inschrijving en StudyProgress; deze pagina
- * lost de studie op met `findAnyStudy` — dezelfde pure lookup waar de echte
- * `findStudy` naar doordelegeert — en verzint zijn stand hieronder.
+ * lost de studie op met `findAnyStudy` - dezelfde pure lookup waar de echte
+ * `findStudy` naar doordelegeert - en verzint zijn stand hieronder.
  *
  * Nooit geïndexeerd: drie ontwerpen van één pagina mogen niet met het echte
  * /studies/[id] om hetzelfde onderwerp concurreren.
@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { id } = await params;
   const study = findAnyStudy(id);
   return {
-    title: study ? `${study.title} — ontwerp A (trouw)` : 'Studie — ontwerp A (trouw)',
+    title: study ? `${study.title} - ontwerp A (trouw)` : 'Studie - ontwerp A (trouw)',
     robots: { index: false, follow: false },
   };
 }
@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
  * DEMOGEGEVENS. Verzonnen en vast: welke studies "begonnen" zijn en hoever.
  *
  * Een id dat hier niet in staat toont het scherm zoals iemand het ziet die nog
- * niet begon — met opzet, zodat beide toestanden via de URL bereikbaar zijn
+ * niet begon - met opzet, zodat beide toestanden via de URL bereikbaar zijn
  * (/studies/versie-a/opstanding tegenover /studies/versie-a/boek-genesis). Op de
  * echte pagina komt dit uit StudyEnrollment en StudyProgress; hier wordt er niets
  * gelezen en niets geschreven.

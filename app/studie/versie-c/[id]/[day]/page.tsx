@@ -45,7 +45,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const study = findAnyStudy(id);
   const lesson = study ? findLesson(study, Number(day)) : undefined;
   return {
-    title: `${lesson ? lesson.title : 'Les'} — ontwerp C (Doorlopend)`,
+    title: `${lesson ? lesson.title : 'Les'} - ontwerp C (Doorlopend)`,
     robots: { index: false, follow: false },
   };
 }

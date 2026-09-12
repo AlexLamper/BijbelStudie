@@ -9,10 +9,7 @@ import { badgeDescription, badgeLabel } from '../../../lib/badgeCatalog';
 import { PUBLIC_CARD_FIELDS, publicLevensboomCard, type PublicCardSource } from '../../../lib/levensboom/publicCard';
 import { catalogItem } from '../../../lib/levensboom/catalog';
 import TreeCanvas from '../../../components/levensboom/TreeCanvas';
-import SceneShell from '../../../components/scene/SceneShell';
-import { SCENE_TREE, sceneSvg } from '../../../components/scene/scene-svg';
-import { Panel, SectionHeading } from '../../../components/scene/pieces';
-import { CTA_BRAND, EYEBROW, TEAL_DEEP, TEAL_ON_DARK, TILE } from '../../../components/scene/tokens';
+import { Card, Pill } from '../../../components/kit/primitives';
 
 /**
  * /gebruiker/[id] - a reader's public tree.
@@ -20,18 +17,24 @@ import { CTA_BRAND, EYEBROW, TEAL_DEEP, TEAL_ON_DARK, TILE } from '../../../comp
  * Opt-in: a 404 until the account switches "Openbaar profiel" on, and the same
  * 404 for an id that does not exist, so the page never confirms an account.
  * What it shows is the tree, the first name, the stage and level, the badges
- * and the join month - never the email, the streak or anything read.
+ * and the join month - never the email, the streak or anything read. That list
+ * is `lib/levensboom/publicCard.ts` and this page adds nothing to it.
  *
  * Static for five minutes at a time (ISR): the tree changes slowly and the
  * page depends on no session, so a shared link costs the CDN, not a render
  * per visit. Kept out of the index: a thin page per user is not content.
  *
- * On the scene, in its signed-out shape. No session is guaranteed here, so the
- * backdrop is the default `static` one - a landscape rendered to an SVG on the
- * server, in the first paint and in what a crawler gets - and neither `header`
- * nor `rail` is passed, because both read the session. No `gateId` either: this
- * visitor's tree is drawn by the live TreeCanvas below, and that is the one
- * animated canvas the page is allowed (components/scene/README.md).
+ * ON THE SLATE & TEAL SYSTEM, BUT NOT IN THE APP SHELL. This is the one page a
+ * stranger lands on from a shared link, so `components/shell/AppShell` - the
+ * signed-in sidebar and top bar - would show a visitor a menu they cannot use.
+ * It gets the same ground, cards, tokens and type as /profiel (PAGES.md §6),
+ * in a single centred column with a way in at the end for someone who has no
+ * account yet.
+ *
+ * The picture is the existing renderer (RULES.md §4), driven straight from the
+ * public card. `components/kit/TreeAvatar` cannot stand in for it here: that
+ * one draws *the viewer's* tree through `useLevensboom`, which on this page is
+ * either nobody's or the wrong person's.
  */
 export const revalidate = 300;
 export const dynamicParams = true;
@@ -89,24 +92,29 @@ export default async function PublicProfilePage({ params }: Params) {
     : null;
 
   return (
-    <SceneShell svg={sceneSvg()} {...SCENE_TREE}>
-      <main className="mx-auto w-full max-w-3xl pb-24 pt-16 sm:pt-24">
-        <div className="scene-sky">
-          <p className={EYEBROW} style={{ color: TEAL_ON_DARK }}>
-            Voortgang
-          </p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight text-white drop-shadow-sm sm:text-4xl">
-            De boom van {name}
-          </h1>
-          <p className="mt-2 text-sm text-white/80">
-            {card.stage.name} · niveau {card.level}
-            {since ? ` · lid sinds ${since}` : ''}
-          </p>
+    <div className="min-h-screen bg-line-soft">
+      {/* The only chrome a signed-out visitor gets: who this is from, and a way
+          in. Same 64 px height as the app's top bar, so the page still reads as
+          part of the product. */}
+      <header className="border-b border-line bg-white">
+        <div className="mx-auto flex h-16 w-full max-w-[600px] items-center gap-3 px-5">
+          <Link href="/" className="text-[15px] font-bold tracking-[-0.2px] text-ink no-underline">
+            BijbelStudie
+          </Link>
+          <div className="flex-1" />
+          <Link
+            href="/registreren"
+            className="text-[13px] font-semibold text-teal no-underline hover:text-teal-dark"
+          >
+            Gratis beginnen
+          </Link>
         </div>
+      </header>
 
-        {/* The one animated canvas on this page: the tree itself. */}
-        <div className="mt-8 overflow-hidden rounded-3xl ring-1 ring-white/20 shadow-2xl shadow-black/40">
-          <div className="aspect-[16/10] w-full bg-[#0B1027]">
+      <main className="mx-auto flex w-full max-w-[600px] flex-col gap-[13px] px-5 pb-16 pt-5">
+        {/* Who this is: the tree first, because it is what was shared. */}
+        <Card className="overflow-hidden">
+          <div className="relative aspect-[16/10] w-full bg-sky">
             <TreeCanvas
               seed={card.seed}
               level={card.level}
@@ -120,58 +128,113 @@ export default async function PublicProfilePage({ params }: Params) {
               ariaLabel={`De boom van ${name}: ${card.stage.name.toLowerCase()} op niveau ${card.level}`}
             />
           </div>
+
+          <div className="px-[18px] pb-[18px]">
+            {/* The level marker /profiel puts on the avatar, here on the edge of
+                the scene. `relative` so it paints over the positioned canvas,
+                and hidden from screen readers because the line below already
+                says the level in words. */}
+            <span
+              className="relative -mt-[27px] mb-[13px] flex h-[54px] w-[54px] items-center justify-center rounded-full bg-gold text-[20px] font-bold leading-none text-gold-ink tabular-nums"
+              style={{ border: '3px solid var(--surface)' }}
+              aria-hidden
+            >
+              {card.level}
+            </span>
+
+            <p className="text-[10.5px] font-semibold uppercase tracking-[1.1px] text-ink-faint">
+              Voortgang
+            </p>
+            <h1 className="mt-[6px] text-[26px] font-bold tracking-[-0.5px] text-ink">
+              De boom van {name}
+            </h1>
+            <p className="mt-[5px] text-[13.5px] text-ink-muted">
+              {card.stage.name} · niveau {card.level}
+            </p>
+            <p className="mt-3 text-[13.5px] leading-[1.75] text-ink-body">
+              Deze boom groeit mee met alles wat {name} leest en bestudeert in de Bijbel.
+            </p>
+            {since && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Pill label={`Lid sinds ${since}`} />
+              </div>
+            )}
+          </div>
+        </Card>
+
+        {/* What this tree is made of - all three come from the public catalogue,
+            not from the account. */}
+        <div className="grid grid-cols-1 gap-[13px] sm:grid-cols-3">
+          <Fact label="Boomsoort" value={species?.name ?? '-'} verse={species?.verse} />
+          <Fact label="Omgeving" value={scene?.name ?? '-'} verse={scene?.verse} />
+          <Fact label="Gezelschap" value={animal?.name ?? 'Alleen de boom'} verse={animal?.verse} />
         </div>
 
-        <dl className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
-          <Fact label="Boomsoort" value={species?.name ?? '—'} hint={species?.verse} />
-          <Fact label="Omgeving" value={scene?.name ?? '—'} hint={scene?.verse} />
-          <Fact label="Gezelschap" value={animal?.name ?? 'Alleen de boom'} hint={animal?.verse} />
-        </dl>
-
         {badges.length > 0 && (
-          <section className="mt-10" aria-labelledby="publiek-badges">
-            <SectionHeading id="publiek-badges" title="Badges" rule />
-            <ul className="m-0 mt-3 flex list-none flex-wrap gap-2 p-0">
+          <Card className="p-[15px]">
+            <div className="flex items-baseline gap-2">
+              <span className="flex-1 text-[14.5px] font-bold text-ink">Badges</span>
+              <span className="text-[21px] font-bold text-ink tabular-nums">{badges.length}</span>
+              <span className="text-[12.5px] text-ink-faint">verdiend</span>
+            </div>
+            <div className="mt-3 h-px bg-line" />
+            <ul className="m-0 mt-[15px] flex list-none flex-wrap gap-2 p-0">
               {badges.map((badge) => (
-                <li
-                  key={badge}
-                  className="rounded-full border border-white/25 bg-white/10 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm"
-                  title={badgeDescription(badge)}
-                >
-                  {badgeLabel(badge)}
+                // The description is the tooltip rather than a second line: a
+                // visitor needs the name, not the rulebook.
+                <li key={badge} title={badgeDescription(badge)}>
+                  <Pill label={badgeLabel(badge)} />
                 </li>
               ))}
             </ul>
-          </section>
+          </Card>
         )}
 
-        <p className="mt-12 text-sm italic leading-relaxed text-white/75">
-          &ldquo;Want hij zal zijn als een boom, geplant aan waterbeken, die zijn vrucht geeft op zijn
-          tijd.&rdquo;
-          <span className="not-italic"> — Psalm 1:3</span>
-        </p>
-
-        <Panel className="mt-8 p-6" labelledBy="publiek-cta">
-          <SectionHeading id="publiek-cta" title="Plant je eigen boom" />
-          <p className="mt-2 text-sm leading-relaxed text-white/75">
-            Je boom begint als kiem en groeit met alles wat je leest en bestudeert. Gratis, op de
-            website en in de app.
+        {/* The way in for someone who arrived here without an account. */}
+        <Card className="p-5">
+          <h2 className="text-[16px] font-bold text-ink">Plant je eigen boom</h2>
+          <blockquote className="mt-3 rounded-[10px] bg-line-soft p-[11px]">
+            <p className="m-0 font-serif text-[15px] leading-[1.8] text-scripture">
+              &ldquo;Want hij zal zijn als een boom, geplant aan waterbeken, die zijn vrucht geeft op
+              zijn tijd.&rdquo;
+            </p>
+            <cite className="mt-[6px] block text-[12px] not-italic text-ink-faint">Psalm 1:3</cite>
+          </blockquote>
+          <p className="mt-3 text-[13.5px] leading-[1.75] text-ink-body">
+            Je boom begint als kiem en groeit met elk hoofdstuk dat je leest en elke les die je
+            afrondt. Gratis, op de website en in de app.
           </p>
-          <Link href="/inloggen" className={`mt-5 ${CTA_BRAND}`} style={{ backgroundColor: TEAL_DEEP }}>
-            Gratis beginnen
-          </Link>
-        </Panel>
+          <div className="mt-4 flex flex-wrap items-center gap-4">
+            <Link
+              href="/registreren"
+              className="inline-flex h-11 items-center justify-center rounded-btn bg-teal px-5 text-[14px] font-semibold text-white no-underline transition-opacity hover:opacity-90"
+            >
+              Maak zelf een gratis account
+            </Link>
+            <Link
+              href="/inloggen"
+              className="text-[13px] font-semibold text-teal no-underline hover:text-teal-dark"
+            >
+              Ik heb al een account →
+            </Link>
+          </div>
+        </Card>
+
+        <p className="mt-2 text-center text-[12px] text-ink-faint">
+          BijbelStudie · lees en bestudeer de Bijbel in het Nederlands
+        </p>
       </main>
-    </SceneShell>
+    </div>
   );
 }
 
-function Fact({ label, value, hint }: { label: string; value: string; hint?: string }) {
+/** One line of the tree's make-up: the choice, with the verse it borrows from. */
+function Fact({ label, value, verse }: { label: string; value: string; verse?: string }) {
   return (
-    <div className={`px-4 py-3.5 ${TILE}`}>
-      <dt className="text-[11px] font-semibold uppercase tracking-wide text-white/60">{label}</dt>
-      <dd className="m-0 mt-1 text-sm font-semibold text-white">{value}</dd>
-      {hint && <dd className="m-0 mt-0.5 text-[11px] leading-snug text-white/60">{hint}</dd>}
-    </div>
+    <Card className="px-[17px] py-[15px]">
+      <div className="text-[12px] text-ink-muted">{label}</div>
+      <div className="mt-[6px] text-[14.5px] font-bold leading-[1.35] text-ink">{value}</div>
+      {verse && <div className="mt-[3px] text-[11.5px] text-ink-faint">{verse}</div>}
+    </Card>
   );
 }

@@ -80,7 +80,7 @@ export default function StudyFlowVariantSwitcher({ className = "" }: { className
             className={`${link} ${variant.n === here.variant ? on : off}`}
           >
             {variant.n}
-            <span className="sr-only"> — {variant.name}</span>
+            <span className="sr-only"> - {variant.name}</span>
           </Link>
         ))}
       </span>

@@ -11,7 +11,7 @@ import HorizonArt from './HorizonArt';
 import { ON_ART, ON_ART_FAINT, ON_ART_MUTED, SCRIM_CARD, SCRIM_STRIP, TEAL } from './tint';
 
 /**
- * Ontwerp A — "trouw" — scherm 1 van 3: de catalogus.
+ * Ontwerp A - "trouw" - scherm 1 van 3: de catalogus.
  *
  * De basis is ontwerp 2 ("Vensters"), want dat won het overzicht: de kaart ís
  * het beeld. Niets staat naast de plaat in een 96x64 vakje; de titel en de twee
@@ -20,8 +20,8 @@ import { ON_ART, ON_ART_FAINT, ON_ART_MUTED, SCRIM_CARD, SCRIM_STRIP, TEAL } fro
  *
  * Twee dingen zijn veranderd, precies zoals gevraagd:
  *
- *  1. De uitgelichte kaart was te groot. Hij is nu één brede, lage strook —
- *     ongeveer een tiende van het oppervlak dat de hero innam — zodat de eerste
+ *  1. De uitgelichte kaart was te groot. Hij is nu één brede, lage strook -
+ *     ongeveer een tiende van het oppervlak dat de hero innam - zodat de eerste
  *     schermvulling studies laat zien in plaats van één studie.
  *  2. Het beeld komt uit `lib/studyArt.ts`, het gedeelde plan, niet uit
  *     `study.image` en niet uit een eigen kopie.
@@ -104,7 +104,7 @@ const href = (id: string) => `/studies/versie-a/${encodeURIComponent(id)}`;
 
 /**
  * De focusring, één keer. Teal, met de offsetkleur op de eigen achtergrond van
- * de pagina — `ring-offset-2` valt anders terug op wit en tekent een witte halo
+ * de pagina - `ring-offset-2` valt anders terug op wit en tekent een witte halo
  * op de donkere ondergrond.
  */
 const ring: React.CSSProperties = {

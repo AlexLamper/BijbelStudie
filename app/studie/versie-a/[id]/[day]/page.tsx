@@ -18,7 +18,7 @@ import TrouwLesson, {
 } from '../../../../../components/study/variants/a/TrouwLesson';
 
 /**
- * Ontwerp A — "trouw" — scherm 3 van 3: één les.
+ * Ontwerp A - "trouw" - scherm 3 van 3: één les.
  *
  * EEN BEOORDELINGS-URL, en de reden dat hij kan bestaan is dat alles wat de
  * flow nodig heeft om beoordeeld te worden zonder database op te lossen is:
@@ -32,8 +32,8 @@ import TrouwLesson, {
  * `[studyId]`, dus /studie/versie-a/... lost hier op en elke echte les-URL lost
  * nog steeds op de echte pagina op.
  *
- * Het scherm erft app/studie/layout.tsx — geen appbalk, de 56px hover-rail, het
- * ingezette afgeronde kader — omdat de flow een venster is en geen appschil, en
+ * Het scherm erft app/studie/layout.tsx - geen appbalk, de 56px hover-rail, het
+ * ingezette afgeronde kader - omdat de flow een venster is en geen appschil, en
  * een variant die dat veranderde zou niet met de andere te vergelijken zijn.
  */
 
@@ -46,7 +46,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const study = findAnyStudy(id);
   const lesson = study ? findLesson(study, Number(day)) : undefined;
   return {
-    title: lesson ? `${lesson.title} — ontwerp A (trouw)` : 'Les — ontwerp A (trouw)',
+    title: lesson ? `${lesson.title} - ontwerp A (trouw)` : 'Les - ontwerp A (trouw)',
     robots: { index: false, follow: false },
   };
 }

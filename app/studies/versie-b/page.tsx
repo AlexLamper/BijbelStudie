@@ -15,7 +15,7 @@ import ReviewStrip from '../../../components/study/variants/b/ReviewStrip';
  * concurreren is precies waar /studies/[id] al tegen beschermt.
  */
 export const metadata: Metadata = {
-  title: 'Studies — ontwerp B (Dichter)',
+  title: 'Studies - ontwerp B (Dichter)',
   robots: { index: false, follow: false },
 };
 
