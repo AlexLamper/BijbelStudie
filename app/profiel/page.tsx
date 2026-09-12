@@ -1,19 +1,16 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useSession } from "next-auth/react"
+import { useSession, getSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { getSession } from "next-auth/react"
-import { ArrowRight, Check, Loader2, X } from "lucide-react"
-import UserBadges from "../../components/profile/badges"
-import LevelCard from "../../components/profile/LevelCard"
-import TreeAvatar from "../../components/levensboom/TreeAvatar"
-import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
-import { ProBadge } from "../../components/ui/ProBadge"
-import SceneShell from "../../components/scene/SceneShell"
-import { GlassStat, Panel, SceneSkeleton, SectionHeading } from "../../components/scene/pieces"
-import { CTA_BRAND, CTA_PRIMARY, EYEBROW, TEAL_DEEP, TEAL_ON_DARK } from "../../components/scene/tokens"
+import { Check, Loader2, Lock, Pencil, X } from "lucide-react"
+import UserBadges, { BadgeRings, BADGE_TOTAL } from "../../components/profile/badges"
+import AppShell from "../../components/shell/AppShell"
+import TreeAvatar from "../../components/kit/TreeAvatar"
+import Tabs from "../../components/kit/Tabs"
+import { Card, Pill, ProgressBar, Skeleton, StatCard } from "../../components/kit/primitives"
+import { useLevensboom } from "../../hooks/useLevensboom"
 
 interface UserData {
   _id: string
@@ -31,33 +28,32 @@ interface UserData {
 
 type Status = "idle" | "saving" | "success" | "error"
 
-/** The input and the textarea, on a scene panel rather than on a white card. */
-const FIELD_INPUT =
-  "w-full rounded-lg border border-white/25 bg-black/35 px-3 py-1.5 text-sm text-white placeholder:text-white/40 outline-none focus-visible:border-[#2DD4BF] focus-visible:ring-2 focus-visible:ring-[#2DD4BF]/50"
-
-/** "Bewerken" / "Toevoegen": type only, with a real focus ring on the scene. */
-const EDIT_LINK =
-  "flex-shrink-0 rounded-md text-xs font-semibold outline-none underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-white"
-
 /**
- * /profiel - the reader's own page, on the scene.
+ * /profiel (design_handoff_web/PAGES.md §6).
  *
- * Same three layers as the dashboard: the sky carries who this is, the horizon
- * the two standing figures the page already knew, and the desk the working
- * panels - the account fields, the level, the badges, the tree, the
- * subscription. The backdrop is `reader`, so the landscape behind all of it is
- * this reader's OWN tree; the round avatar in the right column is therefore
- * drawn `still`, because a page may mount exactly one animated canvas and the
- * shell already owns it.
+ * Work column: who this is, four figures, and the activity card. Rail: four
+ * cards of one width - Je boom, Badges, Abonnement, Account.
  *
  * Nothing about what this page reads or writes moved: the same GET /api/user,
- * the same PUT /api/user/update for the name and the bio, the same
- * `updateSession()` after a rename so the navbar does not keep the old one.
+ * the same PUT /api/user/update for the name and the bio, and the same
+ * `updateSession()` after a rename so the sidebar does not keep the old one.
+ * The level, the streak and the badge count come from `useLevensboom`, which
+ * the root layout already mounts for the top bar - so they cost no request.
+ *
+ * THREE FIGURES THE DESIGN ASKS FOR HAVE NO SOURCE HERE, and RULES.md forbids
+ * adding a fetch to get them: bookmarks (web has no bookmark store at all),
+ * the note count (/api/notes) and books opened (/api/user/reading-progress).
+ * Rather than print three zeros that would be wrong, the four tiles show the
+ * four figures this page can actually stand behind. Say the word and the two
+ * fetches can be added.
+ *
+ * THE ACTIVITY CARD has no feed behind it either - nothing on the web records
+ * an activity stream - so it keeps its shape and says so.
  */
 export default function ProfilePage() {
-  // Only the updater is needed here; the page reads the user from /api/user.
   const { update: updateSession } = useSession()
   const router = useRouter()
+  const { data: levensboom } = useLevensboom()
   const [user, setUser] = useState<UserData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -69,6 +65,8 @@ export default function ProfilePage() {
   const [draftBio, setDraftBio] = useState("")
   const [nameStatus, setNameStatus] = useState<Status>("idle")
   const [bioStatus, setBioStatus] = useState<Status>("idle")
+  const [activityTab, setActivityTab] = useState("all")
+  const [badgesOpen, setBadgesOpen] = useState(false)
 
   useEffect(() => { setMounted(true) }, [])
 
@@ -132,9 +130,8 @@ export default function ProfilePage() {
       if (!res.ok) throw new Error()
       setUser({ ...user, name: trimmed })
       // Saving to Mongo is not enough on its own: the client caches the session
-      // until something asks it to refetch, so without this the navbar and the
-      // dashboard greeting kept the old name until a hard reload. `update()`
-      // refetches, which re-runs the session callback and reads the new name.
+      // until something asks it to refetch, so without this the sidebar and the
+      // dashboard greeting kept the old name until a hard reload.
       await updateSession({ name: trimmed })
       setNameStatus("success")
       setEditing(null)
@@ -180,401 +177,295 @@ export default function ProfilePage() {
   const memberSince = user?.createdAt
     ? new Date(user.createdAt).toLocaleDateString("nl-NL", { month: "long", year: "numeric" })
     : null
-  const badgeCount = (user?.badges || []).length
-  const streak = user?.streak || 0
+  const earnedBadges = user?.badges || []
+  const badgeCount = earnedBadges.length
+  const streak = user?.streak ?? levensboom?.streak ?? 0
+  const level = levensboom?.level ?? 1
+  const stageName = levensboom?.levensboom?.stage?.name ?? null
+  const remainingXp = levensboom ? Math.max(0, levensboom.xpForNextLevel - levensboom.xpIntoLevel) : 0
   const dayWord = (n: number) => (n === 1 ? "dag" : "dagen")
+  const isPro = Boolean(user?.subscribed || user?.isAdmin)
 
   return (
-    // The reader's own tree is the landscape here, so `backdrop="reader"`. The
-    // shell owns the root, the scene, the scrims, the navbar, the rail and the
-    // gutter - see components/scene/README.md.
-    <SceneShell backdrop="reader" header rail>
-      {/* -- Layer 1: the sky ------------------------------------------ */}
-      <section
-        aria-labelledby="profiel-titel"
-        className="flex min-h-[calc(100vh-3.5rem)] flex-col justify-between pb-32 pt-5"
-      >
-        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
-          {waiting || !memberSince ? (
-            <span aria-hidden />
-          ) : (
-            <p className="text-sm text-white/80">Lid sinds {memberSince}</p>
+    <AppShell title="Profiel">
+      <div className="flex min-h-full gap-5">
+        {/* ── The work ─────────────────────────────────────────────── */}
+        <div className="flex min-w-0 flex-1 flex-col gap-4">
+          {/* Who this is */}
+          <Card className="flex flex-none items-start gap-5 p-5">
+            <TreeAvatar size={96} ring={4} level={level} levelStyle="dot" />
+
+            <div className="min-w-0 flex-1">
+              {waiting ? (
+                <Skeleton className="h-8 w-64" />
+              ) : editing === "name" ? (
+                <div className="flex items-center gap-2">
+                  <input
+                    value={draftName}
+                    onChange={e => setDraftName(e.target.value)}
+                    onKeyDown={e => { if (e.key === "Enter") saveName(); if (e.key === "Escape") cancelEdit() }}
+                    autoFocus
+                    aria-label="Je naam"
+                    className="h-10 min-w-0 flex-1 rounded-btn border border-line px-3 text-[20px] font-bold text-ink outline-none focus-visible:border-teal"
+                  />
+                  <button
+                    type="button"
+                    onClick={saveName}
+                    aria-label="Naam opslaan"
+                    className="flex h-9 w-9 items-center justify-center rounded-btn bg-teal text-white transition-opacity hover:opacity-90"
+                  >
+                    {nameStatus === "saving" ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={cancelEdit}
+                    aria-label="Annuleren"
+                    className="flex h-9 w-9 items-center justify-center rounded-btn border border-line text-ink-muted transition-colors hover:bg-line-soft"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-[10px]">
+                  <h2 className="truncate text-[26px] font-bold tracking-[-0.5px] text-ink">{user?.name}</h2>
+                  <button
+                    type="button"
+                    onClick={() => setEditing("name")}
+                    aria-label="Naam bewerken"
+                    className="flex-none rounded-[6px] p-1 text-ink-muted transition-colors hover:bg-line-soft hover:text-ink-body"
+                  >
+                    <Pencil size={17} />
+                  </button>
+                  {nameStatus === "error" && (
+                    <span className="text-[12px] font-semibold text-danger">Opslaan mislukt</span>
+                  )}
+                </div>
+              )}
+
+              <p className="mt-[5px] truncate text-[13.5px] text-ink-muted">{user?.email}</p>
+
+              {/* The bio has no place of its own in the design, so it lives
+                  under the address - one line, with the same inline edit. */}
+              {editing === "bio" ? (
+                <div className="mt-3 flex items-start gap-2">
+                  <textarea
+                    value={draftBio}
+                    onChange={e => setDraftBio(e.target.value)}
+                    rows={2}
+                    autoFocus
+                    aria-label="Over jou"
+                    className="min-w-0 flex-1 resize-none rounded-btn border border-line px-3 py-2 text-[13.5px] text-ink outline-none focus-visible:border-teal"
+                  />
+                  <button
+                    type="button"
+                    onClick={saveBio}
+                    aria-label="Bio opslaan"
+                    className="flex h-9 w-9 flex-none items-center justify-center rounded-btn bg-teal text-white transition-opacity hover:opacity-90"
+                  >
+                    {bioStatus === "saving" ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={cancelEdit}
+                    aria-label="Annuleren"
+                    className="flex h-9 w-9 flex-none items-center justify-center rounded-btn border border-line text-ink-muted transition-colors hover:bg-line-soft"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              ) : (
+                <p className="mt-2 text-[13px] leading-[1.6] text-ink-body">
+                  {user?.bio || <span className="text-ink-faint">Nog geen korte beschrijving.</span>}{" "}
+                  <button
+                    type="button"
+                    onClick={() => setEditing("bio")}
+                    className="font-semibold text-teal hover:text-teal-dark"
+                  >
+                    {user?.bio ? "Bewerken" : "Toevoegen"}
+                  </button>
+                </p>
+              )}
+
+              <div className="mt-3 flex flex-wrap gap-2">
+                {isPro && <Pill tone="gold" label={user?.isAdmin ? "Admin toegang" : "Pro actief"} />}
+                {streak > 0 && <Pill tone="warn" label={`${streak} ${dayWord(streak)} reeks`} />}
+                {memberSince && <Pill label={`Lid sinds ${memberSince}`} />}
+              </div>
+            </div>
+          </Card>
+
+          {/* The four figures this page can stand behind without a new fetch. */}
+          <div className="flex flex-none gap-[13px]">
+            <StatCard className="flex-1" label="Leesreeks" value={waiting ? "—" : streak} />
+            <StatCard className="flex-1" label="Badges" value={waiting ? "—" : `${badgeCount}/${BADGE_TOTAL}`} />
+            <StatCard className="flex-1" label="Lessen afgerond" value={levensboom ? levensboom.lessonsCompleted : "—"} />
+            <StatCard className="flex-1" label="Studies afgerond" value={levensboom ? levensboom.studiesCompleted : "—"} />
+          </div>
+
+          {/* Activity */}
+          <Card className="flex min-h-0 flex-1 flex-col overflow-hidden">
+            <div className="flex h-[46px] flex-none items-stretch border-b border-line px-[18px]">
+              <Tabs
+                items={[
+                  { value: "all", label: "Alle activiteit" },
+                  { value: "highlights", label: "Markeringen" },
+                  { value: "notes", label: "Notities" },
+                ]}
+                value={activityTab}
+                onChange={setActivityTab}
+              />
+            </div>
+            <div className="flex flex-1 flex-col items-start justify-center gap-2 px-[18px] py-10">
+              <p className="text-[13.5px] text-ink-body">
+                Er is nog geen activiteitenoverzicht op de webversie.
+              </p>
+              <p className="flex items-center gap-[7px] text-[11.5px] text-ink-faint">
+                <Lock size={12} aria-hidden /> Alleen jij
+              </p>
+              <Link
+                href="/notities"
+                className="mt-2 text-[13px] font-semibold text-teal no-underline hover:text-teal-dark"
+              >
+                Bekijk je notities →
+              </Link>
+            </div>
+          </Card>
+
+          {error && (
+            <Card className="flex-none p-5">
+              <p className="text-[13.5px] text-danger">{error}</p>
+            </Card>
           )}
-          {/* No Pro badge here. The navbar draws one for the account it is
-              signed in as (components/layout/header.tsx), and this row sits
-              directly under it at the same right edge - two identical gold
-              pills stacked on top of each other read as a rendering fault. The
-              Pro state on THIS page belongs to the Abonnement panel below,
-              where it is labelled ("Pro actief") and stands next to what it
-              means. The Admin pill stays: nothing else on the page says it. */}
-          <div className="flex items-center gap-2">
-            {user?.isAdmin && (
-              <span className="rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-semibold text-white ring-1 ring-white/25">
-                Admin
+        </div>
+
+        {/* ── The rail - four cards, all 326 px ────────────────────── */}
+        <aside className="flex w-[326px] flex-none flex-col gap-[13px]">
+          {/* Je boom */}
+          <Card className="flex-none p-[15px]">
+            <div className="text-[14.5px] font-bold text-ink">Je boom</div>
+            <div className="mt-3 h-px bg-line" />
+            <div className="mt-[13px] flex justify-center">
+              <TreeAvatar size={112} ring={4} level={level} levelStyle="dot" />
+            </div>
+            <div className="mt-[14px] text-center text-[14.5px] font-bold text-ink">
+              {stageName ? `${stageName} · niveau ${level}` : `Niveau ${level}`}
+            </div>
+            <div className="mt-[3px] text-center text-[12.5px] text-ink-faint">nog {remainingXp} XP</div>
+            <div className="mt-[13px] text-center">
+              <Link href="/profiel/boom" className="text-[13px] font-semibold text-teal no-underline hover:text-teal-dark">
+                Naar je boom →
+              </Link>
+            </div>
+          </Card>
+
+          {/* Badges */}
+          <Card className="flex-none p-[15px]">
+            <div className="flex items-baseline gap-2">
+              <span className="flex-1 text-[14.5px] font-bold text-ink">Badges</span>
+              <span className="text-[21px] font-bold text-ink tabular-nums">{badgeCount}</span>
+              <span className="text-[12.5px] text-ink-faint">van {BADGE_TOTAL}</span>
+            </div>
+            <div className="mt-3 h-px bg-line" />
+            <div className="mt-[15px]">
+              <BadgeRings earned={earnedBadges} />
+            </div>
+            <div className="mt-[15px] flex items-center">
+              <span className="flex-1 text-[12.5px] text-ink-body">
+                {badgeCount === 0 ? "Nog geen badge verdiend" : `${BADGE_TOTAL - badgeCount} nog te verdienen`}
               </span>
+              <button
+                type="button"
+                onClick={() => setBadgesOpen(v => !v)}
+                className="text-[12.5px] font-semibold text-teal hover:text-teal-dark"
+              >
+                {badgesOpen ? "Verbergen" : "Alle badges →"}
+              </button>
+            </div>
+            {badgesOpen && (
+              <div className="mt-3">
+                <UserBadges earned={earnedBadges} />
+              </div>
             )}
-          </div>
-        </div>
+          </Card>
 
-        <div className="scene-sky max-w-[46rem]">
-          {/* The one accent up here: the word that says which page this is. */}
-          <p className={EYEBROW} style={{ color: TEAL_ON_DARK }}>
-            Profiel
-          </p>
-
-          {/* The heading is always in the tree, so the section's label is never
-              a dangling reference and the page never lacks an h1 while the
-              name is still being fetched. */}
-          <h1
-            id="profiel-titel"
-            className="mt-3 text-4xl font-semibold leading-[1.05] tracking-tight text-white drop-shadow-sm sm:text-5xl xl:text-6xl"
-          >
-            {user ? <span className="content-in">{user.name}</span> : <span className="sr-only">Profiel</span>}
-          </h1>
-          {!user && <SceneSkeleton className="mt-3 h-14 w-[22rem] max-w-full" />}
-
-          <p className="mt-4 max-w-[34rem] text-base leading-relaxed text-white/85 sm:text-lg">
-            Beheer je accountgegevens en uiterlijk.
-          </p>
-
-          <div className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-3">
-            <Link href="/profiel/boom" className={CTA_PRIMARY}>
-              Bekijk je boom
-              <ArrowRight size={18} aria-hidden className="transition-transform group-hover:translate-x-0.5" />
-            </Link>
-            <Link
-              href="/abonnement"
-              className="text-sm font-semibold no-underline underline-offset-4 hover:underline"
-              style={{ color: TEAL_ON_DARK }}
-            >
-              Abonnement →
-            </Link>
-          </div>
-        </div>
-
-        {/* Keeps the button row clear of the numbers that break the fold. */}
-        <div aria-hidden />
-      </section>
-
-      {/* -- Layer 2: the horizon -------------------------------------- */}
-      <div className="scene-horizon -mt-24">
-        <dl className="stagger-in grid max-w-[34rem] grid-cols-2 gap-3 lg:gap-4">
-          <GlassStat label="Dagelijkse reeks" value={waiting ? null : `${streak}`} unit={dayWord(streak)} />
-          <GlassStat
-            label="Badges"
-            value={waiting ? null : `${badgeCount}`}
-            unit="verdiend"
-          />
-        </dl>
-      </div>
-
-      {/* -- Layer 3: the desk ----------------------------------------- */}
-      <div className="grid w-full grid-cols-1 items-start gap-6 pb-20 pt-14 xl:grid-cols-[minmax(0,1fr)_360px] xl:gap-8">
-
-        {error && !user ? (
-          <Panel className="p-6" labelledBy="profiel-fout">
-            <SectionHeading id="profiel-fout" title="Profiel laden mislukt" />
-            <p className="mt-2 text-sm leading-relaxed text-white/80">{error}</p>
-          </Panel>
-        ) : (
-          <>
-            {/* --- The work column ------------------------------------ */}
-            <div className="flex min-w-0 flex-col gap-6">
-
-              {/* Accountgegevens */}
-              <Panel className="p-5 sm:p-6" labelledBy="profiel-account">
-                <SectionHeading id="profiel-account" title="Accountgegevens" rule />
-
-                {waiting || !user ? (
-                  <div className="mt-5 space-y-4">
-                    <SceneSkeleton className="h-4 w-full" />
-                    <SceneSkeleton className="h-4 w-4/5" />
-                    <SceneSkeleton className="h-4 w-3/5" />
-                  </div>
-                ) : (
-                  <div className="mt-5 divide-y divide-white/10">
-                    {/* Name field */}
-                    <FieldRow label="Gebruikersnaam">
-                      {editing === "name" ? (
-                        <div className="flex flex-1 items-center gap-2">
-                          <label htmlFor="profiel-naam" className="sr-only">Gebruikersnaam</label>
-                          <input
-                            id="profiel-naam"
-                            autoFocus
-                            type="text"
-                            value={draftName}
-                            onChange={(e) => setDraftName(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") saveName()
-                              if (e.key === "Escape") cancelEdit()
-                            }}
-                            className={FIELD_INPUT}
-                            maxLength={60}
-                          />
-                          <button
-                            onClick={saveName}
-                            disabled={nameStatus === "saving"}
-                            className="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md text-white outline-none transition-colors hover:bg-[#115E59] focus-visible:ring-2 focus-visible:ring-white disabled:opacity-60"
-                            style={{ backgroundColor: TEAL_DEEP }}
-                            aria-label="Naam opslaan"
-                            title="Opslaan"
-                          >
-                            {nameStatus === "saving"
-                              ? <Loader2 size={14} aria-hidden className="animate-spin" />
-                              : <Check size={14} aria-hidden />}
-                          </button>
-                          <button
-                            onClick={cancelEdit}
-                            className="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md text-white/70 outline-none transition-colors hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white"
-                            aria-label="Bewerken annuleren"
-                            title="Annuleren"
-                          >
-                            <X size={14} aria-hidden />
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="flex min-w-0 flex-1 items-center gap-3">
-                          <p className="flex-1 truncate text-sm text-white">{user.name}</p>
-                          {nameStatus === "success" && (
-                            <span className="text-[11px] font-semibold" style={{ color: TEAL_ON_DARK }}>
-                              Opgeslagen
-                            </span>
-                          )}
-                          {nameStatus === "error" && (
-                            <span className="text-[11px] font-semibold text-[#FCA5A5]">Mislukt</span>
-                          )}
-                          <button
-                            onClick={() => setEditing("name")}
-                            className={EDIT_LINK}
-                            style={{ color: TEAL_ON_DARK }}
-                          >
-                            Bewerken
-                          </button>
-                        </div>
-                      )}
-                    </FieldRow>
-
-                    {/* Email field */}
-                    <FieldRow label="E-mailadres" hint="Kan niet worden gewijzigd">
-                      <p className="truncate text-sm text-white/75">{user.email}</p>
-                    </FieldRow>
-
-                    {/* Bio field */}
-                    <FieldRow label="Over jou" align="start">
-                      {editing === "bio" ? (
-                        <div className="flex-1 space-y-2">
-                          <label htmlFor="profiel-bio" className="sr-only">Over jou</label>
-                          <textarea
-                            id="profiel-bio"
-                            autoFocus
-                            value={draftBio}
-                            onChange={(e) => setDraftBio(e.target.value)}
-                            rows={3}
-                            maxLength={500}
-                            placeholder="Vertel iets over jezelf..."
-                            className={`${FIELD_INPUT} resize-none py-2`}
-                          />
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={saveBio}
-                              disabled={bioStatus === "saving"}
-                              className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold text-white outline-none transition-colors hover:bg-[#115E59] focus-visible:ring-2 focus-visible:ring-white disabled:opacity-60"
-                              style={{ backgroundColor: TEAL_DEEP }}
-                            >
-                              {bioStatus === "saving" && <Loader2 size={12} aria-hidden className="animate-spin" />}
-                              Opslaan
-                            </button>
-                            <button
-                              onClick={cancelEdit}
-                              className="rounded-md px-3 py-1.5 text-xs font-semibold text-white/70 outline-none transition-colors hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white"
-                            >
-                              Annuleren
-                            </button>
-                            <span className="ml-auto text-[11px] tabular-nums text-white/60">{draftBio.length}/500</span>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex min-w-0 flex-1 items-start gap-3">
-                          <p className={`flex-1 text-sm leading-relaxed ${user.bio ? "text-white/85" : "italic text-white/55"}`}>
-                            {user.bio || "Nog geen biografie. Voeg er een toe om jezelf voor te stellen."}
-                          </p>
-                          {bioStatus === "success" && (
-                            <span className="text-[11px] font-semibold" style={{ color: TEAL_ON_DARK }}>
-                              Opgeslagen
-                            </span>
-                          )}
-                          <button
-                            onClick={() => setEditing("bio")}
-                            className={EDIT_LINK}
-                            style={{ color: TEAL_ON_DARK }}
-                          >
-                            {user.bio ? "Bewerken" : "Toevoegen"}
-                          </button>
-                        </div>
-                      )}
-                    </FieldRow>
-                  </div>
+          {/* Abonnement */}
+          <Card className="flex-none p-[15px]">
+            <div className="text-[14.5px] font-bold text-ink">Abonnement</div>
+            <div className="mt-3 h-px bg-line" />
+            {waiting ? (
+              <Skeleton className="mt-4 h-14 w-full" />
+            ) : isPro ? (
+              <>
+                <span
+                  className="mt-[15px] inline-block rounded-full border px-[13px] py-[6px] text-[11px] font-bold uppercase tracking-[0.8px]"
+                  style={{
+                    backgroundImage: "var(--grad-pro-badge)",
+                    borderColor: "var(--pro-badge-border)",
+                    color: "var(--gold-ink)",
+                    boxShadow: "0 1px 2px rgba(74,53,6,.12)",
+                  }}
+                >
+                  {user?.isAdmin ? "Admin toegang" : "Pro actief"}
+                </span>
+                <p className="mt-3 text-[13px] leading-[1.6] text-ink-muted">
+                  {user?.isAdmin
+                    ? "Als admin heb je toegang tot alle Pro-functies."
+                    : "Je hebt een actief Pro-abonnement met toegang tot alle premium functies."}
+                </p>
+                {!user?.isAdmin && (
+                  <Link
+                    href="/abonnement"
+                    className="mt-[13px] inline-block text-[13px] font-semibold text-teal no-underline hover:text-teal-dark"
+                  >
+                    Beheer abonnement →
+                  </Link>
                 )}
-              </Panel>
+              </>
+            ) : (
+              <>
+                <p className="mt-[15px] text-[13px] leading-[1.6] text-ink-muted">
+                  Upgrade naar Pro voor commentaren, de grondtekst en meer studiehulpmiddelen.
+                </p>
+                <Link
+                  href="/abonnement"
+                  className="mt-3 flex h-10 items-center justify-center rounded-btn bg-teal text-[13.5px] font-semibold text-white no-underline transition-opacity hover:opacity-90"
+                >
+                  Upgrade naar Pro
+                </Link>
+              </>
+            )}
+          </Card>
 
-              {/* Niveau - fetches its own summary, so it appears when it can. */}
-              <LevelCard />
-
-              {/* Badges */}
-              <Panel className="p-5 sm:p-6" labelledBy="profiel-badges">
-                <SectionHeading
-                  id="profiel-badges"
-                  title="Jouw badges"
-                  subtitle="Verdien badges door je dagelijkse studie en mijlpalen te bereiken."
-                  rule
-                />
-                <div className="mt-5">
-                  {waiting || !user ? (
-                    <SceneSkeleton className="h-24 w-full rounded-xl" />
-                  ) : (
-                    <UserBadges earned={user.badges || []} />
-                  )}
-                </div>
-              </Panel>
+          {/* Account */}
+          <Card className="flex-none p-[15px]">
+            <div className="text-[14.5px] font-bold text-ink">Account</div>
+            <div className="mt-3 h-px bg-line" />
+            <div className="mt-[6px]">
+              <InfoLine label="Lid sinds" value={memberSince ?? "—"} />
+              <InfoLine label="Dagelijkse reeks" value={waiting ? "—" : `${streak} ${dayWord(streak)}`} />
+              <InfoLine label="Badges verdiend" value={waiting ? "—" : `${badgeCount}`} last />
             </div>
-
-            {/* --- The side column ------------------------------------ */}
-            <div className="flex flex-col gap-6">
-
-              {/* Je boom, as the profile picture. There is no photo upload any
-                  more: the tree is the picture. The initials circle - or the
-                  image an OAuth provider already gave us - only stands in while
-                  the tree loads or when it has been switched off.
-
-                  `still`: the shell's backdrop is already this reader's tree,
-                  animated, and one page may mount exactly one animated canvas
-                  (components/scene/README.md). */}
-              <Panel className="flex flex-col items-center px-5 py-6" labelledBy="profiel-boom">
-                <SectionHeading id="profiel-boom" title="Je boom" className="w-full" rule />
-                <div className="mt-6">
-                  <TreeAvatar
-                    size={132}
-                    still
-                    fallback={
-                      <Avatar className="h-28 w-28 ring-2 ring-white/25">
-                        <AvatarImage src={user?.image || ""} alt={user?.name || ""} className="object-cover" />
-                        <AvatarFallback
-                          className="text-2xl font-semibold text-white"
-                          style={{ backgroundColor: "rgba(13,148,136,0.35)" }}
-                        >
-                          {user?.name?.charAt(0)?.toUpperCase() || "G"}
-                        </AvatarFallback>
-                      </Avatar>
-                    }
-                  />
-                </div>
-              </Panel>
-
-              {/* Abonnement */}
-              <Panel className="p-5 sm:p-6" labelledBy="profiel-abonnement">
-                <SectionHeading id="profiel-abonnement" title="Abonnement" rule />
-                <div className="mt-4">
-                  {waiting || !user ? (
-                    <SceneSkeleton className="h-16 w-full" />
-                  ) : user.subscribed || user.isAdmin ? (
-                    <div className="space-y-3">
-                      {user.isAdmin ? (
-                        <span className="inline-flex rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-white ring-1 ring-white/25">
-                          Admin toegang
-                        </span>
-                      ) : (
-                        <ProBadge size="md" label="Pro actief" />
-                      )}
-                      <p className="text-xs leading-relaxed text-white/75">
-                        {user.isAdmin
-                          ? "Als admin heb je toegang tot alle Pro-functies."
-                          : "Je hebt een actief Pro-abonnement met toegang tot alle premium functies."}
-                      </p>
-                      {user.stripeSubscriptionId && !user.isAdmin && (
-                        <p className="break-all font-mono text-[10px] text-white/55">
-                          ID: {user.stripeSubscriptionId}
-                        </p>
-                      )}
-                      {!user.isAdmin && (
-                        <Link
-                          href="/abonnement"
-                          className="inline-flex rounded-md text-xs font-semibold no-underline underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-white"
-                          style={{ color: TEAL_ON_DARK }}
-                        >
-                          Beheer abonnement →
-                        </Link>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      <p className="text-xs leading-relaxed text-white/75">
-                        Upgrade naar Pro voor commentaren, historische context en meer studiehulpmiddelen.
-                      </p>
-                      <Link
-                        href="/abonnement"
-                        className={`w-full ${CTA_BRAND}`}
-                        style={{ backgroundColor: TEAL_DEEP }}
-                      >
-                        Upgrade naar Pro
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              </Panel>
-
-              {/* Account */}
-              <Panel className="p-5" labelledBy="profiel-overzicht">
-                <SectionHeading id="profiel-overzicht" title="Account" rule />
-                <dl className="mt-4 space-y-2.5">
-                  {memberSince && <InfoLine label="Lid sinds" value={memberSince} />}
-                  <InfoLine
-                    label="Dagelijkse reeks"
-                    value={waiting ? "—" : `${streak} ${dayWord(streak)}`}
-                  />
-                  <InfoLine label="Badges verdiend" value={waiting ? "—" : `${badgeCount}`} />
-                </dl>
-              </Panel>
-            </div>
-          </>
-        )}
+            {levensboom && (
+              <div className="mt-3">
+                <ProgressBar value={levensboom.progressPercentage} height={4} />
+                <p className="mt-2 text-[11.5px] text-ink-faint tabular-nums">
+                  {levensboom.xpIntoLevel} / {levensboom.xpForNextLevel} XP tot niveau {level + 1}
+                </p>
+              </div>
+            )}
+          </Card>
+        </aside>
       </div>
-    </SceneShell>
+    </AppShell>
   )
 }
 
-/**
- * One labelled row in the account panel. The label keeps its own column from
- * `sm` up and stacks below it, so a long value never has to share a line with
- * a truncated label.
- */
-function FieldRow({
-  label, hint, children, align = "center",
-}: {
-  label: string
-  hint?: string
-  children: React.ReactNode
-  align?: "center" | "start"
-}) {
+/** One label/value row in the Account card, with a hairline under it. */
+function InfoLine({ label, value, last = false }: { label: string; value: string; last?: boolean }) {
   return (
-    <div
-      className={`flex flex-col gap-2 py-4 first:pt-0 last:pb-0 sm:flex-row sm:gap-4 ${
-        align === "start" ? "sm:items-start" : "sm:items-center"
-      }`}
-    >
-      <div className="flex-shrink-0 sm:w-40">
-        <p className="text-sm font-medium text-white">{label}</p>
-        {hint && <p className="mt-0.5 text-xs text-white/55">{hint}</p>}
-      </div>
-      <div className="w-full min-w-0 flex-1">{children}</div>
-    </div>
-  )
-}
-
-function InfoLine({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className="flex items-baseline justify-between gap-3 text-xs">
-      <dt className="text-white/60">{label}</dt>
-      <dd className="m-0 font-semibold tabular-nums text-white">{value}</dd>
+    <div className={`flex items-center py-2 ${last ? "" : "border-b border-line-soft"}`}>
+      <span className="flex-1 text-[13px] text-ink-muted">{label}</span>
+      <span className="text-[13px] font-bold text-ink">{value}</span>
     </div>
   )
 }

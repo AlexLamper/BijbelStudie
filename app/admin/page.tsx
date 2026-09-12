@@ -2,24 +2,11 @@
 
 import Link from "next/link"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { RefreshCw } from "lucide-react"
+import { BarChart3, CreditCard, RefreshCw, Search, Settings, Users } from "lucide-react"
 import BillingHealthCard, { type BillingStats } from "../../components/admin/BillingHealthCard"
 import OnboardingPreviewButton from "../../components/admin/OnboardingPreviewButton"
-import { ProBadge } from "../../components/ui/ProBadge"
-import SceneShell from "../../components/scene/SceneShell"
-import { SceneSkeleton, SectionHeading } from "../../components/scene/pieces"
-import { EYEBROW, TEAL_DEEP, TEAL_ON_DARK } from "../../components/scene/tokens"
-import {
-  ADMIN_BUTTON,
-  DANGER,
-  DATA_INSET,
-  DATA_PANEL,
-  DATA_TILE,
-  GOOD,
-  ROW_LINE,
-  SERIES_SKY,
-  WARN,
-} from "../../components/admin/adminSurface"
+import AppShell from "../../components/shell/AppShell"
+import { Card, Skeleton, StatCard } from "../../components/kit/primitives"
 
 /**
  * Every figure is nullable because /api/admin/stats degrades per query: one
@@ -71,8 +58,12 @@ interface RecentUser {
   _id: string
   name: string
   email: string
+  image?: string
   subscribed: boolean
+  isPro?: boolean
   isAdmin: boolean
+  streak?: number
+  lastStreakDate?: string | null
   createdAt: string
 }
 
@@ -85,16 +76,26 @@ function formatDate(d: string): string {
   return new Date(d).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })
 }
 
+function monthYear(d: string): string {
+  return new Date(d).toLocaleDateString("nl-NL", { month: "short", year: "numeric" })
+}
+
 function relativeTime(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime()
   const m = Math.floor(diff / 60000)
-  if (m < 1) return "zojuist"
+  if (m < 1) return "nu"
   if (m < 60) return `${m} min geleden`
   const h = Math.floor(m / 60)
   if (h < 24) return `${h} u geleden`
   const d = Math.floor(h / 24)
   if (d < 30) return `${d} dag${d === 1 ? "" : "en"} geleden`
   return new Date(iso).toLocaleDateString("nl-NL", { day: "numeric", month: "short", year: "numeric" })
+}
+
+/** Active "now" is anything inside the last day - the green dot in the table. */
+function isRecentlyActive(iso: string | null | undefined): boolean {
+  if (!iso) return false
+  return Date.now() - new Date(iso).getTime() < 24 * 60 * 60 * 1000
 }
 
 interface FetchResult {
@@ -134,19 +135,30 @@ function describeStatsFailure({ status, detail }: FetchResult): string {
 }
 
 /**
- * The admin overview, in the immersive shell.
+ * /beheer (design_handoff_web/PAGES.md §5).
  *
- * The shell is the same one the dashboard uses, so a beheerder never leaves the
- * world - but admin gets far less of the picture than any other screen, on
- * purpose. Above the fold there is a heading and the four running figures, set
- * into the landscape the way the dashboard's are. Below that every single thing
- * is operational data, and it all sits on DATA_PANEL: a near-opaque plate in
- * the shell's own ground colour. A revenue figure or a Stripe status has to be
- * read exactly, and the landscape is not allowed to compete with it.
+ * One column: five figures with MRR first, then the users table, then the two
+ * cards under it as siblings of that table - never nested in it. Everything
+ * below those three blocks is what the design has no row for and RULES.md §2
+ * forbids throwing away: the Stripe health card, the two 30-day charts, the
+ * content counters and today's funnel, in the same light surfaces.
  *
  * Restyle only. Every fetch, retry, degradation path, handler and endpoint on
  * this page is unchanged, including the two nullable-figure rules: a null
  * renders as "-", never as 0, and `degraded` names which figures those are.
+ *
+ * THREE THINGS THE DESIGN DRAWS ARE NOT WIRED, because doing so would mean a new
+ * fetch or a new endpoint:
+ *   - "Recente feedback" would need /api/admin/feedback, which this page does
+ *     not call; the slot keeps the recent sign-ups it already has.
+ *   - The table's filter field and its subscription select narrow the rows that
+ *     are loaded, client-side. Full search lives on /admin/users.
+ *   - "Gebruiker toevoegen" has no endpoint at all (admin tooling can only
+ *     toggle isAdmin/subscribed), so the primary button is the link to
+ *     /admin/users instead.
+ * The three admin sub-routes (/admin/users, /admin/insights, /admin/feedback)
+ * are outside the nine routes in this handoff and still wear the old immersive
+ * chrome.
  */
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<Stats | null>(null)
@@ -156,6 +168,8 @@ export default function AdminDashboardPage() {
   const [refreshing, setRefreshing] = useState(false)
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
+  const [userQuery, setUserQuery] = useState("")
+  const [planFilter, setPlanFilter] = useState<"all" | "pro" | "free">("all")
 
   const loadData = useCallback(async () => {
     const fetchJson = async (url: string): Promise<FetchResult> => {
@@ -200,7 +214,7 @@ export default function AdminDashboardPage() {
         if (s) setStats(s as Stats)
         if (i) setInsights(i as InsightsResponse)
         if (u && typeof u === "object" && "users" in u && Array.isArray((u as { users?: unknown[] }).users)) {
-          setRecent(((u as { users: RecentUser[] }).users).slice(0, 6))
+          setRecent((u as { users: RecentUser[] }).users)
         }
         setLoadError(s ? null : describeStatsFailure(statsRes))
         if (s) setLastUpdated(new Date())
@@ -231,347 +245,348 @@ export default function AdminDashboardPage() {
     return { data, max }
   }, [insights])
 
-  return (
-    <SceneShell backdrop="reader" header rail>
-      {/* -- The sky: deliberately short ------------------------------- */}
-      {/* A full screen of landscape before the first number would be wrong
-          here: the person on this page came to read figures. One heading
-          block, then the data. */}
-      <section aria-labelledby="beheer-titel" className="pb-10 pt-6">
-        <div className="scene-sky flex flex-wrap items-end justify-between gap-x-8 gap-y-5">
-          <div className="min-w-0 max-w-[40rem]">
-            {/* The one accent up here, and it does the work the shield chip
-                used to: it says which part of the product you are standing in. */}
-            <p className={EYEBROW} style={{ color: TEAL_ON_DARK }}>
-              Admin
-            </p>
-            <h1
-              id="beheer-titel"
-              className="mt-2 text-3xl font-semibold tracking-tight text-white sm:text-4xl"
-            >
-              Beheer
-            </h1>
-            <p className="mt-3 text-sm leading-relaxed text-white/80">
-              Overzicht van gebruikers, abonnementen en activiteit
-              {lastUpdated && (
-                <span className="text-white/60">
-                  {" "}· bijgewerkt {lastUpdated.toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })}
-                </span>
-              )}
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <button onClick={handleRefresh} disabled={refreshing || loading} className={ADMIN_BUTTON}>
-              {/* Identifies the control, not decoration. */}
-              <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} aria-hidden /> Vernieuwen
-            </button>
-            <Link href="/admin/users" className={ADMIN_BUTTON}>
-              Gebruikers
-            </Link>
-            <Link
-              href="/admin/insights"
-              className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-white no-underline outline-none transition-colors hover:bg-[#115E59] focus-visible:ring-2 focus-visible:ring-white"
-              style={{ backgroundColor: TEAL_DEEP }}
-            >
-              Inzichten
-            </Link>
-          </div>
-        </div>
-      </section>
+  /** The table's own narrowing, over the rows that are loaded. */
+  const tableRows = useMemo(() => {
+    const needle = userQuery.trim().toLowerCase()
+    return recent.filter(u => {
+      const pro = Boolean(u.isPro ?? (u.subscribed || u.isAdmin))
+      if (planFilter === "pro" && !pro) return false
+      if (planFilter === "free" && pro) return false
+      if (!needle) return true
+      return (u.name || "").toLowerCase().includes(needle) || u.email.toLowerCase().includes(needle)
+    })
+  }, [recent, userQuery, planFilter])
 
-      {/* -- The horizon: the four running figures --------------------- */}
-      <div className="scene-horizon">
-        <dl className="stagger-in grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <KpiCard
-            label="Totaal gebruikers"
-            value={formatNumber(stats?.users.total)}
-            sub={stats ? `+${formatNumber(stats.users.newLast7d)} deze week` : ""}
-            loading={loading}
-          />
-          <KpiCard
-            label="Betalende abonnees"
-            value={formatNumber(stats?.users.paying)}
-            sub={
-              stats
-                ? `${formatNumber(stats.users.stripeSubscribers)} Stripe · ${formatNumber(stats.users.storeSubscribers)} store` +
-                  ((stats.users.comped ?? 0) > 0 ? ` · +${stats.users.comped} gratis` : "")
-                : ""
-            }
-            loading={loading}
-          />
-          <KpiCard
-            label="MRR (geschat)"
+  const GRID = "grid grid-cols-[1.9fr_1fr_.9fr_.8fr_.9fr] gap-[14px]"
+
+  return (
+    <AppShell title="Beheer">
+      <div className="flex flex-col gap-4">
+        {/* The one control the design has no row for, kept small: what the
+            figures below were read at, and the way to read them again. */}
+        <div className="flex flex-none items-center gap-3">
+          <p className="flex-1 text-[12px] text-ink-faint">
+            {lastUpdated
+              ? `Bijgewerkt ${lastUpdated.toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })}`
+              : " "}
+            {degraded.length > 0 && (
+              <span className="text-warn"> · {degraded.length} cijfer(s) niet leesbaar: {degraded.join(", ")}</span>
+            )}
+          </p>
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing || loading}
+            className="inline-flex h-8 items-center gap-2 rounded-[9px] border border-line bg-white px-3 text-[12.5px] font-medium text-ink-body transition-colors hover:bg-line-soft disabled:opacity-50"
+          >
+            <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} aria-hidden /> Vernieuwen
+          </button>
+        </div>
+
+        {loadError && (
+          <div role="alert" className="flex-none rounded-card border border-danger/40 bg-white p-4">
+            <p className="text-[13.5px] leading-relaxed text-danger">{loadError}</p>
+          </div>
+        )}
+
+        {/* ── Five figures, MRR first ───────────────────────────────── */}
+        <div className="flex flex-none gap-[13px]">
+          <StatCard
+            className="flex-1"
+            label="MRR"
             value={
               stats?.revenue.mrrEur != null
                 ? `€ ${stats.revenue.mrrEur.toLocaleString("nl-NL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                 : "-"
             }
-            sub={stats ? `${formatNumber(stats.billing.monthlySubscribers)} p/m · ${formatNumber(stats.billing.annualSubscribers)} p/j` : ""}
-            loading={loading}
-            accent={GOOD}
           />
-          <KpiCard
-            label="Actieve streaks"
-            value={formatNumber(stats?.users.activeStreak)}
-            sub={stats ? `Laatste 7 dagen` : ""}
-            loading={loading}
+          <StatCard className="flex-1" label="Betalende gebruikers" value={formatNumber(stats?.users.paying)} />
+          <StatCard
+            className="flex-1"
+            label="Gebruikers totaal"
+            value={formatNumber(stats?.users.total)}
+            delta={stats?.users.newLast7d != null ? `+${formatNumber(stats.users.newLast7d)}` : undefined}
           />
-        </dl>
-      </div>
+          <StatCard
+            className="flex-1"
+            label="Conversie"
+            value={stats?.users.premiumPercent != null ? `${stats.users.premiumPercent.toLocaleString("nl-NL", { maximumFractionDigits: 1 })} %` : "-"}
+          />
+          <StatCard className="flex-1" label="Actieve reeksen" value={formatNumber(stats?.users.activeStreak)} />
+        </div>
 
-      {/* -- The desk: everything below here is opaque ----------------- */}
-      <div className="grid grid-cols-1 items-start gap-6 pb-20 pt-8 xl:grid-cols-[minmax(0,1fr)_320px]">
+        {/* ── The users table ───────────────────────────────────────── */}
+        <Card className="flex-none overflow-hidden">
+          <div className="flex items-center gap-[11px] px-5 py-[14px]">
+            <h2 className="text-[15.5px] font-bold text-ink">Gebruikers beheren</h2>
+            <span className="text-[12px] text-ink-faint tabular-nums">
+              {formatNumber(stats?.users.total)} accounts
+            </span>
+            <div className="flex-1" />
 
-        {/* Left column */}
-        <div className="flex min-w-0 flex-col gap-5">
-          {loadError && (
-            <div
-              role="alert"
-              className="rounded-xl px-4 py-3 text-sm leading-relaxed"
-              style={{ backgroundColor: "rgba(248,113,113,0.16)", color: DANGER, boxShadow: "inset 0 0 0 1px rgba(248,113,113,0.35)" }}
-            >
-              {loadError}
+            <div className="flex h-[34px] w-[210px] items-center gap-2 rounded-[9px] bg-line-soft px-[11px]">
+              <Search size={14} className="flex-none text-ink-muted" aria-hidden />
+              <input
+                value={userQuery}
+                onChange={e => setUserQuery(e.target.value)}
+                placeholder="Naam of e-mailadres"
+                aria-label="Filter gebruikers"
+                className="min-w-0 flex-1 border-0 bg-transparent text-[12.5px] text-ink outline-none placeholder:text-ink-faint"
+              />
             </div>
-          )}
 
-          {/* Partial answer: the response came through, but the server could
-              not read some of the figures. Naming them is the difference
-              between a dash that means "nul" and a dash that means "kapot". */}
-          {degraded.length > 0 && (
-            <div
-              className="rounded-xl px-4 py-3 text-sm leading-relaxed"
-              style={{ backgroundColor: "rgba(251,191,36,0.16)", color: WARN, boxShadow: "inset 0 0 0 1px rgba(251,191,36,0.35)" }}
+            <select
+              value={planFilter}
+              onChange={e => setPlanFilter(e.target.value as "all" | "pro" | "free")}
+              aria-label="Filter op abonnement"
+              className="h-[34px] cursor-pointer rounded-[9px] border border-line bg-white px-3 text-[12.5px] font-medium text-ink-body outline-none"
             >
-              Sommige cijfers konden niet worden opgehaald en staan hieronder als &ldquo;-&rdquo;:{" "}
-              {degraded.join(", ")}. De rest van de pagina klopt wel.
+              <option value="all">Alle abonnementen</option>
+              <option value="pro">Pro</option>
+              <option value="free">Gratis</option>
+            </select>
+
+            <button
+              type="button"
+              onClick={() => exportUsers(tableRows)}
+              disabled={tableRows.length === 0}
+              className="h-[34px] rounded-[9px] border border-line px-3 text-[12.5px] font-medium text-ink-body transition-colors hover:bg-line-soft disabled:opacity-40"
+            >
+              Exporteren
+            </button>
+
+            <Link
+              href="/admin/users"
+              className="flex h-[34px] items-center rounded-[9px] bg-teal px-[14px] text-[12.5px] font-semibold text-white no-underline transition-opacity hover:opacity-90"
+            >
+              Alle gebruikers
+            </Link>
+          </div>
+
+          <div className={`${GRID} px-5 pb-[10px]`}>
+            {["Gebruiker", "Abonnement", "Lid sinds", "Laatst actief", "Voortgang"].map(h => (
+              <div key={h} className="text-[10.5px] font-semibold uppercase tracking-[0.8px] text-ink-faint">
+                {h}
+              </div>
+            ))}
+          </div>
+
+          {loading ? (
+            <div className="space-y-3 px-5 pb-4">
+              {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-10 w-full" />)}
             </div>
+          ) : tableRows.length === 0 ? (
+            <p className="border-t border-line-soft px-5 py-6 text-[13px] text-ink-muted">
+              Geen gebruiker past bij dit filter.
+            </p>
+          ) : (
+            tableRows.map(u => {
+              const pro = Boolean(u.isPro ?? (u.subscribed || u.isAdmin))
+              return (
+                <div key={u._id} className={`${GRID} items-center border-t border-line-soft px-5 py-3`}>
+                  <div className="flex min-w-0 items-center gap-[11px]">
+                    <span className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-line-soft text-[12px] font-semibold text-ink-muted">
+                      {(u.name || u.email).slice(0, 1).toUpperCase()}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="truncate text-[13px] font-semibold text-ink">{u.name || "Naamloos"}</p>
+                      <p className="mt-[2px] truncate text-[11.5px] text-ink-faint">{u.email}</p>
+                    </div>
+                  </div>
+                  <div>
+                    {pro ? (
+                      <span className="rounded-full bg-pro-soft px-[9px] py-1 text-[11px] font-semibold text-gold-ink">
+                        {u.isAdmin ? "Admin" : "Pro"}
+                      </span>
+                    ) : (
+                      <span className="rounded-full bg-line-soft px-[9px] py-1 text-[11px] font-semibold text-ink-muted">
+                        Gratis
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-[12.5px] text-ink-muted">{monthYear(u.createdAt)}</div>
+                  <div className="flex items-center gap-[6px]">
+                    <span
+                      className="h-[7px] w-[7px] flex-none rounded-full"
+                      style={{ backgroundColor: isRecentlyActive(u.lastStreakDate) ? "var(--success-fill)" : "var(--line-strong)" }}
+                      aria-hidden
+                    />
+                    <span className="truncate text-[12.5px] text-ink-muted">
+                      {u.lastStreakDate ? relativeTime(u.lastStreakDate) : "onbekend"}
+                    </span>
+                  </div>
+                  <div className="text-[12.5px] text-ink-faint tabular-nums">
+                    {u.streak ? `${u.streak} dagen reeks` : "—"}
+                  </div>
+                </div>
+              )
+            })
           )}
+        </Card>
 
-          {/* Stripe <-> database health. Placed directly under the KPIs because
-              a paying customer without access is the most expensive thing on
-              this page to not notice. */}
-          <BillingHealthCard billing={stats?.billing} loading={loading} />
+        {/* ── The two cards under it: siblings, never nested ────────── */}
+        <div className="flex flex-none gap-4">
+          <Card className="min-w-0 flex-1 p-[17px]">
+            <div className="flex items-center">
+              <h2 className="flex-1 text-[14.5px] font-bold text-ink">Recente aanmeldingen</h2>
+              <Link href="/admin/users" className="text-[12.5px] font-semibold text-teal no-underline hover:text-teal-dark">
+                Alles bekijken
+              </Link>
+            </div>
+            {loading ? (
+              <div className="mt-3 space-y-3">
+                {[1, 2, 3].map(i => <Skeleton key={i} className="h-8 w-full" />)}
+              </div>
+            ) : recent.length === 0 ? (
+              <p className="mt-3 text-[12.5px] text-ink-muted">Nog geen gebruikers.</p>
+            ) : (
+              recent.slice(0, 3).map(u => (
+                <div key={u._id} className="flex gap-[11px] border-t border-line-soft py-3">
+                  <span className="flex h-[30px] w-[30px] flex-none items-center justify-center rounded-full bg-line-soft text-[12px] font-semibold text-ink-muted">
+                    {(u.name || u.email).slice(0, 1).toUpperCase()}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[13px] leading-[1.5] text-ink-body">
+                      <span className="font-semibold text-ink">{u.name || "Naamloos"}</span> — {u.email}
+                    </p>
+                    <p className="mt-[3px] text-[11px] text-ink-faint">{relativeTime(u.createdAt)}</p>
+                  </div>
+                </div>
+              ))
+            )}
+          </Card>
 
-          {/* Signups chart */}
+          <Card className="w-[340px] flex-none p-[14px]">
+            <h2 className="text-[14.5px] font-bold text-ink">Snel naar</h2>
+            <div className="mt-[11px] flex flex-col gap-[6px]">
+              {[
+                { href: "/admin/users", label: "Gebruikersbeheer", icon: Users },
+                { href: "/admin/insights", label: "Inzichten & analytics", icon: BarChart3 },
+                { href: "/admin/feedback", label: "Feedback", icon: Search },
+                { href: "/abonnement", label: "Abonnementen", icon: CreditCard },
+                { href: "/instellingen", label: "Mijn instellingen", icon: Settings },
+              ].map(({ href, label, icon: Icon }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className="flex min-h-[40px] items-center gap-[11px] rounded-btn border border-line px-[13px] py-[7px] no-underline transition-colors hover:bg-line-soft"
+                >
+                  <Icon size={18} className="flex-none text-ink-body" aria-hidden />
+                  <span className="flex-1 text-[13px] font-semibold text-ink-body">{label}</span>
+                  <span className="text-[13px] text-ink-faint">›</span>
+                </Link>
+              ))}
+              <OnboardingPreviewButton />
+            </div>
+          </Card>
+        </div>
+
+        {/* ── Kept from the old page: everything the design has no row
+               for and RULES.md §2 forbids dropping. ─────────────────── */}
+        <BillingHealthCard billing={stats?.billing} loading={loading} />
+
+        <div className="flex flex-none gap-4">
           <ChartCard
-            id="beheer-aanmeldingen"
             title="Nieuwe gebruikers"
             subtitle="Aanmeldingen per dag (laatste 30 dagen)"
             chart={signupChart}
-            color={TEAL_ON_DARK}
             loading={loading}
           />
-
-          {/* Activity chart */}
           <ChartCard
-            id="beheer-leessessies"
             title="Leessessies"
             subtitle="Activiteit per dag (laatste 30 dagen)"
             chart={activityChart}
-            color={SERIES_SKY}
             loading={loading}
           />
+        </div>
 
-          {/* Content stats */}
-          <section className={`p-5 ${DATA_PANEL}`} aria-labelledby="beheer-content">
-            <SectionHeading
-              id="beheer-content"
-              title="Content & engagement"
-              subtitle="Door gebruikers gegenereerde data"
-            />
-            <dl className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+        <div className="flex flex-none gap-4">
+          <Card className="min-w-0 flex-1 p-[17px]">
+            <h2 className="text-[14.5px] font-bold text-ink">Content &amp; engagement</h2>
+            <p className="mt-1 text-[12.5px] text-ink-muted">Door gebruikers gegenereerde data</p>
+            <div className="mt-3 grid grid-cols-4 gap-[13px]">
               <MiniStat label="Notities" value={formatNumber(stats?.content.notes)} delta={stats ? `+${stats.content.notesLast7d}` : ""} loading={loading} />
               <MiniStat label="Leessessies" value={formatNumber(stats?.content.readingSessions)} delta={stats ? `+${stats.content.sessionsLast7d}` : ""} loading={loading} />
               <MiniStat label="Studiegroepen" value={formatNumber(stats?.content.groups)} loading={loading} />
               <MiniStat label="Leesplannen" value={formatNumber(stats?.content.plans)} loading={loading} />
-            </dl>
-          </section>
-        </div>
+            </div>
+          </Card>
 
-        {/* Right sidebar */}
-        <div className="flex flex-col gap-4">
-
-          {/* Recent users */}
-          <section className={`p-5 ${DATA_PANEL}`} aria-labelledby="beheer-recent">
-            <SectionHeading id="beheer-recent" title="Recente aanmeldingen" rule />
-            {loading ? (
-              <div className="mt-4 space-y-3">
-                {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="space-y-1.5">
-                    <SceneSkeleton className="h-3.5 w-3/5" />
-                    <SceneSkeleton className="h-3 w-4/5" />
-                  </div>
-                ))}
-              </div>
-            ) : recent.length === 0 ? (
-              <p className="mt-4 text-xs text-white/70">Nog geen gebruikers.</p>
-            ) : (
-              <div className="mt-4 flex flex-col gap-3">
-                {recent.map(u => (
-                  <div key={u._id} className="flex min-w-0 items-center gap-3">
-                    <span
-                      aria-hidden
-                      className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white ring-1 ring-white/20"
-                      style={{ backgroundColor: "rgba(13,148,136,0.35)" }}
-                    >
-                      {(u.name || u.email).slice(0, 1).toUpperCase()}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-1.5">
-                        <p className="truncate text-xs font-semibold text-white">{u.name || "Naamloos"}</p>
-                        {u.subscribed && <ProBadge size="xs" />}
-                        {u.isAdmin && (
-                          <span
-                            className="rounded-full px-1.5 py-0.5 text-[9px] font-bold"
-                            style={{ backgroundColor: "rgba(45,212,191,0.18)", color: TEAL_ON_DARK }}
-                          >
-                            ADMIN
-                          </span>
-                        )}
-                      </div>
-                      <p className="truncate text-[11px] text-white/60">{u.email}</p>
-                    </div>
-                    <p className="whitespace-nowrap text-[10px] tabular-nums text-white/55">{relativeTime(u.createdAt)}</p>
-                  </div>
-                ))}
-                <Link
-                  href="/admin/users"
-                  className="pt-0.5 text-xs font-semibold no-underline hover:underline"
-                  style={{ color: TEAL_ON_DARK }}
-                >
-                  Alle gebruikers bekijken →
-                </Link>
-              </div>
-            )}
-          </section>
-
-          {/* Today's funnel */}
-          <section className={`p-5 ${DATA_PANEL}`} aria-labelledby="beheer-vandaag">
-            <SectionHeading id="beheer-vandaag" title="Vandaag" rule />
-            <dl className="mt-1">
+          <Card className="w-[340px] flex-none p-[17px]">
+            <h2 className="text-[14.5px] font-bold text-ink">Vandaag</h2>
+            <dl className="mt-2">
               <FunnelRow label="Nieuwe aanmeldingen" value={stats?.users.newLast24h} loading={loading} />
               <FunnelRow label="Nieuw in 7 dagen" value={stats?.users.newLast7d} loading={loading} />
               <FunnelRow label="Nieuw in 30 dagen" value={stats?.users.newLast30d} loading={loading} />
               <FunnelRow label="Notities deze week" value={stats?.content.notesLast7d} loading={loading} />
               <FunnelRow label="Sessies deze week" value={stats?.content.sessionsLast7d} loading={loading} last />
             </dl>
-          </section>
-
-          {/* Quick actions */}
-          <section className={`p-4 ${DATA_PANEL}`} aria-labelledby="beheer-snel">
-            <SectionHeading id="beheer-snel" title="Snel naar" rule />
-            <div className="mt-2 flex flex-col gap-0.5">
-              {[
-                { href: "/admin/users", label: "Gebruikersbeheer" },
-                { href: "/admin/insights", label: "Inzichten & analytics" },
-                { href: "/admin/feedback", label: "Feedback" },
-                { href: "/abonnement", label: "Abonnementen" },
-                { href: "/instellingen", label: "Mijn instellingen" },
-              ].map(({ href, label }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className="rounded-lg px-3 py-2 text-sm text-white/85 no-underline outline-none transition-colors hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white"
-                >
-                  {label}
-                </Link>
-              ))}
-              <OnboardingPreviewButton />
-            </div>
-          </section>
+          </Card>
         </div>
       </div>
-    </SceneShell>
+    </AppShell>
   )
 }
 
 /* ── Sub components ───────────────────────────────────────────── */
 
-/**
- * One figure on the horizon.
- *
- * Not `GlassStat` from components/scene/pieces: that surface is deliberately
- * translucent so the landscape runs through it, and a euro figure read against
- * moving colour is a figure the beheerder has to check twice. Same shape, opaque
- * plate. The tinted icon square each of these used to carry is gone - it named
- * nothing the label did not already say.
- */
-function KpiCard({
-  label, value, sub, loading, accent,
-}: {
-  label: string
-  value: string
-  sub: string
-  loading: boolean
-  /** Only for a figure whose colour carries meaning, e.g. revenue. */
-  accent?: string
-}) {
-  return (
-    <div className={`px-4 py-3.5 ${DATA_TILE}`}>
-      <dt className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/60">{label}</dt>
-      {loading ? (
-        <dd className="mt-2 space-y-2">
-          <SceneSkeleton className="h-6 w-2/3" />
-          <SceneSkeleton className="h-3 w-1/2" />
-        </dd>
-      ) : (
-        <dd className="content-in mt-1">
-          <span
-            className="block text-2xl font-semibold leading-tight tabular-nums text-white"
-            style={accent ? { color: accent } : undefined}
-          >
-            {value}
-          </span>
-          {sub && <span className="mt-0.5 block text-[11px] tabular-nums text-white/60">{sub}</span>}
-        </dd>
-      )}
-    </div>
-  )
+/** The rows on screen, as a CSV written in the browser. No endpoint is called. */
+function exportUsers(rows: RecentUser[]) {
+  const head = "naam;e-mail;abonnement;lid sinds;reeks"
+  const body = rows
+    .map(u =>
+      [
+        (u.name || "").replace(/;/g, ","),
+        u.email,
+        (u.isPro ?? (u.subscribed || u.isAdmin)) ? "Pro" : "Gratis",
+        new Date(u.createdAt).toLocaleDateString("nl-NL"),
+        String(u.streak ?? 0),
+      ].join(";"),
+    )
+    .join("\n")
+  const blob = new Blob([`${head}\n${body}`], { type: "text/csv;charset=utf-8" })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement("a")
+  link.href = url
+  link.download = "bijbelstudie-gebruikers.csv"
+  link.click()
+  URL.revokeObjectURL(url)
 }
 
 function ChartCard({
-  id, title, subtitle, chart, color, loading,
+  title, subtitle, chart, loading,
 }: {
-  id: string
   title: string
   subtitle: string
   chart: { data: { date: string; count: number }[]; max: number }
-  color: string
   loading: boolean
 }) {
   const total = chart.data.reduce((s, d) => s + d.count, 0)
   return (
-    <section className={`p-5 ${DATA_PANEL}`} aria-labelledby={id}>
-      <SectionHeading
-        id={id}
-        title={title}
-        subtitle={subtitle}
-        action={
-          !loading ? (
-            <p className="text-xs text-white/65">
-              Totaal:{" "}
-              <span className="font-semibold tabular-nums text-white">{total.toLocaleString("nl-NL")}</span>
-            </p>
-          ) : undefined
-        }
-      />
+    <Card className="min-w-0 flex-1 p-[17px]">
+      <div className="flex items-baseline gap-3">
+        <h2 className="text-[14.5px] font-bold text-ink">{title}</h2>
+        <div className="flex-1" />
+        {!loading && (
+          <p className="text-[12px] text-ink-faint">
+            Totaal: <span className="font-semibold text-ink tabular-nums">{total.toLocaleString("nl-NL")}</span>
+          </p>
+        )}
+      </div>
+      <p className="mt-1 text-[12.5px] text-ink-muted">{subtitle}</p>
       {loading ? (
-        <SceneSkeleton className="mt-4 h-32 w-full rounded-lg" />
+        <Skeleton className="mt-4 h-32 w-full" />
       ) : (
         <div className="mt-4">
           <div className="flex h-32 items-end gap-[3px]">
             {chart.data.map((d) => {
               const pct = (d.count / chart.max) * 100
               return (
-                <div key={d.date} className="group relative flex h-full flex-1 flex-col justify-end">
+                <div key={d.date} className="relative flex h-full flex-1 flex-col justify-end">
                   <div
-                    className="w-full rounded-t-sm transition-all"
+                    className="w-full rounded-t-sm"
                     style={{
                       height: d.count === 0 ? "4px" : `${Math.max(pct, 4)}%`,
-                      // An empty day has to still be visible on a dark plate;
-                      // the light-page rgba(0,0,0,0.06) disappeared entirely.
-                      backgroundColor: d.count === 0 ? "rgba(255,255,255,0.16)" : color,
-                      opacity: d.count === 0 ? 0.7 : 1,
+                      backgroundColor: d.count === 0 ? "var(--line)" : "var(--teal)",
                     }}
                     title={`${formatDate(d.date)}: ${d.count}`}
                   />
@@ -579,48 +594,40 @@ function ChartCard({
               )
             })}
           </div>
-          <div className="mt-2 flex justify-between text-[10px] tabular-nums text-white/55">
+          <div className="mt-2 flex justify-between text-[10.5px] text-ink-faint tabular-nums">
             <span>{chart.data.length > 0 && formatDate(chart.data[0].date)}</span>
             <span>{chart.data.length > 0 && formatDate(chart.data[chart.data.length - 1].date)}</span>
           </div>
         </div>
       )}
-    </section>
+    </Card>
   )
 }
 
 function MiniStat({ label, value, delta, loading }: { label: string; value: string; delta?: string; loading: boolean }) {
   return (
-    <div className={`p-3 ${DATA_INSET}`}>
-      <dt className="mb-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-white/60">{label}</dt>
+    <div className="rounded-[10px] border border-line bg-sunken p-3">
+      <dt className="mb-1 text-[10.5px] font-semibold uppercase tracking-[0.8px] text-ink-faint">{label}</dt>
       {loading ? (
-        <dd>
-          <SceneSkeleton className="h-5 w-2/3" />
-        </dd>
+        <dd><Skeleton className="h-5 w-2/3" /></dd>
       ) : (
         <dd className="content-in flex items-baseline gap-1.5">
-          <span className="text-lg font-semibold tabular-nums text-white">{value}</span>
-          {delta && (
-            <span className="text-[10px] font-medium tabular-nums" style={{ color: TEAL_ON_DARK }}>
-              {delta}
-            </span>
-          )}
+          <span className="text-[18px] font-bold text-ink tabular-nums">{value}</span>
+          {delta && <span className="text-[11px] font-semibold text-success tabular-nums">{delta}</span>}
         </dd>
       )}
     </div>
   )
 }
 
-function FunnelRow({ label, value, loading, last }: { label: string; value?: number; loading: boolean; last?: boolean }) {
+function FunnelRow({ label, value, loading, last }: { label: string; value?: number | null; loading: boolean; last?: boolean }) {
   return (
-    <div className={`flex items-center justify-between gap-3 py-2 ${last ? "" : `border-b ${ROW_LINE}`}`}>
-      <dt className="text-xs text-white/70">{label}</dt>
+    <div className={`flex items-center justify-between gap-3 py-2 ${last ? "" : "border-b border-line-soft"}`}>
+      <dt className="text-[12.5px] text-ink-muted">{label}</dt>
       {loading ? (
-        <dd>
-          <SceneSkeleton className="h-3 w-8" />
-        </dd>
+        <dd><Skeleton className="h-3 w-8" /></dd>
       ) : (
-        <dd className="text-sm font-semibold tabular-nums text-white">{formatNumber(value)}</dd>
+        <dd className="text-[13px] font-bold text-ink tabular-nums">{formatNumber(value)}</dd>
       )}
     </div>
   )

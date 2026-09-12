@@ -4,18 +4,14 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Check, CloudOff, RotateCcw } from 'lucide-react';
 
 import LessonLayout, { FOCUS_RING, INK, INK_FAINT, INK_MUTED, Marginal } from './lesson-layout';
-import { TEAL_ON_DARK } from '../../scene/tokens';
 
 /**
- * The recovery notice's amber, on the night ground.
- *
- * #D97706 as small type on the scene ground measures 5.8:1, so on this window
- * the amber can be the brand shade itself rather than the deep end the light
- * card needed
- * (there it was 3.4:1 and failed); the deep end is kept for the fill under the
- * white button label, where white on #B45309 is 5.9:1.
+ * The recovery notice's amber, and the one place the lesson uses a colour that
+ * is not a token: this is a warning, and it has to read on the white page AND
+ * on the night one. #B45309 clears 4.5:1 on both, and white on it is 5.9:1 for
+ * the button fill.
  */
-const AMBER = '#D97706';
+const AMBER = '#B45309';
 const AMBER_DEEP = '#B45309';
 const AUTOSAVE_DELAY_MS = 1500;
 const MAX_CHARS = 8000;
@@ -161,7 +157,8 @@ export default function StepReflection({
     <LessonLayout
       eyebrow={eyebrow ?? 'Reflectie'}
       heading={reflection.question}
-      headingClassName="max-w-[30ch]"
+      headingClassName="max-w-[30ch] sm:text-[27px] leading-[1.3] tracking-[-0.4px]"
+      padTop={30}
       aside={
         <>
           {reflection.prompts && reflection.prompts.length > 0 ? (
@@ -197,7 +194,7 @@ export default function StepReflection({
                 handleChange(recovered.text);
                 setRecovered(null);
               }}
-              className="press inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold text-white outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-white"
+              className={`press inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90 ${FOCUS_RING}`}
               style={{ backgroundColor: AMBER_DEEP }}
             >
               <RotateCcw size={12} /> Herstel die versie
@@ -212,7 +209,7 @@ export default function StepReflection({
                 }
                 setRecovered(null);
               }}
-              className={`px-2.5 py-1.5 rounded-md text-xs font-medium border border-white/25 ${INK} transition-colors hover:bg-white/10 ${FOCUS_RING}`}
+              className={`rounded-md border border-les-card-line px-2.5 py-1.5 text-xs font-medium ${INK} transition-colors hover:bg-les-card ${FOCUS_RING}`}
             >
               Negeren
             </button>
@@ -220,11 +217,13 @@ export default function StepReflection({
         </div>
       )}
 
-      {/* The writing surface is the same 6% lift every other input in the flow
-          wears, not a hole cut in the ground: white in it measures 13.5:1 and
-          the placeholder 5.2:1. There are no plates left anywhere in the
-          window - the passage stands on this ground too. */}
-      <label htmlFor="study-reflection" className={`mt-6 block text-[10px] font-bold uppercase tracking-[0.16em] ${INK_FAINT}`}>
+      {/* The writing surface: the lesson's card token, 250 px tall
+          (design_handoff_web/PAGES-STUDIE-EN-LES.md §13), not a hole cut in the
+          ground. */}
+      <label
+        htmlFor="study-reflection"
+        className={`mt-7 block text-[10.5px] font-semibold uppercase tracking-[1.1px] ${INK_FAINT}`}
+      >
         Jouw aantekening
       </label>
       <textarea
@@ -232,18 +231,17 @@ export default function StepReflection({
         value={text}
         onChange={(event) => handleChange(event.target.value)}
         onBlur={() => void persist(latest.current)}
-        rows={9}
         maxLength={MAX_CHARS}
         placeholder={reflection.placeholder ?? 'Schrijf hier je antwoord...'}
         aria-label="Je reflectie"
-        className={`mt-1.5 w-full rounded-xl border border-white/20 bg-white/[0.06] p-4 text-[15px] leading-relaxed text-white placeholder:text-white/55 resize-y ${FOCUS_RING}`}
+        className={`mt-2 h-[250px] w-full resize-y rounded-[12px] border border-les-card-line bg-les-card px-[17px] py-[15px] text-[14.5px] leading-[1.7] text-les-ink placeholder:text-les-faint ${FOCUS_RING}`}
       />
 
-      <div className={`mt-2 flex items-center justify-between text-xs ${INK_FAINT}`}>
+      <div className={`mt-2 flex items-center justify-between text-[12px] ${INK_FAINT}`}>
         <span aria-live="polite">
           {saveState === 'saving' && 'Opslaan...'}
           {saveState === 'saved' && (
-            <span className="inline-flex items-center gap-1" style={{ color: TEAL_ON_DARK }}>
+            <span className="inline-flex items-center gap-1 text-les-accent">
               <Check size={12} /> Opgeslagen
             </span>
           )}
@@ -258,7 +256,7 @@ export default function StepReflection({
         </span>
       </div>
 
-      <p className={`mt-3 text-xs ${INK_MUTED}`}>
+      <p className={`mt-2 max-w-[30rem] text-[12px] leading-[1.55] ${INK_MUTED}`}>
         Als je de les afrondt wordt dit bewaard als notitie, terug te vinden bij Notities.
       </p>
     </LessonLayout>

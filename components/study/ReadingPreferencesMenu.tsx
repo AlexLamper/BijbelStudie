@@ -1,5 +1,5 @@
 import React from 'react';
-import { Minus, Plus, RotateCcw } from 'lucide-react';
+import { Minus, Plus, RotateCcw, Type } from 'lucide-react';
 import { Button } from '../ui/button';
 import {
   DropdownMenu,
@@ -60,10 +60,17 @@ export function ReadingPreferencesMenu({ preferences, onUpdate }: ReadingPrefere
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-foreground" title={t('reading_preferences')}>
-          <span className="font-serif text-lg font-medium">Aa</span>
-          <span className="sr-only">{t('reading_preferences')}</span>
-        </Button>
+        {/* The first control in the reader's toolbar: a 36 px box with a hairline
+            border, like the chapter controls beside it. `Type` rather than the
+            old "Aa" so the row is one vocabulary of stroke glyphs. */}
+        <button
+          type="button"
+          title={t('reading_preferences')}
+          aria-label={t('reading_preferences')}
+          className="flex h-9 w-9 flex-none items-center justify-center rounded-[9px] border border-line bg-white text-ink-body transition-colors hover:bg-line-soft dark:border-border dark:bg-secondary dark:text-foreground dark:hover:bg-secondary/70"
+        >
+          <Type size={17} strokeWidth={1.9} />
+        </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-72" align="center">
         <DropdownMenuLabel className="flex items-center justify-between">

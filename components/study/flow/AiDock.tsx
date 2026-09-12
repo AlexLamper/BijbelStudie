@@ -183,7 +183,7 @@ export default function AiDock({
             type="button"
             onClick={() => onOpenChange(false)}
             aria-label="Sluiten"
-            className={`h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-white/10 ${INK_FAINT} hover:text-white ${FOCUS_RING}`}
+            className={`h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-les-card ${INK_FAINT} hover:text-les-ink ${FOCUS_RING}`}
           >
             <X size={16} />
           </button>

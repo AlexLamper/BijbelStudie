@@ -1,12 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
-import { MessageCircle, Users, Info, Languages, Sparkles } from 'lucide-react';
+import { MessageSquare } from 'lucide-react';
 import TabComponent from './TabComponent';
-import { ProBadge } from '../ui/ProBadge';
+import { FadeBottom } from '../kit/primitives';
 
 import { ReadingPreferences } from '../../hooks/useReadingPreferences';
-import { SCENE_BG, SCENE_BG_RGB } from '../scene/tokens';
 
 interface StudyMaterialsSectionProps {
   selectedBook: string;
@@ -49,55 +48,62 @@ export default function StudyMaterialsSection({
   const activeTab = activeTabProp ?? internalTab;
   const setActiveTab = onActiveTabChange ?? setInternalTab;
 
+  /**
+   * The five tabs, in the design's order and with its two marks: a PRO label on
+   * Grondtekst, and a filled star on the AI assistant. Only Commentaar carries
+   * an icon - the rest are words, so the row fits the 446 px pane without
+   * wrapping (design_handoff_web/PAGES.md §3).
+   */
   const tabs = [
-    { id: 'commentary', label: t('tabs.commentary'),   icon: MessageCircle, isPro: false },
-    { id: 'original',   label: t('tabs.original'),     icon: Languages,     isPro: true },
-    { id: 'historical', label: t('tabs.general_info'), icon: Info,          isPro: false },
-    { id: 'notes',      label: t('tabs.notes'),        icon: Users,         isPro: false },
-    { id: 'ai',         label: 'AI-assistent',         icon: Sparkles,      isPro: false },
+    { id: 'commentary', label: t('tabs.commentary'),   icon: true,  isPro: false, star: false },
+    { id: 'original',   label: t('tabs.original'),     icon: false, isPro: true,  star: false },
+    { id: 'historical', label: t('tabs.general_info'), icon: false, isPro: false, star: false },
+    { id: 'notes',      label: t('tabs.notes'),        icon: false, isPro: false, star: false },
+    { id: 'ai',         label: 'AI-assistent',         icon: false, isPro: false, star: true  },
   ];
 
   return (
-    /* Transparent, for the same reason as BibleViewerSection: this pane is
-       /lezen's and nothing else's, and the reading room behind it is now the
-       scene's own ground rather than a lit plate. */
-    <section className="flex flex-col h-full min-w-0 overflow-hidden">
+    <section className="flex h-full min-w-0 flex-col overflow-hidden bg-white">
 
-      {/* Tab bar */}
-      <div className="h-14 flex items-center px-1 flex-none border-b border-white/10 bg-black/25">
-        <div className="flex w-full gap-0.5">
-          {tabs.map(({ id, label, icon: Icon, isPro }) => {
-            const active = activeTab === id;
-            return (
-              <button
-                key={id}
-                onClick={() => setActiveTab(id)}
-                title={label}
-                data-track={`reading_tab_${id === "historical" ? "historical" : id}`}
-                className={[
-                  // #2DD4BF, not #0D9488: the brand fill is drawn for a white
-                  // page and measures 3.7:1 on the tab's own tint, whichever
-                  // theme it was in. Its on-dark value measures 7.8:1 there.
-                  'relative flex-1 flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 px-1 py-1.5 text-[9px] sm:text-xs font-medium rounded-lg outline-none transition-colors min-w-0 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#2DD4BF]',
-                  active
-                    ? 'text-[#2DD4BF] bg-[rgba(45,212,191,0.10)]'
-                    : 'text-white/60 hover:text-white hover:bg-white/[0.06]',
-                ].join(' ')}
-              >
-                <Icon size={13} className="flex-shrink-0" />
-                <span className="leading-tight truncate max-w-full">{label}</span>
-                {isPro && <ProBadge size="xs" className="hidden leading-none sm:inline-flex" />}
-                {active && (
-                  <span className="absolute bottom-0 left-1.5 right-1.5 h-0.5 rounded-full bg-[#2DD4BF]" />
-                )}
-              </button>
-            );
-          })}
-        </div>
+      {/* Tab bar - 56 px, underline style, the pane's only hairline. */}
+      <div className="flex h-14 flex-none items-stretch gap-[14px] overflow-x-auto border-b border-line px-4">
+        {tabs.map(({ id, label, icon, isPro, star }) => {
+          const active = activeTab === id;
+          return (
+            <button
+              key={id}
+              onClick={() => setActiveTab(id)}
+              title={label}
+              data-track={`reading_tab_${id === "historical" ? "historical" : id}`}
+              className={[
+                'flex h-full flex-none items-center gap-[6px] whitespace-nowrap border-b-2 px-[2px] text-[13px] outline-none transition-colors',
+                active
+                  ? 'border-teal font-semibold text-teal'
+                  : 'border-transparent font-medium text-ink-muted hover:text-ink-body',
+              ].join(' ')}
+            >
+              {icon && <MessageSquare size={15} strokeWidth={1.8} className="flex-shrink-0" />}
+              {star && (
+                // A filled four-point star in teal-dark: the one glyph that
+                // says "this answer is generated", and the same mark the FAB
+                // in the corner wears.
+                <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden className="flex-shrink-0 fill-teal-dark">
+                  <path d="M12 3.5l1.9 5.1 5.1 1.9-5.1 1.9L12 17.5l-1.9-5.1L5 10.5l5.1-1.9z" />
+                </svg>
+              )}
+              <span>{label}</span>
+              {isPro && (
+                <span className="rounded-[4px] bg-gold px-[5px] py-[2px] text-[10px] font-bold tracking-[0.6px] text-gold-ink">
+                  PRO
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* Content */}
-      <div className="flex-1 min-h-0 min-w-0 overflow-hidden flex flex-col relative">
+      <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <TabComponent
           selectedBook={selectedBook}
           selectedChapter={selectedChapter}
@@ -115,12 +121,8 @@ export default function StudyMaterialsSection({
           aiQuestion={aiQuestion}
           onAiQuestionConsumed={onAiQuestionConsumed}
         />
-        {/* The same fade the passage pane draws, from the same token and to the
-            same colour at zero alpha - see BibleViewerSection. */}
-        <div
-          className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none z-10"
-          style={{ backgroundImage: `linear-gradient(to top, ${SCENE_BG}, rgba(${SCENE_BG_RGB},0))` }}
-        />
+        {/* The same 96 px wash the passage pane draws. */}
+        <FadeBottom />
       </div>
     </section>
   );

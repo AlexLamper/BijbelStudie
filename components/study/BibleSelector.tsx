@@ -1,4 +1,5 @@
 import React from 'react';
+import { ChevronDown } from 'lucide-react';
 import { normalizeBookName, BIBLE_BOOKS_ORDER } from '../../lib/book-mapping';
 
 type Props = {
@@ -24,17 +25,56 @@ const languageNames: Record<string, string> = {
   en: 'English',
 };
 
-const SELECT_CLS = [
-  'text-[13px]',
-  'border rounded-lg cursor-pointer outline-none',
-  'overflow-hidden text-ellipsis whitespace-nowrap',
-  // Light
-  'bg-gray-50 border-gray-200 text-gray-900',
-  // Dark
-  'dark:bg-secondary dark:border-border dark:text-foreground',
-  // Transition
-  'transition-opacity',
-].join(' ');
+/**
+ * One control of the reader's toolbar: a native `<select>` with its own arrow
+ * hidden and the design's chevron drawn beside it, so the three read as one row
+ * of 36 px boxes (design_handoff_web/PAGES.md §3) while keeping the native
+ * dropdown - which is what makes a 66-item book list usable and accessible.
+ */
+function SelectBox({
+  width,
+  bold = false,
+  value,
+  onChange,
+  disabled,
+  title,
+  children,
+}: {
+  width: number;
+  bold?: boolean;
+  value: string | number;
+  onChange: (value: string) => void;
+  disabled?: boolean;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      className={`relative flex h-9 flex-none items-center rounded-[9px] border border-line bg-white ${
+        disabled ? 'opacity-50' : ''
+      }`}
+      style={{ width }}
+    >
+      <select
+        value={value}
+        onChange={event => onChange(event.target.value)}
+        disabled={disabled}
+        title={title}
+        aria-label={title}
+        className={`h-full w-full cursor-pointer appearance-none truncate rounded-[9px] bg-transparent pl-[11px] pr-7 text-[13px] text-ink-body outline-none ${
+          bold ? 'font-semibold' : 'font-medium'
+        }`}
+      >
+        {children}
+      </select>
+      <ChevronDown
+        size={15}
+        strokeWidth={2}
+        className="pointer-events-none absolute right-[9px] text-ink-muted"
+      />
+    </div>
+  );
+}
 
 export default function BibleSelector({
   versions,
@@ -63,14 +103,11 @@ export default function BibleSelector({
   const nt = books.filter(b => BIBLE_BOOKS_ORDER.indexOf(normalizeBookName(b)) >= 39);
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.2fr) minmax(0,1.4fr) 78px', gap: 6, width: '100%', alignItems: 'center' }}>
-
-      {/* Version */}
-      <select
-        className={`${SELECT_CLS} ${loadingVersions ? 'opacity-50' : ''}`}
-        style={{ padding: '5px 8px', appearance: 'auto' }}
+    <>
+      <SelectBox
+        width={176}
         value={selectedVersion ?? ''}
-        onChange={e => onVersionChange(e.target.value)}
+        onChange={onVersionChange}
         disabled={loadingVersions || versions.length === 0}
         title="Bijbelvertaling"
       >
@@ -80,14 +117,13 @@ export default function BibleSelector({
             {grouped[lang].map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
           </optgroup>
         ))}
-      </select>
+      </SelectBox>
 
-      {/* Book */}
-      <select
-        className={`${SELECT_CLS} ${loadingBooks || books.length === 0 ? 'opacity-50' : ''}`}
-        style={{ padding: '5px 8px', appearance: 'auto' }}
+      <SelectBox
+        width={140}
+        bold
         value={selectedBook}
-        onChange={e => onBookChange(e.target.value)}
+        onChange={onBookChange}
         disabled={loadingBooks || books.length === 0}
         title="Bijbelboek"
       >
@@ -104,14 +140,13 @@ export default function BibleSelector({
             {nt.map(b => <option key={b} value={b}>{b}</option>)}
           </optgroup>
         )}
-      </select>
+      </SelectBox>
 
-      {/* Chapter */}
-      <select
-        className={`${SELECT_CLS} ${loadingChapters || chapters.length === 0 ? 'opacity-50' : ''}`}
-        style={{ padding: '5px 8px', appearance: 'auto', textAlign: 'center' }}
+      <SelectBox
+        width={62}
+        bold
         value={selectedChapter}
-        onChange={e => onChapterChange(Number(e.target.value))}
+        onChange={value => onChapterChange(Number(value))}
         disabled={loadingChapters || chapters.length === 0}
         title="Hoofdstuk"
       >
@@ -119,8 +154,7 @@ export default function BibleSelector({
           <option value={0} disabled>{loadingChapters ? '...' : '-'}</option>
         )}
         {chapters.map(c => <option key={c} value={c}>{c}</option>)}
-      </select>
-
-    </div>
+      </SelectBox>
+    </>
   );
 }

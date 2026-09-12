@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
 
 import { FOCUS_RING, INK, INK_MUTED, PANEL_SOLID, scrim } from './lesson-layout';
-import { TEAL_DEEP } from '../../scene/tokens';
 import PromptCard from '../../feedback/PromptCard';
 import type { SerialisedPrompt } from '../../../lib/feedbackPrompts';
 
@@ -197,7 +196,7 @@ export default function StudyExitGuard({
             type="button"
             onClick={stay}
             aria-label="Sluiten"
-            className={`h-8 w-8 flex-none inline-flex items-center justify-center rounded-md hover:bg-white/10 text-white/60 hover:text-white ${FOCUS_RING}`}
+            className={`h-8 w-8 flex-none inline-flex items-center justify-center rounded-md hover:bg-les-card text-les-faint hover:text-les-ink ${FOCUS_RING}`}
           >
             <X size={16} />
           </button>
@@ -216,7 +215,7 @@ export default function StudyExitGuard({
           <button
             type="button"
             onClick={leave}
-            className={`inline-flex items-center justify-center h-10 px-4 rounded-lg text-sm font-semibold border border-white/20 ${INK} hover:bg-white/10 transition-colors ${FOCUS_RING}`}
+            className={`inline-flex h-10 items-center justify-center rounded-lg border border-les-card-line px-4 text-sm font-semibold ${INK} transition-colors hover:bg-les-card ${FOCUS_RING}`}
           >
             Studie verlaten
           </button>
@@ -224,8 +223,7 @@ export default function StudyExitGuard({
             type="button"
             onClick={stay}
             autoFocus
-            className="inline-flex items-center justify-center h-10 px-4 rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90 outline-none focus-visible:ring-2 focus-visible:ring-white"
-            style={{ backgroundColor: TEAL_DEEP }}
+            className={`inline-flex h-10 items-center justify-center rounded-lg bg-teal px-4 text-sm font-semibold text-white transition-opacity hover:opacity-90 ${FOCUS_RING}`}
           >
             In de studie blijven
           </button>

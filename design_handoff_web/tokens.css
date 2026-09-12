@@ -1,0 +1,63 @@
+:root{
+  --teal:#0D9488;
+  --teal-dark:#0F766E;
+  --teal-soft:#CCFBF1;
+  --teal-wash:rgba(13,148,136,.10);
+  --teal-wash-2:rgba(13,148,136,.08);
+  --teal-faint:#F0FDFA;
+  --teal-tint:#E6F5F1;
+
+  --ink:#111827;
+  --ink-body:#374151;
+  --ink-muted:#6B7280;
+  --ink-faint:#9CA3AF;
+
+  --line:#E5E7EB;
+  --line-strong:#D1D5DB;
+  --line-soft:#F3F4F6;
+  --surface:#FFFFFF;
+
+  --success:#047857;
+  --success-fill:#059669;
+  --warn:#EA580C;
+  --danger:#DC2626;
+
+  --gold:#CA9A16;
+  --gold-ink:#422E04;
+  --gold-badge:#7A5E08;
+
+  --scripture:#1F2937;
+
+  --grad-verse:linear-gradient(#4B3A63 0%,#7E5E6E 45%,#C88463 100%);
+  --grad-banner:linear-gradient(135deg,#0F766E,#0F172A);
+  --grad-sky:radial-gradient(circle at 50% 28%,#CFE9F2,#A9D7E4 70%);
+  --grad-pro-pill:linear-gradient(135deg,#F4DFA4,#FFFDF6);
+  --grad-pro-badge:linear-gradient(135deg,#CA9A16,#F2D98C 70%,#FFFBEF);
+  --grad-tree-scene:linear-gradient(#243A4A 0%,#3C5A60 42%,#5E7A63 74%,#2F4A3A 100%);
+
+  --heat-0:#E5E7EB;
+  --heat-1:#CCFBF1;
+  --heat-2:#99D9CE;
+  --heat-3:#4FB3A4;
+  --heat-4:#0D9488;
+
+  --bar-empty:#E5E7EB;
+  --bar-read:#9FD8CD;
+  --bar-today:#0F766E;
+
+  --panel-dark:#152229;
+  --panel-card:rgba(15,23,42,.82);
+  --panel-border:rgba(255,255,255,.12);
+
+  --sidebar-w:196px;
+  --topbar-h:64px;
+  --body-pad-y:26px;
+  --body-pad-x:28px;
+  --radius-card:16px;
+  --radius-btn:10px;
+  --radius-panel:14px;
+
+  --shadow-fab:0 6px 16px rgba(13,148,136,.35);
+  --shadow-badge:0 1px 5px rgba(17,24,39,.22);
+  --shadow-field:0 1px 2px rgba(17,24,39,.04);
+}

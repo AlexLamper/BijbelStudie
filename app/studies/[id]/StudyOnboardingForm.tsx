@@ -12,35 +12,20 @@ import {
   X,
 } from 'lucide-react';
 import type { StudyDepth, StudyRhythm } from '../../../lib/data/curated-studies';
-import {
-  CTA_PRIMARY,
-  CTA_QUIET,
-  EYEBROW,
-  PANEL_DEEP,
-  SCENE_BG,
-  TEAL_DEEP,
-  TEAL_ON_DARK,
-} from '../../../components/scene/tokens';
+/** The eyebrow over a group of controls in the settings dialog. */
+const EYEBROW = 'text-[10px] font-semibold uppercase tracking-[1.1px] text-ink-faint';
 
-/**
- * The dialog's save button.
- *
- * Written out rather than `CTA_BRAND` plus overrides: two Tailwind utilities
- * for the same property have equal specificity, so a `py-0` next to the token's
- * `py-3` would be settled by stylesheet order rather than by intent. The fill
- * is still TEAL_DEEP - white on #0D9488 measures 3.74:1 and fails.
- */
+/** The dialog's save button, and the page's one primary action. */
 const DIALOG_SAVE =
-  'press inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-lg text-sm font-semibold text-white outline-none transition-colors hover:bg-[#115E59] focus-visible:ring-2 focus-visible:ring-white disabled:opacity-60';
+  'press inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-btn bg-teal text-[13.5px] font-semibold text-white outline-none transition-opacity hover:opacity-90 disabled:opacity-60';
 
-/**
- * A message the reader must not miss, on a dark ground.
- *
- * `text-destructive` is a theme token and flips with the reader's light/dark
- * setting; the scene behind this dialog does not. Red-300 is the literal that
- * clears 4.5:1 on the panel underneath it in either setting.
- */
-const ERROR_INK = '#FCA5A5';
+const CTA_PRIMARY =
+  'press inline-flex items-center justify-center gap-2 rounded-btn bg-teal px-5 text-[14px] font-semibold text-white no-underline outline-none transition-opacity hover:opacity-90';
+
+const CTA_QUIET =
+  'press inline-flex items-center justify-center gap-2 rounded-btn border border-line px-4 text-[13px] font-semibold text-ink-body no-underline outline-none transition-colors hover:bg-line-soft';
+
+const ERROR_INK = '#DC2626';
 
 const RHYTHMS: { value: StudyRhythm; label: string; hint: string }[] = [
   { value: 'dagelijks', label: 'Elke dag', hint: 'Eén les per dag' },
@@ -83,12 +68,11 @@ function Choice({
       aria-pressed={active}
       className={[
         'rounded-xl border p-3 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-white',
-        active ? 'border-transparent' : 'border-white/20 hover:bg-white/[0.06]',
+        active ? 'border-teal bg-[var(--teal-wash-2)]' : 'border-line hover:bg-line-soft',
       ].join(' ')}
-      style={active ? { backgroundColor: 'rgba(255,255,255,0.12)', borderColor: TEAL_ON_DARK } : undefined}
     >
-      <span className="block text-sm font-semibold text-white">{label}</span>
-      <span className="mt-0.5 block text-xs text-white/65">{hint}</span>
+      <span className="block text-[13.5px] font-semibold text-ink">{label}</span>
+      <span className="mt-0.5 block text-[12px] text-ink-muted">{hint}</span>
     </button>
   );
 }
@@ -296,17 +280,17 @@ export default function StudySetupProvider({
             aria-modal="true"
             aria-label="Studie-instellingen"
             onClick={(event) => event.stopPropagation()}
-            className={`flex max-h-[88vh] w-full flex-col rounded-t-2xl shadow-2xl sm:max-w-lg sm:rounded-2xl ${PANEL_DEEP}`}
+            className="flex max-h-[88vh] w-full flex-col rounded-t-2xl border border-line bg-white shadow-2xl sm:max-w-lg sm:rounded-2xl"
           >
-            <header className="flex h-14 flex-none items-center justify-between border-b border-white/10 px-5">
-              <h2 className="text-sm font-semibold text-white">
+            <header className="flex h-14 flex-none items-center justify-between border-b border-line px-5">
+              <h2 className="text-[14.5px] font-bold text-ink">
                 {enrolled ? 'Je instellingen' : 'Stel je studie in'}
               </h2>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label="Sluiten"
-                className="inline-flex h-8 w-8 items-center justify-center rounded-md text-white/70 outline-none transition-colors hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md text-ink-muted outline-none transition-colors hover:bg-line-soft hover:text-ink"
               >
                 <X size={16} aria-hidden />
               </button>
@@ -348,10 +332,9 @@ export default function StudySetupProvider({
                           className={[
                             'h-9 w-11 rounded-lg border text-xs font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-white',
                             active
-                              ? 'border-transparent text-white'
-                              : 'border-white/20 text-white/80 hover:bg-white/[0.06]',
+                              ? 'border-transparent bg-teal text-white'
+                              : 'border-line text-ink-body hover:bg-line-soft',
                           ].join(' ')}
-                          style={active ? { backgroundColor: TEAL_DEEP } : undefined}
                         >
                           {weekday.label}
                         </button>
@@ -389,32 +372,27 @@ export default function StudySetupProvider({
                   id="translation"
                   value={translation}
                   onChange={(event) => setTranslation(event.target.value)}
-                  className="w-full rounded-lg border border-white/20 px-3 py-2.5 text-sm text-white outline-none focus-visible:ring-2 focus-visible:ring-white"
-                  style={{ backgroundColor: SCENE_BG }}
+                  className="w-full rounded-btn border border-line bg-white px-3 py-2.5 text-[13.5px] text-ink outline-none focus-visible:border-teal"
                 >
                   {/* Two groups, not one flat list. `optgroup` is used rather
                       than a fake disabled `<option>` separator because it is the
                       native construct for this: screen readers announce the
                       group, and the label cannot be selected by accident. The
                       groups are only rendered when non-empty - an empty
-                      `optgroup` still draws its label in most browsers.
-
-                      The options carry their own colours: a native popup does
-                      not inherit the control's, and unset it can land as dark
-                      text on a dark list. */}
+                      `optgroup` still draws its label in most browsers. */}
                   {dutchTranslations.length > 0 && (
-                    <optgroup label="Nederlandse vertalingen" style={{ backgroundColor: SCENE_BG, color: '#fff' }}>
+                    <optgroup label="Nederlandse vertalingen">
                       {dutchTranslations.map((option) => (
-                        <option key={option.id} value={option.id} style={{ backgroundColor: SCENE_BG, color: '#fff' }}>
+                        <option key={option.id} value={option.id}>
                           {option.name}
                         </option>
                       ))}
                     </optgroup>
                   )}
                   {otherTranslations.length > 0 && (
-                    <optgroup label="Overige vertalingen" style={{ backgroundColor: SCENE_BG, color: '#fff' }}>
+                    <optgroup label="Overige vertalingen">
                       {otherTranslations.map((option) => (
-                        <option key={option.id} value={option.id} style={{ backgroundColor: SCENE_BG, color: '#fff' }}>
+                        <option key={option.id} value={option.id}>
                           {option.name}
                         </option>
                       ))}
@@ -430,11 +408,11 @@ export default function StudySetupProvider({
               )}
             </div>
 
-            <footer className="flex flex-none gap-2.5 border-t border-white/10 p-5">
+            <footer className="flex flex-none gap-2.5 border-t border-line p-5">
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="h-10 flex-1 rounded-lg border border-white/25 text-sm font-medium text-white outline-none transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white"
+                className="h-10 flex-1 rounded-btn border border-line text-[13.5px] font-medium text-ink-body outline-none transition-colors hover:bg-line-soft"
               >
                 Annuleren
               </button>
@@ -443,7 +421,6 @@ export default function StudySetupProvider({
                 onClick={() => void submit(enrolled ? 'save' : 'start')}
                 disabled={busy}
                 className={DIALOG_SAVE}
-                style={{ backgroundColor: TEAL_DEEP }}
               >
                 {busy && <Loader2 size={15} aria-hidden className="animate-spin" />}
                 {enrolled ? 'Opslaan' : 'Opslaan en starten'}
@@ -517,28 +494,32 @@ export function StudyActionBar() {
   const pct = lessonsTotal > 0 ? Math.round((lessonsCompleted / lessonsTotal) * 100) : 0;
 
   return (
-    <div className="flex flex-col gap-6">
+    // The design's "Verder waar je was" card, from the inside out: the eyebrow,
+    // where you are, the bar, then the one primary button with the quiet one
+    // under it (design_handoff_web/PAGES-STUDIE-EN-LES.md §10).
+    <div className="flex flex-col">
+      <p className="text-[10.5px] font-semibold uppercase tracking-[1.1px] text-teal">
+        {enrolled ? 'Verder waar je was' : 'Nog niet begonnen'}
+      </p>
+      <p className="mt-[5px] text-[17px] font-bold text-ink">
+        {enrolled ? `Les ${resumeDay} van ${lessonsTotal}` : 'Begin bij les 1'}
+      </p>
+
       {enrolled && (
-        <div className="max-w-[30rem]">
-          <div className="flex items-baseline justify-between text-xs font-medium tabular-nums text-white/75">
-            <span>
-              Les {resumeDay} van {lessonsTotal}
-            </span>
-            <span>{lessonsCompleted} afgerond</span>
-            <span>{pct}%</span>
-          </div>
-          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/25">
+        <div className="mt-[13px] flex items-center gap-3">
+          <div className="h-[6px] flex-1 overflow-hidden rounded-full bg-line">
             <div
-              className="h-full rounded-full bg-white transition-[width] duration-700 ease-out"
-              style={{ width: `${pct}%`, boxShadow: '0 0 18px rgba(255,255,255,0.85)' }}
+              className="h-full rounded-full bg-teal transition-[width] duration-700 ease-out"
+              style={{ width: `${pct}%` }}
             />
           </div>
+          <span className="text-[12px] font-semibold text-ink-muted tabular-nums">{pct} %</span>
         </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+      <div className="mt-[14px] flex flex-col gap-[9px]">
         {enrolled ? (
-          <a href={resumeHref} data-track="study_resume" className={CTA_PRIMARY}>
+          <a href={resumeHref} data-track="study_resume" className={`${CTA_PRIMARY} h-11 w-full`}>
             <Play size={16} aria-hidden /> Verder met les {resumeDay}
           </a>
         ) : (
@@ -547,7 +528,7 @@ export function StudyActionBar() {
             onClick={start}
             disabled={busy}
             data-track="study_start"
-            className={`${CTA_PRIMARY} disabled:opacity-60`}
+            className={`${CTA_PRIMARY} h-11 w-full disabled:opacity-60`}
           >
             {busy ? (
               <Loader2 size={16} aria-hidden className="animate-spin" />
@@ -564,7 +545,7 @@ export function StudyActionBar() {
       {/* A guest is told up front where the account comes in, so the ask at
           the end of the lesson is expected rather than a wall. */}
       {guest && (
-        <p className="max-w-[30rem] text-sm leading-relaxed text-white/70">
+        <p className="mt-3 text-[12.5px] leading-relaxed text-ink-muted">
           Je kunt deze studie zonder account beginnen. Aan het einde van de les kun je een
           gratis account maken om je voortgang te bewaren.
         </p>
@@ -572,7 +553,7 @@ export function StudyActionBar() {
 
       {/* Suppressed while the dialog is open - it shows the same error. */}
       {error && !settingsOpen && (
-        <p className="text-sm" style={{ color: ERROR_INK }}>
+        <p className="mt-3 text-[13px]" style={{ color: ERROR_INK }}>
           {error}
         </p>
       )}

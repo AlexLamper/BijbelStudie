@@ -3,13 +3,12 @@ import { AlertCircle, Plus } from 'lucide-react';
 import { SkeletonChapter } from '../ui/skeletons';
 import { CreateNoteModal } from './CreateNoteModal';
 import { ReadingPreferences } from '../../hooks/useReadingPreferences';
-import { HIGHLIGHT_TINTS, useVerseAnnotations } from '../../hooks/useVerseAnnotations';
+import { HIGHLIGHT_TINTS, type AnnotationMap } from '../../hooks/useVerseAnnotations';
 import { cn } from '../../lib/utils';
 import { getBibleAttribution } from '../../lib/bible-attribution';
 import SpeakButton from './SpeakButton';
-import { SpokenText, SpokenTextScope } from './SpokenText';
+import { SpokenText } from './SpokenText';
 import VerseMarkers from './VerseMarkers';
-import { VERSE_NUMBER_INK } from '../scene/tokens';
 
 type Props = {
   version: string | null;
@@ -18,6 +17,15 @@ type Props = {
   maxChapter: number;
   preferences?: ReadingPreferences;
   highlightRange?: { start: number; end: number };
+  /**
+   * What the reader has marked in this chapter. Owned by BibleViewerSection,
+   * which also needs the counts for the chapter line - one caller, one request.
+   */
+  annotations: AnnotationMap;
+  /** Called after a note is saved, so the pane can refresh those marks. */
+  onAnnotationsChanged?: () => void;
+  /** Publishes the chapter as one string, for the toolbar's read-aloud button. */
+  onChapterText?: (text: string) => void;
 };
 
 type VerseData = { [key: string]: string };
@@ -41,44 +49,51 @@ export default function ChapterViewer({
   chapter,
   preferences,
   highlightRange,
+  annotations,
+  onAnnotationsChanged,
+  onChapterText,
 }: Props) {
   const [verses, setVerses] = useState<VerseData>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedVerse, setSelectedVerse] = useState<SelectedVerse | null>(null);
   const [showCreateNoteModal, setShowCreateNoteModal] = useState(false);
-  const { annotations, reload: reloadAnnotations } = useVerseAnnotations(book, chapter);
 
   const API_BASE_URL = '/api/bible';
 
-  // Default preferences if not provided
+  // Default preferences if not provided. Serif, because scripture is Lora in
+  // this design and Inter is the UI face; a reader who picks another family in
+  // the reading-preferences menu still wins.
   const prefs = preferences || {
     fontSize: 'base',
-    fontFamily: 'sans',
+    fontFamily: 'serif',
     lineHeight: 'relaxed',
     letterSpacing: 'normal',
     highContrast: false,
     showVerseNumbers: true,
   };
 
+  // The design sets scripture at 17px / 1.8 (design_handoff_web/TOKENS.md), so
+  // "Normaal" is 17 and the other steps move around it. Tailwind's own scale
+  // has no 17, and `text-base` at 16 read a step small beside the commentary.
   const fontSizeClass = {
-    sm: 'text-sm',
-    base: 'text-base',
-    lg: 'text-lg',
-    xl: 'text-xl',
-  }[prefs.fontSize] || 'text-base';
+    sm: 'text-[15px]',
+    base: 'text-[17px]',
+    lg: 'text-[19px]',
+    xl: 'text-[21px]',
+  }[prefs.fontSize] || 'text-[17px]';
 
   const fontFamilyClass = {
     sans: 'font-sans',
     serif: 'font-serif',
     mono: 'font-mono',
-  }[prefs.fontFamily] || 'font-sans';
+  }[prefs.fontFamily] || 'font-serif';
 
   const lineHeightClass = {
-    normal: 'leading-normal',
-    relaxed: 'leading-relaxed',
-    loose: 'leading-loose',
-  }[prefs.lineHeight] || 'leading-relaxed';
+    normal: 'leading-[1.55]',
+    relaxed: 'leading-[1.8]',
+    loose: 'leading-[2.05]',
+  }[prefs.lineHeight] || 'leading-[1.8]';
 
   const letterSpacingClass = {
     tight: 'tracking-tight',
@@ -140,6 +155,14 @@ export default function ChapterViewer({
     }
   }, [book, chapter, version]);
 
+  // Hand the chapter up as one string, so the toolbar's read-aloud button has
+  // something to speak. It is the same join the button used to do for itself
+  // when it lived in this component's header.
+  useEffect(() => {
+    if (!onChapterText) return;
+    onChapterText(Object.keys(verses).length > 0 ? buildChapterText(verses) : '');
+  }, [verses, onChapterText]);
+
   // Auto-scroll to the first highlighted verse when highlightRange or verses change
   useEffect(() => {
     if (!highlightRange || loading || Object.keys(verses).length === 0) return;
@@ -164,7 +187,7 @@ export default function ChapterViewer({
     setSelectedVerse(null);
     // The marker has to appear straight away, or saving a note looks like it
     // did nothing until the next chapter change.
-    void reloadAnnotations();
+    onAnnotationsChanged?.();
   };
 
   const handleCancelNote = () => {
@@ -182,32 +205,22 @@ export default function ChapterViewer({
 
       {error && (
         <div className="flex items-center justify-center py-24">
-          <div className="text-center max-w-md">
-            <AlertCircle className="h-10 w-10 text-red-500 mx-auto mb-6" />
-            <p className="font-merriweather text-red-600 font-semibold mb-3 text-lg dark:text-red-400">Fout bij laden</p>
-            <p className="font-inter text-gray-700 dark:text-muted-foreground">{error}</p>
+          <div className="max-w-md text-center">
+            <AlertCircle className="mx-auto mb-6 h-10 w-10 text-danger" />
+            <p className="mb-3 text-lg font-bold text-danger">Fout bij laden</p>
+            <p className="text-[13.5px] leading-relaxed text-ink-body">{error}</p>
           </div>
         </div>
       )}
 
-      {/* One scope for the whole chapter: the header button reads every verse,
-          each verse has a button of its own, and all of them have to reach the
-          same rendered text. */}
+      {/* The chapter itself. The "GENESIS 5" line and the read-aloud button
+          used to sit here; both moved up into BibleViewerSection, where the
+          design puts them - above the scroller, so they stay put while the
+          passage travels. The SpokenTextScope moved up with them and this
+          component now renders inside it. */}
       {!loading && !error && Object.keys(verses).length > 0 && (
-        <SpokenTextScope>
           <div className="content-in">
-            <div className="flex items-center justify-between mb-3 pb-2 border-b border-gray-100 dark:border-border">
-              <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-muted-foreground">
-                {book} {chapter}
-              </p>
-              <SpeakButton
-                compact
-                showSettings={false}
-                getText={() => buildChapterText(verses)}
-                label="Lees hoofdstuk voor"
-              />
-            </div>
-            <div className="space-y-2 text-justify">
+            <div className="space-y-0">
               {Object.entries(verses).map(([verseNumber, text]) => {
                 const vNum = parseInt(verseNumber, 10);
                 const isHighlighted = highlightRange
@@ -221,9 +234,12 @@ export default function ChapterViewer({
                 <div
                   key={verseNumber}
                   id={`verse-${verseNumber}`}
+                  // The lesson's own range is the design's highlight: a plain
+                  // amber wash with a 4 px radius, no rule down the side. The
+                  // reader's own colour still wins over it.
                   className={cn(
-                    "group relative rounded-sm -mx-1 px-1",
-                    isHighlighted && !tint && "bg-teal-50 dark:bg-teal-950/30 border-l-2 border-teal-500 pl-2"
+                    'group relative -mx-1 mb-[14px] rounded-[4px] px-1',
+                    isHighlighted && !tint && 'bg-highlight',
                   )}
                   style={
                     tint
@@ -232,54 +248,47 @@ export default function ChapterViewer({
                   }
                 >
                   <p className={cn(
-                    "dark:text-foreground text-gray-900",
+                    'text-scripture',
                     fontSizeClass,
                     fontFamilyClass,
                     lineHeightClass,
                     letterSpacingClass,
                   )}>
-                    {/* The verse number is pinned rather than left on
-                        `--muted-foreground`. This viewer is /lezen's only, and
-                        /lezen reads on the scene's own ground: the muted token
-                        lands at 8.6:1 there, while the number measured 10.3:1
-                        on the white page it used to sit on. A superscript this
-                        small may not lose contrast in the move, so it gets
-                        VERSE_NUMBER_INK - #BFC9CC, 11.0:1 - a clear step below
-                        the passage's 18.5:1 and above what it replaced. It is
-                        an inline colour rather than a `dark:` class so it
-                        cannot be undone by a parent that has already fixed the
-                        computed `color`. */}
+                    {/* Inter, not the passage's own face, and `ink-faint`: the
+                        design sets the verse number as a UI mark beside the
+                        scripture rather than as part of it. 11 px is the floor
+                        the token sheet allows for it. */}
                     {prefs.showVerseNumbers && (
                       <sup
                         className={cn(
-                          "font-semibold mr-1",
-                          isHighlighted && "text-teal-600 dark:text-teal-400"
+                          'mr-[5px] align-super font-sans text-[11px] font-semibold',
+                          isHighlighted ? 'text-teal-dark' : 'text-ink-faint',
                         )}
-                        style={isHighlighted ? undefined : { color: VERSE_NUMBER_INK }}
                       >
                         {verseNumber}
                       </sup>
                     )}
-                    <span className="hover:bg-[#0D9488]/10 cursor-pointer transition-colors px-1"
-                          onClick={() => handleVerseClick(verseNumber, text)}>
+                    <span
+                      className="cursor-pointer px-1 transition-colors hover:bg-[var(--teal-wash)]"
+                      onClick={() => handleVerseClick(verseNumber, text)}
+                    >
                       <SpokenText text={text} />
                     </span>
                     <VerseMarkers annotation={marks} />
                   </p>
-                  <div className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
+                  <div className="absolute right-0 top-0 flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
                     <SpeakButton
                       compact
                       showSettings={false}
                       getText={() => text}
                       label={`Vers ${verseNumber} voorlezen`}
-                      className="bg-white dark:bg-card shadow-[0_2px_4px_-1px_rgba(0,0,0,0.1)] border border-gray-200 dark:border-border"
+                      className="border border-line bg-white shadow-field"
                     />
                     <button
                       onClick={() => handleVerseClick(verseNumber, text)}
-                      // #0F766E, not #0D9488: a white glyph on the lighter
-                      // brand fill measures 3.74:1. Same swatch, one step down
-                      // - the value PassageReader already uses for this button.
-                      className="bg-[#0F766E] hover:bg-[#115E59] text-white p-1.5 rounded-sm shadow-[0_2px_4px_-1px_rgba(0,0,0,0.1)] outline-none focus-visible:ring-2 focus-visible:ring-white"
+                      // teal-dark, not teal: a white glyph on the lighter brand
+                      // fill measures 3.74:1.
+                      className="rounded-sm bg-teal-dark p-1.5 text-white shadow-field outline-none transition-opacity hover:opacity-90"
                       title={`Notitie bij vers ${verseNumber}`}
                     >
                       <Plus className="h-3 w-3" />
@@ -296,7 +305,7 @@ export default function ChapterViewer({
                 2.5:1 on white; a required copyright notice has to be readable,
                 so on the room's ground it is the muted token, 8.6:1. */}
             {getBibleAttribution(version) && (
-              <p className="mt-4 pt-3 border-t border-gray-100 dark:border-border text-[11px] leading-snug text-gray-600 dark:text-muted-foreground">
+              <p className="mt-4 border-t border-line-soft pt-3 text-[11px] leading-snug text-ink-muted">
                 {getBibleAttribution(version)}
               </p>
             )}
@@ -317,11 +326,10 @@ export default function ChapterViewer({
               />
             )}
           </div>
-        </SpokenTextScope>
       )}
 
       {!loading && !error && Object.keys(verses).length === 0 && (
-        <div className="py-12 text-center font-inter text-gray-500 dark:text-muted-foreground">
+        <div className="py-12 text-center text-[13.5px] text-ink-muted">
           Geen bijbeltekst gevonden voor dit hoofdstuk. Probeer een ander hoofdstuk.
         </div>
       )}

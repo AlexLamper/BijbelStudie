@@ -109,7 +109,7 @@ export default function BookContextDialog({
             type="button"
             onClick={onClose}
             aria-label="Sluiten"
-            className={`h-8 w-8 flex-none inline-flex items-center justify-center rounded-md hover:bg-white/10 ${INK_FAINT} hover:text-white ${FOCUS_RING}`}
+            className={`h-8 w-8 flex-none inline-flex items-center justify-center rounded-md hover:bg-les-card ${INK_FAINT} hover:text-les-ink ${FOCUS_RING}`}
           >
             <X size={16} />
           </button>
@@ -121,7 +121,7 @@ export default function BookContextDialog({
               {[100, 92, 96, 80, 90, 74, 88, 62, 95, 70].map((width, index) => (
                 <div
                   key={index}
-                  className="h-3.5 rounded animate-pulse bg-white/10"
+                  className="h-3.5 animate-pulse rounded bg-les-card"
                   style={{ width: `${width}%` }}
                 />
               ))}

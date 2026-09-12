@@ -20,8 +20,7 @@ import {
 } from 'lucide-react';
 
 import StudyStepRail, { STEP_LABELS } from './StudyStepRail';
-import { FOCUS_RING, INK, INK_FAINT, INK_MUTED, RULE, scrim } from './lesson-layout';
-import { EYEBROW, PANEL_DEEP, SCENE_BG, TEAL_DEEP, TEAL_ON_DARK } from '../../scene/tokens';
+import { FOCUS_RING, INK, INK_FAINT, INK_MUTED, PANEL_SOLID, RULE, scrim } from './lesson-layout';
 import StepIntro from './StepIntro';
 import StepWord from './StepWord';
 import StepDepth from './StepDepth';
@@ -45,14 +44,13 @@ import {
 import { guestLessonKey, readGuestLesson, writeGuestLesson } from '../../../lib/guestLessons';
 
 /**
- * The brand, in the roles components/scene/tokens.ts defines for it.
+ * The brand, in the roles design_handoff_web/TOKENS-LES.md gives it.
  *
- * Every colour on this screen now comes from that file. The window no longer
- * answers the reader's light/dark setting, so teal as TYPE no longer needs a
- * class pair either: the ground under it is the scene's night in both themes,
- * and TEAL_ON_DARK (#2DD4BF, 9.9:1 on the ground) is the one legible shade there.
- * TEAL stays the fill that carries no type - the rail's bar, a dot, a check -
- * and TEAL_DEEP any solid fill with white type on it.
+ * Every colour on this screen comes from the `les-*` tokens, which resolve
+ * differently in light and dark - so this window answers the reader's Thema
+ * setting again. Teal as TYPE is `les-accent` (#0F766E on white, #2DD4BF on the
+ * night ground); teal as a FILL that carries white type is `#0D9488` in both,
+ * and never moves.
  */
 
 /** localStorage key for the one-time "go full screen" offer. */
@@ -755,10 +753,10 @@ export default function StudyFlowShell({
     // `relative` so the full-screen offer can sit against this frame rather than
     // the viewport - in the windowed layout those are not the same box.
     //
-    // The ground is the scene's own, painted rather than inherited from
-    // `bg-background`: this window keeps one palette in light and dark, the way
-    // every other scene surface in the app does.
-    <div className="relative h-full flex flex-col" style={{ backgroundColor: SCENE_BG }}>
+    // `bg-les-bg` rather than `bg-background`: the lesson has a palette of its
+    // own in light and in dark (design_handoff_web/TOKENS-LES.md), and every
+    // surface below paints from the same set of names.
+    <div className="relative flex h-full flex-col bg-les-bg">
       {/* Asks before an in-app link, a refresh or the Back button pulls the
           reader out of a lesson they are partway through. */}
       <StudyExitGuard
@@ -779,10 +777,7 @@ export default function StudyFlowShell({
 
           z-50 puts the header - and therefore that dismiss layer - above the
           study rail, so a click on the sidebar closes the panel too. */}
-      <header
-        className={`relative z-50 flex-none border-b ${RULE}`}
-        style={{ backgroundColor: SCENE_BG }}
-      >
+      <header className={`relative z-50 flex-none border-b bg-les-bg ${RULE}`}>
         {/* Three tracks, and the outer two share whatever is left over.
             `justify-between` with a `flex-1` middle looked centred and was not:
             the close button is 32px and the control cluster on the right is
@@ -790,13 +785,13 @@ export default function StudyFlowShell({
             the window centre and took the lesson title with it. Equal `flex-1`
             gutters put the title on the actual midline whatever the right-hand
             cluster grows to. */}
-        <div className="px-3 sm:px-5 h-14 flex items-center gap-2">
+        <div className="flex h-[52px] items-center gap-3 pl-[10px] pr-[14px]">
           <div className="flex-1 flex items-center justify-start min-w-0">
           <Link
             href={`/studies/${lesson.study.id}`}
             aria-label="Terug naar de studie"
             title="Terug naar de studie"
-            className={`h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-white/10 ${INK_FAINT} hover:text-white no-underline flex-none ${FOCUS_RING}`}
+            className={`h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-les-card ${INK_FAINT} hover:text-les-ink no-underline flex-none ${FOCUS_RING}`}
           >
             <X size={17} />
           </Link>
@@ -812,15 +807,15 @@ export default function StudyFlowShell({
                 setOutlineOpen((open) => !open);
               }}
               aria-expanded={outlineOpen}
-              className={`w-full min-w-0 flex flex-col items-center rounded-md px-2 py-1 hover:bg-white/10 transition-colors ${FOCUS_RING}`}
+              className={`w-full min-w-0 flex flex-col items-center rounded-md px-2 py-1 hover:bg-les-card transition-colors ${FOCUS_RING}`}
             >
               <span className="flex items-center gap-1.5 max-w-full">
-                <span className={`text-xs font-semibold truncate ${INK}`}>
+                <span className={`truncate text-[13.5px] font-bold ${INK}`}>
                   {lesson.lesson.title}
                 </span>
-                <ListChecks size={12} className={`flex-none ${INK_FAINT}`} />
+                <ListChecks size={13} className={`flex-none ${INK_FAINT}`} />
               </span>
-              <span className={`text-[11px] ${INK_FAINT}`}>
+              <span className={`text-[11.5px] ${INK_FAINT}`}>
                 Les {lesson.lesson.day} van {lesson.study.lessonsTotal} &middot; stap {position} van{' '}
                 {steps.length}
               </span>
@@ -839,7 +834,7 @@ export default function StudyFlowShell({
               data-track="study_fullscreen"
               title={fullscreen ? 'Volledig scherm sluiten' : 'Volledig scherm'}
               aria-label={fullscreen ? 'Volledig scherm sluiten' : 'Volledig scherm'}
-              className={`press hidden sm:inline-flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${INK_FAINT} hover:bg-white/10 hover:text-white ${FOCUS_RING}`}
+              className={`press hidden sm:inline-flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${INK_FAINT} hover:bg-les-card hover:text-les-ink ${FOCUS_RING}`}
             >
               {fullscreen ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
             </button>
@@ -851,7 +846,7 @@ export default function StudyFlowShell({
               data-track="study_sound"
               title={soundOn ? 'Geluid uit' : 'Geluid aan'}
               aria-label={soundOn ? 'Geluid uit' : 'Geluid aan'}
-              className={`press hidden sm:inline-flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${INK_FAINT} hover:bg-white/10 hover:text-white ${FOCUS_RING}`}
+              className={`press hidden sm:inline-flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${INK_FAINT} hover:bg-les-card hover:text-les-ink ${FOCUS_RING}`}
             >
               {soundOn ? <Volume2 size={15} /> : <VolumeX size={15} />}
             </button>
@@ -873,8 +868,8 @@ export default function StudyFlowShell({
                 'press inline-flex h-8 w-8 items-center justify-center rounded-lg transition-colors',
                 FOCUS_RING,
                 settingsOpen
-                  ? `bg-white/15 ${INK}`
-                  : `${INK_FAINT} hover:bg-white/10 hover:text-white`,
+                  ? `bg-les-nav-active text-les-accent`
+                  : `${INK_FAINT} hover:bg-les-card hover:text-les-ink`,
               ].join(' ')}
             >
               <Settings2 size={15} />
@@ -886,17 +881,16 @@ export default function StudyFlowShell({
               aria-pressed={aiOpen}
               data-track="ai_open"
               title="AI-assistent"
+              // The design's AI pill: teal in both themes, always filled -
+              // it is the one control on the bar that is a colour rather than a
+              // glyph, and it must not change shape when the dock opens.
               className={[
-                'press flex-none inline-flex items-center gap-1.5 h-8 pl-2.5 pr-3 rounded-lg text-[12px] font-semibold transition-colors border',
+                'press ml-1 inline-flex h-[30px] flex-none items-center gap-1.5 rounded-full bg-teal px-3 text-[12.5px] font-bold text-white transition-opacity hover:opacity-90',
                 FOCUS_RING,
-                aiOpen
-                  ? 'text-white border-transparent'
-                  : `border-white/20 ${INK} hover:bg-white/10`,
+                aiOpen ? 'ring-2 ring-teal/40' : '',
               ].join(' ')}
-              // TEAL_DEEP, not TEAL: this fill carries the white word "AI".
-              style={aiOpen ? { backgroundColor: TEAL_DEEP } : undefined}
             >
-              <Sparkles size={14} style={aiOpen ? undefined : { color: TEAL_ON_DARK }} />
+              <Sparkles size={14} className="flex-none" />
               <span className="hidden sm:inline">AI</span>
             </button>
           </div>
@@ -968,9 +962,9 @@ export default function StudyFlowShell({
                     : { opacity: 0, x: '-50%', y: -8, scale: 0.97 }
                 }
                 transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                className={`absolute z-50 top-full mt-1.5 left-1/2 w-[min(92vw,360px)] max-h-[min(60vh,420px)] overflow-y-auto ${PANEL_DEEP} shadow-[0_40px_80px_-32px_rgba(0,0,0,0.85)] p-1.5`}
+                className={`absolute z-50 top-full mt-1.5 left-1/2 w-[min(92vw,360px)] max-h-[min(60vh,420px)] overflow-y-auto ${PANEL_SOLID} p-1.5`}
               >
-                <p className={`px-2 py-1.5 ${EYEBROW}`}>{lesson.study.title}</p>
+                <p className={`px-2 py-1.5 text-[10px] font-semibold uppercase tracking-[1.2px] ${INK_FAINT}`}>{lesson.study.title}</p>
                 {lesson.outline.map((entry) => {
                   const isCurrent = entry.day === lesson.lesson.day;
                   // Only what you have done, and the lesson you are on. Jumping
@@ -988,7 +982,7 @@ export default function StudyFlowShell({
                       className={[
                         'w-full flex items-center gap-2.5 rounded-lg px-2 py-2 text-left transition-colors',
                         FOCUS_RING,
-                        reachable ? 'hover:bg-white/10' : 'opacity-50 cursor-default',
+                        reachable ? 'hover:bg-les-card' : 'opacity-50 cursor-default',
                       ].join(' ')}
                       style={isCurrent ? { backgroundColor: 'rgba(45,212,191,0.10)' } : undefined}
                     >
@@ -999,13 +993,13 @@ export default function StudyFlowShell({
                             ? 'border-transparent text-white'
                             : isCurrent
                               ? 'border-transparent'
-                              : `border-white/20 ${INK_FAINT}`,
+                              : `border-les-card-line ${INK_FAINT}`,
                         ].join(' ')}
                         style={
                           entry.completed
-                            ? { backgroundColor: TEAL_DEEP }
+                            ? { backgroundColor: 'var(--teal)' }
                             : isCurrent
-                              ? { backgroundColor: 'rgba(45,212,191,0.16)', color: TEAL_ON_DARK }
+                              ? { backgroundColor: 'var(--les-nav-active)', color: 'var(--les-accent)' }
                               : undefined
                         }
                       >
@@ -1038,14 +1032,16 @@ export default function StudyFlowShell({
       <div className="flex min-h-0 flex-1">
         <nav
           aria-label="Stappen in deze les"
-          className={`hidden w-[216px] flex-none flex-col border-r px-4 py-4 lg:flex ${RULE}`}
+          className={`hidden w-[212px] flex-none flex-col border-r py-4 lg:flex ${RULE}`}
         >
-          <p className={EYEBROW}>Deze les</p>
-          {/* Not a heading element: the one h1 on this screen belongs to the step
-              being read, and an h2 before it would invert the order. */}
-          <p className={`mt-1.5 text-[14px] font-semibold leading-snug ${INK}`}>
-            {lesson.lesson.title}
-          </p>
+          <div className="px-[14px]">
+            <p className={`text-[10px] font-semibold uppercase tracking-[1.2px] ${INK_FAINT}`}>Deze les</p>
+            {/* Not a heading element: the one h1 on this screen belongs to the
+                step being read, and an h2 before it would invert the order. */}
+            <p className={`mt-[7px] text-[14.5px] font-bold leading-[1.35] ${INK}`}>
+              {lesson.lesson.title}
+            </p>
+          </div>
 
           <StudyStepRail
             steps={steps}
@@ -1055,20 +1051,22 @@ export default function StudyFlowShell({
             variant="index"
           />
 
-          <dl className={`mt-auto space-y-1.5 border-t pt-3 text-[11px] ${RULE}`}>
-            <div className="flex justify-between gap-2">
+          {/* The three facts under the steps, inset so the rule above them
+              stops short of the panel's own edge - the design's `margin:0 14px`. */}
+          <dl className={`mx-[14px] mt-auto border-t pt-[14px] text-[12px] ${RULE}`}>
+            <div className="flex justify-between gap-2 py-1">
               <dt className={INK_FAINT}>Gedeelte</dt>
-              <dd className={`text-right tabular-nums ${INK_MUTED}`}>{passageReference}</dd>
+              <dd className={`text-right font-semibold tabular-nums ${INK_MUTED}`}>{passageReference}</dd>
             </div>
-            <div className="flex justify-between gap-2">
+            <div className="flex justify-between gap-2 py-1">
               <dt className={INK_FAINT}>Tijd</dt>
-              <dd className={`tabular-nums ${INK_MUTED}`}>
+              <dd className={`font-semibold tabular-nums ${INK_MUTED}`}>
                 &plusmn; {lesson.lesson.estimatedMinutes} min
               </dd>
             </div>
-            <div className="flex justify-between gap-2">
+            <div className="flex justify-between gap-2 py-1">
               <dt className={INK_FAINT}>Van de studie</dt>
-              <dd className={`tabular-nums ${INK_MUTED}`}>
+              <dd className={`font-semibold tabular-nums ${INK_MUTED}`}>
                 {lessonsDone}/{lesson.study.lessonsTotal}
               </dd>
             </div>
@@ -1133,8 +1131,7 @@ export default function StudyFlowShell({
             // block for every `fixed` descendant (the reading-preferences menu,
             // note popovers) even when nothing is moving. Framer sets and clears
             // it for the duration of the transition on its own.
-            className="absolute inset-0"
-            style={{ backgroundColor: SCENE_BG }}
+            className="absolute inset-0 bg-les-bg"
           >
             {body}
           </motion.div>
@@ -1164,41 +1161,44 @@ export default function StudyFlowShell({
         </div>
       </div>
 
+      {/* The foot: 68 px, "Vorige" outlined on the left (nothing at all on
+          step 1), the step's own name in the middle, and the one primary button
+          on the right - "Les afronden" on the last step. */}
       <footer
-        className={`flex-none border-t ${RULE} px-4 sm:px-6 py-3 flex items-center justify-between gap-3`}
-        style={{ backgroundColor: SCENE_BG }}
+        className={`flex h-[68px] flex-none items-center gap-3 border-t bg-les-bg px-[22px] ${RULE}`}
       >
-        {/* A lit outline rather than a transparent one: on the previous
-            grey-on-grey button the only thing separating "Vorige" from the
-            footer was a hairline. */}
-        <button
-          type="button"
-          onClick={onPrevious}
-          disabled={!canGoBack}
-          data-track="study_step_previous"
-          className={[
-            'inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium border transition-colors',
-            FOCUS_RING,
-            canGoBack
-              ? `border-white/20 bg-white/10 ${INK} hover:bg-white/20`
-              : 'bg-transparent border-transparent text-transparent pointer-events-none',
-          ].join(' ')}
-        >
-          <ArrowLeft size={15} /> Vorige
-        </button>
+        <div className="flex-none">
+          {canGoBack && (
+            <button
+              type="button"
+              onClick={onPrevious}
+              data-track="study_step_previous"
+              className={[
+                'inline-flex h-[42px] items-center gap-1.5 rounded-btn border px-[18px] text-[13.5px] font-semibold transition-colors',
+                RULE,
+                INK,
+                'hover:bg-les-card',
+                FOCUS_RING,
+              ].join(' ')}
+            >
+              <ArrowLeft size={16} /> Vorige
+            </button>
+          )}
+        </div>
 
-        <span className={`hidden sm:block text-xs ${INK_FAINT}`}>{STEP_LABELS[step]}</span>
+        <span className={`hidden flex-1 text-center text-[12.5px] font-medium sm:block ${INK_FAINT}`}>
+          {STEP_LABELS[step]}
+        </span>
 
         <button
           type="button"
           onClick={() => void onNext()}
           disabled={finishing}
           data-track={isLast ? "study_lesson_complete" : "study_step_next"}
-          className="press inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60 outline-none focus-visible:ring-2 focus-visible:ring-white"
-          style={{ backgroundColor: TEAL_DEEP }}
+          className={`press ml-auto inline-flex h-[42px] flex-none items-center gap-2 rounded-btn bg-teal px-[18px] text-[13.5px] font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60 ${FOCUS_RING}`}
         >
           {finishing ? 'Afronden...' : isLast ? 'Les afronden' : 'Volgende'}
-          {!finishing && <ArrowRight size={15} />}
+          {!finishing && <ArrowRight size={16} />}
         </button>
       </footer>
 
@@ -1215,9 +1215,9 @@ export default function StudyFlowShell({
             className="pointer-events-none absolute inset-x-0 bottom-20 z-40 hidden sm:flex justify-center px-4"
           >
             <div
-              className={`pointer-events-auto flex items-center gap-3 ${PANEL_DEEP} px-3.5 py-2.5 shadow-[0_40px_80px_-32px_rgba(0,0,0,0.85)]`}
+              className={`pointer-events-auto flex items-center gap-3 ${PANEL_SOLID} px-3.5 py-2.5`}
             >
-              <Maximize2 size={15} className="flex-none" style={{ color: TEAL_ON_DARK }} />
+              <Maximize2 size={15} className="flex-none text-les-accent" />
               <p className={`text-[12.5px] ${INK}`}>
                 Studeer in volledig scherm, zonder afleiding?
               </p>
@@ -1228,8 +1228,7 @@ export default function StudyFlowShell({
                   dismissFullscreenHint();
                 }}
                 data-track="study_fullscreen_hint_accept"
-                className="press h-7 px-2.5 rounded-lg text-[12px] font-semibold text-white outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-white"
-                style={{ backgroundColor: TEAL_DEEP }}
+                className={`press h-7 rounded-lg bg-teal px-2.5 text-[12px] font-semibold text-white transition-opacity hover:opacity-90 ${FOCUS_RING}`}
               >
                 Ja, graag
               </button>
@@ -1237,7 +1236,7 @@ export default function StudyFlowShell({
                 type="button"
                 onClick={dismissFullscreenHint}
                 aria-label="Sluiten"
-                className={`press h-7 w-7 inline-flex items-center justify-center rounded-lg ${INK_FAINT} hover:bg-white/10 hover:text-white ${FOCUS_RING}`}
+                className={`press h-7 w-7 inline-flex items-center justify-center rounded-lg ${INK_FAINT} hover:bg-les-card hover:text-les-ink ${FOCUS_RING}`}
               >
                 <X size={14} />
               </button>

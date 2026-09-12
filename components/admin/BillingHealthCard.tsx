@@ -3,8 +3,19 @@
 import { useState } from "react"
 import { AlertTriangle, CheckCircle2, RefreshCw, Wrench } from "lucide-react"
 import { SceneSkeleton, SectionHeading } from "../scene/pieces"
-import { TEAL_DEEP, TEAL_ON_DARK } from "../scene/tokens"
-import { ADMIN_BUTTON, DANGER, DATA_INSET, DATA_PANEL, GOOD, ROW_LINE, TABLE_HEAD, WARN } from "./adminSurface"
+/* The three admin sub-routes still wear the immersive surfaces in
+   components/admin/adminSurface.ts; this card is /beheer's only, so it is
+   written in the redesign's light tokens instead. */
+const DATA_PANEL = "rounded-card border border-line bg-white"
+const DATA_INSET = "rounded-[10px] border border-line bg-sunken"
+const ROW_LINE = "border-line-soft"
+const TABLE_HEAD = "text-left text-[10.5px] font-semibold uppercase tracking-[0.8px] text-ink-faint"
+const ADMIN_BUTTON =
+  "inline-flex items-center gap-2 rounded-[9px] border border-line bg-white px-3 py-2 text-[12.5px] font-medium text-ink-body no-underline outline-none transition-colors hover:bg-line-soft disabled:opacity-50"
+/* Status hues for a white page: the values the light palette always used. */
+const WARN = "#D97706"
+const DANGER = "#DC2626"
+const GOOD = "#047857"
 
 /**
  * Stripe <-> database health, on the admin dashboard.
@@ -175,7 +186,7 @@ export default function BillingHealthCard({
           label="Actief"
           value={billing?.byStatus?.active}
           loading={loading}
-          color={TEAL_ON_DARK}
+          color={GOOD}
         />
         <Stat
           label="Betaalprobleem"
@@ -218,16 +229,16 @@ export default function BillingHealthCard({
         <div className="mt-4 space-y-4">
           {/* Webhook configuration */}
           <div className={`p-3 ${DATA_INSET}`}>
-            <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-white/60">
+            <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-ink-faint">
               Webhook-configuratie ({report.stripeMode})
             </p>
             {report.webhookEndpointError ? (
-              <p className="text-xs text-white/70">
+              <p className="text-xs text-ink-muted">
                 Kon endpoints niet uitlezen: {report.webhookEndpointError}
               </p>
             ) : appWebhook && webhookHealth ? (
               <div className="space-y-1.5">
-                <p className="break-all text-xs text-white/85">
+                <p className="break-all text-xs text-ink-body">
                   <span
                     className="mr-1.5 inline-block rounded px-1.5 py-0.5 text-[10px] font-bold"
                     style={{
@@ -239,7 +250,7 @@ export default function BillingHealthCard({
                             : "rgba(248,113,113,0.18)",
                       color:
                         webhookHealth.status === "ok"
-                          ? TEAL_ON_DARK
+                          ? GOOD
                           : webhookHealth.status === "warn"
                             ? AMBER
                             : RED,
@@ -248,14 +259,14 @@ export default function BillingHealthCard({
                     {webhookHealth.status}
                   </span>
                   {appWebhook.url}
-                  <span className="text-white/60"> · {appWebhook.enabledEvents.length} events</span>
+                  <span className="text-ink-faint"> · {appWebhook.enabledEvents.length} events</span>
                 </p>
                 <p
                   className="text-xs"
                   style={{
                     color:
                       webhookHealth.status === "ok"
-                        ? TEAL_ON_DARK
+                        ? GOOD
                         : webhookHealth.status === "warn"
                           ? AMBER
                           : RED,
@@ -264,7 +275,7 @@ export default function BillingHealthCard({
                   {webhookHealth.message}
                 </p>
                 {webhookHealth.missingEvents.length > 0 && (
-                  <p className="text-[11px] leading-relaxed text-white/65">
+                  <p className="text-[11px] leading-relaxed text-ink-muted">
                     Ontbrekende events: {webhookHealth.missingEvents.join(", ")}
                   </p>
                 )}
@@ -301,8 +312,8 @@ export default function BillingHealthCard({
                     {report.mismatches.map((m, i) => (
                       <tr key={i} className={`border-b align-top ${ROW_LINE}`}>
                         <td className="py-2 pr-3">
-                          <p className="font-semibold text-white">{m.email ?? "onbekend"}</p>
-                          <p className="text-[10px] text-white/55">
+                          <p className="font-semibold text-ink">{m.email ?? "onbekend"}</p>
+                          <p className="text-[10px] text-ink-faint">
                             {m.stripeCustomerId ?? "-"}
                           </p>
                           {m.note && (
@@ -312,16 +323,16 @@ export default function BillingHealthCard({
                         <td className="py-2 pr-3">
                           <Pill
                             text={m.stripeStatus ?? "geen"}
-                            color={m.stripeEntitled ? TEAL_ON_DARK : AMBER}
+                            color={m.stripeEntitled ? GOOD : AMBER}
                           />
                         </td>
                         <td className="py-2 pr-3">
                           <Pill
                             text={m.localSubscribed ? "pro" : m.localStatus ?? "geen"}
-                            color={m.localSubscribed ? TEAL_ON_DARK : RED}
+                            color={m.localSubscribed ? GOOD : RED}
                           />
                         </td>
-                        <td className="py-2 text-[10px] text-white/65">
+                        <td className="py-2 text-[10px] text-ink-muted">
                           {m.wouldChange.length > 0 ? m.wouldChange.join(", ") : "-"}
                         </td>
                       </tr>
@@ -341,7 +352,7 @@ export default function BillingHealthCard({
               )}
 
               <div className="flex flex-wrap items-center gap-3">
-                <label className="flex items-center gap-1.5 text-xs text-white/75">
+                <label className="flex items-center gap-1.5 text-xs text-ink-body">
                   <input
                     type="checkbox"
                     checked={repairDocuments}
@@ -353,8 +364,7 @@ export default function BillingHealthCard({
                 <button
                   onClick={apply}
                   disabled={applying || report.mismatches.every(m => !m.userId)}
-                  className="press inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold text-white outline-none transition-colors hover:bg-[#115E59] focus-visible:ring-2 focus-visible:ring-white disabled:opacity-50"
-                  style={{ backgroundColor: TEAL_DEEP }}
+                  className="press inline-flex items-center gap-1.5 rounded-[9px] bg-teal px-3 py-2 text-[12.5px] font-semibold text-white outline-none transition-opacity hover:opacity-90 disabled:opacity-50"
                 >
                   <Wrench size={12} aria-hidden />
                   {applying ? "Bezig…" : "Herstel op basis van Stripe"}
@@ -383,7 +393,7 @@ function Stat({
 }) {
   return (
     <div className={`p-3 ${DATA_INSET}`} title={hint}>
-      <dt className="text-[10px] font-semibold uppercase tracking-[0.1em] text-white/60">
+      <dt className="text-[10px] font-semibold uppercase tracking-[0.1em] text-ink-faint">
         {label}
       </dt>
       {loading ? (
@@ -392,7 +402,7 @@ function Stat({
         </dd>
       ) : (
         <dd
-          className="text-xl font-semibold leading-tight tabular-nums text-white"
+          className="text-xl font-semibold leading-tight tabular-nums text-ink"
           style={color ? { color } : undefined}
         >
           {(value ?? 0).toLocaleString("nl-NL")}

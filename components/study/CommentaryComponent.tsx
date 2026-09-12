@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import React, { useEffect, useMemo, useState, type CSSProperties } from 'react';
-import { AlertCircle, ChevronDown, Lock } from 'lucide-react';
+import { AlertCircle, ChevronDown, Lock, Volume2 } from 'lucide-react';
 import { SkeletonBlock, SkeletonText } from '../ui/skeletons';
 import { Card, CardContent } from '../ui/card';
 import { useTranslation } from '../../app/i18n/client';
@@ -294,26 +294,21 @@ function CommentaryEntry({
 
   return (
     <div
-      className="border-b border-gray-100 dark:border-border pb-6 last:border-0 pr-2 mb-6 last:mb-0 rounded-md -ml-3 pl-3 motion-safe:transition-colors"
+      className="-ml-3 mb-[18px] rounded-md border-b border-line pb-[18px] pl-3 pr-2 last:mb-0 last:border-0 motion-safe:transition-colors dark:border-border"
       style={
         beingRead
-          ? { backgroundColor: 'rgba(13,148,136,0.06)', boxShadow: 'inset 3px 0 0 0 #0D9488' }
+          ? { backgroundColor: 'var(--teal-wash-2)', boxShadow: 'inset 3px 0 0 0 var(--teal)' }
           : undefined
       }
     >
-      {isHtml ? (
-        <div className="inline-flex items-center gap-1.5 mb-1">
-          <span className="text-[11px] font-semibold tracking-wider uppercase text-[#0D9488] dark:text-teal-400 bg-[rgba(13,148,136,0.08)] dark:bg-[rgba(13,148,136,0.15)] px-2 py-0.5 rounded-full">
-            {label}
-          </span>
-        </div>
-      ) : (
-        <h3 className="font-merriweather font-semibold text-gray-900 dark:text-foreground mb-2 mt-1">
-          {label}
-        </h3>
-      )}
+      {/* One heading shape for both kinds of entry: "Inleiding" and "Vers 4"
+          are the same rank in the design (Inter 700, 15.5-17 px), so the pill
+          the HTML branch used to wear is gone. */}
+      <h3 className={`mb-[9px] font-bold text-ink dark:text-foreground ${isHtml ? 'text-[15.5px]' : 'text-[17px]'}`}>
+        {label}
+      </h3>
       <div
-        className={`text-gray-700 dark:text-foreground max-w-none ${prefClasses}`}
+        className={`max-w-none text-[14.5px] leading-[1.75] text-ink-body dark:text-foreground ${prefClasses}`}
         style={prefStyles}
         dangerouslySetInnerHTML={{ __html: html }}
       />
@@ -465,52 +460,61 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
     // The button that reads the commentary sits in this header and the entries
     // it reads are further down the same card, so the scope goes around both.
     <SpokenTextScope>
-      <Card className={`border-0 shadow-none rounded-lg dark:bg-card ${height ? 'h-full flex flex-col' : ''}`}>
-        {/* Source Selector */}
-        <div className="px-4 sm:px-6 py-3 border-b border-gray-100 dark:border-border flex items-center justify-between gap-2 bg-gray-50 dark:bg-card">
-          <span className="text-sm font-medium text-gray-600 dark:text-muted-foreground">Commentaarbron</span>
-          <div className="flex items-center gap-2">
-            {commentary && Object.keys(commentary).length > 0 && (
-              <SpeakButton
-                compact
-                showSettings={false}
-                getText={() => buildCommentaryText(commentary)}
-                label="Lees commentaar voor"
-              />
-            )}
-            <div className="relative">
-                <select
-                    value={selectedSource}
-                    onChange={(e) => {
-                      const newSource = e.target.value;
-                      setSelectedSource(newSource);
-                      if (onSourceChange) {
-                        onSourceChange(newSource);
-                      }
-                    }}
-                    className="appearance-none bg-white dark:bg-secondary border border-gray-200 dark:border-border rounded-md py-1 pl-3 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-[#0D9488] dark:text-foreground"
-                >
-                    {availableSources.length > 0 ? (
-                        sortedLanguages.map(lang => (
-                            <optgroup key={lang} label={languageNames[lang] || lang.toUpperCase()}>
-                                {groupedSources[lang].map(src => (
-                                    <option key={src.id} value={src.id}>
-                                      {src.name}
-                                    </option>
-                                ))}
-                            </optgroup>
-                        ))
-                    ) : (
-                        <option value={selectedSource}>{formatSourceLabel(selectedSource)}</option>
-                    )}
-                </select>
-                <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-            </div>
+      <Card className={`rounded-none border-0 bg-transparent shadow-none ${height ? 'flex h-full flex-col' : ''}`}>
+        {/* Source row - a caps label on the left, then read-aloud as a 32 px
+            icon button and the source itself as a 186 px select
+            (design_handoff_web/PAGES.md §3). */}
+        <div className="flex flex-none items-center gap-[10px] border-b border-line-soft px-5 py-[11px] dark:border-border">
+          <span className="flex-1 text-[12px] font-semibold uppercase tracking-[1.2px] text-ink-muted dark:text-muted-foreground">
+            Commentaarbron
+          </span>
+          {commentary && Object.keys(commentary).length > 0 && (
+            <SpeakButton
+              compact
+              showSettings={false}
+              getText={() => buildCommentaryText(commentary)}
+              label="Lees commentaar voor"
+              className="h-8 w-8 flex-none rounded-lg text-teal hover:bg-line-soft"
+              icon={<Volume2 size={17} strokeWidth={1.9} />}
+            />
+          )}
+          <div className="relative flex h-9 w-[186px] flex-none items-center rounded-[9px] border border-line bg-white dark:border-border dark:bg-secondary">
+            <select
+              value={selectedSource}
+              onChange={(e) => {
+                const newSource = e.target.value;
+                setSelectedSource(newSource);
+                if (onSourceChange) {
+                  onSourceChange(newSource);
+                }
+              }}
+              aria-label="Commentaarbron"
+              className="h-full w-full cursor-pointer appearance-none truncate rounded-[9px] bg-transparent pl-[11px] pr-7 text-[13px] font-medium text-ink-body outline-none dark:text-foreground"
+            >
+              {availableSources.length > 0 ? (
+                sortedLanguages.map(lang => (
+                  <optgroup key={lang} label={languageNames[lang] || lang.toUpperCase()}>
+                    {groupedSources[lang].map(src => (
+                      <option key={src.id} value={src.id}>
+                        {src.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))
+              ) : (
+                <option value={selectedSource}>{formatSourceLabel(selectedSource)}</option>
+              )}
+            </select>
+            <ChevronDown
+              size={15}
+              strokeWidth={2}
+              className="pointer-events-none absolute right-[9px] text-ink-muted dark:text-muted-foreground"
+            />
           </div>
         </div>
 
         {/* Content Area */}
-        <CardContent className={`px-4 sm:px-6 pt-4 pb-24 space-y-6 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-secondary scrollbar-track-transparent ${height ? 'flex-1 min-h-0' : 'max-h-[600px] lg:max-h-[calc(100vh-300px)]'}`}>
+        <CardContent className={`overflow-y-auto px-5 pb-28 pt-[18px] ${height ? 'min-h-0 flex-1' : 'max-h-[600px] lg:max-h-[calc(100vh-300px)]'}`}>
           {isLocked() ? (
             <div className="flex flex-col items-center justify-center py-12 text-center space-y-4">
               <div className="bg-amber-100 dark:bg-amber-900/20 p-4 rounded-full">

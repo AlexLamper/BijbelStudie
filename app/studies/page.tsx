@@ -9,9 +9,7 @@ import {
   itemListNode,
   courseNode,
 } from '../../lib/seo/structuredData'
-import SceneShell from '../../components/scene/SceneShell'
-import { SCENE_TREE, sceneSvg } from '../../components/scene/scene-svg'
-import { EYEBROW, TEAL_ON_DARK } from '../../components/scene/tokens'
+import AppShell from '../../components/shell/AppShell'
 import StudiesBrowser from './StudiesBrowser'
 
 /**
@@ -54,70 +52,32 @@ const STUDIES_GRAPH = (() => {
 })()
 
 /**
- * The study catalogue, in the shared immersive scene.
+ * The study catalogue (design_handoff_web/PAGES.md §2).
  *
- * A server component on purpose, for two reasons. The structured-data graph and
- * the heading are produced on the server and are therefore in the HTML a
- * crawler receives rather than something hydration makes; and `sceneSvg()`
- * renders the tree to a string with the levensboom generator, which has no
- * business in a browser bundle and must never be imported from a client module.
+ * A server component on purpose: the structured-data graph is produced here and
+ * is therefore in the HTML a crawler receives rather than something hydration
+ * makes. Everything that answers to a click lives in StudiesBrowser.
  *
- * THE BACKDROP IS THE DASHBOARD'S. Signed in, this is `backdrop="reader"` - the
- * reader's own tree, at the visitor's own hour, exactly what /dashboard shows -
- * because the owner's verdict on the page was "the visuals change on the
- * studies page vs the dashboard - use the SAME". The two are one click apart on
- * the rail, and a different tree in a different light at a different hour read
- * as a different product. Signed out there is no tree to draw and reader mode
- * falls back to a level disc, which is not a landscape, so a guest gets the
- * public oak as before: the static SVG, no `gateId`, so the shell keeps the
- * still picture and never mounts a canvas on a screen that already draws
- * seventy-seven generated pictures of its own.
+ * The page's own `h1` is the one the top bar renders ("Studies"). The hero that
+ * used to stand here - an eyebrow, a display heading and a lead paragraph over
+ * the landscape - is not in the redesign: this screen is a catalogue and the
+ * design spends its first 46 px on the search field instead. The description a
+ * crawler reads still ships, in the WebPage node below and in the route's
+ * metadata.
  *
- * Everything that answers to a click lives in StudiesBrowser; the heading is
- * handed to it as children so it stays server-rendered inside the sky layer.
- *
- * The chrome is unconditional. It used to be rendered only with a session,
- * because the header bounced a guest to the sign-in page and the rail linked to
- * routes the middleware bounced to "/". Neither is true any more: the bar shows
- * a guest an Inloggen button, and every rail item leads somewhere for a guest
- * (components/auth/GuestGate.tsx). So this page - the first thing a signed-out
- * visitor sees - wears the same frame as the signed-in app, which is the point:
- * a guest is using the app, not a preview of it.
+ * The chrome is unconditional and guest-aware: /studies is the first thing a
+ * signed-out visitor sees, and the shell shows them an Inloggen button where
+ * the account would be.
  */
 export default async function StudiesPage() {
   // `authOptions` is required: without it the session callback that attaches
-  // isAdmin/isSubscribed is skipped. Only the presence of a session is read
-  // here - the tree itself comes from the provider the root layout mounts.
-  const session = await getServerSession(authOptions)
-  const signedIn = Boolean(session?.user?.email)
-
-  const shell = signedIn
-    ? ({ backdrop: 'reader' } as const)
-    : ({ svg: sceneSvg(), ...SCENE_TREE } as const)
+  // isAdmin/isSubscribed is skipped.
+  await getServerSession(authOptions)
 
   return (
-    <SceneShell {...shell} header rail>
+    <AppShell title="Studies">
       <JsonLd data={STUDIES_GRAPH} />
-
-      <StudiesBrowser>
-        <p className={EYEBROW} style={{ color: TEAL_ON_DARK }}>
-          Bijbelstudies
-        </p>
-        {/* One step down from the /studies/[id] display sizes on purpose. This
-            heading sits above a catalogue, not above a single thing to decide
-            on, and every line it costs is a line of studies pushed under the
-            fold - the whole first screen has to fit a 1280x720 laptop. */}
-        <h1
-          id="studies-titel"
-          className="mt-2 text-3xl font-semibold leading-[1.08] tracking-tight text-white drop-shadow-sm sm:text-4xl xl:text-5xl"
-        >
-          Wat is je volgende studie?
-        </h1>
-        <p className="mt-2.5 max-w-[40rem] text-[15px] leading-relaxed text-white/85 sm:text-base">
-          Elk bijbelboek, en daarnaast studies over personen, thema&rsquo;s en losse gedeelten.
-          Kies er een en lees stap voor stap door de Schrift.
-        </p>
-      </StudiesBrowser>
-    </SceneShell>
+      <StudiesBrowser />
+    </AppShell>
   )
 }

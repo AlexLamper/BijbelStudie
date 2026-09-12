@@ -10,8 +10,7 @@ import StudyMaterialsSection from '../../components/study/StudyMaterialsSection'
 import AiAssistantWidget from '../../components/study/AiAssistantWidget';
 import { BookOpen, CheckCircle, ChevronLeft, ChevronRight, X, Trophy, MessageCircle } from 'lucide-react';
 import { toast } from '../../hooks/use-toast';
-import { TEAL_DEEP, TEAL_ON_DARK } from '../../components/scene/tokens';
-import { RAIL_GUTTER, READING_ROOM, ROOM_HEIGHT } from './room';
+import AppShell from '../../components/shell/AppShell';
 
 const COMPLETED_KEY = 'bijbelstudie_completed_studies';
 
@@ -88,33 +87,27 @@ function CompletionOverlay({ study, onClose }: { study: ActiveStudy; onClose: ()
       className="fixed inset-0 z-50 flex items-center justify-center p-6"
       style={{ backgroundColor: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(6px)' }}
     >
-      <div className="bg-white dark:bg-card rounded-2xl shadow-2xl max-w-sm w-full p-8 text-center border border-border animate-in fade-in zoom-in-95 duration-200">
-        {/* The overlay is inside the room's `dark` scope, so its card is the
-            scene's own panel and #0D9488 - a brand fill meant for a white page
-            - measures about 4.3:1 on it. TEAL_ON_DARK is the same swatch's
-            on-dark value and measures 8.6:1 there. */}
-        <div
-          className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center"
-          style={{ backgroundColor: 'rgba(45,212,191,0.10)' }}
-        >
-          <Trophy size={38} style={{ color: TEAL_ON_DARK }} />
+      {/* The page is a white one again, so the card is white and the glyph is
+          the brand fill rather than its on-dark value. */}
+      <div className="w-full max-w-sm rounded-card border border-line bg-white p-8 text-center shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-teal-faint">
+          <Trophy size={38} className="text-teal" />
         </div>
-        <h2 className="text-2xl font-bold text-foreground mb-2">Studie voltooid!</h2>
-        <p className="text-sm text-muted-foreground mb-1">
-          Je hebt alle <span className="font-semibold text-foreground">{study.lessons.length} lessen</span> afgerond van
+        <h2 className="mb-2 text-2xl font-bold text-ink">Studie voltooid!</h2>
+        <p className="mb-1 text-sm text-ink-muted">
+          Je hebt alle <span className="font-semibold text-ink">{study.lessons.length} lessen</span> afgerond van
         </p>
-        <p className="text-base font-bold mt-1 mb-6" style={{ color: TEAL_ON_DARK }}>
+        <p className="mb-6 mt-1 text-base font-bold text-teal">
           &ldquo;{study.studyTitle}&rdquo;
         </p>
-        <div className="flex items-center gap-2 justify-center mb-7">
+        <div className="mb-7 flex items-center justify-center gap-2">
           {study.lessons.map((_, i) => (
-            <span key={i} className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: TEAL_ON_DARK }} />
+            <span key={i} className="h-2.5 w-2.5 flex-shrink-0 rounded-full bg-teal" />
           ))}
         </div>
         <button
           onClick={onClose}
-          className="w-full py-3 rounded-xl text-sm font-semibold text-white outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-white"
-          style={{ backgroundColor: TEAL_DEEP }}
+          className="w-full rounded-btn bg-teal py-3 text-sm font-semibold text-white outline-none transition-opacity hover:opacity-90"
         >
           Sluiten
         </button>
@@ -155,25 +148,21 @@ function MiniStudyBar({
     : (isDone ? 'Volgende les' : 'Markeer & verder');
 
   return (
-    <div className="flex-shrink-0 border-t-2 border-teal-300 dark:border-teal-700 bg-teal-50 dark:bg-teal-950/50">
+    <div className="flex-shrink-0 border-t border-line bg-teal-faint">
       {/* Row 1: meta + dismiss */}
-      <div className="flex items-center gap-1.5 px-3 pt-2 pb-1">
-        {/* The one inline colour in this bar, so it is the one the `dark` scope
-            cannot correct: #0F766E on the dark teal band is barely visible.
-            TEAL_ON_DARK reads at 8:1 there. */}
-        <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded"
-          style={{ backgroundColor: 'rgba(45,212,191,0.12)', color: TEAL_ON_DARK }}>
+      <div className="flex items-center gap-1.5 px-3 pb-1 pt-2">
+        <span className="inline-flex items-center gap-1 rounded bg-[var(--teal-wash)] px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-teal-dark">
           <BookOpen size={9} /> Studie
         </span>
-        <span className="text-[11px] font-semibold text-teal-900 dark:text-teal-100 truncate" title={study.studyTitle}>
+        <span className="truncate text-[11px] font-semibold text-ink" title={study.studyTitle}>
           {study.studyTitle}
         </span>
-        <span className="text-[10px] tabular-nums text-teal-700 dark:text-teal-300 ml-auto flex-shrink-0">
-          {lessonIdx + 1}<span className="opacity-50">/{total}</span>
+        <span className="ml-auto flex-shrink-0 text-[10px] text-ink-muted tabular-nums">
+          {lessonIdx + 1}<span className="opacity-60">/{total}</span>
         </span>
         <button
           onClick={onDismiss}
-          className="flex items-center justify-center w-5 h-5 rounded text-teal-500 hover:text-teal-800 dark:hover:text-teal-200 hover:bg-teal-100 dark:hover:bg-teal-900 transition-colors flex-shrink-0"
+          className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded text-ink-faint transition-colors hover:bg-line hover:text-ink-body"
           title="Studiebalk verbergen"
           aria-label="Studiebalk verbergen"
         >
@@ -183,18 +172,14 @@ function MiniStudyBar({
 
       {/* Row 2: current lesson line */}
       <div className="px-3 pb-1.5">
-        <p className="text-[11px] leading-tight text-teal-800 dark:text-teal-200 truncate" title={lesson?.title || ''}>
+        <p className="truncate text-[11px] leading-tight text-ink-body" title={lesson?.title || ''}>
           <span className="font-medium">{lesson?.title}</span>
           {lesson?.verseRange && (
-            <span className="text-teal-600 dark:text-teal-400 ml-1.5">· {lesson.book} {lesson.chapter}:{lesson.verseRange}</span>
+            <span className="ml-1.5 text-ink-muted">· {lesson.book} {lesson.chapter}:{lesson.verseRange}</span>
           )}
         </p>
-        {/* Progress bar */}
-        <div className="mt-1 h-1 rounded-full bg-teal-200/70 dark:bg-teal-900 overflow-hidden" title={`${progressPct}% voltooid`}>
-          <div
-            className="h-full rounded-full transition-all"
-            style={{ width: `${progressPct}%`, backgroundColor: '#0D9488' }}
-          />
+        <div className="mt-1 h-1 overflow-hidden rounded-full bg-line" title={`${progressPct}% voltooid`}>
+          <div className="h-full rounded-full bg-teal transition-all" style={{ width: `${progressPct}%` }} />
         </div>
       </div>
 
@@ -203,7 +188,7 @@ function MiniStudyBar({
         <button
           onClick={() => onGoto(lessonIdx - 1)}
           disabled={lessonIdx === 0}
-          className="flex items-center gap-0.5 px-2 h-7 rounded-md text-[10.5px] font-medium disabled:opacity-30 disabled:cursor-not-allowed text-teal-700 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900 transition-colors"
+          className="flex h-7 items-center gap-0.5 rounded-md px-2 text-[10.5px] font-medium text-ink-body transition-colors hover:bg-line disabled:cursor-not-allowed disabled:opacity-30"
           title="Vorige les"
           aria-label="Vorige les"
         >
@@ -212,8 +197,7 @@ function MiniStudyBar({
 
         <button
           onClick={handlePrimary}
-          className="inline-flex items-center gap-1 px-3 h-7 rounded-md text-[11px] font-semibold text-white outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-white whitespace-nowrap"
-          style={{ backgroundColor: TEAL_DEEP }}
+          className="inline-flex h-7 items-center gap-1 whitespace-nowrap rounded-md bg-teal px-3 text-[11px] font-semibold text-white outline-none transition-opacity hover:opacity-90"
           title={primaryLabel}
         >
           {isLast && isDone ? <Trophy size={12} /> : <CheckCircle size={12} />}
@@ -409,94 +393,63 @@ function StudyPageInner() {
 
   return (
     /*
-     * The reading room is a FIXED frame on the scene, not a scrolling page.
+     * The reader (design_handoff_web/PAGES.md §3).
      *
-     * Every other converted screen lets the document scroll, which is what
-     * drives the shell's depth engine. This one deliberately does not, for the
-     * reason the whole page exists: someone sits here with a chapter for twenty
-     * minutes, and a landscape sliding underneath the verse they are following
-     * is the one thing atmosphere must never do. The passage and the study
-     * materials keep their own scroll containers, exactly as before, and the
-     * scene stays where it is.
+     * `padded={false}`: this is one of the two routes whose body fills the shell
+     * edge to edge. Two panes, no margin, no radius, no card border - the
+     * passage at `flex:1.05` with a single hairline down its right side, the
+     * study materials at `flex:1`. Neither pane paints anything but white.
      *
-     * What changed: the room no longer sits IN the scene, it IS the scene. No
-     * outer padding, no rounded plate, no shadow, no gutter of landscape around
-     * a white card - the room runs from the underside of the navbar to all four
-     * edges, transparent, over the shell's muted picture (see ../layout.tsx),
-     * and the rail stands on it the way it stands on every other converted
-     * screen. See `./room`, which holds both the palette and the height so
-     * `loading.tsx` can stream into an identical frame.
+     * The page itself still does NOT scroll, for the reason it never did:
+     * someone sits here with a chapter for twenty minutes, and each pane keeps
+     * its own scroll container so the frame around the text stays put.
+     *
+     * The immersive room is gone with the landscape - no `dark` scope, no
+     * READING_ROOM palette, no RAIL_GUTTER (the sidebar is a real column now,
+     * so nothing has to be inset around a floating rail).
      */
-    <div className={`dark relative flex ${ROOM_HEIGHT} w-full min-w-0 flex-col overflow-hidden font-inter text-foreground`} style={READING_ROOM}>
+    <>
       {showCompletionOverlay && activeStudy && (
         <CompletionOverlay study={activeStudy} onClose={handleCloseOverlay} />
       )}
 
-      {/*
-       * The page's heading, kept for the document outline and for a screen
-       * reader, and taken off the screen: it was an eyebrow over the frame that
-       * cost a line of vertical space and repeated what the rail's active item
-       * and the chapter selector both already say. On a screen whose entire
-       * job is the number of verses that fit, that line is measure.
-       */}
-      <h1 className="sr-only">Lezen</h1>
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden bg-white">
+        {/* Mobile pane switcher - only below lg; the design is the desktop
+            split, and a phone has room for one pane at a time. */}
+        <div className="flex flex-none items-stretch border-b border-line lg:hidden">
+          <button
+            onClick={() => setMobileView('bible')}
+            aria-pressed={mobileView === 'bible'}
+            className={[
+              'relative flex h-12 flex-1 items-center justify-center gap-1.5 text-sm font-semibold outline-none transition-colors',
+              mobileView === 'bible' ? 'text-teal' : 'text-ink-muted hover:text-ink-body',
+            ].join(' ')}
+          >
+            <BookOpen size={16} /> Bijbel
+            {mobileView === 'bible' && (
+              <span className="absolute inset-x-4 bottom-0 h-0.5 rounded-full bg-teal" />
+            )}
+          </button>
+          <button
+            onClick={() => setMobileView('materials')}
+            aria-pressed={mobileView === 'materials'}
+            className={[
+              'relative flex h-12 flex-1 items-center justify-center gap-1.5 text-sm font-semibold outline-none transition-colors',
+              mobileView === 'materials' ? 'text-teal' : 'text-ink-muted hover:text-ink-body',
+            ].join(' ')}
+          >
+            <MessageCircle size={16} /> Studie
+            {mobileView === 'materials' && (
+              <span className="absolute inset-x-4 bottom-0 h-0.5 rounded-full bg-teal" />
+            )}
+          </button>
+        </div>
 
-      {/* Mobile pane switcher - only below lg; desktop/landscape keeps the split.
-          Recessed rather than lifted (`bg-black/25`, the scene's own scrim
-          value), so the passage stays the lightest thing in the room. */}
-      <div className="lg:hidden flex-none flex items-stretch border-b border-white/10 bg-black/25">
-        <button
-          onClick={() => setMobileView('bible')}
-          aria-pressed={mobileView === 'bible'}
-          className={[
-            'flex-1 flex items-center justify-center gap-1.5 h-12 text-sm font-semibold relative outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#2DD4BF]',
-            mobileView === 'bible'
-              ? 'text-[#2DD4BF] bg-[rgba(45,212,191,0.10)]'
-              : 'text-white/60 hover:text-white hover:bg-white/[0.06]',
-          ].join(' ')}
-        >
-          <BookOpen size={16} /> Bijbel
-          {mobileView === 'bible' && (
-            <span className="absolute bottom-0 left-4 right-4 h-0.5 rounded-full bg-[#2DD4BF]" />
-          )}
-        </button>
-        <button
-          onClick={() => setMobileView('materials')}
-          aria-pressed={mobileView === 'materials'}
-          className={[
-            'flex-1 flex items-center justify-center gap-1.5 h-12 text-sm font-semibold relative outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#2DD4BF]',
-            mobileView === 'materials'
-              ? 'text-[#2DD4BF] bg-[rgba(45,212,191,0.10)]'
-              : 'text-white/60 hover:text-white hover:bg-white/[0.06]',
-          ].join(' ')}
-        >
-          <MessageCircle size={16} /> Studie
-          {mobileView === 'materials' && (
-            <span className="absolute bottom-0 left-4 right-4 h-0.5 rounded-full bg-[#2DD4BF]" />
-          )}
-        </button>
-      </div>
-
-      <div className="flex flex-col lg:flex-row flex-1 min-h-0 w-full overflow-hidden">
-        {/*
-         * RAIL_GUTTER is the ONLY inset left on this page, and it is not
-         * margin - it is the strip the rail stands in, exactly 13rem wide, so
-         * the pane's left edge is the rail's right edge. See `./room`, which
-         * explains why this route sets it itself instead of taking `SCENE_X`,
-         * and what has to move with it.
-         *
-         * The split leans left by half that strip (`calc(50% + 6.5rem)`, half
-         * of RAIL_GUTTER's 13rem) so the inset comes out of the page rather
-         * than out of the passage: the two panes each get an even half of the
-         * width that is left beside the rail, and the two widths sum to exactly
-         * 100%. (At the old 14rem they were 50%+7rem and 50%-3rem, which sums
-         * to 100%+4rem - the materials pane ran 4rem past the right edge and was
-         * clipped there.)
-         */}
+        <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden lg:flex-row">
         <div
           data-tour="bible-text"
           className={[
-            `h-full w-full lg:w-[calc(50%_+_6.5rem)] lg:flex-none min-h-0 min-w-0 overflow-hidden lg:border-r lg:border-white/10 ${RAIL_GUTTER}`,
+            'h-full min-h-0 w-full min-w-0 overflow-hidden lg:h-auto lg:flex-[1.05] lg:border-r lg:border-line',
             mobileView === 'bible' ? 'block' : 'hidden',
             'lg:block',
           ].join(' ')}
@@ -528,7 +481,7 @@ function StudyPageInner() {
         <div
           data-tour="commentary"
           className={[
-            'h-full w-full lg:w-[calc(50%_-_6.5rem)] lg:flex-none min-h-0 min-w-0 overflow-hidden',
+            'relative h-full min-h-0 w-full min-w-0 overflow-hidden lg:h-auto lg:flex-1',
             mobileView === 'materials' ? 'block' : 'hidden',
             'lg:block',
           ].join(' ')}
@@ -551,6 +504,7 @@ function StudyPageInner() {
             onAiQuestionConsumed={handleAiQuestionConsumed}
           />
         </div>
+        </div>
       </div>
 
       {/* Hide the floating widget whenever the AI tab itself is visible:
@@ -566,14 +520,16 @@ function StudyPageInner() {
             : ''
         }
       />
-    </div>
+    </>
   );
 }
 
 export default function StudyPage() {
   return (
-    <Suspense fallback={null}>
-      <StudyPageInner />
-    </Suspense>
+    <AppShell title="Lezen" padded={false}>
+      <Suspense fallback={null}>
+        <StudyPageInner />
+      </Suspense>
+    </AppShell>
   );
 }

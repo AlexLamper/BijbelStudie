@@ -141,11 +141,17 @@ export default function DailyVerseCard({
   const photo = dailyVersePhoto()
 
   return (
-    <div className="relative overflow-hidden rounded-xl min-w-0 flex flex-col min-h-[330px]">
+    <div className="relative flex h-[218px] min-w-0 flex-none flex-col overflow-hidden rounded-card">
       {/* The photograph, and the wash that makes text legible over it. A flat
           layer guarantees contrast over a bright sky; the gradient keeps the
           eyebrow and the action row readable over a light patch at either
-          edge. Both are copied from the app's _PhotoScrim. */}
+          edge. Both are copied from the app's _PhotoScrim.
+
+          The handoff draws a mauve-to-amber gradient with two hills here. That
+          is a placeholder for server imagery, like every other gradient plate
+          in the prototype (design_handoff_web/RULES.md §4) - the real picture
+          is one of the 76 curated landscapes, so the structure and the
+          measurements below are the design's and the illustration is not. */}
       <div
         aria-hidden
         className="absolute inset-0 bg-cover bg-center"
@@ -161,89 +167,75 @@ export default function DailyVerseCard({
         }}
       />
 
-      <div className="relative flex flex-col flex-1 p-5">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/70">
+      <div className="relative z-[1] flex flex-1 flex-col px-[26px] pb-5 pt-[22px]">
+        {/* One eyebrow carries both the label and the reference, so the verse
+            itself is the next thing the eye lands on. */}
+        <p className="text-[10.5px] font-semibold uppercase tracking-[1.5px] text-white/[0.82]">
           Tekst van de dag
+          {verse ? ` · ${verse.reference}${version ? ` ${version}` : ""}` : ""}
         </p>
 
         {loading ? (
-          <>
-            <div className="h-4 w-32 rounded skeleton-pulse bg-white/25 mt-2" />
-            <div className="space-y-2.5 mt-5">
-              <div className="h-3.5 rounded skeleton-pulse bg-white/25" />
-              <div className="h-3.5 rounded skeleton-pulse w-4/5 bg-white/25" />
-              <div className="h-3.5 rounded skeleton-pulse w-3/5 bg-white/25" />
-            </div>
-          </>
-        ) : verse ? (
-          <div className="content-in flex flex-col flex-1">
-            {/* "Micha 3:1 SV" - reference and translation on one line, as the
-                app prints it. */}
-            <p className="text-[15px] font-bold mt-1 text-white">
-              {verse.reference}
-              {version ? <span className="text-white/75"> {version}</span> : null}
-            </p>
-
-            <p
-              className="my-5 flex-1 text-white"
-              style={{
-                fontFamily: "Georgia, serif",
-                fontSize: "1.15rem",
-                lineHeight: 1.5,
-                fontWeight: 500,
-                wordBreak: "break-word",
-                overflowWrap: "break-word",
-                textShadow: "0 1px 2px rgba(0,0,0,0.35)",
-              }}
-            >
-              {verse.text}
-            </p>
-
-            {/* Centred, per the app. Plain icons, no button styling. */}
-            <div className="flex items-center justify-center gap-1">
-              <IconAction
-                label={liked ? "Verwijder uit favorieten" : "Favoriet"}
-                onClick={handleLike}
-                active={liked}
-              >
-                <Heart size={19} fill={liked ? "currentColor" : "none"} />
-              </IconAction>
-
-              <IconAction label="Delen" onClick={handleShare}>
-                <Share2 size={19} />
-              </IconAction>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    type="button"
-                    aria-label="Meer"
-                    className="p-2 rounded-full text-white/85 hover:text-white hover:bg-white/20 transition-colors"
-                  >
-                    <MoreHorizontal size={19} />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="center" className="w-56">
-                  <DropdownMenuItem asChild>
-                    <Link href={chapterHref} className="cursor-pointer">
-                      <BookOpen size={14} className="mr-2" />
-                      Lees het hele hoofdstuk
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className="cursor-pointer"
-                    onSelect={() => setHistoryOpen(true)}
-                  >
-                    <History size={14} className="mr-2" />
-                    Bekijk voorgaande dagen
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-
-            <p className="h-4 text-center text-[11px] text-white/75">{shareNote}</p>
+          <div className="mt-3 space-y-2.5">
+            <div className="skeleton-pulse h-4 rounded bg-white/25" />
+            <div className="skeleton-pulse h-4 w-4/5 rounded bg-white/25" />
           </div>
+        ) : verse ? (
+          <p
+            className="content-in mt-3 max-w-[680px] font-serif text-[25px] font-normal leading-[1.45] text-white"
+            style={{ textShadow: "0 1px 3px rgba(0,0,0,.28)", overflowWrap: "break-word" }}
+          >
+            {verse.text}
+          </p>
         ) : null}
+
+        <div className="flex-1" />
+
+        {/* Three round actions along the foot of the card, in the design's
+            order: heart, share, overflow. */}
+        <div className="flex items-center gap-[10px]">
+          <RoundAction
+            label={liked ? "Verwijder uit favorieten" : "Favoriet"}
+            onClick={handleLike}
+            disabled={!verse}
+          >
+            <Heart size={19} fill={liked ? "currentColor" : "none"} />
+          </RoundAction>
+
+          <RoundAction label="Delen" onClick={handleShare} disabled={!verse}>
+            <Share2 size={19} />
+          </RoundAction>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                aria-label="Meer"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.32] text-white transition-colors hover:bg-white/20"
+                style={{ backgroundColor: "rgba(17,24,39,.45)" }}
+              >
+                <MoreHorizontal size={19} />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-56">
+              <DropdownMenuItem asChild>
+                <Link href={chapterHref} className="cursor-pointer">
+                  <BookOpen size={14} className="mr-2" />
+                  Lees het hele hoofdstuk
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onSelect={() => setHistoryOpen(true)}
+              >
+                <History size={14} className="mr-2" />
+                Bekijk voorgaande dagen
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {shareNote && <span className="text-[11px] text-white/85">{shareNote}</span>}
+        </div>
       </div>
 
       <Dialog open={historyOpen} onOpenChange={setHistoryOpen}>
@@ -290,28 +282,31 @@ export default function DailyVerseCard({
   )
 }
 
-/** One of the three actions. An icon and a hit area, nothing else. */
-function IconAction({
+/**
+ * One of the three actions: a 40 px disc of smoked glass with a white glyph,
+ * so the row reads as controls over a photograph rather than as three icons
+ * floating on it.
+ */
+function RoundAction({
   label,
   onClick,
-  active = false,
+  disabled = false,
   children,
 }: {
   label: string
   onClick: () => void
-  active?: boolean
+  disabled?: boolean
   children: React.ReactNode
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
+      disabled={disabled}
       aria-label={label}
       title={label}
-      aria-pressed={active}
-      className={`p-2 rounded-full transition-colors hover:bg-white/20 ${
-        active ? "text-white" : "text-white/85 hover:text-white"
-      }`}
+      className="flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.32] text-white transition-colors hover:bg-white/20 disabled:opacity-50"
+      style={{ backgroundColor: "rgba(17,24,39,.45)" }}
     >
       {children}
     </button>

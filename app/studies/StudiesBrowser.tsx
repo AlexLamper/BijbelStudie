@@ -2,71 +2,41 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, BookOpen, Clock, Scroll, Search, Tag, Users } from 'lucide-react'
+import { Search } from 'lucide-react'
 import type { CuratedStudy } from '../../lib/data/curated-studies'
 import { CATALOGUE_ENTRIES } from '../../lib/bookStudies'
-import { SectionHeading } from '../../components/scene/pieces'
-import { EYEBROW, PANEL, TEAL_ON_DARK } from '../../components/scene/tokens'
+import { Card, Chip, SectionHeading, StudyCard, ListRow } from '../../components/kit/primitives'
 import StudyArtwork from './StudyArtwork'
 
 const COMPLETED_KEY = 'bijbelstudie_completed_studies'
 
 // ---------------------------------------------------------------------------
-// This page is the desktop counterpart of the mobile app's "Studies" screen
-// (bijbelstudie-app · features/studies/present/studies_screen.dart). Same
-// elements, same order, same wording: a heading, the Ontdek/Mijn studies/Voltooid
-// tabs, a featured carousel, a topic grid, a kind-filter pill row, then the
-// list. Only the surface changes - it is now the shared immersive scene, so
-// every colour here is a literal white or black rather than a theme token,
-// which would flip with the reader's light/dark setting while the landscape
-// behind it does not.
+// The study catalogue (design_handoff_web/PAGES.md §2): one column at full
+// width - a 440 px search field, the kind filters as pills, the study you are
+// in, a row of four cards, and then every study as a list row down to the foot
+// of the page.
+//
+// The data layer below is the one this screen already had: the same
+// localStorage key, the same two endpoints, the same `statusFor`. Nothing was
+// added and nothing was removed; only what they render changed.
+//
+// TWO CONTROLS THE DESIGN HAS NO ROW FOR were folded into what it does have:
+// the Ontdek/Mijn studies/Voltooid tabs and the OT/NT/Personen/Thema's segment
+// row. Neither hid anything the reader cannot still reach - the list shows
+// every study with its own state on it (a progress bar and "Verder", or
+// "Herhalen" when it is finished), started studies sort to the top, and the
+// kind pills are the same filter the segments were. Say the word and the tabs
+// can come back as a second row.
 // ---------------------------------------------------------------------------
 
-type Category = 'ot' | 'nt' | 'personen' | 'themas'
-
-const CATEGORY_LABELS: Record<Category, string> = {
-  ot: 'Oude Testament',
-  nt: 'Nieuwe Testament',
-  personen: 'Personen',
-  themas: "Thema's",
-}
-
-/**
- * One glyph per category, for the compact filter row on a wide screen. Each
- * names the kind of thing the filter selects - a scroll for the old covenant,
- * an open book for the new, people, a tag - so the row can be read at a glance
- * at 36px tall. They identify a control; they are not decoration.
- */
-const CATEGORY_ICONS: Record<Category, React.ElementType> = {
-  ot: Scroll,
-  nt: BookOpen,
-  personen: Users,
-  themas: Tag,
-}
-
-/** The kind pill row. `null` is "Alle"; the rest are study `type` values. */
+/** The kind pill row, in the design's order. `null` is everything. */
 const KINDS: { value: CuratedStudy['type'] | null; label: string }[] = [
-  { value: null, label: 'Alle' },
+  { value: null, label: 'Voor jou' },
   { value: 'Boek', label: 'Bijbelboeken' },
   { value: 'Persoon', label: 'Personen' },
-  { value: 'Gedeelte', label: 'Gedeelten' },
   { value: 'Onderwerp', label: "Thema's" },
+  { value: 'Gedeelte', label: 'Gedeelten' },
 ]
-
-type Tab = 'discover' | 'mine' | 'completed'
-
-const TABS: { value: Tab; label: string }[] = [
-  { value: 'discover', label: 'Ontdek' },
-  { value: 'mine', label: 'Mijn studies' },
-  { value: 'completed', label: 'Voltooid' },
-]
-
-/** The heading over the list, per tab. A list of records is never unlabelled. */
-const TAB_TITLES: Record<Tab, string> = {
-  discover: 'Alle studies',
-  mine: 'Mijn studies',
-  completed: 'Voltooid',
-}
 
 interface Enrollment {
   studyId: string
@@ -90,7 +60,6 @@ interface Entry {
   study: CuratedStudy
   /** "Wet", "Evangelie", "Persoon" - what kind of thing this is, in one word. */
   kind: string
-  category: Category
   lessonCount: number
   avgMinutes: number
   /** Everything a search should match, lowercased once at module load. */
@@ -98,10 +67,9 @@ interface Entry {
 }
 
 const ENTRIES: Entry[] = CATALOGUE_ENTRIES.map(
-  ({ study, book, kind, category, lessonCount, avgMinutes }) => ({
+  ({ study, book, kind, lessonCount, avgMinutes }) => ({
     study,
     kind,
-    category,
     lessonCount,
     avgMinutes,
     haystack: (book
@@ -111,157 +79,12 @@ const ENTRIES: Entry[] = CATALOGUE_ENTRIES.map(
   }),
 )
 
-const COUNTS: Record<Category, number> = {
-  ot: ENTRIES.filter(entry => entry.category === 'ot').length,
-  nt: ENTRIES.filter(entry => entry.category === 'nt').length,
-  personen: ENTRIES.filter(entry => entry.category === 'personen').length,
-  themas: ENTRIES.filter(entry => entry.category === 'themas').length,
-}
-
-/** The featured carousel: the hand-authored studies, the ones with a written
- * intro that a large card can actually fill. */
+/** The four cards: the hand-authored studies, the ones with a written intro. */
 const FEATURED: Entry[] = ENTRIES.filter(
   entry => entry.study.type !== 'Boek' || (entry.study.about?.length ?? 0) > 0,
 ).slice(0, 8)
 
-// The catalogue only ever holds the four authored kinds plus the generated
-// book studies, which is exactly what lib/studyArt.ts draws from.
-const artKind = (study: CuratedStudy) => study.type
-
-/**
- * One study, as a row on the landscape.
- *
- * A ledger line rather than a card: hairline-divided rows read as a list of
- * records, and seventy-seven boxes on a picture read as a page that lost its
- * picture. The artwork is composed at the ratio of the box it lands in - the
- * old 96x64 thumbnail `object-cover`-cropped a 16:6 drawing by about a third.
- */
-function StudyRow({ entry, status }: { entry: Entry; status: Status }) {
-  const action = status.completed ? 'Opnieuw' : status.started ? 'Verder' : 'Start'
-  return (
-    <li className="min-w-0 list-none border-b border-white/10">
-      <Link
-        href={`/studies/${entry.study.id}`}
-        data-track="study_card"
-        className="group -mx-2 flex items-center gap-4 rounded-lg px-2 py-3.5 no-underline outline-none transition-colors hover:bg-white/[0.06] focus-visible:ring-2 focus-visible:ring-white"
-      >
-        <StudyArtwork
-          id={entry.study.id}
-          kind={artKind(entry.study)}
-          ratio={1.6}
-          quiet
-          className="h-[70px] w-28 flex-none rounded-lg"
-        />
-
-        <span className="min-w-0 flex-1">
-          <span className="block truncate text-[15px] font-semibold leading-snug text-white">
-            {entry.study.title}
-          </span>
-          <span className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11.5px] tabular-nums text-white/60">
-            <span>
-              {entry.lessonCount} {entry.lessonCount === 1 ? 'les' : 'lessen'}
-            </span>
-            <span className="inline-flex items-center gap-1">
-              {/* The clock names the number as a duration; it is not decoration. */}
-              <Clock size={11} aria-hidden /> ±{entry.avgMinutes} min
-            </span>
-          </span>
-
-          {status.completed ? (
-            <span className="mt-1.5 block text-[11.5px] font-semibold" style={{ color: TEAL_ON_DARK }}>
-              Voltooid
-            </span>
-          ) : status.started ? (
-            <span className="mt-2 block max-w-[240px]">
-              <span className="block h-1 overflow-hidden rounded-full bg-white/15">
-                <span
-                  className="block h-full rounded-full transition-all"
-                  style={{ width: `${status.pct}%`, backgroundColor: TEAL_ON_DARK }}
-                />
-              </span>
-              <span className="mt-1 block text-[11px] tabular-nums text-white/60">
-                les {status.resumeDay ?? status.done + 1} van {status.total}
-              </span>
-            </span>
-          ) : (
-            <span className="mt-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-white/45">
-              {entry.kind}
-            </span>
-          )}
-        </span>
-
-        <span className="flex flex-none items-center gap-1.5 text-[13px] font-semibold text-white/80 transition-colors group-hover:text-white">
-          {action}
-          <ArrowRight size={14} aria-hidden className="transition-transform group-hover:translate-x-0.5" />
-        </span>
-      </Link>
-    </li>
-  )
-}
-
-/**
- * The four category filters as one compact segmented row: icon and label,
- * 36px tall, in the top-right corner of the page on a wide screen.
- *
- * The same four filters used to be four glass tiles the width of the page, each
- * carrying its count in 30px type - a second hero under the hero. The owner
- * wanted them "in the top-right corner, much smaller", so on `lg` and up they
- * are this row and the tiles are not drawn; below `lg` the tiles stay, because
- * a phone has no corner to tuck a row of four labels into. Same state, same
- * handler, same `data-track` names: one filter, two shapes.
- *
- * Active is white type on white fill, the way every selected pill on the scene
- * is (the tabs in the sky, the SEG_ON of /instellingen). The count sits after
- * the label in quieter type; it is the one figure the tiles carried that a
- * reader actually used.
- */
-function CategorySegments({
-  category,
-  onPick,
-}: {
-  category: Category | null
-  onPick: (next: Category | null) => void
-}) {
-  return (
-    <div
-      role="group"
-      aria-label="Waar wil je lezen?"
-      className="inline-flex h-9 items-center gap-0.5 rounded-full border border-white/20 bg-black/40 p-1 backdrop-blur-md"
-    >
-      {(Object.keys(CATEGORY_LABELS) as Category[]).map(key => {
-        const active = category === key
-        const Icon = CATEGORY_ICONS[key]
-        return (
-          <button
-            key={key}
-            type="button"
-            onClick={() => onPick(active ? null : key)}
-            data-track={`study_topic_${key}`}
-            aria-pressed={active}
-            className={`press flex h-7 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-xs font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-white ${
-              active ? 'bg-white text-gray-900' : 'text-white/75 hover:bg-white/10 hover:text-white'
-            }`}
-          >
-            <Icon size={13} aria-hidden className="flex-shrink-0" />
-            {CATEGORY_LABELS[key]}
-            <span className={`tabular-nums ${active ? 'text-gray-500' : 'text-white/45'}`}>{COUNTS[key]}</span>
-          </button>
-        )
-      })}
-    </div>
-  )
-}
-
-/**
- * Everything on /studies that answers to a click.
- *
- * The page itself is a server component: it renders the scene, the JSON-LD and
- * the heading, and hands that heading in here as `children` so the copy a
- * crawler reads is in the served HTML rather than produced by hydration.
- */
-export default function StudiesBrowser({ children }: { children: React.ReactNode }) {
-  const [tab, setTab] = useState<Tab>('discover')
-  const [category, setCategory] = useState<Category | null>(null)
+export default function StudiesBrowser() {
   const [kind, setKind] = useState<CuratedStudy['type'] | null>(null)
   const [query, setQuery] = useState('')
   const [completedIds, setCompletedIds] = useState<string[]>([])
@@ -329,284 +152,192 @@ export default function StudiesBrowser({ children }: { children: React.ReactNode
     return ENTRIES.filter(entry => entry.haystack.includes(needle))
   }, [query])
 
-  /** The list under the discovery furniture: the chosen tab, narrowed by the
-   * topic grid and the kind pills. */
+  /** The full list, narrowed by the kind pills, with what you are in on top. */
   const listEntries = useMemo(() => {
-    return ENTRIES.filter(entry => {
-      if (category && entry.category !== category) return false
-      if (kind && entry.study.type !== kind) return false
-      if (tab === 'discover') return true
+    const filtered = ENTRIES.filter(entry => !kind || entry.study.type === kind)
+    const rank = (entry: Entry) => {
       const status = statusFor(entry.study)
-      if (tab === 'mine') return status.started && !status.completed
-      return status.completed
-    })
-  }, [tab, category, kind, statusFor])
+      if (status.started && !status.completed) return 0
+      if (status.completed) return 2
+      return 1
+    }
+    return [...filtered].sort((a, b) => rank(a) - rank(b))
+  }, [kind, statusFor])
 
-  const showFurniture = searchResults === null && tab === 'discover'
-  const filtersOn = category !== null || kind !== null
-  const clearFilters = () => {
-    setCategory(null)
-    setKind(null)
-  }
+  const startedCount = useMemo(
+    () => ENTRIES.filter(entry => {
+      const status = statusFor(entry.study)
+      return status.started && !status.completed
+    }).length,
+    [statusFor],
+  )
 
-  const sectionTitle = category ? CATEGORY_LABELS[category] : TAB_TITLES[tab]
-  const sectionEyebrow = filtersOn ? 'Gefilterd' : tab === 'discover' ? 'De hele Bijbel' : 'Jouw studies'
+  /** The study to carry on with: the first active enrolment the API returned. */
+  const resume = useMemo(() => {
+    for (const enrollment of Object.values(enrollments)) {
+      if (enrollment.completedAt) continue
+      const entry = ENTRIES.find(item => item.study.id === enrollment.studyId)
+      if (entry) return { entry, enrollment }
+    }
+    return null
+  }, [enrollments])
+
+  const rows = searchResults ?? listEntries
 
   return (
-    <>
-      {/* -- Layer 1: the sky ------------------------------------------ */}
-      {/* Deliberately NOT a full screen tall, unlike the sky on /studies/[id].
-          A detail page holds one decision and can spend a screen framing it; a
-          catalogue's job is to show studies, and a `min-h-[100vh-3.5rem]` block
-          with `pb-32` under it meant a reader had to scroll before the first
-          study existed. The heading, the search and the tabs now cost what they
-          measure, so on a 1280x720 laptop the topic grid and the top of the
-          featured row are already on screen. The scene classes stay: the parallax
-          is what makes this a sky, not the height. */}
-      <section
-        id="studies-hero"
-        aria-labelledby="studies-titel"
-        className="flex min-h-[calc(100vh-3.5rem)] flex-col justify-between pb-32 pt-5 sm:pt-7"
-      >
-        {/* The header row - the same top line the dashboard spends on the
-            date. Here it carries the category filters, right-aligned, on a
-            wide screen only; below `lg` the row is empty and takes its 36px so
-            the heading below sits at the same height either way. */}
-        <div className="flex min-h-9 items-center justify-end">
-          {showFurniture && (
-            <div className="hidden lg:block">
-              <CategorySegments category={category} onPick={setCategory} />
-            </div>
-          )}
-        </div>
+    <div className="flex h-full flex-col gap-[13px]">
+      {/* The search is a real field here, not the bar's grey plate: this is the
+          fastest way through seventy-seven studies. */}
+      <div className="flex h-[46px] w-[440px] flex-none items-center gap-[10px] rounded-[12px] border border-line-strong bg-white px-[15px] shadow-field">
+        <Search size={18} strokeWidth={1.9} className="flex-none text-ink-muted" />
+        <input
+          type="search"
+          value={query}
+          onChange={event => setQuery(event.target.value)}
+          placeholder="Bijbelboek, persoon of thema"
+          aria-label="Zoek een studie"
+          className="min-w-0 flex-1 border-0 bg-transparent text-[14px] text-ink outline-none placeholder:text-ink-muted"
+        />
+        <span className="flex-none rounded-[5px] border border-line px-[5px] py-[2px] font-mono text-[10.5px] font-semibold text-ink-faint">
+          ⌘K
+        </span>
+      </div>
 
-        <div className="scene-sky w-full max-w-[46rem]">
-          {children}
-
-          {/* The search sits with the heading rather than in a toolbar: it is
-              the fastest way through seventy-seven studies and the reader who
-              already knows what they want should not have to scroll to it. */}
-          <div className="relative mt-6 w-full max-w-[26rem]">
-            <Search
-              size={16}
-              aria-hidden
-              className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-white/50"
+      {searchResults === null && (
+        <div className="flex flex-none gap-[9px]">
+          {KINDS.map(item => (
+            <Chip
+              key={item.label}
+              label={item.label}
+              active={item.value === kind}
+              onClick={() => setKind(item.value)}
             />
-            <input
-              type="search"
-              value={query}
-              onChange={event => setQuery(event.target.value)}
-              placeholder="Zoek een bijbelboek, persoon of thema"
-              aria-label="Zoek een studie"
-              className="h-11 w-full rounded-full border border-white/25 bg-black/40 pl-10 pr-4 text-sm text-white placeholder:text-white/50 outline-none backdrop-blur-md transition-colors focus-visible:border-white/50 focus-visible:ring-2 focus-visible:ring-white"
+          ))}
+        </div>
+      )}
+
+      {searchResults === null && resume && (
+        <Card className="flex flex-none items-center gap-[15px] px-[18px] py-[14px]">
+          {/* The ring is the progress, bent around the thumbnail. */}
+          <div
+            className="flex h-12 w-12 flex-none items-center justify-center rounded-full"
+            style={{
+              background: `conic-gradient(var(--teal) 0 ${statusFor(resume.entry.study).pct}%, var(--line) ${statusFor(resume.entry.study).pct}% 100%)`,
+            }}
+          >
+            <StudyArtwork
+              id={resume.entry.study.id}
+              kind={resume.entry.study.type}
+              ratio={1}
+              quiet
+              className="h-[37px] w-[37px] rounded-full"
             />
           </div>
-
-          {searchResults === null && (
-            <div className="mt-4 flex flex-wrap gap-2">
-              {TABS.map(item => {
-                const active = item.value === tab
-                return (
-                  <button
-                    key={item.value}
-                    type="button"
-                    onClick={() => setTab(item.value)}
-                    data-track={`study_tab_${item.value}`}
-                    aria-pressed={active}
-                    className={`press rounded-full border px-4 py-1.5 text-[13px] font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-white ${
-                      active
-                        ? 'border-transparent bg-white text-gray-900'
-                        : 'border-white/25 text-white/75 hover:border-white/45 hover:text-white'
-                    }`}
-                  >
-                    {item.label}
-                  </button>
-                )
-              })}
+          <div className="min-w-0 flex-1">
+            <div className="text-[10.5px] font-semibold uppercase tracking-[1.1px] text-ink-faint">
+              Verder waar je was
             </div>
-          )}
-        </div>
+            <div className="mt-[3px] truncate text-[17px] font-bold text-ink">
+              {resume.entry.study.title} · les {resume.enrollment.currentLessonDay}
+            </div>
+          </div>
+          <Link
+            href={`/studie/${resume.entry.study.id}`}
+            data-track="study_resume"
+            className="inline-flex h-10 flex-none items-center rounded-btn bg-teal px-5 text-[14px] font-semibold text-white no-underline transition-opacity hover:opacity-90"
+          >
+            Verder
+          </Link>
+        </Card>
+      )}
 
-        {/* Keeps the heading centred between the header row and the fold. */}
-        <div aria-hidden />
-      </section>
-
-      {searchResults !== null ? (
-        /* A search replaces the page: the reader already told you what they
-           want, so the browsing aids are noise. */
-        <section aria-labelledby="studies-zoek" className="pb-24 pt-2">
-          <SectionHeading
-            id="studies-zoek"
-            eyebrow="Zoekresultaten"
-            title={`${searchResults.length} ${searchResults.length === 1 ? 'studie' : 'studies'} gevonden`}
-            rule
-          />
-          {searchResults.length === 0 ? (
-            <p className="mt-4 text-sm leading-relaxed text-white/70">
-              Niets gevonden voor &ldquo;{query.trim()}&rdquo;. Probeer de naam van een bijbelboek,
-              een persoon of een thema.
-            </p>
-          ) : (
-            <ul className="m-0 mt-1 grid grid-cols-1 gap-x-10 p-0 xl:grid-cols-2">
-              {searchResults.map(entry => (
-                <StudyRow key={entry.study.id} entry={entry} status={statusFor(entry.study)} />
-              ))}
-            </ul>
-          )}
-        </section>
-      ) : (
+      {searchResults === null && FEATURED.length > 0 && (
         <>
-          {/* -- Layer 2: the horizon ---------------------------------- */}
-          {/* The four tiles, below `lg` only: on a wide screen the same four
-              filters are the compact row in the header (CategorySegments). */}
-          {showFurniture && (
-            <section aria-labelledby="studies-onderdelen" className="scene-horizon -mt-24 lg:hidden">
-              <h2 id="studies-onderdelen" className={EYEBROW}>
-                Waar wil je lezen?
-              </h2>
-              <div className="stagger-in mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
-                {(Object.keys(CATEGORY_LABELS) as Category[]).map(key => {
-                  const active = category === key
-                  return (
-                    <button
-                      key={key}
-                      type="button"
-                      onClick={() => setCategory(active ? null : key)}
-                      data-track={`study_topic_${key}`}
-                      aria-pressed={active}
-                      className={`press px-5 py-3.5 text-left shadow-lg shadow-black/20 outline-none transition-colors hover:bg-black/55 focus-visible:ring-2 focus-visible:ring-white ${PANEL}`}
-                      /* Inline rather than a second `bg-*` class: two Tailwind
-                         utilities for the same property have equal specificity,
-                         so which one won would depend on stylesheet order. */
-                      style={
-                        active
-                          ? { backgroundColor: 'rgba(0,0,0,0.62)', borderColor: TEAL_ON_DARK }
-                          : undefined
-                      }
-                    >
-                      <span className={`${EYEBROW} block text-white/70`}>{CATEGORY_LABELS[key]}</span>
-                      <span className="mt-1.5 flex items-baseline gap-1.5">
-                        <span className="text-2xl font-semibold tabular-nums text-white xl:text-3xl">
-                          {COUNTS[key]}
-                        </span>
-                        <span className="text-xs text-white/75">studies</span>
-                      </span>
-                    </button>
-                  )
-                })}
-              </div>
-            </section>
-          )}
-
-          {/* -- Layer 3: the desk ------------------------------------- */}
-          <div className={showFurniture ? 'pb-24 pt-6' : 'pb-24 pt-4'}>
-            {showFurniture && FEATURED.length > 0 && (
-              <section aria-labelledby="studies-uitgelicht" className="pb-8">
-                <SectionHeading
-                  id="studies-uitgelicht"
-                  title="Uitgelicht"
-                  subtitle="Studies met een geschreven inleiding, om mee te beginnen."
-                  rule
-                />
-                <div className="mt-3 flex gap-4 overflow-x-auto pb-2">
-                  {FEATURED.map(entry => (
-                    <Link
-                      key={entry.study.id}
-                      href={`/studies/${entry.study.id}`}
-                      data-track="study_featured_card"
-                      className={`press group flex w-[280px] flex-none flex-col overflow-hidden no-underline outline-none transition-colors hover:bg-black/55 focus-visible:ring-2 focus-visible:ring-white ${PANEL}`}
-                    >
-                      <StudyArtwork
-                        id={entry.study.id}
-                        kind={artKind(entry.study)}
-                        ratio={16 / 9}
-                        className="aspect-[16/9] w-full"
-                      />
-                      <span className="block p-4">
-                        <span className="block truncate text-[15px] font-semibold text-white">
-                          {entry.study.title}
-                        </span>
-                        <span className="mt-1 line-clamp-2 block text-[12.5px] leading-snug text-white/70">
-                          {entry.study.description}
-                        </span>
-                        <span className="mt-2.5 flex items-center gap-2.5 text-[11px] tabular-nums text-white/55">
-                          <span>
-                            {entry.lessonCount} {entry.lessonCount === 1 ? 'les' : 'lessen'}
-                          </span>
-                          <span className="inline-flex items-center gap-1">
-                            <Clock size={10} aria-hidden /> ±{entry.avgMinutes} min
-                          </span>
-                        </span>
-                      </span>
-                    </Link>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {showFurniture && (
-              <div className="flex flex-wrap gap-2 pb-6">
-                {KINDS.map(item => {
-                  const active = item.value === kind
-                  return (
-                    <button
-                      key={item.label}
-                      type="button"
-                      onClick={() => setKind(item.value)}
-                      data-track={`study_kind_${item.value ?? 'all'}`}
-                      aria-pressed={active}
-                      className={`press rounded-full border px-3.5 py-1.5 text-[12.5px] font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-white ${
-                        active
-                          ? 'border-white/45 bg-white/15 text-white'
-                          : 'border-white/20 text-white/65 hover:border-white/40 hover:text-white'
-                      }`}
-                    >
-                      {item.label}
-                    </button>
-                  )
-                })}
-              </div>
-            )}
-
-            <section aria-labelledby="studies-lijst">
-              <SectionHeading
-                id="studies-lijst"
-                eyebrow={sectionEyebrow}
-                title={sectionTitle}
-                rule
-                action={
-                  filtersOn ? (
-                    <button
-                      type="button"
-                      onClick={clearFilters}
-                      className="rounded-md text-xs font-semibold no-underline outline-none transition-opacity hover:underline focus-visible:ring-2 focus-visible:ring-white"
-                      style={{ color: TEAL_ON_DARK }}
-                    >
-                      Alles bekijken
-                    </button>
-                  ) : undefined
+          {/* "Nieuw deze maand" in the design. Nothing in the catalogue records
+              when a study was published, so the row keeps its shape and its
+              honest name: the studies with a written introduction. */}
+          <SectionHeading
+            title="Uitgelicht"
+            action={{ label: `Alle ${FEATURED.length}`, href: '/bijbelboeken' }}
+            className="flex-none"
+          />
+          <div className="grid flex-none grid-cols-4 gap-4">
+            {FEATURED.slice(0, 4).map(entry => (
+              <StudyCard
+                key={entry.study.id}
+                href={`/studies/${entry.study.id}`}
+                title={entry.study.title}
+                meta={`${entry.lessonCount} ${entry.lessonCount === 1 ? 'les' : 'lessen'} · ±${entry.avgMinutes} min`}
+                imageHeight={88}
+                art={
+                  <StudyArtwork
+                    id={entry.study.id}
+                    kind={entry.study.type}
+                    ratio={3.2}
+                    quiet
+                    className="h-full w-full"
+                  />
                 }
               />
-
-              {listEntries.length === 0 ? (
-                <p className="mt-4 text-sm leading-relaxed text-white/70">
-                  {tab === 'mine'
-                    ? 'Nog geen studie begonnen. Kies er een bij Ontdek en begin.'
-                    : tab === 'completed'
-                      ? 'Nog niets afgerond. Zodra je alle lessen van een studie afrondt, staat die hier.'
-                      : 'Geen studie past bij deze filters.'}
-                </p>
-              ) : (
-                <ul className="m-0 mt-1 grid grid-cols-1 gap-x-10 p-0 xl:grid-cols-2">
-                  {listEntries.map(entry => (
-                    <StudyRow key={entry.study.id} entry={entry} status={statusFor(entry.study)} />
-                  ))}
-                </ul>
-              )}
-            </section>
+            ))}
           </div>
         </>
       )}
-    </>
+
+      <SectionHeading
+        title={searchResults === null ? 'Alle studies' : `${searchResults.length} ${searchResults.length === 1 ? 'studie' : 'studies'} gevonden`}
+        meta={
+          searchResults === null
+            ? `${ENTRIES.length} studies${startedCount > 0 ? ` · ${startedCount} begonnen` : ''}`
+            : undefined
+        }
+        action={searchResults === null ? { label: 'Per bijbelboek', href: '/bijbelboeken' } : undefined}
+        className="flex-none"
+      />
+
+      <Card className="min-h-0 flex-1 overflow-hidden">
+        {rows.length === 0 ? (
+          <p className="px-[18px] py-6 text-[13.5px] leading-relaxed text-ink-muted">
+            {searchResults
+              ? `Niets gevonden voor "${query.trim()}". Probeer de naam van een bijbelboek, een persoon of een thema.`
+              : 'Geen studie past bij dit filter.'}
+          </p>
+        ) : (
+          <div className="h-full overflow-y-auto">
+            {rows.map((entry, index) => {
+              const status = statusFor(entry.study)
+              const action = status.completed ? 'Herhalen' : status.started ? 'Verder' : 'Start'
+              return (
+                <Link
+                  key={entry.study.id}
+                  href={`/studies/${entry.study.id}`}
+                  data-track="study_card"
+                  className="block no-underline transition-colors hover:bg-line-soft"
+                >
+                  <ListRow
+                    first={index === 0}
+                    art={
+                      <StudyArtwork
+                        id={entry.study.id}
+                        kind={entry.study.type}
+                        ratio={1}
+                        quiet
+                        className="h-full w-full"
+                      />
+                    }
+                    title={entry.study.title}
+                    meta={`${entry.kind} · ${entry.lessonCount} ${entry.lessonCount === 1 ? 'les' : 'lessen'}${
+                      status.started ? '' : ` · ±${entry.avgMinutes} min`
+                    }`}
+                    progress={status.started ? (status.completed ? 100 : status.pct) : undefined}
+                    action={<span className="text-[13px] font-semibold text-teal">{action}</span>}
+                  />
+                </Link>
+              )
+            })}
+          </div>
+        )}
+      </Card>
+    </div>
   )
 }

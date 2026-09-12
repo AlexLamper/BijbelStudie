@@ -419,19 +419,19 @@ export default function GeoImages({ book, chapter, className, variant = 'grid', 
   if (variant === 'panel') {
     return (
       <>
-        <p className="text-[11px] text-gray-400 dark:text-muted-foreground mb-2">
+        <p className="mb-2 text-[12px] text-les-faint">
           {scope === 'book'
             ? `Geen locaties in dit hoofdstuk - dit zijn de plaatsen uit ${book}.`
             : `Plaatsen die in ${book} ${chapter} voorkomen.`}
         </p>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-[11px]">
           {images.map((image, index) => (
             <button
               key={`${image.id}-${index}`}
               onClick={() => setActiveIndex(index)}
-              className="group text-left rounded-lg overflow-hidden border border-gray-200 dark:border-border bg-white dark:bg-card hover:border-teal-300 dark:hover:border-teal-700 transition-colors"
+              className="group overflow-hidden rounded-[12px] border border-les-card-line bg-les-card text-left transition-colors hover:border-teal"
             >
-              <div className="bg-gray-100 dark:bg-secondary/60 overflow-hidden" style={{ height: 78 }}>
+              <div className="overflow-hidden bg-les-input" style={{ height: 132 }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={thumbSrc(image, 384)}
@@ -445,10 +445,10 @@ export default function GeoImages({ book, chapter, className, variant = 'grid', 
                   onError={e => { (e.currentTarget as HTMLImageElement).src = imgSrc(image); }}
                 />
               </div>
-              <div className="px-2 py-1.5">
-                <p className="text-[11px] font-semibold text-foreground truncate">{image.placeName}</p>
+              <div className="px-[13px] py-[10px]">
+                <p className="truncate text-[13px] font-bold text-les-ink">{image.placeName}</p>
                 {image.verses?.[0] && (
-                  <p className="text-[10px] text-gray-400 dark:text-muted-foreground truncate">{image.verses[0]}</p>
+                  <p className="truncate text-[11.5px] text-les-faint">{image.verses[0]}</p>
                 )}
               </div>
             </button>

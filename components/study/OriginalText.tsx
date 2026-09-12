@@ -122,14 +122,14 @@ function WordCard({ word, isHebrew }: WordCardProps) {
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-1 text-[9.5px] tabular-nums tracking-wide px-1.5 py-0.5 rounded font-semibold text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-950/40 hover:bg-teal-100 dark:hover:bg-teal-900/60 transition-colors inline-flex items-center gap-0.5"
+          className="mt-1 text-[10px] tabular-nums tracking-wide px-1.5 py-0.5 rounded font-semibold text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-950/40 hover:bg-teal-100 dark:hover:bg-teal-900/60 transition-colors inline-flex items-center gap-0.5"
           title="Bekijk in Strong's lexicon (biblehub.com)"
         >
           {displayStrong(word.s)}
           <ExternalLink size={8} className="opacity-60" />
         </a>
       ) : (
-        <span className="mt-1 text-[9.5px] text-gray-400">-</span>
+        <span className="mt-1 text-[10px] text-gray-400">-</span>
       )}
     </div>
   );

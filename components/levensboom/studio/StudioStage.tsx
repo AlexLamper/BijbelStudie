@@ -78,7 +78,10 @@ export default function StudioStage({ tree }: { tree: StageTree | null }) {
   const ring = ringColors(tree?.avatar.ring);
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-0">
+    // `absolute`, not `fixed`: since the redesign the tree fills the studio's
+    // left pane rather than the whole viewport - the sidebar and the top bar are
+    // real chrome now, and the picking column is a 446 px panel beside it.
+    <div className="pointer-events-none absolute inset-0 z-0">
       {/* The picture. Absent while the tree is loading and when the reader has
           turned it off - the scrims below then sit on the page's own ground,
           which is what the studio's empty state stands on. */}
@@ -110,20 +113,15 @@ export default function StudioStage({ tree }: { tree: StageTree | null }) {
         aria-hidden
         className="absolute inset-x-0 top-0 h-[15rem] bg-gradient-to-b from-black/75 via-black/40 to-transparent"
       />
-      {/* The left wash, which carries the rail and the reading column. */}
+      {/* The left wash, which carries the two pills and the heading. */}
       <span aria-hidden className={SCRIM_LEFT} />
-      {/* The bottom wash, under the progress block and the foot of the grid. */}
+      {/* The bottom wash, under the level card. */}
       <span
         aria-hidden
         className="absolute inset-x-0 bottom-0 h-[45%] bg-gradient-to-t from-black/70 via-black/25 to-transparent"
       />
-      {/* The right wash, under the picking column. Only from `lg`, where that
-          column exists as a column; below it the grid scrolls up the page and
-          the bottom wash is the one that carries it. */}
-      <span
-        aria-hidden
-        className="absolute inset-y-0 right-0 hidden w-[30rem] bg-gradient-to-l from-black/65 via-black/25 to-transparent lg:block"
-      />
+      {/* The right wash is gone with the floating picking column: the choices
+          now live on a solid 446 px panel that draws its own ground. */}
 
       {/* The ring, which used to be the stage card's border. With no card left
           it frames the world instead: a hairline at the very edge of the

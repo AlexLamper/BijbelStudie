@@ -1,43 +1,31 @@
-import { SceneSkeleton } from "../../components/scene/pieces"
-import { SCENE_BG, SCENE_X } from "../../components/scene/tokens"
+import AppShell from "../../components/shell/AppShell"
+import { Skeleton } from "../../components/kit/primitives"
 
 /**
  * Shown while the route segment streams in, so a navigation lands on the page's
  * own shape instead of an empty frame. It unmounts as soon as the page
  * component mounts - nothing here holds it open.
- *
- * It stands on the scene's own ground (`SCENE_BG`, set through `style` because
- * Tailwind never generates a class built from a constant) with white-on-dark
- * blocks, so the frame
- * before the landscape arrives already belongs to the picture rather than
- * flashing a white page at the reader.
  */
 export default function ProfielLoading() {
   return (
-    <div role="status" aria-label="Profiel laden" className="min-h-screen w-full" style={{ backgroundColor: SCENE_BG }}>
-      <div className={`${SCENE_X} pb-20 pt-24`}>
-        <div className="max-w-[46rem] space-y-4">
-          <SceneSkeleton className="h-3 w-24" />
-          <SceneSkeleton className="h-12 w-[22rem] max-w-full" />
-          <SceneSkeleton className="h-4 w-[26rem] max-w-full" />
-        </div>
-
-        <div className="mt-16 grid max-w-[34rem] grid-cols-2 gap-3">
-          <SceneSkeleton className="h-[5.5rem] rounded-2xl" />
-          <SceneSkeleton className="h-[5.5rem] rounded-2xl" />
-        </div>
-
-        <div className="mt-14 grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_360px] xl:gap-8">
-          <div className="space-y-6">
-            <SceneSkeleton className="h-64 rounded-2xl" />
-            <SceneSkeleton className="h-48 rounded-2xl" />
+    <AppShell title="Profiel">
+      <div role="status" aria-label="Profiel laden" className="flex min-h-full gap-5">
+        <div className="flex min-w-0 flex-1 flex-col gap-4">
+          <Skeleton className="h-[152px] rounded-card" />
+          <div className="flex gap-[13px]">
+            {[0, 1, 2, 3].map(i => (
+              <Skeleton key={i} className="h-[84px] flex-1 rounded-card" />
+            ))}
           </div>
-          <div className="space-y-6">
-            <SceneSkeleton className="h-64 rounded-2xl" />
-            <SceneSkeleton className="h-44 rounded-2xl" />
-          </div>
+          <Skeleton className="min-h-[240px] flex-1 rounded-card" />
         </div>
+        <aside className="flex w-[326px] flex-none flex-col gap-[13px]">
+          <Skeleton className="h-[280px] rounded-card" />
+          <Skeleton className="h-[180px] rounded-card" />
+          <Skeleton className="h-[170px] rounded-card" />
+          <Skeleton className="h-[160px] rounded-card" />
+        </aside>
       </div>
-    </div>
+    </AppShell>
   )
 }

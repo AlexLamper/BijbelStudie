@@ -3,8 +3,7 @@
 import React from 'react';
 import { Check } from 'lucide-react';
 
-import { TEAL, TEAL_ON_DARK } from '../../scene/tokens';
-import { FOCUS_RING, INK_FAINT, RULE } from './lesson-layout';
+import { FOCUS_RING, INK, INK_FAINT } from './lesson-layout';
 import { STEP_LABELS, type StepKey } from '../../../lib/studyFlow';
 
 // The labels moved to lib/studyFlow.ts so server code can read them too; they
@@ -46,7 +45,7 @@ export default function StudyStepRail({
 
   if (variant === 'index') {
     return (
-      <ol className="mt-4 space-y-0.5">
+      <ol className="mt-[14px]">
         {steps.map((step, index) => {
           const isCurrent = step === current;
           const reachable = completed.includes(step) || index <= currentIndex;
@@ -59,32 +58,40 @@ export default function StudyStepRail({
                 disabled={!reachable}
                 onClick={() => reachable && onSelect(step)}
                 aria-current={isCurrent ? 'step' : undefined}
+                // 34 px rows with a 2 px accent rule down the left of the
+                // current one and the faintest teal wash behind it - never a
+                // fill, which would put white on the accent.
                 className={[
-                  'flex w-full items-baseline gap-2 rounded-sm border-l-2 py-1.5 pl-2.5 text-left text-[12.5px] transition-colors',
+                  'flex h-[34px] w-full items-center gap-[10px] border-l-2 pr-3 text-left transition-colors',
                   FOCUS_RING,
-                  isCurrent ? 'font-semibold' : 'border-l-transparent',
-                  reachable
-                    ? isCurrent
-                      ? ''
-                      : `${INK_FAINT} hover:text-white`
-                    : `${INK_FAINT} cursor-not-allowed opacity-45`,
+                  isCurrent
+                    ? 'border-l-teal bg-les-step-active pl-[10px]'
+                    : 'border-l-transparent pl-[10px]',
+                  !reachable ? 'cursor-not-allowed opacity-45' : '',
                 ].join(' ')}
-                // The marker on the current step is the accent as type and as a
-                // rule - never a fill, which would put white on #2DD4BF.
-                style={isCurrent ? { color: TEAL_ON_DARK, borderLeftColor: TEAL_ON_DARK } : undefined}
               >
-                <span className="flex-none text-[10.5px] tabular-nums opacity-70">
+                <span
+                  className={[
+                    'w-4 flex-none text-[11px] font-semibold tabular-nums',
+                    isCurrent ? 'text-les-accent' : INK_FAINT,
+                  ].join(' ')}
+                >
                   {String(index + 1).padStart(2, '0')}
                 </span>
-                <span className="min-w-0 truncate">{STEP_LABELS[step]}</span>
+                <span
+                  className={[
+                    'min-w-0 flex-1 truncate text-[13px]',
+                    isCurrent
+                      ? 'font-semibold text-les-accent'
+                      : done
+                        ? `font-medium ${INK}`
+                        : `font-medium ${INK_FAINT}`,
+                  ].join(' ')}
+                >
+                  {STEP_LABELS[step]}
+                </span>
                 {done && !isCurrent ? (
-                  <Check
-                    size={11}
-                    strokeWidth={2.5}
-                    aria-hidden
-                    className="ml-auto flex-none"
-                    style={{ color: TEAL }}
-                  />
+                  <Check size={13} strokeWidth={2.5} aria-hidden className="flex-none text-les-check" />
                 ) : null}
               </button>
             </li>
@@ -93,14 +100,14 @@ export default function StudyStepRail({
 
         {/* Not a button, and deliberately so: finishing a lesson writes XP and a
             note, and that happens through "Les afronden" or not at all. */}
-        <li className={`mt-1.5 border-t pt-1.5 ${RULE}`}>
+        <li>
           <span
-            className={`flex w-full items-baseline gap-2 border-l-2 border-l-transparent py-1.5 pl-2.5 text-[12.5px] ${INK_FAINT} opacity-70`}
+            className={`flex h-[34px] w-full items-center gap-[10px] border-l-2 border-l-transparent pl-[10px] pr-3 ${INK_FAINT}`}
           >
-            <span className="flex-none text-[10.5px] tabular-nums opacity-70">
+            <span className="w-4 flex-none text-[11px] font-semibold tabular-nums">
               {String(steps.length + 1).padStart(2, '0')}
             </span>
-            <span>Afronding</span>
+            <span className="text-[13px] font-medium">Afronding</span>
           </span>
         </li>
       </ol>
@@ -137,17 +144,15 @@ export default function StudyStepRail({
                 and the bar does not ripple on every step. */}
             <span
               className={[
-                'relative block w-full h-[3px] rounded-full overflow-hidden bg-white/15 transition-colors',
-                reachable && !filled ? 'group-hover:bg-white/25' : '',
+                'relative block h-[3px] w-full overflow-hidden rounded-full bg-les-line transition-colors',
               ].join(' ')}
             >
               {filled && (
                 <span
                   className={[
-                    'absolute inset-0 rounded-full origin-left',
+                    'absolute inset-0 origin-left rounded-full bg-teal',
                     isCurrent ? 'motion-safe:animate-rail-fill' : '',
                   ].join(' ')}
-                  style={{ backgroundColor: TEAL }}
                 />
               )}
             </span>

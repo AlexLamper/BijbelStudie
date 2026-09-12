@@ -7,29 +7,24 @@ import { ArrowRight, Award, NotebookPen, Trophy } from 'lucide-react';
 import { badgeDescription, badgeLabel } from '../../../lib/badgeCatalog';
 import LessonTreeMoment from '../../levensboom/LessonTreeMoment';
 import { INK, INK_FAINT, INK_MUTED, SURFACE } from './lesson-layout';
-import { TEAL, TEAL_DEEP, TEAL_ON_DARK } from '../../scene/tokens';
 import PromptCard from '../../feedback/PromptCard';
 import type { SerialisedPrompt } from '../../../lib/feedbackPrompts';
 
 /**
- * The reward palette, in the roles components/scene/tokens.ts defines.
+ * The reward palette.
  *
- * This is a COLOUR alignment and nothing else: the sequence, the timings and the
- * copy on this screen are the reward-moments plan's and are untouched. What
- * changes is which shade plays which part. TEAL and AMBER stay the fills that
- * carry no type - the ring stroke, a dot. Anything with white type on it drops
- * to the deep end of the same swatch (white on #0D9488 is 3.74:1, on #0F766E
- * 5.5:1; white on #D97706 is 3.2:1, on #B45309 5.9:1).
+ * A COLOUR alignment and nothing else: the sequence, the timings and the copy on
+ * this screen are the reward-moments plan's and are untouched.
  *
- * The class pairs are gone: this card no longer flips with the reader's theme,
- * because the window it lands in does not either. Teal AS type is #2DD4BF
- * (10.1:1 on the night ground) and amber as type #FBBF24 (11.3:1) - the shades
- * that were the dark half of each pair.
+ * Teal AS TYPE is `les-accent`, which is #0F766E on the light lesson and
+ * #2DD4BF on the dark one; teal as a FILL under white type is #0D9488 in both.
+ * Amber has to work on both grounds from one value, so it is the deep end
+ * (#B45309, 4.8:1 on white and 5.3:1 on the night ground).
  */
-const AMBER = '#D97706';
+const AMBER = '#B45309';
 const AMBER_DEEP = '#B45309';
-const AMBER_ON_DARK = '#FBBF24';
-const FOCUS_RING = 'outline-none focus-visible:ring-2 focus-visible:ring-white';
+const AMBER_ON_DARK = '#B45309';
+const FOCUS_RING = 'outline-none focus-visible:ring-2 focus-visible:ring-teal';
 
 export interface CompletionSummary {
   xpAwarded: number;
@@ -141,7 +136,7 @@ function ProgressRing({
           r={radius}
           fill="none"
           strokeWidth="8"
-          className="stroke-white/15"
+          className="stroke-les-line"
         />
         <circle
           cx="60"
@@ -383,16 +378,13 @@ function GuestSaveGate({
 
   return (
     <div className="h-full overflow-y-auto flex flex-col justify-center">
-      <div className="mx-auto w-full max-w-xl px-5 sm:px-8 py-6">
+      <div className="mx-auto w-full max-w-[470px] px-5 py-6">
         <header className="text-center">
-          <ProgressRing pct={pct} done={1} total={lessonsTotal} accent={TEAL} ink={TEAL_ON_DARK} animate={animate} />
-          <p
-            className="mt-4 text-[11px] font-bold uppercase tracking-[0.14em]"
-            style={{ color: TEAL_ON_DARK }}
-          >
+          <ProgressRing pct={pct} done={1} total={lessonsTotal} accent="var(--teal)" ink="var(--les-accent)" animate={animate} />
+          <p className="mt-4 text-[11px] font-bold uppercase tracking-[1.1px] text-les-accent">
             Les {lessonDay} van {lessonsTotal} afgerond
           </p>
-          <h1 className={`mt-1 text-xl sm:text-2xl font-bold leading-tight text-balance ${INK}`}>
+          <h1 className={`mt-1 text-[26px] font-bold leading-tight tracking-[-0.4px] text-balance ${INK}`}>
             {lessonTitle}
           </h1>
           <p className={`mt-1.5 text-[13px] ${INK_MUTED}`}>
@@ -415,15 +407,14 @@ function GuestSaveGate({
             <Link
               href={`/registreren?next=${next}`}
               data-track="guest_save_register"
-              className={`press flex-1 inline-flex items-center justify-center gap-2 h-11 rounded-xl text-sm font-semibold text-white no-underline transition-opacity hover:opacity-90 ${FOCUS_RING}`}
-              style={{ backgroundColor: TEAL_DEEP }}
+              className={`press inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-btn bg-teal text-[14px] font-semibold text-white no-underline transition-opacity hover:opacity-90 ${FOCUS_RING}`}
             >
               Gratis account maken <ArrowRight size={15} />
             </Link>
             <Link
               href={`/inloggen?next=${next}`}
               data-track="guest_save_signin"
-              className={`press inline-flex items-center justify-center px-4 h-11 rounded-xl text-sm font-medium border border-white/20 bg-white/10 ${INK} no-underline hover:bg-white/20 ${FOCUS_RING}`}
+              className={`press inline-flex h-11 items-center justify-center rounded-btn border border-les-card-line px-4 text-[14px] font-medium ${INK} no-underline hover:bg-les-card ${FOCUS_RING}`}
             >
               Inloggen
             </Link>
@@ -435,14 +426,14 @@ function GuestSaveGate({
             <button
               type="button"
               onClick={onContinue}
-              className={`inline-flex items-center gap-1.5 rounded-md text-[13px] font-medium ${INK_MUTED} hover:text-white transition-colors ${FOCUS_RING}`}
+              className={`inline-flex items-center gap-1.5 rounded-md text-[13px] font-medium ${INK_MUTED} transition-colors hover:text-les-ink ${FOCUS_RING}`}
             >
               Verder met les {nextLessonDay} zonder account <ArrowRight size={13} />
             </button>
           )}
           <Link
             href={`/studies/${studyId}`}
-            className={`inline-flex items-center rounded-md text-[13px] font-medium ${INK_MUTED} no-underline hover:text-white transition-colors ${FOCUS_RING}`}
+            className={`inline-flex items-center rounded-md text-[13px] font-medium ${INK_MUTED} no-underline transition-colors hover:text-les-ink ${FOCUS_RING}`}
           >
             Overzicht
           </Link>
@@ -488,9 +479,9 @@ function SignedInCompletion({
   const finished = summary.studyCompleted;
   // One accent, in its three roles: the ring stroke carries no type, the solid
   // button carries white type, and the eyebrow IS type.
-  const accent = finished ? AMBER : TEAL;
-  const accentSolid = finished ? AMBER_DEEP : TEAL_DEEP;
-  const accentInk = finished ? AMBER_ON_DARK : TEAL_ON_DARK;
+  const accent = finished ? AMBER : 'var(--teal)';
+  const accentSolid = finished ? AMBER_DEEP : 'var(--teal)';
+  const accentInk = finished ? AMBER_ON_DARK : 'var(--les-accent)';
   const hasQuiz = quizScore !== null && quizTotal !== null && quizTotal > 0;
   const done = Math.min(lessonsCompleted, lessonsTotal);
   const pct = lessonsTotal > 0 ? Math.round((done / lessonsTotal) * 100) : 0;
@@ -498,7 +489,7 @@ function SignedInCompletion({
 
   return (
     <div className="h-full overflow-y-auto flex flex-col justify-center">
-      <div className="mx-auto w-full max-w-xl px-5 sm:px-8 py-6">
+      <div className="mx-auto w-full max-w-[470px] px-5 py-6">
         <header className="text-center">
           {/* The reader's own tree, with what this lesson just did to it: the
               XP is already applied, so new leaves are open and a level-up grows
@@ -519,12 +510,12 @@ function SignedInCompletion({
           />
 
           <p
-            className="mt-4 text-[11px] font-bold uppercase tracking-[0.14em]"
+            className="mt-4 text-[11px] font-bold uppercase tracking-[1.1px]"
             style={{ color: accentInk }}
           >
             {finished ? 'Studie afgerond' : `Les ${lessonDay} van ${lessonsTotal} afgerond`}
           </p>
-          <h1 className={`mt-1 text-xl sm:text-2xl font-bold leading-tight text-balance ${INK}`}>
+          <h1 className={`mt-1 text-[26px] font-bold leading-tight tracking-[-0.4px] text-balance ${INK}`}>
             {finished ? studyTitle : lessonTitle}
           </h1>
           <p className={`mt-1.5 text-[13px] ${INK_MUTED}`}>
@@ -552,11 +543,11 @@ function SignedInCompletion({
 
         {/* Four figures, one row. The quiz result is one of them rather than a
             card of its own - it is a number with a label, like the rest. */}
-        <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <div className="mt-6 grid grid-cols-2 gap-[11px] sm:grid-cols-4">
           <Stat
             value={summary.xpAwarded > 0 ? `+${xp}` : '0'}
             label="XP verdiend"
-            accentInk={TEAL_ON_DARK}
+            accentInk="var(--les-accent)"
           />
           <Stat
             value={`${done}/${lessonsTotal}`}
@@ -574,9 +565,9 @@ function SignedInCompletion({
         {summary.noteId && (
           <Link
             href="/notities"
-            className={`mt-4 flex items-center gap-2 rounded-md text-[12.5px] no-underline ${INK_MUTED} hover:text-white transition-colors ${FOCUS_RING}`}
+            className={`mt-4 flex items-center gap-2 rounded-md text-[12.5px] no-underline ${INK_MUTED} transition-colors hover:text-les-ink ${FOCUS_RING}`}
           >
-            <NotebookPen size={14} className="flex-none" style={{ color: TEAL_ON_DARK }} />
+            <NotebookPen size={14} className="flex-none text-les-accent" />
             Je reflectie is bewaard als notitie
             <ArrowRight size={13} className="flex-none" />
           </Link>
@@ -589,15 +580,12 @@ function SignedInCompletion({
           >
             <span
               className="h-8 w-8 flex-none rounded-lg flex items-center justify-center text-[12.5px] font-bold"
-              style={{ backgroundColor: 'rgba(45,212,191,0.16)', color: TEAL_ON_DARK }}
+              style={{ backgroundColor: 'var(--teal-wash)', color: 'var(--les-accent)' }}
             >
               {nextLesson.day}
             </span>
             <span className="min-w-0 flex-1">
-              <span
-                className="block text-[10px] font-bold uppercase tracking-[0.14em]"
-                style={{ color: TEAL_ON_DARK }}
-              >
+              <span className="block text-[10px] font-bold uppercase tracking-[1.1px] text-les-accent">
                 Hierna
               </span>
               <span className={`block text-[13px] font-semibold truncate ${INK}`}>
@@ -623,15 +611,14 @@ function SignedInCompletion({
             <button
               type="button"
               onClick={onContinue}
-              className={`press flex-1 inline-flex items-center justify-center gap-2 h-11 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 ${FOCUS_RING}`}
-              style={{ backgroundColor: TEAL_DEEP }}
+              className={`press inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-btn bg-teal text-[14px] font-semibold text-white transition-opacity hover:opacity-90 ${FOCUS_RING}`}
             >
               Verder met les {summary.nextLessonDay} <ArrowRight size={15} />
             </button>
           ) : (
             <Link
               href={`/studies/${studyId}`}
-              className={`press flex-1 inline-flex items-center justify-center gap-2 h-11 rounded-xl text-sm font-semibold text-white no-underline transition-opacity hover:opacity-90 ${FOCUS_RING}`}
+              className={`press inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-btn text-[14px] font-semibold text-white no-underline transition-opacity hover:opacity-90 ${FOCUS_RING}`}
               style={{ backgroundColor: accentSolid }}
             >
               Terug naar de studie <ArrowRight size={15} />
@@ -640,7 +627,7 @@ function SignedInCompletion({
 
           <Link
             href={`/studies/${studyId}`}
-            className={`press inline-flex items-center justify-center px-4 h-11 rounded-xl text-sm font-medium border border-white/20 bg-white/10 ${INK} no-underline hover:bg-white/20 ${FOCUS_RING}`}
+            className={`press inline-flex h-11 items-center justify-center rounded-btn border border-les-card-line px-4 text-[14px] font-medium ${INK} no-underline hover:bg-les-card ${FOCUS_RING}`}
           >
             Overzicht
           </Link>

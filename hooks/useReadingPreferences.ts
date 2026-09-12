@@ -11,7 +11,11 @@ export interface ReadingPreferences {
 
 const defaultPreferences: ReadingPreferences = {
   fontSize: 'base',
-  fontFamily: 'sans',
+  // Lora. Scripture is set in the serif face and the UI in Inter - never the
+  // other way round (design_handoff_web/TOKENS.md). This is only the fallback
+  // for a reader with nothing stored; `/api/user/preferences` still wins, so an
+  // account that has explicitly chosen "Schreefloos" keeps it.
+  fontFamily: 'serif',
   lineHeight: 'relaxed',
   letterSpacing: 'normal',
   highContrast: false,

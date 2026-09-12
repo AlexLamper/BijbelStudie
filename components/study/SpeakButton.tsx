@@ -14,6 +14,13 @@ interface SpeakButtonProps {
   compact?: boolean;
   showSettings?: boolean;
   className?: string;
+  /**
+   * The glyph at rest, when the caller wants one of its own - the reader's two
+   * toolbars ask for a speaker rather than a play triangle. Loading, playing
+   * and error keep their own glyphs, because those say what the button is
+   * doing rather than what it is for.
+   */
+  icon?: React.ReactNode;
 }
 
 const TEAL = '#0D9488';
@@ -30,6 +37,7 @@ export default function SpeakButton({
   compact = false,
   showSettings = true,
   className,
+  icon,
 }: SpeakButtonProps) {
   const tts = useTTS();
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -123,7 +131,7 @@ export default function SpeakButton({
               ? <AlertCircle className="h-3.5 w-3.5" />
               : isPlaying
                 ? <Pause className="h-3.5 w-3.5" />
-                : <Play className="h-3.5 w-3.5" />
+                : icon ?? <Play className="h-3.5 w-3.5" />
           }
         </button>
 

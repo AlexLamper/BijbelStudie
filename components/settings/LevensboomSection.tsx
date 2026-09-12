@@ -23,17 +23,18 @@ import { useLevensboom } from '../../hooks/useLevensboom';
  * at a different x from every other control on the page.
  */
 
-/** The shared Switch, dressed for a dark panel; its own defaults are tokens
- *  that go near-black in dark mode and disappear here. */
-const SCENE_SWITCH =
-  'data-[state=unchecked]:bg-white/25 data-[state=checked]:bg-[#0D9488] focus-visible:ring-white focus-visible:ring-offset-transparent [&>span]:bg-white';
-
-/** Accent type on a dark ground: #0D9488 is far too dark to read here. */
-const TEAL_ON_DARK = '#2DD4BF';
+/**
+ * The design's toggle: a 46 x 27 track with a 21 px knob, teal when on and
+ * `line-strong` when off (design_handoff_web/PAGES.md §8). The shared Switch is
+ * 44 x 24 with a 20 px knob and its own theme tokens, so the size and both
+ * states are set here; the travel follows from the box (46 - 6 - 21 = 19).
+ */
+const TOGGLE =
+  'h-[27px] w-[46px] border-0 px-[3px] data-[state=checked]:bg-teal data-[state=unchecked]:bg-line-strong focus-visible:ring-teal focus-visible:ring-offset-0 [&>span]:h-[21px] [&>span]:w-[21px] [&>span]:bg-white [&>span]:shadow-none [&>span[data-state=checked]]:translate-x-[19px]';
 
 /** One row of the settings page, repeated here so the columns line up. */
 const ROW =
-  'flex flex-col gap-2.5 py-4 first:pt-5 last:pb-0 sm:flex-row sm:items-center sm:justify-between sm:gap-8';
+  'flex flex-col gap-2.5 py-[14px] first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between sm:gap-8';
 
 export default function LevensboomSection() {
   const { data, loading, setPrefs, setPublicProfile } = useLevensboom();
@@ -54,7 +55,7 @@ export default function LevensboomSection() {
 
   return (
     <>
-      <div className="divide-y divide-white/10">
+      <div className="divide-y divide-line-soft">
         <Row
           label="Boom tonen"
           hint="Je XP, niveau en badges lopen door als je hem verbergt"
@@ -82,20 +83,19 @@ export default function LevensboomSection() {
         {prefs?.publicProfile && (
           <div className={ROW}>
             <div className="min-w-0 sm:max-w-[26rem]">
-              <p className="text-sm font-medium text-white">Je openbare adres</p>
-              <p className="mt-1 text-xs leading-relaxed text-white/60">
+              <p className="text-[14.5px] text-ink">Je openbare adres</p>
+              <p className="mt-[3px] text-[12px] leading-relaxed text-ink-faint">
                 Alleen wie deze link heeft, vindt de pagina.
               </p>
             </div>
             <div className="flex min-w-0 flex-shrink-0 flex-wrap items-center gap-x-3 gap-y-1.5 sm:justify-end">
-              <code className="truncate rounded bg-white/10 px-2 py-1 text-[11px] text-white ring-1 ring-white/15">
+              <code className="truncate rounded border border-line bg-line-soft px-2 py-1 text-[11px] text-ink-body">
                 /gebruiker/{prefs.seed}
               </code>
               <button
                 type="button"
                 onClick={() => void share()}
-                className="rounded-md text-xs font-semibold underline-offset-4 outline-none transition-colors hover:underline focus-visible:ring-2 focus-visible:ring-white"
-                style={{ color: TEAL_ON_DARK }}
+                className="text-[12.5px] font-semibold text-teal underline-offset-4 transition-colors hover:underline"
               >
                 {copied ? 'Gekopieerd' : 'Kopieer link'}
               </button>
@@ -104,11 +104,10 @@ export default function LevensboomSection() {
         )}
       </div>
 
-      <div className="mt-5 border-t border-white/10 pt-4">
+      <div className="mt-4 border-t border-line-soft pt-4">
         <Link
           href="/profiel/boom"
-          className="inline-block rounded-md text-xs font-semibold no-underline underline-offset-4 outline-none transition-colors hover:underline focus-visible:ring-2 focus-visible:ring-white"
-          style={{ color: TEAL_ON_DARK }}
+          className="inline-block text-[13px] font-semibold text-teal no-underline underline-offset-4 transition-colors hover:underline"
         >
           Naar je boom →
         </Link>
@@ -133,8 +132,8 @@ function Row({
   return (
     <div className={ROW}>
       <div className="min-w-0 sm:max-w-[26rem]">
-        <p className="text-sm font-medium text-white">{label}</p>
-        <p className="mt-1 text-xs leading-relaxed text-white/60">{hint}</p>
+        <p className="text-[14.5px] text-ink">{label}</p>
+        <p className="mt-[3px] text-[12px] leading-relaxed text-ink-faint">{hint}</p>
       </div>
       <div className="flex flex-shrink-0 items-center sm:justify-end">
         <Switch
@@ -142,7 +141,7 @@ function Row({
           disabled={disabled}
           onCheckedChange={onChange}
           aria-label={label}
-          className={SCENE_SWITCH}
+          className={TOGGLE}
         />
       </div>
     </div>

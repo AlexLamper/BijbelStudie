@@ -8,7 +8,6 @@ import { maxDepthForLevel } from '../../lib/levensboom/generate';
 import { itemsUnlockedAtLevel } from '../../lib/levensboom/catalog';
 import { ringColors } from '../../lib/levensboom/ring';
 
-const TEAL = '#0D9488';
 const GROW_MS = 1200;
 
 /**
@@ -61,9 +60,12 @@ export default function LessonTreeMoment({
   const ring = ringColors(tree.avatar.ring);
 
   return (
+    // The design's scene: 246 px tall, radius 14, and a 3 px GOLD frame around
+    // it (design_handoff_web/PAGES-STUDIE-EN-LES.md §15). A reader whose ring is
+    // the Pro gold keeps their own stroke, which is the same colour anyway.
     <div
-      className="relative mx-auto aspect-[16/9] w-full max-w-md overflow-hidden rounded-2xl"
-      style={{ boxShadow: `0 0 0 2px ${gold ? ring.stroke : 'rgba(13,148,136,0.35)'}` }}
+      className="relative mx-auto h-[246px] w-full max-w-[470px] overflow-hidden rounded-[14px]"
+      style={{ border: `3px solid ${gold ? ring.stroke : 'var(--gold)'}` }}
     >
       <TreeCanvas
         seed={tree.seed}
@@ -80,24 +82,29 @@ export default function LessonTreeMoment({
         className="block h-full w-full"
         ariaLabel={`Je boom, ${tree.stage.name.toLowerCase()} op niveau ${level}`}
       />
-      <div className="pointer-events-none absolute bottom-2.5 left-2.5 flex items-center gap-1.5">
-        <span
-          className="rounded-full px-2 py-0.5 text-[11px] font-bold text-white"
-          style={{ backgroundColor: gold ? ring.stroke : TEAL }}
-        >
+      {/* Bottom left: the level on gold with gold ink - never white on gold -
+          and the stage on white. */}
+      <div className="pointer-events-none absolute bottom-3 left-3 flex items-center gap-2">
+        <span className="rounded-full bg-gold px-[10px] py-[3px] text-[11px] font-bold text-gold-ink">
           Niveau {level}
         </span>
-        <span className="rounded-full bg-black/45 px-2 py-0.5 text-[11px] font-semibold text-white backdrop-blur">
+        <span className="rounded-full bg-white px-[10px] py-[3px] text-[11px] font-semibold text-[#0F172A]">
           {tree.stage.name}
         </span>
       </div>
       {xpAwarded > 0 && (
-        <span className="pointer-events-none absolute right-2.5 top-2.5 rounded-full bg-white/90 px-2 py-0.5 text-[11px] font-bold tabular-nums dark:bg-card/90" style={{ color: TEAL }}>
+        <span
+          className="pointer-events-none absolute right-3 top-3 rounded-full px-[10px] py-[3px] text-[11px] font-bold text-white tabular-nums"
+          style={{ backgroundColor: 'rgba(6,48,44,.72)' }}
+        >
           +{xpAwarded} XP
         </span>
       )}
       {unlocked.length > 0 && (
-        <span className="pointer-events-none absolute bottom-2.5 right-2.5 max-w-[55%] truncate rounded-full bg-white/90 px-2 py-0.5 text-[11px] font-semibold dark:bg-card/90" style={{ color: TEAL }}>
+        <span
+          className="pointer-events-none absolute bottom-3 right-3 max-w-[55%] truncate rounded-full px-[10px] py-[3px] text-[11px] font-semibold text-white"
+          style={{ backgroundColor: 'rgba(6,48,44,.72)' }}
+        >
           Nieuw: {unlocked.map((item) => item.name).join(', ')}
         </span>
       )}

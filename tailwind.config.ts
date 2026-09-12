@@ -63,12 +63,83 @@ export default {
           "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))"
+        },
+
+        // ── Web platform design tokens (design_handoff_web/TOKENS.md) ──
+        // The nine app routes are styled from these names only. Written as
+        // literals that mirror the custom properties in app/globals.css, so
+        // `bg-teal` and `background: var(--teal)` can never drift.
+        //
+        // `teal` is EXTENDED, not replaced: Tailwind deep-merges an extend
+        // colour object, so teal-50..950 still resolve and the ~130 existing
+        // `text-teal-600`-style classes elsewhere in the app keep working.
+        // Only DEFAULT/dark/soft/faint/tint are added.
+        teal: { DEFAULT: "#0D9488", dark: "#0F766E", soft: "#CCFBF1", faint: "#F0FDFA", tint: "#E6F5F1", bright: "#5EEAD4" },
+        ink: { DEFAULT: "#111827", body: "#374151", muted: "#6B7280", faint: "#9CA3AF" },
+        line: { DEFAULT: "#E5E7EB", strong: "#D1D5DB", soft: "#F3F4F6" },
+        // Never white on gold: white on #CA9A16 is 2.6:1. Every gold surface
+        // takes `gold-ink`.
+        gold: { DEFAULT: "#CA9A16", ink: "#422E04", badge: "#7A5E08" },
+        success: { DEFAULT: "#047857", fill: "#059669" },
+        warn: { DEFAULT: "#EA580C", wash: "#FFF7ED" },
+        danger: "#DC2626",
+        scripture: "#1F2937",
+        panel: { dark: "#152229" },
+        heat: { 0: "#E5E7EB", 1: "#CCFBF1", 2: "#99D9CE", 3: "#4FB3A4", 4: "#0D9488" },
+        bar: { empty: "#E5E7EB", read: "#9FD8CD", today: "#0F766E" },
+        // Values TOKENS.md gives inside a gradient row or a page paragraph.
+        pro: { pill: "#E6D2A0", ink: "#4A3506", badge: "#D9B95E", soft: "#FEF6E0" },
+        sunken: "#F9FAFB",
+        highlight: "#FEF3C7",
+        badgering: { DEFAULT: "#7C3AED", wash: "#F5F3FF" },
+        hill: { front: "#6C8C4E", back: "#3F6B3C" },
+
+        // ── Lesson flow (design_handoff_web/TOKENS-LES.md) ──
+        // These resolve through custom properties rather than literals, because
+        // the lesson is the one surface that exists in two palettes: the same
+        // class has to paint #FFFFFF on light and #0B1E1E on dark. The values
+        // live in app/globals.css on `:root` and on `.dark`/[data-theme=dark].
+        les: {
+          bg: "var(--les-bg)",
+          sb: "var(--les-sb)",
+          line: "var(--les-line)",
+          card: "var(--les-card)",
+          "card-line": "var(--les-card-line)",
+          ink: "var(--les-ink)",
+          muted: "var(--les-muted)",
+          faint: "var(--les-faint)",
+          accent: "var(--les-accent)",
+          scripture: "var(--les-scripture)",
+          body: "var(--les-body)",
+          "nav-active": "var(--les-nav-active)",
+          "step-active": "var(--les-step-active)",
+          quote: "var(--les-quote)",
+          input: "var(--les-input)",
+          check: "var(--les-check)",
+          level: "var(--les-level)",
         }
+      },
+      backgroundImage: {
+        verse: "linear-gradient(#4B3A63 0%,#7E5E6E 45%,#C88463 100%)",
+        banner: "linear-gradient(135deg,#0F766E,#0F172A)",
+        sky: "radial-gradient(circle at 50% 28%,#CFE9F2,#A9D7E4 70%)",
+        "pro-pill": "linear-gradient(135deg,#F4DFA4,#FFFDF6)",
+        "pro-badge": "linear-gradient(135deg,#CA9A16,#F2D98C 70%,#FFFBEF)",
+        "tree-scene": "linear-gradient(#243A4A 0%,#3C5A60 42%,#5E7A63 74%,#2F4A3A 100%)",
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)"
+        sm: "calc(var(--radius) - 4px)",
+        card: "16px",
+        btn: "10px",
+        panel: "14px"
+      },
+      spacing: { sidebar: "196px", topbar: "64px" },
+      boxShadow: {
+        fab: "0 6px 16px rgba(13,148,136,.35)",
+        badge: "0 1px 5px rgba(17,24,39,.22)",
+        field: "0 1px 2px rgba(17,24,39,.04)",
       },
       fontFamily: {
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],

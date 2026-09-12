@@ -1,60 +1,44 @@
-import { SceneSkeleton } from "../../components/scene/pieces"
-import { SCENE_BG, SCENE_X, TILE } from "../../components/scene/tokens"
+import AppShell from "../../components/shell/AppShell"
+import { Card, Skeleton } from "../../components/kit/primitives"
 
 /**
  * Shown while the route segment streams in, so a navigation lands on the page's
  * own shape instead of an empty frame. It unmounts as soon as the page
  * component mounts - nothing here holds it open.
  *
- * It is the scene's ground rather than a white page: /studies is now a
- * full-bleed landscape, and a light card grid in front of it flashed a white
- * screen on every navigation into the route. The ground comes from SCENE_BG
- * through `style`, because Tailwind never generates a class built from a
- * constant.
- *
- * The gutter is `SCENE_X`, the WITH-rail one. It used to be `SCENE_X_EDGE`,
- * whose left inset at `lg` is narrower than the rail itself - so the skeleton
- * spent its whole life tucked under the rail and then jumped right when the
- * page arrived. Now the rail renders for guests too, so there is no signed-out
- * case to be wrong about: the skeleton lands exactly where the page does. The
- * four tiles are drawn below `lg` only, as on the page (the filter row takes
- * their place above it).
+ * It draws the real shell, so the sidebar and the bar do not appear a beat
+ * after the body: only the column inside is grey.
  */
 export default function StudiesLoading() {
   return (
-    <div
-      className={`min-h-screen w-full pb-20 pt-16 ${SCENE_X}`}
-      style={{ backgroundColor: SCENE_BG }}
-      role="status"
-      aria-label="Studies laden"
-    >
-      <div className="max-w-[46rem] space-y-4">
-        <SceneSkeleton className="h-3 w-28" />
-        <SceneSkeleton className="h-12 w-full max-w-[34rem]" />
-        <SceneSkeleton className="h-4 w-full max-w-[30rem]" />
-        <SceneSkeleton className="h-12 w-full max-w-[26rem] rounded-full" />
-      </div>
-
-      <div className="mt-14 grid grid-cols-2 gap-3 lg:hidden">
-        {[0, 1, 2, 3].map(index => (
-          <div key={index} className={`px-5 py-4 ${TILE}`}>
-            <SceneSkeleton className="h-3 w-20" />
-            <SceneSkeleton className="mt-2.5 h-7 w-14" />
-          </div>
-        ))}
-      </div>
-
-      <ul className="m-0 mt-14 grid grid-cols-1 gap-x-10 p-0 xl:grid-cols-2">
-        {[0, 1, 2, 3, 4, 5].map(index => (
-          <li key={index} className="flex list-none items-center gap-4 border-b border-white/10 py-3.5">
-            <SceneSkeleton className="h-[70px] w-28 flex-none rounded-lg" />
-            <div className="min-w-0 flex-1 space-y-2">
-              <SceneSkeleton className="h-4 w-2/3" />
-              <SceneSkeleton className="h-3 w-1/3" />
+    <AppShell title="Studies">
+      <div role="status" aria-label="Studies laden" className="flex h-full flex-col gap-[13px]">
+        <Skeleton className="h-[46px] w-[440px] rounded-[12px]" />
+        <div className="flex gap-[9px]">
+          {[0, 1, 2, 3, 4].map(i => (
+            <Skeleton key={i} className="h-[37px] w-[110px] rounded-full" />
+          ))}
+        </div>
+        <Skeleton className="h-[76px] rounded-card" />
+        <Skeleton className="h-4 w-40" />
+        <div className="grid grid-cols-4 gap-4">
+          {[0, 1, 2, 3].map(i => (
+            <Skeleton key={i} className="h-[150px] rounded-card" />
+          ))}
+        </div>
+        <Skeleton className="h-4 w-40" />
+        <Card className="min-h-0 flex-1 overflow-hidden">
+          {[0, 1, 2, 3, 4].map(i => (
+            <div key={i} className="flex items-center gap-[14px] border-t border-line-soft px-[18px] py-3 first:border-t-0">
+              <Skeleton className="h-[44px] w-[44px] rounded-btn" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-1/3" />
+                <Skeleton className="h-3 w-1/5" />
+              </div>
             </div>
-          </li>
-        ))}
-      </ul>
-    </div>
+          ))}
+        </Card>
+      </div>
+    </AppShell>
   )
 }

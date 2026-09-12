@@ -2,24 +2,20 @@
 
 import { Check, Lock } from 'lucide-react';
 import TreeCanvas from '../TreeCanvas';
-import { ProBadge } from '../../ui/ProBadge';
 import { ringColors } from '../../../lib/levensboom/ring';
 import { itemKey, unlockLabel, type AvatarChoice, type CatalogItem, type ItemKind } from '../../../lib/levensboom/catalog';
-import { TEAL_DEEP, TEAL_ON_DARK } from '../../scene/tokens';
 
 export type TilePick = { item: CatalogItem; locked: boolean };
 
 /**
- * The shared TILE, one step deeper.
+ * The tile, on the studio's own panel (design_handoff_web/PAGES.md §7).
  *
- * These tiles float on the reader's own tree rather than on the fixed dusk
- * landscape every other page has, and that sky follows the reader's clock:
- * between 09:00 and 18:00 it runs to #DFF3F7. On `bg-black/40` over that, the
- * 11px caption under a tile measures about 3.7:1; on `bg-black/55` it measures
- * 5.0:1, and at night the difference costs the picture nothing. Same border,
- * same radius, same blur - only the ground is heavier.
+ * The tiles no longer float on the reader's sky - they sit on `--panel-dark`,
+ * a solid 446 px column beside the tree - so the heavy scrim and the blur are
+ * gone and what is left is the design's plate: radius 12, a hairline of white
+ * at 14 %, and a ground of white at 6 %.
  */
-const STUDIO_TILE = 'rounded-2xl border border-white/20 bg-black/55 backdrop-blur-md';
+const STUDIO_TILE = 'rounded-[12px] border border-white/[0.14] bg-white/[0.06]';
 
 /**
  * One tile per catalog item, drawn as the reader's own tree wearing that item,
@@ -60,10 +56,13 @@ export function ItemGrid({
   onPick: (pick: TilePick) => void;
 }) {
   return (
-    // Two columns from `lg` and no more: from there the grid is the studio's
-    // picking column beside the tree rather than the full width of the page, so
-    // a third column would put 130px tiles in a 22rem gutter.
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-2" role="radiogroup" aria-label={KIND_TITLES[kind]}>
+    // Two columns, always: the grid lives in a 446 px panel, and a third column
+    // there would put 130 px tiles in a gutter.
+    <div
+      className="grid grid-cols-2 content-start gap-[14px]"
+      role="radiogroup"
+      aria-label={KIND_TITLES[kind]}
+    >
       {items.map((item) => {
         const key = itemKey(item);
         const isUnlocked = unlocked.has(key);
@@ -127,7 +126,7 @@ function ItemTile({
   onPick: () => void;
 }) {
   const pro = item.unlock.kind === 'pro';
-  const outline = selected ? TEAL_ON_DARK : previewing ? 'rgba(45,212,191,0.55)' : undefined;
+  const requirement = unlockLabel(item.unlock);
 
   // A locked tile is still a button: tapping it previews the item on the whole
   // landscape and opens the panel that says what it takes. `aria-disabled`
@@ -138,59 +137,66 @@ function ItemTile({
       role="radio"
       aria-checked={selected}
       aria-disabled={locked || undefined}
-      aria-label={`${item.name}${locked ? `, vergrendeld: ${unlockLabel(item.unlock)} nodig` : ''}`}
+      aria-label={`${item.name}${locked ? `, vergrendeld: ${requirement} nodig` : ''}`}
       onClick={onPick}
-      className={`group relative flex flex-col overflow-hidden text-left outline-none transition-transform hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-white motion-reduce:transition-none motion-reduce:hover:translate-y-0 ${STUDIO_TILE}`}
-      style={{
-        borderColor: selected || previewing ? outline : undefined,
-        boxShadow: selected ? `0 0 0 2px ${TEAL_ON_DARK}` : undefined,
-      }}
+      className={`group relative flex flex-col overflow-hidden text-left outline-none transition-colors hover:border-white/30 ${STUDIO_TILE} ${
+        selected ? 'border-2 border-teal' : previewing ? 'border-teal/55' : ''
+      }`}
     >
-      <div className={`relative w-full overflow-hidden ${kind === 'species' || kind === 'ring' ? 'aspect-square' : 'aspect-[16/10]'}`}>
-        {/* Locked artwork is dimmed and drained so the lock reads at a glance;
-            the requirement pill sits on the picture so the reader never has to
-            tap to learn what opens it. */}
-        <div className={`h-full w-full ${locked ? 'opacity-45 saturate-[.35]' : ''}`}>
+      {/* A fixed 108 px plate, whatever the item is - the design's grid is two
+          even columns of even tiles. */}
+      <div className="relative h-[108px] w-full overflow-hidden">
+        {/* Locked artwork is drained to grey so the lock reads at a glance. */}
+        <div className={`h-full w-full ${locked ? 'opacity-40 grayscale' : ''}`}>
           <Thumb kind={kind} item={item} seed={seed} level={level} frac={frac} health={health} avatar={avatar} />
         </div>
+
         {locked && (
-          <>
-            <span className="absolute inset-0 bg-black/20" aria-hidden />
+          <span className="absolute inset-0 flex items-center justify-center bg-black/25" aria-hidden>
             <span
-              className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-black/70 text-white ring-1 ring-white/30 backdrop-blur"
-              aria-hidden
+              className="inline-flex max-w-[90%] items-center gap-[5px] truncate rounded-full px-[10px] py-[5px] text-[11px] font-bold text-white"
+              style={{ backgroundColor: 'rgba(17,24,39,.7)' }}
             >
-              <Lock size={13} />
+              <Lock size={12} />
+              {requirement}
             </span>
-            {/* The requirement pill. A Pro item already wears the gold ProBadge
-                below, which is the same statement in the brand's own colour. */}
-            {!pro && (
-              <span className="absolute inset-x-2 bottom-2 flex justify-start" aria-hidden>
-                <span
-                  className="inline-flex max-w-full items-center truncate rounded-full px-2.5 py-1 text-xs font-bold text-white shadow-lg shadow-black/40 ring-1 ring-white/30"
-                  style={{ backgroundColor: TEAL_DEEP }}
-                >
-                  {unlockLabel(item.unlock)}
-                </span>
-              </span>
-            )}
-          </>
+          </span>
         )}
+
         {selected && !locked && (
-          <span className="absolute right-2 top-2 inline-flex h-6 w-6 items-center justify-center rounded-full text-white ring-1 ring-white/40" style={{ backgroundColor: TEAL_DEEP }}>
+          <span className="absolute right-2 top-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-teal text-white">
             <Check size={14} aria-hidden />
           </span>
         )}
+
         {isNew && !selected && (
-          <span className="absolute left-2 top-2 rounded-full bg-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide" style={{ color: TEAL_DEEP }}>
+          <span className="absolute left-2 top-2 rounded-full bg-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-teal-dark">
             Nieuw
           </span>
         )}
-        {pro && <ProBadge className="absolute bottom-2 right-2" />}
+
+        {/* Gold plate, gold ink - never white on gold. */}
+        {pro && (
+          <span className="absolute bottom-2 right-2 rounded-[4px] bg-gold px-[5px] py-[2px] text-[10px] font-bold tracking-[0.6px] text-gold-ink">
+            PRO
+          </span>
+        )}
       </div>
-      <div className="px-3 py-2.5">
-        <p className={`text-sm font-semibold ${locked ? 'text-white/80' : 'text-white'}`}>{item.name}</p>
-        <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-white/65">{item.blurb}</p>
+
+      <div className="px-3 py-[10px]">
+        {locked ? (
+          <>
+            <p className="text-[13px] font-bold text-white/80">Vergrendeld</p>
+            <p className="mt-0.5 text-[11.5px] leading-[1.4] text-white/[0.62]">
+              {item.unlock.kind === 'pro' ? 'Hoort bij Pro' : `${requirement} om te openen`}
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="text-[13px] font-bold text-white">{item.name}</p>
+            <p className="mt-0.5 line-clamp-2 text-[11.5px] leading-[1.4] text-white/[0.62]">{item.blurb}</p>
+          </>
+        )}
       </div>
     </button>
   );

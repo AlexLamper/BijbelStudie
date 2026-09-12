@@ -1,12 +1,12 @@
 'use client';
 
 import React from 'react';
+import { Play } from 'lucide-react';
 
 import PassageReader from './PassageReader';
 import LessonLayout, {
   FOCUS_RING,
   INK_FAINT,
-  INK_MUTED,
   Marginal,
   READING_SURFACE,
 } from './lesson-layout';
@@ -63,16 +63,12 @@ function TranslationPicker({
         onChange={(event) => onChange(event.target.value)}
         title="Bijbelvertaling"
         data-track="study_word_version"
-        className={`h-9 w-full cursor-pointer rounded-lg border border-white/20 bg-white/10 px-2.5 text-[12.5px] font-medium text-white transition-colors hover:bg-white/15 ${FOCUS_RING}`}
+        className={`h-9 w-full cursor-pointer rounded-[9px] border border-les-card-line bg-les-bg px-[11px] text-[13px] font-medium text-les-ink transition-colors hover:border-les-line ${FOCUS_RING}`}
       >
         {languages.map((language) => (
-          <optgroup
-            key={language}
-            label={LANGUAGE_LABELS[language] ?? 'Overige vertalingen'}
-            style={{ color: '#0f172a', backgroundColor: '#fff' }}
-          >
+          <optgroup key={language} label={LANGUAGE_LABELS[language] ?? 'Overige vertalingen'}>
             {groups.get(language)!.map((option) => (
-              <option key={option.id} value={option.id} style={{ color: '#0f172a', backgroundColor: '#fff' }}>
+              <option key={option.id} value={option.id}>
                 {option.name}
               </option>
             ))}
@@ -164,7 +160,11 @@ export default function StepWord({
                   onChange={onVersionChange}
                 />
               )}
-              <div className="mt-2.5 flex items-center gap-1.5">
+              {/* The design's two controls under the picker: a labelled
+                  "Voorlezen" with a teal play glyph, and the 40 px type square.
+                  The speak button keeps every one of its states - loading,
+                  playing, error - and only its resting glyph is replaced. */}
+              <div className="mt-[10px] flex items-stretch gap-2">
                 <SpeakButton
                   compact
                   showSettings={false}
@@ -176,7 +176,13 @@ export default function StepWord({
                       .join(' ');
                   }}
                   label="Lees het gedeelte voor"
-                  className="border border-white/20 rounded-md"
+                  className="h-[34px] flex-1 rounded-[9px] border border-les-card-line bg-les-bg p-0 text-[12px] font-semibold text-les-ink hover:bg-les-card"
+                  icon={
+                    <span className="inline-flex items-center gap-[7px]">
+                      <Play size={13} className="text-les-accent" fill="currentColor" />
+                      Voorlezen
+                    </span>
+                  }
                 />
                 {onUpdatePreferences && (
                   <ReadingPreferencesMenu
@@ -198,19 +204,27 @@ export default function StepWord({
 
             {reflectionQuestion ? (
               <Marginal label="Straks de vraag">
-                <p className="italic">{reflectionQuestion}</p>
+                <p className="font-serif text-[13px] italic leading-[1.6] text-les-muted">
+                  {reflectionQuestion}
+                </p>
               </Marginal>
             ) : null}
+
+            {/* The line that used to sit under the passage. It belongs in the
+                rail with the other notes about how to read, not in the measure. */}
+            <Marginal label="Markeren">
+              Selecteer een vers om het te markeren of er een notitie bij te schrijven.
+            </Marginal>
           </>
         }
       >
         {versionName ? (
-          <p className={`mt-1.5 text-[11.5px] uppercase tracking-[0.14em] ${INK_FAINT}`}>
+          <p className={`mt-[6px] text-[11px] font-semibold uppercase tracking-[1.3px] ${INK_FAINT}`}>
             {versionName}
           </p>
         ) : null}
 
-        <section className={`${READING_SURFACE} mt-6`}>
+        <section className={`${READING_SURFACE} mt-5`}>
           <PassageReader
             book={book}
             chapter={chapter}
@@ -221,9 +235,6 @@ export default function StepWord({
           />
         </section>
 
-        <p className={`mt-3.5 text-xs ${INK_MUTED}`}>
-          Klik op een vers om er een notitie bij te maken.
-        </p>
       </LessonLayout>
     </SpokenTextScope>
   );

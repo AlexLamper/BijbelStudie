@@ -1,49 +1,76 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Star, Loader2, CheckCircle2, AlertCircle } from "lucide-react"
-import SceneShell from "../../components/scene/SceneShell"
-import { Panel, SectionHeading } from "../../components/scene/pieces"
-import { EYEBROW, SCENE_BG, TEAL_DEEP, TEAL_ON_DARK, TILE } from "../../components/scene/tokens"
+import { useSession } from "next-auth/react"
+import { Star, Loader2, CheckCircle2, AlertCircle, Check } from "lucide-react"
+import AppShell from "../../components/shell/AppShell"
+import { Card } from "../../components/kit/primitives"
 
 type Category = "bug" | "feature" | "praise" | "other"
 
 /**
- * The four categories, without the icon each one used to carry.
+ * The four choices, in the design's row of four boxes.
  *
- * A bug got a bug, a compliment got a heart: the picture said nothing the Dutch
- * word beside it did not, and the row already has a radio marker telling the
- * reader which one is chosen. On the landscape that is two decorations per row
- * competing with the copy.
+ * The design labels them Idee · Probleem · Vraag · Anders. The API has four
+ * categories and "vraag" is not one of them, so the third box keeps the value
+ * that does exist (`praise`) under its own Dutch word rather than sending two
+ * different boxes to `other` - see app/api/feedback/route.ts, which the admin
+ * feedback view filters on.
  */
-const CATEGORIES: { value: Category; label: string; description: string }[] = [
-  { value: "bug",     label: "Bug melden",    description: "Iets werkt niet zoals verwacht"    },
-  { value: "feature", label: "Functie idee",  description: "Een idee om de app te verbeteren"  },
-  { value: "praise",  label: "Compliment",    description: "Laat weten wat je waardeert"       },
-  { value: "other",   label: "Iets anders",   description: "Vraag, opmerking of suggestie"     },
+const CATEGORIES: { value: Category; label: string }[] = [
+  { value: "feature", label: "Idee" },
+  { value: "bug", label: "Probleem" },
+  { value: "praise", label: "Compliment" },
+  { value: "other", label: "Anders" },
+]
+
+const REASONS = [
+  {
+    title: "Het wordt echt gelezen",
+    body: "Elke inzending komt direct binnen, er zit geen supportafdeling tussen.",
+  },
+  {
+    title: "Het bepaalt de volgorde",
+    body: "De meest genoemde punten gaan als eerste op de lijst.",
+  },
+  {
+    title: "Je hoort wat ermee gebeurt",
+    body: "Je krijgt bericht zodra er iets mee is gedaan.",
+  },
 ]
 
 type Status = "idle" | "sending" | "success" | "error"
 
 /**
- * Feedback, in the shared immersive shell.
+ * /feedback (design_handoff_web/PAGES.md §9).
  *
- * Three layers: a short sky, the category chooser on the horizon - it is the
- * first decision the page asks for and therefore what should break the fold -
- * and the message itself on the desk, with the two standing notes beside it.
+ * One card at full width beside a 350 px rail: the rating block, the four kinds,
+ * a subject, the message, and the send row. No max-width of 700 on the form -
+ * the card IS the column.
  *
- * Nothing about the submission changed: the same POST /api/feedback with the
- * same body (category, rating, message, page, website), the same honeypot, the
- * same four-second reset after a success and the same minimum of four
- * characters.
+ * The submission is the one this page always made: POST /api/feedback with
+ * {category, rating, message, page, website}, the same honeypot, the same
+ * four-second reset after a success and the same minimum of four characters.
+ *
+ * TWO FIELDS THE DESIGN ADDS have no column of their own in that body, so they
+ * are composed into `message` rather than sent as new fields - the endpoint is
+ * untouched:
+ *   - "Onderwerp" becomes the message's first line.
+ *   - The tick box appends the browser's user-agent string, and only when the
+ *     reader has ticked it. The design says "app-versie en apparaat"; on the web
+ *     there is no app version, so the label says what is actually sent.
  */
 export default function FeedbackPage() {
   const pathname = usePathname()
-  const [category, setCategory] = useState<Category>("other")
+  const { data: session } = useSession()
+  const [category, setCategory] = useState<Category>("feature")
   const [rating, setRating] = useState<number>(0)
   const [hoverRating, setHoverRating] = useState<number>(0)
+  const [subject, setSubject] = useState("")
   const [message, setMessage] = useState("")
+  const [sendDevice, setSendDevice] = useState(false)
   const [status, setStatus] = useState<Status>("idle")
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   // Honeypot. Left empty by anyone who can see the form; a bot fills
@@ -54,6 +81,7 @@ export default function FeedbackPage() {
   useEffect(() => {
     if (status !== "success") return
     const t = setTimeout(() => {
+      setSubject("")
       setMessage("")
       setRating(0)
       setStatus("idle")
@@ -71,6 +99,15 @@ export default function FeedbackPage() {
     }
     setStatus("sending")
     setErrorMsg(null)
+
+    const body = [
+      subject.trim(),
+      message.trim(),
+      sendDevice && typeof navigator !== "undefined" ? `— ${navigator.userAgent}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n\n")
+
     try {
       const res = await fetch("/api/feedback", {
         method: "POST",
@@ -78,7 +115,7 @@ export default function FeedbackPage() {
         body: JSON.stringify({
           category,
           rating: rating || undefined,
-          message: message.trim(),
+          message: body,
           page: pathname || "",
           website,
         }),
@@ -97,83 +134,37 @@ export default function FeedbackPage() {
   }
 
   return (
-    <SceneShell backdrop="reader" header rail>
-      {/* -- The sky ---------------------------------------------------- */}
-      <section aria-labelledby="feedback-titel" className="pb-10 pt-6">
-        <div className="scene-sky max-w-[40rem]">
-          <p className={EYEBROW} style={{ color: TEAL_ON_DARK }}>Feedback</p>
-          <h1 id="feedback-titel" className="mt-2 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-            Wat kan beter?
-          </h1>
-          <p className="mt-3 text-sm leading-relaxed text-white/80">
-            BijbelStudie wordt actief ontwikkeld. Jouw bericht komt direct bij ons terecht.
-          </p>
-        </div>
-      </section>
+    <AppShell title="Feedback">
+      <div className="flex min-h-full gap-5">
+        {/* ── The form ─────────────────────────────────────────────── */}
+        <form onSubmit={handleSubmit} className="min-w-0 flex-1">
+          {/* Honeypot: off-screen rather than display:none, which some bots
+              skip, and aria-hidden + tabIndex so it is invisible to assistive
+              technology and to the keyboard. */}
+          <input
+            type="text"
+            name="website"
+            value={website}
+            onChange={(e) => setWebsite(e.target.value)}
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }}
+          />
 
-      <form onSubmit={handleSubmit}>
-        {/* Honeypot: off-screen rather than display:none, which some bots
-            skip, and aria-hidden + tabIndex so it is invisible to assistive
-            technology and to the keyboard. */}
-        <input
-          type="text"
-          name="website"
-          value={website}
-          onChange={(e) => setWebsite(e.target.value)}
-          tabIndex={-1}
-          autoComplete="off"
-          aria-hidden="true"
-          style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }}
-        />
+          <Card className="p-[22px]">
+            <h2 className="text-[19px] font-bold tracking-[-0.2px] text-ink">Wat kan er beter?</h2>
+            <p className="mt-[6px] max-w-[520px] text-[13.5px] leading-[1.6] text-ink-muted">
+              Alles wordt gelezen. Vertel gerust wat er misgaat of wat je mist — hoe concreter, hoe beter.
+            </p>
 
-        {/* -- The horizon: the one decision the page asks for ---------- */}
-        <div className="scene-horizon">
-          <fieldset className={`p-5 shadow-lg shadow-black/20 ${TILE}`}>
-            <legend className={`${EYEBROW} px-1`}>Waar gaat je feedback over?</legend>
-            <div className="mt-3 grid gap-2 sm:grid-cols-2">
-              {CATEGORIES.map((c) => {
-                const isActive = category === c.value
-                return (
-                  <button
-                    key={c.value}
-                    type="button"
-                    aria-pressed={isActive}
-                    onClick={() => setCategory(c.value)}
-                    className={`press flex items-start gap-3 rounded-xl border px-3.5 py-3 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-white ${
-                      isActive ? "border-white/40 bg-white/10" : "border-white/15 bg-black/20 hover:bg-black/30"
-                    }`}
-                  >
-                    <span
-                      aria-hidden
-                      className="mt-0.5 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full border-2 transition-colors"
-                      style={{
-                        borderColor: isActive ? TEAL_ON_DARK : "rgba(255,255,255,0.4)",
-                        backgroundColor: isActive ? TEAL_ON_DARK : "transparent",
-                      }}
-                    >
-                      {isActive && <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: SCENE_BG }} />}
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block text-sm font-semibold leading-tight text-white">{c.label}</span>
-                      <span className="mt-0.5 block text-xs leading-snug text-white/65">{c.description}</span>
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
-          </fieldset>
-        </div>
-
-        {/* -- The desk ------------------------------------------------- */}
-        <div className="grid grid-cols-1 items-start gap-6 pb-24 pt-12 xl:grid-cols-[minmax(0,1fr)_340px]">
-          <div className="flex min-w-0 flex-col gap-5">
             {/* Rating */}
-            <Panel className="p-5" labelledBy="feedback-cijfer">
-              <SectionHeading
-                id="feedback-cijfer"
-                title={<>Hoe beoordeel je BijbelStudie? <span className="font-normal text-white/60">(optioneel)</span></>}
-              />
-              <div className="mt-3 flex items-center gap-1.5">
+            <div className="mt-[18px] flex items-center gap-[18px] rounded-[12px] border border-line bg-sunken px-[18px] py-[15px]">
+              <div className="min-w-0 flex-1">
+                <p className="text-[14.5px] font-semibold text-ink">Hoe beoordeel je BijbelStudie?</p>
+                <p className="mt-[3px] text-[12px] text-ink-faint">Optioneel — één tik</p>
+              </div>
+              <div className="flex gap-[5px]">
                 {[1, 2, 3, 4, 5].map((n) => {
                   const filled = (hoverRating || rating) >= n
                   return (
@@ -183,131 +174,188 @@ export default function FeedbackPage() {
                       onClick={() => setRating(n === rating ? 0 : n)}
                       onMouseEnter={() => setHoverRating(n)}
                       onMouseLeave={() => setHoverRating(0)}
-                      className="rounded-md p-1 outline-none transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white"
+                      className="rounded-[6px] outline-none transition-transform hover:scale-110"
                       aria-label={`${n} sterren`}
                       aria-pressed={rating >= n}
                     >
                       <Star
-                        size={26}
+                        size={30}
                         strokeWidth={1.5}
                         aria-hidden
-                        style={{
-                          color: filled ? "#FBBF24" : "rgba(255,255,255,0.4)",
-                          fill: filled ? "#FBBF24" : "transparent",
-                          transition: "all 0.12s",
-                        }}
+                        className={filled ? "fill-gold text-gold" : "fill-transparent text-line-strong"}
                       />
                     </button>
                   )
                 })}
-                {rating > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => setRating(0)}
-                    className="ml-3 rounded text-xs font-semibold text-white/70 outline-none transition-colors hover:text-white focus-visible:ring-2 focus-visible:ring-white"
-                  >
-                    Wissen
-                  </button>
-                )}
               </div>
-            </Panel>
+              <span className="w-6 text-right text-[15px] font-bold text-gold-ink tabular-nums">
+                {rating || ""}
+              </span>
+            </div>
+
+            {/* Kind */}
+            <FieldLabel className="mt-5">Soort</FieldLabel>
+            <div className="mt-[9px] flex gap-[10px]">
+              {CATEGORIES.map((c) => {
+                const active = category === c.value
+                return (
+                  <button
+                    key={c.value}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => setCategory(c.value)}
+                    className={[
+                      "flex-1 rounded-[11px] p-[13px] text-center text-[13.5px] font-semibold transition-colors",
+                      active
+                        ? "border-2 border-teal bg-[var(--teal-wash-2)] text-teal"
+                        : "border border-line bg-white text-ink-body hover:border-line-strong",
+                    ].join(" ")}
+                  >
+                    {c.label}
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Subject */}
+            <FieldLabel className="mt-[18px]" htmlFor="feedback-onderwerp">Onderwerp</FieldLabel>
+            <input
+              id="feedback-onderwerp"
+              type="text"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              maxLength={120}
+              placeholder="Kort samengevat"
+              className="mt-2 h-11 w-full rounded-btn border border-line px-[14px] text-[14px] text-ink outline-none transition-colors placeholder:text-ink-faint focus-visible:border-teal"
+            />
 
             {/* Message */}
-            <Panel className="p-5" labelledBy="feedback-bericht">
-              <SectionHeading
-                id="feedback-bericht"
-                title="Je bericht"
-                subtitle={
-                  category === "bug" ? "Beschrijf wat er gebeurde en wat je verwachtte."
-                  : category === "feature" ? "Wat zou de app voor jou nog beter maken?"
-                  : category === "praise" ? "Wat vind je goed werken aan BijbelStudie?"
-                  : "Deel je vraag, opmerking of suggestie."
-                }
-              />
-              <label htmlFor="feedback-tekst" className="sr-only">Je bericht</label>
-              <textarea
-                id="feedback-tekst"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                rows={7}
-                maxLength={4000}
-                placeholder={
-                  category === "bug"
-                    ? "Bijv. 'Wanneer ik op X klik, gebeurt Y in plaats van Z. Ik gebruik Chrome op Windows...'"
-                    : category === "feature"
-                    ? "Bijv. 'Ik zou graag X kunnen doen omdat...'"
-                    : category === "praise"
-                    ? "Bijv. 'De inductieve studie heeft me echt geholpen om...'"
-                    : "Vertel ons wat er op je hart ligt..."
-                }
-                className="mt-4 w-full resize-y rounded-lg border border-white/20 bg-black/30 px-3 py-2.5 text-sm leading-relaxed text-white outline-none transition-colors placeholder:text-white/45 hover:bg-black/40 focus-visible:ring-2 focus-visible:ring-white"
-              />
-              <div className="mt-2 flex items-center justify-between">
-                <p className="text-[11px] text-white/60">Minimaal 4 tekens · max 4000</p>
-                <p className="text-[11px] tabular-nums text-white/60">{message.length} / 4000</p>
-              </div>
-            </Panel>
+            <FieldLabel className="mt-4" htmlFor="feedback-tekst">Toelichting</FieldLabel>
+            <textarea
+              id="feedback-tekst"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              maxLength={4000}
+              placeholder="Wat gebeurde er, en wat had je verwacht?"
+              className="mt-2 h-[116px] w-full resize-y rounded-btn border border-line px-[14px] py-[13px] text-[14px] leading-[1.6] text-ink outline-none transition-colors placeholder:text-ink-faint focus-visible:border-teal"
+            />
+            <p className="mt-[6px] text-[11.5px] text-ink-faint tabular-nums">
+              Minimaal 4 tekens · {message.length} / 4000
+            </p>
 
-            {/* Error / success banner */}
+            {/* Device */}
+            <label className="mt-[14px] flex cursor-pointer items-center gap-[10px]">
+              <input
+                type="checkbox"
+                checked={sendDevice}
+                onChange={(e) => setSendDevice(e.target.checked)}
+                className="sr-only"
+              />
+              <span
+                aria-hidden
+                className={[
+                  "flex h-5 w-5 flex-none items-center justify-center rounded-[5px] border transition-colors",
+                  sendDevice ? "border-teal bg-teal text-white" : "border-line-strong bg-white",
+                ].join(" ")}
+              >
+                {sendDevice && <Check size={13} strokeWidth={3} />}
+              </span>
+              <span className="text-[13.5px] text-ink-body">Stuur mijn browser en apparaat mee</span>
+            </label>
+
+            {/* Banners */}
             {status === "error" && errorMsg && (
-              <div role="alert" className="flex items-start gap-2 rounded-xl border border-red-400/40 bg-red-950/40 p-3.5">
-                <AlertCircle size={16} aria-hidden className="mt-0.5 flex-shrink-0 text-red-300" />
-                <p className="text-sm text-red-200">{errorMsg}</p>
+              <div role="alert" className="mt-4 flex items-start gap-2 rounded-[10px] border border-line bg-sunken p-3.5">
+                <AlertCircle size={16} aria-hidden className="mt-0.5 flex-shrink-0 text-danger" />
+                <p className="text-[13.5px] text-danger">{errorMsg}</p>
               </div>
             )}
             {status === "success" && (
-              <div role="status" className="flex items-start gap-2 rounded-xl border border-white/20 bg-black/40 p-3.5">
-                <CheckCircle2 size={16} aria-hidden className="mt-0.5 flex-shrink-0" style={{ color: TEAL_ON_DARK }} />
+              <div role="status" className="mt-4 flex items-start gap-2 rounded-[10px] border border-line bg-teal-faint p-3.5">
+                <CheckCircle2 size={16} aria-hidden className="mt-0.5 flex-shrink-0 text-teal" />
                 <div>
-                  <p className="text-sm font-semibold text-white">Dank je wel!</p>
-                  <p className="mt-0.5 text-xs text-white/70">
+                  <p className="text-[13.5px] font-semibold text-ink">Dank je wel!</p>
+                  <p className="mt-0.5 text-[12px] text-ink-muted">
                     Je feedback is verzonden. We nemen elke reactie serieus mee.
                   </p>
                 </div>
               </div>
             )}
 
-            {/* Submit */}
-            <div className="flex justify-end">
+            {/* Send */}
+            <div className="mt-[18px] flex items-center gap-3">
               <button
                 type="submit"
                 disabled={status === "sending" || message.trim().length < 4}
-                className="press inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white outline-none transition-colors hover:bg-[#115E59] focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-50"
-                style={{ backgroundColor: TEAL_DEEP }}
+                className="inline-flex h-11 items-center gap-2 rounded-btn bg-teal px-[22px] text-[14px] font-semibold text-white outline-none transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {status === "sending" ? (
-                  <><Loader2 size={14} aria-hidden className="animate-spin" /> Versturen...</>
+                  <><Loader2 size={14} aria-hidden className="animate-spin" /> Versturen…</>
                 ) : (
-                  "Verstuur feedback"
+                  "Versturen"
                 )}
               </button>
+              {session?.user?.email && (
+                <p className="text-[12.5px] text-ink-faint">Je krijgt antwoord op {session.user.email}</p>
+              )}
             </div>
-          </div>
+          </Card>
+        </form>
 
-          {/* The standing notes beside it */}
-          <aside className="flex flex-col gap-4">
-            <Panel className="p-5" labelledBy="feedback-waarom">
-              <SectionHeading id="feedback-waarom" title="Waarom feedback geven?" />
-              <p className="mt-3 text-sm leading-relaxed text-white/80">
-                BijbelStudie wordt actief ontwikkeld en jouw input bepaalt mee wat we als volgende
-                bouwen. Elke bug, elk idee en elk compliment komt direct bij ons terecht.
-              </p>
-              <ul className="mt-4 space-y-2 border-t border-white/15 pt-4 text-xs text-white/65">
-                <li>Bugs worden snel opgepakt en gefixt</li>
-                <li>Functie-ideeen gaan op de roadmap</li>
-              </ul>
-            </Panel>
+        {/* ── The rail ─────────────────────────────────────────────── */}
+        <aside className="flex w-[350px] flex-none flex-col gap-[18px]">
+          <Card className="flex-none p-[18px]">
+            <h2 className="text-[15px] font-bold text-ink">Waarom feedback geven?</h2>
+            <p className="mt-[6px] text-[12.5px] leading-[1.6] text-ink-muted">
+              BijbelStudie wordt door één persoon gemaakt. Wat jij opmerkt, bepaalt wat er hierna komt.
+            </p>
+            <div className="mt-2">
+              {REASONS.map((reason, i) => (
+                <div key={reason.title} className="flex gap-3 border-t border-line-soft py-[13px]">
+                  <span className="flex h-7 w-7 flex-none items-center justify-center rounded-[8px] bg-teal-faint text-[12px] font-bold text-teal">
+                    {i + 1}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[13.5px] font-semibold text-ink">{reason.title}</p>
+                    <p className="mt-[3px] text-[12.5px] leading-[1.55] text-ink-muted">{reason.body}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
 
-            <Panel className="p-5" labelledBy="feedback-tip">
-              <SectionHeading id="feedback-tip" title="Tip" />
-              <p className="mt-3 text-sm leading-relaxed text-white/80">
-                Bij een bug: vermeld de stappen om het te reproduceren en welke browser/apparaat je
-                gebruikt. Hoe specifieker, hoe sneller we het kunnen oplossen.
-              </p>
-            </Panel>
-          </aside>
-        </div>
-      </form>
-    </SceneShell>
+          <Card className="flex-none p-[18px]">
+            <h2 className="text-[15px] font-bold text-ink">Liever direct contact?</h2>
+            <p className="mt-[6px] text-[13px] leading-[1.6] text-ink-muted">
+              Voor vragen over je abonnement of account gaat mailen sneller.
+            </p>
+            <Link
+              href="/contact"
+              className="mt-3 flex h-[38px] items-center justify-center rounded-[9px] border border-line text-[13px] font-semibold text-ink-body no-underline transition-colors hover:bg-line-soft"
+            >
+              Mail het team
+            </Link>
+          </Card>
+        </aside>
+      </div>
+    </AppShell>
+  )
+}
+
+/** The caps label over a field. */
+function FieldLabel({
+  children,
+  className = "",
+  htmlFor,
+}: {
+  children: React.ReactNode
+  className?: string
+  htmlFor?: string
+}) {
+  const cls = `block text-[10.5px] font-semibold uppercase tracking-[1.1px] text-ink-faint ${className}`
+  return htmlFor ? (
+    <label htmlFor={htmlFor} className={cls}>{children}</label>
+  ) : (
+    <p className={cls}>{children}</p>
   )
 }

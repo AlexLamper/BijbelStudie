@@ -11,7 +11,6 @@ import BookContextDialog from './BookContextDialog';
 import type { ReadingPreferences } from '../../../hooks/useReadingPreferences';
 
 import { FOCUS_RING, INK, INK_FAINT, INK_MUTED, RULE } from './lesson-layout';
-import { SCENE_BG, SCENE_BG_RGB, TEAL, TEAL_DEEP, TEAL_ON_DARK } from '../../scene/tokens';
 
 export interface DepthContentProps {
   body?: string[];
@@ -134,7 +133,7 @@ export default function StepDepth({
     <div className="h-full overflow-y-auto lg:overflow-hidden lg:flex lg:flex-row lg:min-h-0">
       {/* Left: the commentary, edge to edge. */}
       <div
-        className={`lg:w-1/2 lg:flex-none min-w-0 lg:min-h-0 relative border-b lg:border-b-0 lg:border-r ${RULE}`}
+        className={`relative min-w-0 border-b lg:min-h-0 lg:flex-1 lg:border-b-0 lg:border-r ${RULE}`}
       >
         <div className="lg:h-full lg:min-h-0">
           <CommentaryComponent
@@ -151,8 +150,8 @@ export default function StepDepth({
             which is a theme token and would end in the wrong black. */}
         <div
           aria-hidden
-          className="hidden lg:block pointer-events-none absolute bottom-0 left-0 right-0 h-14"
-          style={{ backgroundImage: `linear-gradient(to top, ${SCENE_BG}, rgba(${SCENE_BG_RGB},0))` }}
+          className="pointer-events-none absolute inset-x-0 bottom-0 hidden h-[88px] lg:block"
+          style={{ background: 'var(--les-fade)' }}
         />
       </div>
 
@@ -160,7 +159,7 @@ export default function StepDepth({
           `bg-black/25` it used to carry: the divider already says where the
           commentary stops, and a darker rectangle beside a lighter one made the
           step two colours instead of one surface with two halves. */}
-      <aside className="lg:w-1/2 lg:flex-none min-w-0 lg:min-h-0 flex flex-col bg-white/[0.02]">
+      <aside className="flex min-w-0 flex-col lg:min-h-0 lg:w-[344px] lg:flex-none">
         {/* The book's background, as a row rather than a button that looked like
             a form field. It answers "who wrote this, when, and why", so it says
             that instead of "Algemene info". */}
@@ -168,16 +167,13 @@ export default function StepDepth({
           type="button"
           onClick={() => setContextOpen(true)}
           data-track="study_book_context"
-          className={`group flex-none flex items-center gap-3 px-4 sm:px-5 py-3 text-left border-b ${RULE} transition-colors hover:bg-white/10 ${FOCUS_RING}`}
+          className={`group flex flex-none items-center gap-3 border-b px-[18px] py-[13px] text-left ${RULE} transition-colors hover:bg-les-card ${FOCUS_RING}`}
         >
-          <span
-            className="h-8 w-8 flex-none rounded-lg flex items-center justify-center"
-            style={{ backgroundColor: 'rgba(45,212,191,0.14)' }}
-          >
-            <Landmark size={15} style={{ color: TEAL_ON_DARK }} />
+          <span className="flex h-[34px] w-[34px] flex-none items-center justify-center rounded-[9px] bg-[var(--teal-wash)]">
+            <Landmark size={15} className="text-les-accent" />
           </span>
           <span className="min-w-0 flex-1">
-            <span className={`block text-[13px] font-semibold truncate ${INK}`}>
+            <span className={`block truncate text-[13.5px] font-bold ${INK}`}>
               Achtergrond bij {book}
             </span>
             <span className={`block text-[11.5px] truncate ${INK_FAINT}`}>
@@ -203,18 +199,17 @@ export default function StepDepth({
                   onClick={() => setPanel(key)}
                   aria-pressed={isActive}
                   className={[
-                    'relative inline-flex items-center justify-center gap-1.5 px-3 sm:px-4 h-11 text-[12.5px] font-semibold transition-colors min-w-0',
+                    'relative inline-flex h-11 min-w-0 items-center justify-center gap-1.5 px-3 text-[12.5px] font-semibold transition-colors sm:px-4',
                     FOCUS_RING,
-                    isActive ? '' : `${INK_FAINT} hover:text-white`,
+                    isActive ? 'text-les-accent' : `${INK_FAINT} hover:text-les-ink`,
                   ].join(' ')}
-                  style={isActive ? { color: TEAL_ON_DARK } : undefined}
                 >
                   <Icon size={14} className="flex-none" />
                   <span className="truncate">{label}</span>
                   <span
                     aria-hidden
-                    className="absolute inset-x-1.5 -bottom-px h-[2px] rounded-full transition-opacity"
-                    style={{ backgroundColor: TEAL, opacity: isActive ? 1 : 0 }}
+                    className="absolute inset-x-1.5 -bottom-px h-[2px] rounded-full bg-teal transition-opacity"
+                    style={{ opacity: isActive ? 1 : 0 }}
                   />
                 </button>
               );
@@ -222,11 +217,11 @@ export default function StepDepth({
           </div>
         </div>
 
-        <p className={`flex-none px-4 sm:px-5 py-2 text-[11.5px] ${INK_FAINT} border-b ${RULE}`}>
+        <p className={`flex-none border-b px-[18px] py-[9px] text-[12px] ${INK_FAINT} ${RULE}`}>
           {active.blurb}
         </p>
 
-        <div className="lg:flex-1 lg:min-h-0 lg:overflow-y-auto px-4 sm:px-5 py-4">
+        <div className="px-[18px] py-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
           {panel === 'media' &&
             (showMedia ? (
               <GeoImages book={book} chapter={chapter} variant="panel" fallbackToBook />
@@ -248,7 +243,7 @@ export default function StepDepth({
             It hands off to the same assistant the header opens, so the answer
             lands in the conversation that travels with the lesson. */}
         {onAskAi && (
-          <div className={`flex-none border-t ${RULE} p-3`}>
+          <div className={`flex-none border-t px-[18px] py-3 ${RULE}`}>
             <div className="flex gap-2">
               <input
                 id="depth-ai"
@@ -262,15 +257,14 @@ export default function StepDepth({
                 }}
                 aria-label="Vraag het de AI-assistent"
                 placeholder={`Vraag iets over ${book} ${chapter}...`}
-                className={`flex-1 min-w-0 h-10 px-3 rounded-lg border border-white/20 bg-white/10 text-sm text-white placeholder:text-white/55 ${FOCUS_RING}`}
+                className={`h-[42px] min-w-0 flex-1 rounded-btn border border-les-card-line bg-les-input px-3 text-[13.5px] text-les-ink placeholder:text-les-faint ${FOCUS_RING}`}
               />
               <button
                 type="button"
                 onClick={ask}
                 disabled={!question.trim()}
                 aria-label="Vraag versturen"
-                className="press h-10 w-10 flex-none inline-flex items-center justify-center rounded-lg text-white transition-opacity hover:opacity-90 disabled:opacity-40 outline-none focus-visible:ring-2 focus-visible:ring-white"
-                style={{ backgroundColor: TEAL_DEEP }}
+                className={`press inline-flex h-[42px] w-[42px] flex-none items-center justify-center rounded-btn bg-teal text-white transition-opacity hover:opacity-90 disabled:opacity-40 ${FOCUS_RING}`}
               >
                 <Send size={15} />
               </button>

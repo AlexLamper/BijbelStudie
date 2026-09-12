@@ -89,6 +89,162 @@
   }
 }
 
+/* ─── Web platform design tokens ────────────────────────────────
+   The single source of truth for the nine app routes (dashboard, studies,
+   lezen, notities, profiel, profiel/boom, instellingen, feedback, admin).
+   Copied verbatim from design_handoff_web/tokens.css - no page writes a hex
+   value that is not in this block. The same names are hung on Tailwind in
+   tailwind.config.ts, so `bg-teal` and `var(--teal)` are the same colour.
+
+   Plain literals rather than the HSL triplets above: these are handed to
+   gradients and rgba() as-is, which the `hsl(var(--x))` convention cannot do.
+   They are deliberately theme-independent - the redesign is specified in one
+   (light) palette only. */
+:root{
+  --teal:#0D9488;
+  --teal-dark:#0F766E;
+  --teal-soft:#CCFBF1;
+  --teal-wash:rgba(13,148,136,.10);
+  --teal-wash-2:rgba(13,148,136,.08);
+  --teal-faint:#F0FDFA;
+  --teal-tint:#E6F5F1;
+
+  --ink:#111827;
+  --ink-body:#374151;
+  --ink-muted:#6B7280;
+  --ink-faint:#9CA3AF;
+
+  --line:#E5E7EB;
+  --line-strong:#D1D5DB;
+  --line-soft:#F3F4F6;
+  --surface:#FFFFFF;
+
+  --success:#047857;
+  --success-fill:#059669;
+  --warn:#EA580C;
+  --danger:#DC2626;
+
+  --gold:#CA9A16;
+  --gold-ink:#422E04;
+  --gold-badge:#7A5E08;
+
+  --scripture:#1F2937;
+
+  --grad-verse:linear-gradient(#4B3A63 0%,#7E5E6E 45%,#C88463 100%);
+  --grad-banner:linear-gradient(135deg,#0F766E,#0F172A);
+  --grad-sky:radial-gradient(circle at 50% 28%,#CFE9F2,#A9D7E4 70%);
+  --grad-pro-pill:linear-gradient(135deg,#F4DFA4,#FFFDF6);
+  --grad-pro-badge:linear-gradient(135deg,#CA9A16,#F2D98C 70%,#FFFBEF);
+  --grad-tree-scene:linear-gradient(#243A4A 0%,#3C5A60 42%,#5E7A63 74%,#2F4A3A 100%);
+
+  --heat-0:#E5E7EB;
+  --heat-1:#CCFBF1;
+  --heat-2:#99D9CE;
+  --heat-3:#4FB3A4;
+  --heat-4:#0D9488;
+
+  --bar-empty:#E5E7EB;
+  --bar-read:#9FD8CD;
+  --bar-today:#0F766E;
+
+  --panel-dark:#152229;
+  --panel-card:rgba(15,23,42,.82);
+  --panel-border:rgba(255,255,255,.12);
+
+  --sidebar-w:196px;
+  --topbar-h:64px;
+  --body-pad-y:26px;
+  --body-pad-x:28px;
+  --radius-card:16px;
+  --radius-btn:10px;
+  --radius-panel:14px;
+
+  --shadow-fab:0 6px 16px rgba(13,148,136,.35);
+  --shadow-badge:0 1px 5px rgba(17,24,39,.22);
+  --shadow-field:0 1px 2px rgba(17,24,39,.04);
+
+  /* Values TOKENS.md states inside a gradient row or a page paragraph rather
+     than in the colour table. Named here so the rule "no hex outside this
+     block" can actually hold - every one of them is quoted from the handoff,
+     none is invented. */
+  --pro-pill-border:#E6D2A0;   /* Pro-pill border   (TOKENS.md, gradients)   */
+  --pro-pill-ink:#4A3506;      /* Pro-pill ink      (TOKENS.md, gradients)   */
+  --pro-badge-border:#D9B95E;  /* Pro-badge border  (TOKENS.md, gradients)   */
+  --pro-soft:#FEF6E0;          /* Pro pill in the admin table (PAGES.md §5)  */
+  --warn-wash:#FFF7ED;         /* streak pill ground (PAGES.md §6)           */
+  --badge-ring:#7C3AED;        /* badge rings        (PAGES.md §6)           */
+  --badge-wash:#F5F3FF;        /* badge ring fill    (PAGES.md §6)           */
+  --highlight:#FEF3C7;         /* highlighted verse  (PAGES.md §3)           */
+  --surface-sunken:#F9FAFB;    /* preview + rating blocks (PAGES.md §8, §9)  */
+  --teal-bright:#5EEAD4;       /* eyebrow + unlock line on the scene (§7)    */
+  --hill-front:#6C8C4E;
+  --hill-back:#3F6B3C;
+
+  /* The four study-banner variants beside the default --grad-banner. */
+  --grad-banner-2:linear-gradient(135deg,#0D9488,#0F172A);
+  --grad-banner-3:linear-gradient(135deg,#3B2C55,#6B4A6E);
+  --grad-banner-4:linear-gradient(135deg,#6B4A2E,#0F172A);
+  --grad-banner-5:linear-gradient(135deg,#1E3A5F,#0F172A);
+}
+
+/* ─── Lesson-flow tokens ────────────────────────────────────────
+   design_handoff_web/TOKENS-LES.md. The lesson exists in LIGHT and DARK - same
+   sizes, same components, a different palette - so every surface in the flow is
+   painted from one of these names and never from a literal.
+
+   The light set is below; the dark set follows on `.dark` (what next-themes
+   stamps on <html>) and on `[data-theme="dark"]` (what the handoff names for a
+   wrapper that wants the dark lesson whatever the app theme is). Both selectors
+   carry the same values, so either way in works.
+
+   Note the accent: #0D9488 on white is 3.1:1 and too light for small type, so
+   headings and links go to #0F766E on light and to #2DD4BF on dark. FILLS stay
+   #0D9488 in both - the primary button and the AI pill never move. */
+:root{
+  --les-bg:#FFFFFF;
+  --les-sb:#FFFFFF;
+  --les-line:#E5E7EB;
+  --les-card:#F9FAFB;
+  --les-card-line:#E5E7EB;
+  --les-ink:#111827;
+  --les-muted:#6B7280;
+  --les-faint:#9CA3AF;
+  --les-accent:#0F766E;
+  --les-scripture:#1F2937;
+  --les-body:#374151;
+  --les-nav-active:rgba(13,148,136,.10);
+  --les-step-active:rgba(13,148,136,.07);
+  --les-quote:#F0FDFA;
+  --les-input:#F3F4F6;
+  --les-check:#059669;
+  /* The level number at the foot of the collapsed rail: gold-badge on white. */
+  --les-level:#7A5E08;
+  --les-fade:linear-gradient(rgba(255,255,255,0),#FFFFFF 76%);
+}
+
+.dark,
+[data-theme="dark"]{
+  --les-bg:#0B1E1E;
+  --les-sb:#081717;
+  --les-line:rgba(255,255,255,.08);
+  --les-card:rgba(255,255,255,.04);
+  --les-card-line:rgba(255,255,255,.10);
+  --les-ink:#E9F1F0;
+  --les-muted:#9BB2B0;
+  --les-faint:#8AA3A1;
+  --les-accent:#2DD4BF;
+  --les-scripture:#EAF2F1;
+  --les-body:#C9D9D7;
+  --les-nav-active:rgba(45,212,191,.12);
+  --les-step-active:rgba(45,212,191,.06);
+  --les-quote:rgba(13,148,136,.10);
+  --les-input:rgba(255,255,255,.05);
+  --les-check:#34D399;
+  /* Gold as TYPE on the night ground; #7A5E08 there is 1.4:1. */
+  --les-level:#E3C766;
+  --les-fade:linear-gradient(rgba(11,30,30,0),#0B1E1E 76%);
+}
+
 @layer base {
   * { @apply border-border; }
   body {

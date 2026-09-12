@@ -1,8 +1,7 @@
 ﻿'use client';
 
 import React, { useRef, useState } from 'react';
-import { Send, Sparkles, X } from 'lucide-react';
-import { TEAL_DEEP } from '../scene/tokens';
+import { Send, X } from 'lucide-react';
 
 interface AiAssistantWidgetProps {
   // Called with the typed question; the parent switches to the AI tab and
@@ -92,8 +91,7 @@ export default function AiAssistantWidget({ onAsk, className = '' }: AiAssistant
               onClick={submit}
               disabled={input.trim().length === 0}
               aria-label="Vraag stellen"
-              className="flex-shrink-0 h-9 w-9 flex items-center justify-center rounded-md text-white outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-white disabled:opacity-40 disabled:cursor-not-allowed"
-              style={{ backgroundColor: TEAL_DEEP }}
+              className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-md bg-teal text-white outline-none transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <Send size={16} />
             </button>
@@ -113,18 +111,23 @@ export default function AiAssistantWidget({ onAsk, className = '' }: AiAssistant
         aria-label={open ? 'AI-assistent sluiten' : 'AI-assistent openen'}
         aria-expanded={open}
         className={[
-          'fixed z-40 bottom-4 right-4 sm:bottom-6 sm:right-6',
-          'w-12 h-12 rounded-full flex items-center justify-center',
-          // The fill carries a white glyph, so it is the deeper brand step
-          // (5.5:1) rather than #0D9488 (3.74:1) - see components/scene/tokens.
-          'text-white shadow-lg hover:shadow-xl hover:opacity-90',
-          'outline-none focus-visible:ring-2 focus-visible:ring-white',
-          'transition-all duration-200',
+          // 52 px in the bottom-right corner of the study pane, with the design's
+          // teal glow under it. The one element in this redesign that carries a
+          // shadow besides the streak badge and the Studies search field.
+          'fixed bottom-5 right-5 z-40 flex h-[52px] w-[52px] items-center justify-center rounded-full',
+          'bg-teal text-white shadow-fab outline-none transition-opacity duration-200 hover:opacity-90',
           className,
         ].join(' ')}
-        style={{ backgroundColor: TEAL_DEEP }}
       >
-        {open ? <X size={20} /> : <Sparkles size={20} />}
+        {open ? (
+          <X size={22} />
+        ) : (
+          // The same filled four-point star the AI tab wears, so the two read
+          // as one feature.
+          <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden className="fill-white">
+            <path d="M12 3.5l1.9 5.1 5.1 1.9-5.1 1.9L12 17.5l-1.9-5.1L5 10.5l5.1-1.9z" />
+          </svg>
+        )}
       </button>
     </>
   );

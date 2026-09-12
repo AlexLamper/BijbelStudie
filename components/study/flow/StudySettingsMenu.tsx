@@ -5,7 +5,9 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Maximize2, Minimize2, Volume2, VolumeX } from 'lucide-react';
 
 import { FOCUS_RING, INK, INK_FAINT, PANEL_SOLID, RULE, scrim } from './lesson-layout';
-import { EYEBROW, TEAL, TEAL_ON_DARK } from '../../scene/tokens';
+
+/** The caps label over a group of controls in this menu. */
+const EYEBROW = 'text-[10px] font-semibold uppercase tracking-[1.2px] text-les-faint';
 import type { ReadingPreferences } from '../../../hooks/useReadingPreferences';
 
 /** Group headings for the translation picker, Dutch first. */
@@ -52,7 +54,7 @@ function Segmented<T extends string>({
   return (
     <div>
       <p className={`mb-1.5 ${EYEBROW}`}>{label}</p>
-      <div className="flex gap-1 rounded-lg bg-white/10 p-1">
+      <div className="flex gap-1 rounded-lg bg-les-input p-1">
         {options.map((option, index) => {
           const active = option.value === value;
           return (
@@ -65,9 +67,8 @@ function Segmented<T extends string>({
                 'flex-1 h-8 rounded-md font-semibold transition-colors',
                 FOCUS_RING,
                 sizes ? sizes[index] : 'text-[12px]',
-                active ? 'bg-white/15 shadow-sm' : `${INK_FAINT} hover:text-white`,
+                active ? 'bg-les-bg text-les-accent shadow-sm' : `${INK_FAINT} hover:text-les-ink`,
               ].join(' ')}
-              style={active ? { color: TEAL_ON_DARK } : undefined}
             >
               {option.label}
             </button>
@@ -99,13 +100,13 @@ function Toggle({
       type="button"
       onClick={onToggle}
       aria-pressed={on}
-      className={`w-full flex items-center gap-2.5 rounded-lg px-2 py-2 text-left transition-colors hover:bg-white/10 ${FOCUS_RING}`}
+      className={`flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-left transition-colors hover:bg-les-card ${FOCUS_RING}`}
     >
       <span
         className="h-8 w-8 flex-none rounded-lg flex items-center justify-center"
         style={{ backgroundColor: on ? 'rgba(45,212,191,0.14)' : 'rgba(255,255,255,0.10)' }}
       >
-        <span className={on ? '' : INK_FAINT} style={on ? { color: TEAL_ON_DARK } : undefined}>
+        <span className={on ? 'text-les-accent' : INK_FAINT}>
           {on ? onIcon : offIcon}
         </span>
       </span>
@@ -116,7 +117,7 @@ function Toggle({
       <span
         aria-hidden
         className="flex-none h-5 w-9 rounded-full p-0.5 transition-colors"
-        style={{ backgroundColor: on ? TEAL : 'rgba(255,255,255,0.22)' }}
+        style={{ backgroundColor: on ? 'var(--teal)' : 'var(--les-line)' }}
       >
         <span
           className="block h-4 w-4 rounded-full bg-white transition-transform"
@@ -224,7 +225,7 @@ export default function StudySettingsMenu({
                 value={version}
                 onChange={(event) => onVersionChange(event.target.value)}
                 data-track="study_settings_version"
-                className={`w-full h-9 cursor-pointer rounded-lg border border-white/20 bg-white/10 px-2.5 text-[13px] text-white ${FOCUS_RING}`}
+                className={`h-9 w-full cursor-pointer rounded-lg border border-les-card-line bg-les-bg px-2.5 text-[13px] text-les-ink ${FOCUS_RING}`}
               >
                 {languages.map((language) => (
                   <optgroup

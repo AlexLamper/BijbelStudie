@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getServerSession } from 'next-auth';
-import { ArrowLeft } from 'lucide-react';
 
 import { authOptions } from '../../../lib/authOptions';
 import connectMongoDB from '../../../lib/mongodb';
@@ -12,10 +11,9 @@ import { getVersions } from '../../../lib/local-data';
 import { estimateStudyMinutes, formatStudyMinutes } from '../../../lib/studyFlow';
 import { isBookStudyId } from '../../../lib/bookStudies';
 import { findStudy, getEnrollment } from '../../../lib/studyEnrollmentService';
-import SceneShell from '../../../components/scene/SceneShell';
-import { SCENE_TREE, sceneSvg } from '../../../components/scene/scene-svg';
-import { GlassStat, Panel, SectionHeading } from '../../../components/scene/pieces';
-import { EYEBROW, TEAL_ON_DARK } from '../../../components/scene/tokens';
+import AppShell from '../../../components/shell/AppShell';
+import { Card } from '../../../components/kit/primitives';
+import { bannerGradient } from '../../../components/kit/primitives';
 import StudySetupProvider, { StudyActionBar } from './StudyOnboardingForm';
 import LessonList from './LessonList';
 
@@ -74,37 +72,21 @@ const TYPE_LABEL: Record<string, string> = {
 };
 
 /**
- * Study detail and onboarding, in the shared immersive scene.
+ * Study detail (design_handoff_web/PAGES-STUDIE-EN-LES.md §10).
+ *
+ * The ordinary AppShell with `active="studies"` and the study's own name as the
+ * title, then one column: a 142 px banner carrying the breadcrumb, the title and
+ * three pills; four figures; and below them the pitch and the lessons beside a
+ * 326 px rail.
  *
  * Public and indexable: this is where someone decides whether a study is for
  * them, so it must be reachable without an account and crawlable. Only the
  * settings form needs a session, and it sends anonymous visitors to sign in at
  * the moment they press start.
  *
- * The three-band chrome this page used to be - a fixed h-14 header, two panes
- * scrolling independently, a fixed action bar at the foot, and the document
- * itself never moving - could not stay: the scene's depth engine measures
- * `window.scrollY`, and inside a fixed-height box the landscape never moves. So
- * the page is the shell's three layers now, which carry the same three things
- * in the same order:
- *
- *   the sky      what this study is, and the one action - start or resume
- *   the horizon  the four facts you weigh: lessons, time, books, progress
- *   the desk     the pitch, the reading plan, the lessons
- *
- * There is no cover picture on the desk any more. The landscape behind the page
- * is already this study's view; a drawn horizon in the column repeated it a size
- * smaller and cost a screen of text. `StudyArtwork` is untouched - it still
- * draws the /studies rows and featured cards - and `study.image` still goes out
- * verbatim over /api/v1/studies to the shipped app.
- *
- * `backdrop="static"` with the server-rendered SVG, because there is no
- * guaranteed session here; `gateId` points at the hero so the live canvas only
- * runs while the first screen is actually on show and stops for good once the
- * reader is down among the lessons.
- *
  * The state behind the settings dialog and the start button is still one
- * object, held by StudySetupProvider above the whole page.
+ * object, held by StudySetupProvider above the whole page, and every query this
+ * page makes is the one it already made.
  */
 export default async function StudyDetailPage({ params }: PageProps) {
   const { id } = await params;
@@ -224,142 +206,143 @@ export default async function StudyDetailPage({ params }: PageProps) {
       lessonsTotal={lessonsTotal}
       lessonsCompleted={lessonsDone}
     >
-      <SceneShell svg={sceneSvg()} {...SCENE_TREE} gateId="studie-hero" header rail>
-        {/* -- Layer 1: the sky ---------------------------------------- */}
-        <section
-          id="studie-hero"
-          aria-labelledby="studie-titel"
-          className="flex min-h-[calc(100vh-3.5rem)] flex-col justify-center pb-32 pt-10"
-        >
-          <div className="scene-sky w-full max-w-[46rem]">
-            {/* A control, not a breadcrumb: the way back out of a study you
-                decided against, on the same baseline as everything else. */}
-            <Link
-              href="/studies"
-              title="Terug naar alle studies"
-              className="press group inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/40 px-4 py-2 text-[12.5px] font-medium text-white/80 no-underline outline-none backdrop-blur-md transition-colors hover:border-white/45 hover:text-white focus-visible:ring-2 focus-visible:ring-white"
-            >
-              <ArrowLeft
-                size={14}
-                aria-hidden
-                className="flex-none transition-transform duration-200 group-hover:-translate-x-0.5"
-              />
-              Alle studies
-            </Link>
-
-            <p className={`${EYEBROW} mt-7`} style={{ color: TEAL_ON_DARK }}>
-              {TYPE_LABEL[study.type] ?? study.type}
-            </p>
-            <h1
-              id="studie-titel"
-              className="mt-3 text-4xl font-semibold leading-[1.05] tracking-tight text-white drop-shadow-sm sm:text-5xl xl:text-6xl"
-            >
+      <AppShell title={study.title} active="/studies">
+        <div className="flex min-h-full flex-col gap-4">
+          {/* The banner. A gradient plate rather than artwork, per RULES.md §4:
+              the design draws one here and the server has no cover image for a
+              study - `StudyArtwork` draws the catalogue rows instead. */}
+          <div
+            className="relative flex h-[142px] flex-none flex-col justify-end overflow-hidden rounded-card px-[26px] py-[22px]"
+            style={{ background: bannerGradient(study.id) }}
+          >
+            <div className="flex items-center gap-2 text-[12.5px] text-white/70">
+              <Link href="/studies" className="text-white/70 no-underline hover:text-white">
+                Studies
+              </Link>
+              <span aria-hidden>&rsaquo;</span>
+              <span className="font-semibold text-white">{study.title}</span>
+            </div>
+            <h1 className="mt-2 text-[34px] font-bold leading-none tracking-[-0.7px] text-white">
               {study.title}
             </h1>
-            <p className="mt-4 max-w-[34rem] text-base leading-relaxed text-white/85 sm:text-lg">
-              {study.description}
-            </p>
-
-            {/* Where you are, and the one way on. */}
-            <div className="mt-9">
-              <StudyActionBar />
+            <div className="mt-3 flex flex-wrap gap-2">
+              <span className="rounded-full bg-white px-[11px] py-[5px] text-[12px] font-semibold text-teal-dark">
+                {TYPE_LABEL[study.type] ?? study.type}
+              </span>
+              <span
+                className="rounded-full px-[11px] py-[5px] text-[12px] font-semibold text-white"
+                style={{ backgroundColor: 'rgba(17,24,39,.5)' }}
+              >
+                {lessonsTotal} {lessonsTotal === 1 ? 'les' : 'lessen'} &middot; {formatStudyMinutes(minutes)}
+              </span>
+              {books.length > 0 && (
+                <span
+                  className="rounded-full px-[11px] py-[5px] text-[12px] font-semibold text-white"
+                  style={{ backgroundColor: 'rgba(17,24,39,.5)' }}
+                >
+                  {books.length === 1 ? books[0] : `${books.length} bijbelboeken`}
+                </span>
+              )}
             </div>
           </div>
-        </section>
 
-        {/* -- Layer 2: the horizon ------------------------------------ */}
-        <div className="scene-horizon -mt-24">
-          <dl className="stagger-in grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
-            <GlassStat
-              label="Lessen"
-              value={`${lessonsTotal}`}
-              unit={lessonsTotal === 1 ? 'les' : 'lessen'}
-            />
-            <GlassStat label="Tijd" value={formatStudyMinutes(minutes)} unit="totaal" />
-            <GlassStat
+          {/* Four figures, with the unit beside the value rather than under it. */}
+          <div className="flex flex-none gap-[14px]">
+            <DetailStat label="Lessen" value={`${lessonsTotal}`} unit={lessonsTotal === 1 ? 'les' : 'lessen'} />
+            <DetailStat label="Tijd" value={formatStudyMinutes(minutes)} unit="totaal" />
+            <DetailStat
               label="Bijbelboeken"
               value={`${books.length}`}
               unit={books.length === 1 ? 'boek' : 'boeken'}
             />
-            <GlassStat
-              label="Voortgang"
-              value={`${pct}%`}
-              unit={`${lessonsDone} van ${lessonsTotal}`}
-              note={enrolled ? undefined : 'Nog niet begonnen'}
-            />
-          </dl>
-        </div>
-
-        {/* -- Layer 3: the desk --------------------------------------- */}
-        <div className="grid w-full grid-cols-1 gap-6 pb-24 pt-14 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-8">
-          <div className="min-w-0 space-y-6">
-            {/* No cover picture here. The scene behind the page IS this study's
-                view; a second drawn horizon in the column repeated it at a
-                smaller size and pushed the text down a screen. StudyArtwork
-                still draws the catalogue rows and the featured cards on
-                /studies, and `study.image` is still served verbatim to the app
-                by /api/v1/studies - neither may be removed for this. */}
-            {about.length > 0 && (
-              <Panel className="p-6" labelledBy="studie-over">
-                <SectionHeading id="studie-over" title="Waar gaat deze studie over?" />
-                <div className="mt-3 space-y-3">
-                  {about.map((paragraph, index) => (
-                    <p key={index} className="text-[15px] leading-relaxed text-white/80">
-                      {paragraph}
-                    </p>
-                  ))}
-                </div>
-              </Panel>
-            )}
-
-            <section aria-labelledby="studie-leesplan">
-              <SectionHeading
-                id="studie-leesplan"
-                title="Wat je leest"
-                subtitle="De hoofdstukken die deze studie langsgaat, in volgorde."
-                rule
-              />
-              <ul className="m-0 mt-1 divide-y divide-white/10 p-0">
-                {readingPlan.map((entry) => (
-                  <li
-                    key={entry.book}
-                    className="flex list-none items-baseline justify-between gap-4 py-3"
-                  >
-                    <span className="min-w-0 truncate text-[15px] font-semibold text-white">
-                      {entry.book}
-                    </span>
-                    <span className="flex-none text-sm tabular-nums text-white/65">
-                      hoofdstuk {entry.chapters}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </section>
+            <DetailStat label="Voortgang" value={`${pct} %`} unit={`${lessonsDone} van ${lessonsTotal}`} />
           </div>
 
-          {/* The lessons. Sticks once it reaches the top and scrolls inside
-              itself, so a twelve-lesson book study never runs the column past
-              the end of the page. `top-[4.5rem]` clears the sticky h-14 navbar. */}
-          <aside className="min-w-0 lg:sticky lg:top-[4.5rem] lg:max-h-[calc(100vh-6rem)] lg:self-start lg:overflow-y-auto">
-            <LessonList
-              studyId={study.id}
-              lessons={study.lessons.map((lesson) => ({
-                day: lesson.day,
-                title: lesson.title,
-                book: lesson.book,
-                chapter: lesson.chapter,
-                verseRange: lesson.verseRange ?? null,
-                focus: lesson.focus,
-                minutes: lesson.estimatedMinutes ?? 12,
-              }))}
-              completedDays={completedDays}
-              currentDay={enrolled ? resumeDay : null}
-              enrolled={enrolled}
-              guest={!signedIn}
-            />
-          </aside>
+          <div className="flex min-h-0 flex-1 gap-5">
+            {/* The pitch, then the lessons. */}
+            <div className="flex min-w-0 flex-1 flex-col gap-4">
+              {about.length > 0 && (
+                <Card className="flex-none px-[21px] py-[19px]">
+                  <h2 className="text-[16px] font-bold text-ink">Waar gaat deze studie over?</h2>
+                  <div className="mt-[9px] space-y-3">
+                    {about.map((paragraph, index) => (
+                      <p key={index} className="text-[14.5px] leading-[1.7] text-ink-body">
+                        {paragraph}
+                      </p>
+                    ))}
+                  </div>
+                </Card>
+              )}
+
+              <LessonList
+                studyId={study.id}
+                lessons={study.lessons.map((lesson) => ({
+                  day: lesson.day,
+                  title: lesson.title,
+                  book: lesson.book,
+                  chapter: lesson.chapter,
+                  verseRange: lesson.verseRange ?? null,
+                  focus: lesson.focus,
+                  minutes: lesson.estimatedMinutes ?? 12,
+                }))}
+                completedDays={completedDays}
+                currentDay={enrolled ? resumeDay : null}
+                enrolled={enrolled}
+                guest={!signedIn}
+              />
+            </div>
+
+            {/* The rail: where you are, and what this study is made of. */}
+            <aside className="flex w-[326px] flex-none flex-col gap-[13px]">
+              <Card className="flex-none p-[18px]">
+                <StudyActionBar />
+              </Card>
+
+              <Card className="flex-none p-[18px]">
+                <h2 className="text-[14.5px] font-bold text-ink">Over deze studie</h2>
+                <div className="mb-1 mt-3 h-px bg-line" />
+                <AboutRow label="Soort" value={TYPE_LABEL[study.type] ?? study.type} />
+                <AboutRow
+                  label="Gedeelte"
+                  value={readingPlan.map((entry) => `${entry.book} ${entry.chapters}`).join(' · ')}
+                />
+                <AboutRow
+                  label="Vertaling"
+                  value={
+                    translations.find((entry) => entry.id === (settings.translation ?? study.startVersion))
+                      ?.name ?? (settings.translation ?? study.startVersion)
+                  }
+                />
+                <AboutRow label="Lessen" value={`${lessonsTotal}`} />
+                <AboutRow label="Tijd per les" value={`± ${study.lessons[0]?.estimatedMinutes ?? 12} min`} last />
+              </Card>
+            </aside>
+          </div>
         </div>
-      </SceneShell>
+      </AppShell>
     </StudySetupProvider>
+  );
+}
+
+/** One of the four figures over the columns: label, value, and its unit. */
+function DetailStat({ label, value, unit }: { label: string; value: string; unit: string }) {
+  return (
+    <Card className="flex-1 px-[17px] py-[15px]">
+      <p className="text-[12px] text-ink-muted">{label}</p>
+      <p className="mt-[7px] flex items-baseline gap-[7px]">
+        <span className="text-[24px] font-bold tracking-[-0.5px] text-ink tabular-nums">{value}</span>
+        <span className="text-[12px] text-ink-faint">{unit}</span>
+      </p>
+    </Card>
+  );
+}
+
+/** One label/value row in "Over deze studie". */
+function AboutRow({ label, value, last = false }: { label: string; value: string; last?: boolean }) {
+  return (
+    <div className={`flex items-center gap-4 py-2 ${last ? '' : 'border-b border-line-soft'}`}>
+      <span className="flex-1 text-[13px] text-ink-muted">{label}</span>
+      <span className="min-w-0 truncate text-right text-[13px] font-bold text-ink">{value}</span>
+    </div>
   );
 }

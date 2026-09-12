@@ -17,7 +17,6 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip"
 import { cn } from "../../lib/utils"
 import { BADGE_META } from "../../lib/badgeCatalog"
-import { TEAL } from "../scene/tokens"
 import type { LucideIcon } from "lucide-react"
 
 interface BadgeInfo {
@@ -55,14 +54,50 @@ interface UserBadgesProps {
   earned: string[]
 }
 
+/** How many badges there are to earn. The profile card counts against this. */
+export const BADGE_TOTAL = badges.length
+
 /**
- * The badge wall, on the scene.
+ * The first few badges the reader has earned, as overlapping rings - the shape
+ * the Badges card wears at rest (design_handoff_web/PAGES.md §6). The last ring
+ * is the remainder as a number, so the row says "and this many more" without
+ * growing.
+ */
+export function BadgeRings({ earned, show = 4 }: { earned: string[]; show?: number }) {
+  const mine = badges.filter(b => earned.includes(b.id))
+  const shown = mine.slice(0, show)
+  const rest = BADGE_TOTAL - shown.length
+
+  return (
+    <div className="ml-[9px] flex">
+      {shown.map(b => {
+        const Icon = b.icon
+        const label = BADGE_META[b.id]?.label ?? b.id
+        return (
+          <span
+            key={b.id}
+            title={label}
+            className="-ml-[9px] flex h-11 w-11 items-center justify-center rounded-full border-[2.5px] border-badgering bg-badgering-wash shadow-[0_0_0_3px_var(--surface)]"
+          >
+            <Icon size={19} strokeWidth={1.8} className="text-badgering" aria-hidden />
+          </span>
+        )
+      })}
+      {rest > 0 && (
+        <span className="-ml-[9px] flex h-11 w-11 items-center justify-center rounded-full bg-line text-[12.5px] font-semibold text-ink-muted shadow-[0_0_0_3px_var(--surface)] tabular-nums">
+          +{rest}
+        </span>
+      )}
+    </div>
+  )
+}
+
+/**
+ * The badge wall.
  *
- * Earned is the brand fill; not-yet-earned is a film of white with the icon
- * dropped back, so the grid reads as one set with two states rather than as
- * two designs. Every colour is literal - the panel behind this is dark in both
- * themes, so a token would be wrong half the time. The old `bg-brand` class is
- * gone: the project hardcodes the brand inline.
+ * Earned is the brand fill with a white glyph; not-yet-earned is the page's own
+ * sunken grey with the glyph dropped back, so the grid reads as one set with
+ * two states rather than as two designs.
  *
  * Each badge is a real button so the tooltip is reachable by keyboard, and it
  * carries its name and its state as its accessible name - the icon alone says
@@ -71,7 +106,7 @@ interface UserBadgesProps {
 export default function UserBadges({ earned }: UserBadgesProps) {
   return (
     <TooltipProvider>
-      <ul className="m-0 grid list-none grid-cols-5 gap-3 p-0 sm:grid-cols-6 lg:grid-cols-8">
+      <ul className="m-0 grid list-none grid-cols-5 gap-2 p-0">
         {badges.map((b) => {
           const IconComponent = b.icon
           const has = earned.includes(b.id)
@@ -84,14 +119,13 @@ export default function UserBadges({ earned }: UserBadgesProps) {
                     type="button"
                     aria-label={`${label} — ${has ? "verdiend" : "nog niet verdiend"}`}
                     className={cn(
-                      "flex aspect-square w-full items-center justify-center rounded-xl outline-none transition-colors focus-visible:ring-2 focus-visible:ring-white",
+                      "flex aspect-square w-full items-center justify-center rounded-[10px] outline-none transition-colors",
                       has
-                        ? "text-white ring-1 ring-white/25"
-                        : "bg-white/[0.06] text-white/35 ring-1 ring-white/15 hover:bg-white/10",
+                        ? "bg-teal text-white"
+                        : "bg-line-soft text-ink-faint hover:bg-line",
                     )}
-                    style={has ? { backgroundColor: TEAL } : undefined}
                   >
-                    <IconComponent className="h-5 w-5" aria-hidden />
+                    <IconComponent className="h-4 w-4" aria-hidden />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>

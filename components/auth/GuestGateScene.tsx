@@ -1,25 +1,25 @@
 import SessionProvider from "../providers/SessionProvider"
 import { SidebarProvider } from "../ui/sidebar"
-import SceneShell from "../scene/SceneShell"
-import { SCENE_TREE, sceneSvg } from "../scene/scene-svg"
+import AppShell from "../shell/AppShell"
 import GuestGate from "./GuestGate"
 
 /**
- * A whole guest page for an account-bound route: the shared scene with its
- * navbar and rail, and the GuestGate card in it.
+ * A whole guest page for an account-bound route: the app's own shell with the
+ * GuestGate card in it.
  *
  * Rendered by the LAYOUT of each such route in place of `children` when there
- * is no session. The layouts are server components and this stays one too, so
- * `sceneSvg()` - which runs the tree generator - never reaches a browser bundle.
+ * is no session, so it has to be a server component like they are.
  *
- * The chrome is the real thing: the same `Header variant="scene"` (which shows
- * a guest an Inloggen button) and the same SceneRail (which shows a guest the
- * whole nav plus the way in) as every signed-in screen. A guest who clicks
- * Notities in the rail therefore sees the app's own frame with the card in it,
- * not a bare page and not the marketing site.
+ * THE CHROME IS THE REAL THING. The same 196 px sidebar and 64 px top bar every
+ * signed-in route wears, both of which are guest-aware: the bar shows an
+ * Inloggen button where the account would be, and the sidebar's foot offers the
+ * way in instead of the tree (components/shell/Sidebar.tsx). A guest who clicks
+ * Notities therefore sees the app's own frame with the card in it - not a bare
+ * page, not the marketing site, and not the immersive landscape this used to
+ * draw, which is a frame the product no longer has.
  *
- * `backdrop` is the static SVG on purpose: there is no reader to draw a tree
- * for. No `gateId`, so no canvas is mounted for a screen that is one card.
+ * `title` is both the shell's page title and the card's eyebrow, so the bar and
+ * the card name the same page.
  */
 export default function GuestGateScene(props: {
   title: string
@@ -29,9 +29,9 @@ export default function GuestGateScene(props: {
   return (
     <SessionProvider session={null}>
       <SidebarProvider>
-        <SceneShell svg={sceneSvg()} {...SCENE_TREE} header rail>
+        <AppShell title={props.title}>
           <GuestGate {...props} />
-        </SceneShell>
+        </AppShell>
       </SidebarProvider>
     </SessionProvider>
   )
