@@ -58,7 +58,10 @@ export default async function StudyLayout({
     // carry is gone - the whole app is a light product now, so a lesson that
     // forced night was the screen that had not joined the redesign, and the
     // reader's Thema setting decides again (design_handoff_web/TOKENS-LES.md).
-    <div className="relative flex h-[100dvh] overflow-hidden bg-les-bg text-les-ink antialiased">
+    // `w-full min-w-0` for the reason components/scene/SceneShell.tsx states:
+    // a signed-in layout may wrap the page in a `flex` row, and a flex child
+    // without them is sized to its content rather than to the viewport.
+    <div className="relative flex h-[100dvh] w-full min-w-0 overflow-hidden bg-les-bg text-les-ink antialiased">
       <SessionProvider session={session}>
         {/* The app's sidebar, collapsed to 64 px of icons. Same items, same
             order - see components/shell/nav.ts. */}

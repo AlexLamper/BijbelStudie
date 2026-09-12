@@ -27,7 +27,16 @@ export default function AppShell({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex h-screen bg-line-soft">
+    // `w-full min-w-0` is load-bearing, not belt-and-braces.
+    //
+    // Every one of these routes is wrapped by `SidebarProvider`, which renders
+    // `<div class="flex min-h-svh w-full">` - so the shell is a FLEX ITEM. A
+    // flex item defaults to `flex: 0 1 auto`, which sizes it to its content
+    // instead of to the line, and the whole app rendered at the intrinsic width
+    // of the widest card with a strip of empty page beside it. `w-full` sets the
+    // basis to the line; `min-w-0` lets the body's own truncation work rather
+    // than pushing the shell wider than the viewport.
+    <div className="flex h-screen w-full min-w-0 bg-line-soft">
       <Sidebar active={active} />
       <main className="flex min-w-0 flex-1 flex-col">
         <TopBar title={title} />
