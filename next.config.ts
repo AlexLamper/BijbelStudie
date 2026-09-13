@@ -53,6 +53,8 @@ const nextConfig: NextConfig = {
     "/api/bible/**": ["./private/**/*"],
     // The AI chat route reads chapter text via getChapter() from ./private too.
     "/api/ai/**": ["./private/**/*"],
+    // The daily verse swaps in the reader's translation, NBG51 included.
+    "/api/v1/daytext": ["./private/**/*"],
   },
   /**
    * Headers that affect Core Web Vitals or crawling. Nothing decorative here -

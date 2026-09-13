@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { bookNameMap, normalizeBookName, BIBLE_BOOKS_ORDER } from '../lib/book-mapping';
+import { rememberReaderVersion } from '../lib/dailyVerseStore';
 
 /* ─── Static data - never changes ───────────────────────────── */
 const VERSIONS = [
@@ -370,6 +371,9 @@ export function useBibleData(lng: string, options: UseBibleDataOptions = {}): Us
     }
     setSelectedBook('');
     setSelectedVersion(version);
+    // Immediately, unlike last-read (debounced 1.5 s and dropped on unmount):
+    // the dashboard's verse of the day follows this choice on the way back.
+    rememberReaderVersion(version);
   }, [books, selectedBook, selectedChapter]);
 
   const handleBookChange = useCallback((book: string) => {

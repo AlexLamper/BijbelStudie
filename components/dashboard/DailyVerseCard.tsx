@@ -30,6 +30,7 @@ import {
   versionAbbreviation,
   type StoredVerse,
 } from "../../lib/dailyVerseStore"
+import { getBibleAttribution } from "../../lib/bible-attribution"
 
 const TEAL = "#0D9488"
 
@@ -66,6 +67,12 @@ export type DailyVerse = {
   chapter: number
   verse?: number
   version?: string
+  /** Translation id the text is in; the server falls back to "statenvertaling". */
+  versionId?: string
+  /** Copyright notice that must be shown with this text, verbatim (NBG51). */
+  attribution?: string | null
+  /** The translation the reader reads in - where "Lees het hele hoofdstuk" opens. */
+  readerVersion?: string
 }
 
 /**
@@ -102,7 +109,10 @@ export default function DailyVerseCard({
   const [historyOpen, setHistoryOpen] = useState(false)
   const [shareNote, setShareNote] = useState<string | null>(null)
 
-  const version = versionAbbreviation(verse?.version)
+  // The id first: it is exact, where the display name ("De Heilige Schrift
+  // 1917") has no abbreviation of its own.
+  const version = versionAbbreviation(verse?.versionId ?? verse?.version)
+  const attribution = verse?.attribution ?? null
 
   // Whether there is a tree to draw at all. `disabled` is the reader's own
   // "verberg mijn boom" setting, and it has to be honoured here too.
@@ -142,6 +152,7 @@ export default function DailyVerseCard({
         chapter: verse.chapter,
         verse: verse.verse,
         version,
+        versionId: verse.versionId,
       }),
     )
   }, [verse, version])
@@ -156,8 +167,9 @@ export default function DailyVerseCard({
 
   async function handleShare() {
     if (!verse) return
-    const attribution = version ? `${verse.reference} (${version})` : verse.reference
-    const payload = `"${verse.text}"\n\n${attribution}`
+    const source = version ? `${verse.reference} (${version})` : verse.reference
+    // A licensed translation's notice travels with its text, off the site too.
+    const payload = `"${verse.text}"\n\n${source}${attribution ? `\n${attribution}` : ""}`
 
     // The Web Share sheet where the browser has one (mostly mobile), the
     // clipboard everywhere else. A share the user cancels is not a failure.
@@ -198,7 +210,7 @@ export default function DailyVerseCard({
   }
 
   const chapterHref = verse
-    ? `/lezen?book=${encodeURIComponent(verse.book)}&chapter=${verse.chapter}&version=statenvertaling`
+    ? `/lezen?book=${encodeURIComponent(verse.book)}&chapter=${verse.chapter}&version=${encodeURIComponent(verse.readerVersion ?? verse.versionId ?? "statenvertaling")}`
     : "/lezen"
 
   const photo = dailyVersePhoto()
@@ -295,6 +307,13 @@ export default function DailyVerseCard({
           </p>
         ) : null}
 
+        {/* The licensing line, verbatim - the NBG51 notice is a contractual
+            string, so nothing here may reword or truncate it. Public-domain
+            translations have none and render nothing. */}
+        {!loading && verse && attribution && (
+          <p className="mt-2 text-[11px] leading-snug text-white/[0.78]">{attribution}</p>
+        )}
+
         <div className="flex-1" />
 
         {/* Three round actions along the foot of the card, in the design's
@@ -375,7 +394,7 @@ export default function DailyVerseCard({
               {history.map((entry) => (
                 <li key={entry.date} className="py-3.5">
                   <Link
-                    href={`/lezen?book=${encodeURIComponent(entry.book)}&chapter=${entry.chapter}&version=statenvertaling`}
+                    href={`/lezen?book=${encodeURIComponent(entry.book)}&chapter=${entry.chapter}&version=${encodeURIComponent(entry.versionId ?? "statenvertaling")}`}
                     className="block group no-underline"
                     onClick={() => setHistoryOpen(false)}
                   >
@@ -392,6 +411,11 @@ export default function DailyVerseCard({
                     >
                       {entry.text}
                     </p>
+                    {getBibleAttribution(entry.versionId) && (
+                      <p className="mt-1 text-[11px] leading-snug text-gray-500 dark:text-muted-foreground">
+                        {getBibleAttribution(entry.versionId)}
+                      </p>
+                    )}
                   </Link>
                 </li>
               ))}

@@ -5,6 +5,8 @@ import { useSession } from "next-auth/react"
 import { CHAPTER_COUNTS } from "../lib/data/bible-chapter-counts"
 import type { DailyVerse } from "../components/dashboard/DailyVerseCard"
 import { pendingStreakLoss, type StreakLoss } from "../lib/streak"
+import { DAYTEXT_DEFAULT_VERSION, pickDashboardVersion } from "../lib/dailyVerseTranslation"
+import { readReaderVersion } from "../lib/dailyVerseStore"
 
 /**
  * Everything the dashboard shows, fetched once and derived in one place.
@@ -146,23 +148,45 @@ export function useDashboardData() {
   }, [])
 
   useEffect(() => {
-    fetch("/api/bible/daytext")
-      .then(r => r.ok ? r.json() : null)
-      .then(d => { if (d?.text) setVerse(d) })
-      .catch(() => {})
-      .finally(() => setVerseLoading(false))
-  }, [])
+    let cancelled = false
+    const toJson = (r: Response) => (r.ok ? r.json() : null)
 
-  useEffect(() => {
+    // Read once, used twice: the "waar je gebleven was" card below, and the
+    // translation the verse of the day is shown in.
+    const lastReadRequest = fetch("/api/user/last-read").then(toJson).catch(() => null)
+
+    // The verse of the day, in the translation the reader reads in. This
+    // effect runs on every visit to the dashboard (client navigation remounts
+    // the page), so a translation switched in /lezen shows up on the way back
+    // without a refresh. Each translation is its own URL, and so its own
+    // shared CDN copy; the Statenvertaling keeps the plain URL it always had.
+    lastReadRequest
+      .then(async (ld) => {
+        const lr = ld?.book ? ld : ld?.lastReadChapter
+        const local = readReaderVersion()
+        // The preference only matters when there is no last-read translation,
+        // exactly as in the reader, so it costs a request only then.
+        const preferred = !lr?.version && !local
+          ? (await fetch("/api/user/preferences").then(toJson).catch(() => null))?.preferences?.translation
+          : null
+        const readerVersion = pickDashboardVersion({ local, lastRead: lr, preferred })
+        const query = readerVersion === DAYTEXT_DEFAULT_VERSION
+          ? ""
+          : `?version=${encodeURIComponent(readerVersion)}`
+        const d = await fetch(`/api/bible/daytext${query}`).then(toJson)
+        if (!cancelled && d?.text) setVerse({ ...d, readerVersion })
+      })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setVerseLoading(false) })
+
     Promise.all([
-      fetch("/api/user"),
-      fetch("/api/user/last-read"),
+      fetch("/api/user").then(toJson),
+      lastReadRequest,
       // Three notes are rendered and the total comes back in `pagination`.
-      fetch("/api/notes?limit=3"),
-      fetch("/api/user/reading-progress"),
-      fetch("/api/v1/gamification"),
+      fetch("/api/notes?limit=3").then(toJson),
+      fetch("/api/user/reading-progress").then(toJson),
+      fetch("/api/v1/gamification").then(toJson),
     ])
-      .then(rs => Promise.all(rs.map(r => r.ok ? r.json() : null)))
       .then(([ud, ld, nd, rp, gd]) => {
         setStreak(ud?.user?.streak ?? 0)
         setLastStreakDate(ud?.user?.lastStreakDate ?? null)
@@ -201,6 +225,8 @@ export function useDashboardData() {
       })
       .catch(() => {})
       .finally(() => setLoading(false))
+
+    return () => { cancelled = true }
   }, [])
 
   const derived = useMemo(() => {

@@ -23,6 +23,8 @@ export type StoredVerse = {
   verse?: number;
   /** Abbreviation as printed after the reference, e.g. "SV". */
   version: string;
+  /** Translation id the text is in, e.g. "nbg51". Absent on older entries. */
+  versionId?: string;
 };
 
 const HISTORY_KEY = 'bijbelstudie_daytext_history';
@@ -78,6 +80,38 @@ export function rememberVerse(entry: StoredVerse): StoredVerse[] {
   const next = [entry, ...withoutToday].slice(0, MAX_HISTORY);
   write(HISTORY_KEY, next);
   return next;
+}
+
+const READER_VERSION_KEY = 'bijbelstudie_reader_version';
+
+/**
+ * The translation last picked in the reader on this device, and when.
+ *
+ * The reader posts last-read on a 1.5 s debounce that is cancelled when it
+ * unmounts, so the account copy can lag behind a switch made just before going
+ * back to the dashboard. The dashboard compares this stamp with the server's
+ * `lastReadChapter.updatedAt` (see `pickDashboardVersion`), so the newer of the
+ * two wins and a switch on another device is not overridden.
+ */
+export function rememberReaderVersion(id: string, at = Date.now()): void {
+  if (typeof window === 'undefined' || !id) return;
+  try {
+    window.localStorage.setItem(READER_VERSION_KEY, JSON.stringify({ id, at }));
+  } catch {
+    // Storage blocked: the account copy answers instead.
+  }
+}
+
+export function readReaderVersion(): { id: string; at: number } | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.localStorage.getItem(READER_VERSION_KEY);
+    const parsed = raw ? JSON.parse(raw) : null;
+    if (typeof parsed?.id !== 'string' || typeof parsed?.at !== 'number') return null;
+    return { id: parsed.id, at: parsed.at };
+  } catch {
+    return null;
+  }
 }
 
 export function readLikes(): string[] {

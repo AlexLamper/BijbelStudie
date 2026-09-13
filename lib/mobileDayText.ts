@@ -6,6 +6,15 @@
  * verse today" rather than an error - the dashboard must still render.
  */
 
+import { unstable_cache } from 'next/cache';
+import {
+  DAYTEXT_DEFAULT_VERSION,
+  resolveDayTextVersion,
+  verseFromChapter,
+  withDayTextVersion,
+  type DayTextInVersion,
+} from './dailyVerseTranslation';
+
 export type DayText = {
   text: string;
   reference: string;
@@ -79,6 +88,59 @@ export async function readDayTextHistory(limit = 60): Promise<(DayText & { date:
     return rows as unknown as (DayText & { date: string })[];
   } catch {
     return [];
+  }
+}
+
+/**
+ * One verse's text in one translation, cached across instances.
+ *
+ * A (translation, book, chapter, verse) text never changes, so the Data Cache
+ * entry is safe for a week; the args are part of the key, so translations can
+ * never bleed into each other. This matters for CPU: NBG51 is a single-file
+ * source, and a cold instance would otherwise re-parse the whole translation
+ * just to read one verse. A miss THROWS so it is not cached - a chapter that is
+ * "not synced yet" must not stay missing for a week.
+ */
+const cachedVerseText = unstable_cache(
+  async (versionId: string, book: string, chapter: number, verse: number): Promise<string> => {
+    const [{ getChapter }, { CANONICAL_NL }] = await Promise.all([
+      import('./local-data'),
+      import('./book-mapping'),
+    ]);
+    // Upstream's English name first, then the canonical Dutch one; getChapter
+    // tries each name's own variants as well.
+    const names = Array.from(new Set([book, CANONICAL_NL[book]].filter(Boolean) as string[]));
+    for (const name of names) {
+      const data = await getChapter(versionId, name, chapter);
+      const text = verseFromChapter(data?.verses, verse);
+      if (text) return text;
+    }
+    throw new Error('DAYTEXT_VERSE_MISSING');
+  },
+  ['daytext-verse-text-v1'],
+  { revalidate: 604_800 },
+);
+
+/**
+ * Today's verse in the translation the reader asked for.
+ *
+ * `requested` goes through the licensing allowlist first; anything not on it,
+ * and any verse the translation does not have, returns the Statenvertaling
+ * original. Never throws - the card must render.
+ */
+export async function dayTextInVersion(
+  base: DayText,
+  requested: string | null | undefined,
+): Promise<DayTextInVersion> {
+  const versionId = resolveDayTextVersion(requested);
+  if (versionId === DAYTEXT_DEFAULT_VERSION) {
+    return withDayTextVersion(base, versionId, null);
+  }
+  try {
+    const text = await cachedVerseText(versionId, base.book, base.chapter, base.verse);
+    return withDayTextVersion(base, versionId, text);
+  } catch {
+    return withDayTextVersion(base, versionId, null);
   }
 }
 
