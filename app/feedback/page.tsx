@@ -204,8 +204,8 @@ export default function FeedbackPage() {
                     className={[
                       "flex-1 rounded-[11px] p-[13px] text-center text-[13.5px] font-semibold transition-colors",
                       active
-                        ? "border-2 border-teal bg-[var(--teal-wash-2)] text-teal"
-                        : "border border-line bg-white text-ink-body hover:border-line-strong",
+                        ? "border-2 border-teal bg-[var(--teal-wash-2)] text-teal dark:text-teal-400"
+                        : "border border-line bg-surface text-ink-body hover:border-line-strong",
                     ].join(" ")}
                   >
                     {c.label}
@@ -252,7 +252,7 @@ export default function FeedbackPage() {
                 aria-hidden
                 className={[
                   "flex h-5 w-5 flex-none items-center justify-center rounded-[5px] border transition-colors",
-                  sendDevice ? "border-teal bg-teal text-white" : "border-line-strong bg-white",
+                  sendDevice ? "border-teal bg-teal text-white" : "border-line-strong bg-surface",
                 ].join(" ")}
               >
                 {sendDevice && <Check size={13} strokeWidth={3} />}
@@ -313,7 +313,7 @@ export default function FeedbackPage() {
             <div className="mt-2">
               {REASONS.map((reason, i) => (
                 <div key={reason.title} className="flex gap-3 border-t border-line-soft py-[13px]">
-                  <span className="flex h-7 w-7 flex-none items-center justify-center rounded-[8px] bg-teal-faint text-[12px] font-bold text-teal">
+                  <span className="flex h-7 w-7 flex-none items-center justify-center rounded-[8px] bg-teal-faint text-[12px] font-bold text-teal dark:text-teal-400">
                     {i + 1}
                   </span>
                   <div className="min-w-0 flex-1">

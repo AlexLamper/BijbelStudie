@@ -49,8 +49,7 @@ export default function NotitiesTab({ groupId }: { groupId: string }) {
           </p>
         </div>
         <Link href="/studie"
-          className="flex items-center gap-1 text-xs font-semibold whitespace-nowrap ml-3 flex-shrink-0"
-          style={{ color: "#0D9488" }}>
+          className="flex items-center gap-1 text-xs font-semibold whitespace-nowrap ml-3 flex-shrink-0 text-teal dark:text-teal-400">
           Open studie <ArrowRight size={12} />
         </Link>
       </div>
@@ -96,7 +95,7 @@ export default function NotitiesTab({ groupId }: { groupId: string }) {
                     </span>
                   </div>
                   {note.verseReference && (
-                    <p className="text-xs font-semibold mb-1.5" style={{ color: "#0D9488" }}>
+                    <p className="text-xs font-semibold mb-1.5 text-teal dark:text-teal-400">
                       {note.verseReference}
                     </p>
                   )}

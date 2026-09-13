@@ -339,7 +339,7 @@ export function CreateNoteModal({
             {/* Reference preview: the passage behind a 2 px teal rule, in the
                 serif face, the way /notities shows it on a saved note. */}
             <div className="rounded-btn bg-sunken px-[14px] py-3 dark:bg-muted">
-              <p className="text-[12.5px] font-semibold text-teal">
+              <p className="text-[12.5px] font-semibold text-teal dark:text-teal-400">
                 {computedReference()}
               </p>
               {scope === "vers" && verseText && (

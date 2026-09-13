@@ -228,7 +228,7 @@ export default function NotesPage() {
                   className={[
                     "border-b-2 pb-[13px] pt-4 text-[14px] transition-colors",
                     active
-                      ? "border-teal font-semibold text-teal"
+                      ? "border-teal font-semibold text-teal dark:text-teal-400"
                       : "border-transparent font-medium text-ink-muted hover:text-ink-body",
                   ].join(" ")}
                 >
@@ -280,7 +280,7 @@ export default function NotesPage() {
                   <article key={note._id} className="border-b border-line px-[22px] py-[18px] last:border-b-0">
                     {/* Meta: where it is, when it was written, and the menu. */}
                     <div className="flex items-center gap-[9px]">
-                      <span className="text-[12.5px] font-semibold text-teal">{note.verseReference}</span>
+                      <span className="text-[12.5px] font-semibold text-teal dark:text-teal-400">{note.verseReference}</span>
                       <span className="h-[3px] w-[3px] rounded-full bg-line-strong" />
                       <time dateTime={note.createdAt} className="text-[12.5px] text-ink-faint">
                         {new Date(note.createdAt).toLocaleDateString("nl-NL", { day: "numeric", month: "long" })}
@@ -516,7 +516,7 @@ function FilterRow({
         active ? "bg-[var(--teal-wash-2)]" : "hover:bg-line-soft",
       ].join(" ")}
     >
-      <span className={`flex-1 truncate text-[13px] ${active ? "font-semibold text-teal" : "font-medium text-ink-body"}`}>
+      <span className={`flex-1 truncate text-[13px] ${active ? "font-semibold text-teal dark:text-teal-400" : "font-medium text-ink-body"}`}>
         {label}
       </span>
       {count != null && <span className="text-[12px] font-medium text-ink-faint tabular-nums">{count}</span>}

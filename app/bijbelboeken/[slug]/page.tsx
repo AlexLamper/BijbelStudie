@@ -21,8 +21,8 @@ import {
 } from "../../../lib/seo/structuredData";
 
 const TEAL = "#0D9488";
-/** #0D9488 is 3.7:1 on white - fine as a fill, short of AA as type. */
-const TEAL_TEXT = "#0F766E";
+/* Teal type is text-teal-dark (#0F766E): #0D9488 is 3.7:1 on white - fine as a
+   fill, short of AA as type. On dark it lifts to teal-400. */
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -104,8 +104,7 @@ export default async function BijbelboekPage({ params }: PageProps) {
       <article className="max-w-4xl mx-auto px-6 py-12 lg:py-16">
         <header className="mb-8">
           <p
-            className="text-xs font-bold uppercase tracking-widest mb-3"
-            style={{ color: TEAL_TEXT }}
+            className="text-xs font-bold uppercase tracking-widest mb-3 text-teal-dark dark:text-teal-400"
           >
             {testamentLabel} · boek {book.position} van 66
           </p>
@@ -121,8 +120,7 @@ export default async function BijbelboekPage({ params }: PageProps) {
             "hoeveel hoofdstukken heeft X" above the fold, which is what those
             queries want. */}
         <dl
-          className="grid gap-px rounded-xl overflow-hidden border mb-10 sm:grid-cols-2"
-          style={{ backgroundColor: "#E5E7EB", borderColor: "#E5E7EB" }}
+          className="grid gap-px rounded-xl overflow-hidden border mb-10 sm:grid-cols-2 bg-line border-line"
         >
           <Fact label="Schrijver" value={book.author} />
           <Fact label="Ontstaanstijd" value={book.written} />
@@ -157,12 +155,10 @@ export default async function BijbelboekPage({ params }: PageProps) {
             {book.outline.map(section => (
               <li
                 key={section.range}
-                className="rounded-lg border bg-white dark:bg-card p-4 flex gap-4"
-                style={{ borderColor: "#E5E7EB" }}
+                className="rounded-lg border bg-surface p-4 flex gap-4 border-line"
               >
                 <span
-                  className="shrink-0 text-xs font-bold tabular-nums px-2 py-1 rounded-md h-fit"
-                  style={{ backgroundColor: "rgba(13,148,136,0.10)", color: TEAL_TEXT }}
+                  className="shrink-0 text-xs font-bold tabular-nums px-2 py-1 rounded-md h-fit bg-teal/10 text-teal-dark dark:bg-teal-400/15 dark:text-teal-400"
                 >
                   {section.range}
                 </span>
@@ -187,8 +183,7 @@ export default async function BijbelboekPage({ params }: PageProps) {
             {book.keyVerses.map(verse => (
               <li
                 key={verse}
-                className="text-sm font-medium px-3 py-1.5 rounded-lg border bg-white dark:bg-card text-gray-800 dark:text-foreground"
-                style={{ borderColor: "#E5E7EB" }}
+                className="text-sm font-medium px-3 py-1.5 rounded-lg border bg-surface text-gray-800 dark:text-foreground border-line"
               >
                 {verse}
               </li>
@@ -219,8 +214,7 @@ export default async function BijbelboekPage({ params }: PageProps) {
         </section>
 
         <section
-          className="rounded-2xl p-6 border text-center"
-          style={{ backgroundColor: "#FFFFFF", borderColor: "#E5E7EB" }}
+          className="rounded-2xl p-6 border text-center bg-surface border-line"
         >
           <h2 className="text-lg font-bold text-gray-900 dark:text-foreground">
             Lees {book.name} online
@@ -244,8 +238,7 @@ export default async function BijbelboekPage({ params }: PageProps) {
                 the first. */}
             <Link
               href={`/studies/${bookStudyId(book.slug)}`}
-              className="inline-flex items-center justify-center gap-2 font-semibold px-5 py-2.5 rounded-xl border no-underline text-gray-700 dark:text-foreground"
-              style={{ borderColor: "#E5E7EB" }}
+              className="inline-flex items-center justify-center gap-2 font-semibold px-5 py-2.5 rounded-xl border no-underline text-gray-700 dark:text-foreground border-line"
             >
               {book.name} bestuderen
             </Link>
@@ -261,10 +254,9 @@ export default async function BijbelboekPage({ params }: PageProps) {
           {previous ? (
             <Link
               href={`/bijbelboeken/${previous.slug}`}
-              className="flex items-center gap-2 rounded-xl border bg-white dark:bg-card px-4 py-3 text-sm no-underline hover:border-teal-500 transition-colors"
-              style={{ borderColor: "#E5E7EB" }}
+              className="flex items-center gap-2 rounded-xl border bg-surface px-4 py-3 text-sm no-underline hover:border-teal-500 transition-colors border-line"
             >
-              <ArrowLeft className="h-4 w-4 shrink-0" style={{ color: TEAL_TEXT }} aria-hidden />
+              <ArrowLeft className="h-4 w-4 shrink-0 text-teal-dark dark:text-teal-400" aria-hidden />
               <span className="text-gray-500 dark:text-muted-foreground">
                 Vorige:{" "}
                 <span className="font-semibold text-gray-900 dark:text-foreground">
@@ -278,8 +270,7 @@ export default async function BijbelboekPage({ params }: PageProps) {
           {next && (
             <Link
               href={`/bijbelboeken/${next.slug}`}
-              className="flex items-center justify-end gap-2 rounded-xl border bg-white dark:bg-card px-4 py-3 text-sm no-underline hover:border-teal-500 transition-colors"
-              style={{ borderColor: "#E5E7EB" }}
+              className="flex items-center justify-end gap-2 rounded-xl border bg-surface px-4 py-3 text-sm no-underline hover:border-teal-500 transition-colors border-line"
             >
               <span className="text-gray-500 dark:text-muted-foreground">
                 Volgende:{" "}
@@ -287,7 +278,7 @@ export default async function BijbelboekPage({ params }: PageProps) {
                   {next.name}
                 </span>
               </span>
-              <ArrowRight className="h-4 w-4 shrink-0" style={{ color: TEAL_TEXT }} aria-hidden />
+              <ArrowRight className="h-4 w-4 shrink-0 text-teal-dark dark:text-teal-400" aria-hidden />
             </Link>
           )}
         </nav>
@@ -323,7 +314,7 @@ export default async function BijbelboekPage({ params }: PageProps) {
 
 function Fact({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-white dark:bg-card p-4">
+    <div className="bg-surface p-4">
       <dt className="text-xs font-bold uppercase tracking-widest text-gray-500 dark:text-muted-foreground">
         {label}
       </dt>

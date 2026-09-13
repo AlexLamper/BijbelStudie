@@ -74,27 +74,33 @@ export default {
         // colour object, so teal-50..950 still resolve and the ~130 existing
         // `text-teal-600`-style classes elsewhere in the app keep working.
         // Only DEFAULT/dark/soft/faint/tint are added.
-        teal: { DEFAULT: "#0D9488", dark: "#0F766E", soft: "#CCFBF1", faint: "#F0FDFA", tint: "#E6F5F1", bright: "#5EEAD4" },
-        ink: { DEFAULT: "#111827", body: "#374151", muted: "#6B7280", faint: "#9CA3AF" },
-        line: { DEFAULT: "#E5E7EB", strong: "#D1D5DB", soft: "#F3F4F6" },
+        //
+        // The neutrals (ink, line, surface, sunken, the washes) resolve through
+        // the custom properties instead, because they are what flips in dark
+        // mode: `.dark` in app/globals.css redefines them. Fills that carry
+        // white type (teal, teal-dark, gold, danger, success) stay literals.
+        teal: { DEFAULT: "#0D9488", dark: "#0F766E", soft: "#CCFBF1", faint: "var(--teal-faint)", tint: "var(--teal-tint)", bright: "#5EEAD4" },
+        ink: { DEFAULT: "var(--ink)", body: "var(--ink-body)", muted: "var(--ink-muted)", faint: "var(--ink-faint)" },
+        line: { DEFAULT: "var(--line)", strong: "var(--line-strong)", soft: "var(--line-soft)" },
+        surface: "var(--surface)",
         // Never white on gold: white on #CA9A16 is 2.6:1, `gold-ink` on it is
         // 5.0:1. Every gold surface takes `gold-ink`. `gold-badge` is the other
         // direction - gold ON white, 6.1:1.
-        gold: { DEFAULT: "#CA9A16", ink: "#422E04", badge: "#7A5E08" },
+        gold: { DEFAULT: "#CA9A16", ink: "#422E04", badge: "var(--gold-badge)" },
         success: { DEFAULT: "#047857", fill: "#059669" },
-        warn: { DEFAULT: "#EA580C", wash: "#FFF7ED" },
+        warn: { DEFAULT: "#EA580C", wash: "var(--warn-wash)" },
         danger: "#DC2626",
-        scripture: "#1F2937",
+        scripture: "var(--scripture)",
         panel: { dark: "#152229" },
-        heat: { 0: "#E5E7EB", 1: "#CCFBF1", 2: "#99D9CE", 3: "#4FB3A4", 4: "#0D9488" },
-        bar: { empty: "#E5E7EB", read: "#9FD8CD", today: "#0F766E" },
+        heat: { 0: "var(--heat-0)", 1: "#CCFBF1", 2: "#99D9CE", 3: "#4FB3A4", 4: "#0D9488" },
+        bar: { empty: "var(--bar-empty)", read: "#9FD8CD", today: "#0F766E" },
         // The two Pro edges and the admin-table ground. Mirrors --pro-* in
         // app/globals.css; `badge` is the deep gold rim shared with the avatar
         // ring, not a lighter halo around the plate.
-        pro: { pill: "#D5B36A", ink: "#4A3506", badge: "#926C10", soft: "#FAEECB" },
-        sunken: "#F9FAFB",
-        highlight: "#FEF3C7",
-        badgering: { DEFAULT: "#7C3AED", wash: "#F5F3FF" },
+        pro: { pill: "#D5B36A", ink: "#4A3506", badge: "#926C10", soft: "var(--pro-soft)" },
+        sunken: "var(--surface-sunken)",
+        highlight: "var(--highlight)",
+        badgering: { DEFAULT: "#7C3AED", wash: "var(--badge-wash)" },
         hill: { front: "#6C8C4E", back: "#3F6B3C" },
 
         // ── Lesson flow (design_handoff_web/TOKENS-LES.md) ──

@@ -37,7 +37,7 @@ export default function Tabs({
 }) {
   if (variant === "segmented") {
     return (
-      <div className={`inline-flex items-center gap-1 rounded-[12px] border border-line bg-white p-[5px] ${className}`}>
+      <div className={`inline-flex items-center gap-1 rounded-[12px] border border-line bg-surface p-[5px] ${className}`}>
         {items.map((item) => {
           const active = item.value === value;
           return (
@@ -67,7 +67,7 @@ export default function Tabs({
         const colour = active
           ? tone === "dark"
             ? "text-white font-bold"
-            : "text-teal font-semibold"
+            : "text-teal font-semibold dark:text-teal-400"
           : tone === "dark"
             ? "text-white/60 font-medium hover:text-white/85"
             : "text-ink-muted font-medium hover:text-ink-body";

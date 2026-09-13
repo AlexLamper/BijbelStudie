@@ -26,9 +26,10 @@ const CTA_PRIMARY =
 
 /** Bewaren / Delen: quiet slate buttons, half the card each. */
 const CTA_SECONDARY =
-  'press inline-flex h-10 min-w-0 items-center justify-center gap-2 rounded-btn border border-slate-200 bg-slate-50 px-3 text-[13px] font-medium text-slate-600 outline-none transition-colors hover:bg-slate-100 hover:text-slate-800 focus-visible:ring-2 focus-visible:ring-slate-300 disabled:opacity-60';
+  'press inline-flex h-10 min-w-0 items-center justify-center gap-2 rounded-btn border border-slate-200 bg-slate-50 px-3 text-[13px] font-medium text-slate-600 outline-none transition-colors hover:bg-slate-100 hover:text-slate-800 focus-visible:ring-2 focus-visible:ring-slate-300 disabled:opacity-60 dark:border-line dark:bg-line-soft dark:text-ink-body dark:hover:bg-line dark:hover:text-ink dark:focus-visible:ring-line-strong';
 
-const ERROR_INK = '#DC2626';
+/** Danger red as type; #DC2626 is too dim on the dark card, so it lifts to red-400 there. */
+const ERROR_INK = 'text-danger dark:text-red-400';
 
 const RHYTHMS: { value: StudyRhythm; label: string; hint: string }[] = [
   { value: 'dagelijks', label: 'Elke dag', hint: 'Eén les per dag' },
@@ -299,7 +300,7 @@ export default function StudySetupProvider({
             aria-modal="true"
             aria-label="Studie-instellingen"
             onClick={(event) => event.stopPropagation()}
-            className="flex max-h-[88vh] w-full flex-col rounded-t-2xl border border-line bg-white shadow-2xl sm:max-w-lg sm:rounded-2xl"
+            className="flex max-h-[88vh] w-full flex-col rounded-t-2xl border border-line bg-surface shadow-2xl sm:max-w-lg sm:rounded-2xl"
           >
             <header className="flex h-14 flex-none items-center justify-between border-b border-line px-5">
               <h2 className="text-[14.5px] font-bold text-ink">
@@ -391,7 +392,7 @@ export default function StudySetupProvider({
                   id="translation"
                   value={translation}
                   onChange={(event) => setTranslation(event.target.value)}
-                  className="w-full rounded-btn border border-line bg-white px-3 py-2.5 text-[13.5px] text-ink outline-none focus-visible:border-teal"
+                  className="w-full rounded-btn border border-line bg-surface px-3 py-2.5 text-[13.5px] text-ink outline-none focus-visible:border-teal"
                 >
                   {/* Two groups, not one flat list. `optgroup` is used rather
                       than a fake disabled `<option>` separator because it is the
@@ -421,7 +422,7 @@ export default function StudySetupProvider({
               </div>
 
               {error && (
-                <p className="text-sm" style={{ color: ERROR_INK }}>
+                <p className={`text-sm ${ERROR_INK}`}>
                   {error}
                 </p>
               )}
@@ -572,7 +573,7 @@ export function StudySaveShareButtons() {
           <span className="truncate">Delen</span>
         </button>
       </div>
-      <p role="status" aria-live="polite" className="mt-2 text-center text-[12px] text-slate-500 empty:hidden">
+      <p role="status" aria-live="polite" className="mt-2 text-center text-[12px] text-slate-500 empty:hidden dark:text-ink-muted">
         {note}
       </p>
     </div>
@@ -613,7 +614,7 @@ export function StudyActionBar() {
     // where you are, the bar, then the one primary button with the quiet one
     // under it (design_handoff_web/PAGES-STUDIE-EN-LES.md §10).
     <div className="flex flex-col">
-      <p className="text-[10.5px] font-semibold uppercase tracking-[1.1px] text-teal">
+      <p className="text-[10.5px] font-semibold uppercase tracking-[1.1px] text-teal dark:text-teal-400">
         {enrolled ? 'Verder waar je was' : 'Nog niet begonnen'}
       </p>
       <p className="mt-[5px] text-[17px] font-bold text-ink">
@@ -668,7 +669,7 @@ export function StudyActionBar() {
 
       {/* Suppressed while the dialog is open - it shows the same error. */}
       {error && !settingsOpen && (
-        <p className="mt-3 text-[13px]" style={{ color: ERROR_INK }}>
+        <p className={`mt-3 text-[13px] ${ERROR_INK}`}>
           {error}
         </p>
       )}

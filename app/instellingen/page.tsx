@@ -82,9 +82,9 @@ const TOGGLE =
 /** One control height for the whole page: 36 px, radius 9, hairline border. */
 const CONTROL_H = "h-9"
 const FIELD =
-  "rounded-[9px] border border-line bg-white text-[13px] font-medium text-ink-body outline-none transition-colors hover:border-line-strong focus-visible:border-teal disabled:cursor-not-allowed disabled:opacity-60"
+  "rounded-[9px] border border-line bg-surface text-[13px] font-medium text-ink-body outline-none transition-colors hover:border-line-strong focus-visible:border-teal disabled:cursor-not-allowed disabled:opacity-60"
 
-const SEG_TRACK = `inline-flex ${CONTROL_H} items-center rounded-[9px] border border-line bg-white p-[3px]`
+const SEG_TRACK = `inline-flex ${CONTROL_H} items-center rounded-[9px] border border-line bg-surface p-[3px]`
 const SEG_ITEM =
   "flex h-[28px] items-center gap-1.5 rounded-[7px] px-3 text-[12.5px] font-medium outline-none transition-colors"
 const SEG_ON = "bg-teal font-semibold text-white"
@@ -221,7 +221,7 @@ export default function SettingsPage() {
       <div className="flex min-h-full flex-col gap-[18px]">
         {/* The sections, as a row of buttons above the panels. */}
         <div
-          className="flex flex-none items-center gap-1 self-start rounded-[12px] border border-line bg-white p-[5px]"
+          className="flex flex-none items-center gap-1 self-start rounded-[12px] border border-line bg-surface p-[5px]"
           role="tablist"
           aria-label="Instellingen"
         >
@@ -709,10 +709,10 @@ function AboutRow({
   external?: boolean
   last?: boolean
 }) {
-  const className = `flex items-center justify-between py-[14px] text-[14.5px] text-ink no-underline transition-colors hover:text-teal ${
+  const className = `flex items-center justify-between py-[14px] text-[14.5px] text-ink no-underline transition-colors hover:text-teal dark:hover:text-teal-400 ${
     last ? "" : ""
   }`
-  const arrow = <span className="text-[13px] font-semibold text-teal">→</span>
+  const arrow = <span className="text-[13px] font-semibold text-teal dark:text-teal-400">→</span>
   return external ? (
     <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
       {label}

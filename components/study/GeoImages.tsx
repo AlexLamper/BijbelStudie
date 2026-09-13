@@ -97,8 +97,9 @@ function LightboxContent({
       onClick={onClose}
     >
       <div
+        className="bg-white dark:bg-card"
         style={{
-          backgroundColor: '#fff', borderRadius: 20,
+          borderRadius: 20,
           boxShadow: '0 32px 64px rgba(0,0,0,0.35)',
           width: '100%', maxWidth: 560, overflow: 'hidden',
           position: 'relative',
@@ -106,7 +107,7 @@ function LightboxContent({
         onClick={e => e.stopPropagation()}
       >
         {/* Cover image */}
-        <div style={{ position: 'relative', aspectRatio: '16/9', backgroundColor: '#E5E7EB', overflow: 'hidden' }}>
+        <div className="bg-[#E5E7EB] dark:bg-secondary" style={{ position: 'relative', aspectRatio: '16/9', overflow: 'hidden' }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             key={selected.id + '-' + index}
@@ -187,11 +188,11 @@ function LightboxContent({
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
             <div style={{ width: 3, height: 28, borderRadius: 2, backgroundColor: '#0D9488', flexShrink: 0 }} />
             <div>
-              <p style={{ fontSize: 18, fontWeight: 700, color: '#111827', margin: 0, lineHeight: 1.2 }}>
+              <p className="text-[#111827] dark:text-foreground" style={{ fontSize: 18, fontWeight: 700, margin: 0, lineHeight: 1.2 }}>
                 {selected.placeName}
               </p>
               {selected.modernId && (
-                <p style={{ fontSize: 11, color: '#9CA3AF', margin: '2px 0 0' }}>{selected.modernId}</p>
+                <p className="text-[#9CA3AF] dark:text-muted-foreground" style={{ fontSize: 11, margin: '2px 0 0' }}>{selected.modernId}</p>
               )}
             </div>
           </div>
@@ -199,9 +200,9 @@ function LightboxContent({
           {selected.verses.length > 0 && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 14 }}>
               {selected.verses.map(v => (
-                <span key={v} style={{
+                <span key={v} className="text-[#0D9488] dark:text-teal-400" style={{
                   fontSize: 11, fontWeight: 500, padding: '3px 9px', borderRadius: 999,
-                  backgroundColor: 'rgba(13,148,136,0.07)', color: '#0D9488',
+                  backgroundColor: 'rgba(13,148,136,0.07)',
                   border: '1px solid rgba(13,148,136,0.18)',
                 }}>{v}</span>
               ))}
@@ -209,31 +210,32 @@ function LightboxContent({
           )}
 
           {selected.description && (
-            <p style={{ fontSize: 14, color: '#4B5563', lineHeight: 1.7, margin: '0 0 16px' }}>
+            <p className="text-[#4B5563] dark:text-neutral-300" style={{ fontSize: 14, lineHeight: 1.7, margin: '0 0 16px' }}>
               {selected.description}
             </p>
           )}
 
-          <div style={{
+          <div className="border-t border-[#F3F4F6] dark:border-border" style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            paddingTop: 14, borderTop: '1px solid #F3F4F6', gap: 8, flexWrap: 'wrap',
+            paddingTop: 14, gap: 8, flexWrap: 'wrap',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               {selected.license && (
-                <span style={{
+                <span className="bg-[#F3F4F6] text-[#6B7280] dark:bg-secondary dark:text-muted-foreground" style={{
                   fontSize: 10, fontWeight: 600, letterSpacing: '0.04em',
                   padding: '2px 7px', borderRadius: 5,
-                  backgroundColor: '#F3F4F6', color: '#6B7280', textTransform: 'uppercase',
+                  textTransform: 'uppercase',
                 }}>{selected.license}</span>
               )}
               {selected.credit && (
-                <span style={{ fontSize: 12, color: '#9CA3AF' }}>© {selected.credit}</span>
+                <span className="text-[#9CA3AF] dark:text-muted-foreground" style={{ fontSize: 12 }}>© {selected.credit}</span>
               )}
             </div>
             {selected.creditUrl && (
               <a
                 href={selected.creditUrl} target="_blank" rel="noopener noreferrer"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 500, color: '#0D9488', textDecoration: 'none' }}
+                className="text-[#0D9488] dark:text-teal-400"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 500, textDecoration: 'none' }}
                 onMouseEnter={e => (e.currentTarget as HTMLElement).style.textDecoration = 'underline'}
                 onMouseLeave={e => (e.currentTarget as HTMLElement).style.textDecoration = 'none'}
               >
@@ -244,20 +246,21 @@ function LightboxContent({
 
           {/* Thumbnail strip for quick jumping */}
           {hasMultiple && (
-            <div style={{
+            <div className="border-t border-[#F3F4F6] dark:border-border" style={{
               display: 'flex', gap: 6, overflowX: 'auto',
-              paddingTop: 14, marginTop: 16, borderTop: '1px solid #F3F4F6',
+              paddingTop: 14, marginTop: 16,
             }}>
               {images.map((img, i) => (
                 <button
                   key={`${img.id}-${i}`}
                   onClick={() => onSelect(i)}
                   aria-label={`Toon ${img.placeName}`}
+                  className="bg-[#F3F4F6] dark:bg-secondary"
                   style={{
                     flexShrink: 0, width: 56, height: 42,
                     borderRadius: 6, overflow: 'hidden', padding: 0,
                     border: i === index ? '2px solid #0D9488' : '2px solid transparent',
-                    cursor: 'pointer', backgroundColor: '#F3F4F6',
+                    cursor: 'pointer',
                     transition: 'transform 0.12s, border-color 0.12s',
                   }}
                   onMouseEnter={e => {
@@ -559,7 +562,7 @@ export default function GeoImages({ book, chapter, className, variant = 'grid', 
         {/* Section header */}
         <div className="flex items-center gap-2 mb-4">
           <MapPin className="w-4 h-4 flex-shrink-0" style={{ color: '#0D9488' }} />
-          <span className="text-sm font-semibold text-gray-700">
+          <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
             {t('geo_images.locations_in_book_chapter', { book, chapter })}
           </span>
         </div>
@@ -570,9 +573,9 @@ export default function GeoImages({ book, chapter, className, variant = 'grid', 
             <button
               key={`${image.id}-${index}`}
               onClick={() => setActiveIndex(index)}
-              className="group text-left rounded-xl overflow-hidden border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow focus:outline-none"
+              className="group text-left rounded-xl overflow-hidden border border-gray-100 bg-white dark:border-border dark:bg-card shadow-sm hover:shadow-md transition-shadow focus:outline-none"
             >
-              <div style={{ height: 110, overflow: 'hidden', backgroundColor: '#F3F4F6' }}>
+              <div className="bg-[#F3F4F6] dark:bg-secondary" style={{ height: 110, overflow: 'hidden' }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={thumbSrc(image, 384)}
@@ -594,11 +597,11 @@ export default function GeoImages({ book, chapter, className, variant = 'grid', 
               </div>
               {/* Caption */}
               <div style={{ padding: '8px 12px 10px' }}>
-                <p style={{ fontSize: 12, fontWeight: 600, color: '#111827', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', margin: 0 }}>
+                <p className="text-[#111827] dark:text-foreground" style={{ fontSize: 12, fontWeight: 600, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', margin: 0 }}>
                   {image.placeName}
                 </p>
                 {image.description && (
-                  <p style={{ fontSize: 11, color: '#9CA3AF', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', marginTop: 2 }}>
+                  <p className="text-[#9CA3AF] dark:text-muted-foreground" style={{ fontSize: 11, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', marginTop: 2 }}>
                     {image.description}
                   </p>
                 )}

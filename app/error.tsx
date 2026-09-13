@@ -42,7 +42,7 @@ export default function AppError({
           className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl"
           style={{ backgroundColor: 'rgba(217,119,6,0.12)' }}
         >
-          <AlertTriangle size={22} style={{ color: '#D97706' }} />
+          <AlertTriangle size={22} className="text-amber-600 dark:text-amber-400" />
         </span>
 
         <h1 className="text-xl font-bold text-foreground mb-1.5">Er ging iets mis</h1>

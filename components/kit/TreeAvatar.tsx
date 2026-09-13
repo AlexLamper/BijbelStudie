@@ -68,7 +68,7 @@ export default function TreeAvatar({
         {level}
       </span>
     ) : (
-      <span className="absolute -bottom-[3px] -right-[3px] rounded-full border border-line bg-white px-[5px] py-px text-[10px] font-bold leading-none text-gold-badge tabular-nums">
+      <span className="absolute -bottom-[3px] -right-[3px] rounded-full border border-line bg-surface px-[5px] py-px text-[10px] font-bold leading-none text-gold-badge tabular-nums">
         {level}
       </span>
     );

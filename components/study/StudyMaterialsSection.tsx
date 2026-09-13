@@ -63,7 +63,7 @@ export default function StudyMaterialsSection({
   ];
 
   return (
-    <section className="flex h-full min-w-0 flex-col overflow-hidden bg-white">
+    <section className="flex h-full min-w-0 flex-col overflow-hidden bg-surface">
 
       {/* Tab bar - 56 px, underline style, the pane's only hairline. */}
       <div className="flex h-14 flex-none items-stretch gap-[14px] overflow-x-auto border-b border-line px-4">
@@ -78,7 +78,7 @@ export default function StudyMaterialsSection({
               className={[
                 'flex h-full flex-none items-center gap-[6px] whitespace-nowrap border-b-2 px-[2px] text-[13px] outline-none transition-colors',
                 active
-                  ? 'border-teal font-semibold text-teal'
+                  ? 'border-teal font-semibold text-teal dark:text-teal-400'
                   : 'border-transparent font-medium text-ink-muted hover:text-ink-body',
               ].join(' ')}
             >

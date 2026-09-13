@@ -71,7 +71,7 @@ export function StudyDiscovery() {
                 <Link
                   href={`/studies/${study.id}`}
                   data-track="landing_study_card"
-                  className="lp-card group flex h-full flex-col overflow-hidden rounded-2xl no-underline"
+                  className="lp-card dark:bg-surface dark:border-line dark:hover:border-line-strong group flex h-full flex-col overflow-hidden rounded-2xl no-underline"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img

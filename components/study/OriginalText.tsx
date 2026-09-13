@@ -129,7 +129,7 @@ function WordCard({ word, isHebrew }: WordCardProps) {
           <ExternalLink size={8} className="opacity-60" />
         </a>
       ) : (
-        <span className="mt-1 text-[10px] text-gray-400">-</span>
+        <span className="mt-1 text-[10px] text-gray-400 dark:text-muted-foreground">-</span>
       )}
     </div>
   );

@@ -137,7 +137,7 @@ export function ChapterNotes({ book, chapter, bare = false }: ChapterNotesProps)
                 <li key={note._id} className="py-3 first:pt-0">
                   <div className="flex items-baseline gap-2 mb-1">
                     {note.verseReference && (
-                      <span className="text-[11.5px] font-semibold" style={{ color: '#0D9488' }}>
+                      <span className="text-[11.5px] font-semibold text-[#0D9488] dark:text-teal-400">
                         {note.verseReference}
                       </span>
                     )}
@@ -154,8 +154,7 @@ export function ChapterNotes({ book, chapter, bare = false }: ChapterNotesProps)
 
             <button
               onClick={() => setShowModal(true)}
-              className="press mt-3 inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-[12.5px] font-semibold transition-colors hover:bg-[rgba(13,148,136,0.08)]"
-              style={{ color: '#0D9488' }}
+              className="press mt-3 inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-[12.5px] font-semibold transition-colors text-[#0D9488] dark:text-teal-400 hover:bg-[rgba(13,148,136,0.08)] dark:hover:bg-teal-400/10"
             >
               <Plus className="w-3.5 h-3.5" />
               Notitie toevoegen
@@ -183,23 +182,19 @@ export function ChapterNotes({ book, chapter, bare = false }: ChapterNotesProps)
         {/* Header */}
         <div className="px-4 sm:px-6 py-3 border-b border-gray-100 dark:border-border flex items-center justify-between bg-gray-50/50 dark:bg-card/50 flex-none">
           <div className="flex items-center gap-2">
-            <StickyNote className="w-4 h-4" style={{ color: '#0D9488' }} />
-            <span className="text-sm font-medium text-gray-600">
+            <StickyNote className="w-4 h-4 text-[#0D9488] dark:text-teal-400" />
+            <span className="text-sm font-medium text-gray-600 dark:text-muted-foreground">
               {scope === 'book' ? book : `${book} ${chapter}`}
             </span>
             {notes.length > 0 && (
-              <span className="text-xs px-1.5 py-0.5 rounded-full font-medium"
-                style={{ backgroundColor: 'rgba(13,148,136,0.08)', color: '#0D9488' }}>
+              <span className="text-xs px-1.5 py-0.5 rounded-full font-medium bg-[rgba(13,148,136,0.08)] text-[#0D9488] dark:bg-teal-400/10 dark:text-teal-400">
                 {notes.length}
               </span>
             )}
           </div>
           <button
             onClick={() => setShowModal(true)}
-            className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors"
-            style={{ backgroundColor: 'rgba(13,148,136,0.08)', color: '#0D9488' }}
-            onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(13,148,136,0.15)'}
-            onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(13,148,136,0.08)'}
+            className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors bg-[rgba(13,148,136,0.08)] hover:bg-[rgba(13,148,136,0.15)] text-[#0D9488] dark:bg-teal-400/10 dark:hover:bg-teal-400/20 dark:text-teal-400"
           >
             <Plus className="w-3.5 h-3.5" />
             Nieuwe notitie
@@ -214,17 +209,16 @@ export function ChapterNotes({ book, chapter, bare = false }: ChapterNotesProps)
           )}
 
           {error && (
-            <p className="text-sm text-red-500 text-center py-8">{error}</p>
+            <p className="text-sm text-red-500 dark:text-red-400 text-center py-8">{error}</p>
           )}
 
           {!loading && !error && notes.length === 0 && (
             <div className="content-in flex flex-col items-center text-center py-12 px-4">
-              <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4"
-                style={{ backgroundColor: 'rgba(13,148,136,0.07)' }}>
-                <StickyNote className="w-5 h-5" style={{ color: '#0D9488' }} />
+              <div className="w-12 h-12 rounded-full flex items-center justify-center mb-4 bg-[rgba(13,148,136,0.07)] dark:bg-teal-400/10">
+                <StickyNote className="w-5 h-5 text-[#0D9488] dark:text-teal-400" />
               </div>
               <p className="font-semibold text-gray-800 dark:text-foreground mb-1.5">Nog niets opgeschreven</p>
-              <p className="text-sm text-gray-400 leading-relaxed mb-5 max-w-xs">
+              <p className="text-sm text-gray-400 dark:text-muted-foreground leading-relaxed mb-5 max-w-xs">
                 Wat raakt je in dit hoofdstuk? Schrijf een notitie over een vers, een gedeelte, of het hele hoofdstuk.
               </p>
               <button
@@ -252,12 +246,11 @@ export function ChapterNotes({ book, chapter, bare = false }: ChapterNotesProps)
                   className="rounded-xl border border-gray-100 dark:border-border bg-white dark:bg-card p-4 shadow-sm">
                   <div className="flex items-start justify-between mb-2 gap-2">
                     {note.verseReference && (
-                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full"
-                        style={{ backgroundColor: 'rgba(13,148,136,0.07)', color: '#0D9488' }}>
+                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-[rgba(13,148,136,0.07)] text-[#0D9488] dark:bg-teal-400/10 dark:text-teal-400">
                         {note.verseReference}
                       </span>
                     )}
-                    <div className="flex items-center gap-1 text-xs text-gray-400 ml-auto flex-shrink-0">
+                    <div className="flex items-center gap-1 text-xs text-gray-400 dark:text-muted-foreground ml-auto flex-shrink-0">
                       <Calendar className="h-3 w-3" />
                       {formatDate(note.createdAt)}
                     </div>

@@ -33,7 +33,7 @@ interface UserData {
 type Status = "idle" | "saving" | "success" | "error"
 
 /**
- * /profiel (design_handoff_web/PAGES.md §6), with the "Midnight" Pro design.
+ * /profiel (design_handoff_web/PAGES.md §6).
  *
  * Work column: who this is, four figures, and the activity card. Rail: Je boom,
  * Badges, the membership panel and Account; it stacks under the work below lg.
@@ -284,7 +284,7 @@ export default function ProfilePage() {
                     <button
                       type="button"
                       onClick={() => setEditing("bio")}
-                      className="font-semibold text-teal hover:text-teal-dark"
+                      className="font-semibold text-teal hover:text-teal-dark dark:hover:text-teal-bright"
                     >
                       {user?.bio ? "Bewerken" : "Toevoegen"}
                     </button>
@@ -294,11 +294,8 @@ export default function ProfilePage() {
                 <div className="mt-3 flex flex-wrap gap-2">
                   {isPro && (
                     <span
-                      className="inline-flex items-center whitespace-nowrap rounded-full px-3 py-[6px] text-[12.5px] font-semibold text-white"
-                      style={{
-                        backgroundColor: "#0F172A",
-                        boxShadow: "inset 0 0 0 1px rgba(45,212,191,.35)",
-                      }}
+                      className="inline-flex items-center whitespace-nowrap rounded-full bg-slate-900 px-3 py-[6px] text-[12.5px] font-semibold text-white dark:bg-teal-500/15 dark:text-ink"
+                      style={{ boxShadow: "inset 0 0 0 1px rgba(45,212,191,.35)" }}
                     >
                       <span className="mr-[6px] text-[10.5px] uppercase tracking-[0.14em] text-teal-200">Pro</span>
                       {isAdmin ? "Beheerder" : "Lid"}
@@ -354,7 +351,7 @@ export default function ProfilePage() {
               </div>
               <div className="mt-[3px] text-center text-[12.5px] text-ink-faint">nog {remainingXp} XP</div>
               <div className="mt-[13px] text-center">
-                <Link href="/profiel/boom" className="text-[13px] font-semibold text-teal no-underline hover:text-teal-dark">
+                <Link href="/profiel/boom" className="text-[13px] font-semibold text-teal no-underline hover:text-teal-dark dark:hover:text-teal-bright">
                   Naar je boom →
                 </Link>
               </div>
@@ -364,7 +361,7 @@ export default function ProfilePage() {
               type="button"
               onClick={() => setBadgesOpen(true)}
               aria-haspopup="dialog"
-              className="flex-none rounded-card border border-line bg-white p-[15px] text-left transition-colors hover:border-line-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal"
+              className="flex-none rounded-card border border-line bg-surface p-[15px] text-left transition-colors hover:border-line-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal"
             >
               <span className="flex items-baseline gap-2">
                 <span className="flex-1 text-[14.5px] font-bold text-ink">Badges</span>

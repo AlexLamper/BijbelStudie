@@ -18,12 +18,16 @@ import type { SerialisedPrompt } from '../../../lib/feedbackPrompts';
  *
  * Teal AS TYPE is `les-accent`, which is #0F766E on the light lesson and
  * #2DD4BF on the dark one; teal as a FILL under white type is #0D9488 in both.
- * Amber has to work on both grounds from one value, so it is the deep end
- * (#B45309, 4.8:1 on white and 5.3:1 on the night ground).
+ * Amber as a FILL or stroke is the deep end (#B45309, 4.8:1 on white); amber
+ * as TYPE goes through AMBER_ON_DARK, which lifts to amber-400 on the night one.
  */
 const AMBER = '#B45309';
 const AMBER_DEEP = '#B45309';
-const AMBER_ON_DARK = '#B45309';
+// As TYPE, amber reads through a scoped custom property set on the card's root
+// (AMBER_SCOPE): #B45309 on the white lesson, amber-400 on the night one, where
+// #B45309 measures only ~3.5:1.
+const AMBER_ON_DARK = 'var(--les-amber-ink)';
+const AMBER_SCOPE = '[--les-amber-ink:#B45309] dark:[--les-amber-ink:#FBBF24]';
 const FOCUS_RING = 'outline-none focus-visible:ring-2 focus-visible:ring-teal';
 
 export interface CompletionSummary {
@@ -377,7 +381,7 @@ function GuestSaveGate({
   const pct = lessonsTotal > 0 ? Math.round((1 / lessonsTotal) * 100) : 0;
 
   return (
-    <div className="h-full overflow-y-auto flex flex-col justify-center">
+    <div className={`h-full overflow-y-auto flex flex-col justify-center ${AMBER_SCOPE}`}>
       <div className="mx-auto w-full max-w-[470px] px-5 py-6">
         <header className="text-center">
           <ProgressRing pct={pct} done={1} total={lessonsTotal} accent="var(--teal)" ink="var(--les-accent)" animate={animate} />
@@ -494,7 +498,7 @@ function SignedInCompletion({
   const xp = useCountUp(summary.xpAwarded, !reduceMotion);
 
   return (
-    <div className="h-full overflow-y-auto flex flex-col justify-center">
+    <div className={`h-full overflow-y-auto flex flex-col justify-center ${AMBER_SCOPE}`}>
       <div className="mx-auto w-full max-w-[470px] px-5 py-6">
         <header className="text-center">
           {/* The reader's own tree, with what this lesson just did to it: the

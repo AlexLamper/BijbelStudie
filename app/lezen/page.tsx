@@ -89,7 +89,7 @@ function CompletionOverlay({ study, onClose }: { study: ActiveStudy; onClose: ()
     >
       {/* The page is a white one again, so the card is white and the glyph is
           the brand fill rather than its on-dark value. */}
-      <div className="w-full max-w-sm rounded-card border border-line bg-white p-8 text-center shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+      <div className="w-full max-w-sm rounded-card border border-line bg-surface p-8 text-center shadow-2xl animate-in fade-in zoom-in-95 duration-200">
         <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-teal-faint">
           <Trophy size={38} className="text-teal" />
         </div>
@@ -97,7 +97,7 @@ function CompletionOverlay({ study, onClose }: { study: ActiveStudy; onClose: ()
         <p className="mb-1 text-sm text-ink-muted">
           Je hebt alle <span className="font-semibold text-ink">{study.lessons.length} lessen</span> afgerond van
         </p>
-        <p className="mb-6 mt-1 text-base font-bold text-teal">
+        <p className="mb-6 mt-1 text-base font-bold text-teal dark:text-teal-400">
           &ldquo;{study.studyTitle}&rdquo;
         </p>
         <div className="mb-7 flex items-center justify-center gap-2">
@@ -151,7 +151,7 @@ function MiniStudyBar({
     <div className="flex-shrink-0 border-t border-line bg-teal-faint">
       {/* Row 1: meta + dismiss */}
       <div className="flex items-center gap-1.5 px-3 pb-1 pt-2">
-        <span className="inline-flex items-center gap-1 rounded bg-[var(--teal-wash)] px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-teal-dark">
+        <span className="inline-flex items-center gap-1 rounded bg-[var(--teal-wash)] px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-widest text-teal-dark dark:text-teal-400">
           <BookOpen size={9} /> Studie
         </span>
         <span className="truncate text-[11px] font-semibold text-ink" title={study.studyTitle}>
@@ -413,7 +413,7 @@ function StudyPageInner() {
         <CompletionOverlay study={activeStudy} onClose={handleCloseOverlay} />
       )}
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden bg-white">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden bg-surface">
         {/* Mobile pane switcher - only below lg; the design is the desktop
             split, and a phone has room for one pane at a time. */}
         <div className="flex flex-none items-stretch border-b border-line lg:hidden">
@@ -422,7 +422,7 @@ function StudyPageInner() {
             aria-pressed={mobileView === 'bible'}
             className={[
               'relative flex h-12 flex-1 items-center justify-center gap-1.5 text-sm font-semibold outline-none transition-colors',
-              mobileView === 'bible' ? 'text-teal' : 'text-ink-muted hover:text-ink-body',
+              mobileView === 'bible' ? 'text-teal dark:text-teal-400' : 'text-ink-muted hover:text-ink-body',
             ].join(' ')}
           >
             <BookOpen size={16} /> Bijbel
@@ -435,7 +435,7 @@ function StudyPageInner() {
             aria-pressed={mobileView === 'materials'}
             className={[
               'relative flex h-12 flex-1 items-center justify-center gap-1.5 text-sm font-semibold outline-none transition-colors',
-              mobileView === 'materials' ? 'text-teal' : 'text-ink-muted hover:text-ink-body',
+              mobileView === 'materials' ? 'text-teal dark:text-teal-400' : 'text-ink-muted hover:text-ink-body',
             ].join(' ')}
           >
             <MessageCircle size={16} /> Studie

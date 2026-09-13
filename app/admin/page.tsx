@@ -277,14 +277,14 @@ export default function AdminDashboardPage() {
           <button
             onClick={handleRefresh}
             disabled={refreshing || loading}
-            className="inline-flex h-8 items-center gap-2 rounded-[9px] border border-line bg-white px-3 text-[12.5px] font-medium text-ink-body transition-colors hover:bg-line-soft disabled:opacity-50"
+            className="inline-flex h-8 items-center gap-2 rounded-[9px] border border-line bg-surface px-3 text-[12.5px] font-medium text-ink-body transition-colors hover:bg-line-soft disabled:opacity-50"
           >
             <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} aria-hidden /> Vernieuwen
           </button>
         </div>
 
         {loadError && (
-          <div role="alert" className="flex-none rounded-card border border-danger/40 bg-white p-4">
+          <div role="alert" className="flex-none rounded-card border border-danger/40 bg-surface p-4">
             <p className="text-[13.5px] leading-relaxed text-danger">{loadError}</p>
           </div>
         )}
@@ -346,7 +346,7 @@ export default function AdminDashboardPage() {
               value={planFilter}
               onChange={e => setPlanFilter(e.target.value as "all" | "pro" | "free")}
               aria-label="Filter op abonnement"
-              className="h-[34px] cursor-pointer rounded-[9px] border border-line bg-white px-3 text-[12.5px] font-medium text-ink-body outline-none"
+              className="h-[34px] cursor-pointer rounded-[9px] border border-line bg-surface px-3 text-[12.5px] font-medium text-ink-body outline-none"
             >
               <option value="all">Alle abonnementen</option>
               <option value="pro">Pro</option>

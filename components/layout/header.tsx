@@ -29,7 +29,7 @@ const LOGO_GREEN = "#0F766E"
  * unconverted page still has its h1). One component for both the signed-in and
  * the guest bar, so the two can never drift apart.
  */
-function Wordmark() {
+function Wordmark({ scene = false }: { scene?: boolean }) {
   return (
     <Link
       href="/dashboard"
@@ -45,7 +45,10 @@ function Wordmark() {
         priority
       />
       <span className="text-[15px] font-bold tracking-tight text-foreground whitespace-nowrap">
-        Bijbel<span style={{ color: LOGO_GREEN }}>Studie</span>
+        {/* On the app theme's dark bar #0F766E drops to 3.4:1, so it steps up to
+            teal-400 there. The scene bar keeps the literal: its scoped `dark`
+            is not the reader's theme. */}
+        Bijbel<span className={scene ? undefined : "text-[#0F766E] dark:text-teal-400"} style={scene ? { color: LOGO_GREEN } : undefined}>Studie</span>
       </span>
     </Link>
   )
@@ -193,7 +196,7 @@ export function Header({ title, variant = "default" }: HeaderProps) {
           )}
         </div>
         <div className="flex items-center gap-3">
-          <Wordmark />
+          <Wordmark scene={scene} />
           {!scene && <ModeToggle />}
           <Link
             href={`/inloggen?next=${encodeURIComponent(pathname || "/")}`}
@@ -241,7 +244,7 @@ export function Header({ title, variant = "default" }: HeaderProps) {
 
       {/* Right: the wordmark, then the desktop controls */}
       <div className="hidden md:flex items-center gap-2">
-        <Wordmark />
+        <Wordmark scene={scene} />
         <div className="w-px h-5 bg-border mx-1" />
         {/* A scene screen paints its own light: the page is the same night
             landscape in either theme, so a light/dark switch on it changes
@@ -348,7 +351,7 @@ export function Header({ title, variant = "default" }: HeaderProps) {
 
       {/* Mobile: the wordmark, the tree, then the menu. */}
       <div className="md:hidden relative flex items-center gap-1" ref={menuRef}>
-        <Wordmark />
+        <Wordmark scene={scene} />
         <Link href="/profiel/boom" aria-label="Mijn voortgang" className="inline-flex items-center p-1">
           <NavTreeAvatar size={26} fallback={null} />
         </Link>

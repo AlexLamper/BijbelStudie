@@ -262,7 +262,7 @@ export default function ChapterViewer({
                       <sup
                         className={cn(
                           'mr-[5px] align-super font-sans text-[11px] font-semibold',
-                          isHighlighted ? 'text-teal-dark' : 'text-ink-faint',
+                          isHighlighted ? 'text-teal-dark dark:text-teal-400' : 'text-ink-faint',
                         )}
                       >
                         {verseNumber}
@@ -282,7 +282,7 @@ export default function ChapterViewer({
                       showSettings={false}
                       getText={() => text}
                       label={`Vers ${verseNumber} voorlezen`}
-                      className="border border-line bg-white shadow-field"
+                      className="border border-line bg-surface shadow-field"
                     />
                     <button
                       onClick={() => handleVerseClick(verseNumber, text)}

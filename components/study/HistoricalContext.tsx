@@ -154,8 +154,8 @@ export default function HistoricalContext({ book, chapter, preferences }: Histor
           <SummarySkeleton />
         ) : error ? (
           <div className="py-10 text-center">
-            <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-3" />
-            <p className="text-sm text-red-500">{error}</p>
+            <AlertCircle className="h-8 w-8 text-red-500 dark:text-red-400 mx-auto mb-3" />
+            <p className="text-sm text-red-500 dark:text-red-400">{error}</p>
           </div>
         ) : summary ? (
           <div

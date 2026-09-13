@@ -47,10 +47,11 @@ export default function PromptCard({
   const [state, setState] = useState<'open' | 'thanks' | 'gone'>('open');
 
   const dark = tone === 'dark';
-  const ink = dark ? 'text-white' : 'text-gray-900';
-  const inkMuted = dark ? 'text-white/70' : 'text-gray-500';
+  const ink = dark ? 'text-white' : 'text-ink';
+  const inkMuted = dark ? 'text-white/70' : 'text-ink-muted';
   const border = dark ? 'rgba(45,212,191,0.35)' : 'rgba(13,148,136,0.30)';
-  const accent = dark ? '#2DD4BF' : '#0F766E';
+  // On the light tone the page itself may be dark (app theme), so teal steps up there.
+  const accent = dark ? 'text-[#2DD4BF]' : 'text-teal-dark dark:text-teal-400';
 
   const followUp = choice ? prompt.followUp?.[choice] ?? null : null;
   const needsSubmit = prompt.input === 'text' || Boolean(followUp);
@@ -103,8 +104,7 @@ export default function PromptCard({
       style={{ borderColor: border }}
     >
       <p
-        className="text-[10px] font-bold uppercase tracking-[0.14em]"
-        style={{ color: accent }}
+        className={`text-[10px] font-bold uppercase tracking-[0.14em] ${accent}`}
       >
         {prompt.chrome.eyebrow}
       </p>
@@ -120,7 +120,7 @@ export default function PromptCard({
           className={`mt-2.5 w-full resize-none rounded-lg border px-2.5 py-2 text-[13px] outline-none ${
             dark
               ? 'border-white/15 bg-white/10 text-white placeholder:text-white/45'
-              : 'border-gray-200 bg-white text-gray-900 placeholder:text-gray-400'
+              : 'border-line bg-surface text-ink placeholder:text-ink-faint'
           }`}
         />
       )}
@@ -141,7 +141,7 @@ export default function PromptCard({
                       : 'border-white/20 text-white/85 hover:bg-white/10'
                     : active
                       ? 'border-transparent bg-teal-700 text-white'
-                      : 'border-gray-200 text-gray-700 hover:bg-gray-50'
+                      : 'border-line text-ink-body hover:bg-sunken'
                 }`}
               >
                 {option.label}
@@ -162,7 +162,7 @@ export default function PromptCard({
             className={`mt-1.5 w-full resize-none rounded-lg border px-2.5 py-2 text-[13px] outline-none ${
               dark
                 ? 'border-white/15 bg-white/10 text-white placeholder:text-white/45'
-                : 'border-gray-200 bg-white text-gray-900 placeholder:text-gray-400'
+                : 'border-line bg-surface text-ink placeholder:text-ink-faint'
             }`}
           />
         </>

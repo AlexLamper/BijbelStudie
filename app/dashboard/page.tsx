@@ -176,7 +176,7 @@ export default function DashboardPage() {
           ) : (
             <Card className="flex flex-none flex-wrap items-center gap-x-8 gap-y-4 px-6 py-5">
               <div className="min-w-[min(100%,240px)] flex-1">
-                <div className="text-[11px] font-semibold uppercase tracking-[1.4px] text-teal">
+                <div className="text-[11px] font-semibold uppercase tracking-[1.4px] text-teal dark:text-teal-400">
                   {resume || lastRead ? "Verder waar je was" : "Begin waar je wilt"}
                 </div>
                 <div className="mt-[6px] text-[22px] font-bold leading-[1.25] tracking-[-0.3px] text-ink [overflow-wrap:anywhere]">
@@ -213,7 +213,7 @@ export default function DashboardPage() {
                 {!resume && (
                   <Link
                     href="/studie"
-                    className="text-[14px] font-semibold text-ink-body no-underline transition-colors hover:text-teal"
+                    className="text-[14px] font-semibold text-ink-body no-underline transition-colors hover:text-teal dark:hover:text-teal-400"
                   >
                     Studie openen
                   </Link>
@@ -297,7 +297,7 @@ export default function DashboardPage() {
               </div>
               <div className="mt-[13px] flex items-center gap-3">
                 <ProgressBar value={pct} height={6} className="flex-1" />
-                <span className="flex-none whitespace-nowrap text-[13px] font-semibold text-teal group-hover:text-teal-dark">
+                <span className="flex-none whitespace-nowrap text-[13px] font-semibold text-teal dark:text-teal-400 group-hover:text-teal-dark dark:group-hover:text-teal-300">
                   Bekijken →
                 </span>
               </div>

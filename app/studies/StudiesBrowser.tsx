@@ -262,7 +262,7 @@ export default function StudiesBrowser() {
     <div className="flex flex-col gap-[13px]">
       {/* The search is a real field here, not the bar's grey plate: this is the
           fastest way through seventy-seven studies. */}
-      <div className="flex h-[46px] w-full max-w-[440px] flex-none items-center gap-[10px] rounded-[12px] border border-line-strong bg-white px-[15px] shadow-field">
+      <div className="flex h-[46px] w-full max-w-[440px] flex-none items-center gap-[10px] rounded-[12px] border border-line-strong bg-surface px-[15px] shadow-field">
         <Search size={18} strokeWidth={1.9} className="flex-none text-ink-muted" />
         <input
           type="search"
@@ -346,7 +346,7 @@ export default function StudiesBrowser() {
                 onClick={() => scrollCarousel(-1)}
                 disabled={!canScrollPrev}
                 aria-label="Vorige uitgelichte studies"
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-white text-ink-body transition-colors hover:border-line-strong disabled:cursor-default disabled:opacity-40 disabled:hover:border-line"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-surface text-ink-body transition-colors hover:border-line-strong disabled:cursor-default disabled:opacity-40 disabled:hover:border-line"
               >
                 <ChevronLeft size={16} />
               </button>
@@ -355,7 +355,7 @@ export default function StudiesBrowser() {
                 onClick={() => scrollCarousel(1)}
                 disabled={!canScrollNext}
                 aria-label="Volgende uitgelichte studies"
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-white text-ink-body transition-colors hover:border-line-strong disabled:cursor-default disabled:opacity-40 disabled:hover:border-line"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-surface text-ink-body transition-colors hover:border-line-strong disabled:cursor-default disabled:opacity-40 disabled:hover:border-line"
               >
                 <ChevronRight size={16} />
               </button>
@@ -440,7 +440,7 @@ export default function StudiesBrowser() {
                       status.started ? '' : ` · ±${entry.avgMinutes} min`
                     }`}
                     progress={status.started ? (status.completed ? 100 : status.pct) : undefined}
-                    action={<span className="text-[13px] font-semibold text-teal">{action}</span>}
+                    action={<span className="text-[13px] font-semibold text-teal dark:text-teal-400">{action}</span>}
                   />
                 </Link>
               )
@@ -454,7 +454,7 @@ export default function StudiesBrowser() {
           <button
             type="button"
             onClick={() => setVisibleCount(count => count + LIST_PAGE_SIZE)}
-            className="inline-flex h-10 items-center rounded-btn border border-line bg-white px-5 text-[14px] font-semibold text-teal transition-colors hover:border-line-strong"
+            className="inline-flex h-10 items-center rounded-btn border border-line bg-surface px-5 text-[14px] font-semibold text-teal transition-colors dark:text-teal-400 hover:border-line-strong"
           >
             Meer tonen
           </button>

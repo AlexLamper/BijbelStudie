@@ -43,7 +43,7 @@ export function Card({
   style?: React.CSSProperties;
 }) {
   return (
-    <div className={`rounded-card border border-line bg-white ${className}`} style={style}>
+    <div className={`rounded-card border border-line bg-surface ${className}`} style={style}>
       {children}
     </div>
   );
@@ -105,7 +105,7 @@ export function Chip({
     "inline-flex items-center rounded-full px-[15px] py-2 text-[13px] no-underline transition-colors",
     active
       ? "bg-teal font-semibold text-white"
-      : "border border-line bg-white font-medium text-ink-body hover:border-line-strong",
+      : "border border-line bg-surface font-medium text-ink-body hover:border-line-strong",
   ].join(" ");
   if (href) {
     return (
@@ -168,7 +168,7 @@ export function Pill({
   }
   return (
     <span
-      className={`inline-flex items-center rounded-full border border-line bg-white px-3 py-[6px] text-[12.5px] font-bold text-ink-body ${className}`}
+      className={`inline-flex items-center rounded-full border border-line bg-surface px-3 py-[6px] text-[12.5px] font-bold text-ink-body ${className}`}
     >
       {label}
     </span>
@@ -231,7 +231,7 @@ export function SectionHeading({
       {action && (
         <Link
           href={action.href}
-          className="inline-flex items-center gap-1 text-[13px] font-semibold text-teal no-underline hover:text-teal-dark"
+          className="inline-flex items-center gap-1 text-[13px] font-semibold text-teal no-underline hover:text-teal-dark dark:text-teal-400 dark:hover:text-teal-300"
         >
           {action.label}
           <ChevronRight size={14} />
@@ -328,7 +328,7 @@ export function StudyCard({
   );
 
   const cls =
-    "flex flex-col overflow-hidden rounded-card border border-line bg-white no-underline transition-colors hover:border-line-strong";
+    "flex flex-col overflow-hidden rounded-card border border-line bg-surface no-underline transition-colors hover:border-line-strong";
 
   return href ? (
     <Link href={href} className={cls}>
@@ -360,7 +360,7 @@ export function IconButton({
 }) {
   const cls = [
     "inline-flex flex-none items-center justify-center rounded-btn transition-colors",
-    active ? "bg-[var(--teal-wash)] text-teal" : "text-ink-body hover:bg-line-soft",
+    active ? "bg-[var(--teal-wash)] text-teal dark:text-teal-400" : "text-ink-body hover:bg-line-soft",
     className,
   ].join(" ");
   const style = { width: size, height: size };
@@ -465,7 +465,7 @@ export function WeekBars({
           <span
             key={d}
             className={`flex-1 text-center text-[11.5px] ${
-              i === todayIndex ? "font-semibold text-teal-dark" : "text-ink-faint"
+              i === todayIndex ? "font-semibold text-teal-dark dark:text-teal-400" : "text-ink-faint"
             }`}
           >
             {d}

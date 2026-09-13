@@ -4,8 +4,8 @@ import type { Guide } from "../../lib/content/guides";
 import { RelatedLinks } from "./ContentShell";
 
 const TEAL = "#0D9488";
-/** #0D9488 is 3.7:1 on white - fine as a fill, short of AA as type. */
-const TEAL_TEXT = "#0F766E";
+/** Teal type: #0F766E (3.7:1 for #0D9488 on white is short of AA), teal-400 on dark. */
+const TEAL_TEXT = "text-teal-dark dark:text-teal-400";
 
 /**
  * Renders one guide from lib/content/guides.
@@ -19,10 +19,7 @@ export function GuideArticle({ guide }: { guide: Guide }) {
   return (
     <article className="max-w-4xl mx-auto px-6 py-12 lg:py-16">
       <header className="mb-10">
-        <p
-          className="text-xs font-bold uppercase tracking-widest mb-3"
-          style={{ color: TEAL_TEXT }}
-        >
+        <p className={`text-xs font-bold uppercase tracking-widest mb-3 ${TEAL_TEXT}`}>
           Gids
         </p>
         <h1 className="text-3xl lg:text-4xl font-extrabold tracking-tight leading-tight text-gray-900 dark:text-foreground">
@@ -48,8 +45,7 @@ export function GuideArticle({ guide }: { guide: Guide }) {
       {guide.sections.length > 2 && (
         <nav
           aria-label="Inhoudsopgave"
-          className="mb-12 rounded-xl border bg-white dark:bg-card p-5"
-          style={{ borderColor: "#E5E7EB" }}
+          className="mb-12 rounded-xl border border-line bg-surface p-5"
         >
           <h2 className="text-xs font-bold uppercase tracking-widest mb-3 text-gray-500 dark:text-muted-foreground">
             In dit artikel
@@ -61,7 +57,7 @@ export function GuideArticle({ guide }: { guide: Guide }) {
                   href={`#${section.id}`}
                   className="text-sm hover:underline text-gray-700 dark:text-foreground"
                 >
-                  <span className="tabular-nums mr-2" style={{ color: TEAL_TEXT }}>
+                  <span className={`tabular-nums mr-2 ${TEAL_TEXT}`}>
                     {String(i + 1).padStart(2, "0")}
                   </span>
                   {section.heading}
@@ -95,8 +91,7 @@ export function GuideArticle({ guide }: { guide: Guide }) {
                 {section.list.map(item => (
                   <li
                     key={item.title}
-                    className="rounded-lg border bg-white dark:bg-card p-4"
-                    style={{ borderColor: "#E5E7EB" }}
+                    className="rounded-lg border border-line bg-surface p-4"
                   >
                     <strong className="block text-sm font-bold text-gray-900 dark:text-foreground">
                       {item.title}
@@ -173,8 +168,7 @@ export function GuideArticle({ guide }: { guide: Guide }) {
       )}
 
       <section
-        className="mt-16 rounded-2xl p-8 text-center border"
-        style={{ backgroundColor: "#FFFFFF", borderColor: "#E5E7EB" }}
+        className="mt-16 rounded-2xl p-8 text-center border border-line bg-surface"
       >
         <h2 className="text-xl font-bold text-gray-900 dark:text-foreground">
           Begin vandaag met bijbelstudie

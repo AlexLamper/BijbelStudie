@@ -44,7 +44,7 @@ export default function GuestGate({
       className="flex min-h-full flex-col justify-center py-6"
     >
       <Card className="mx-auto w-full max-w-[34rem] p-7 sm:p-9">
-        <p className="text-[10.5px] font-semibold uppercase tracking-[1.1px] text-teal">
+        <p className="text-[10.5px] font-semibold uppercase tracking-[1.1px] text-teal dark:text-teal-400">
           {title}
         </p>
         <h1
@@ -78,11 +78,11 @@ export default function GuestGate({
 
         <p className="mt-6 text-[13px] leading-relaxed text-ink-muted">
           Zonder account kun je gewoon verder: de{" "}
-          <Link href="/studies" className="font-semibold text-teal underline-offset-4 hover:underline">
+          <Link href="/studies" className="font-semibold text-teal underline-offset-4 hover:underline dark:text-teal-400">
             studies
           </Link>{" "}
           en de{" "}
-          <Link href="/lezen" className="font-semibold text-teal underline-offset-4 hover:underline">
+          <Link href="/lezen" className="font-semibold text-teal underline-offset-4 hover:underline dark:text-teal-400">
             Bijbel
           </Link>{" "}
           zijn voor iedereen open.

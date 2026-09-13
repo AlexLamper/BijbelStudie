@@ -26,7 +26,7 @@ export const FooterBase = ({ t, lng }) => {
           {index > 0 && ' or '}
           <button 
             onClick={() => switchLanguage(l)}
-            className="text-blue-600 hover:underline bg-transparent border-none cursor-pointer p-0"
+            className="text-blue-600 dark:text-blue-400 hover:underline bg-transparent border-none cursor-pointer p-0"
           >
             {l}
           </button>

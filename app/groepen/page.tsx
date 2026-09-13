@@ -27,7 +27,9 @@ interface Group {
  * own values from components/scene/tokens.ts instead.
  */
 const IC = TEAL                       // fills that carry no type
-const TEAL_TEXT = TEAL_DEEP           // #0D9488 is 3.7:1 on white, short of AA for small text
+// #0D9488 is 3.7:1 on white, short of AA for small text: teal-dark (= TEAL_DEEP)
+// on the white card, teal-400 on the dark one.
+const TEAL_TEXT = "text-teal-dark dark:text-teal-400"
 const BG_TEAL = "rgba(13,148,136,0.08)"
 
 /** A control on the landscape: quiet glass, white type, a real focus ring. */
@@ -221,8 +223,7 @@ function CreateModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
               onClick={() => setForm(p => ({ ...p, isPublic: true }))}
               className="press flex flex-col gap-1 p-3 rounded-xl border text-left transition-colors"
               style={{ borderColor: form.isPublic ? IC : undefined, backgroundColor: form.isPublic ? BG_TEAL : undefined }}>
-              <span className="flex items-center gap-2 text-sm font-semibold whitespace-nowrap"
-                style={{ color: form.isPublic ? TEAL_TEXT : undefined }}>
+              <span className={`flex items-center gap-2 text-sm font-semibold whitespace-nowrap ${form.isPublic ? TEAL_TEXT : ""}`}>
                 <Globe size={14} className="shrink-0" /> Openbaar
               </span>
               <span className="text-xs leading-snug text-muted-foreground">
@@ -235,8 +236,7 @@ function CreateModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
               onClick={() => setForm(p => ({ ...p, isPublic: false }))}
               className="press flex flex-col gap-1 p-3 rounded-xl border text-left transition-colors"
               style={{ borderColor: !form.isPublic ? IC : undefined, backgroundColor: !form.isPublic ? BG_TEAL : undefined }}>
-              <span className="flex items-center gap-2 text-sm font-semibold whitespace-nowrap"
-                style={{ color: !form.isPublic ? TEAL_TEXT : undefined }}>
+              <span className={`flex items-center gap-2 text-sm font-semibold whitespace-nowrap ${!form.isPublic ? TEAL_TEXT : ""}`}>
                 <Lock size={14} className="shrink-0" /> Privé
               </span>
               <span className="text-xs leading-snug text-muted-foreground">
@@ -253,8 +253,7 @@ function CreateModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
               Een eigen groep aanmaken hoort bij Pro. Deelnemen aan bestaande groepen is gratis.
             </p>
             <Link href="/abonnement"
-              className="mt-2 inline-block text-sm font-semibold underline underline-offset-2"
-              style={{ color: TEAL_TEXT }}>
+              className={`mt-2 inline-block text-sm font-semibold underline underline-offset-2 ${TEAL_TEXT}`}>
               Bekijk Pro
             </Link>
           </div>

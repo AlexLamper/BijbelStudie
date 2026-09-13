@@ -7,11 +7,10 @@ import LessonLayout, { FOCUS_RING, INK, INK_FAINT, INK_MUTED, Marginal } from '.
 
 /**
  * The recovery notice's amber, and the one place the lesson uses a colour that
- * is not a token: this is a warning, and it has to read on the white page AND
- * on the night one. #B45309 clears 4.5:1 on both, and white on it is 5.9:1 for
- * the button fill.
+ * is not a token: this is a warning. White on #B45309 is 5.9:1 for the button
+ * fill; as type (the "Niet opgeslagen" line) it lifts to amber-400 on the night
+ * page, where #B45309 measures only ~3.5:1.
  */
-const AMBER = '#B45309';
 const AMBER_DEEP = '#B45309';
 const AUTOSAVE_DELAY_MS = 1500;
 const MAX_CHARS = 8000;
@@ -246,7 +245,7 @@ export default function StepReflection({
             </span>
           )}
           {saveState === 'error' && (
-            <span className="inline-flex items-center gap-1" style={{ color: AMBER }}>
+            <span className="inline-flex items-center gap-1 text-[#B45309] dark:text-amber-400">
               <CloudOff size={12} /> Niet opgeslagen - je tekst staat nog op dit apparaat
             </span>
           )}

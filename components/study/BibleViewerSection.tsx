@@ -37,7 +37,7 @@ interface BibleViewerSectionProps {
 
 /** A 36 px square control in the toolbar: white, hairline border, radius 9. */
 const TOOL_BTN =
-  'flex h-9 w-9 flex-none items-center justify-center rounded-[9px] border border-line bg-white text-ink-body transition-colors hover:bg-line-soft disabled:cursor-not-allowed disabled:opacity-40';
+  'flex h-9 w-9 flex-none items-center justify-center rounded-[9px] border border-line bg-surface text-ink-body transition-colors hover:bg-line-soft disabled:cursor-not-allowed disabled:opacity-40';
 
 export default function BibleViewerSection({
   selectedBook,
@@ -94,7 +94,7 @@ export default function BibleViewerSection({
 
   return (
     <SpokenTextScope>
-      <section className="flex h-full min-w-0 flex-col bg-white">
+      <section className="flex h-full min-w-0 flex-col bg-surface">
         {/* Toolbar - 56 px, in the design's order: reading preferences, a rule,
             then the chapter controls, and read-aloud alone on the right. */}
         <div
@@ -150,7 +150,7 @@ export default function BibleViewerSection({
             showSettings={false}
             getText={() => chapterText}
             label="Lees hoofdstuk voor"
-            className="h-8 w-8 flex-none rounded-lg text-teal hover:bg-line-soft"
+            className="h-8 w-8 flex-none rounded-lg text-teal dark:text-teal-400 hover:bg-line-soft"
             icon={<Volume2 size={17} strokeWidth={1.9} />}
           />
         </div>
@@ -164,9 +164,9 @@ export default function BibleViewerSection({
             </div>
             {(marks.notes > 0 || marks.highlights > 0) && (
               <div className="flex items-center gap-[6px]">
-                <NotebookPen size={15} strokeWidth={1.8} className="text-teal" />
+                <NotebookPen size={15} strokeWidth={1.8} className="text-teal dark:text-teal-400" />
                 {/* teal-dark, not teal: #0D9488 as 12 px type on white is 3.1:1. */}
-                <span className="text-[12px] font-semibold text-teal-dark tabular-nums">{marks.notes}</span>
+                <span className="text-[12px] font-semibold text-teal-dark dark:text-teal-400 tabular-nums">{marks.notes}</span>
                 <span className="h-[3px] w-[3px] rounded-full bg-line-strong" />
                 <span className="text-[12px] font-medium text-ink-muted tabular-nums">
                   {marks.highlights} {marks.highlights === 1 ? 'markering' : 'markeringen'}

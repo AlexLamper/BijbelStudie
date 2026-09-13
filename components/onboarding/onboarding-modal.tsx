@@ -538,7 +538,7 @@ export function OnboardingModal({
               <div className="flex items-center gap-2.5">
                 <Image src="/images/icon-192.png" alt="" width={28} height={28} className="rounded-lg" />
                 <span className="text-[15px] font-bold text-foreground">
-                  Bijbel<span style={{ color: "#0F766E" }}>Studie</span>
+                  Bijbel<span className="text-[#0F766E] dark:text-teal-400">Studie</span>
                 </span>
               </div>
               <div aria-hidden="true" className="flex items-center gap-1.5">

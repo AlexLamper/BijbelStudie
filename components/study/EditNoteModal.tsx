@@ -261,8 +261,8 @@ export function EditNoteModal({
                   type="button"
                   onClick={() => setSelectedColor(color.name)}
                   aria-pressed={selectedColor === color.name}
-                  className={`w-8 h-8 rounded-full border-2 outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#0D9488] ${color.class} ${
-                    selectedColor === color.name ? "ring-2 ring-offset-1 ring-[#0D9488]" : ""
+                  className={`w-8 h-8 rounded-full border-2 outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:ring-offset-card focus-visible:ring-[#0D9488] ${color.class} ${
+                    selectedColor === color.name ? "ring-2 ring-offset-1 ring-[#0D9488] dark:ring-offset-card" : ""
                   }`}
                   title={color.name}
                 />
@@ -298,7 +298,7 @@ export function EditNoteModal({
                   type="button"
                   aria-label={`Tag ${tag} verwijderen`}
                   onClick={() => handleRemoveTag(tag)}
-                  className="text-gray-500 hover:text-gray-700 rounded outline-none focus-visible:ring-2 focus-visible:ring-[#0D9488]"
+                  className="text-gray-500 hover:text-gray-700 dark:text-muted-foreground dark:hover:text-foreground rounded outline-none focus-visible:ring-2 focus-visible:ring-[#0D9488]"
                 >
                   <X className="h-3 w-3" aria-hidden />
                 </button>
@@ -341,13 +341,12 @@ export function EditNoteModal({
               <button
                 type="button"
                 onClick={() => setGroupId("")}
-                className="flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all"
+                className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${!selectedGroupId ? "border-[#0D9488]" : "border-[#E5E7EB] dark:border-border"}`}
                 style={{
-                  borderColor: !selectedGroupId ? "#0D9488" : "#E5E7EB",
                   backgroundColor: !selectedGroupId ? "rgba(13,148,136,0.05)" : "transparent",
                 }}
               >
-                <Lock className="h-4 w-4 flex-shrink-0" style={{ color: !selectedGroupId ? "#0D9488" : "#9CA3AF" }} />
+                <Lock className={`h-4 w-4 flex-shrink-0 ${!selectedGroupId ? "text-[#0D9488] dark:text-teal-400" : "text-[#9CA3AF] dark:text-muted-foreground"}`} />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-gray-900 dark:text-foreground">Alleen voor mij</p>
                   <p className="text-xs text-gray-400 dark:text-muted-foreground">Alleen jij kunt deze notitie zien</p>
@@ -359,13 +358,12 @@ export function EditNoteModal({
                   <button
                     type="button"
                     onClick={() => !selectedGroupId && setGroupId(myGroups[0]._id)}
-                    className="w-full flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all"
+                    className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${selectedGroupId ? "border-[#0D9488]" : "border-[#E5E7EB] dark:border-border"}`}
                     style={{
-                      borderColor: selectedGroupId ? "#0D9488" : "#E5E7EB",
                       backgroundColor: selectedGroupId ? "rgba(13,148,136,0.05)" : "transparent",
                     }}
                   >
-                    <Users className="h-4 w-4 flex-shrink-0" style={{ color: selectedGroupId ? "#0D9488" : "#9CA3AF" }} />
+                    <Users className={`h-4 w-4 flex-shrink-0 ${selectedGroupId ? "text-[#0D9488] dark:text-teal-400" : "text-[#9CA3AF] dark:text-muted-foreground"}`} />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-gray-900 dark:text-foreground">Bijbelgroep</p>
                       <p className="text-xs text-gray-400 dark:text-muted-foreground">Gedeeld met de leden van een groep</p>

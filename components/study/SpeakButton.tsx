@@ -148,8 +148,8 @@ export default function SpeakButton({
             tts.error
               ? 'text-[#E11D48] bg-[rgba(225,29,72,0.08)]'
               : isPlaying
-                ? 'bg-[rgba(13,148,136,0.15)] text-[#0D9488]'
-                : 'text-gray-500 hover:text-[#0D9488] hover:bg-[rgba(13,148,136,0.08)]',
+                ? 'bg-[rgba(13,148,136,0.15)] text-[#0D9488] dark:text-teal-400'
+                : 'text-gray-500 hover:text-[#0D9488] hover:bg-[rgba(13,148,136,0.08)] dark:text-muted-foreground dark:hover:text-teal-400',
             className,
           )}
         >
@@ -228,7 +228,7 @@ export default function SpeakButton({
             className={cn(
               'inline-flex items-center justify-center rounded-lg p-1.5 border transition-colors',
               settingsOpen
-                ? 'bg-[rgba(13,148,136,0.1)] text-[#0D9488] border-[rgba(13,148,136,0.3)]'
+                ? 'bg-[rgba(13,148,136,0.1)] text-[#0D9488] border-[rgba(13,148,136,0.3)] dark:text-teal-400'
                 : 'bg-white dark:bg-card text-gray-600 dark:text-foreground border-gray-200 dark:border-border hover:bg-gray-50 dark:hover:bg-secondary',
             )}
           >
@@ -291,7 +291,7 @@ function SpeakLoginDialog({ open, onClose }: { open: boolean; onClose: () => voi
         <DialogPrimitive.Content
           className="fixed left-1/2 top-1/2 z-[80] w-[calc(100%-2rem)] max-w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-slate-200 dark:border-border bg-white dark:bg-card p-6 shadow-xl focus:outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
         >
-          <p className="text-[10.5px] font-semibold uppercase tracking-[1.1px]" style={{ color: TEAL }}>
+          <p className="text-[10.5px] font-semibold uppercase tracking-[1.1px] text-[#0D9488] dark:text-teal-400">
             Voorlezen
           </p>
           <DialogTitle className="mt-2 text-lg font-semibold leading-snug text-slate-900 dark:text-foreground">
@@ -328,8 +328,7 @@ function SpeakLoginDialog({ open, onClose }: { open: boolean; onClose: () => voi
               href={`/registreren?next=${target}`}
               onClick={onClose}
               data-track="tts_guest_register"
-              className="font-semibold underline-offset-4 hover:underline"
-              style={{ color: TEAL }}
+              className="font-semibold underline-offset-4 hover:underline text-[#0D9488] dark:text-teal-400"
             >
               Gratis registreren
             </Link>
@@ -376,8 +375,7 @@ function SpeakErrorPanel({
         {onFallback && (
           <button
             onClick={onFallback}
-            className="mt-1.5 text-[11px] font-semibold underline hover:no-underline"
-            style={{ color: TEAL }}
+            className="mt-1.5 text-[11px] font-semibold underline hover:no-underline text-[#0D9488] dark:text-teal-400"
           >
             Wissel naar browser-stem
           </button>
@@ -438,8 +436,8 @@ function SettingsPopover({
             <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-muted-foreground inline-flex items-center gap-1">
               <Cloud className="h-2.5 w-2.5" /> Cloud-stemmen
             </p>
-            <span className="inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
-              style={{ backgroundColor: 'rgba(13,148,136,0.1)', color: TEAL }}>
+            <span className="inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full text-[#0D9488] dark:text-teal-400"
+              style={{ backgroundColor: 'rgba(13,148,136,0.1)' }}>
               <Sparkles className="h-2 w-2" /> Hoge kwaliteit
             </span>
           </div>
@@ -529,8 +527,8 @@ function CloudVoiceRow({
           </p>
         </div>
         {selected && (
-          <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full flex-shrink-0"
-            style={{ backgroundColor: 'rgba(13,148,136,0.1)', color: TEAL }}>
+          <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full flex-shrink-0 text-[#0D9488] dark:text-teal-400"
+            style={{ backgroundColor: 'rgba(13,148,136,0.1)' }}>
             Actief
           </span>
         )}
@@ -539,7 +537,7 @@ function CloudVoiceRow({
         onClick={onPreview}
         disabled={isLoading}
         title={`Probeer ${voice.name}`}
-        className="inline-flex items-center justify-center rounded-md p-1.5 text-gray-500 hover:text-[#0D9488] hover:bg-[rgba(13,148,136,0.1)] transition-colors flex-shrink-0 disabled:opacity-50"
+        className="inline-flex items-center justify-center rounded-md p-1.5 text-gray-500 hover:text-[#0D9488] hover:bg-[rgba(13,148,136,0.1)] dark:text-muted-foreground dark:hover:text-teal-400 transition-colors flex-shrink-0 disabled:opacity-50"
       >
         {isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}
       </button>

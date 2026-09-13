@@ -36,7 +36,7 @@ export default function AppShell({
     // of the widest card with a strip of empty page beside it. `w-full` sets the
     // basis to the line; `min-w-0` lets the body's own truncation work rather
     // than pushing the shell wider than the viewport.
-    <div className="flex h-screen w-full min-w-0 bg-line-soft">
+    <div className="flex h-screen w-full min-w-0 bg-line-soft dark:bg-background">
       <Sidebar active={active} />
       <main className="flex min-w-0 flex-1 flex-col">
         <TopBar title={title} />

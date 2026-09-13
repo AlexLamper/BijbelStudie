@@ -129,8 +129,7 @@ export default function LedenTab({
                       {m.userId.name} {isCurrentUser && <span className="text-gray-400">(u)</span>}
                     </span>
                     {isLeader && (
-                      <span className="flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0"
-                        style={{ backgroundColor: "rgba(13,148,136,0.1)", color: "#0D9488" }}>
+                      <span className="flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0 bg-teal/10 text-teal dark:text-teal-400">
                         <Shield size={8} /> Leider
                       </span>
                     )}
@@ -236,10 +235,10 @@ export default function LedenTab({
             </div>
 
             {settingsError && (
-              <p className="text-xs text-red-600">{settingsError}</p>
+              <p className="text-xs text-red-600 dark:text-red-400">{settingsError}</p>
             )}
             {settingsSuccess && (
-              <p className="text-xs" style={{ color: "#0D9488" }}>Instellingen opgeslagen!</p>
+              <p className="text-xs text-teal dark:text-teal-400">Instellingen opgeslagen!</p>
             )}
 
             <button

@@ -23,11 +23,14 @@ import {
 import TreeCanvas from '../levensboom/TreeCanvas';
 
 const TEAL = '#0D9488';
-const TEAL_TEXT = '#0F766E';
-const TEXT = '#111827';
-const MUTED = '#4B5563';
-const FAINT = '#9CA3AF';
-const BORDER = '#E5E7EB';
+/* Neutrals as CSS variables so the demo follows dark mode. The `--lp-*` set
+   comes from LP_THEME_VARS on the landing page root; the fallbacks are the
+   light values these always had. */
+const TEAL_TEXT = 'var(--lp-teal-text, #0F766E)';
+const TEXT = 'var(--ink)';
+const MUTED = 'var(--lp-muted, #4B5563)';
+const FAINT = 'var(--ink-faint)';
+const BORDER = 'var(--line)';
 
 /** Everything the demo shows. Built on the server from the real lesson data. */
 export type DemoLesson = {
@@ -151,7 +154,7 @@ function WordFrame({ lesson }: { lesson: DemoLesson }) {
           </h3>
         </div>
         <span
-          className="flex-none rounded-md border bg-white px-2 py-1 text-[11px] font-medium"
+          className="flex-none rounded-md border bg-surface px-2 py-1 text-[11px] font-medium"
           style={{ borderColor: BORDER, color: TEXT }}
         >
           {lesson.translation}
@@ -205,8 +208,8 @@ function DepthFrame({ lesson }: { lesson: DemoLesson }) {
       </div>
 
       {/* Right: what supports the reading - background, grondtekst, notes, the assistant. */}
-      <div className="flex min-w-0 flex-col" style={{ backgroundColor: 'rgba(249,250,251,0.8)' }}>
-        <div className="flex items-center gap-2.5 border-b bg-white px-4 py-2.5" style={{ borderColor: BORDER }}>
+      <div className="flex min-w-0 flex-col bg-gray-50/80 dark:bg-black/20">
+        <div className="flex items-center gap-2.5 border-b bg-surface px-4 py-2.5" style={{ borderColor: BORDER }}>
           <span className="flex h-7 w-7 flex-none items-center justify-center rounded-lg" style={{ backgroundColor: 'rgba(13,148,136,0.10)' }}>
             <Landmark size={13} style={{ color: TEAL }} aria-hidden />
           </span>
@@ -221,7 +224,7 @@ function DepthFrame({ lesson }: { lesson: DemoLesson }) {
           <ChevronRight size={13} style={{ color: FAINT }} aria-hidden />
         </div>
 
-        <div className="flex border-b bg-white px-2" style={{ borderColor: BORDER }}>
+        <div className="flex border-b bg-surface px-2" style={{ borderColor: BORDER }}>
           {tabs.map(({ key, label, icon: Icon }) => {
             const active = key === 'original';
             return (
@@ -244,7 +247,7 @@ function DepthFrame({ lesson }: { lesson: DemoLesson }) {
 
         <div className="flex flex-1 flex-wrap content-start gap-1.5 px-4 py-3">
           {lesson.greek.map((entry) => (
-            <div key={entry.strong} className="flex min-w-[64px] flex-col items-center rounded-md bg-white px-2 py-1.5 text-center ring-1 ring-black/5">
+            <div key={entry.strong} className="flex min-w-[64px] flex-col items-center rounded-md bg-surface px-2 py-1.5 text-center ring-1 ring-black/5 dark:ring-white/10">
               <span lang="grc" className="font-serif text-[16px] leading-tight" style={{ color: TEXT }}>
                 {entry.word}
               </span>
@@ -261,7 +264,7 @@ function DepthFrame({ lesson }: { lesson: DemoLesson }) {
           ))}
         </div>
 
-        <div className="flex gap-2 border-t bg-white p-2.5" style={{ borderColor: BORDER }}>
+        <div className="flex gap-2 border-t bg-surface p-2.5" style={{ borderColor: BORDER }}>
           <span className="flex h-8 flex-1 items-center rounded-lg border px-2.5 text-[11.5px]" style={{ borderColor: BORDER, color: FAINT }}>
             Vraag iets over Johannes 20...
           </span>
@@ -308,7 +311,7 @@ function ReflectionFrame({ lesson, reduce }: { lesson: DemoLesson; reduce: boole
           </li>
         ))}
       </ul>
-      <div className="mt-3 min-h-[4.5rem] rounded-xl border bg-white p-3 text-[12.5px] leading-relaxed" style={{ borderColor: finished ? BORDER : TEAL, color: TEXT }} aria-label="Je reflectie">
+      <div className="mt-3 min-h-[4.5rem] rounded-xl border bg-surface p-3 text-[12.5px] leading-relaxed" style={{ borderColor: finished ? BORDER : TEAL, color: TEXT }} aria-label="Je reflectie">
         {typed === 0 ? (
           <span style={{ color: FAINT }}>{lesson.reflection.placeholder}</span>
         ) : (
@@ -445,7 +448,7 @@ function DoneFrame({ lesson, live, reduce }: { lesson: DemoLesson; live: boolean
           { value: `${lesson.lesson.minutes} min`, label: 'gelezen', accent: false },
           { value: `${lesson.lesson.day}/${lesson.lessonsTotal}`, label: 'lessen', accent: false },
         ].map((stat) => (
-          <div key={stat.label} className="rounded-lg border bg-white px-2 py-2" style={{ borderColor: BORDER }}>
+          <div key={stat.label} className="rounded-lg border bg-surface px-2 py-2" style={{ borderColor: BORDER }}>
             <p className="text-[15px] font-bold leading-none tabular-nums" style={{ color: stat.accent ? TEAL : TEXT }}>
               {stat.value}
             </p>
@@ -578,7 +581,7 @@ export default function StudyFlowDemo({ lesson }: { lesson: DemoLesson }) {
           <div
             role="group"
             aria-label="Voorbeeld van een les, stap voor stap"
-            className="relative flex aspect-[4/5] flex-col overflow-hidden rounded-xl bg-white text-left sm:aspect-[16/10]"
+            className="relative flex aspect-[4/5] flex-col overflow-hidden rounded-xl bg-surface text-left sm:aspect-[16/10]"
             style={{ color: TEXT }}
           >
             {/* Header: the same three tracks as the real lesson. */}
@@ -618,7 +621,7 @@ export default function StudyFlowDemo({ lesson }: { lesson: DemoLesson }) {
                         event.stopPropagation();
                         go(i);
                       }}
-                      className="relative block h-[3px] flex-1 overflow-hidden rounded-full bg-gray-200"
+                      className="relative block h-[3px] flex-1 overflow-hidden rounded-full bg-line"
                     >
                       {filled && (
                         <span
@@ -638,7 +641,7 @@ export default function StudyFlowDemo({ lesson }: { lesson: DemoLesson }) {
               <div key={frame} className={`absolute inset-0 overflow-hidden ${moved ? 'lp-demo-enter' : ''}`}>
                 {body}
               </div>
-              <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-white to-transparent" />
+              <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-surface to-transparent" />
             </div>
 
             {/* Footer: the two buttons that move the lesson. */}
@@ -650,8 +653,8 @@ export default function StudyFlowDemo({ lesson }: { lesson: DemoLesson }) {
                   go(index - 1);
                 }}
                 disabled={index === 0}
-                className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-[11.5px] font-medium ${index === 0 ? 'pointer-events-none border-transparent text-transparent' : 'bg-white shadow-sm hover:bg-gray-50'}`}
-                style={index === 0 ? undefined : { borderColor: '#D1D5DB', color: TEXT }}
+                className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-[11.5px] font-medium ${index === 0 ? 'pointer-events-none border-transparent text-transparent' : 'bg-surface shadow-sm hover:bg-sunken'}`}
+                style={index === 0 ? undefined : { borderColor: 'var(--line-strong)', color: TEXT }}
               >
                 <ArrowLeft size={13} aria-hidden /> Vorige
               </button>
@@ -689,7 +692,7 @@ export default function StudyFlowDemo({ lesson }: { lesson: DemoLesson }) {
               type="button"
               onClick={() => setHeld((value) => !value)}
               aria-pressed={held}
-              className="inline-flex h-8 items-center gap-1.5 rounded-lg border bg-white px-3 text-[12px] font-semibold transition-colors hover:bg-gray-50"
+              className="inline-flex h-8 items-center gap-1.5 rounded-lg border bg-surface px-3 text-[12px] font-semibold transition-colors hover:bg-sunken"
               style={{ borderColor: BORDER, color: TEXT }}
             >
               {held ? <Play size={12} aria-hidden /> : <Pause size={12} aria-hidden />}
@@ -716,12 +719,12 @@ export default function StudyFlowDemo({ lesson }: { lesson: DemoLesson }) {
                 className="flex w-full items-start gap-3 rounded-xl border px-3 py-2 text-left transition-colors lg:px-3.5 lg:py-3"
                 style={{
                   borderColor: active ? 'rgba(13,148,136,0.45)' : BORDER,
-                  backgroundColor: active ? 'rgba(13,148,136,0.06)' : '#FFFFFF',
+                  backgroundColor: active ? 'rgba(13,148,136,0.06)' : 'var(--surface)',
                 }}
               >
                 <span
                   className="mt-px flex h-5 w-5 flex-none items-center justify-center rounded-full text-[10px] font-bold"
-                  style={active ? { backgroundColor: TEAL, color: '#FFFFFF' } : { backgroundColor: '#F3F4F6', color: MUTED }}
+                  style={active ? { backgroundColor: TEAL, color: '#FFFFFF' } : { backgroundColor: 'var(--line-soft)', color: MUTED }}
                 >
                   {isReward ? <Check size={11} aria-hidden /> : i + 1}
                 </span>

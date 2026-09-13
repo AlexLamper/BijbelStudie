@@ -95,7 +95,7 @@ export default function LevensboomSection() {
               <button
                 type="button"
                 onClick={() => void share()}
-                className="text-[12.5px] font-semibold text-teal underline-offset-4 transition-colors hover:underline"
+                className="text-[12.5px] font-semibold text-teal dark:text-teal-400 underline-offset-4 transition-colors hover:underline"
               >
                 {copied ? 'Gekopieerd' : 'Kopieer link'}
               </button>
@@ -107,7 +107,7 @@ export default function LevensboomSection() {
       <div className="mt-4 border-t border-line-soft pt-4">
         <Link
           href="/profiel/boom"
-          className="inline-block text-[13px] font-semibold text-teal no-underline underline-offset-4 transition-colors hover:underline"
+          className="inline-block text-[13px] font-semibold text-teal dark:text-teal-400 no-underline underline-offset-4 transition-colors hover:underline"
         >
           Naar je boom →
         </Link>

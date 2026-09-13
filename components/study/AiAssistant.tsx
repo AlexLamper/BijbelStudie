@@ -125,7 +125,7 @@ const markdownComponents = {
   ),
   a: (props: React.AnchorHTMLAttributes<HTMLAnchorElement>) => (
     <a
-      className="text-[#0D9488] underline underline-offset-2"
+      className="text-[#0D9488] dark:text-teal-400 underline underline-offset-2"
       target="_blank"
       rel="noopener noreferrer"
       {...props}

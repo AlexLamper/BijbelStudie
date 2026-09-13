@@ -196,7 +196,7 @@ function Medallion({
       </span>
       {!earned && (
         <span
-          className="absolute bottom-0 right-0 inline-flex items-center justify-center rounded-full border border-line bg-white"
+          className="absolute bottom-0 right-0 inline-flex items-center justify-center rounded-full border border-line bg-surface"
           style={{ width: chip, height: chip, boxShadow: "var(--shadow-field)" }}
         >
           <Lock size={Math.round(chip * 0.55)} className="text-ink-faint" />
@@ -212,7 +212,7 @@ function BadgeTile({ badge, earned }: { badge: BadgeInfo; earned: boolean }) {
   const description = BADGE_META[badge.id]?.description ?? ""
 
   return (
-    <li className="flex flex-col items-center rounded-card border border-line bg-white px-[10px] pb-3 pt-[14px] text-center">
+    <li className="flex flex-col items-center rounded-card border border-line bg-surface px-[10px] pb-3 pt-[14px] text-center">
       <Medallion icon={badge.icon} tone={badge.tone} earned={earned} />
       <span className={`mt-[10px] text-[12.5px] font-bold leading-[1.3] ${earned ? "text-ink" : "text-ink-muted"}`}>
         {label}
@@ -345,7 +345,7 @@ export function BadgesDialog({
         aria-modal="true"
         aria-labelledby="badges-dialoog-titel"
         onClick={event => event.stopPropagation()}
-        className="flex max-h-[88vh] w-full flex-col rounded-t-card bg-white sm:max-h-[85vh] sm:max-w-[660px] sm:rounded-card"
+        className="flex max-h-[88vh] w-full flex-col rounded-t-card bg-surface sm:max-h-[85vh] sm:max-w-[660px] sm:rounded-card"
       >
         <header className="flex h-14 flex-none items-center gap-3 border-b border-line px-5">
           <h2 id="badges-dialoog-titel" className="flex-1 text-[15px] font-bold text-ink">

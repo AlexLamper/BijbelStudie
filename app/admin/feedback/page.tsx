@@ -4,7 +4,6 @@ import Link from "next/link"
 import { useCallback, useEffect, useState } from "react"
 import { ArrowLeft, MessageSquare, RefreshCw } from "lucide-react"
 
-const TEAL = "#0D9488"
 
 interface FeedbackRow {
   _id: string
@@ -154,8 +153,7 @@ export default function AdminFeedbackPage() {
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-bold text-foreground">Feedback</h1>
               <span
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold"
-                style={{ backgroundColor: "rgba(13,148,136,0.1)", color: TEAL }}
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-teal/10 text-teal dark:text-teal-400"
               >
                 <MessageSquare size={11} /> {total}
               </span>
@@ -279,7 +277,7 @@ export default function AdminFeedbackPage() {
                 <div className="flex items-start justify-between gap-4 flex-wrap">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <span className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: TEAL }}>
+                      <span className="text-[11px] font-semibold uppercase tracking-wide text-teal dark:text-teal-400">
                         {TOUCHPOINT_LABELS[row.touchpoint] ?? row.touchpoint}
                       </span>
                       <span className="text-[11px] px-1.5 py-0.5 rounded-full bg-gray-100 dark:bg-secondary text-gray-600 dark:text-muted-foreground">

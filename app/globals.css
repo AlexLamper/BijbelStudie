@@ -98,8 +98,7 @@
 
    Plain literals rather than the HSL triplets above: these are handed to
    gradients and rgba() as-is, which the `hsl(var(--x))` convention cannot do.
-   They are deliberately theme-independent - the redesign is specified in one
-   (light) palette only. */
+   The neutrals and washes have a dark set further down, on `.dark`. */
 :root{
   --teal:#0D9488;
   --teal-dark:#0F766E;
@@ -212,6 +211,42 @@
   --grad-banner-3:linear-gradient(135deg,#3B2C55,#6B4A6E);
   --grad-banner-4:linear-gradient(135deg,#6B4A2E,#0F172A);
   --grad-banner-5:linear-gradient(135deg,#1E3A5F,#0F172A);
+}
+
+/* The dark set for the tokens above. Only the neutrals and washes move - the
+   fills that carry white type (--teal, --teal-dark, --gold, --danger) and the
+   scene gradients read the same on either ground. Neutral greys, matching the
+   HSL `.dark` block at the top, so `bg-card` and `bg-surface` are one colour. */
+.dark{
+  --teal-wash:rgba(45,212,191,.12);
+  --teal-wash-2:rgba(45,212,191,.09);
+  --teal-faint:rgba(45,212,191,.08);
+  --teal-tint:rgba(45,212,191,.12);
+
+  --ink:#E5E5E5;
+  --ink-body:#C8C8C8;
+  --ink-muted:#9A9A9A;
+  --ink-faint:#767676;
+
+  --line:#383838;
+  --line-strong:#4A4A4A;
+  --line-soft:#2A2A2A;
+  --surface:#212121;
+  --surface-sunken:#1B1B1B;
+
+  --gold-badge:#E3C766;
+  --scripture:#EDEDED;
+
+  --pro-soft:rgba(202,154,22,.18);
+  --warn-wash:rgba(234,88,12,.14);
+  --badge-wash:rgba(124,58,237,.16);
+  --highlight:rgba(250,204,21,.20);
+
+  --heat-0:#333333;
+  --bar-empty:#333333;
+
+  --shadow-field:0 1px 2px rgba(0,0,0,.4);
+  --shadow-badge:0 1px 5px rgba(0,0,0,.5);
 }
 
 /* ─── Lesson-flow tokens ────────────────────────────────────────
@@ -370,7 +405,7 @@
 }
 
 html.is-stuck .nav-shadow {
-  border-bottom-color: #E5E7EB;
+  border-bottom-color: var(--line);
   box-shadow: 0 1px 16px rgba(15, 23, 42, 0.07);
 }
 
@@ -385,8 +420,8 @@ html.is-stuck .nav-shadow {
    `transform`, and the reveal's `transform: none` is the more specific rule,
    which would silently kill the hover lift. The reveal goes on the wrapper. */
 .lp-card {
-  background-color: #FFFFFF;
-  border: 1px solid #E5E7EB;
+  background-color: var(--surface);
+  border: 1px solid var(--line);
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
   transition:
     border-color 200ms ease-out,
@@ -395,7 +430,7 @@ html.is-stuck .nav-shadow {
 }
 
 .lp-card:hover {
-  border-color: #D1D5DB;
+  border-color: var(--line-strong);
   box-shadow:
     0 14px 30px -14px rgba(15, 23, 42, 0.18),
     0 4px 10px -6px rgba(15, 23, 42, 0.08);

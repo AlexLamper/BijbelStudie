@@ -76,16 +76,17 @@ function ProMark({ size }: { size: number }) {
 function StreakMark({ size, streak }: { size: number; streak: number }) {
   const { pill } = metrics(size);
   const label = `${streak} ${streak === 1 ? "dag" : "dagen"} reeks`;
+  // Plate, number and hairline follow the theme: surface plate, ink number,
+  // and a light hairline in dark mode where the slate one would vanish.
   return (
     <span
       aria-label={label}
       title={label}
-      className="absolute inline-flex items-center justify-center rounded-full bg-white font-semibold leading-none tabular-nums"
+      className="absolute inline-flex items-center justify-center rounded-full bg-surface font-semibold leading-none tabular-nums text-[#0F172A] [--streak-edge:rgba(15,23,42,.14)] dark:text-ink dark:[--streak-edge:rgba(255,255,255,.18)]"
       style={{
         ...pillBase(size, "top"),
         minWidth: pill.height,
-        color: SLATE_900,
-        boxShadow: `inset 0 0 0 1px rgba(15,23,42,.14), 0 0 0 ${pill.outline}px var(--surface, #fff), 0 1px 3px rgba(15,23,42,.10)`,
+        boxShadow: `inset 0 0 0 1px var(--streak-edge), 0 0 0 ${pill.outline}px var(--surface, #fff), 0 1px 3px rgba(15,23,42,.10)`,
       }}
     >
       {streak}

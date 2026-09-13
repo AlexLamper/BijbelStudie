@@ -140,7 +140,7 @@ export default function ActivityFeed({
         <p className="text-[13.5px] text-ink-body">{empty}</p>
         <Link
           href="/notities"
-          className="mt-1 text-[13px] font-semibold text-teal no-underline hover:text-teal-dark"
+          className="mt-1 text-[13px] font-semibold text-teal no-underline hover:text-teal-dark dark:hover:text-teal-bright"
         >
           Bekijk je notities →
         </Link>

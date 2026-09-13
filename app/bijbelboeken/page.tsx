@@ -22,8 +22,8 @@ import {
 export const metadata: Metadata = generatePageMetadata("bibleBooks");
 export const dynamic = "force-static";
 
-/** #0D9488 is 3.7:1 on white - fine as a fill, short of AA as type. */
-const TEAL_TEXT = "#0F766E";
+/* Teal type is text-teal-dark (#0F766E): #0D9488 is 3.7:1 on white - fine as a
+   fill, short of AA as type. On dark it lifts to teal-400. */
 
 const CRUMBS = [
   { name: "Home", path: "/" },
@@ -82,8 +82,7 @@ export default function BijbelboekenPage() {
       <div className="max-w-4xl mx-auto px-6 py-12 lg:py-16">
         <header className="mb-10">
           <p
-            className="text-xs font-bold uppercase tracking-widest mb-3"
-            style={{ color: TEAL_TEXT }}
+            className="text-xs font-bold uppercase tracking-widest mb-3 text-teal-dark dark:text-teal-400"
           >
             Naslag
           </p>
@@ -165,10 +164,9 @@ export default function BijbelboekenPage() {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div
-      className="rounded-xl border bg-white dark:bg-card p-4 text-center"
-      style={{ borderColor: "#E5E7EB" }}
+      className="rounded-xl border bg-surface p-4 text-center border-line"
     >
-      <div className="text-2xl font-extrabold tabular-nums" style={{ color: TEAL_TEXT }}>
+      <div className="text-2xl font-extrabold tabular-nums text-teal-dark dark:text-teal-400">
         {value}
       </div>
       <div className="text-xs mt-0.5 text-gray-500 dark:text-muted-foreground">
@@ -221,12 +219,10 @@ function GenreGroup({ genre, books }: { genre: BookGenre; books: BibleBook[] }) 
           <li key={book.slug}>
             <Link
               href={`/bijbelboeken/${book.slug}`}
-              className="group flex items-baseline gap-3 rounded-lg border bg-white dark:bg-card px-4 py-3 transition-colors hover:border-teal-500 no-underline"
-              style={{ borderColor: "#E5E7EB" }}
+              className="group flex items-baseline gap-3 rounded-lg border bg-surface px-4 py-3 transition-colors hover:border-teal-500 no-underline border-line"
             >
               <span
-                className="text-[10px] font-bold tabular-nums shrink-0 w-5"
-                style={{ color: TEAL_TEXT }}
+                className="text-[10px] font-bold tabular-nums shrink-0 w-5 text-teal-dark dark:text-teal-400"
                 aria-hidden
               >
                 {book.position}

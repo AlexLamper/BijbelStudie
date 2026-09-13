@@ -141,7 +141,7 @@ export default function LevensboomGroeiDemo({ seed, initialSvg }: { seed: string
         )}
       </div>
 
-      <p className="mt-4 min-h-[2.75rem] text-sm leading-relaxed" style={{ color: '#4B5563' }}>
+      <p className="mt-4 min-h-[2.75rem] text-sm leading-relaxed" style={{ color: 'var(--lp-muted, #4B5563)' }}>
         {happening}
       </p>
 
@@ -169,9 +169,9 @@ export default function LevensboomGroeiDemo({ seed, initialSvg }: { seed: string
                 onClick={() => take(s.from)}
                 className="rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-colors"
                 style={{
-                  color: active ? '#FFFFFF' : '#6B7280',
+                  color: active ? '#FFFFFF' : 'var(--ink-muted)',
                   backgroundColor: active ? TEAL : 'transparent',
-                  borderColor: active ? TEAL : '#E5E7EB',
+                  borderColor: active ? TEAL : 'var(--line)',
                 }}
                 aria-pressed={active}
               >

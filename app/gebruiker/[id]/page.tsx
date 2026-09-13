@@ -92,11 +92,11 @@ export default async function PublicProfilePage({ params }: Params) {
     : null;
 
   return (
-    <div className="min-h-screen bg-line-soft">
+    <div className="min-h-screen bg-line-soft dark:bg-background">
       {/* The only chrome a signed-out visitor gets: who this is from, and a way
           in. Same 64 px height as the app's top bar, so the page still reads as
           part of the product. */}
-      <header className="border-b border-line bg-white">
+      <header className="border-b border-line bg-surface">
         <div className="mx-auto flex h-16 w-full max-w-[600px] items-center gap-3 px-5">
           <Link href="/" className="text-[15px] font-bold tracking-[-0.2px] text-ink no-underline">
             BijbelStudie
@@ -104,7 +104,7 @@ export default async function PublicProfilePage({ params }: Params) {
           <div className="flex-1" />
           <Link
             href="/registreren"
-            className="text-[13px] font-semibold text-teal no-underline hover:text-teal-dark"
+            className="text-[13px] font-semibold text-teal dark:text-teal-400 no-underline hover:text-teal-dark dark:hover:text-teal-300"
           >
             Gratis beginnen
           </Link>
@@ -213,7 +213,7 @@ export default async function PublicProfilePage({ params }: Params) {
             </Link>
             <Link
               href="/inloggen"
-              className="text-[13px] font-semibold text-teal no-underline hover:text-teal-dark"
+              className="text-[13px] font-semibold text-teal dark:text-teal-400 no-underline hover:text-teal-dark dark:hover:text-teal-300"
             >
               Ik heb al een account →
             </Link>

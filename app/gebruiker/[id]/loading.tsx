@@ -8,8 +8,8 @@ import { Skeleton } from "../../../components/kit/primitives"
  */
 export default function PubliekeBoomLoading() {
   return (
-    <div className="min-h-screen bg-line-soft">
-      <header className="border-b border-line bg-white">
+    <div className="min-h-screen bg-line-soft dark:bg-background">
+      <header className="border-b border-line bg-surface">
         <div className="mx-auto flex h-16 w-full max-w-[600px] items-center px-5">
           <span className="text-[15px] font-bold tracking-[-0.2px] text-ink">BijbelStudie</span>
         </div>

@@ -23,8 +23,19 @@ export type ProBadgeSize = keyof typeof SIZES
  */
 const TONES = {
   solid: { backgroundColor: "#0F172A", borderColor: "rgba(45,212,191,.45)", color: "#99F6E4" },
-  soft: { backgroundColor: "#F0FDFA", borderColor: "rgba(13,148,136,.32)", color: "#0F766E" },
+  soft: {},
 } as const
+
+/**
+ * Tone colours that have to follow the theme live in classes, not inline
+ * style. `solid` reads the same on light and dark grounds, so it stays inline;
+ * `soft` resolves through the flipping teal-faint token and swaps to teal-300
+ * type on a teal hairline in dark mode.
+ */
+const TONE_CLASSES: Record<keyof typeof TONES, string> = {
+  solid: "",
+  soft: "bg-teal-faint text-teal-dark border-[rgba(13,148,136,.32)] dark:text-teal-300 dark:border-[rgba(45,212,191,.35)]",
+}
 
 export type ProBadgeTone = keyof typeof TONES
 
@@ -52,6 +63,7 @@ export function ProBadge({
       className={cn(
         "inline-flex items-center rounded-full border font-bold uppercase leading-none whitespace-nowrap",
         SIZES[size],
+        TONE_CLASSES[tone],
         className,
       )}
       style={TONES[tone]}

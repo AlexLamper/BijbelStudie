@@ -60,7 +60,7 @@ export default function TopBar({ title }: { title: string }) {
   }, [bellOpen]);
 
   return (
-    <header className="flex h-topbar flex-none items-center gap-4 border-b border-line bg-white px-[28px]">
+    <header className="flex h-topbar flex-none items-center gap-4 border-b border-line bg-surface px-[28px]">
       {/* 1. Title */}
       <h1 className="flex-none text-[18px] font-bold tracking-[-0.2px] text-ink">{title}</h1>
 
@@ -81,7 +81,7 @@ export default function TopBar({ title }: { title: string }) {
           placeholder="Zoek vers, studie of notitie"
           className="min-w-0 flex-1 border-0 bg-transparent p-0 text-[13px] text-ink outline-none placeholder:text-ink-faint [&::-webkit-search-cancel-button]:hidden"
         />
-        <span className="flex-none rounded-[5px] border border-line bg-white px-[5px] py-[2px] font-mono text-[10.5px] font-semibold text-ink-faint">
+        <span className="flex-none rounded-[5px] border border-line bg-surface px-[5px] py-[2px] font-mono text-[10.5px] font-semibold text-ink-faint">
           ⌘K
         </span>
       </div>
@@ -111,14 +111,13 @@ export default function TopBar({ title }: { title: string }) {
               <Bell size={19} strokeWidth={1.8} className="text-ink-body" />
             </button>
             {bellOpen && (
-              <div className="absolute right-0 top-[44px] z-50 w-[232px] rounded-[10px] border border-line bg-white p-3 text-[12.5px] leading-[1.55] text-ink-muted shadow-[0_8px_24px_-10px_rgba(17,24,39,.25)]">
+              <div className="absolute right-0 top-[44px] z-50 w-[232px] rounded-[10px] border border-line bg-surface p-3 text-[12.5px] leading-[1.55] text-ink-muted shadow-[0_8px_24px_-10px_rgba(17,24,39,.25)] dark:shadow-[0_8px_24px_-10px_rgba(0,0,0,.6)]">
                 Geen nieuwe meldingen.
               </div>
             )}
           </div>
 
-          {/* 5. Account. The same AccountAvatar as the sidebar foot and the
-                 profile header - one component, one Pro source (useIsPro), one
+          {/* 5. Account. The same AccountAvatar as the profile header - one component, one Pro source (useIsPro), one
                  streak source (useLevensboom) - so they can never disagree.
                  38 px is the old 34 px circle plus the 2 px ring it drew
                  outside itself. Streak top-right, PRO bottom-right; both are

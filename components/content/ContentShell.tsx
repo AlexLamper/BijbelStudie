@@ -3,8 +3,8 @@ import { ChevronRight } from "lucide-react";
 import { Header } from "../landing/navbar";
 import { Footer } from "../landing/footer";
 
-/** #0D9488 is 3.7:1 on white - fine as a fill, short of AA as type. */
-const TEAL_TEXT = "#0F766E";
+/* Teal type is `text-teal-dark` (#0F766E): #0D9488 is 3.7:1 on white - fine as
+   a fill, short of AA as type. On dark it lifts to teal-400. */
 
 export interface Crumb {
   name: string;
@@ -27,7 +27,7 @@ export function ContentShell({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: "#F9FAFB" }}>
+    <div className="min-h-screen flex flex-col bg-[#F9FAFB] dark:bg-background">
       <Header />
       {crumbs.length > 0 && <Breadcrumbs crumbs={crumbs} />}
       <main className="flex-grow">{children}</main>
@@ -45,8 +45,7 @@ export function Breadcrumbs({ crumbs }: { crumbs: Crumb[] }) {
   return (
     <nav
       aria-label="Kruimelpad"
-      className="border-b bg-white dark:bg-card"
-      style={{ borderColor: "#E5E7EB" }}
+      className="border-b border-line bg-surface"
     >
       <ol className="max-w-4xl mx-auto px-6 py-3 flex items-center gap-1.5 text-xs flex-wrap text-gray-500 dark:text-muted-foreground">
         {crumbs.map((crumb, i) => {
@@ -80,20 +79,16 @@ export function RelatedLinks({
   links: { href: string; label: string; description: string }[];
 }) {
   return (
-    <section className="mt-16 pt-10 border-t" style={{ borderColor: "#E5E7EB" }}>
+    <section className="mt-16 pt-10 border-t border-line">
       <h2 className="text-xl font-bold mb-5 text-gray-900 dark:text-foreground">{title}</h2>
       <div className="grid gap-3 sm:grid-cols-2">
         {links.map(link => (
           <Link
             key={link.href}
             href={link.href}
-            className="group block rounded-xl border bg-white dark:bg-card p-4 transition-colors hover:border-teal-500 no-underline"
-            style={{ borderColor: "#E5E7EB" }}
+            className="group block rounded-xl border border-line bg-surface p-4 transition-colors hover:border-teal-500 no-underline"
           >
-            <span
-              className="font-semibold text-sm block group-hover:underline"
-              style={{ color: TEAL_TEXT }}
-            >
+            <span className="font-semibold text-sm block group-hover:underline text-teal-dark dark:text-teal-400">
               {link.label}
             </span>
             <span className="text-sm mt-1 block text-gray-500 dark:text-muted-foreground">

@@ -19,24 +19,31 @@ import CountUp from "./CountUp"
 import { renderTreeSvg } from "../../lib/levensboom/svg"
 import { STAGES } from "../../lib/levensboom/stages"
 import { CATALOG } from "../../lib/levensboom/catalog"
+import { LP_THEME_VARS } from "./studyLandingShared"
 
 /* ─── Design tokens ──────────────────────────────────────────── */
+/* The neutrals are CSS variables so the page follows dark mode: the global
+   tokens where one exists, otherwise the `--lp-*` set from LP_THEME_VARS on the
+   root element. Light values are unchanged (noted beside each). */
 const T = {
   sidebar:  "#1F2937",
   teal:     "#0D9488",
   tealDark: "#0F766E",
-  tealLight:"#CCFBF1",
-  tealText: "#0F766E",
+  tealLight:"var(--lp-teal-light)",   // #CCFBF1
+  tealText: "var(--lp-teal-text)",    // #0F766E
   // For type on the teal-tinted pills: #0F766E only reaches 4.43:1 there.
-  tealDeep: "#115E59",
+  tealDeep: "var(--lp-teal-deep)",    // #115E59
   bg:       "#F3F4F6",
-  card:     "#FFFFFF",
-  border:   "#E5E7EB",
-  text:     "#111827",
+  // Section and page ground (#FFFFFF); cards sit on `card`, which in dark mode
+  // is one step lighter than the page.
+  page:     "var(--lp-page)",
+  card:     "var(--surface)",         // #FFFFFF
+  border:   "var(--line)",            // #E5E7EB
+  text:     "var(--ink)",             // #111827
   // Passes 4.5:1 on white *and* on the #F3F4F6 section background; #6B7280
   // reached only 4.39:1 on the latter.
-  muted:    "#4B5563",
-  light:    "#F9FAFB",
+  muted:    "var(--lp-muted)",        // #4B5563
+  light:    "var(--surface-sunken)",  // #F9FAFB
 }
 
 /**
@@ -155,9 +162,8 @@ function Navbar() {
          ScrollEffects sees content pass underneath. A permanent hairline under
          a header that is flush with a white hero just draws a line for no
          reason. */
-      className="nav-shadow sticky top-0 z-50"
+      className="nav-shadow sticky top-0 z-50 bg-white/[0.88] dark:bg-neutral-900/[0.88] [.dark.is-stuck_&]:border-b-line"
       style={{
-        backgroundColor: "rgba(255,255,255,0.88)",
         backdropFilter: "blur(12px)",
         WebkitBackdropFilter: "blur(12px)",
       }}
@@ -181,7 +187,7 @@ function Navbar() {
             { href: "#faq",           label: "FAQ" },
           ].map(({ href, label }) => (
             <Link key={href} href={href}
-              className="rounded-lg px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors hover:bg-gray-100"
+              className="rounded-lg px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors hover:bg-line-soft"
               style={{ color: T.muted }}>
               {label}
             </Link>
@@ -191,7 +197,7 @@ function Navbar() {
         {/* Knoppen - rechts uitgelijnd */}
         <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0 md:justify-self-end">
           <Link href="/inloggen"
-            className="hidden rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-gray-100 sm:block"
+            className="hidden rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-line-soft sm:block"
             style={{ color: T.muted }}>
             Inloggen
           </Link>
@@ -247,7 +253,7 @@ function Hero() {
     <section
       className="relative overflow-hidden"
       style={{
-        backgroundColor: T.card,
+        backgroundColor: T.page,
         /* The laptop fix. This block was `py-20 lg:py-28`, so a 1440x800 laptop
            and a 1440x1080 desktop got the same 112px top and bottom - and the
            laptop, which also loses 64px to the sticky header, ended up with the
@@ -455,8 +461,8 @@ function Hero() {
                 three floating labels read as clutter, and the progress card
                 already says what the XP is for. */}
             <div
-              className="absolute left-4 top-4 flex items-center gap-3 rounded-2xl border bg-white/85 py-2 pl-2 pr-4 backdrop-blur-md"
-              style={{ borderColor: "rgba(15,23,42,0.08)", boxShadow: "0 10px 24px -14px rgba(15,23,42,0.35)" }}
+              className="absolute left-4 top-4 flex items-center gap-3 rounded-2xl border border-slate-900/[0.08] bg-white/85 py-2 pl-2 pr-4 backdrop-blur-md dark:border-white/10 dark:bg-neutral-900/85"
+              style={{ boxShadow: "0 10px 24px -14px rgba(15,23,42,0.35)" }}
             >
               <LandingTree
                 svg={renderTreeSvg({ seed: LANDING_SEED, level: 14, frac: 0.7, species: "eik", framing: "portrait", width: 96, height: 96, rootAttributes: 'aria-hidden="true"' })}
@@ -475,14 +481,14 @@ function Hero() {
             {/* Where it is going. The streak cell that used to share this card
                 came off: one line and one bar is the calmer composition. */}
             <div
-              className="absolute inset-x-4 bottom-4 rounded-2xl border bg-white/85 px-4 py-3 backdrop-blur-md"
-              style={{ borderColor: "rgba(15,23,42,0.08)", boxShadow: "0 10px 24px -14px rgba(15,23,42,0.35)" }}
+              className="absolute inset-x-4 bottom-4 rounded-2xl border border-slate-900/[0.08] bg-white/85 px-4 py-3 backdrop-blur-md dark:border-white/10 dark:bg-neutral-900/85"
+              style={{ boxShadow: "0 10px 24px -14px rgba(15,23,42,0.35)" }}
             >
               <div className="flex items-baseline justify-between gap-3">
                 <p className="text-[12px] font-bold" style={{ color: T.text }}>Nog 340 XP tot de amandelboom</p>
                 <p className="text-[11px] tabular-nums" style={{ color: T.muted }}>62%</p>
               </div>
-              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full" style={{ backgroundColor: "rgba(15,23,42,0.08)" }}>
+              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-900/[0.08] dark:bg-white/15">
                 <div className="h-full rounded-full" style={{ width: "62%", backgroundColor: T.teal }} />
               </div>
             </div>
@@ -577,7 +583,7 @@ function LibraryGroup({
  */
 function BibleLibrary() {
   return (
-    <section id="bibliotheek" className={`${SECTION_Y} scroll-mt-16`} style={{ backgroundColor: T.card, ...EDGE }}>
+    <section id="bibliotheek" className={`${SECTION_Y} scroll-mt-16`} style={{ backgroundColor: T.page, ...EDGE }}>
       <div className={SHELL}>
         <SectionHeader
           label="Bibliotheek"
@@ -779,7 +785,7 @@ function Pricing() {
                 </ul>
 
                 <Link href="/inloggen"
-                  className="press block rounded-xl border py-3 text-center text-sm font-semibold transition-colors hover:bg-gray-50"
+                  className="press block rounded-xl border py-3 text-center text-sm font-semibold transition-colors hover:bg-sunken"
                   style={{ borderColor: T.border, color: T.text }}>
                   Gratis beginnen
                 </Link>
@@ -840,7 +846,7 @@ function Pricing() {
 /* ─── FAQ ────────────────────────────────────────────────────── */
 function FAQ() {
   return (
-    <section id="faq" className={`${SECTION_Y} scroll-mt-16`} style={{ backgroundColor: T.card, ...EDGE }}>
+    <section id="faq" className={`${SECTION_Y} scroll-mt-16`} style={{ backgroundColor: T.page, ...EDGE }}>
       <div className={SHELL}>
         <div className="mx-auto max-w-3xl">
           <SectionHeader label="FAQ" title="Veelgestelde vragen over bijbelstudie" />
@@ -927,7 +933,7 @@ function CTA() {
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link href="#levensboom"
-                  className="press inline-flex items-center justify-center gap-2 rounded-xl border bg-white px-8 py-3.5 font-semibold transition-colors hover:bg-gray-50"
+                  className="press inline-flex items-center justify-center gap-2 rounded-xl border bg-surface px-8 py-3.5 font-semibold transition-colors hover:bg-sunken"
                   style={{ borderColor: T.border, color: T.text }}>
                   Meer informatie
                 </Link>
@@ -959,7 +965,7 @@ function CTA() {
 function LevensboomSection() {
   const levelItems = CATALOG.filter(item => item.unlock.kind === "level")
   return (
-    <section id="levensboom" className={`${SECTION_Y} scroll-mt-16`} style={{ backgroundColor: T.card, ...EDGE }}>
+    <section id="levensboom" className={`${SECTION_Y} scroll-mt-16`} style={{ backgroundColor: T.page, ...EDGE }}>
       <div className={SHELL}>
         <SectionHeader
           label="Jouw voortgang"
@@ -987,14 +993,14 @@ function LevensboomSection() {
                 ]
                 const sample = to === null ? stage.from + 2 : Math.round((stage.from + to) / 2)
                 return (
-                  <li key={stage.id} className="lp-card flex items-center gap-4 rounded-2xl p-3">
+                  <li key={stage.id} className="lp-card dark:bg-surface dark:border-line dark:hover:border-line-strong flex items-center gap-4 rounded-2xl p-3">
                     <LandingTree
                       svg={renderTreeSvg({ seed: LANDING_SEED, level: sample, frac: 0.6, species: "eik", framing: "portrait", width: 120, height: 120, rootAttributes: 'aria-hidden="true"' })}
                       seed={LANDING_SEED}
                       level={sample}
                       species="eik"
                       framing="portrait"
-                      className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-full ring-1 ring-black/5"
+                      className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-full ring-1 ring-black/5 dark:ring-white/10"
                     />
                     <div className="min-w-0">
                       <div className="flex items-baseline justify-between gap-3">
@@ -1020,7 +1026,7 @@ function LevensboomSection() {
 /* ─── Page ───────────────────────────────────────────────────── */
 export default function LandingPage() {
   return (
-    <div className="relative min-h-screen" style={{ backgroundColor: T.card }}>
+    <div className={`relative min-h-screen ${LP_THEME_VARS}`} style={{ backgroundColor: T.page }}>
       {/* The header's stuck state is "is this pixel still on screen". A
           sentinel answers that with an observer instead of a scroll listener
           running a React state update on every frame. */}

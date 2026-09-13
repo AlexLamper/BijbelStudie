@@ -16,7 +16,7 @@ export default function LezenLoading() {
       <div
         role="status"
         aria-label="Bijbel laden"
-        className="flex min-h-0 w-full flex-1 overflow-hidden bg-white"
+        className="flex min-h-0 w-full flex-1 overflow-hidden bg-surface"
       >
         <div className="flex min-w-0 flex-[1.05] flex-col border-r border-line">
           <div className="flex h-14 flex-none items-center gap-[9px] border-b border-line px-4">

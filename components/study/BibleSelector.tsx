@@ -50,7 +50,7 @@ function SelectBox({
 }) {
   return (
     <div
-      className={`relative flex h-9 flex-none items-center rounded-[9px] border border-line bg-white ${
+      className={`relative flex h-9 flex-none items-center rounded-[9px] border border-line bg-surface ${
         disabled ? 'opacity-50' : ''
       }`}
       style={{ width }}

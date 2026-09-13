@@ -65,7 +65,7 @@ export default function LessonList({
 
   return (
     <section
-      className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-card border border-line bg-white"
+      className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-card border border-line bg-surface"
       aria-labelledby="studie-lessen"
     >
       <div className="flex flex-none items-center gap-[22px] border-b border-line px-[21px]">
@@ -85,7 +85,7 @@ export default function LessonList({
               className={[
                 'border-b-2 pb-3 pt-[15px] text-[14px] transition-colors',
                 active
-                  ? 'border-teal font-semibold text-teal'
+                  ? 'border-teal font-semibold text-teal dark:border-teal-400 dark:text-teal-400'
                   : 'border-transparent font-medium text-ink-muted hover:text-ink-body',
               ].join(' ')}
             >
@@ -133,7 +133,7 @@ export default function LessonList({
                           isDone
                             ? 'bg-success-fill text-white'
                             : isCurrent
-                              ? 'border-[2.5px] border-teal bg-white text-teal'
+                              ? 'border-[2.5px] border-teal bg-surface text-teal dark:text-teal-400'
                               : 'border border-line bg-line-soft text-ink-faint',
                         ].join(' ')}
                       >
@@ -152,7 +152,7 @@ export default function LessonList({
                         <span
                           className={[
                             'mt-[2px] block truncate text-[12px]',
-                            isCurrent ? 'font-semibold text-teal' : 'text-ink-faint',
+                            isCurrent ? 'font-semibold text-teal dark:text-teal-400' : 'text-ink-faint',
                           ].join(' ')}
                         >
                           {reference} · {lesson.minutes} min{isCurrent ? ' · nu' : ''}
@@ -167,7 +167,7 @@ export default function LessonList({
                         data-track="study_lesson_open"
                         className={[
                           'flex-none text-[12.5px] font-semibold outline-none transition-colors',
-                          isDone || isCurrent ? 'text-teal hover:text-teal-dark' : 'text-ink-faint hover:text-ink-body',
+                          isDone || isCurrent ? 'text-teal hover:text-teal-dark dark:text-teal-400 dark:hover:text-teal-300' : 'text-ink-faint hover:text-ink-body',
                         ].join(' ')}
                       >
                         {action}

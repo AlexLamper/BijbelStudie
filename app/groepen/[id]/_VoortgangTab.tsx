@@ -5,7 +5,8 @@ import { CalendarCheck2, Check, Target, Settings } from "lucide-react"
 import { SkeletonRows } from "../../../components/ui/skeletons"
 
 const TEAL = "#0D9488"
-const TEAL_TEXT = "#0F766E"
+/** #0F766E on the white card; teal-400 on the dark one. */
+const TEAL_TEXT = "text-teal-dark dark:text-teal-400"
 
 interface MemberRow {
   id: string
@@ -88,7 +89,7 @@ export default function VoortgangTab({ groupId }: { groupId: string }) {
         <section>
           <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
             <div>
-              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: TEAL_TEXT }}>
+              <p className={`text-xs font-bold uppercase tracking-widest ${TEAL_TEXT}`}>
                 Weekopdracht
               </p>
               <p className="text-sm font-semibold text-gray-900 dark:text-foreground mt-0.5">
@@ -111,7 +112,7 @@ export default function VoortgangTab({ groupId }: { groupId: string }) {
                 className="flex items-center justify-between rounded-lg px-3 py-2 bg-gray-50 dark:bg-secondary/40">
                 <span className="text-sm text-gray-800 dark:text-foreground truncate">{m.name}</span>
                 {m.assignmentDone ? (
-                  <span className="flex items-center gap-1 text-xs font-semibold" style={{ color: TEAL_TEXT }}>
+                  <span className={`flex items-center gap-1 text-xs font-semibold ${TEAL_TEXT}`}>
                     <Check size={13} /> Bestudeerd
                   </span>
                 ) : (
@@ -128,7 +129,7 @@ export default function VoortgangTab({ groupId }: { groupId: string }) {
           <div className="flex items-center gap-2 mb-3">
             <Target size={14} style={{ color: TEAL }} />
             <div>
-              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: TEAL_TEXT }}>
+              <p className={`text-xs font-bold uppercase tracking-widest ${TEAL_TEXT}`}>
                 Challenge
               </p>
               <p className="text-sm font-semibold text-gray-900 dark:text-foreground mt-0.5">

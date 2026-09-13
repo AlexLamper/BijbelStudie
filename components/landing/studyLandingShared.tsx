@@ -3,22 +3,33 @@
  * (`ContinueStudy`, `StudyDiscovery`).
  *
  * These mirror the `T` / `SHELL` / `EDGE` tokens defined inside
- * `LandingPage.tsx` - the landing page is a light-only surface that styles with
- * hardcoded hex through inline styles rather than Tailwind `dark:` variants, so
- * the new sections follow the same idiom to stay visually consistent with the
- * page they live on. The teal is `#0D9488`, the brand value used everywhere.
+ * `LandingPage.tsx` - the landing page styles through inline styles rather than
+ * Tailwind `dark:` variants, so the new sections follow the same idiom to stay
+ * visually consistent with the page they live on. The teal is `#0D9488`, the brand value used everywhere.
  */
+/**
+ * Dark mode for the landing page. The page styles through inline `style`
+ * colours, which a `dark:` class cannot reach, so the colours that have no
+ * global token are scoped CSS variables set here and flipped under `.dark`.
+ * The rest point at the global tokens (`--ink`, `--line`, `--surface`,
+ * `--surface-sunken`), whose light values are the hex this page always used.
+ * Put this class on the landing page's root element.
+ */
+export const LP_THEME_VARS =
+  "[--lp-teal-text:#0F766E] [--lp-teal-deep:#115E59] [--lp-teal-light:#CCFBF1] [--lp-muted:#4B5563] [--lp-page:#FFFFFF] " +
+  "dark:[--lp-teal-text:#2DD4BF] dark:[--lp-teal-deep:#5EEAD4] dark:[--lp-teal-light:rgba(45,212,191,0.15)] dark:[--lp-muted:#A3A3A3] dark:[--lp-page:#171717]"
+
 export const ST = {
   teal: "#0D9488",
   tealDark: "#0F766E",
-  tealText: "#0F766E",
-  tealDeep: "#115E59",
-  tealLight: "#CCFBF1",
-  card: "#FFFFFF",
-  border: "#E5E7EB",
-  text: "#111827",
-  muted: "#4B5563",
-  light: "#F9FAFB",
+  tealText: "var(--lp-teal-text, #0F766E)",
+  tealDeep: "var(--lp-teal-deep, #115E59)",
+  tealLight: "var(--lp-teal-light, #CCFBF1)",
+  card: "var(--surface)",
+  border: "var(--line)",
+  text: "var(--ink)",
+  muted: "var(--lp-muted, #4B5563)",
+  light: "var(--surface-sunken)",
 } as const
 
 /** One container width and gutter, identical to the landing page's `SHELL`. */

@@ -43,11 +43,11 @@ function relativeTime(iso: string) {
 function TypeBadge({ type }: { type: MsgType }) {
   if (type === "bericht") return null
   const label = type === "gebedsverzoek" ? "Gebedsverzoek" : "Aankondiging"
-  const bg    = type === "gebedsverzoek" ? "#F3E8FF" : "#FEF3C7"
-  const color = type === "gebedsverzoek" ? "#6B21A8" : "#92400E"
+  const tone = type === "gebedsverzoek"
+    ? "bg-purple-100 text-purple-800 dark:bg-purple-500/15 dark:text-purple-300"
+    : "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300"
   return (
-    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-      style={{ backgroundColor: bg, color }}>
+    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${tone}`}>
       {label}
     </span>
   )
@@ -91,12 +91,9 @@ function ReactionBar({
     <div className="flex items-center gap-1 flex-wrap relative">
       {Object.entries(grouped).map(([emoji, { count, mine }]) => (
         <button key={emoji} onClick={() => toggle(emoji)}
-          className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-xs border transition-colors"
-          style={{
-            backgroundColor: mine ? "rgba(13,148,136,0.1)" : "#F9FAFB",
-            borderColor: mine ? "rgba(13,148,136,0.3)" : "#E5E7EB",
-            color: mine ? "#0D9488" : "#6B7280",
-          }}>
+          className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-xs border transition-colors ${
+            mine ? "bg-teal/10 border-teal/30 text-teal dark:text-teal-400" : "bg-sunken border-line text-ink-muted"
+          }`}>
           {emoji} {count}
         </button>
       ))}
@@ -151,7 +148,7 @@ function ReplyThread({
     <div className="ml-10 mt-2 space-y-2 border-l-2 border-gray-100 dark:border-border pl-3">
       {replies.map(r => (
         <div key={r._id} className="flex items-start gap-2">
-          {r.userId ? <Avatar name={r.userId.name} size={6} card={r.userId.levensboom} /> : <div className="w-6 h-6 rounded-full bg-gray-200" />}
+          {r.userId ? <Avatar name={r.userId.name} size={6} card={r.userId.levensboom} /> : <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-secondary" />}
           <div className="flex-1 min-w-0">
             {r.deletedAt ? (
               <p className="text-xs text-gray-400 dark:text-muted-foreground italic">Dit bericht is verwijderd.</p>
@@ -203,7 +200,7 @@ function MessageCard({
       ) : (
         <>
           <div className="flex items-start gap-3">
-            {msg.userId ? <Avatar name={msg.userId.name} size={8} card={msg.userId.levensboom} /> : <div className="w-8 h-8 rounded-full bg-gray-200" />}
+            {msg.userId ? <Avatar name={msg.userId.name} size={8} card={msg.userId.levensboom} /> : <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-secondary" />}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap mb-1">
                 <span className="text-sm font-semibold text-gray-900 dark:text-foreground">{msg.userId?.name}</span>
@@ -211,7 +208,7 @@ function MessageCard({
                 <span className="text-xs text-gray-400 dark:text-muted-foreground ml-auto">{relativeTime(msg.createdAt)}</span>
               </div>
               {msg.verseRef && (
-                <p className="text-xs font-semibold mb-1" style={{ color: "#0D9488" }}>
+                <p className="text-xs font-semibold mb-1 text-teal dark:text-teal-400">
                   {msg.verseRef.book} {msg.verseRef.chapter}{msg.verseRef.verse ? `:${msg.verseRef.verse}` : ""}
                 </p>
               )}
@@ -437,7 +434,7 @@ export default function DiscussieTab({
             <span className="text-gray-600 dark:text-muted-foreground">
               Antwoord op <span className="font-semibold text-gray-800 dark:text-foreground">{replyTo.userId?.name}</span>
             </span>
-            <button onClick={() => setReplyTo(null)} className="ml-auto text-gray-400 hover:text-gray-600">
+            <button onClick={() => setReplyTo(null)} className="ml-auto text-gray-400 hover:text-gray-600 dark:hover:text-foreground">
               <X size={12} />
             </button>
           </div>
@@ -458,12 +455,9 @@ export default function DiscussieTab({
             {/* Type pills */}
             {!replyTo && MSG_TYPES.map(({ type, label }) => (
               <button key={type} onClick={() => setType(type)}
-                className="text-xs px-2.5 py-1 rounded-full border font-medium transition-colors"
-                style={{
-                  backgroundColor: composerType === type ? "#0D9488" : "transparent",
-                  color: composerType === type ? "white" : "#6B7280",
-                  borderColor: composerType === type ? "#0D9488" : "#E5E7EB",
-                }}>
+                className={`text-xs px-2.5 py-1 rounded-full border font-medium transition-colors ${
+                  composerType === type ? "bg-teal border-teal text-white" : "bg-transparent border-line text-ink-muted"
+                }`}>
                 {label}
               </button>
             ))}

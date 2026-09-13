@@ -23,8 +23,9 @@ import { track, trackNow } from "../../lib/analytics"
 import { Panel, SceneSkeleton, SectionHeading } from "../../components/scene/pieces"
 import { PLATE, TEAL, TEAL_DEEP, TEAL_ON_DARK } from "../../components/scene/tokens"
 
-/** #0D9488 is 3.7:1 on white - fine as a fill, short of AA as type. */
-const TEAL_TEXT = "#0F766E"
+/** #0D9488 is 3.7:1 on white - fine as a fill, short of AA as type. #0F766E
+ *  (teal-700) is the type colour on the light plate, teal-400 on the dark one. */
+const TEAL_TEXT = "text-teal-700 dark:text-teal-400"
 
 /**
  * The reasons apply to the product, not to a billing interval. The page used to
@@ -68,7 +69,7 @@ function PlanCard({
 
   return (
     <div
-      className={`relative flex flex-col p-6 ${PLATE}`}
+      className={`relative flex flex-col p-6 ${PLATE} dark:bg-surface dark:ring-white/10`}
       // `outline` rather than a ring, so the plate keeps its own hairline and
       // its shadow; a negative offset keeps the frame inside the rounded edge.
       style={recommended ? { outline: `2px solid ${TEAL}`, outlineOffset: -2 } : undefined}
@@ -88,7 +89,7 @@ function PlanCard({
 
       <div className="mb-5">
         <div className="mb-1 flex flex-wrap items-center gap-2">
-          <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
+          <p className="text-xs font-semibold uppercase tracking-widest text-ink-muted">
             {isAnnual ? "Jaarlijks" : "Maandelijks"}
           </p>
           {/* The badge is a comparison between the two tariffs we actually
@@ -99,8 +100,7 @@ function PlanCard({
               the prices do not support. */}
           {isAnnual && (
             <span
-              className="whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-bold"
-              style={{ backgroundColor: "#FEF3C7", color: "#92400E" }}
+              className="whitespace-nowrap rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-800 dark:bg-amber-500/15 dark:text-amber-300"
             >
               {annualDiscountPercent()}% goedkoper
             </span>
@@ -110,28 +110,28 @@ function PlanCard({
         {/* Headline is the weekly figure; the amount actually charged sits
             directly underneath, which the price-indication rules require. */}
         <div className="flex flex-wrap items-end gap-1.5">
-          <span className="text-4xl font-bold tabular-nums text-gray-900">
+          <span className="text-4xl font-bold tabular-nums text-ink">
             {perWeek(plan)}
           </span>
-          <span className="mb-1 text-sm text-gray-500">per week</span>
+          <span className="mb-1 text-sm text-ink-muted">per week</span>
         </div>
 
         {isAnnual ? (
           <>
-            <p className="mt-1.5 text-xs font-semibold" style={{ color: TEAL_TEXT }}>
+            <p className={`mt-1.5 text-xs font-semibold ${TEAL_TEXT}`}>
               Je bespaart {annualSaving()} per jaar
             </p>
-            <p className="mt-0.5 text-xs text-gray-500">
+            <p className="mt-0.5 text-xs text-ink-muted">
               {plan.billedLabel} · {effectivePerMonth(plan)} per maand
             </p>
             {/* A comparison between two tariffs we genuinely charge - not a
                 former price - so it carries no "was/now" styling. */}
-            <p className="mt-0.5 text-xs text-gray-500">
+            <p className="mt-0.5 text-xs text-ink-muted">
               Bij maandelijkse betaling: {monthlyEquivalentPerYear()} per jaar
             </p>
           </>
         ) : (
-          <p className="mt-1.5 text-xs text-gray-500">
+          <p className="mt-1.5 text-xs text-ink-muted">
             {plan.billedLabel} · Altijd opzegbaar
           </p>
         )}
@@ -139,11 +139,11 @@ function PlanCard({
 
       <ul className="mb-6 flex-1 space-y-2.5">
         {PRO_FEATURES.map(f => (
-          <li key={f} className="flex items-start gap-2.5 text-sm text-gray-700">
+          <li key={f} className="flex items-start gap-2.5 text-sm text-ink-body">
             {/* Both plans contain the same product, so both get the same ticks.
                 The annual card used to render these grey, which read as
                 "not included". */}
-            <CheckCircle size={14} aria-hidden style={{ color: TEAL_TEXT, flexShrink: 0, marginTop: 3 }} />
+            <CheckCircle size={14} aria-hidden className={TEAL_TEXT} style={{ flexShrink: 0, marginTop: 3 }} />
             {f}
           </li>
         ))}
@@ -152,12 +152,10 @@ function PlanCard({
       <button
         onClick={() => onSelect(interval)}
         disabled={busy}
-        className="press flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[#0F766E] focus-visible:ring-offset-2 disabled:opacity-60"
-        style={
-          recommended
-            ? { backgroundColor: TEAL_DEEP, color: "#fff" }
-            : { color: "#374151", backgroundColor: "#FFFFFF", border: "1px solid #D1D5DB" }
-        }
+        className={`press flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[#0F766E] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-surface disabled:opacity-60 ${
+          recommended ? "" : "border border-line-strong bg-surface text-ink-body"
+        }`}
+        style={recommended ? { backgroundColor: TEAL_DEEP, color: "#fff" } : undefined}
       >
         {busy ? (
           <Loader2 size={16} aria-hidden className="animate-spin" />
