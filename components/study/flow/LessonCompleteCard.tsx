@@ -431,11 +431,13 @@ function GuestSaveGate({
               Verder met les {nextLessonDay} zonder account <ArrowRight size={13} />
             </button>
           )}
+          {/* After the final lesson the study's own page has nothing further
+              to offer a guest, so the quiet way out is the catalogue. */}
           <Link
-            href={`/studies/${studyId}`}
+            href={nextLessonDay == null ? '/studies' : `/studies/${studyId}`}
             className={`inline-flex items-center rounded-md text-[13px] font-medium ${INK_MUTED} no-underline transition-colors hover:text-les-ink ${FOCUS_RING}`}
           >
-            Overzicht
+            {nextLessonDay == null ? 'Andere studies bekijken' : 'Overzicht'}
           </Link>
         </div>
       </div>
@@ -485,6 +487,10 @@ function SignedInCompletion({
   const hasQuiz = quizScore !== null && quizTotal !== null && quizTotal > 0;
   const done = Math.min(lessonsCompleted, lessonsTotal);
   const pct = lessonsTotal > 0 ? Math.round((done / lessonsTotal) * 100) : 0;
+  // Navigation only: every lesson is done, whether this completion closed the
+  // study or repeated its final lesson afterwards.
+  const studyDone =
+    finished || (summary.nextLessonDay == null && lessonsTotal > 0 && done >= lessonsTotal);
   const xp = useCountUp(summary.xpAwarded, !reduceMotion);
 
   return (
@@ -606,6 +612,12 @@ function SignedInCompletion({
           />
         )}
 
+        {/* A finished study has nothing left on its detail page, so the way out
+            is onward: the catalogue to pick the next study, or the dashboard.
+            A repeat of the final lesson of a study already completed earlier
+            (studyCompleted is only true on the completion that closed it) is
+            the same situation. A final lesson with earlier lessons still open
+            keeps "Terug naar de studie" - that is where the gaps are. */}
         <div className="mt-4 flex flex-col sm:flex-row gap-2">
           {summary.nextLessonDay != null && !finished ? (
             <button
@@ -615,6 +627,14 @@ function SignedInCompletion({
             >
               Verder met les {summary.nextLessonDay} <ArrowRight size={15} />
             </button>
+          ) : studyDone ? (
+            <Link
+              href="/studies"
+              className={`press inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-btn text-[14px] font-semibold text-white no-underline transition-opacity hover:opacity-90 ${FOCUS_RING}`}
+              style={{ backgroundColor: accentSolid }}
+            >
+              Kies een nieuwe studie <ArrowRight size={15} />
+            </Link>
           ) : (
             <Link
               href={`/studies/${studyId}`}
@@ -626,10 +646,10 @@ function SignedInCompletion({
           )}
 
           <Link
-            href={`/studies/${studyId}`}
+            href={studyDone ? '/dashboard' : `/studies/${studyId}`}
             className={`press inline-flex h-11 items-center justify-center rounded-btn border border-les-card-line px-4 text-[14px] font-medium ${INK} no-underline hover:bg-les-card ${FOCUS_RING}`}
           >
-            Overzicht
+            {studyDone ? 'Naar dashboard' : 'Overzicht'}
           </Link>
         </div>
       </div>

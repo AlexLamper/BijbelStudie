@@ -1,9 +1,11 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { ArrowRight, BookOpen, ChartNoAxesColumn } from "lucide-react"
 import { CHAPTER_COUNTS } from "../../lib/data/bible-chapter-counts"
 import { curatedStudies } from "../../lib/data/curated-studies"
+import { findAnyStudy } from "../../lib/bookStudies"
 import {
   NT_BOOKS,
   OT_BOOKS,
@@ -24,7 +26,6 @@ import {
   SectionHeading,
   StudyCard,
   WeekBars,
-  bannerGradient,
 } from "../../components/kit/primitives"
 
 /**
@@ -35,9 +36,9 @@ import {
  * studies; the rail is the tree, the week and the 66 books.
  *
  * Every number on this screen comes from the hooks that were already here -
- * `useDashboardData` and `useTreeSummary` are untouched, and no fetch was
- * added. Where the design shows a value this page has no source for, the UI is
- * built and the value is left to the source (see "Verder waar je was" below).
+ * `useDashboardData` and `useTreeSummary` are untouched. The one addition is
+ * `useResumeStudy` below: a single indexed read of the user's enrolments, so
+ * "Verder waar je was" can name the running study lesson.
  *
  * THE READING HEATMAP is the one derived value RULES.md §3 asks for: a 0-4 step
  * per book, computed here from `bookReadRatio`, which the hook already returns.
@@ -53,9 +54,74 @@ function heatStep(ratio: number): number {
   return 4
 }
 
+/** The fields of a serialised enrolment this page reads. */
+interface EnrollmentSummary {
+  studyId: string
+  status: string
+  currentLessonDay: number | null
+  lessonsTotal: number
+  lessonsCompleted: number
+  completedAt: string | null
+}
+
+/**
+ * The running study lesson for "Verder waar je was".
+ *
+ * One GET to /api/v1/study-enrollments: a single indexed find on
+ * `{ userId, lastActivityAt }`, already sorted newest first, and a 401 before
+ * any query for a guest. The first active, unfinished enrolment wins - the
+ * same one /studie resumes.
+ */
+function useResumeStudy() {
+  const [enrollment, setEnrollment] = useState<EnrollmentSummary | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let cancelled = false
+    fetch("/api/v1/study-enrollments")
+      .then(r => (r.ok ? r.json() : null))
+      .then(data => {
+        if (cancelled) return
+        const list: EnrollmentSummary[] = data?.enrollments ?? []
+        const active = list.find(e => e.status === "active" && !e.completedAt && findAnyStudy(e.studyId))
+        setEnrollment(active ?? null)
+      })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true }
+  }, [])
+
+  if (!enrollment) return { resume: null, loading }
+
+  const study = findAnyStudy(enrollment.studyId)!
+  const total = enrollment.lessonsTotal || study.lessons.length
+  const day = enrollment.currentLessonDay ?? Math.min(total, enrollment.lessonsCompleted + 1)
+  const lesson = study.lessons.find(l => l.day === day)
+  // Generated book lessons are titled "6. Noach" or "Hoofdstuk 6"; the number
+  // is already in "les 6", so keep only a name that says something.
+  const rawTitle = lesson?.title.replace(/^\d+\.\s*/, "") ?? ""
+  const lessonTitle = /^Hoofdstuk \d+$/.test(rawTitle) ? "" : rawTitle
+
+  return {
+    loading,
+    resume: {
+      href: `/studie/${study.id}`,
+      title: study.title,
+      day,
+      total,
+      lessonTitle,
+      pct: total > 0 ? Math.round((enrollment.lessonsCompleted / total) * 100) : 0,
+    },
+  }
+}
+
 export default function DashboardPage() {
   const d = useDashboardData()
   const tree = useTreeSummary()
+  const { resume, loading: resumeLoading } = useResumeStudy()
+  // Hold the card until both sources have answered, so it never flips from the
+  // last chapter to the study lesson a moment later.
+  const continueLoading = !resume && (d.loading || resumeLoading)
 
   const level = d.level?.level ?? tree.level
   const pct = Math.min(100, d.level?.progressPercentage ?? tree.progressPercentage)
@@ -92,55 +158,81 @@ export default function DashboardPage() {
           <DailyVerseCard verse={d.verse} loading={d.verseLoading} />
 
           {/* Verder waar je was.
-              The design writes this card around a running study lesson
-              ("Genesis - les 6 van 50"). Nothing this page already fetches
-              knows which study that is - the enrolment lives behind
-              /api/v1/study-enrollments and RULES.md forbids adding a fetch - so
-              the card is built on the value that IS here: the last chapter
-              read. The second button still hands off to /studie, which resolves
-              the newest active enrolment server-side. */}
-          <Card className="flex flex-none overflow-hidden">
-            <div
-              className="w-[124px] flex-none"
-              style={{ background: bannerGradient(lastRead?.book ?? "lezen") }}
-            />
-            <div className="min-w-0 flex-1 px-[22px] py-5">
-              <div className="text-[10.5px] font-semibold uppercase tracking-[1.1px] text-teal">
-                {lastRead ? "Verder waar je was" : "Begin waar je wilt"}
+              One row: the text block at `flex-1` (eyebrow, title, a slim bar
+              with "les 6 van 50" beside it) and a single teal button on the
+              right. The row wraps, so in a narrow work column the button drops
+              under the text instead of squeezing the title.
+              Three states, most specific first: a running study lesson (from
+              the enrolment), else the last chapter read, else a start. */}
+          {continueLoading ? (
+            <Card className="flex flex-none flex-wrap items-center gap-x-8 gap-y-4 px-6 py-5">
+              <div className="min-w-[min(100%,240px)] flex-1" aria-busy="true">
+                <div className="h-[11px] w-[130px] animate-pulse rounded bg-line-soft" />
+                <div className="mt-[10px] h-[24px] w-[min(100%,300px)] animate-pulse rounded bg-line-soft" />
+                <div className="mt-[14px] h-[6px] max-w-[340px] animate-pulse rounded-full bg-line-soft" />
               </div>
-              <div className="mt-[5px] truncate text-[21px] font-bold tracking-[-0.3px] text-ink">
-                {lastRead ? `${lastRead.book} ${lastRead.chapter}` : "Kies een hoofdstuk of een studie"}
-              </div>
-              <div className="mt-1 text-[13px] text-ink-faint">
-                {lastRead
-                  ? `${bookRead} van ${bookChapters} hoofdstukken in ${lastRead.book}`
-                  : "Je laatst gelezen hoofdstuk verschijnt hier"}
-              </div>
-
-              {lastRead && (
-                <div className="mt-[13px] flex max-w-[420px] items-center gap-3">
-                  <ProgressBar value={bookPct} height={6} className="flex-1" />
-                  <span className="text-[12px] font-semibold text-ink-muted tabular-nums">{bookPct} %</span>
+              <div className="h-12 w-[180px] flex-none animate-pulse rounded-btn bg-line-soft" />
+            </Card>
+          ) : (
+            <Card className="flex flex-none flex-wrap items-center gap-x-8 gap-y-4 px-6 py-5">
+              <div className="min-w-[min(100%,240px)] flex-1">
+                <div className="text-[11px] font-semibold uppercase tracking-[1.4px] text-teal">
+                  {resume || lastRead ? "Verder waar je was" : "Begin waar je wilt"}
                 </div>
-              )}
+                <div className="mt-[6px] text-[22px] font-bold leading-[1.25] tracking-[-0.3px] text-ink [overflow-wrap:anywhere]">
+                  {resume
+                    ? `${resume.title} · les ${resume.day}${resume.lessonTitle ? ` — ${resume.lessonTitle}` : ""}`
+                    : lastRead
+                      ? `${lastRead.book} ${lastRead.chapter}`
+                      : "Kies een hoofdstuk of een studie"}
+                </div>
 
-              <div className="mt-4 flex gap-[10px]">
+                {resume || lastRead ? (
+                  <div className="mt-[14px] flex items-center gap-[14px]">
+                    <ProgressBar
+                      value={resume ? resume.pct : bookPct}
+                      height={6}
+                      className="max-w-[340px] flex-1"
+                    />
+                    <span className="flex-none whitespace-nowrap text-[13px] text-ink-muted tabular-nums">
+                      {resume
+                        ? `les ${resume.day} van ${resume.total}`
+                        : `${bookRead} van ${bookChapters} hoofdstukken`}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="mt-[6px] text-[13px] text-ink-muted">
+                    Je laatst gelezen hoofdstuk verschijnt hier
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-none flex-wrap items-center gap-x-5 gap-y-2">
+                {/* The old card's second door to /studie stays wherever the card
+                    is not already about a study. */}
+                {!resume && (
+                  <Link
+                    href="/studie"
+                    className="text-[14px] font-semibold text-ink-body no-underline transition-colors hover:text-teal"
+                  >
+                    Studie openen
+                  </Link>
+                )}
                 <Link
-                  href={readingHref}
-                  className="inline-flex h-[42px] items-center gap-2 rounded-btn bg-teal px-[18px] text-[14px] font-semibold text-white no-underline transition-opacity hover:opacity-90"
+                  href={resume ? resume.href : readingHref}
+                  data-track={resume ? "study_resume" : undefined}
+                  className="inline-flex h-12 items-center gap-[10px] rounded-[12px] bg-teal px-[22px] text-[15px] font-semibold text-white no-underline transition-colors hover:bg-teal-dark"
                 >
-                  {lastRead ? "Verder lezen" : "Beginnen met lezen"}
-                  <ArrowRight size={16} />
-                </Link>
-                <Link
-                  href="/studie"
-                  className="inline-flex h-[42px] items-center rounded-btn border border-line px-[18px] text-[14px] font-semibold text-ink-body no-underline transition-colors hover:bg-line-soft"
-                >
-                  Studie openen
+                  {resume
+                    ? `Verder met les ${resume.day}`
+                    : lastRead
+                      ? "Verder lezen"
+                      : "Beginnen met lezen"}
+                  <ArrowRight size={17} strokeWidth={2.2} />
                 </Link>
               </div>
-            </div>
-          </Card>
+            </Card>
+          )}
 
           <SectionHeading
             title="Aanbevolen voor jou"
