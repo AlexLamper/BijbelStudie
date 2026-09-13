@@ -10,6 +10,8 @@ import { getPreferenceClasses, getPreferenceStyles } from '../../lib/preferenceC
 import SpeakButton from './SpeakButton';
 import { SpokenTextScope, useSpokenLocalRange } from './SpokenText';
 import UpgradePrompt from "../pricing/UpgradePrompt";
+import CalvinCoverageNotice from './CalvinCoverageNotice';
+import { calvinCoverageNotice, isCalvinSource } from '../../lib/calvinCoverage';
 
 function stripHtml(html: string): string {
   return html
@@ -338,6 +340,22 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
   const { t } = useTranslation('study');
   const [notFound, setNotFound] = useState(false);
 
+  // Calvijn did not comment on every book or chapter, and calvijn_nl ships a
+  // placeholder for chapters not yet translated. Explain which case it is
+  // instead of an empty panel (lib/calvinCoverage.ts).
+  const calvinNotice = useMemo(() => {
+    if (loading || error || !isCalvinSource(selectedSource)) return null;
+    const settled = Boolean(commentary) || notFound;
+    const notice = calvinCoverageNotice({
+      sourceId: selectedSource,
+      book,
+      chapter,
+      texts: commentary ? Object.values(commentary) : null,
+    });
+    // Before the first fetch settles only the historical cases are known.
+    return notice && (settled || notice.kind !== 'not-yet-available') ? notice : null;
+  }, [loading, error, selectedSource, book, chapter, commentary, notFound]);
+
   const API_BASE_URL = '/api';
 
   useEffect(() => {
@@ -468,7 +486,7 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
           <span className="flex-1 text-[12px] font-semibold uppercase tracking-[1.2px] text-ink-muted dark:text-muted-foreground">
             Commentaarbron
           </span>
-          {commentary && Object.keys(commentary).length > 0 && (
+          {commentary && Object.keys(commentary).length > 0 && !calvinNotice && (
             <SpeakButton
               compact
               showSettings={false}
@@ -552,6 +570,19 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
                       Error loading commentary
                   </p>
                   <p className="font-inter text-gray-700 dark:text-muted-foreground text-sm">{error}</p>
+              </div>
+          ) : calvinNotice ? (
+              <div className="py-2">
+                <CalvinCoverageNotice
+                  notice={calvinNotice}
+                  alternatives={availableSources
+                    .filter((s) => !isCalvinSource(s.id))
+                    .sort((a, b) => Number(a.language !== 'nl') - Number(b.language !== 'nl'))}
+                  onSwitch={(newSource) => {
+                    setSelectedSource(newSource);
+                    if (onSourceChange) onSourceChange(newSource);
+                  }}
+                />
               </div>
           ) : notFound ? (
               <div className="py-12 text-center text-gray-500 dark:text-muted-foreground text-sm">

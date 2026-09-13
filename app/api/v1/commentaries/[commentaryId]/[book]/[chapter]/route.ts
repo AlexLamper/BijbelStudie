@@ -4,7 +4,9 @@ import {
   corsPreflight,
   errorV1,
   handleV1Error,
+  jsonV1,
 } from '../../../../../../../lib/apiV1';
+import { calvinCoverageEnvelope } from '../../../../../../../lib/calvinCoverage';
 import { getMobileCommentaryChapter } from '../../../../../../../lib/mobileContent';
 import { resolveUser } from '../../../../../../../lib/apiAuth';
 import { gateCommentary } from '../../../../../../../lib/proContent';
@@ -29,7 +31,31 @@ export async function GET(
 
     const decodedBook = decodeURIComponent(book);
     const payload = await getMobileCommentaryChapter(commentaryId, decodedBook, chapterNumber);
-    if (!payload) return errorV1('NOT_FOUND', 404, 'Commentaar niet gevonden.');
+    if (!payload) {
+      // Additive: Calvin sources explain WHY there is nothing (lib/calvinCoverage.ts).
+      const coverage = calvinCoverageEnvelope({
+        sourceId: commentaryId,
+        book: decodedBook,
+        chapter: chapterNumber,
+        texts: null,
+      });
+      if (coverage) {
+        return jsonV1(
+          { error: 'NOT_FOUND', message: coverage.message ?? 'Commentaar niet gevonden.', coverage },
+          { status: 404 },
+        );
+      }
+      return errorV1('NOT_FOUND', 404, 'Commentaar niet gevonden.');
+    }
+
+    // Computed on the ungated text, so a free reader's preview never looks
+    // like "no content".
+    const coverage = calvinCoverageEnvelope({
+      sourceId: commentaryId,
+      book: decodedBook,
+      chapter: chapterNumber,
+      texts: payload.verses.map((v) => v.t),
+    });
 
     const user = await resolveUser(req);
     const gated = gateCommentary(
@@ -41,7 +67,14 @@ export async function GET(
 
     return cachedJsonV1(
       req,
-      { ...payload, verses: gated.items, locked: gated.locked, totalVerses: payload.verses.length },
+      {
+        ...payload,
+        verses: gated.items,
+        locked: gated.locked,
+        totalVerses: payload.verses.length,
+        // Only present for Calvin sources, so other payloads are unchanged.
+        ...(coverage ? { coverage } : {}),
+      },
       { private: true },
     );
   } catch (error) {
