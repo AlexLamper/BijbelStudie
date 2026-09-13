@@ -15,14 +15,14 @@ const SIZES = {
 export type ProBadgeSize = keyof typeof SIZES
 
 /**
- * `solid` - deep teal plate, white type. The default, and the one that works on
- *           every ground: white cards, the dark /abonnement hero, dark admin
- *           cards.
+ * `solid` - "Midnight": slate-900 plate, teal-200 type, teal hairline border.
+ *           The default, and the one that works on every ground: white cards,
+ *           the dark /abonnement hero, dark admin cards.
  * `soft`  - teal-faint plate, deep teal type, hairline teal border. For a Pro
- *           marker that stands in a row of quiet chips (the /profiel header).
+ *           marker that stands in a row of quiet chips.
  */
 const TONES = {
-  solid: { backgroundColor: "#0F766E", borderColor: "rgba(255,255,255,.14)", color: "#FFFFFF" },
+  solid: { backgroundColor: "#0F172A", borderColor: "rgba(45,212,191,.45)", color: "#99F6E4" },
   soft: { backgroundColor: "#F0FDFA", borderColor: "rgba(13,148,136,.32)", color: "#0F766E" },
 } as const
 
@@ -33,9 +33,8 @@ export type ProBadgeTone = keyof typeof TONES
  * account avatar (components/kit/AccountAvatar).
  *
  * Slate-and-teal, no gold, no gradient, no glow, no icon: a compact small-caps
- * word is the whole mark. The plate is #0F766E rather than brand #0D9488
- * because white on brand teal measures 3.7:1 and these are 10-11 px words;
- * #0F766E holds 5.5:1. The soft tone's ink is the same #0F766E on #F0FDFA.
+ * word is the whole mark. Teal-200 on slate-900 holds well above 4.5:1 for
+ * these 10-11 px words. The soft tone's ink is #0F766E on #F0FDFA.
  */
 export function ProBadge({
   size = "sm",

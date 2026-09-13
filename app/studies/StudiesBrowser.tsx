@@ -291,10 +291,9 @@ export default function StudiesBrowser() {
       )}
 
       {searchResults === null && resume && (
-        // A compact resume card, as wide as a comfortable title line and no
-        // wider: stretched across a wide screen the button drifts far from
-        // the study it continues.
-        <Card className="flex w-full max-w-[560px] flex-none items-center gap-[15px] px-[18px] py-[14px]">
+        // A resume card with room for a long title, capped so that on a wide
+        // screen the button does not drift far from the study it continues.
+        <Card className="flex w-full max-w-[860px] flex-none items-center gap-[15px] px-[18px] py-[14px]">
           {/* The ring is the progress, bent around the thumbnail. */}
           <div
             className="flex h-12 w-12 flex-none items-center justify-center rounded-full"

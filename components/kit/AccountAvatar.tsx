@@ -4,8 +4,7 @@ import NavTreeAvatar from "../levensboom/NavTreeAvatar";
 import { useIsPro } from "../../hooks/useIsPro";
 import { useLevensboom } from "../../hooks/useLevensboom";
 
-const TEAL = "#0D9488";
-const TEAL_DEEP = "#0F766E";
+const SLATE_900 = "#0F172A";
 
 /**
  * Ring and corner-mark metrics per avatar size, so a 36 px sidebar avatar and a
@@ -22,12 +21,12 @@ const TEAL_DEEP = "#0F766E";
  */
 function metrics(size: number) {
   if (size < 48) {
-    return { stroke: 1.5, gap: 2, pill: { font: 10, height: 15, padX: 4, track: 0.6, outline: 2, x: -7, y: -3 } };
+    return { stroke: 1.5, gap: 2, glow: 6, pill: { font: 9.5, height: 15, padX: 4, track: 0.9, outline: 2, x: -7, y: -3 } };
   }
   if (size < 80) {
-    return { stroke: 2, gap: 2.5, pill: { font: 10, height: 16, padX: 5, track: 0.7, outline: 2, x: -5, y: -2 } };
+    return { stroke: 1.75, gap: 2.5, glow: 10, pill: { font: 10, height: 16, padX: 5, track: 1, outline: 2, x: -5, y: -2 } };
   }
-  return { stroke: 2.5, gap: 3, pill: { font: 11, height: 19, padX: 7, track: 0.8, outline: 2.5, x: 2, y: 6 } };
+  return { stroke: 2, gap: 3.5, glow: 18, pill: { font: 10, height: 19, padX: 7, track: 1.4, outline: 2.5, x: 2, y: 6 } };
 }
 
 type Corner = "top" | "bottom";
@@ -45,21 +44,23 @@ function pillBase(size: number, corner: Corner): React.CSSProperties {
 }
 
 /**
- * The compact PRO mark, bottom-right. Deep teal plate, white type (5.5:1 -
- * brand teal itself is 3.7:1 against white and fails for 10 px text), and an
- * outline in the surface colour so it sits cleanly over the ring it overlaps.
- * No gradient, no glow, no icon.
+ * The compact PRO mark, bottom-right ("Midnight"): a slate-900 plate with
+ * letter-spaced teal-200 type and a teal hairline, plus an outline in the
+ * surface colour so it sits cleanly over the ring it overlaps. No gold, no
+ * icon.
  */
 function ProMark({ size }: { size: number }) {
   const { pill } = metrics(size);
   return (
     <span
-      className="absolute inline-flex items-center justify-center rounded-full font-bold uppercase leading-none text-white"
+      className="absolute inline-flex items-center justify-center rounded-full font-semibold uppercase leading-none"
       style={{
         ...pillBase(size, "bottom"),
         letterSpacing: pill.track,
-        backgroundColor: TEAL_DEEP,
-        boxShadow: `0 0 0 ${pill.outline}px var(--surface, #fff)`,
+        paddingLeft: pill.padX + pill.track / 2,
+        backgroundColor: SLATE_900,
+        color: "#99F6E4",
+        boxShadow: `inset 0 0 0 1px rgba(45,212,191,.45), 0 0 0 ${pill.outline}px var(--surface, #fff), 0 2px 6px rgba(15,23,42,.18)`,
       }}
     >
       Pro
@@ -69,21 +70,22 @@ function ProMark({ size }: { size: number }) {
 
 /**
  * The streak count, top-right. The quiet partner of the PRO mark: white plate,
- * deep teal number, a teal hairline for an edge on a white ground, and the same
+ * slate-900 number, a hairline for an edge on a white ground, and the same
  * surface-coloured outline where it crosses the ring.
  */
 function StreakMark({ size, streak }: { size: number; streak: number }) {
   const { pill } = metrics(size);
+  const label = `${streak} ${streak === 1 ? "dag" : "dagen"} reeks`;
   return (
     <span
-      aria-label={`${streak} ${streak === 1 ? "dag" : "dagen"} reeks`}
-      title={`${streak} ${streak === 1 ? "dag" : "dagen"} reeks`}
-      className="absolute inline-flex items-center justify-center rounded-full bg-white font-bold leading-none tabular-nums"
+      aria-label={label}
+      title={label}
+      className="absolute inline-flex items-center justify-center rounded-full bg-white font-semibold leading-none tabular-nums"
       style={{
         ...pillBase(size, "top"),
         minWidth: pill.height,
-        color: TEAL_DEEP,
-        boxShadow: `inset 0 0 0 1px rgba(13,148,136,.35), 0 0 0 ${pill.outline}px var(--surface, #fff)`,
+        color: SLATE_900,
+        boxShadow: `inset 0 0 0 1px rgba(15,23,42,.14), 0 0 0 ${pill.outline}px var(--surface, #fff), 0 1px 3px rgba(15,23,42,.10)`,
       }}
     >
       {streak}
@@ -93,13 +95,13 @@ function StreakMark({ size, streak }: { size: number; streak: number }) {
 
 /**
  * The frame every account avatar shares: the tree disc, a gap in the surface
- * colour, and the ring. Pro draws a thin teal ring that deepens slightly toward
- * the bottom; a free account draws a hairline in `line`, at the same inset, so
- * the tree is the same size either way.
+ * colour, and the ring. Pro draws a thin teal-to-emerald ring with a barely
+ * visible teal glow and a second hairline on the disc itself; a free account
+ * draws one hairline in `line`, at the same inset, so the tree is the same size
+ * either way.
  *
  * `pro` and `streak` are passed in rather than read here so callers that
- * already know them (and the tests of this component, should they come) do not
- * need a session or the tree state.
+ * already know them do not need a session or the tree state.
  */
 export function AvatarFrame({
   size,
@@ -119,7 +121,7 @@ export function AvatarFrame({
   /** Extra corner content, e.g. a level marker. */
   children?: React.ReactNode;
 }) {
-  const { stroke, gap } = metrics(size);
+  const { stroke, gap, glow } = metrics(size);
   const inset = stroke + gap;
   const inner = Math.max(1, Math.round(size - inset * 2));
 
@@ -134,7 +136,11 @@ export function AvatarFrame({
         className="absolute inset-0 rounded-full"
         style={
           pro
-            ? { backgroundImage: `linear-gradient(160deg, ${TEAL} 0%, ${TEAL_DEEP} 100%)` }
+            ? {
+                backgroundImage:
+                  "conic-gradient(from 210deg, #0D9488, #10B981 30%, #5EEAD4 50%, #10B981 70%, #0D9488)",
+                boxShadow: `0 0 ${glow}px rgba(13,148,136,.16)`,
+              }
             : { backgroundColor: "var(--line, #E5E7EB)" }
         }
       />
@@ -150,6 +156,17 @@ export function AvatarFrame({
       >
         <NavTreeAvatar size={inner} showLevel={false} fallback={null} />
       </span>
+      <span
+        aria-hidden
+        className="pointer-events-none absolute rounded-full"
+        style={{
+          top: inset,
+          left: inset,
+          width: inner,
+          height: inner,
+          boxShadow: pro ? "inset 0 0 0 1px rgba(13,148,136,.28)" : "inset 0 0 0 1px rgba(15,23,42,.06)",
+        }}
+      />
       {streak != null && streak > 0 && <StreakMark size={size} streak={streak} />}
       {pro && mark && <ProMark size={size} />}
       {children}
@@ -162,10 +179,10 @@ export function AvatarFrame({
  * mark. The top bar, the sidebar foot and the profile header all draw this one
  * component, from one source each - Pro from `useIsPro` (the session's resolved
  * entitlement), the streak from `useLevensboom().data.streak` (the
- * /api/v1/gamification summary, which is what the top bar always showed) - so
- * they can never show different things for the same account.
+ * /api/v1/gamification summary) - so they can never show different things for
+ * the same account.
  *
- * The streak is shown only when it is above 0, as the top bar did before.
+ * The streak is shown only when it is above 0.
  */
 export default function AccountAvatar({
   size,
