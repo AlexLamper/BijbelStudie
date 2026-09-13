@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { MoreHorizontal, LogOut } from "lucide-react";
-import AccountAvatar from "../kit/AccountAvatar";
 import { useLevensboom } from "../../hooks/useLevensboom";
 import { useIsPro } from "../../hooks/useIsPro";
 import { NAV_GROUPS, isNavActive, type NavItem } from "./nav";
@@ -40,12 +39,12 @@ function NavRow({ item, active }: { item: NavItem; active: boolean }) {
       <Icon
         size={18}
         strokeWidth={1.8}
-        className={active ? "text-teal-dark flex-shrink-0" : "text-ink-muted flex-shrink-0"}
+        className={active ? "text-teal-dark dark:text-teal-400 flex-shrink-0" : "text-ink-muted flex-shrink-0"}
       />
       <span
         className={[
           "flex-1 text-[13.5px]",
-          active ? "font-semibold text-teal-dark" : "font-medium text-ink-body",
+          active ? "font-semibold text-teal-dark dark:text-teal-400" : "font-medium text-ink-body",
         ].join(" ")}
       >
         {item.title}
@@ -86,7 +85,7 @@ function AccountMenu() {
         <MoreHorizontal size={17} className="text-ink-faint" />
       </button>
       {open && (
-        <div className="absolute bottom-[26px] right-0 z-50 w-[172px] overflow-hidden rounded-[10px] border border-line bg-white py-1 shadow-[0_8px_24px_-10px_rgba(17,24,39,.25)]">
+        <div className="absolute bottom-[26px] right-0 z-50 w-[172px] overflow-hidden rounded-[10px] border border-line bg-surface py-1 shadow-[0_8px_24px_-10px_rgba(17,24,39,.25)] dark:shadow-[0_8px_24px_-10px_rgba(0,0,0,.6)]">
           <Link
             href="/profiel"
             onClick={() => setOpen(false)}
@@ -105,7 +104,7 @@ function AccountMenu() {
           <button
             type="button"
             onClick={() => signOut({ callbackUrl: "/" })}
-            className="flex w-full items-center gap-2 px-3 py-2 text-left text-[13px] font-medium text-danger hover:bg-line-soft"
+            className="flex w-full items-center gap-2 px-3 py-2 text-left text-[13px] font-medium text-danger hover:bg-line-soft dark:text-red-400"
           >
             <LogOut size={14} />
             Uitloggen
@@ -126,7 +125,7 @@ export default function Sidebar({ active }: { active?: string }) {
   const showTreeSub = pathname === "/profiel" || pathname === "/profiel/boom";
 
   return (
-    <aside className="flex w-sidebar flex-none flex-col overflow-hidden border-r border-line bg-white">
+    <aside className="flex w-sidebar flex-none flex-col overflow-hidden border-r border-line bg-surface">
       {/* Brand - 64 px, exactly the top bar's height, so the two rules meet */}
       <Link
         href="/dashboard"
@@ -163,7 +162,7 @@ export default function Sidebar({ active }: { active?: string }) {
                       className={[
                         "flex h-[32px] items-center rounded-[8px] pl-[40px] pr-[11px] text-[12.5px] no-underline transition-colors",
                         pathname === "/profiel/boom"
-                          ? "bg-[var(--teal-wash-2)] font-semibold text-teal-dark"
+                          ? "bg-[var(--teal-wash-2)] font-semibold text-teal-dark dark:text-teal-400"
                           : "font-medium text-ink-body hover:bg-line-soft",
                       ].join(" ")}
                     >
@@ -180,12 +179,11 @@ export default function Sidebar({ active }: { active?: string }) {
       {/* Account. /studies and /lezen are open to visitors without an account,
           so the foot has two shapes: the account, or the way in. */}
       {session?.user ? (
-        <div className="flex flex-none items-center gap-[12px] border-t border-line p-[11px]">
-          {/* The same AccountAvatar as the top bar - streak top-right, PRO
-              bottom-right, from the same sources (useLevensboom, useIsPro) - so
-              the two circles always match. The level lives in the line under
-              the name. */}
-          <AccountAvatar size={36} />
+        <div className="flex flex-none items-center gap-[8px] border-t border-line py-[11px] pl-[21px] pr-[11px]">
+          {/* No avatar here: the top bar already carries the account circle.
+              The text starts on the nav rows' own left edge (10 px nav padding
+              + 11 px row padding), and the level lives in the line under the
+              name. */}
           <div className="min-w-0 flex-1">
             <div className="truncate text-[13px] font-semibold text-ink">
               {session.user.name ?? "Gebruiker"}
