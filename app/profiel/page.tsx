@@ -9,9 +9,12 @@ import { BadgesDialog, BadgeRings, BADGE_TOTAL } from "../../components/profile/
 import ActivityFeed, { type ActivityFilter } from "../../components/profile/ActivityFeed"
 import AppShell from "../../components/shell/AppShell"
 import TreeAvatar from "../../components/kit/TreeAvatar"
+import AccountAvatar from "../../components/kit/AccountAvatar"
 import Tabs from "../../components/kit/Tabs"
 import { Card, Pill, ProgressBar, Skeleton, StatCard } from "../../components/kit/primitives"
+import { ProBadge } from "../../components/ui/ProBadge"
 import { useLevensboom } from "../../hooks/useLevensboom"
+import { useIsPro } from "../../hooks/useIsPro"
 
 interface UserData {
   _id: string
@@ -187,7 +190,10 @@ export default function ProfilePage() {
   const stageName = levensboom?.levensboom?.stage?.name ?? null
   const remainingXp = levensboom ? Math.max(0, levensboom.xpForNextLevel - levensboom.xpIntoLevel) : 0
   const dayWord = (n: number) => (n === 1 ? "dag" : "dagen")
-  const isPro = Boolean(user?.subscribed || user?.isAdmin)
+  // The session's resolved entitlement, the same source the top bar and the
+  // sidebar read. `/api/user`'s `subscribed` is only the Stripe flag, so an App
+  // Store subscriber was Pro in the shell and "Upgrade naar Pro" here.
+  const isPro = useIsPro()
 
   return (
     <AppShell title="Profiel">
@@ -196,7 +202,7 @@ export default function ProfilePage() {
         <div className="flex min-w-0 flex-1 flex-col gap-4">
           {/* Who this is */}
           <Card className="flex flex-none items-start gap-5 p-5">
-            <TreeAvatar size={96} ring={4} level={level} levelStyle="dot" />
+            <AccountAvatar size={96} />
 
             <div className="min-w-0 flex-1">
               {waiting ? (
@@ -290,7 +296,14 @@ export default function ProfilePage() {
               )}
 
               <div className="mt-3 flex flex-wrap gap-2">
-                {isPro && <Pill tone="gold" label={user?.isAdmin ? "Admin toegang" : "Pro actief"} />}
+                {isPro && (
+                  <ProBadge
+                    tone="soft"
+                    size="md"
+                    className="self-center"
+                    label={user?.isAdmin ? "Admin toegang" : "Pro actief"}
+                  />
+                )}
                 {streak > 0 && <Pill tone="warn" label={`${streak} ${dayWord(streak)} reeks`} />}
                 {memberSince && <Pill label={`Lid sinds ${memberSince}`} />}
               </div>
@@ -387,17 +400,11 @@ export default function ProfilePage() {
               <Skeleton className="mt-4 h-14 w-full" />
             ) : isPro ? (
               <>
-                <span
-                  className="mt-[15px] inline-block rounded-full border px-[13px] py-[6px] text-[11px] font-bold uppercase tracking-[0.8px]"
-                  style={{
-                    backgroundImage: "var(--grad-pro-badge)",
-                    borderColor: "var(--pro-badge-border)",
-                    color: "var(--gold-ink)",
-                    boxShadow: "0 1px 2px rgba(74,53,6,.12)",
-                  }}
-                >
-                  {user?.isAdmin ? "Admin toegang" : "Pro actief"}
-                </span>
+                <ProBadge
+                  size="md"
+                  className="mt-[15px]"
+                  label={user?.isAdmin ? "Admin toegang" : "Pro actief"}
+                />
                 <p className="mt-3 text-[13px] leading-[1.6] text-ink-muted">
                   {user?.isAdmin
                     ? "Als admin heb je toegang tot alle Pro-functies."

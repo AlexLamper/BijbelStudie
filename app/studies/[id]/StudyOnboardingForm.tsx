@@ -4,11 +4,13 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   BookOpen,
+  Bookmark,
   CalendarDays,
   Layers,
   Loader2,
   Play,
   Settings2,
+  Share2,
   X,
 } from 'lucide-react';
 import type { StudyDepth, StudyRhythm } from '../../../lib/data/curated-studies';
@@ -22,8 +24,9 @@ const DIALOG_SAVE =
 const CTA_PRIMARY =
   'press inline-flex items-center justify-center gap-2 rounded-btn bg-teal px-5 text-[14px] font-semibold text-white no-underline outline-none transition-opacity hover:opacity-90';
 
-const CTA_QUIET =
-  'press inline-flex items-center justify-center gap-2 rounded-btn border border-line px-4 text-[13px] font-semibold text-ink-body no-underline outline-none transition-colors hover:bg-line-soft';
+/** Bewaren / Delen: quiet slate buttons, half the card each. */
+const CTA_SECONDARY =
+  'press inline-flex h-10 min-w-0 items-center justify-center gap-2 rounded-btn border border-slate-200 bg-slate-50 px-3 text-[13px] font-medium text-slate-600 outline-none transition-colors hover:bg-slate-100 hover:text-slate-800 focus-visible:ring-2 focus-visible:ring-slate-300 disabled:opacity-60';
 
 const ERROR_INK = '#DC2626';
 
@@ -95,6 +98,11 @@ interface StudySetup {
   /** The action block stays quiet about an error the dialog is already showing. */
   settingsOpen: boolean;
   openSettings: () => void;
+  studyId: string;
+  studyTitle: string;
+  /** This account has the study in its saved list. Always false for a guest. */
+  saved: boolean;
+  setSaved: (saved: boolean) => void;
   /** Creates the enrollment with the current settings and opens lesson one. */
   start: () => void;
 }
@@ -135,6 +143,8 @@ function useStudySetup(component: string) {
  */
 export default function StudySetupProvider({
   studyId,
+  studyTitle = '',
+  initialSaved = false,
   translations,
   defaultTranslation,
   suggestedRhythm,
@@ -148,7 +158,11 @@ export default function StudySetupProvider({
   children,
 }: {
   studyId: string;
-  translations: { id: string; name: string; language?: string }[];
+  /** Used as the share sheet's title. */
+  studyTitle?: string;
+  /** Whether the signed-in account has already saved this study. */
+  initialSaved?: boolean;
+  translations:{ id: string; name: string; language?: string }[];
   defaultTranslation: string;
   suggestedRhythm: StudyRhythm;
   suggestedDepth: StudyDepth;
@@ -175,6 +189,7 @@ export default function StudySetupProvider({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
+  const [saved, setSaved] = useState(initialSaved);
 
   useEffect(() => {
     if (!open) return;
@@ -266,6 +281,10 @@ export default function StudySetupProvider({
         settingsOpen: open,
         openSettings: () => setOpen(true),
         start: () => void submit('start'),
+        studyId,
+        studyTitle,
+        saved,
+        setSaved,
       }}
     >
       {children}
@@ -434,14 +453,13 @@ export default function StudySetupProvider({
 }
 
 /**
- * The settings, as the quiet action beside the primary one.
+ * The settings entry point, sitting in the banner's top-right corner.
  *
- * Summary and entry point in one control: one line of values, the dialog behind
- * it. Below md the three values would run past the measure, so the control
- * falls back to its own name there - the values stay on the button as its
- * accessible name and as a tooltip either way.
+ * Same dialog as before; only its place moved. The current values stay on the
+ * button as its accessible name and tooltip. Translucent white because it sits
+ * on the banner's gradient. The label drops below 400 px, the icon stays.
  */
-export function StudySettingsButton() {
+export function StudySettingsButton({ className = '' }: { className?: string }) {
   const { rhythmLabel, depthLabel, translationName, openSettings } =
     useStudySetup('StudySettingsButton');
 
@@ -455,12 +473,109 @@ export function StudySettingsButton() {
       aria-haspopup="dialog"
       title={`Instellingen: ${summary}`}
       aria-label={`Studie-instellingen wijzigen. Nu: ${summary}`}
-      className={CTA_QUIET}
+      className={`press inline-flex h-8 items-center gap-1.5 rounded-full border border-white/25 bg-white/15 px-2.5 text-[12px] font-medium text-white outline-none backdrop-blur-sm transition-colors hover:bg-white/25 focus-visible:ring-2 focus-visible:ring-white/60 min-[400px]:px-3 ${className}`}
     >
       <Settings2 size={14} aria-hidden className="flex-none" />
-      <span className="hidden max-w-[340px] truncate md:inline">{summary}</span>
-      <span className="md:hidden">Instellingen</span>
+      <span className="hidden min-[400px]:inline">Instellingen</span>
     </button>
+  );
+}
+
+/**
+ * Bewaren and Delen, side by side at half the card each.
+ *
+ * Bewaren toggles the study in the account's `savedStudies` list
+ * (/api/v1/saved-studies) optimistically, rolling back if the write fails; a
+ * guest is sent to sign in first. Delen opens the Web Share sheet where there
+ * is one and copies the link everywhere else.
+ */
+export function StudySaveShareButtons() {
+  const router = useRouter();
+  const { guest, studyId, studyTitle, saved, setSaved } = useStudySetup('StudySaveShareButtons');
+  const [saving, setSaving] = useState(false);
+  const [note, setNote] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!note) return;
+    const timer = setTimeout(() => setNote(null), 2500);
+    return () => clearTimeout(timer);
+  }, [note]);
+
+  async function toggleSaved() {
+    if (guest) {
+      router.push(`/inloggen?next=${encodeURIComponent(`/studies/${studyId}`)}`);
+      return;
+    }
+    const next = !saved;
+    setSaved(next);
+    setSaving(true);
+    try {
+      const res = await fetch('/api/v1/saved-studies', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ studyId, saved: next }),
+      });
+      if (res.status === 401) {
+        setSaved(!next);
+        router.push(`/inloggen?next=${encodeURIComponent(`/studies/${studyId}`)}`);
+        return;
+      }
+      if (!res.ok) throw new Error('save failed');
+    } catch {
+      setSaved(!next);
+      setNote('Bewaren lukte niet');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function share() {
+    const url = window.location.href;
+    // A share the user cancels is not a failure, so no fallback after it.
+    if (typeof navigator.share === 'function') {
+      try {
+        await navigator.share({ title: studyTitle || document.title, url });
+      } catch {
+        /* cancelled */
+      }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      setNote('Link gekopieerd');
+    } catch {
+      setNote('Kopiëren lukte niet');
+    }
+  }
+
+  return (
+    <div>
+      <div className="grid grid-cols-2 gap-[9px]">
+        <button
+          type="button"
+          onClick={() => void toggleSaved()}
+          disabled={saving}
+          aria-pressed={guest ? undefined : saved}
+          data-track="study_save"
+          className={CTA_SECONDARY}
+        >
+          <Bookmark
+            size={15}
+            aria-hidden
+            className="flex-none"
+            fill={saved ? 'currentColor' : 'none'}
+          />
+          <span className="truncate">{saved ? 'Bewaard' : 'Bewaren'}</span>
+        </button>
+        <button type="button" onClick={() => void share()} data-track="study_share" className={CTA_SECONDARY}>
+          <Share2 size={15} aria-hidden className="flex-none" />
+          <span className="truncate">Delen</span>
+        </button>
+      </div>
+      <p role="status" aria-live="polite" className="mt-2 text-center text-[12px] text-slate-500 empty:hidden">
+        {note}
+      </p>
+    </div>
   );
 }
 
@@ -539,7 +654,7 @@ export function StudyActionBar() {
           </button>
         )}
 
-        <StudySettingsButton />
+        <StudySaveShareButtons />
       </div>
 
       {/* A guest is told up front where the account comes in, so the ask at

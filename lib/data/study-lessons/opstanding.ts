@@ -22,7 +22,7 @@ export const opstandingLessons: Record<number, LessonContent> = {
       ],
     },
     word: {
-      readingCue: 'Lees rustig. Let op wie er beweegt, en in welke richting.',
+      readingCue: 'Lees de tekst aandachtig en neem de tijd. Let op wat de getuigen zien, en hoe zij daarop reageren.',
     },
     depth: {
       body: [

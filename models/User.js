@@ -27,6 +27,9 @@ const UserSchema = new mongoose.Schema(
     lostStreakAt: { type: Date, default: null },
     lostStreakSeenAt: { type: Date, default: null },
     badges: { type: [String], default: [] },
+    // Studies bookmarked from /studies/[id] ("Bewaren"). Ids only, written by
+    // /api/v1/saved-studies with $addToSet / $pull - never by a save().
+    savedStudies: { type: [String], default: [] },
     // Experience and level. XP is awarded by lib/gamification.ts, which weights
     // a studied passage far above a read one on purpose: the point of the app
     // is understanding a small portion, not covering a large one.

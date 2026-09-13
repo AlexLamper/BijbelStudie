@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
 import { Heart, Share2, MoreHorizontal, BookOpen, History } from "lucide-react"
 import {
@@ -17,6 +17,7 @@ import {
 } from "../ui/dialog"
 import { ProgressTreeScene } from "./ProgressTree"
 import { useLevensboom } from "../../hooks/useLevensboom"
+import { paletteForNow } from "../../lib/levensboom/palette"
 import {
   dailyVersePhoto,
   dayLabel,
@@ -40,6 +41,23 @@ const TEAL = "#0D9488"
  * the beat and the transition that draws it.
  */
 const BEAT_MS = 130
+
+/**
+ * The widest the tree's landscape is ever drawn, in CSS pixels.
+ *
+ * The scene framing of `TreeCanvas` places its backdrop in fractions of the
+ * canvas width - the moon, the boat, the tower, the stones and the hill waves
+ * are all sized from `w` - while the tree itself is sized from the height. In
+ * a card that is 218 px tall and, on a 2560 px screen, close to 1900 px wide,
+ * that drew a thumbnail tree under a moon the size of the card and hills
+ * pulled out into a flat line. Past this width the landscape stops growing:
+ * it stays anchored to the right, away from the verse, and the sky and earth
+ * carry on to the left as plain colour.
+ */
+const SCENE_MAX_W = 880
+/** How far into the landscape its left edge dissolves into that plain colour. */
+const SCENE_FADE_W = 280
+const sceneMask = `linear-gradient(to right, transparent calc(100% - ${SCENE_MAX_W}px), #000 calc(100% - ${SCENE_MAX_W - SCENE_FADE_W}px))`
 
 export type DailyVerse = {
   text: string
@@ -89,7 +107,20 @@ export default function DailyVerseCard({
   // Whether there is a tree to draw at all. `disabled` is the reader's own
   // "verberg mijn boom" setting, and it has to be honoured here too.
   const { data: levensboom } = useLevensboom()
-  const hasTree = Boolean(levensboom?.levensboom && !levensboom.levensboom.disabled)
+  const tree = levensboom?.levensboom
+  const hasTree = Boolean(tree && !tree.disabled)
+
+  // The sky and earth the landscape continues into on a card wider than
+  // SCENE_MAX_W: the same palette call TreeCanvas makes, laid out the way it
+  // paints them (sky down to the earth band's top at 88 %, then the band).
+  const treeHealth = tree?.health
+  const treeScene = tree?.avatar.scene
+  const treeSpecies = tree?.avatar.species
+  const sceneGround = useMemo(() => {
+    if (!hasTree) return undefined
+    const p = paletteForNow(treeHealth, new Date(), { scene: treeScene, species: treeSpecies })
+    return `linear-gradient(to bottom, ${p.skyTop} 0%, ${p.skyBottom} 88%, ${p.ground} 88%, ${p.groundDeep} 100%)`
+  }, [hasTree, treeHealth, treeScene, treeSpecies])
 
   // Read the archive after mount, never during render: localStorage does not
   // exist on the server, and touching it in the render pass would make the
@@ -173,7 +204,10 @@ export default function DailyVerseCard({
   const photo = dailyVersePhoto()
 
   return (
-    <div className="relative flex h-[218px] min-w-0 flex-none flex-col overflow-hidden rounded-card">
+    // `min-h`, not `h`: 218 px is the design's height, but a long verse at a
+    // phone's width (or four lines at the 680 px measure) needs more, and a
+    // fixed height clipped it under the action row.
+    <div className="relative flex min-h-[218px] min-w-0 flex-none flex-col overflow-hidden rounded-card">
       {/* THE PICTURE IS THE READER'S OWN TREE.
           `ProgressTreeScene` draws the landscape they built in the studio -
           their species, their scene, their animal, at their level - which is
@@ -207,8 +241,26 @@ export default function DailyVerseCard({
         <div
           aria-hidden
           className="absolute inset-0 motion-safe:animate-fade-in"
+          style={{ backgroundImage: sceneGround }}
         >
-          <ProgressTreeScene still className="h-full w-full" />
+          {/* The canvas never gets wider than SCENE_MAX_W, so its backdrop
+              keeps the proportions it was drawn for (the tree itself is always
+              drawn at one uniform scale, so it never distorts). The mask sits
+              on the full-card layer so its stops follow the card: on a card
+              narrower than SCENE_MAX_W - SCENE_FADE_W both stops fall left of
+              the card and nothing is faded; wider, the landscape's left edge
+              dissolves over SCENE_FADE_W into the plain sky and earth. */}
+          <div
+            className="absolute inset-0"
+            style={{
+              WebkitMaskImage: sceneMask,
+              maskImage: sceneMask,
+            }}
+          >
+            <div className="absolute inset-y-0 right-0 w-full" style={{ maxWidth: SCENE_MAX_W }}>
+              <ProgressTreeScene still className="h-full w-full" />
+            </div>
+          </div>
         </div>
       )}
       <div
@@ -236,7 +288,7 @@ export default function DailyVerseCard({
           </div>
         ) : verse ? (
           <p
-            className="content-in mt-3 max-w-[680px] font-serif text-[25px] font-normal leading-[1.45] text-white"
+            className="content-in mt-3 max-w-[680px] font-serif text-[21px] font-normal leading-[1.45] text-white sm:text-[25px]"
             style={{ textShadow: "0 1px 3px rgba(0,0,0,.28)", overflowWrap: "break-word" }}
           >
             {verse.text}
@@ -247,7 +299,7 @@ export default function DailyVerseCard({
 
         {/* Three round actions along the foot of the card, in the design's
             order: heart, share, overflow. */}
-        <div className="flex items-center gap-[10px]">
+        <div className="mt-4 flex items-center gap-[10px]">
           <RoundAction
             label={liked ? "Verwijder uit favorieten" : "Favoriet"}
             onClick={handleLike}

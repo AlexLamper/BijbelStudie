@@ -5,8 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Search, Bell } from "lucide-react";
-import NavTreeAvatar from "../levensboom/NavTreeAvatar";
-import { useLevensboom } from "../../hooks/useLevensboom";
+import AccountAvatar from "../kit/AccountAvatar";
 
 /**
  * The top bar, identical on all nine routes.
@@ -32,14 +31,10 @@ import { useLevensboom } from "../../hooks/useLevensboom";
 export default function TopBar({ title }: { title: string }) {
   const pathname = usePathname();
   const { data: session, status } = useSession();
-  const { data } = useLevensboom();
   const [bellOpen, setBellOpen] = useState(false);
   const bellRef = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
-  // Iedereen draagt dezelfde boom, dus de ring is het enige wat een abonnement
-  // laat zien. `isSubscribed` dekt zowel Stripe als de App Store (resolveIsPro).
-  const isPro = session?.user?.isSubscribed === true;
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -122,26 +117,14 @@ export default function TopBar({ title }: { title: string }) {
             )}
           </div>
 
-          {/* 5. Account. The streak badge is a SIBLING of the circle, never a
-                 child: the circle clips at 50% and would cut the badge in half.
-                 De ring om de cirkel zegt welk abonnement er onder ligt: groen
-                 voor gratis, goud voor Pro. `ring` is een box-shadow en wordt
-                 buiten de rand getekend, dus de `overflow-hidden` die de boom
-                 bijsnijdt raakt hem niet, en hij kost geen layoutruimte - de
-                 andere vier onderdelen blijven staan waar ze stonden. */}
-          <Link href="/profiel" aria-label="Profiel" className="relative flex-none no-underline">
-            <div
-              className={`h-[34px] w-[34px] overflow-hidden rounded-full bg-sky ring-2 ${
-                isPro ? "ring-gold" : "ring-teal"
-              }`}
-            >
-              <NavTreeAvatar size={34} showLevel={false} fallback={null} />
-            </div>
-            {data?.streak != null && data.streak > 0 && (
-              <span className="absolute -bottom-[3px] -right-[9px] rounded-full bg-white px-2 py-[2px] text-[12px] font-bold leading-[1.25] text-teal-dark shadow-badge">
-                {data.streak}
-              </span>
-            )}
+          {/* 5. Account. The same AccountAvatar as the sidebar foot and the
+                 profile header - one component, one Pro source (useIsPro), one
+                 streak source (useLevensboom) - so they can never disagree.
+                 38 px is the old 34 px circle plus the 2 px ring it drew
+                 outside itself. Streak top-right, PRO bottom-right; both are
+                 drawn as siblings of the clipped disc, so neither is cut off. */}
+          <Link href="/profiel" aria-label="Profiel" className="flex flex-none no-underline">
+            <AccountAvatar size={38} />
           </Link>
         </>
       )}

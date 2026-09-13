@@ -1,12 +1,16 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useContext } from 'react';
 import { createPortal } from 'react-dom';
+import Link from 'next/link';
+import { SessionContext } from 'next-auth/react';
+import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { Play, Pause, Square, Volume2, Settings2, Loader2, Cloud, Monitor, Sparkles, AlertCircle, X } from 'lucide-react';
 import { useTTS, type SelectedVoice } from '../../hooks/useTTS';
 import { useSpokenTextPublisher } from './SpokenText';
 import type { CloudVoice } from '../../lib/cloudVoices';
 import { cn } from '../../lib/utils';
+import { Dialog, DialogPortal, DialogOverlay, DialogTitle, DialogDescription, DialogClose } from '../ui/dialog';
 
 interface SpeakButtonProps {
   getText: () => string;
@@ -52,6 +56,19 @@ export default function SpeakButton({
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
+  // Voorlezen needs an account. The context is read directly rather than
+  // through `useSession`, because this button is mounted on routes whose layout
+  // has no SessionProvider and `useSession` throws there. Without a provider
+  // the status is simply unknown, and the 401 from /api/tts still opens the
+  // same dialog through `tts.authRequired`.
+  const sessionCtx = useContext(SessionContext);
+  const isGuest = sessionCtx?.status === 'unauthenticated';
+  const [loginPromptOpen, setLoginPromptOpen] = useState(false);
+  const closeLoginPrompt = () => {
+    setLoginPromptOpen(false);
+    tts.clearAuthRequired();
+  };
+
   useEffect(() => {
     if (!settingsOpen) return;
     function handleClick(e: MouseEvent) {
@@ -79,6 +96,13 @@ export default function SpeakButton({
 
   /** The one way this component starts a voice, so the text is never unrecorded. */
   const startSpeaking = (text: string, voiceOverride?: SelectedVoice) => {
+    // A known guest gets the sign-in dialog straight away instead of a request
+    // that can only come back 401. The settings preview goes through here too.
+    if (isGuest) {
+      setSettingsOpen(false);
+      setLoginPromptOpen(true);
+      return;
+    }
     spokenTextRef.current = text;
     tts.speak(text, voiceOverride);
   };
@@ -106,6 +130,10 @@ export default function SpeakButton({
     }
     tts.clearError();
   };
+
+  const loginPrompt = (
+    <SpeakLoginDialog open={loginPromptOpen || tts.authRequired} onClose={closeLoginPrompt} />
+  );
 
   if (compact) {
     return (
@@ -151,6 +179,8 @@ export default function SpeakButton({
           </div>,
           document.body,
         )}
+
+        {loginPrompt}
       </>
     );
   }
@@ -224,7 +254,96 @@ export default function SpeakButton({
         className="max-w-[360px]"
       />
     )}
+
+    {loginPrompt}
     </div>
+  );
+}
+
+/**
+ * What a guest sees when they press voorlezen.
+ *
+ * Voorlezen runs on the account (the cloud voices are billed per character and
+ * /api/tts refuses anonymous calls), so a guest used to get the red failure
+ * panel with "Niet geauthenticeerd" in it - a fault report for something that
+ * is not a fault. This says what is going on and offers the way in.
+ *
+ * Built on the Radix dialog from components/ui, so Escape, the focus trap, the
+ * scroll lock and the aria wiring come with it. Composed from the parts rather
+ * than `DialogContent` for a lighter scrim and a z-index above the /studie
+ * flow's own overlays.
+ */
+function SpeakLoginDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+  // The path to come back to, read when the dialog opens so it includes the
+  // query (chapter, translation). app/inloggen passes it through safeRedirect.
+  const [next, setNext] = useState('/');
+  useEffect(() => {
+    if (open && typeof window !== 'undefined') {
+      setNext(window.location.pathname + window.location.search);
+    }
+  }, [open]);
+  const target = encodeURIComponent(next);
+
+  return (
+    <Dialog open={open} onOpenChange={o => { if (!o) onClose(); }}>
+      <DialogPortal>
+        <DialogOverlay className="z-[80] bg-slate-900/50 backdrop-blur-[2px]" />
+        <DialogPrimitive.Content
+          className="fixed left-1/2 top-1/2 z-[80] w-[calc(100%-2rem)] max-w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-slate-200 dark:border-border bg-white dark:bg-card p-6 shadow-xl focus:outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
+        >
+          <p className="text-[10.5px] font-semibold uppercase tracking-[1.1px]" style={{ color: TEAL }}>
+            Voorlezen
+          </p>
+          <DialogTitle className="mt-2 text-lg font-semibold leading-snug text-slate-900 dark:text-foreground">
+            Log in om te laten voorlezen
+          </DialogTitle>
+          <DialogDescription className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-muted-foreground">
+            Voorlezen is alleen beschikbaar als je bent ingelogd. Met een gratis account
+            laat je elke Bijbeltekst en uitleg voorlezen door een natuurlijke Nederlandse stem.
+          </DialogDescription>
+
+          <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <DialogClose asChild>
+              <button
+                type="button"
+                className="inline-flex h-10 items-center justify-center rounded-lg border border-slate-200 dark:border-border px-4 text-sm font-medium text-slate-700 dark:text-foreground transition-colors hover:bg-slate-50 dark:hover:bg-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0D9488] focus-visible:ring-offset-2"
+              >
+                Annuleren
+              </button>
+            </DialogClose>
+            <Link
+              href={`/inloggen?next=${target}`}
+              onClick={onClose}
+              data-track="tts_guest_signin"
+              className="inline-flex h-10 items-center justify-center rounded-lg px-5 text-sm font-semibold text-white no-underline transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0D9488] focus-visible:ring-offset-2"
+              style={{ backgroundColor: TEAL }}
+            >
+              Inloggen
+            </Link>
+          </div>
+
+          <p className="mt-4 text-center text-[13px] text-slate-500 dark:text-muted-foreground sm:text-right">
+            Nog geen account?{' '}
+            <Link
+              href={`/registreren?next=${target}`}
+              onClick={onClose}
+              data-track="tts_guest_register"
+              className="font-semibold underline-offset-4 hover:underline"
+              style={{ color: TEAL }}
+            >
+              Gratis registreren
+            </Link>
+          </p>
+
+          <DialogClose
+            className="absolute right-4 top-4 rounded-md p-1 text-slate-400 transition-colors hover:text-slate-700 dark:hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0D9488]"
+            aria-label="Sluiten"
+          >
+            <X className="h-4 w-4" />
+          </DialogClose>
+        </DialogPrimitive.Content>
+      </DialogPortal>
+    </Dialog>
   );
 }
 

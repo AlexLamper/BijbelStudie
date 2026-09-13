@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getServerSession } from 'next-auth';
+import { BookOpen, Clock, Layers, TrendingUp, type LucideIcon } from 'lucide-react';
 
 import { authOptions } from '../../../lib/authOptions';
 import connectMongoDB from '../../../lib/mongodb';
@@ -14,7 +15,7 @@ import { findStudy, getEnrollment } from '../../../lib/studyEnrollmentService';
 import AppShell from '../../../components/shell/AppShell';
 import { Card } from '../../../components/kit/primitives';
 import { bannerGradient } from '../../../components/kit/primitives';
-import StudySetupProvider, { StudyActionBar } from './StudyOnboardingForm';
+import StudySetupProvider, { StudyActionBar, StudySettingsButton } from './StudyOnboardingForm';
 import LessonList from './LessonList';
 
 interface PageProps {
@@ -109,15 +110,17 @@ export default async function StudyDetailPage({ params }: PageProps) {
   let resumeStep: string | null = null;
   let completedDays: number[] = [];
   let settings: { rhythm?: string; depth?: string; translation?: string | null } = {};
+  let savedStudy = false;
 
   if (session?.user?.email) {
     await connectMongoDB();
     const user = await User.findOne({ email: session.user.email })
-      .select('_id')
-      .lean<{ _id: unknown }>();
+      .select('_id savedStudies')
+      .lean<{ _id: unknown; savedStudies?: string[] | null }>();
 
     if (user) {
       const userId = String(user._id);
+      savedStudy = Array.isArray(user.savedStudies) && user.savedStudies.includes(study.id);
       const enrollment = await getEnrollment(userId, study.id);
       if (enrollment) {
         enrolled = true;
@@ -195,6 +198,8 @@ export default async function StudyDetailPage({ params }: PageProps) {
        which is what keeps the page crawlable. */
     <StudySetupProvider
       studyId={study.id}
+      studyTitle={study.title}
+      initialSaved={savedStudy}
       translations={translations}
       defaultTranslation={settings.translation ?? study.startVersion}
       suggestedRhythm={(settings.rhythm as never) ?? study.suggestedRhythm ?? 'dagelijks'}
@@ -212,32 +217,33 @@ export default async function StudyDetailPage({ params }: PageProps) {
               the design draws one here and the server has no cover image for a
               study - `StudyArtwork` draws the catalogue rows instead. */}
           <div
-            className="relative flex h-[142px] flex-none flex-col justify-end overflow-hidden rounded-card px-[26px] py-[22px]"
+            className="relative flex h-[142px] flex-none flex-col justify-end overflow-hidden rounded-card px-[24px] pb-[18px] pt-[32px]"
             style={{ background: bannerGradient(study.id) }}
           >
-            <div className="flex items-center gap-2 text-[12.5px] text-white/70">
+            <StudySettingsButton className="absolute right-[10px] top-[10px] z-10" />
+            <div className="mt-[10px] flex items-center gap-1.5 text-[11.5px] text-white/70">
               <Link href="/studies" className="text-white/70 no-underline hover:text-white">
                 Studies
               </Link>
               <span aria-hidden>&rsaquo;</span>
               <span className="font-semibold text-white">{study.title}</span>
             </div>
-            <h1 className="mt-2 text-[34px] font-bold leading-none tracking-[-0.7px] text-white">
+            <h1 className="mt-1.5 text-[25px] font-bold leading-none tracking-[-0.5px] text-white">
               {study.title}
             </h1>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <span className="rounded-full bg-white px-[11px] py-[5px] text-[12px] font-semibold text-teal-dark">
+            <div className="mt-2.5 flex flex-wrap gap-1.5">
+              <span className="rounded-full bg-white px-[9px] py-[3px] text-[11px] font-semibold text-teal-dark">
                 {TYPE_LABEL[study.type] ?? study.type}
               </span>
               <span
-                className="rounded-full px-[11px] py-[5px] text-[12px] font-semibold text-white"
+                className="rounded-full px-[9px] py-[3px] text-[11px] font-semibold text-white"
                 style={{ backgroundColor: 'rgba(17,24,39,.5)' }}
               >
                 {lessonsTotal} {lessonsTotal === 1 ? 'les' : 'lessen'} &middot; {formatStudyMinutes(minutes)}
               </span>
               {books.length > 0 && (
                 <span
-                  className="rounded-full px-[11px] py-[5px] text-[12px] font-semibold text-white"
+                  className="rounded-full px-[9px] py-[3px] text-[11px] font-semibold text-white"
                   style={{ backgroundColor: 'rgba(17,24,39,.5)' }}
                 >
                   {books.length === 1 ? books[0] : `${books.length} bijbelboeken`}
@@ -248,14 +254,15 @@ export default async function StudyDetailPage({ params }: PageProps) {
 
           {/* Four figures, with the unit beside the value rather than under it. */}
           <div className="flex flex-none gap-[14px]">
-            <DetailStat label="Lessen" value={`${lessonsTotal}`} unit={lessonsTotal === 1 ? 'les' : 'lessen'} />
-            <DetailStat label="Tijd" value={formatStudyMinutes(minutes)} unit="totaal" />
+            <DetailStat icon={Layers} label="Lessen" value={`${lessonsTotal}`} unit={lessonsTotal === 1 ? 'les' : 'lessen'} />
+            <DetailStat icon={Clock} label="Tijd" value={formatStudyMinutes(minutes)} unit="totaal" />
             <DetailStat
+              icon={BookOpen}
               label="Bijbelboeken"
               value={`${books.length}`}
               unit={books.length === 1 ? 'boek' : 'boeken'}
             />
-            <DetailStat label="Voortgang" value={`${pct} %`} unit={`${lessonsDone} van ${lessonsTotal}`} />
+            <DetailStat icon={TrendingUp} label="Voortgang" value={`${pct} %`} unit={`${lessonsDone} van ${lessonsTotal}`} />
           </div>
 
           <div className="flex min-h-0 flex-1 gap-5">
@@ -325,10 +332,23 @@ export default async function StudyDetailPage({ params }: PageProps) {
 }
 
 /** One of the four figures over the columns: label, value, and its unit. */
-function DetailStat({ label, value, unit }: { label: string; value: string; unit: string }) {
+function DetailStat({
+  icon: Icon,
+  label,
+  value,
+  unit,
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: string;
+  unit: string;
+}) {
   return (
     <Card className="flex-1 px-[17px] py-[15px]">
-      <p className="text-[12px] text-ink-muted">{label}</p>
+      <p className="flex items-center gap-1.5 text-[12px] text-ink-muted">
+        <Icon aria-hidden size={14} strokeWidth={2} className="flex-none text-teal" />
+        {label}
+      </p>
       <p className="mt-[7px] flex items-baseline gap-[7px]">
         <span className="text-[24px] font-bold tracking-[-0.5px] text-ink tabular-nums">{value}</span>
         <span className="text-[12px] text-ink-faint">{unit}</span>
@@ -342,7 +362,7 @@ function AboutRow({ label, value, last = false }: { label: string; value: string
   return (
     <div className={`flex items-center gap-4 py-2 ${last ? '' : 'border-b border-line-soft'}`}>
       <span className="flex-1 text-[13px] text-ink-muted">{label}</span>
-      <span className="min-w-0 truncate text-right text-[13px] font-bold text-ink">{value}</span>
+      <span className="min-w-0 truncate text-right text-[13px] font-medium text-ink">{value}</span>
     </div>
   );
 }

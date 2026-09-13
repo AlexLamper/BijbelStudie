@@ -338,13 +338,13 @@ function Hero() {
               as an ad; a solid button with a soft teal cast under it carries the
               same emphasis without the noise. */}
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-            {/* Into the app, not the sign-up form. A visitor may start a study
-                without an account (guest mode), and is asked to sign up at the
-                end of a lesson when there is progress to save - so the primary
-                action opens the studies. The navbar's "Gratis beginnen" and the
-                closing CTA keep the account route for whoever wants it first. */}
+            {/* To the auth page, like every other start CTA on this page. Guest
+                mode is not lost: /inloggen offers "Doorgaan als gast" under the
+                sign-in options, and the dotted link below still opens the
+                studies directly. A signed-in visitor never sees this button -
+                middleware sends "/" to /dashboard when there is a session. */}
             <Link
-              href="/studies"
+              href="/inloggen"
               data-track="hero_cta_signup"
               className="press group h-14 w-full sm:w-auto inline-flex items-center justify-center gap-2 font-semibold text-white px-7 rounded-xl bg-teal-700 hover:bg-teal-800 transition-colors"
               style={{

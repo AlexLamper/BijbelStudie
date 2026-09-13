@@ -144,6 +144,9 @@ export default function StepWord({
       <LessonLayout
         eyebrow={eyebrow ?? 'Het Woord'}
         heading={reference}
+        // The passage takes the full width of the column; the scroller's own
+        // side padding keeps it off the edges.
+        measure="none"
         aside={
           <>
             {readingCue ? (

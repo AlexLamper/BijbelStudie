@@ -6,8 +6,9 @@ import { usePathname } from "next/navigation";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { MoreHorizontal, LogOut } from "lucide-react";
-import NavTreeAvatar from "../levensboom/NavTreeAvatar";
+import AccountAvatar from "../kit/AccountAvatar";
 import { useLevensboom } from "../../hooks/useLevensboom";
+import { useIsPro } from "../../hooks/useIsPro";
 import { NAV_GROUPS, isNavActive, type NavItem } from "./nav";
 import { useIsAdmin } from "./useIsAdmin";
 
@@ -115,32 +116,12 @@ function AccountMenu() {
   );
 }
 
-/** Tree avatar 32 px with the level as a pill in the corner - white, hairline
- *  border, and the number in `gold-badge` so it clears 4.5:1 on white. */
-function AccountAvatar() {
-  const { data } = useLevensboom();
-  return (
-    <div className="relative flex-none">
-      <NavTreeAvatar
-        size={32}
-        showLevel={false}
-        fallback={
-          <span className="block h-8 w-8 rounded-full bg-sky" />
-        }
-      />
-      {data?.level != null && (
-        <span className="absolute -bottom-[3px] -right-[3px] rounded-full border border-line bg-white px-[5px] py-px text-[10px] font-bold leading-none text-gold-badge">
-          {data.level}
-        </span>
-      )}
-    </div>
-  );
-}
-
 export default function Sidebar({ active }: { active?: string }) {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const { data: tree } = useLevensboom();
   const isAdmin = useIsAdmin();
+  const isPro = useIsPro();
 
   const showTreeSub = pathname === "/profiel" || pathname === "/profiel/boom";
 
@@ -199,14 +180,19 @@ export default function Sidebar({ active }: { active?: string }) {
       {/* Account. /studies and /lezen are open to visitors without an account,
           so the foot has two shapes: the account, or the way in. */}
       {session?.user ? (
-        <div className="flex flex-none items-center gap-[10px] border-t border-line p-[11px]">
-          <AccountAvatar />
+        <div className="flex flex-none items-center gap-[12px] border-t border-line p-[11px]">
+          {/* The same AccountAvatar as the top bar - streak top-right, PRO
+              bottom-right, from the same sources (useLevensboom, useIsPro) - so
+              the two circles always match. The level lives in the line under
+              the name. */}
+          <AccountAvatar size={36} />
           <div className="min-w-0 flex-1">
             <div className="truncate text-[13px] font-semibold text-ink">
               {session.user.name ?? "Gebruiker"}
             </div>
             <div className="truncate text-[11px] text-ink-faint">
-              {session.user.isSubscribed ? "Pro" : "Gratis account"}
+              {isPro ? "Pro" : "Gratis account"}
+              {tree?.level != null ? ` · niveau ${tree.level}` : ""}
             </div>
           </div>
           <AccountMenu />

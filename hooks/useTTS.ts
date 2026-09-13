@@ -42,6 +42,14 @@ export interface UseTTSReturn {
   setRate: (r: number) => void;
   error: string | null;
   clearError: () => void;
+  /**
+   * The voorleesdienst answered 401: the reader is not signed in. Kept apart
+   * from `error` on purpose - it is not a fault to report but a reason to offer
+   * the way in, and the button shows a sign-in dialog for it instead of the
+   * red "Voorlezen lukt niet" panel.
+   */
+  authRequired: boolean;
+  clearAuthRequired: () => void;
 }
 
 const PREFERRED_VOICE_KEYWORDS = [
@@ -372,6 +380,8 @@ export function useTTS(): UseTTSReturn {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const clearError = useCallback(() => setError(null), []);
+  const [authRequired, setAuthRequired] = useState(false);
+  const clearAuthRequired = useCallback(() => setAuthRequired(false), []);
 
   const [spokenRange, setSpokenRange] = useState<SpokenRange | null>(null);
 
@@ -658,6 +668,21 @@ export function useTTS(): UseTTSReturn {
     }
     if (stoppedRef.current) return;
 
+    if (res.status === 401) {
+      // A guest. Not an error banner - the button answers this with the
+      // sign-in dialog. The queue is reset the same way `fail` does it.
+      if (!stoppedRef.current) {
+        queueRef.current = [];
+        idxRef.current = 0;
+        setIsSpeaking(false);
+        setIsPaused(false);
+        setIsLoading(false);
+        setSpokenRange(null);
+        setAuthRequired(true);
+      }
+      return;
+    }
+
     if (!res.ok) {
       // The route always sends a Dutch `hint` now; Google's own English
       // `message` is deliberately no longer used as user-facing copy.
@@ -832,5 +857,6 @@ export function useTTS(): UseTTSReturn {
     browserVoices, cloudVoices: CLOUD_VOICES, cloudAvailable,
     rate, setRate,
     error, clearError,
+    authRequired, clearAuthRequired,
   };
 }

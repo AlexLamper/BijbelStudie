@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
-import { Search } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Search } from 'lucide-react'
 import type { CuratedStudy } from '../../lib/data/curated-studies'
 import { CATALOGUE_ENTRIES, isBookStudyId } from '../../lib/bookStudies'
 import { Card, Chip, SectionHeading, StudyCard, ListRow } from '../../components/kit/primitives'
@@ -13,8 +13,8 @@ const COMPLETED_KEY = 'bijbelstudie_completed_studies'
 // ---------------------------------------------------------------------------
 // The study catalogue (design_handoff_web/PAGES.md §2): one column at full
 // width - a 440 px search field, the kind filters as pills, the study you are
-// in, two rows of four cards, and then every study as a list row down to the
-// foot of the page.
+// in, a sideways-scrolling row of featured cards, and then every study as a
+// list row, ten at a time, down the page.
 //
 // The data layer below is the one this screen already had: the same
 // localStorage key, the same two endpoints, the same `statusFor`. Nothing was
@@ -80,20 +80,20 @@ const ENTRIES: Entry[] = CATALOGUE_ENTRIES.map(
 )
 
 /**
- * How many studies "Uitgelicht" puts on screen.
+ * How many studies "Uitgelicht" puts in its carousel.
  *
- * Two rows of four. The design measures the CARD (four columns, image height
- * 88) and not how many there are, so a second row buys eight openings into the
- * catalogue for the price of one row of height and leaves that measurement -
- * and the grid's rhythm - untouched. A third row would start eating the list
- * card below, which is the part that has to keep scrolling.
+ * One row that scrolls sideways, so the count costs no height: ten openings
+ * into the catalogue at the height of a single card.
  *
- * This is the only place the number is written down: the grid renders the whole
- * array and the heading counts the same array, so what you see and what the
- * label claims cannot drift apart - not even if the catalogue ever holds fewer
- * studies than the cap.
+ * This is the only place the number is written down: the carousel renders the
+ * whole array and the heading counts the same array, so what you see and what
+ * the label claims cannot drift apart - not even if the catalogue ever holds
+ * fewer studies than the cap.
  */
-const FEATURED_COUNT = 8
+const FEATURED_COUNT = 10
+
+/** How many rows "Alle studies" shows at first, and adds per "Meer tonen". */
+const LIST_PAGE_SIZE = 10
 
 /**
  * The featured cards: the HAND-AUTHORED studies, in catalogue order.
@@ -106,16 +106,62 @@ const FEATURED_COUNT = 8
  *
  * `isBookStudyId` is the one honest test for "somebody wrote this on purpose" -
  * it is the same check app/studies/[id]/page.tsx uses to decide indexability.
+ *
+ * Should there ever be fewer hand-authored studies than the cap, the row is
+ * topped up with book studies so the carousel still carries a full set.
  */
-const FEATURED: Entry[] = ENTRIES.filter(
-  entry => !isBookStudyId(entry.study.id),
-).slice(0, FEATURED_COUNT)
+const FEATURED: Entry[] = (() => {
+  const authored = ENTRIES.filter(entry => !isBookStudyId(entry.study.id))
+  const books = ENTRIES.filter(entry => isBookStudyId(entry.study.id))
+  return [...authored, ...books].slice(0, FEATURED_COUNT)
+})()
 
 export default function StudiesBrowser() {
   const [kind, setKind] = useState<CuratedStudy['type'] | null>(null)
   const [query, setQuery] = useState('')
   const [completedIds, setCompletedIds] = useState<string[]>([])
   const [enrollments, setEnrollments] = useState<Record<string, Enrollment>>({})
+  const [visibleCount, setVisibleCount] = useState(LIST_PAGE_SIZE)
+
+  // A new filter or search starts the list from its first page again.
+  const changeKind = (value: CuratedStudy['type'] | null) => {
+    setKind(value)
+    setVisibleCount(LIST_PAGE_SIZE)
+  }
+  const changeQuery = (value: string) => {
+    setQuery(value)
+    setVisibleCount(LIST_PAGE_SIZE)
+  }
+
+  /* The "Uitgelicht" carousel: the arrows scroll it by most of a viewport and
+     disable themselves at either end. */
+  const browsing = query.trim() === ''
+  const carouselRef = useRef<HTMLDivElement>(null)
+  const [canScrollPrev, setCanScrollPrev] = useState(false)
+  const [canScrollNext, setCanScrollNext] = useState(false)
+
+  const updateCarouselEdges = useCallback(() => {
+    const el = carouselRef.current
+    if (!el) return
+    setCanScrollPrev(el.scrollLeft > 4)
+    setCanScrollNext(el.scrollLeft + el.clientWidth < el.scrollWidth - 4)
+  }, [])
+
+  const scrollCarousel = (direction: 1 | -1) => {
+    const el = carouselRef.current
+    if (!el) return
+    el.scrollBy({ left: direction * el.clientWidth * 0.85, behavior: 'smooth' })
+  }
+
+  useEffect(() => {
+    const el = carouselRef.current
+    if (!el) return
+    updateCarouselEdges()
+    const observer = new ResizeObserver(updateCarouselEdges)
+    observer.observe(el)
+    return () => observer.disconnect()
+    // The carousel unmounts during a search; re-attach when it comes back.
+  }, [updateCarouselEdges, browsing])
 
   useEffect(() => {
     try {
@@ -210,17 +256,18 @@ export default function StudiesBrowser() {
   }, [enrollments])
 
   const rows = searchResults ?? listEntries
+  const visibleRows = rows.slice(0, visibleCount)
 
   return (
-    <div className="flex h-full flex-col gap-[13px]">
+    <div className="flex flex-col gap-[13px]">
       {/* The search is a real field here, not the bar's grey plate: this is the
           fastest way through seventy-seven studies. */}
-      <div className="flex h-[46px] w-[440px] flex-none items-center gap-[10px] rounded-[12px] border border-line-strong bg-white px-[15px] shadow-field">
+      <div className="flex h-[46px] w-full max-w-[440px] flex-none items-center gap-[10px] rounded-[12px] border border-line-strong bg-white px-[15px] shadow-field">
         <Search size={18} strokeWidth={1.9} className="flex-none text-ink-muted" />
         <input
           type="search"
           value={query}
-          onChange={event => setQuery(event.target.value)}
+          onChange={event => changeQuery(event.target.value)}
           placeholder="Bijbelboek, persoon of thema"
           aria-label="Zoek een studie"
           className="min-w-0 flex-1 border-0 bg-transparent text-[14px] text-ink outline-none placeholder:text-ink-muted"
@@ -231,20 +278,23 @@ export default function StudiesBrowser() {
       </div>
 
       {searchResults === null && (
-        <div className="flex flex-none gap-[9px]">
+        <div className="flex flex-none flex-wrap gap-[9px]">
           {KINDS.map(item => (
             <Chip
               key={item.label}
               label={item.label}
               active={item.value === kind}
-              onClick={() => setKind(item.value)}
+              onClick={() => changeKind(item.value)}
             />
           ))}
         </div>
       )}
 
       {searchResults === null && resume && (
-        <Card className="flex flex-none items-center gap-[15px] px-[18px] py-[14px]">
+        // A compact resume card, as wide as a comfortable title line and no
+        // wider: stretched across a wide screen the button drifts far from
+        // the study it continues.
+        <Card className="flex w-full max-w-[560px] flex-none items-center gap-[15px] px-[18px] py-[14px]">
           {/* The ring is the progress, bent around the thumbnail. */}
           <div
             className="flex h-12 w-12 flex-none items-center justify-center rounded-full"
@@ -283,33 +333,61 @@ export default function StudiesBrowser() {
           {/* "Nieuw deze maand" in the design. Nothing in the catalogue records
               when a study was published, so the block keeps its shape and its
               honest name: the studies with a written introduction. */}
-          <SectionHeading
-            title="Uitgelicht"
-            action={{ label: `Alle ${FEATURED.length}`, href: '/bijbelboeken' }}
-            className="flex-none"
-          />
-          {/* Four columns at image height 88, as the design measures it; the
-              eight entries simply wrap into a second row. `flex-none` keeps
-              both rows at full height so the list card below takes what is
-              left and does the scrolling. */}
-          <div className="grid flex-none grid-cols-4 gap-4">
+          <div className="flex flex-none items-center gap-3">
+            <SectionHeading
+              title="Uitgelicht"
+              action={{ label: `Alle ${FEATURED.length}`, href: '/bijbelboeken' }}
+              className="min-w-0 flex-1"
+            />
+            {/* Arrows only where there is a mouse to need them; on touch the
+                row is swiped. */}
+            <div className="hidden flex-none items-center gap-[6px] sm:flex">
+              <button
+                type="button"
+                onClick={() => scrollCarousel(-1)}
+                disabled={!canScrollPrev}
+                aria-label="Vorige uitgelichte studies"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-white text-ink-body transition-colors hover:border-line-strong disabled:cursor-default disabled:opacity-40 disabled:hover:border-line"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollCarousel(1)}
+                disabled={!canScrollNext}
+                aria-label="Volgende uitgelichte studies"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-white text-ink-body transition-colors hover:border-line-strong disabled:cursor-default disabled:opacity-40 disabled:hover:border-line"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          </div>
+          {/* One row at image height 88, as the design measures the card, that
+              scrolls sideways with snap points. Each card has a fixed width so
+              the row reads as a shelf rather than a squeezed grid. */}
+          <div
+            ref={carouselRef}
+            onScroll={updateCarouselEdges}
+            className="flex flex-none snap-x snap-mandatory gap-4 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
             {FEATURED.map(entry => (
-              <StudyCard
-                key={entry.study.id}
-                href={`/studies/${entry.study.id}`}
-                title={entry.study.title}
-                meta={`${entry.lessonCount} ${entry.lessonCount === 1 ? 'les' : 'lessen'} · ±${entry.avgMinutes} min`}
-                imageHeight={88}
-                art={
-                  <StudyArtwork
-                    id={entry.study.id}
-                    kind={entry.study.type}
-                    ratio={3.2}
-                    quiet
-                    className="h-full w-full"
-                  />
-                }
-              />
+              <div key={entry.study.id} className="grid w-[210px] flex-none snap-start sm:w-[232px]">
+                <StudyCard
+                  href={`/studies/${entry.study.id}`}
+                  title={entry.study.title}
+                  meta={`${entry.lessonCount} ${entry.lessonCount === 1 ? 'les' : 'lessen'} · ±${entry.avgMinutes} min`}
+                  imageHeight={88}
+                  art={
+                    <StudyArtwork
+                      id={entry.study.id}
+                      kind={entry.study.type}
+                      ratio={3.2}
+                      quiet
+                      className="h-full w-full"
+                    />
+                  }
+                />
+              </div>
             ))}
           </div>
         </>
@@ -326,7 +404,9 @@ export default function StudiesBrowser() {
         className="flex-none"
       />
 
-      <Card className="min-h-0 flex-1 overflow-hidden">
+      {/* The list grows with the page and the page scrolls; it is paged
+          client-side in steps of ten so the first screen stays light. */}
+      <Card className="flex-none overflow-hidden">
         {rows.length === 0 ? (
           <p className="px-[18px] py-6 text-[13.5px] leading-relaxed text-ink-muted">
             {searchResults
@@ -334,8 +414,8 @@ export default function StudiesBrowser() {
               : 'Geen studie past bij dit filter.'}
           </p>
         ) : (
-          <div className="h-full overflow-y-auto">
-            {rows.map((entry, index) => {
+          <div>
+            {visibleRows.map((entry, index) => {
               const status = statusFor(entry.study)
               const action = status.completed ? 'Herhalen' : status.started ? 'Verder' : 'Start'
               return (
@@ -369,6 +449,21 @@ export default function StudiesBrowser() {
           </div>
         )}
       </Card>
+
+      {rows.length > visibleRows.length && (
+        <div className="flex flex-none flex-col items-center gap-[6px] pt-1">
+          <button
+            type="button"
+            onClick={() => setVisibleCount(count => count + LIST_PAGE_SIZE)}
+            className="inline-flex h-10 items-center rounded-btn border border-line bg-white px-5 text-[14px] font-semibold text-teal transition-colors hover:border-line-strong"
+          >
+            Meer tonen
+          </button>
+          <span className="text-[12px] text-ink-faint">
+            {visibleRows.length} van {rows.length} getoond
+          </span>
+        </div>
+      )}
     </div>
   )
 }

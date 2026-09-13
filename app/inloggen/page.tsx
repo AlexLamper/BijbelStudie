@@ -9,6 +9,7 @@ import { safeRedirect } from "../../lib/safeRedirect"
 import AuthTreeBackdrop from "../../components/auth/AuthTreeBackdrop"
 import { EYEBROW, SCENE_BG, SKEL, TEAL_ON_DARK } from "../../components/scene/tokens"
 import { BrandMark } from "./BrandMark"
+import ContinueAsGuest from "../../components/auth/ContinueAsGuest"
 
 const GOOGLE_SVG = (
   <svg width="18" height="18" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -278,6 +279,11 @@ function SignInPageInner() {
               <div className={`skeleton-pulse h-[42px] w-full rounded-lg ${SKEL}`} />
             </div>
           )}
+
+          {/* Guest mode: the app works without an account, so the auth page
+              must not be a wall. The raw `next` goes in; guestTarget decides
+              whether a guest can use that page or should land on the studies. */}
+          <ContinueAsGuest next={searchParams.get("next")} />
 
           <p className="text-center text-xs text-white/60">
             Door in te loggen ga je akkoord met onze{" "}

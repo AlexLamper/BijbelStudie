@@ -135,7 +135,11 @@ export default function LessonLayout({
   lead,
   aside,
   children,
-  /** The design's measure: 640 px on most steps, 660 on the quiz. */
+  /**
+   * The design's measure: 640 px on most steps, 660 on the quiz. `'none'` lets
+   * the column fill the scroller - the reading step uses it so the passage takes
+   * the full width, still inside the scroller's side padding.
+   */
   measure = 640,
   /** 26 px on the reading step, 30 on the ones that open with a question. */
   padTop = 26,
@@ -148,7 +152,7 @@ export default function LessonLayout({
   lead?: React.ReactNode;
   aside?: React.ReactNode;
   children?: React.ReactNode;
-  measure?: number;
+  measure?: number | 'none';
   padTop?: number;
 }) {
   return (
@@ -158,7 +162,7 @@ export default function LessonLayout({
           className="min-h-0 flex-1 overflow-y-auto px-5 pb-24 sm:px-[34px]"
           style={{ paddingTop: padTop }}
         >
-          <div className="min-w-0" style={{ maxWidth: measure }}>
+          <div className="min-w-0" style={measure === 'none' ? undefined : { maxWidth: measure }}>
             <StepEyebrow>{eyebrow}</StepEyebrow>
             <h1
               className={`mt-[9px] text-[26px] font-bold leading-[1.16] tracking-[-0.5px] sm:text-[30px] ${INK} ${headingClassName}`}

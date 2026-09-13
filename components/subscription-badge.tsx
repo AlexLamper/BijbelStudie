@@ -5,7 +5,7 @@ interface SubscriptionBadgeProps {
   className?: string
 }
 
-/** The Pro marker next to the account in the header. Gold, like everywhere else. */
+/** The Pro marker next to the account in the header. The shared teal ProBadge. */
 export function SubscriptionBadge({ isSubscribed, className }: SubscriptionBadgeProps) {
   if (!isSubscribed) return null
 

@@ -31,7 +31,7 @@ import {
  * The dashboard (design_handoff_web/PAGES.md §1).
  *
  * Two columns: the work at `flex-1` and a 320 px rail, 20 px apart. The work
- * column is the verse, the one thing to carry on with, and six recommended
+ * column is the verse, the one thing to carry on with, and four recommended
  * studies; the rail is the tree, the week and the 66 books.
  *
  * Every number on this screen comes from the hooks that were already here -
@@ -74,7 +74,8 @@ export default function DashboardPage() {
   const otLevels = OT_BOOKS.map(b => heatStep(d.bookReadRatio(b)))
   const ntLevels = NT_BOOKS.map(b => heatStep(d.bookReadRatio(b)))
 
-  const recommended = curatedStudies.slice(0, 6)
+  // Four: one full row of four on a wide screen, a clean 2 x 2 below it.
+  const recommended = curatedStudies.slice(0, 4)
 
   return (
     <AppShell title="Dashboard">
@@ -146,7 +147,12 @@ export default function DashboardPage() {
             action={{ label: "Alle studies", href: "/studies" }}
           />
 
-          <div className="grid grid-cols-3 gap-[14px]">
+          {/* The work column is the viewport less the 196 px sidebar, 56 px of
+              body padding, the 320 px rail and its 20 px gap - about 590 px of
+              fixed chrome. At xl (1280) that leaves ~690 px, ~160 px a card at
+              four across, still room for a two-line title and the meta line;
+              under xl four would crush them, so it stays at two. */}
+          <div className="grid grid-cols-1 gap-[14px] sm:grid-cols-2 xl:grid-cols-4">
             {recommended.map(study => (
               <StudyCard
                 key={study.id}

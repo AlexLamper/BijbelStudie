@@ -1,9 +1,19 @@
 import React from 'react'
+import Image from 'next/image'
 
 import { studyArtFor, studyHorizon, type StudyArtKind } from '../../lib/studyArt'
+import { studyPhotoFor } from '../../lib/studyPhotos'
 
 /**
- * One study's own horizon, drawn.
+ * One study's cover: its photograph, over its own drawn horizon.
+ *
+ * The photograph comes from `lib/studyPhotos.ts` (one per study, Unsplash
+ * License, local files). It is painted OVER the horizon rather than instead of
+ * it, so the horizon is the placeholder while the photo lazy-loads and the
+ * fallback for a study without a photo or a file that fails - `next/image`
+ * paints a failed image transparent, so nothing broken ever shows.
+ * `unoptimized`: the files are already sized, and /_next/image would spend
+ * Vercel CPU re-encoding them.
  *
  * All of the geometry, the palette, the season and the time of day come out of
  * `lib/studyArt.ts` - seeded per study id and clock-free, so the server and the
@@ -34,6 +44,7 @@ export default function StudyArtwork({
   ratio,
   className = '',
   quiet = false,
+  size,
 }: {
   id: string
   kind: StudyArtKind
@@ -42,7 +53,14 @@ export default function StudyArtwork({
   className?: string
   /** Drop the sun and the stars: at thumbnail size they are noise, not detail. */
   quiet?: boolean
+  /**
+   * Which photo file to load. Defaults from `ratio`: a square-ish box is a list
+   * thumbnail (240 px file), anything wider is a banner (800 px file).
+   */
+  size?: 'thumb' | 'banner'
 }) {
+  const photo = studyPhotoFor(id)
+  const useThumb = (size ?? (ratio <= 1.5 ? 'thumb' : 'banner')) === 'thumb'
   const art = studyArtFor(id, kind)
   const height = 100
   const width = Math.max(1, Math.round(height * ratio))
@@ -120,6 +138,29 @@ export default function StudyArtwork({
           backgroundImage: `linear-gradient(180deg, ${horizon.ground} 0%, ${horizon.groundDeep} 100%)`,
         }}
       />
+
+      {photo && (
+        <>
+          <Image
+            src={useThumb ? photo.thumb : photo.src}
+            alt=""
+            fill
+            unoptimized
+            sizes={useThumb ? '64px' : '(max-width: 640px) 100vw, 400px'}
+            className="object-cover"
+          />
+          {/* A soft slate wash, darker at the top edge where a badge sits and
+              at the foot, so overlaid controls stay legible on a bright sky
+              without dimming the picture itself. */}
+          <span
+            className="pointer-events-none absolute inset-0"
+            style={{
+              backgroundImage:
+                'linear-gradient(180deg, rgba(15,23,42,0.22) 0%, rgba(15,23,42,0) 38%, rgba(15,23,42,0) 62%, rgba(15,23,42,0.18) 100%)',
+            }}
+          />
+        </>
+      )}
 
       {/* A hairline inside the frame, so a pale sky keeps an edge against the
           scene behind it. White at 14% holds on every one of the palettes. */}

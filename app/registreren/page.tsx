@@ -11,6 +11,7 @@ import { EYEBROW, SCENE_BG, TEAL_ON_DARK } from "../../components/scene/tokens"
 // The identical mark + halo treatment as /inloggen, imported rather than
 // duplicated so the two pages can never drift apart.
 import { BrandMark } from "../inloggen/BrandMark"
+import ContinueAsGuest from "../../components/auth/ContinueAsGuest"
 
 /**
  * Every colour on this page is a literal - see app/inloggen/page.tsx. The page
@@ -240,6 +241,9 @@ function RegisterPageInner() {
               ) : "Account aanmaken"}
             </button>
           </form>
+
+          {/* Same guest way in as /inloggen - see components/auth/ContinueAsGuest. */}
+          <ContinueAsGuest next={searchParams.get("next")} />
 
           <p className="text-center text-xs text-white/60">
             Door te registreren ga je akkoord met onze{" "}
