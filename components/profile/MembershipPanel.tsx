@@ -3,13 +3,12 @@
 import Link from "next/link"
 
 /**
- * Ontwerp A - het lidmaatschapspaneel dat de Abonnement-kaart vervangt.
+ * Het lidmaatschapspaneel dat de Abonnement-kaart vervangt.
  *
- * Pro: een donker paneel (slate-900 naar diep teal), een teal haarlijn aan de
- * binnenkant, een zachte grote schaduw en één statisch lichtvlak in de
- * rechterbovenhoek. Geen animatie, geen icoon, geen goud.
- * Gratis: dezelfde opbouw op een witte kaart, met een donkere knop die het
- * Pro-paneel aankondigt in plaats van een teal vlak.
+ * Dezelfde kaart als de andere kaarten in de rail van /profiel (Je boom,
+ * Badges, Account): lichte ondergrond, haarlijn, 14.5 px titel met een lijn
+ * eronder. Pro onderscheidt zich alleen met een teal accent op het woord "Pro"
+ * en de status rechtsboven, niet met een donkere ondergrond.
  */
 
 export interface BillingInfo {
@@ -33,16 +32,28 @@ function planLabel(b: BillingInfo | null, isAdmin: boolean): string {
   return via ? `Pro${via}` : "Pro"
 }
 
-function Row({ label, value, dark }: { label: string; value: string; dark: boolean }) {
+function Row({ label, value, last = false }: { label: string; value: string; last?: boolean }) {
   return (
-    <div className="flex items-baseline gap-3 py-[7px]">
-      <dt className={`flex-1 text-[12.5px] ${dark ? "text-slate-400" : "text-ink-muted"}`}>{label}</dt>
-      <dd className={`text-right text-[13px] font-semibold ${dark ? "text-slate-100" : "text-ink"}`}>{value}</dd>
+    <div className={`flex items-baseline gap-3 py-2 ${last ? "" : "border-b border-line-soft"}`}>
+      <dt className="flex-1 text-[13px] text-ink-muted">{label}</dt>
+      <dd className="text-right text-[13px] font-bold text-ink">{value}</dd>
     </div>
   )
 }
 
-const EYEBROW = "text-[10.5px] font-semibold uppercase tracking-[0.18em]"
+const CARD = "flex-none rounded-card border border-line bg-surface p-[15px]"
+
+function Header({ status, statusAccent }: { status: string; statusAccent: boolean }) {
+  return (
+    <>
+      <div className="flex items-baseline gap-2">
+        <span className="flex-1 text-[14.5px] font-bold text-ink">Lidmaatschap</span>
+        <span className={`text-[12.5px] ${statusAccent ? "font-semibold text-teal" : "text-ink-faint"}`}>{status}</span>
+      </div>
+      <div className="mt-3 h-px bg-line" />
+    </>
+  )
+}
 
 export function ProMembershipPanel({
   memberSince,
@@ -61,96 +72,65 @@ export function ProMembershipPanel({
       : "Verlengt op"
   const renewValue = billing?.isPaused ? fmtDate(billing.pausedUntil) : fmtDate(renew)
 
+  const showRenew = !isAdmin && !!renewValue
+
   return (
-    <section
-      aria-label="Lidmaatschap"
-      className="relative flex-none overflow-hidden rounded-card p-[18px] text-white"
-      style={{
-        backgroundImage: "linear-gradient(158deg, #0F172A 0%, #0C1F2A 52%, #042F2E 100%)",
-        boxShadow: "0 22px 44px -22px rgba(2,6,23,.55), 0 6px 14px -8px rgba(4,47,46,.35)",
-      }}
-    >
-      {/* Statisch lichtvlak rechtsboven. */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{ backgroundImage: "radial-gradient(120% 80% at 100% 0%, rgba(94,234,212,.13) 0%, rgba(94,234,212,0) 55%)" }}
-      />
-      {/* Binnenste haarlijn. */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-0 rounded-card"
-        style={{ boxShadow: "inset 0 0 0 1px rgba(45,212,191,.18), inset 0 1px 0 rgba(255,255,255,.06)" }}
-      />
+    <section aria-label="Lidmaatschap" className={CARD}>
+      <Header status={isAdmin ? "Beheerder" : "Actief"} statusAccent />
 
-      <div className="relative">
-        <div className="flex items-center justify-between gap-3">
-          <span className={`${EYEBROW} text-teal-200/70`}>Lidmaatschap</span>
-          <span className="text-[10.5px] font-medium text-slate-400">{isAdmin ? "Beheerder" : "Actief"}</span>
-        </div>
+      <div className="mt-[13px] text-[17px] font-bold leading-tight tracking-[-0.3px] text-ink">
+        BijbelStudie <span className="text-teal">Pro</span>
+      </div>
+      <p className="mt-[5px] text-[12.5px] leading-[1.55] text-ink-body">
+        {isAdmin
+          ? "Als beheerder heb je toegang tot alle Pro-functies."
+          : "Commentaren, de grondtekst en alle studiehulpmiddelen staan voor je open."}
+      </p>
 
-        <div className="mt-[10px] text-[21px] font-semibold leading-tight tracking-[-0.3px]">
-          BijbelStudie <span className="font-medium text-teal-200">Pro</span>
-        </div>
-        <p className="mt-[6px] text-[12.5px] leading-[1.55] text-slate-300">
-          {isAdmin
-            ? "Als beheerder heb je toegang tot alle Pro-functies."
-            : "Commentaren, de grondtekst en alle studiehulpmiddelen staan voor je open."}
-        </p>
+      <dl className="mt-[6px]">
+        <Row label="Lid sinds" value={memberSince ?? "-"} />
+        <Row label="Abonnement" value={planLabel(billing, isAdmin)} last={!showRenew} />
+        {showRenew && renewValue && <Row label={renewLabel} value={renewValue} last />}
+      </dl>
 
-        <div className="mt-[14px] h-px" style={{ backgroundColor: "rgba(148,163,184,.16)" }} />
-
-        <dl className="mt-[4px]">
-          <Row dark label="Lid sinds" value={memberSince ?? "-"} />
-          <Row dark label="Abonnement" value={planLabel(billing, isAdmin)} />
-          {!isAdmin && renewValue && <Row dark label={renewLabel} value={renewValue} />}
-        </dl>
-
-        {!isAdmin && (
-          <>
-            <div className="mt-[6px] h-px" style={{ backgroundColor: "rgba(148,163,184,.16)" }} />
+      {!isAdmin && (
+        <>
+          <div className="mt-[6px] h-px bg-line" />
+          <div className="mt-[13px] text-center">
             <Link
               href="/abonnement"
-              className="mt-[12px] inline-flex text-[13px] font-semibold text-teal-200 no-underline transition-colors hover:text-white"
+              className="text-[13px] font-semibold text-teal no-underline hover:text-teal-dark dark:hover:text-teal-bright"
             >
               Abonnement beheren →
             </Link>
-          </>
-        )}
-      </div>
+          </div>
+        </>
+      )}
     </section>
   )
 }
 
 export function FreeMembershipPanel({ memberSince }: { memberSince: string | null }) {
   return (
-    <section aria-label="Lidmaatschap" className="flex-none rounded-card border border-line bg-white p-[18px]">
-      <div className="flex items-center justify-between gap-3">
-        <span className={`${EYEBROW} text-ink-faint`}>Lidmaatschap</span>
-        <span className="text-[10.5px] font-medium text-ink-faint">Gratis</span>
-      </div>
+    <section aria-label="Lidmaatschap" className={CARD}>
+      <Header status="Gratis" statusAccent={false} />
 
-      <div className="mt-[10px] text-[19px] font-semibold leading-tight tracking-[-0.3px] text-ink">
-        BijbelStudie <span className="font-medium text-ink-muted">Gratis</span>
+      <div className="mt-[13px] text-[17px] font-bold leading-tight tracking-[-0.3px] text-ink">
+        BijbelStudie <span className="font-semibold text-ink-muted">Gratis</span>
       </div>
-      <p className="mt-[6px] text-[12.5px] leading-[1.55] text-ink-muted">
+      <p className="mt-[5px] text-[12.5px] leading-[1.55] text-ink-body">
         Upgrade naar Pro voor commentaren, de grondtekst en meer studiehulpmiddelen.
       </p>
 
-      <div className="mt-[14px] h-px bg-line" />
-      <dl className="mt-[4px]">
-        <Row dark={false} label="Lid sinds" value={memberSince ?? "-"} />
+      <dl className="mt-[6px]">
+        <Row label="Lid sinds" value={memberSince ?? "-"} last />
       </dl>
 
       <Link
         href="/abonnement"
-        className="relative mt-[10px] flex h-10 items-center justify-center overflow-hidden rounded-btn text-[13.5px] font-semibold text-white no-underline transition-opacity hover:opacity-95"
-        style={{
-          backgroundImage: "linear-gradient(158deg, #0F172A 0%, #042F2E 100%)",
-          boxShadow: "inset 0 0 0 1px rgba(45,212,191,.28), 0 8px 18px -10px rgba(2,6,23,.5)",
-        }}
+        className="mt-[10px] flex h-10 items-center justify-center rounded-btn bg-teal text-[13.5px] font-semibold text-white no-underline transition-opacity hover:opacity-90"
       >
-        Upgrade naar <span className="ml-1 text-teal-200">Pro</span>
+        Upgrade naar Pro
       </Link>
     </section>
   )
