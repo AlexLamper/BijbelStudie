@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { Sparkles } from "lucide-react"
 import { PLANS, perWeek } from "../../lib/pricing"
 import { track, trackNow } from "../../lib/analytics"
 
@@ -57,13 +56,11 @@ export function UpgradePrompt({
 
   return (
     <div
-      className={`max-w-[340px] mx-auto rounded-xl border border-gray-200 dark:border-border bg-gradient-to-br from-gray-50 to-white dark:from-card dark:to-background text-center shadow-sm ${
+      className={`max-w-[340px] mx-auto rounded-xl border border-line bg-gradient-to-br from-gray-50 to-white dark:from-card dark:to-background text-center shadow-sm ${
         compact ? "p-4" : "p-5"
       }`}
     >
-      <Sparkles className="h-5 w-5 mx-auto mb-2.5" style={{ color: TEAL }} />
-
-      <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-100 mb-1.5">
+      <h3 className="font-semibold text-sm text-ink mb-1.5">
         {title}
       </h3>
 
@@ -73,13 +70,13 @@ export function UpgradePrompt({
 
       {/* The price, answered here. The billed amount stays attached to the
           per-week figure wherever that figure appears. */}
-      <p className="text-xs text-gray-500 dark:text-gray-400 mb-3.5">
+      <p className="text-xs text-ink-muted mb-3.5">
         Vanaf{" "}
-        <span className="font-bold text-gray-900 dark:text-gray-100 tabular-nums">
+        <span className="font-bold text-ink tabular-nums">
           {perWeek(PLANS.annual)}
         </span>{" "}
         per week
-        <span className="block text-[11px] text-gray-400 mt-0.5">
+        <span className="block text-[11px] text-ink-faint mt-0.5">
           {PLANS.annual.billedLabel}
         </span>
       </p>

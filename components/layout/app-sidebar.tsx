@@ -11,7 +11,7 @@ import {
 } from "../ui/sidebar"
 import {
   LayoutDashboard, BookOpen, BookMarked,
-  StickyNote, User, Settings, Sparkles, ShieldCheck,
+  StickyNote, User, Settings, ShieldCheck,
   ArrowRight, ArrowUpRight, Check, MessageSquareText,
 } from "lucide-react"
 import { useSession } from "next-auth/react"
@@ -19,14 +19,13 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import React, { useEffect, useState } from "react"
 
-// Same green as the Levensboom stage name in the level-up dialog
-// (components/levensboom/LevelUpDialog.tsx, also the spring "leafAlt" tone in
-// lib/levensboom/palette.ts) - reused here so "Studie" in the wordmark reads
-// as the same brand green everywhere, not a second invented shade.
-const LOGO_GREEN = "#0F766E"
 import { APP_STORE_URL } from "../../lib/appStore"
 import { useStudyStyle } from "../providers/study-style-provider"
 import { ProBadge } from "../ui/ProBadge"
+
+// "Studie" in the wordmark: #0F766E, the brand green used everywhere else,
+// stepping up to teal-400 on the dark theme where #0F766E falls to 3.4:1.
+const LOGO_GREEN = "text-[#0F766E] dark:text-teal-400"
 
 /**
  * The nav as someone who wants to be guided sees it - and the order the menu
@@ -214,7 +213,7 @@ export function StudyRail() {
             priority
           />
           <span className="text-[15px] font-bold tracking-tight text-gray-900 dark:text-foreground whitespace-nowrap">
-            Bijbel<span style={{ color: LOGO_GREEN }}>Studie</span>
+            Bijbel<span className={LOGO_GREEN}>Studie</span>
           </span>
         </Link>
 
@@ -345,12 +344,6 @@ function ProCTA() {
 
         <div className="relative p-3.5">
           <div className="flex items-center gap-1.5 mb-1.5">
-            <div
-              className="h-6 w-6 rounded-md flex items-center justify-center shadow-sm"
-              style={{ backgroundColor: "#0D9488" }}
-            >
-              <Sparkles size={12} className="text-white" />
-            </div>
             <ProBadge />
           </div>
 
@@ -428,7 +421,7 @@ export function AppSidebar({ ...props }) {
             priority
           />
           <span className="text-[15px] font-bold tracking-tight text-gray-900 dark:text-foreground">
-            Bijbel<span style={{ color: LOGO_GREEN }}>Studie</span>
+            Bijbel<span className={LOGO_GREEN}>Studie</span>
           </span>
         </Link>
       </SidebarHeader>

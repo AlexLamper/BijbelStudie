@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react"
 import { createPortal } from "react-dom"
 import { usePathname, useRouter } from "next/navigation"
-import { ArrowLeft, ArrowRight, Sparkles, X, Check } from "lucide-react"
+import { ArrowLeft, ArrowRight, X, Check } from "lucide-react"
 
 const TEAL = "#0D9488"
 
@@ -349,10 +349,9 @@ export function GuidedTour({ open, onClose, startStep = 0, steps: stepsProp }: G
           <div className="px-5 pt-4 pb-3 border-b border-gray-100 dark:border-border">
             <div className="flex items-center justify-between mb-2">
               <span
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest"
-                style={{ backgroundColor: "rgba(13,148,136,0.1)", color: TEAL }}
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest bg-teal/10 text-teal dark:text-teal-400"
               >
-                <Sparkles size={9} /> Rondleiding
+                Rondleiding
               </span>
               <button
                 onClick={onClose}

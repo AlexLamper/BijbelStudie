@@ -7,18 +7,17 @@ import { PLANS, effectivePerMonth, annualSaving } from "../../lib/pricing"
 import { track, trackNow } from "../../lib/analytics"
 
 /**
- * Colours on a dark panel. Everything here is a literal, never a theme token:
- * the panel is dark in BOTH themes because the landscape behind it does not
- * flip with the reader's setting.
+ * This panel sits on the /instellingen surface card, which follows the theme.
+ * (It used to sit on a dark landscape, which is where the pale #FCD34D and
+ * #FCA5A5 text came from - unreadable on white.)
  */
-/** The warning amber, lightened for a dark ground - #B45309 is unreadable here. */
-const WARN = "#FCD34D"
-/** The error red, likewise. The destructive BUTTON keeps its #B91C1C fill,
- *  where white type measures well over 4.5:1. */
-const DANGER_TEXT = "#FCA5A5"
+/** Warning text: deep amber on light, light amber on dark. */
+const WARN_TEXT = "text-amber-700 dark:text-amber-400"
+/** Error text, likewise. The destructive BUTTON keeps its #B91C1C fill,
+ *  where white type measures well over 4.5:1 in both themes. */
+const DANGER_TEXT = "text-red-700 dark:text-red-400"
 const DANGER_FILL = "#B91C1C"
-/** The brand as an accent on dark. Never a fill under white type. */
-/** The brand fill, for a glyph beside body type on a white card. */
+/** The brand fill, for a glyph beside body type on the card. */
 const TEAL = "#0D9488"
 
 /** A quiet bordered control on the scene, with a real focus ring. */
@@ -262,7 +261,7 @@ export function SubscriptionSection() {
           </p>
           <p className="mt-1 text-[12px] text-ink-faint">{plan.billedLabel}</p>
           {state.cancelAtPeriodEnd ? (
-            <p className="mt-1 text-xs" style={{ color: WARN }}>
+            <p className={`mt-1 text-xs ${WARN_TEXT}`}>
               Loopt af op {formatDate(state.currentPeriodEnd)}
             </p>
           ) : state.currentPeriodEnd ? (
@@ -280,7 +279,7 @@ export function SubscriptionSection() {
       </div>
 
       {error && (
-        <p className="mt-4 text-xs" style={{ color: DANGER_TEXT }}>{error}</p>
+        <p className={`mt-4 text-xs ${DANGER_TEXT}`}>{error}</p>
       )}
 
       {/* Cancellation. Stays available while paused: a paused subscriber must
@@ -315,7 +314,7 @@ export function SubscriptionSection() {
                   forbid; the answer rate matters less than the exit staying
                   open. A real fieldset/legend, so the six radios are one named
                   group instead of six unrelated controls under a paragraph. */}
-              <fieldset className="min-w-0" style={{ colorScheme: "dark" }}>
+              <fieldset className="min-w-0">
                 <legend className="text-[12px] font-medium text-ink-muted">
                   Wil je ons vertellen waarom? (optioneel)
                 </legend>
@@ -328,7 +327,7 @@ export function SubscriptionSection() {
                         value={r.value}
                         checked={reason === r.value}
                         onChange={() => setReason(r.value)}
-                        className="accent-[#2DD4BF]"
+                        className="accent-teal dark:accent-teal-400"
                       />
                       {r.label}
                     </label>
@@ -342,14 +341,14 @@ export function SubscriptionSection() {
                 placeholder="Wil je er iets aan toevoegen? (optioneel)"
                 aria-label="Toelichting bij het opzeggen"
                 rows={3}
-                className="w-full rounded-btn border border-line bg-white p-2.5 text-[13.5px] text-ink placeholder:text-ink-faint outline-none transition-colors focus-visible:border-teal"
+                className="w-full rounded-btn border border-line bg-surface p-2.5 text-[13.5px] text-ink placeholder:text-ink-faint outline-none transition-colors focus-visible:border-teal"
               />
 
               <div className="flex flex-wrap items-center gap-3">
                 <button
                   onClick={confirmCancel}
                   disabled={busy}
-                  className="press inline-flex h-10 items-center gap-2 rounded-lg px-4 text-[14.5px] font-semibold text-ink outline-none transition-colors focus-visible:ring-2 focus-visible:ring-white disabled:opacity-50"
+                  className="press inline-flex h-10 items-center gap-2 rounded-lg px-4 text-[14.5px] font-semibold text-white outline-none transition-colors focus-visible:ring-2 focus-visible:ring-teal focus-visible:ring-offset-2 focus-visible:ring-offset-sunken disabled:opacity-50"
                   style={{ backgroundColor: DANGER_FILL }}
                 >
                   {busy && <Loader2 size={14} aria-hidden className="animate-spin" />}
