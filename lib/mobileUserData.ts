@@ -38,10 +38,20 @@ export type SyncRecord = {
   data: Record<string, unknown>;
 };
 
-const UUID_RE = /^[0-9a-fA-F-]{8,64}$/;
+/**
+ * Three id shapes reach the app from the list endpoint, and every one must
+ * come back through edit and delete:
+ *  - a UUID minted on a device;
+ *  - `web-<uuid>`, which app/api/notes stamps on notes written on the website;
+ *  - a bare 24-hex Mongo `_id`, for website notes older than clientId.
+ * The old hex-only pattern 400'd the `web-` shape, and the app treats a 400 as
+ * final - so every note written on the website was undeletable from the app.
+ * Still strictly [0-9a-f-] after the prefix: no Mongo operator syntax.
+ */
+const CLIENT_ID_RE = /^(?:web-)?[0-9a-fA-F-]{8,64}$/;
 
 export function assertClientId(value: unknown): string {
-  if (typeof value !== 'string' || !UUID_RE.test(value)) {
+  if (typeof value !== 'string' || !CLIENT_ID_RE.test(value)) {
     const err = new Error('Invalid client id');
     (err as { status?: number }).status = 400;
     throw err;
@@ -206,6 +216,22 @@ function oid(userId: string) {
   return new mongoose.Types.ObjectId(userId);
 }
 
+const OBJECT_ID_RE = /^[0-9a-fA-F]{24}$/;
+
+/**
+ * Finds the Note a sync id refers to. A note created on the website has no
+ * `clientId`, so `serialiseNote` hands the app its Mongo `_id` instead - and
+ * the app sends that id straight back on edit and delete. Matching on
+ * `clientId` alone found nothing for those notes: a delete answered 204 and
+ * removed nothing (the note reappeared on the next refetch), and an edit
+ * upserted a duplicate.
+ */
+async function findNoteBySyncId(user: mongoose.Types.ObjectId, id: string) {
+  const byClientId = await Note.findOne({ userId: user, clientId: id });
+  if (byClientId || !OBJECT_ID_RE.test(id)) return byClientId;
+  return Note.findOne({ userId: user, _id: id, clientId: null });
+}
+
 export async function listRecords(
   userId: string,
   kind: SyncKind,
@@ -280,16 +306,27 @@ export async function upsertRecord(
   if (tombstone) return { record: null, skipped: 'deleted', created: false };
 
   if (kind === 'note' || kind === 'highlight') {
-    const existing = await Note.findOne({ userId: user, clientId });
+    const existing = await findNoteBySyncId(user, clientId);
     if (existing && isStale(existing.updatedAt, clientUpdatedAt)) {
       return { record: serialiseNote(existing.toObject(), kind), skipped: 'stale', created: false };
     }
     const fields = noteFieldsFrom(data, kind);
-    const doc = await Note.findOneAndUpdate(
-      { userId: user, clientId },
-      { $set: { ...fields, userId: user, clientId } },
-      { new: true, upsert: true, setDefaultsOnInsert: true },
-    );
+    // A website "both" note shows up in the app's notes list; editing its text
+    // there must not silently drop the highlight half.
+    if (existing?.type === 'both' && kind === 'note') fields.type = 'both';
+    const doc = existing
+      ? await Note.findOneAndUpdate(
+          { _id: existing._id, userId: user },
+          // Website notes gain the id the app already knows them by, so every
+          // later lookup takes the plain clientId path.
+          { $set: { ...fields, clientId } },
+          { new: true },
+        )
+      : await Note.findOneAndUpdate(
+          { userId: user, clientId },
+          { $set: { ...fields, userId: user, clientId } },
+          { new: true, upsert: true, setDefaultsOnInsert: true },
+        );
     return { record: serialiseNote(doc.toObject(), kind), skipped: null, created: !existing };
   }
 
@@ -335,7 +372,10 @@ export async function deleteRecord(
 
   let removed = 0;
   if (kind === 'note' || kind === 'highlight') {
-    removed = (await Note.deleteOne({ userId: user, clientId })).deletedCount ?? 0;
+    const existing = await findNoteBySyncId(user, clientId);
+    if (existing) {
+      removed = (await Note.deleteOne({ _id: existing._id, userId: user })).deletedCount ?? 0;
+    }
   } else if (kind === 'bookmark') {
     removed = (await Bookmark.deleteOne({ userId: user, clientId })).deletedCount ?? 0;
   } else {
