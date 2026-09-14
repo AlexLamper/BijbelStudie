@@ -5,6 +5,8 @@ import connectMongoDB from "../../../lib/mongodb";
 import Note from "../../../models/Note";
 import User from "../../../models/User";
 import { grantNoteXp } from "../../../lib/noteXp";
+import { resolveIsPro } from "../../../lib/mobilePremium";
+import { isAdminEmail } from "../../../lib/adminEmails";
 import { randomUUID } from "crypto";
 
 interface NotesQuery {
@@ -93,7 +95,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Check note limit for free users
-    if (!user.subscribed) {
+    const isPro = resolveIsPro(user, isAdminEmail(session.user.email));
+    if (!isPro) {
       const noteCount = await Note.countDocuments({ userId: user._id });
       if (noteCount >= 7) {
         return NextResponse.json(
@@ -158,7 +161,7 @@ export async function POST(request: NextRequest) {
     // (creates only, 15 characters, three a day) live in lib/noteXp.ts so this
     // route and the app's /api/v1/notes cannot pay different amounts.
     const xp = await grantNoteXp(user._id.toString(), {
-      isPro: Boolean(user.subscribed),
+      isPro,
       noteText,
       type: type || "note",
       created: true,

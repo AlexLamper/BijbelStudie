@@ -119,7 +119,7 @@ const TYPE_PILLS: { value: CuratedStudy['type'] | null; label: string }[] = [
   { value: 'Onderwerp', label: "Thema's" },
 ]
 
-const LIST_PAGE_SIZE = 12
+const LIST_PAGE_SIZE = 16
 
 export default function StudiesBrowser() {
   const [typeFilter, setTypeFilter] = useState<CuratedStudy['type'] | null>(null)
