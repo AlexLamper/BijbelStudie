@@ -176,6 +176,21 @@ export function renderTreeSvg(options: TreeSvgOptions): string {
         ry = size * 0.22;
         ox = size * 1.6;
         break;
+      case 'lance':
+        rx = size * 1.5;
+        ry = size * 0.22;
+        ox = size * 0.8;
+        break;
+      case 'scale':
+        rx = size * 0.6;
+        ry = size * 0.4;
+        ox = size * 0.45;
+        break;
+      case 'feather':
+        rx = size * 1.1;
+        ry = size * 0.3;
+        ox = size * 0.7;
+        break;
       default:
         break;
     }

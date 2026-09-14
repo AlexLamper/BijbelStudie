@@ -16,7 +16,7 @@ export type Palette = {
   /** Carried through so a renderer can draw the seasonal events of §6's
    *  `seasons` trait without re-deriving the month it already resolved. */
   season: Season;
-  /** After the scene's say: a `forceNight` scene reports `night` at noon. */
+  /** After the scene's say: a `forceTime: 'night'` scene reports `night` at noon. */
   timeOfDay: TimeOfDay;
   scene: SceneId;
   skyTop: string;
@@ -59,7 +59,6 @@ const BARK_LIT = '#6B5442';
 const NIGHT_MIX = '#1B2340';
 const WILT_MIX = '#8A8F7A';
 const WINTER_MIX = '#8A9A8A';
-const ALMOND_BLOSSOM = '#FBD3E0';
 
 function parseHex(hex: string): [number, number, number] {
   const value = hex.replace('#', '');
@@ -117,7 +116,7 @@ export function buildPalette(
 ): Palette {
   const scene = sceneSpec(options.scene ?? DEFAULT_SCENE);
   const sp = speciesParams(options.species ?? DEFAULT_SPECIES);
-  const tod: TimeOfDay = scene.forceNight ? 'night' : timeOfDay;
+  const tod: TimeOfDay = scene.forceTime ?? timeOfDay;
   const sky = scene.sky[tod] ?? SKY[tod];
   const foliage = FOLIAGE[season];
   const night = tod === 'night';
@@ -143,7 +142,9 @@ export function buildPalette(
     }
   }
 
-  const blossom = foliage.blossom ? (sp.blossom === 'always' ? ALMOND_BLOSSOM : foliage.blossom) : null;
+  // A species with its own blossom colour (the amandel's pale pink, the
+  // mosterd's yellow) keeps it; the seasons only decide whether there is any.
+  const blossom = foliage.blossom ? (sp.blossomColor ?? foliage.blossom) : null;
   const ground = scene.ground ? scene.ground.top : foliage.ground;
   const groundDeep = scene.ground ? scene.ground.bottom : mix(foliage.ground, BARK, 0.7);
 

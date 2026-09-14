@@ -77,6 +77,7 @@ type Star = { x: number; y: number; r: number; phase: number };
 type Drifter = { x: number; y: number; size: number; speed: number; drift: number; phase: number };
 type Firefly = { x: number; y: number; phase: number };
 type Butterfly = { rx: number; ry: number; speed: number; phase: number; hue: number };
+type Bee = { rx: number; ry: number; speed: number; phase: number };
 
 type Decor = {
   motes: Mote[];
@@ -84,11 +85,18 @@ type Decor = {
   drifters: Drifter[];
   fireflies: Firefly[];
   butterflies: Butterfly[];
+  bees: Bee[];
+  /** Where on its circle the eagle starts. */
+  eaglePhase: number;
   /** Backdrop details: stone/flower/olive positions, extra stars. 0..1 pairs. */
   dots: { x: number; y: number; r: number; k: number }[];
   /** Where the ground animals stand, in tree units left/right of the trunk. */
   sheep: [number, number];
   deer: number;
+  fox: number;
+  donkey: number;
+  stork: number;
+  lion: number;
 };
 
 type Frame = {
@@ -162,6 +170,14 @@ function buildDecor(seed: string): Decor {
     phase: rand(),
     hue: i,
   }));
+  // Appended after everything that existed before, so no older decor moved.
+  const bees: Bee[] = Array.from({ length: 7 }, () => ({
+    rx: 0.35 + rand() * 0.55,
+    ry: 0.3 + rand() * 0.5,
+    speed: 0.6 + rand() * 0.8,
+    phase: rand(),
+  }));
+  const eaglePhase = rand();
 
   const scene = seededRng(`${seed}:scene`);
   const dots = Array.from({ length: 120 }, () => ({
@@ -172,8 +188,13 @@ function buildDecor(seed: string): Decor {
   }));
   const sheep: [number, number] = [-(13 + scene() * 8), 11 + scene() * 7];
   const deer = 15 + scene() * 6;
+  // Same rule: later animals draw after the earlier ones.
+  const fox = -(12 + scene() * 6);
+  const donkey = 14 + scene() * 6;
+  const stork = 12 + scene() * 5;
+  const lion = 15 + scene() * 5;
 
-  return { motes, stars, drifters, fireflies, butterflies, dots, sheep, deer };
+  return { motes, stars, drifters, fireflies, butterflies, bees, eaglePhase, dots, sheep, deer, fox, donkey, stork, lion };
 }
 
 function drawBranches(
@@ -231,6 +252,19 @@ function leafPath(ctx: CanvasRenderingContext2D, shape: LeafShape, size: number,
       break;
     case 'almond':
       ctx.ellipse(size * 0.65, 0, size * 1.15, size * 0.42, 0, 0, Math.PI * 2);
+      break;
+    case 'lance':
+      // The willow: long and thin, hanging from its stem.
+      ctx.ellipse(size * 0.8, 0, size * 1.5, size * 0.22, 0, 0, Math.PI * 2);
+      break;
+    case 'scale':
+      // The cypress: short, fat foliage that overlaps into a dense mass.
+      ctx.ellipse(size * 0.45, 0, size * 0.6, size * 0.4, 0, 0, Math.PI * 2);
+      break;
+    case 'feather':
+      // The acacia: a rib with tiny leaflets; the leaflets are strokes added
+      // by the caller where there is room to see them.
+      ctx.ellipse(size * 0.7, 0, size * 1.1, size * 0.3, 0, 0, Math.PI * 2);
       break;
     case 'needle': {
       // A tuft of needles. At avatar sizes a single stroke is all that
@@ -315,6 +349,72 @@ function drawFruit(
       ctx.lineTo(x + size * 0.5, y + size * 0.2);
       ctx.stroke();
       break;
+    case 'apple':
+      ctx.beginPath();
+      ctx.arc(x, y, size * 0.85, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = palette.fruitAlt;
+      ctx.lineWidth = Math.max(0.5, size * 0.14);
+      ctx.beginPath();
+      ctx.moveTo(x, y - size * 0.8);
+      ctx.lineTo(x + size * 0.15, y - size * 1.25);
+      ctx.stroke();
+      break;
+    case 'pomegranate':
+      ctx.beginPath();
+      ctx.arc(x, y, size * 0.9, 0, Math.PI * 2);
+      ctx.fill();
+      // The calyx crown on top.
+      ctx.fillStyle = palette.fruitAlt;
+      ctx.beginPath();
+      ctx.moveTo(x - size * 0.3, y - size * 0.75);
+      ctx.lineTo(x - size * 0.35, y - size * 1.15);
+      ctx.lineTo(x, y - size * 0.95);
+      ctx.lineTo(x + size * 0.35, y - size * 1.15);
+      ctx.lineTo(x + size * 0.3, y - size * 0.75);
+      ctx.closePath();
+      ctx.fill();
+      break;
+    case 'catkin':
+      ctx.beginPath();
+      ctx.ellipse(x, y + size * 0.5, size * 0.32, size * 0.9, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = palette.fruitAlt;
+      for (const [ox, oy] of [
+        [-0.12, 0.1],
+        [0.14, 0.55],
+        [-0.1, 1.0],
+      ]) {
+        ctx.beginPath();
+        ctx.arc(x + ox * size, y + oy * size, size * 0.12, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      break;
+    case 'pod':
+      // A hanging, curved seed pod with a seam.
+      ctx.strokeStyle = palette.fruit;
+      ctx.lineCap = 'round';
+      ctx.lineWidth = Math.max(0.8, size * 0.4);
+      ctx.beginPath();
+      ctx.moveTo(x - size * 0.5, y - size * 0.3);
+      ctx.quadraticCurveTo(x + size * 0.1, y + size * 1.2, x + size * 0.7, y + size * 0.9);
+      ctx.stroke();
+      ctx.strokeStyle = palette.fruitAlt;
+      ctx.lineWidth = Math.max(0.4, size * 0.1);
+      ctx.stroke();
+      break;
+    case 'berry':
+      ctx.beginPath();
+      ctx.arc(x, y, size * 0.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(x - size * 0.4, y + size * 0.45, size * 0.38, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = palette.fruitAlt;
+      ctx.beginPath();
+      ctx.arc(x + size * 0.55, y + size * 0.35, size * 0.42, 0, Math.PI * 2);
+      ctx.fill();
+      break;
     case 'acorn':
     default:
       ctx.beginPath();
@@ -349,10 +449,214 @@ function hillPath(ctx: CanvasRenderingContext2D, width: number, baseY: number, a
   ctx.closePath();
 }
 
-function drawFarBackdrop(ctx: CanvasRenderingContext2D, palette: Palette, decor: Decor, frame: Frame) {
+/** A wavy line across the frame: sea swell, the shore's foam. */
+function wavePath(ctx: CanvasRenderingContext2D, width: number, y: number, amp: number, count: number, shift: number) {
+  ctx.beginPath();
+  const step = width / count;
+  ctx.moveTo(-step + shift, y);
+  for (let i = -1; i <= count; i += 1) {
+    const x = i * step + shift;
+    ctx.quadraticCurveTo(x + step * 0.5, y - amp, x + step, y);
+  }
+}
+
+function drawFarBackdrop(ctx: CanvasRenderingContext2D, palette: Palette, decor: Decor, frame: Frame, t: number, still: boolean) {
   const { width: w, height: h, groundTop } = frame;
   const spec = sceneSpec(palette.scene);
   switch (spec.backdrop) {
+    case 'river': {
+      // Far bank and hills, then the river itself between them and the near
+      // bank the tree stands on - the reader is on the Jordan's shore.
+      ctx.fillStyle = palette.farAlt;
+      hillPath(ctx, w, groundTop, h * 0.08, 1.4, 0.6, h * 0.04);
+      ctx.fill();
+      ctx.fillStyle = palette.far;
+      hillPath(ctx, w, groundTop, h * 0.05, 2.3, 2.9, 0);
+      ctx.fill();
+      const top = groundTop - h * 0.085;
+      ctx.fillStyle = palette.water ?? palette.far;
+      ctx.fillRect(0, top, w, groundTop - top);
+      ctx.strokeStyle = palette.light;
+      ctx.globalAlpha = 0.35;
+      ctx.lineWidth = Math.max(1, h * 0.003);
+      for (let i = 0; i < 5; i += 1) {
+        const d = decor.dots[50 + i];
+        const y = top + (0.2 + d.y * 0.6) * (groundTop - top);
+        const drift = still ? 0 : Math.sin(t * 0.0006 + d.k * 6.283) * w * 0.01;
+        ctx.beginPath();
+        ctx.moveTo(d.x * w - w * 0.04 * (0.5 + d.r) + drift, y);
+        ctx.lineTo(d.x * w + w * 0.04 * (0.5 + d.r) + drift, y);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      break;
+    }
+    case 'vineyard': {
+      ctx.fillStyle = palette.farAlt;
+      hillPath(ctx, w, groundTop, h * 0.08, 1.4, 0.6, h * 0.04);
+      ctx.fill();
+      ctx.fillStyle = palette.far;
+      hillPath(ctx, w, groundTop, h * 0.05, 2.3, 2.9, 0);
+      ctx.fill();
+      // Rows of vines on posts, smaller as they recede up the hill.
+      for (let row = 0; row < 4; row += 1) {
+        const perspective = 1 - row * 0.18;
+        const y = groundTop - h * (0.015 + row * 0.03);
+        const step = w * 0.07 * perspective;
+        const offset = step * (row % 2 === 0 ? 0.25 : 0.6);
+        let k = 0;
+        for (let x = offset; x < w; x += step, k += 1) {
+          const d = decor.dots[(row * 17 + k) % 120];
+          ctx.strokeStyle = palette.groundDeep;
+          ctx.globalAlpha = 0.55;
+          ctx.lineWidth = Math.max(0.7, w * 0.004 * perspective);
+          ctx.beginPath();
+          ctx.moveTo(x, y);
+          ctx.lineTo(x, y - h * 0.03 * perspective);
+          ctx.stroke();
+          ctx.globalAlpha = 0.9;
+          ctx.fillStyle = palette.farAlt;
+          ctx.beginPath();
+          ctx.ellipse(x, y - h * 0.028 * perspective, Math.max(1.5, w * 0.022 * perspective), Math.max(1, h * 0.014 * perspective), 0, 0, Math.PI * 2);
+          ctx.fill();
+          if (d.k > 0.5) {
+            ctx.fillStyle = spec.accent;
+            ctx.beginPath();
+            ctx.arc(x + (d.x - 0.5) * w * 0.02, y - h * 0.018 * perspective, Math.max(0.6, w * 0.004 * perspective), 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      }
+      ctx.globalAlpha = 1;
+      break;
+    }
+    case 'field': {
+      ctx.fillStyle = palette.farAlt;
+      hillPath(ctx, w, groundTop, h * 0.06, 1.1, 1.9, h * 0.03);
+      ctx.fill();
+      ctx.fillStyle = palette.far;
+      hillPath(ctx, w, groundTop, h * 0.04, 1.9, 4.1, 0);
+      ctx.fill();
+      break;
+    }
+    case 'sea': {
+      const horizon = groundTop - h * 0.16;
+      ctx.fillStyle = palette.water ?? palette.far;
+      ctx.fillRect(0, horizon, w, groundTop - horizon);
+      // Swell: rows of low scallops, drifting sideways.
+      ctx.strokeStyle = spec.accent;
+      ctx.lineWidth = Math.max(1, h * 0.004);
+      for (let i = 0; i < 5; i += 1) {
+        const y = horizon + (0.18 + i * 0.17) * (groundTop - horizon);
+        const count = 9 + i * 2;
+        const shift = still ? 0 : ((t * 0.012 * (1 + i * 0.2)) % (w / count)) - w / count;
+        ctx.globalAlpha = 0.2 + i * 0.07;
+        wavePath(ctx, w, y, h * 0.006 * (1 + i * 0.3), count, shift);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      break;
+    }
+    case 'rainbow': {
+      // The bow: six bands on a centre below the horizon; the earth band
+      // covers the part that would run under the ground.
+      const cx = w * 0.62;
+      const cy = groundTop + h * 0.32;
+      const r = h * 0.78;
+      const band = Math.max(1.5, h * 0.014);
+      const colours = ['#E4483F', '#F0933A', '#F2D24A', '#6DBA5C', '#4E9CD6', '#7A5FB8'];
+      ctx.lineWidth = band;
+      ctx.globalAlpha = 0.5;
+      colours.forEach((colour, i) => {
+        ctx.strokeStyle = colour;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r - i * band, Math.PI, Math.PI * 2);
+        ctx.stroke();
+      });
+      ctx.globalAlpha = 0.55;
+      ctx.fillStyle = palette.far;
+      hillPath(ctx, w, groundTop, h * 0.04, 1.2, 1.1, 0);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      break;
+    }
+    case 'sunrise': {
+      const sx = w * 0.5;
+      const sy = groundTop - h * 0.1;
+      const sr = Math.max(6, w * 0.09);
+      const halo = ctx.createRadialGradient(sx, sy, 0, sx, sy, sr * 3);
+      halo.addColorStop(0, `${palette.glow}66`);
+      halo.addColorStop(1, `${palette.glow}00`);
+      ctx.fillStyle = halo;
+      ctx.fillRect(0, 0, w, groundTop);
+      // Rays, turning very slowly.
+      ctx.strokeStyle = spec.accent;
+      ctx.globalAlpha = 0.18;
+      ctx.lineWidth = Math.max(1, w * 0.006);
+      const turn = still ? 0 : t * 0.00008;
+      for (let i = 0; i < 9; i += 1) {
+        const a = Math.PI + (i / 8) * Math.PI + turn;
+        ctx.beginPath();
+        ctx.moveTo(sx + Math.cos(a) * sr * 1.15, sy + Math.sin(a) * sr * 1.15);
+        ctx.lineTo(sx + Math.cos(a) * sr * 2.4, sy + Math.sin(a) * sr * 2.4);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = spec.accent;
+      ctx.beginPath();
+      ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = palette.farAlt;
+      hillPath(ctx, w, groundTop, h * 0.1, 1.2, 0.4, h * 0.05);
+      ctx.fill();
+      ctx.fillStyle = palette.far;
+      hillPath(ctx, w, groundTop, h * 0.06, 2.0, 2.4, 0);
+      ctx.fill();
+      break;
+    }
+    case 'shepherds': {
+      // One bright star over the fields, and a flock on the near hill.
+      const sx = w * 0.72;
+      const sy = h * 0.14;
+      const sr = Math.max(3, w * 0.02);
+      const twinkle = still ? 1 : 0.92 + 0.08 * Math.sin(t * 0.002);
+      const halo = ctx.createRadialGradient(sx, sy, 0, sx, sy, sr * 5);
+      halo.addColorStop(0, `${spec.accent}55`);
+      halo.addColorStop(1, `${spec.accent}00`);
+      ctx.fillStyle = halo;
+      ctx.fillRect(sx - sr * 5, sy - sr * 5, sr * 10, sr * 10);
+      ctx.fillStyle = spec.accent;
+      ctx.beginPath();
+      ctx.moveTo(sx, sy - sr * 3 * twinkle);
+      ctx.lineTo(sx + sr * 0.3, sy);
+      ctx.lineTo(sx, sy + sr * 3 * twinkle);
+      ctx.lineTo(sx - sr * 0.3, sy);
+      ctx.closePath();
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(sx - sr * 2.2 * twinkle, sy);
+      ctx.lineTo(sx, sy - sr * 0.3);
+      ctx.lineTo(sx + sr * 2.2 * twinkle, sy);
+      ctx.lineTo(sx, sy + sr * 0.3);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = palette.farAlt;
+      hillPath(ctx, w, groundTop, h * 0.09, 1.1, 1.5, h * 0.04);
+      ctx.fill();
+      ctx.fillStyle = palette.far;
+      hillPath(ctx, w, groundTop, h * 0.05, 1.8, 3.6, 0);
+      ctx.fill();
+      ctx.fillStyle = palette.light;
+      ctx.globalAlpha = 0.8;
+      for (let i = 0; i < 5; i += 1) {
+        const d = decor.dots[70 + i];
+        ctx.beginPath();
+        ctx.ellipse(w * (0.08 + d.x * 0.84), groundTop - h * 0.012 - d.y * h * 0.03, Math.max(1.2, w * 0.008), Math.max(0.8, w * 0.005), 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      break;
+    }
     case 'hills': {
       ctx.fillStyle = palette.farAlt;
       hillPath(ctx, w, groundTop, h * 0.09, 1.3, 0.8, h * 0.05);
@@ -562,11 +866,76 @@ function drawFarBackdrop(ctx: CanvasRenderingContext2D, palette: Palette, decor:
 }
 
 /** Details that sit on the earth band: the stream, the pool, flowers, stones. */
-function drawNearBackdrop(ctx: CanvasRenderingContext2D, palette: Palette, decor: Decor, frame: Frame) {
+function drawNearBackdrop(ctx: CanvasRenderingContext2D, palette: Palette, decor: Decor, frame: Frame, t: number, still: boolean) {
   const { width: w, height: h, groundTop } = frame;
   const band = h - groundTop;
   const spec = sceneSpec(palette.scene);
   switch (spec.backdrop) {
+    case 'river': {
+      // Reeds along the near bank, swaying at the head.
+      for (let i = 0; i < 10; i += 1) {
+        const d = decor.dots[54 + i];
+        const x = w * (0.03 + d.x * 0.94);
+        const base = groundTop + band * (0.5 + d.y * 0.45);
+        const top = base - band * (0.5 + d.r * 0.35);
+        const sway = still ? 0 : Math.sin(t * 0.0015 + d.k * 6.283) * band * 0.04;
+        ctx.strokeStyle = palette.groundDeep;
+        ctx.lineWidth = Math.max(0.8, band * 0.03);
+        ctx.beginPath();
+        ctx.moveTo(x, base);
+        ctx.quadraticCurveTo(x, (base + top) / 2, x + sway, top);
+        ctx.stroke();
+        ctx.fillStyle = spec.accent;
+        ctx.beginPath();
+        ctx.ellipse(x + sway, top - band * 0.06, Math.max(1, band * 0.03), Math.max(2, band * 0.09), 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      break;
+    }
+    case 'field': {
+      // Standing wheat, heads nodding in the wind.
+      for (let i = 0; i < 22; i += 1) {
+        const d = decor.dots[60 + i];
+        const x = w * (0.02 + d.x * 0.96);
+        const base = groundTop + band * (0.35 + d.y * 0.6);
+        const top = base - band * (0.5 + d.r * 0.4);
+        const sway = still ? 0 : Math.sin(t * 0.0013 + d.k * 6.283) * band * 0.05;
+        ctx.strokeStyle = palette.groundDeep;
+        ctx.lineWidth = Math.max(0.8, band * 0.025);
+        ctx.beginPath();
+        ctx.moveTo(x, base);
+        ctx.quadraticCurveTo(x, (base + top) / 2, x + sway, top);
+        ctx.stroke();
+        ctx.fillStyle = spec.accent;
+        ctx.beginPath();
+        ctx.ellipse(x + sway, top - band * 0.08, Math.max(1, band * 0.035), Math.max(2, band * 0.11), sway / band, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      break;
+    }
+    case 'sea': {
+      // Foam where the last wave reaches the sand.
+      ctx.strokeStyle = spec.accent;
+      ctx.globalAlpha = 0.85;
+      ctx.lineWidth = Math.max(1.5, band * 0.06);
+      const shift = still ? 0 : Math.sin(t * 0.0009) * w * 0.01;
+      wavePath(ctx, w, groundTop + band * 0.04, band * 0.05, 11, shift);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      // Two shells.
+      ctx.fillStyle = palette.light;
+      for (let i = 0; i < 2; i += 1) {
+        const d = decor.dots[44 + i];
+        ctx.beginPath();
+        ctx.ellipse(w * (0.1 + d.x * 0.8), groundTop + band * (0.45 + d.y * 0.4), Math.max(1.2, w * 0.008), Math.max(1, w * 0.006), 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      break;
+    }
+    case 'vineyard':
+    case 'rainbow':
+    case 'sunrise':
+    case 'shepherds':
     case 'meadow': {
       if (!palette.water) break;
       // The stream: enters at the right, widens toward the viewer.
@@ -679,10 +1048,16 @@ function drawBird(ctx: CanvasRenderingContext2D, x: number, y: number, scale: nu
   ctx.stroke();
 }
 
-function drawDove(ctx: CanvasRenderingContext2D, x: number, y: number, scale: number, t: number, still: boolean) {
+type PerchBirdColours = { body: string; wing: string; beak: string; eye: string };
+
+const DOVE: PerchBirdColours = { body: '#F4F4F0', wing: '#E2E2D8', beak: '#E0A458', eye: '#2B2B2B' };
+const RAVEN: PerchBirdColours = { body: '#26262B', wing: '#3A3A42', beak: '#5A5A60', eye: '#DADAE0' };
+
+/** The dove and the raven: one bird, two coats. */
+function drawPerchBird(ctx: CanvasRenderingContext2D, x: number, y: number, scale: number, t: number, still: boolean, c: PerchBirdColours) {
   const s = Math.max(2.5, 2.4 * scale);
   const flap = still ? 0 : Math.sin(t * 0.004) * 0.25;
-  ctx.fillStyle = '#F4F4F0';
+  ctx.fillStyle = c.body;
   ctx.beginPath();
   ctx.ellipse(x, y - s * 0.4, s, s * 0.55, -0.15, 0, Math.PI * 2);
   ctx.fill();
@@ -698,7 +1073,7 @@ function drawDove(ctx: CanvasRenderingContext2D, x: number, y: number, scale: nu
   ctx.arc(x + s * 0.85, y - s * 0.8, s * 0.38, 0, Math.PI * 2);
   ctx.fill();
   // Wing.
-  ctx.fillStyle = '#E2E2D8';
+  ctx.fillStyle = c.wing;
   ctx.beginPath();
   ctx.moveTo(x - s * 0.1, y - s * 0.55);
   ctx.quadraticCurveTo(x - s * 0.2, y - s * (1.35 + flap), x + s * 0.7, y - s * (1.05 + flap));
@@ -706,17 +1081,385 @@ function drawDove(ctx: CanvasRenderingContext2D, x: number, y: number, scale: nu
   ctx.closePath();
   ctx.fill();
   // Beak and eye.
-  ctx.fillStyle = '#E0A458';
+  ctx.fillStyle = c.beak;
   ctx.beginPath();
   ctx.moveTo(x + s * 1.2, y - s * 0.82);
   ctx.lineTo(x + s * 1.5, y - s * 0.72);
   ctx.lineTo(x + s * 1.18, y - s * 0.66);
   ctx.closePath();
   ctx.fill();
-  ctx.fillStyle = '#2B2B2B';
+  ctx.fillStyle = c.eye;
   ctx.beginPath();
   ctx.arc(x + s * 0.95, y - s * 0.86, Math.max(0.5, s * 0.08), 0, Math.PI * 2);
   ctx.fill();
+}
+
+/** Asleep by day, eyes open at night - with the odd blink. */
+function drawOwl(ctx: CanvasRenderingContext2D, x: number, y: number, scale: number, t: number, still: boolean, night: boolean) {
+  const s = Math.max(2.5, 2.2 * scale);
+  const brown = '#8A6A48';
+  const face = '#D9C4A0';
+  const dark = '#4A3A28';
+  const awake = night && (still || Math.sin(t * 0.0009) < 0.97);
+  ctx.fillStyle = brown;
+  ctx.beginPath();
+  ctx.ellipse(x, y - s * 0.7, s * 0.7, s * 0.95, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Ear tufts.
+  for (const side of [-1, 1]) {
+    ctx.beginPath();
+    ctx.moveTo(x + side * s * 0.5, y - s * 1.55);
+    ctx.lineTo(x + side * s * 0.6, y - s * 2.05);
+    ctx.lineTo(x + side * s * 0.2, y - s * 1.65);
+    ctx.closePath();
+    ctx.fill();
+  }
+  // Folded wings.
+  ctx.fillStyle = dark;
+  ctx.globalAlpha = 0.35;
+  for (const side of [-1, 1]) {
+    ctx.beginPath();
+    ctx.ellipse(x + side * s * 0.45, y - s * 0.6, s * 0.25, s * 0.55, side * 0.2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  // Face.
+  ctx.fillStyle = face;
+  ctx.beginPath();
+  ctx.ellipse(x, y - s * 1.2, s * 0.55, s * 0.45, 0, 0, Math.PI * 2);
+  ctx.fill();
+  for (const side of [-1, 1]) {
+    const ex = x + side * s * 0.22;
+    const ey = y - s * 1.22;
+    if (awake) {
+      ctx.fillStyle = '#F2C14E';
+      ctx.beginPath();
+      ctx.arc(ex, ey, s * 0.16, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = dark;
+      ctx.beginPath();
+      ctx.arc(ex, ey, s * 0.07, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      ctx.strokeStyle = dark;
+      ctx.lineWidth = Math.max(0.6, s * 0.06);
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.arc(ex, ey - s * 0.04, s * 0.14, 0.2, Math.PI - 0.2);
+      ctx.stroke();
+    }
+  }
+  // Beak.
+  ctx.fillStyle = dark;
+  ctx.beginPath();
+  ctx.moveTo(x - s * 0.07, y - s * 1.08);
+  ctx.lineTo(x + s * 0.07, y - s * 1.08);
+  ctx.lineTo(x, y - s * 0.94);
+  ctx.closePath();
+  ctx.fill();
+}
+
+/** Sitting on the left of the trunk, looking at it. */
+function drawFox(ctx: CanvasRenderingContext2D, x: number, y: number, scale: number, t: number, still: boolean) {
+  const s = Math.max(3, 1.7 * scale);
+  const body = '#D2692E';
+  const dark = '#8E4A1E';
+  const cream = '#F4EDE2';
+  const wag = still ? 0 : Math.sin(t * 0.002) * 0.08;
+  // The tail curls round the front.
+  ctx.fillStyle = body;
+  ctx.beginPath();
+  ctx.ellipse(x - s * 1.1, y - s * 0.45, s * 1.3, s * 0.5, -0.5 + wag, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = cream;
+  ctx.beginPath();
+  ctx.arc(x - s * 2.1, y - s * 0.85, s * 0.3, 0, Math.PI * 2);
+  ctx.fill();
+  // Body, chest.
+  ctx.fillStyle = body;
+  ctx.beginPath();
+  ctx.ellipse(x, y - s * 1.0, s * 0.85, s * 1.05, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = cream;
+  ctx.beginPath();
+  ctx.ellipse(x + s * 0.25, y - s * 0.75, s * 0.4, s * 0.6, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Head and ears.
+  ctx.fillStyle = body;
+  ctx.beginPath();
+  ctx.arc(x + s * 0.35, y - s * 2.05, s * 0.55, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(x + s * 0.05, y - s * 2.4);
+  ctx.lineTo(x + s * 0.2, y - s * 3.0);
+  ctx.lineTo(x + s * 0.45, y - s * 2.45);
+  ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(x + s * 0.5, y - s * 2.45);
+  ctx.lineTo(x + s * 0.75, y - s * 3.0);
+  ctx.lineTo(x + s * 0.85, y - s * 2.35);
+  ctx.closePath();
+  ctx.fill();
+  // Snout, nose, eye, paws.
+  ctx.fillStyle = cream;
+  ctx.beginPath();
+  ctx.ellipse(x + s * 0.7, y - s * 1.95, s * 0.35, s * 0.22, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = dark;
+  ctx.beginPath();
+  ctx.arc(x + s * 0.98, y - s * 1.97, Math.max(0.5, s * 0.08), 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(x + s * 0.5, y - s * 2.15, Math.max(0.5, s * 0.07), 0, Math.PI * 2);
+  ctx.fill();
+  for (const px of [0.35, 0.75]) {
+    ctx.beginPath();
+    ctx.ellipse(x + s * px, y - s * 0.05, s * 0.22, s * 0.12, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+/** Standing on the right, facing the tree. */
+function drawDonkey(ctx: CanvasRenderingContext2D, x: number, y: number, scale: number, t: number, still: boolean) {
+  const s = Math.max(3, 1.9 * scale);
+  const grey = '#8C8A86';
+  const dark = '#5E5C58';
+  const light = '#C9C4BB';
+  const flick = still ? 0 : Math.max(0, Math.sin(t * 0.003)) * 0.3;
+  ctx.strokeStyle = dark;
+  ctx.lineCap = 'round';
+  ctx.lineWidth = Math.max(1, s * 0.2);
+  for (const lx of [-0.95, -0.5, 0.5, 0.95]) {
+    ctx.beginPath();
+    ctx.moveTo(x + lx * s, y - s * 1.05);
+    ctx.lineTo(x + lx * s, y);
+    ctx.stroke();
+  }
+  ctx.fillStyle = grey;
+  ctx.beginPath();
+  ctx.ellipse(x, y - s * 1.45, s * 1.5, s * 0.75, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Neck, head, muzzle.
+  ctx.strokeStyle = grey;
+  ctx.lineWidth = Math.max(1.5, s * 0.5);
+  ctx.beginPath();
+  ctx.moveTo(x - s * 1.2, y - s * 1.7);
+  ctx.lineTo(x - s * 1.75, y - s * 2.55);
+  ctx.stroke();
+  ctx.fillStyle = grey;
+  ctx.beginPath();
+  ctx.ellipse(x - s * 1.95, y - s * 2.7, s * 0.55, s * 0.38, 0.35, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = light;
+  ctx.beginPath();
+  ctx.ellipse(x - s * 2.35, y - s * 2.55, s * 0.3, s * 0.22, 0.35, 0, Math.PI * 2);
+  ctx.fill();
+  // Ears.
+  ctx.fillStyle = grey;
+  ctx.beginPath();
+  ctx.ellipse(x - s * 1.75, y - s * 3.3, s * 0.14, s * 0.5, -0.25 - flick, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(x - s * 1.5, y - s * 3.2, s * 0.14, s * 0.5, 0.15, 0, Math.PI * 2);
+  ctx.fill();
+  // Mane, eye, tail.
+  ctx.strokeStyle = dark;
+  ctx.lineWidth = Math.max(0.8, s * 0.12);
+  ctx.beginPath();
+  for (let i = 0; i < 3; i += 1) {
+    const mx = x - s * (1.25 + i * 0.18);
+    const my = y - s * (1.85 + i * 0.28);
+    ctx.moveTo(mx, my);
+    ctx.lineTo(mx + s * 0.2, my - s * 0.12);
+  }
+  ctx.stroke();
+  ctx.fillStyle = dark;
+  ctx.beginPath();
+  ctx.arc(x - s * 2.05, y - s * 2.8, Math.max(0.5, s * 0.07), 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(x + s * 1.4, y - s * 1.6);
+  ctx.lineTo(x + s * 1.75, y - s * 0.9);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(x + s * 1.78, y - s * 0.82, s * 0.15, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+/** On one leg, on the right, facing the tree. */
+function drawStork(ctx: CanvasRenderingContext2D, x: number, y: number, scale: number, t: number, still: boolean) {
+  const s = Math.max(3, 2 * scale);
+  const white = '#F6F6F2';
+  const black = '#2B2B2E';
+  const red = '#D9432F';
+  const nod = still ? 0 : Math.sin(t * 0.0015) * 0.06;
+  ctx.strokeStyle = red;
+  ctx.lineCap = 'round';
+  ctx.lineWidth = Math.max(0.8, s * 0.12);
+  ctx.beginPath();
+  ctx.moveTo(x, y - s * 1.6);
+  ctx.lineTo(x, y);
+  ctx.moveTo(x + s * 0.1, y - s * 1.6);
+  ctx.lineTo(x + s * 0.35, y - s * 1.0);
+  ctx.lineTo(x + s * 0.1, y - s * 0.75);
+  ctx.stroke();
+  ctx.fillStyle = white;
+  ctx.beginPath();
+  ctx.ellipse(x + s * 0.1, y - s * 2.1, s * 0.9, s * 0.5, -0.15, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = black;
+  ctx.beginPath();
+  ctx.ellipse(x + s * 0.7, y - s * 2.05, s * 0.45, s * 0.28, -0.2, 0, Math.PI * 2);
+  ctx.fill();
+  // Neck and head.
+  const hy = y - s * (3.55 - nod);
+  ctx.strokeStyle = white;
+  ctx.lineWidth = Math.max(1.5, s * 0.28);
+  ctx.beginPath();
+  ctx.moveTo(x - s * 0.5, y - s * 2.3);
+  ctx.lineTo(x - s * 0.85, hy + s * 0.15);
+  ctx.stroke();
+  ctx.fillStyle = white;
+  ctx.beginPath();
+  ctx.arc(x - s * 0.9, hy, s * 0.3, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = red;
+  ctx.beginPath();
+  ctx.moveTo(x - s * 1.1, hy);
+  ctx.lineTo(x - s * 2.0, hy + s * 0.2);
+  ctx.lineTo(x - s * 1.1, hy + s * 0.1);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = black;
+  ctx.beginPath();
+  ctx.arc(x - s * 0.98, hy - s * 0.07, Math.max(0.5, s * 0.06), 0, Math.PI * 2);
+  ctx.fill();
+}
+
+/** Lying down on the right, facing the tree, tail tip twitching. */
+function drawLion(ctx: CanvasRenderingContext2D, x: number, y: number, scale: number, t: number, still: boolean) {
+  const s = Math.max(3, 2.1 * scale);
+  const tan = '#C9973F';
+  const mane = '#8E5E1E';
+  const dark = '#5C3A12';
+  const cream = '#EBD9A8';
+  const sway = still ? 0 : Math.sin(t * 0.0018) * 0.15;
+  ctx.strokeStyle = tan;
+  ctx.lineCap = 'round';
+  ctx.lineWidth = Math.max(0.8, s * 0.14);
+  ctx.beginPath();
+  ctx.moveTo(x + s * 1.6, y - s * 0.7);
+  ctx.quadraticCurveTo(x + s * 2.2, y - s * 0.7, x + s * (2.4 + sway), y - s * 0.2);
+  ctx.stroke();
+  ctx.fillStyle = mane;
+  ctx.beginPath();
+  ctx.arc(x + s * (2.45 + sway), y - s * 0.18, s * 0.2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = tan;
+  ctx.beginPath();
+  ctx.ellipse(x + s * 0.2, y - s * 0.75, s * 1.7, s * 0.7, 0, 0, Math.PI * 2);
+  ctx.fill();
+  for (const [ox, oy] of [
+    [-1.0, -0.25],
+    [-0.8, -0.1],
+  ]) {
+    ctx.beginPath();
+    ctx.ellipse(x + s * ox, y + s * oy, s * 0.7, s * 0.21, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.fillStyle = mane;
+  ctx.beginPath();
+  ctx.arc(x - s * 1.05, y - s * 1.5, s * 0.85, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = tan;
+  ctx.beginPath();
+  ctx.arc(x - s * 1.15, y - s * 1.45, s * 0.55, 0, Math.PI * 2);
+  ctx.fill();
+  for (const ex of [-0.75, -1.45]) {
+    ctx.beginPath();
+    ctx.arc(x + s * ex, y - s * 1.95, s * 0.16, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.fillStyle = cream;
+  ctx.beginPath();
+  ctx.ellipse(x - s * 1.35, y - s * 1.3, s * 0.32, s * 0.22, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = dark;
+  ctx.beginPath();
+  ctx.arc(x - s * 1.6, y - s * 1.38, Math.max(0.5, s * 0.08), 0, Math.PI * 2);
+  ctx.fill();
+  for (const ex of [-1.3, -1.0]) {
+    ctx.beginPath();
+    ctx.arc(x + s * ex, y - s * 1.6, Math.max(0.5, s * 0.06), 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function drawBees(ctx: CanvasRenderingContext2D, decor: Decor, scene: TreeScene, frame: Frame, t: number, still: boolean) {
+  const { scale, originX, originY } = frame;
+  const b = scene.bounds;
+  const cx = originX + ((b.minX + b.maxX) / 2) * scale;
+  const cy = originY + ((b.minY + GROUND_Y) / 2) * scale;
+  const rx = ((b.maxX - b.minX) / 2) * scale;
+  const ry = ((GROUND_Y - b.minY) / 2) * scale;
+  const size = Math.max(1.2, 0.6 * scale);
+  for (const bee of decor.bees) {
+    const p = bee.phase * Math.PI * 2;
+    const tt = still ? 0 : t * 0.0011 * bee.speed;
+    const x = cx + Math.cos(tt + p) * rx * bee.rx;
+    const y = cy + Math.sin(tt * 1.7 + p) * ry * bee.ry + (still ? 0 : Math.sin(t * 0.02 + p) * size * 0.3);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.globalAlpha = 0.7;
+    for (const side of [-1, 1]) {
+      ctx.beginPath();
+      ctx.ellipse(x + side * size * 0.4, y - size * 0.7, size * 0.45, size * 0.3, side * -0.6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#F2C744';
+    ctx.beginPath();
+    ctx.ellipse(x, y, size, size * 0.65, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#3B3330';
+    ctx.fillRect(x - size * 0.18, y - size * 0.6, size * 0.36, size * 1.2);
+  }
+}
+
+/** A silhouette circling high in the sky, in viewport fractions. */
+function drawEagle(ctx: CanvasRenderingContext2D, decor: Decor, frame: Frame, t: number, still: boolean, colour: string) {
+  const { width: w, height: h } = frame;
+  const cx = w * 0.5;
+  const cy = h * 0.16;
+  const rx = w * 0.3;
+  const ry = h * 0.06;
+  const a = (still ? 0 : t * 0.00035) + decor.eaglePhase * Math.PI * 2;
+  const x = cx + Math.cos(a) * rx;
+  const y = cy + Math.sin(a) * ry;
+  const heading = Math.atan2(Math.cos(a) * ry, -Math.sin(a) * rx);
+  const s = Math.max(4, w * 0.03);
+  const glide = 1 + (still ? 0 : 0.08 * Math.sin(t * 0.006));
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(heading);
+  ctx.fillStyle = colour;
+  ctx.globalAlpha = 0.85;
+  ctx.beginPath();
+  ctx.moveTo(0, -s * 1.6 * glide);
+  ctx.quadraticCurveTo(-s * 0.45, -s * 0.8, -s * 0.1, 0);
+  ctx.quadraticCurveTo(-s * 0.45, s * 0.8, 0, s * 1.6 * glide);
+  ctx.quadraticCurveTo(s * 0.25, s * 0.8, s * 0.15, 0);
+  ctx.quadraticCurveTo(s * 0.25, -s * 0.8, 0, -s * 1.6 * glide);
+  ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(0, 0, s * 0.55, s * 0.2, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(s * 0.6, 0, s * 0.14, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+  ctx.restore();
 }
 
 function drawSheep(ctx: CanvasRenderingContext2D, x: number, y: number, scale: number, facing: number, t: number, still: boolean) {
@@ -865,6 +1608,10 @@ function extentWithAnimals(scene: TreeScene, animal: string, decor: Decor): { mi
     maxX = Math.max(maxX, TRUNK_X + decor.sheep[1] + 5);
   }
   if (animal === 'hert') maxX = Math.max(maxX, TRUNK_X + decor.deer + 6);
+  if (animal === 'vos') minX = Math.min(minX, TRUNK_X + decor.fox - 5);
+  if (animal === 'ezel') maxX = Math.max(maxX, TRUNK_X + decor.donkey + 7);
+  if (animal === 'ooievaar') maxX = Math.max(maxX, TRUNK_X + decor.stork + 4);
+  if (animal === 'leeuw') maxX = Math.max(maxX, TRUNK_X + decor.lion + 8);
   return { minX, maxX };
 }
 
@@ -1039,7 +1786,7 @@ export default function TreeCanvas({
       }
     };
 
-    const drawGround = () => {
+    const drawGround = (t: number) => {
       const { width, height, scale, pivotX, pivotY, groundTop } = frame;
       if (framing === 'portrait') {
         // A soft shadow and a thin arc of ground: enough to stand on, not a
@@ -1069,7 +1816,7 @@ export default function TreeCanvas({
       ctx.fillStyle = glow;
       ctx.fillRect(0, 0, width, groundTop);
 
-      drawFarBackdrop(ctx, palette, decor, frame);
+      drawFarBackdrop(ctx, palette, decor, frame, t, still);
 
       // The earth band, with a low mound where the trunk goes in.
       const earth = ctx.createLinearGradient(0, groundTop, 0, height);
@@ -1082,7 +1829,7 @@ export default function TreeCanvas({
       ctx.ellipse(pivotX, groundTop + 0.2 * scale, Math.max(8, 14 * scale), Math.max(2, 2.2 * scale), 0, Math.PI, 0);
       ctx.fill();
 
-      drawNearBackdrop(ctx, palette, decor, frame);
+      drawNearBackdrop(ctx, palette, decor, frame, t, still);
 
       ctx.save();
       ctx.globalAlpha = 0.28;
@@ -1139,21 +1886,23 @@ export default function TreeCanvas({
         } else {
           ctx.fillStyle = colour;
           ctx.fill();
-          if (shape === 'frond' || shape === 'large') {
+          if (shape === 'frond' || shape === 'large' || shape === 'feather') {
             ctx.strokeStyle = palette.leafAlt === colour ? palette.leaf : palette.leafAlt;
             ctx.lineWidth = Math.max(0.5, size * 0.08);
             ctx.beginPath();
             ctx.moveTo(0, 0);
-            ctx.lineTo(size * (shape === 'frond' ? 2.9 : 1.5), 0);
+            ctx.lineTo(size * (shape === 'frond' ? 2.9 : shape === 'feather' ? 1.7 : 1.5), 0);
             ctx.stroke();
             // Leaflets either side of the rib, where there is room to see them.
-            if (shape === 'frond' && scale > 1.4) {
-              const length = size * 3.2;
+            if ((shape === 'frond' || shape === 'feather') && scale > 1.4) {
+              const pairs = shape === 'frond' ? 6 : 4;
+              const length = size * (shape === 'frond' ? 3.2 : 1.8);
+              const reachMax = size * (shape === 'frond' ? 0.9 : 0.4);
               ctx.lineWidth = Math.max(0.5, size * 0.06);
               ctx.beginPath();
-              for (let k = 1; k <= 6; k += 1) {
-                const at = (k / 7) * length;
-                const reach = size * 0.9 * (1 - k / 9);
+              for (let k = 1; k <= pairs; k += 1) {
+                const at = (k / (pairs + 1)) * length;
+                const reach = reachMax * (1 - k / (pairs + 3));
                 ctx.moveTo(at, 0);
                 ctx.lineTo(at + reach * 0.55, -reach);
                 ctx.moveTo(at, 0);
@@ -1217,11 +1966,13 @@ export default function TreeCanvas({
         ctx.globalAlpha = 1;
       }
 
-      if (scene.perch && (animalId === 'vogel' || animalId === 'duif')) {
+      if (scene.perch && (animalId === 'vogel' || animalId === 'duif' || animalId === 'raaf' || animalId === 'uil')) {
         const x = originX + scene.perch.x * scale;
         const y = originY + scene.perch.y * scale;
         if (animalId === 'vogel') drawBird(ctx, x, y, scale, palette.bark);
-        else drawDove(ctx, x, y, scale, t, still);
+        else if (animalId === 'duif') drawPerchBird(ctx, x, y, scale, t, still, DOVE);
+        else if (animalId === 'raaf') drawPerchBird(ctx, x, y, scale, t, still, RAVEN);
+        else drawOwl(ctx, x, y, scale, t, still, palette.night);
       }
 
       ctx.restore();
@@ -1236,7 +1987,14 @@ export default function TreeCanvas({
         drawSheep(ctx, pivotX + decor.sheep[1] * scale, groundY, scale, -1, t, still);
       }
       if (animalId === 'hert') drawDeer(ctx, pivotX + decor.deer * scale, groundY, scale, t, still);
+      if (animalId === 'vos') drawFox(ctx, pivotX + decor.fox * scale, groundY, scale, t, still);
+      if (animalId === 'ezel') drawDonkey(ctx, pivotX + decor.donkey * scale, groundY, scale, t, still);
+      if (animalId === 'ooievaar') drawStork(ctx, pivotX + decor.stork * scale, groundY, scale, t, still);
+      if (animalId === 'leeuw') drawLion(ctx, pivotX + decor.lion * scale, groundY, scale, t, still);
       if (animalId === 'vlinders') drawButterflies(ctx, decor, scene, frame, t, still);
+      if (animalId === 'bijen') drawBees(ctx, decor, scene, frame, t, still);
+      // The eagle needs a sky: it circles in the scene framing only.
+      if (animalId === 'adelaar' && framing === 'scene') drawEagle(ctx, decor, frame, t, still, palette.bark);
 
       if (animalId === 'vuurvliegjes' && palette.night) {
         const b = scene.bounds;
@@ -1321,7 +2079,7 @@ export default function TreeCanvas({
     const draw = (time: number) => {
       const t = still ? 0 : time;
       drawSky(t);
-      drawGround();
+      drawGround(t);
       drawTree(t);
       drawForeground(t);
     };

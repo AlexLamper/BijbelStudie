@@ -78,6 +78,61 @@ export function backdrop(palette: Palette, width: number, height: number, ground
     }
     case 'stars':
       return '';
+    case 'river':
+    case 'vineyard':
+      return (
+        `<path d="${hillPath(width, groundTop, height * 0.08, 1.4, 0.6, height * 0.04)}" fill="${palette.farAlt}"/>` +
+        `<path d="${hillPath(width, groundTop, height * 0.05, 2.3, 2.9, 0)}" fill="${palette.far}"/>`
+      );
+    case 'field':
+      return (
+        `<path d="${hillPath(width, groundTop, height * 0.06, 1.1, 1.9, height * 0.03)}" fill="${palette.farAlt}"/>` +
+        `<path d="${hillPath(width, groundTop, height * 0.04, 1.9, 4.1, 0)}" fill="${palette.far}"/>`
+      );
+    case 'sea': {
+      const horizon = groundTop - height * 0.16;
+      return `<rect x="0" y="${f(horizon)}" width="${width}" height="${f(groundTop - horizon)}" fill="${palette.water ?? palette.far}"/>`;
+    }
+    case 'rainbow': {
+      // The bow: six bands on a centre below the horizon, each drawn only as
+      // the arc above the ground line, so no clip path (and no id) is needed.
+      const cx = width * 0.62;
+      const cy = groundTop + height * 0.32;
+      const r = height * 0.78;
+      const band = Math.max(1.5, height * 0.014);
+      const colours = ['#E4483F', '#F0933A', '#F2D24A', '#6DBA5C', '#4E9CD6', '#7A5FB8'];
+      let bow = '';
+      colours.forEach((colour, i) => {
+        const ri = r - i * band;
+        const dx = Math.sqrt(Math.max(0, ri * ri - (cy - groundTop) ** 2));
+        bow += `<path d="M${f(cx - dx)} ${f(groundTop)}A${f(ri)} ${f(ri)} 0 0 1 ${f(cx + dx)} ${f(groundTop)}" fill="none" stroke="${colour}" stroke-width="${f(band)}" opacity="0.5"/>`;
+      });
+      return `${bow}<path d="${hillPath(width, groundTop, height * 0.04, 1.2, 1.1, 0)}" fill="${palette.far}" opacity="0.55"/>`;
+    }
+    case 'sunrise': {
+      const sx = width * 0.5;
+      const sy = groundTop - height * 0.1;
+      const sr = Math.max(6, width * 0.09);
+      return (
+        `<circle cx="${f(sx)}" cy="${f(sy)}" r="${f(sr * 2.6)}" fill="${palette.glow}" opacity="0.28"/>` +
+        `<circle cx="${f(sx)}" cy="${f(sy)}" r="${f(sr)}" fill="${palette.accent}"/>` +
+        `<path d="${hillPath(width, groundTop, height * 0.1, 1.2, 0.4, height * 0.05)}" fill="${palette.farAlt}"/>` +
+        `<path d="${hillPath(width, groundTop, height * 0.06, 2.0, 2.4, 0)}" fill="${palette.far}"/>`
+      );
+    }
+    case 'shepherds': {
+      const sx = width * 0.72;
+      const sy = height * 0.14;
+      const sr = Math.max(3, width * 0.02);
+      return (
+        `<circle cx="${f(sx)}" cy="${f(sy)}" r="${f(sr * 4)}" fill="${palette.accent}" opacity="0.14"/>` +
+        `<circle cx="${f(sx)}" cy="${f(sy)}" r="${f(sr * 0.5)}" fill="${palette.accent}"/>` +
+        `<path d="M${f(sx)} ${f(sy - sr * 3)}L${f(sx + sr * 0.3)} ${f(sy)}L${f(sx)} ${f(sy + sr * 3)}L${f(sx - sr * 0.3)} ${f(sy)}Z" fill="${palette.accent}"/>` +
+        `<path d="M${f(sx - sr * 2.2)} ${f(sy)}L${f(sx)} ${f(sy - sr * 0.3)}L${f(sx + sr * 2.2)} ${f(sy)}L${f(sx)} ${f(sy + sr * 0.3)}Z" fill="${palette.accent}"/>` +
+        `<path d="${hillPath(width, groundTop, height * 0.09, 1.1, 1.5, height * 0.04)}" fill="${palette.farAlt}"/>` +
+        `<path d="${hillPath(width, groundTop, height * 0.05, 1.8, 3.6, 0)}" fill="${palette.far}"/>`
+      );
+    }
     case 'meadow':
     default:
       return `<path d="${hillPath(width, groundTop, height * 0.04, 1.2, 1.1, 0)}" fill="${palette.far}" opacity="0.55"/>`;

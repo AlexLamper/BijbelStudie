@@ -130,6 +130,11 @@ export function studyHorizon(art: StudyArt, width: number, height: number): Stud
   switch (spec.backdrop) {
     case 'hills':
     case 'garden':
+    case 'river':
+    case 'vineyard':
+    case 'field':
+    case 'sunrise':
+    case 'shepherds':
       layers.push({ d: hillPath(width, groundTop, height * (amp + 0.03), freq, phase, height * lift), fill: p.farAlt });
       layers.push({ d: hillPath(width, groundTop, height * amp, freq * 1.6, phase + 1.8, 0), fill: p.far });
       break;
@@ -137,7 +142,8 @@ export function studyHorizon(art: StudyArt, width: number, height: number): Stud
       layers.push({ d: hillPath(width, groundTop, height * (amp + 0.04), freq * 0.7, phase, height * lift), fill: p.farAlt });
       layers.push({ d: hillPath(width, groundTop, height * amp, freq * 1.1, phase + 2.2, 0), fill: p.far });
       break;
-    case 'lake': {
+    case 'lake':
+    case 'sea': {
       const horizon = groundTop - height * 0.16;
       layers.push({ d: hillPath(width, horizon, height * (amp * 0.6), freq * 1.2, phase, 0), fill: p.far });
       layers.push({
@@ -179,6 +185,7 @@ export function studyHorizon(art: StudyArt, width: number, height: number): Stud
       layers.push({ d: hillPath(width, groundTop, height * amp * 0.5, freq * 0.8, phase, 0), fill: p.far, opacity: 0.85 });
       break;
     case 'meadow':
+    case 'rainbow':
     default:
       layers.push({ d: hillPath(width, groundTop, height * amp * 0.7, freq, phase, 0), fill: p.far, opacity: 0.55 });
       break;

@@ -16,10 +16,41 @@
 import { DEFAULT_SPECIES, SPECIES_IDS, type SpeciesId } from './species';
 import { DEFAULT_SCENE, SCENE_IDS, type SceneId } from './scenes';
 
-export const CATALOG_VERSION = 1;
+export const CATALOG_VERSION = 2;
 
-export type AnimalId = 'geen' | 'vogel' | 'vlinders' | 'schaap' | 'duif' | 'vuurvliegjes' | 'hert';
-export const ANIMAL_IDS: readonly AnimalId[] = ['geen', 'vogel', 'vlinders', 'schaap', 'duif', 'vuurvliegjes', 'hert'];
+export type AnimalId =
+  | 'geen'
+  | 'vogel'
+  | 'vlinders'
+  | 'schaap'
+  | 'duif'
+  | 'vuurvliegjes'
+  | 'hert'
+  | 'raaf'
+  | 'vos'
+  | 'ezel'
+  | 'bijen'
+  | 'ooievaar'
+  | 'uil'
+  | 'adelaar'
+  | 'leeuw';
+export const ANIMAL_IDS: readonly AnimalId[] = [
+  'geen',
+  'vogel',
+  'vlinders',
+  'schaap',
+  'duif',
+  'vuurvliegjes',
+  'hert',
+  'raaf',
+  'vos',
+  'ezel',
+  'bijen',
+  'ooievaar',
+  'uil',
+  'adelaar',
+  'leeuw',
+];
 export const DEFAULT_ANIMAL: AnimalId = 'geen';
 
 export type RingId = 'teal' | 'goud';
@@ -57,18 +88,32 @@ export const CATALOG: readonly CatalogItem[] = [
   // Boomsoorten
   { id: 'eik', kind: 'species', name: 'Eik', blurb: 'Breed en sterk, met eikels in de herfst.', verse: 'Genesis 18:1', unlock: free },
   { id: 'olijf', kind: 'species', name: 'Olijfboom', blurb: 'Knoestig en altijd groen.', verse: 'Psalm 52:10', unlock: free },
+  { id: 'mosterd', kind: 'species', name: 'Mosterdboom', blurb: 'Het kleinste zaadje; bloeit geel, ieder voorjaar.', verse: 'Mattheüs 13:31', unlock: level(2) },
   { id: 'vijg', kind: 'species', name: 'Vijgenboom', blurb: 'Laag en wijd, met grote bladeren.', verse: 'Micha 4:4', unlock: level(4) },
   { id: 'palm', kind: 'species', name: 'Palmboom', blurb: 'Eén hoge stam en een kroon van bladeren.', verse: 'Psalm 92:13', unlock: level(8) },
+  { id: 'appel', kind: 'species', name: 'Appelboom', blurb: 'Een ronde kroon en rode appels.', verse: 'Hooglied 2:3', unlock: level(10) },
   { id: 'amandel', kind: 'species', name: 'Amandelboom', blurb: 'Bloeit als eerste, ieder voorjaar.', verse: 'Jeremia 1:11', unlock: level(12) },
+  { id: 'granaatappel', kind: 'species', name: 'Granaatappelboom', blurb: 'Klein en dicht, met rode bloesem.', verse: 'Deuteronomium 8:8', unlock: level(14) },
+  { id: 'sycomoor', kind: 'species', name: 'Sycomoor', blurb: 'Laag en breed genoeg om in te klimmen.', verse: 'Lukas 19:4', unlock: level(16) },
+  { id: 'acacia', kind: 'species', name: 'Acacia', blurb: 'Een lange stam en een vlakke kroon; het hout van de ark.', verse: 'Exodus 25:10', unlock: level(19) },
+  { id: 'wilg', kind: 'species', name: 'Treurwilg', blurb: 'Lange takken die naar het water hangen.', verse: 'Psalm 137:2', unlock: streak(21) },
   { id: 'ceder', kind: 'species', name: 'Ceder van de Libanon', blurb: 'Hoog en kegelvormig, altijd groen.', verse: 'Psalm 92:13', unlock: pro },
+  { id: 'cipres', kind: 'species', name: 'Cipres', blurb: 'Smal en donker, recht omhoog.', verse: 'Jesaja 55:13', unlock: pro },
 
   // Omgevingen
   { id: 'waterbeken', kind: 'scene', name: 'Waterbeken', blurb: 'Een beek langs de wortels.', verse: 'Psalm 1:3', unlock: free },
   { id: 'heuvels', kind: 'scene', name: 'Heuvels van Galilea', blurb: 'Glooiende heuvels met olijfgaarden.', unlock: level(3) },
   { id: 'meer', kind: 'scene', name: 'Meer van Galilea', blurb: 'De oever, met een bootje op het water.', unlock: level(6) },
+  { id: 'jordaan', kind: 'scene', name: 'De Jordaan', blurb: 'Een brede rivier met riet langs de oever.', verse: 'Jozua 3:17', unlock: level(9) },
+  { id: 'wijngaard', kind: 'scene', name: 'Wijngaard', blurb: 'Rijen wijnstokken op de heuvel.', verse: 'Johannes 15:5', unlock: level(18) },
+  { id: 'regenboog', kind: 'scene', name: 'Regenboog', blurb: 'Een boog in de wolken, na de regen.', verse: 'Genesis 9:13', unlock: level(20) },
   { id: 'woestijn', kind: 'scene', name: 'Woestijn-oase', blurb: 'Zand, warmte en een bron.', verse: 'Jesaja 35:1', unlock: streak(7) },
   { id: 'berg', kind: 'scene', name: 'De berg', blurb: 'Rotsen en een verre bergketen.', verse: 'Psalm 121:1', unlock: streak(30) },
+  { id: 'kust', kind: 'scene', name: 'De kust', blurb: 'Zand, golven en de zee tot aan de horizon.', verse: 'Psalm 93:4', unlock: streak(50) },
+  { id: 'dageraad', kind: 'scene', name: 'Dageraad', blurb: 'De zon komt op; elke morgen nieuw.', verse: 'Klaagliederen 3:23', unlock: streak(90) },
   { id: 'stadsmuur', kind: 'scene', name: 'Stadsmuur', blurb: 'Onder de muren van Jeruzalem.', verse: 'Psalm 122', unlock: badge('completed5', '5 studies voltooid') },
+  { id: 'graanveld', kind: 'scene', name: 'Graanveld', blurb: 'Rijp koren, zoals op het veld van Boaz.', verse: 'Ruth 2:3', unlock: badge('completed10', '10 studies voltooid') },
+  { id: 'herdersveld', kind: 'scene', name: 'Velden van Efratha', blurb: "Een heldere ster boven de velden, 's nachts.", verse: 'Lukas 2:8', unlock: badge('anniversary', 'Een jaar lid') },
   { id: 'hof', kind: 'scene', name: 'De hof', blurb: 'Een tuin met bloemen en een rivier.', verse: 'Genesis 2:8', unlock: pro },
   { id: 'sterrennacht', kind: 'scene', name: 'Sterrennacht', blurb: 'Kijk omhoog en tel de sterren.', verse: 'Genesis 15:5', unlock: pro },
 
@@ -76,10 +121,18 @@ export const CATALOG: readonly CatalogItem[] = [
   { id: 'geen', kind: 'animal', name: 'Geen', blurb: 'Alleen de boom.', unlock: free },
   { id: 'vogel', kind: 'animal', name: 'Vogel', blurb: 'Nestelt in je kroon.', verse: 'Psalm 84:4', unlock: level(5) },
   { id: 'vlinders', kind: 'animal', name: 'Vlinders', blurb: 'Drie vlinders rond je boom.', unlock: level(7) },
-  { id: 'schaap', kind: 'animal', name: 'Schapen', blurb: 'Twee schapen grazen bij de stam.', verse: 'Psalm 23:2', unlock: badge('completed1', 'Eerste studie voltooid') },
-  { id: 'duif', kind: 'animal', name: 'Duif', blurb: 'Een witte duif op de hoogste tak.', verse: 'Genesis 8:11', unlock: streak(14) },
+  { id: 'vos', kind: 'animal', name: 'Vos', blurb: 'Een vos, opgerold bij de stam.', verse: 'Lukas 9:58', unlock: level(11) },
+  { id: 'bijen', kind: 'animal', name: 'Bijen', blurb: 'Een zwerm bijen rond je kroon.', verse: 'Psalm 119:103', unlock: level(13) },
   { id: 'vuurvliegjes', kind: 'animal', name: 'Vuurvliegjes', blurb: "Lichtjes in je boom, 's nachts.", unlock: level(15) },
+  { id: 'ooievaar', kind: 'animal', name: 'Ooievaar', blurb: 'Een ooievaar op één poot naast je boom.', verse: 'Jeremia 8:7', unlock: level(17) },
+  { id: 'adelaar', kind: 'animal', name: 'Adelaar', blurb: 'Cirkelt hoog boven je boom.', verse: 'Jesaja 40:31', unlock: level(22) },
+  { id: 'duif', kind: 'animal', name: 'Duif', blurb: 'Een witte duif op de hoogste tak.', verse: 'Genesis 8:11', unlock: streak(14) },
+  { id: 'uil', kind: 'animal', name: 'Uil', blurb: "Slaapt overdag in je kroon, waakt 's nachts.", verse: 'Psalm 102:7', unlock: streak(40) },
   { id: 'hert', kind: 'animal', name: 'Hert', blurb: 'Een hert naast je boom.', verse: 'Psalm 42:2', unlock: streak(60) },
+  { id: 'schaap', kind: 'animal', name: 'Schapen', blurb: 'Twee schapen grazen bij de stam.', verse: 'Psalm 23:2', unlock: badge('completed1', 'Eerste studie voltooid') },
+  { id: 'raaf', kind: 'animal', name: 'Raaf', blurb: 'Een raaf op een tak, zoals bij Elia.', verse: '1 Koningen 17:6', unlock: badge('firstlesson', 'Eerste les voltooid') },
+  { id: 'ezel', kind: 'animal', name: 'Ezel', blurb: 'Een ezel dat geduldig wacht bij je boom.', verse: 'Zacharia 9:9', unlock: badge('completed5', '5 studies voltooid') },
+  { id: 'leeuw', kind: 'animal', name: 'Leeuw', blurb: 'De leeuw uit de stam van Juda rust bij je boom.', verse: 'Openbaring 5:5', unlock: pro },
 
   // Ring
   { id: 'teal', kind: 'ring', name: 'Groene ring', blurb: 'De standaard voortgangsring.', unlock: free },

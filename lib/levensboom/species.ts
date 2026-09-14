@@ -1,5 +1,5 @@
 /**
- * The six boomsoorten, as generator parameters.
+ * The thirteen boomsoorten, as generator parameters.
  *
  * A species never adds a random draw of its own: every number here scales or
  * biases a draw the branching recursion already makes, so the same seed keeps
@@ -10,17 +10,60 @@
  * Contract: docs/levensboom-spec.md §4.4.
  */
 
-export type SpeciesId = 'eik' | 'olijf' | 'vijg' | 'palm' | 'amandel' | 'ceder';
+export type SpeciesId =
+  | 'eik'
+  | 'olijf'
+  | 'vijg'
+  | 'palm'
+  | 'amandel'
+  | 'ceder'
+  | 'mosterd'
+  | 'appel'
+  | 'granaatappel'
+  | 'sycomoor'
+  | 'wilg'
+  | 'acacia'
+  | 'cipres';
 
-export const SPECIES_IDS: readonly SpeciesId[] = ['eik', 'olijf', 'vijg', 'palm', 'amandel', 'ceder'];
+export const SPECIES_IDS: readonly SpeciesId[] = [
+  'eik',
+  'olijf',
+  'vijg',
+  'palm',
+  'amandel',
+  'ceder',
+  'mosterd',
+  'appel',
+  'granaatappel',
+  'sycomoor',
+  'wilg',
+  'acacia',
+  'cipres',
+];
 
 export const DEFAULT_SPECIES: SpeciesId = 'eik';
 
-/** How the renderer draws a leaf. Geometry does not care. */
-export type LeafShape = 'oval' | 'narrow' | 'large' | 'needle' | 'frond' | 'almond';
+/**
+ * How the renderer draws a leaf. Geometry does not care.
+ *
+ * `lance` is a long willow leaf, `scale` the short overlapping foliage of a
+ * cypress, `feather` a pinnate acacia leaf (a rib with tiny leaflets).
+ */
+export type LeafShape = 'oval' | 'narrow' | 'large' | 'needle' | 'frond' | 'almond' | 'lance' | 'scale' | 'feather';
 
 /** How the renderer draws the vrucht. Geometry does not care. */
-export type FruitStyle = 'acorn' | 'olive' | 'fig' | 'dates' | 'almond' | 'cone';
+export type FruitStyle =
+  | 'acorn'
+  | 'olive'
+  | 'fig'
+  | 'dates'
+  | 'almond'
+  | 'cone'
+  | 'apple'
+  | 'pomegranate'
+  | 'catkin'
+  | 'pod'
+  | 'berry';
 
 /**
  * `branching` is the recursive fan every deciduous tree uses. `palm` is one
@@ -45,6 +88,13 @@ export type SpeciesParams = {
   thirdChildBias: number;
   /** Multiplies the trunk's seeded lean. */
   leanMul: number;
+  /**
+   * 0..1. How far branch tips hang toward straight down when the tree is
+   * perfectly healthy - the weeping willow. Added to the wilt droop, which is
+   * why it is a generator parameter and not paint. Zero for every species
+   * that existed before it, so their fixtures did not move.
+   */
+  droopBase: number;
   leafCountMul: number;
   leafSizeMul: number;
   leafShape: LeafShape;
@@ -55,6 +105,8 @@ export type SpeciesParams = {
    * `never` is for the trees that simply do not.
    */
   blossom: 'never' | 'seasonal' | 'always';
+  /** The blossom's own colour. `null` keeps the seasonal pink. Palette only. */
+  blossomColor: string | null;
   /** Keeps its leaves through autumn and winter. Palette only. */
   evergreen: boolean;
   /** Foliage and fruit colour. `null` keeps the seasonal default. */
@@ -75,9 +127,11 @@ const BRANCHING_DEFAULTS = {
   childWidthRatio: 0.68,
   thirdChildBias: 0,
   leanMul: 1,
+  droopBase: 0,
   leafCountMul: 1,
   leafSizeMul: 1,
   blossom: 'seasonal' as 'never' | 'seasonal' | 'always',
+  blossomColor: null,
   evergreen: false,
   leaf: null,
   leafAlt: null,
@@ -167,6 +221,7 @@ export const SPECIES: Record<SpeciesId, SpeciesParams> = {
     leafShape: 'almond',
     fruitStyle: 'almond',
     blossom: 'always',
+    blossomColor: '#FBD3E0',
     leaf: '#6DAE70',
     leafAlt: '#8CC58E',
     fruit: '#D9C7A0',
@@ -194,6 +249,160 @@ export const SPECIES: Record<SpeciesId, SpeciesParams> = {
     leafAlt: '#3F7F5F',
     fruit: '#6B4E2A',
     fruitAlt: '#4A361D',
+  },
+  // The smallest seed. Many thin twigs, tiny leaves, and yellow flowers every
+  // spring whatever the level - the point of the parable is that it blooms.
+  mosterd: {
+    ...BRANCHING_DEFAULTS,
+    trunkLenMul: 0.85,
+    trunkWidthMul: 0.8,
+    spreadBase: 34,
+    spreadJitter: 16,
+    curveAmp: 14,
+    childLenRatio: 0.72,
+    childWidthRatio: 0.62,
+    thirdChildBias: 0.3,
+    leanMul: 1.1,
+    leafCountMul: 1.3,
+    leafSizeMul: 0.6,
+    leafShape: 'oval',
+    fruitStyle: 'pod',
+    blossom: 'always',
+    blossomColor: '#F3D45A',
+    leaf: '#8DBB5E',
+    leafAlt: '#A9CF74',
+    fruit: '#9BA85A',
+    fruitAlt: '#6F7C3A',
+  },
+  appel: {
+    ...BRANCHING_DEFAULTS,
+    trunkLenMul: 0.9,
+    trunkWidthMul: 1.05,
+    spreadBase: 32,
+    spreadJitter: 12,
+    curveAmp: 10,
+    childLenRatio: 0.72,
+    childWidthRatio: 0.68,
+    thirdChildBias: 0.12,
+    leanMul: 0.9,
+    leafCountMul: 1.05,
+    leafSizeMul: 0.95,
+    leafShape: 'oval',
+    fruitStyle: 'apple',
+    blossomColor: '#FBE4EC',
+    leaf: '#5FA85A',
+    leafAlt: '#7CC077',
+    fruit: '#C8382E',
+    fruitAlt: '#8E2320',
+  },
+  granaatappel: {
+    ...BRANCHING_DEFAULTS,
+    trunkLenMul: 0.7,
+    trunkWidthMul: 1,
+    spreadBase: 38,
+    spreadJitter: 14,
+    curveAmp: 14,
+    childLenRatio: 0.7,
+    childWidthRatio: 0.66,
+    thirdChildBias: 0.2,
+    leafCountMul: 1.2,
+    leafSizeMul: 0.75,
+    leafShape: 'narrow',
+    fruitStyle: 'pomegranate',
+    blossomColor: '#E8532F',
+    leaf: '#4E9A4A',
+    leafAlt: '#6CB35F',
+    fruit: '#B8322F',
+    fruitAlt: '#7E1F1D',
+  },
+  // Zacheüs' tree: low, wide, thick enough to climb.
+  sycomoor: {
+    ...BRANCHING_DEFAULTS,
+    trunkLenMul: 0.7,
+    trunkWidthMul: 1.6,
+    spreadBase: 46,
+    spreadJitter: 12,
+    curveAmp: 12,
+    childLenRatio: 0.7,
+    childWidthRatio: 0.74,
+    thirdChildBias: 0.2,
+    leafCountMul: 0.75,
+    leafSizeMul: 1.2,
+    leafShape: 'large',
+    fruitStyle: 'fig',
+    blossom: 'never',
+    leaf: '#5E9E4E',
+    leafAlt: '#7DB566',
+    fruit: '#D9A24A',
+    fruitAlt: '#A87428',
+  },
+  // The one species with a droop of its own: long thin branches that hang.
+  wilg: {
+    ...BRANCHING_DEFAULTS,
+    trunkWidthMul: 1.15,
+    spreadBase: 30,
+    spreadJitter: 14,
+    curveAmp: 12,
+    childLenRatio: 0.8,
+    childWidthRatio: 0.6,
+    thirdChildBias: 0.15,
+    leanMul: 1.2,
+    droopBase: 0.5,
+    leafCountMul: 1.2,
+    leafSizeMul: 0.9,
+    leafShape: 'lance',
+    fruitStyle: 'catkin',
+    blossom: 'never',
+    leaf: '#8FB86A',
+    leafAlt: '#B0CC8A',
+    fruit: '#D9D27A',
+    fruitAlt: '#A9A24A',
+  },
+  // A long stem and a flat, wide crown of feathery leaves.
+  acacia: {
+    ...BRANCHING_DEFAULTS,
+    trunkLenMul: 1.25,
+    trunkWidthMul: 0.9,
+    spreadBase: 50,
+    spreadJitter: 10,
+    curveAmp: 6,
+    childLenRatio: 0.6,
+    childWidthRatio: 0.62,
+    thirdChildBias: 0.25,
+    leanMul: 1.3,
+    leafCountMul: 1.2,
+    leafSizeMul: 0.7,
+    leafShape: 'feather',
+    fruitStyle: 'pod',
+    blossomColor: '#F6E27A',
+    leaf: '#6E9E5A',
+    leafAlt: '#8FB574',
+    fruit: '#8B6B3A',
+    fruitAlt: '#5E4626',
+  },
+  // The ceder's narrow cousin: same spine, a much tighter fan.
+  cipres: {
+    ...BRANCHING_DEFAULTS,
+    form: 'conical',
+    trunkLenMul: 1.3,
+    trunkWidthMul: 0.8,
+    spreadBase: 12,
+    spreadJitter: 6,
+    curveAmp: 3,
+    childLenRatio: 0.6,
+    childWidthRatio: 0.7,
+    thirdChildBias: 0.2,
+    leanMul: 0.3,
+    leafCountMul: 1.5,
+    leafSizeMul: 0.7,
+    leafShape: 'scale',
+    fruitStyle: 'berry',
+    blossom: 'never',
+    evergreen: true,
+    leaf: '#2E5E3E',
+    leafAlt: '#3D7450',
+    fruit: '#7A6A4A',
+    fruitAlt: '#55492F',
   },
 };
 

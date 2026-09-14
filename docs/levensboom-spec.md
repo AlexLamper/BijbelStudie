@@ -18,7 +18,7 @@ values the server already has, plus the species the reader picked.
 | `level` | int ≥ 1 | `levelForXp(xp)` from `lib/gamification.ts` |
 | `frac` | 0..1 | `xpIntoLevel / xpForNextLevel` |
 | `health` | 0.3..1 | §5, derived from `lastStreakDate` |
-| `species` | `eik \| olijf \| vijg \| palm \| amandel \| ceder` | `User.levensboom.species`, after the unlock check (§9) |
+| `species` | `eik \| olijf \| vijg \| palm \| amandel \| ceder \| mosterd \| appel \| granaatappel \| sycomoor \| wilg \| acacia \| cipres` | `User.levensboom.species`, after the unlock check (§9) |
 | `season` | `spring \| summer \| autumn \| winter` | device month |
 | `timeOfDay` | `dawn \| day \| dusk \| night` | device clock |
 | `scene` | §7.2 id | `User.levensboom.scene`, after the unlock check |
@@ -65,8 +65,10 @@ Dart: mask the 64-bit product). The stream is seeded once with
 `fnv1a32(seed)` and drawn from in exactly the order below.
 
 Renderers own two more streams, `"<seed>:decor"` (motes, stars, drifters,
-fireflies, butterflies) and `"<seed>:scene"` (backdrop details, where the
-ground animals stand). Neither can shift a branch.
+fireflies, butterflies, bees, the eagle's phase) and `"<seed>:scene"` (backdrop
+details, where the ground animals stand: sheep, deer, fox, donkey, stork,
+lion, in that order). Neither can shift a branch. New decor is only ever
+appended to the end of its stream, so older decor never moves.
 
 ## 4. Geometry
 
@@ -135,16 +137,19 @@ for i in 0 .. childCount - 1:
     jitter     = (rand() * 2 - 1) * 8
     if spine and i == 1:                            # the leader
         raw = endAngle + jitter * 0.35
-        childLen = len * 0.72;  childWidth = width * 0.72;  childLeader = true
+        childLen = len * 0.78;  childWidth = width * 0.72;  childLeader = true
     else if spine:                                  # near-flat side branches, longer low down
-        raw = endAngle + t * (spread + 40) + jitter
-        childLen = len * sp.childLenRatio * (0.55 + 0.45 * (1 - depth / maxDepth))
-        childWidth = width * 0.55;  childLeader = false
+        raw = endAngle + t * (spread + 42) + jitter
+        childLen = len * 0.62 * (1 - 0.55 * (depth / maxDepth))
+        childWidth = width * 0.5;  childLeader = false
+    else if sp.form == conical:                     # a tier: only a slight fan
+        raw = endAngle + t * spread * 0.55 + jitter * 0.6
+        childLen = len * 0.66;  childWidth = width * 0.66;  childLeader = false
     else:
         raw = endAngle + t * spread + jitter
         childLen = len * sp.childLenRatio;  childWidth = width * sp.childWidthRatio
         childLeader = false
-    droop      = droopT * ((depth + 1) / maxDepth)
+    droop      = (droopT + sp.droopBase) * ((depth + 1) / maxDepth)
     childAngle = raw + (90 - raw) * droop        # rotate toward straight down
     recurse(x1, y1, childAngle, childLen, childWidth, depth + 1, childLeader)
 
@@ -173,17 +178,28 @@ Species parameters (`lib/levensboom/species.ts`, `domain/species.dart`). The
 silhouette. Renderer-only columns (leaf/fruit shape, colours, evergreen) are in
 the code and not repeated here.
 
-| id | form | trunkLen | trunkW | spread | jitter | curve | childLen | childW | third | lean | leafCount | leafSize | blossom |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| `eik` | branching | 1 | 1 | 26 | 14 | 10 | 0.74 | 0.68 | 0 | 1 | 1 | 1 | seasonal |
-| `olijf` | branching | 0.8 | 1.3 | 36 | 16 | 18 | 0.70 | 0.70 | 0.10 | 1.4 | 1.15 | 0.85 | seasonal |
-| `vijg` | branching | 0.75 | 1.3 | 40 | 12 | 12 | 0.72 | 0.75 | 0.15 | 1 | 0.55 | 1.7 | never |
-| `palm` | palm | 1.45 | 0.9 | – | – | 6 | – | – | – | 1.2 | – | 1 | never |
-| `amandel` | branching | 1.05 | 0.85 | 22 | 10 | 8 | 0.76 | 0.66 | 0.05 | 0.8 | 0.9 | 0.9 | always |
-| `ceder` | conical | 1.0 | 1.1 | 30 | 8 | 5 | 0.68 | 0.70 | 0.20 | 0.5 | 1.2 | 0.8 | never |
+| id | form | trunkLen | trunkW | spread | jitter | curve | childLen | childW | third | lean | droop | leafCount | leafSize | blossom |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| `eik` | branching | 1 | 1 | 26 | 14 | 10 | 0.74 | 0.68 | 0 | 1 | 0 | 1 | 1 | seasonal |
+| `olijf` | branching | 0.8 | 1.3 | 36 | 16 | 18 | 0.70 | 0.70 | 0.10 | 1.4 | 0 | 1.15 | 0.85 | seasonal |
+| `vijg` | branching | 0.75 | 1.3 | 40 | 12 | 12 | 0.72 | 0.75 | 0.15 | 1 | 0 | 0.55 | 1.35 | never |
+| `palm` | palm | 1.45 | 0.9 | – | – | 6 | – | – | – | 1.2 | 0 | – | 1 | never |
+| `amandel` | branching | 1.05 | 0.85 | 22 | 10 | 8 | 0.76 | 0.66 | 0.05 | 0.8 | 0 | 0.9 | 0.9 | always |
+| `ceder` | conical | 1.15 | 1.1 | 30 | 8 | 5 | 0.68 | 0.70 | 0.20 | 0.5 | 0 | 1.6 | 0.8 | never |
+| `mosterd` | branching | 0.85 | 0.8 | 34 | 16 | 14 | 0.72 | 0.62 | 0.30 | 1.1 | 0 | 1.3 | 0.6 | always |
+| `appel` | branching | 0.9 | 1.05 | 32 | 12 | 10 | 0.72 | 0.68 | 0.12 | 0.9 | 0 | 1.05 | 0.95 | seasonal |
+| `granaatappel` | branching | 0.7 | 1 | 38 | 14 | 14 | 0.70 | 0.66 | 0.20 | 1 | 0 | 1.2 | 0.75 | seasonal |
+| `sycomoor` | branching | 0.7 | 1.6 | 46 | 12 | 12 | 0.70 | 0.74 | 0.20 | 1 | 0 | 0.75 | 1.2 | never |
+| `wilg` | branching | 1 | 1.15 | 30 | 14 | 12 | 0.80 | 0.60 | 0.15 | 1.2 | 0.5 | 1.2 | 0.9 | never |
+| `acacia` | branching | 1.25 | 0.9 | 50 | 10 | 6 | 0.60 | 0.62 | 0.25 | 1.3 | 0 | 1.2 | 0.7 | seasonal |
+| `cipres` | conical | 1.3 | 0.8 | 12 | 6 | 3 | 0.60 | 0.70 | 0.20 | 0.3 | 0 | 1.5 | 0.7 | never |
 
 `seasonal` blossoms in spring from level 5 (the `blossom` trait); `always`
-blossoms every spring; `never` grows no blossom ornaments.
+blossoms every spring; `never` grows no blossom ornaments. `droop` is
+`droopBase`: how far a perfectly healthy tree's tips already hang toward
+straight down - the treurwilg. It adds to the wilt droop of §4.3 and is zero
+for every species that existed before it, so their fixtures did not move.
+`palm` and `conical` ignore the columns their form does not read.
 
 ### 4.5 `growPalm(x0, y0, angle0, trunkLen, trunkW, depthBase)`
 
@@ -302,17 +318,21 @@ Bark is `#4A3A2E`, lit edge `#6B5442`; night desaturates everything by mixing
 ### 7.1 Species and the seasons
 
 A species with its own leaf colour (all but `eik`) keeps it in spring and
-summer. A deciduous species (`vijg`, `amandel`) turns with the seasonal table
-in autumn and winter. An evergreen (`olijf`, `palm`, `ceder`) keeps its own
-green all year, mixed 10 % toward `#8A9A8A` in autumn and 30 % in winter.
-Fruit colours are per species. The amandel's blossom is `#FBD3E0`.
+summer. A deciduous species turns with the seasonal table in autumn and
+winter. An evergreen (`olijf`, `palm`, `ceder`, `cipres`) keeps its own green
+all year, mixed 10 % toward `#8A9A8A` in autumn and 30 % in winter. Fruit
+colours are per species. A species may carry its own `blossomColor`, used
+whenever the season has blossom at all: amandel `#FBD3E0`, mosterd `#F3D45A`,
+appel `#FBE4EC`, granaatappel `#E8532F`, acacia `#F6E27A`; the rest take the
+seasonal pink.
 
 ### 7.2 Scenes
 
 A scene overrides the sky per time of day (optional), the ground band, and
 adds `far`, `farAlt`, `water` and `accent` for the backdrop the renderer draws
-behind the tree. `sterrennacht` forces `night`. The table is
-`lib/levensboom/scenes.ts` / `domain/scenes.dart`:
+behind the tree. `forceTime` pins the time of day whatever the clock says:
+`sterrennacht` and `herdersveld` are always `night`, `dageraad` is always
+`dawn`. The table is `lib/levensboom/scenes.ts` / `domain/scenes.dart`:
 
 | id | backdrop | what the renderer draws |
 |---|---|---|
@@ -324,6 +344,13 @@ behind the tree. `sterrennacht` forces `night`. The table is
 | `stadsmuur` | wall | a crenellated wall, a tower, stone courses, a gate |
 | `hof` | garden | hedge layers, a river on the left, flowers on stems |
 | `sterrennacht` | stars | a dense star field, a milky-way band, a crescent moon |
+| `jordaan` | river | far bank and hills, a river strip between them and the ground line, reeds on the near bank |
+| `wijngaard` | vineyard | two hill layers, four receding rows of vines on posts with the odd grape |
+| `graanveld` | field | two golden ridges, standing wheat on the earth band, heads nodding |
+| `kust` | sea | sea to the horizon with drifting swell lines, a foam line and two shells on the sand |
+| `regenboog` | rainbow | a six-band bow on a centre below the horizon, over the meadow ridge |
+| `dageraad` | sunrise | a sun on the horizon with a halo and slow rays, two hill layers in front |
+| `herdersveld` | shepherds | one bright four-point star with a halo, two dark hills, a small flock on the near one |
 
 ### 7.3 Seasonal and celebration layers (renderer-only)
 
@@ -357,7 +384,8 @@ Both renderers stop animating under reduced motion, when told `still`, and
 
 Given `seed = "65f0c1a2b3c4d5e6f7a8b9c0"`, `health = 1`, both sides assert the
 same `branches.length`, `leaves.length`, open leaves, `blossoms.length`,
-`fruits.length`, `maxDepth` and `traits` for every species at:
+`fruits.length`, `maxDepth` and `traits` for every one of the thirteen species
+at:
 
 | level | frac |
 |---|---|
@@ -383,27 +411,56 @@ unlocked by exactly one rule; unlocks are never stored, they are evaluated from
 |---|---|---|
 | species | `eik` | free (default) |
 | species | `olijf` | free |
+| species | `mosterd` | level 2 |
 | species | `vijg` | level 4 |
 | species | `palm` | level 8 |
+| species | `appel` | level 10 |
 | species | `amandel` | level 12 |
+| species | `granaatappel` | level 14 |
+| species | `sycomoor` | level 16 |
+| species | `acacia` | level 19 |
+| species | `wilg` | streak 21 |
 | species | `ceder` | Pro |
+| species | `cipres` | Pro |
 | scene | `waterbeken` | free (default) |
 | scene | `heuvels` | level 3 |
 | scene | `meer` | level 6 |
+| scene | `jordaan` | level 9 |
+| scene | `wijngaard` | level 18 |
+| scene | `regenboog` | level 20 |
 | scene | `woestijn` | streak 7 |
 | scene | `berg` | streak 30 |
+| scene | `kust` | streak 50 |
+| scene | `dageraad` | streak 90 |
 | scene | `stadsmuur` | badge `completed5` |
+| scene | `graanveld` | badge `completed10` |
+| scene | `herdersveld` | badge `anniversary` |
 | scene | `hof` | Pro |
 | scene | `sterrennacht` | Pro |
 | animal | `geen` | free (default) |
 | animal | `vogel` | level 5 |
 | animal | `vlinders` | level 7 |
-| animal | `schaap` | badge `completed1` |
-| animal | `duif` | streak 14 |
+| animal | `vos` | level 11 |
+| animal | `bijen` | level 13 |
 | animal | `vuurvliegjes` | level 15 |
+| animal | `ooievaar` | level 17 |
+| animal | `adelaar` | level 22 |
+| animal | `duif` | streak 14 |
+| animal | `uil` | streak 40 |
 | animal | `hert` | streak 60 |
+| animal | `schaap` | badge `completed1` |
+| animal | `raaf` | badge `firstlesson` |
+| animal | `ezel` | badge `completed5` |
+| animal | `leeuw` | Pro |
 | ring | `teal` | free (default) |
 | ring | `goud` | Pro |
+
+Where an animal sits: `vogel`, `duif`, `raaf` and `uil` take the perch (§4.6;
+the owl's eyes are open only when the palette is night). `schaap`, `hert`,
+`vos`, `ezel`, `ooievaar` and `leeuw` stand on the ground at the offsets the
+`"<seed>:scene"` stream gives them, and the frame widens to hold them.
+`vlinders` and `bijen` orbit the canopy, `vuurvliegjes` only at night, and
+`adelaar` circles the top of the sky in the `scene` framing only.
 
 **Default ring.** An account with no stored ring gets `goud` when it is Pro and `teal` otherwise (`defaultRingFor(isPro)`, applied in `normaliseChoice`). The server fills this in before `chosen` and `avatar` leave the API, so the app never decides it; a stored ring, either one, is a real choice and always wins.
 
