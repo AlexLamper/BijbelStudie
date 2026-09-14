@@ -1,43 +1,27 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { ChevronLeft, ChevronRight, Search } from 'lucide-react'
+import { Search, Check } from 'lucide-react'
 import type { CuratedStudy } from '../../lib/data/curated-studies'
-import { CATALOGUE_ENTRIES, isBookStudyId } from '../../lib/bookStudies'
-import { Card, Chip, SectionHeading, StudyCard, ProgressBar } from '../../components/kit/primitives'
+import { CATALOGUE_ENTRIES } from '../../lib/bookStudies'
+import { Card, Chip } from '../../components/kit/primitives'
 import StudyArtwork from './StudyArtwork'
 
 const COMPLETED_KEY = 'bijbelstudie_completed_studies'
 
 // ---------------------------------------------------------------------------
-// The study catalogue (design_handoff_web/PAGES.md §2): one column at full
-// width - a 440 px search field, the kind filters as pills, the study you are
-// in, a sideways-scrolling row of featured cards, and then every study as a
-// compact card in a responsive grid (1/2/3/4 columns), twelve at a time, with
-// the kind pills directly above it.
+// The study catalogue, laid out after the reader's own mock for this screen:
+// a filter rail on the left (Oude/Nieuwe Testament by genre, plus Personen /
+// Thema's / Gedeelten), a search field and a coarse type-pill row on top, a
+// "Je bent bezig met" row of the studies in progress, and the filtered list
+// as a grid of banner cards - a genre label and title baked into the banner,
+// a lesson count and an action word below it.
 //
-// The data layer below is the one this screen already had: the same
-// localStorage key, the same two endpoints, the same `statusFor`. Nothing was
-// added and nothing was removed; only what they render changed.
-//
-// TWO CONTROLS THE DESIGN HAS NO ROW FOR were folded into what it does have:
-// the Ontdek/Mijn studies/Voltooid tabs and the OT/NT/Personen/Thema's segment
-// row. Neither hid anything the reader cannot still reach - the list shows
-// every study with its own state on it (a progress bar and "Verder", or
-// "Herhalen" when it is finished), started studies sort to the top, and the
-// kind pills are the same filter the segments were. Say the word and the tabs
-// can come back as a second row.
+// The data layer is the one this screen already had: the same localStorage
+// key, the same two endpoints, the same `statusFor`. Nothing about progress
+// tracking changed, only what narrows and renders it.
 // ---------------------------------------------------------------------------
-
-/** The kind pill row, in the design's order. `null` is everything. */
-const KINDS: { value: CuratedStudy['type'] | null; label: string }[] = [
-  { value: null, label: 'Voor jou' },
-  { value: 'Boek', label: 'Bijbelboeken' },
-  { value: 'Persoon', label: 'Personen' },
-  { value: 'Onderwerp', label: "Thema's" },
-  { value: 'Gedeelte', label: 'Gedeelten' },
-]
 
 interface Enrollment {
   studyId: string
@@ -59,18 +43,19 @@ interface Status {
 /** A catalogue row: the study plus the facts the list needs. */
 interface Entry {
   study: CuratedStudy
-  /** "Wet", "Evangelie", "Persoon" - what kind of thing this is, in one word. */
+  /** "Wet", "Geschiedenis", "Persoon" - the genre label the mock bakes into the banner. */
   kind: string
+  category: 'ot' | 'nt' | 'personen' | 'themas'
   lessonCount: number
   avgMinutes: number
-  /** Everything a search should match, lowercased once at module load. */
   haystack: string
 }
 
 const ENTRIES: Entry[] = CATALOGUE_ENTRIES.map(
-  ({ study, book, kind, lessonCount, avgMinutes }) => ({
+  ({ study, book, kind, category, lessonCount, avgMinutes }) => ({
     study,
     kind,
+    category,
     lessonCount,
     avgMinutes,
     haystack: (book
@@ -81,91 +66,83 @@ const ENTRIES: Entry[] = CATALOGUE_ENTRIES.map(
 )
 
 /**
- * How many studies "Uitgelicht" puts in its carousel.
+ * The filter rail's rows, in the mock's order and grouping.
  *
- * One row that scrolls sideways, so the count costs no height: ten openings
- * into the catalogue at the height of a single card.
- *
- * This is the only place the number is written down: the carousel renders the
- * whole array and the heading counts the same array, so what you see and what
- * the label claims cannot drift apart - not even if the catalogue ever holds
- * fewer studies than the cap.
+ * The rail is coarser than the raw `kind` field in two places: the mock's
+ * "Profeten" is Grote profeten + Kleine profeten together, and its NT
+ * "Evangeliën" is the four gospels plus Handelingen (a history book, but not
+ * one anybody browses on its own). `match` is the one place either merge is
+ * written down.
  */
-const FEATURED_COUNT = 10
+interface RailGroup {
+  heading: string
+  items: { id: string; label: string; match: (entry: Entry) => boolean }[]
+}
 
-/**
- * How many cards "Alle studies" shows at first, and adds per "Meer tonen".
- * Twelve so every page fills whole rows at two, three and four columns.
- */
+const RAIL: RailGroup[] = [
+  {
+    heading: 'Oude testament',
+    items: [
+      { id: 'wet', label: 'Wet', match: e => e.category === 'ot' && e.kind === 'Wet' },
+      { id: 'ot-geschiedenis', label: 'Geschiedenis', match: e => e.category === 'ot' && e.kind === 'Geschiedenis' },
+      { id: 'poezie', label: 'Poëzie en wijsheid', match: e => e.kind === 'Poëzie en wijsheid' },
+      { id: 'profeten', label: 'Profeten', match: e => e.kind === 'Grote profeten' || e.kind === 'Kleine profeten' },
+    ],
+  },
+  {
+    heading: 'Nieuwe testament',
+    items: [
+      {
+        id: 'evangelien',
+        label: 'Evangeliën',
+        match: e => e.category === 'nt' && (e.kind === 'Evangelie' || e.kind === 'Geschiedenis'),
+      },
+      { id: 'brieven', label: 'Brieven', match: e => e.kind === 'Brief' },
+      { id: 'openbaring', label: 'Openbaring', match: e => e.category === 'nt' && e.kind === 'Apocalyptiek' },
+    ],
+  },
+  {
+    heading: 'Anders ingedeeld',
+    items: [
+      { id: 'personen', label: 'Personen', match: e => e.category === 'personen' },
+      { id: 'themas', label: "Thema's", match: e => e.category === 'themas' && e.kind === 'Thema' },
+      { id: 'gedeelten', label: 'Gedeelten', match: e => e.kind === 'Gedeelte' },
+    ],
+  },
+]
+
+/** The top pill row: a coarse type filter, independent of the rail below it. */
+const TYPE_PILLS: { value: CuratedStudy['type'] | null; label: string }[] = [
+  { value: null, label: 'Alles' },
+  { value: 'Boek', label: 'Bijbelboeken' },
+  { value: 'Persoon', label: 'Personen' },
+  { value: 'Onderwerp', label: "Thema's" },
+]
+
 const LIST_PAGE_SIZE = 12
 
-/**
- * The featured cards: the HAND-AUTHORED studies, in catalogue order.
- *
- * The rule used to be "has a written intro", which sounded curated and was not:
- * `generateBookStudy` gives every one of the sixty-six generated book studies an
- * `about` from the book's own summary, so the filter passed on all seventy-seven
- * entries and the row was simply the first few of the Old Testament. At four
- * cards that read as a sampler; at eight it read as "the start of Genesis".
- *
- * `isBookStudyId` is the one honest test for "somebody wrote this on purpose" -
- * it is the same check app/studies/[id]/page.tsx uses to decide indexability.
- *
- * Should there ever be fewer hand-authored studies than the cap, the row is
- * topped up with book studies so the carousel still carries a full set.
- */
-const FEATURED: Entry[] = (() => {
-  const authored = ENTRIES.filter(entry => !isBookStudyId(entry.study.id))
-  const books = ENTRIES.filter(entry => isBookStudyId(entry.study.id))
-  return [...authored, ...books].slice(0, FEATURED_COUNT)
-})()
-
 export default function StudiesBrowser() {
-  const [kind, setKind] = useState<CuratedStudy['type'] | null>(null)
+  const [typeFilter, setTypeFilter] = useState<CuratedStudy['type'] | null>(null)
+  const [railId, setRailId] = useState<string | null>(null)
+  const [sort, setSort] = useState<'canoniek' | 'alfabetisch'>('canoniek')
   const [query, setQuery] = useState('')
   const [completedIds, setCompletedIds] = useState<string[]>([])
   const [enrollments, setEnrollments] = useState<Record<string, Enrollment>>({})
   const [visibleCount, setVisibleCount] = useState(LIST_PAGE_SIZE)
+  const [showAllBezig, setShowAllBezig] = useState(false)
 
-  // A new filter or search starts the list from its first page again.
-  const changeKind = (value: CuratedStudy['type'] | null) => {
-    setKind(value)
+  const changeTypeFilter = (value: CuratedStudy['type'] | null) => {
+    setTypeFilter(value)
+    setVisibleCount(LIST_PAGE_SIZE)
+  }
+  const changeRail = (id: string | null) => {
+    setRailId(current => (current === id ? null : id))
     setVisibleCount(LIST_PAGE_SIZE)
   }
   const changeQuery = (value: string) => {
     setQuery(value)
     setVisibleCount(LIST_PAGE_SIZE)
   }
-
-  /* The "Uitgelicht" carousel: the arrows scroll it by most of a viewport and
-     disable themselves at either end. */
-  const browsing = query.trim() === ''
-  const carouselRef = useRef<HTMLDivElement>(null)
-  const [canScrollPrev, setCanScrollPrev] = useState(false)
-  const [canScrollNext, setCanScrollNext] = useState(false)
-
-  const updateCarouselEdges = useCallback(() => {
-    const el = carouselRef.current
-    if (!el) return
-    setCanScrollPrev(el.scrollLeft > 4)
-    setCanScrollNext(el.scrollLeft + el.clientWidth < el.scrollWidth - 4)
-  }, [])
-
-  const scrollCarousel = (direction: 1 | -1) => {
-    const el = carouselRef.current
-    if (!el) return
-    el.scrollBy({ left: direction * el.clientWidth * 0.85, behavior: 'smooth' })
-  }
-
-  useEffect(() => {
-    const el = carouselRef.current
-    if (!el) return
-    updateCarouselEdges()
-    const observer = new ResizeObserver(updateCarouselEdges)
-    observer.observe(el)
-    return () => observer.disconnect()
-    // The carousel unmounts during a search; re-attach when it comes back.
-  }, [updateCarouselEdges, browsing])
 
   useEffect(() => {
     try {
@@ -223,23 +200,33 @@ export default function StudiesBrowser() {
     }
   }, [enrollments, completedIds])
 
+  const railCounts = useMemo(() => {
+    const counts: Record<string, number> = {}
+    for (const group of RAIL) {
+      for (const item of group.items) counts[item.id] = ENTRIES.filter(item.match).length
+    }
+    return counts
+  }, [])
+
+  const activeRailItem = useMemo(
+    () => RAIL.flatMap(group => group.items).find(item => item.id === railId) ?? null,
+    [railId],
+  )
+
   const searchResults = useMemo(() => {
     const needle = query.trim().toLowerCase()
     if (!needle) return null
     return ENTRIES.filter(entry => entry.haystack.includes(needle))
   }, [query])
 
-  /** The full list, narrowed by the kind pills, with what you are in on top. */
   const listEntries = useMemo(() => {
-    const filtered = ENTRIES.filter(entry => !kind || entry.study.type === kind)
-    const rank = (entry: Entry) => {
-      const status = statusFor(entry.study)
-      if (status.started && !status.completed) return 0
-      if (status.completed) return 2
-      return 1
+    let filtered = ENTRIES.filter(entry => !typeFilter || entry.study.type === typeFilter)
+    if (activeRailItem) filtered = filtered.filter(activeRailItem.match)
+    if (sort === 'alfabetisch') {
+      return [...filtered].sort((a, b) => a.study.title.localeCompare(b.study.title, 'nl'))
     }
-    return [...filtered].sort((a, b) => rank(a) - rank(b))
-  }, [kind, statusFor])
+    return filtered
+  }, [typeFilter, activeRailItem, sort])
 
   const startedCount = useMemo(
     () => ENTRIES.filter(entry => {
@@ -248,249 +235,255 @@ export default function StudiesBrowser() {
     }).length,
     [statusFor],
   )
+  const completedCount = useMemo(
+    () => ENTRIES.filter(entry => statusFor(entry.study).completed).length,
+    [statusFor],
+  )
 
-  /** The study to carry on with: the first active enrolment the API returned. */
-  const resume = useMemo(() => {
-    for (const enrollment of Object.values(enrollments)) {
-      if (enrollment.completedAt) continue
-      const entry = ENTRIES.find(item => item.study.id === enrollment.studyId)
-      if (entry) return { entry, enrollment }
-    }
-    return null
-  }, [enrollments])
+  /** Every study in progress, most recently resumed first isn't tracked - catalogue order stands in. */
+  const bezigMet = useMemo(
+    () => ENTRIES.filter(entry => {
+      const status = statusFor(entry.study)
+      return status.started && !status.completed
+    }),
+    [statusFor],
+  )
+  const bezigVisible = showAllBezig ? bezigMet : bezigMet.slice(0, 3)
 
   const rows = searchResults ?? listEntries
   const visibleRows = rows.slice(0, visibleCount)
 
+  const listTitle = searchResults
+    ? `${searchResults.length} ${searchResults.length === 1 ? 'studie' : 'studies'} gevonden`
+    : activeRailItem?.label ?? 'Alle studies'
+  const listMeta = searchResults
+    ? undefined
+    : `${rows.length} ${rows.length === 1 ? 'studie' : 'studies'} · ${rows.reduce((sum, entry) => sum + entry.lessonCount, 0)} lessen`
+
   return (
-    <div className="flex flex-col gap-[13px]">
-      {/* The search is a real field here, not the bar's grey plate: this is the
-          fastest way through seventy-seven studies. */}
-      <div className="search-field flex h-[46px] w-full max-w-[440px] flex-none items-center gap-[10px] rounded-[12px] border border-line-strong bg-surface px-[15px] shadow-field">
-        <Search size={18} strokeWidth={1.9} className="flex-none text-ink-muted" />
-        <input
-          type="search"
-          value={query}
-          onChange={event => changeQuery(event.target.value)}
-          placeholder="Bijbelboek, persoon of thema"
-          aria-label="Zoek een studie"
-          className="min-w-0 flex-1 border-0 bg-transparent text-[14px] text-ink outline-none placeholder:text-ink-muted"
-        />
-        <span className="flex-none rounded-[5px] border border-line px-[5px] py-[2px] font-mono text-[10.5px] font-semibold text-ink-faint">
-          ⌘K
-        </span>
-      </div>
-
-      {searchResults === null && resume && (
-        // A resume card with room for a long title, capped so that on a wide
-        // screen the button does not drift far from the study it continues.
-        <Card className="flex w-full max-w-[860px] flex-none items-center gap-[15px] px-[18px] py-[14px]">
-          {/* The ring is the progress, bent around the thumbnail. */}
-          <div
-            className="flex h-12 w-12 flex-none items-center justify-center rounded-full"
-            style={{
-              background: `conic-gradient(var(--teal) 0 ${statusFor(resume.entry.study).pct}%, var(--line) ${statusFor(resume.entry.study).pct}% 100%)`,
-            }}
-          >
-            <StudyArtwork
-              id={resume.entry.study.id}
-              kind={resume.entry.study.type}
-              ratio={1}
-              quiet
-              className="h-[37px] w-[37px] rounded-full"
-            />
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="text-[10.5px] font-semibold uppercase tracking-[1.1px] text-ink-faint">
-              Verder waar je was
-            </div>
-            <div className="mt-[3px] truncate text-[17px] font-bold text-ink">
-              {resume.entry.study.title} · les {resume.enrollment.currentLessonDay}
-            </div>
-          </div>
-          <Link
-            href={`/studie/${resume.entry.study.id}`}
-            data-track="study_resume"
-            className="inline-flex h-10 flex-none items-center rounded-btn bg-teal px-5 text-[14px] font-semibold text-white no-underline transition-opacity hover:opacity-90"
-          >
-            Verder
-          </Link>
-        </Card>
-      )}
-
-      {searchResults === null && FEATURED.length > 0 && (
-        <>
-          {/* "Nieuw deze maand" in the design. Nothing in the catalogue records
-              when a study was published, so the block keeps its shape and its
-              honest name: the studies with a written introduction. */}
-          <div className="flex flex-none items-center gap-3">
-            <SectionHeading
-              title="Uitgelicht"
-              action={{ label: `Alle ${FEATURED.length}`, href: '/bijbelboeken' }}
-              className="min-w-0 flex-1"
-            />
-            {/* Arrows only where there is a mouse to need them; on touch the
-                row is swiped. */}
-            <div className="hidden flex-none items-center gap-[6px] sm:flex">
-              <button
-                type="button"
-                onClick={() => scrollCarousel(-1)}
-                disabled={!canScrollPrev}
-                aria-label="Vorige uitgelichte studies"
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-surface text-ink-body transition-colors hover:border-line-strong disabled:cursor-default disabled:opacity-40 disabled:hover:border-line"
-              >
-                <ChevronLeft size={16} />
-              </button>
-              <button
-                type="button"
-                onClick={() => scrollCarousel(1)}
-                disabled={!canScrollNext}
-                aria-label="Volgende uitgelichte studies"
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-surface text-ink-body transition-colors hover:border-line-strong disabled:cursor-default disabled:opacity-40 disabled:hover:border-line"
-              >
-                <ChevronRight size={16} />
-              </button>
-            </div>
-          </div>
-          {/* One row at image height 88, as the design measures the card, that
-              scrolls sideways with snap points. Each card has a fixed width so
-              the row reads as a shelf rather than a squeezed grid. */}
-          <div
-            ref={carouselRef}
-            onScroll={updateCarouselEdges}
-            className="flex flex-none snap-x snap-mandatory gap-4 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          >
-            {FEATURED.map(entry => (
-              <div key={entry.study.id} className="grid w-[210px] flex-none snap-start sm:w-[232px]">
-                <StudyCard
-                  href={`/studies/${entry.study.id}`}
-                  title={entry.study.title}
-                  meta={`${entry.lessonCount} ${entry.lessonCount === 1 ? 'les' : 'lessen'} · ±${entry.avgMinutes} min`}
-                  imageHeight={88}
-                  art={
-                    <StudyArtwork
-                      id={entry.study.id}
-                      kind={entry.study.type}
-                      ratio={3.2}
-                      quiet
-                      className="h-full w-full"
-                    />
-                  }
-                />
+    <div className="flex flex-col gap-6 md:flex-row md:gap-8">
+      {/* The filter rail: Oude/Nieuwe testament by genre, plus the studies
+          that are not a bible book at all. Collapses above the grid on small
+          screens rather than hiding - every row is still one tap away. */}
+      <aside className="flex-none md:w-[200px]">
+        <nav className="flex flex-col gap-5 md:sticky md:top-0">
+          {RAIL.map(group => (
+            <div key={group.heading}>
+              <div className="px-[2px] text-[11px] font-semibold uppercase tracking-[0.6px] text-ink-faint">
+                {group.heading}
               </div>
+              <div className="mt-2 flex flex-col gap-[2px]">
+                {group.items.map(item => {
+                  const active = railId === item.id
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => changeRail(item.id)}
+                      className={[
+                        'flex items-center justify-between rounded-btn px-[10px] py-[7px] text-left text-[13.5px] transition-colors',
+                        active
+                          ? 'bg-[var(--teal-wash)] font-semibold text-teal dark:text-teal-400'
+                          : 'text-ink-body hover:bg-line-soft',
+                      ].join(' ')}
+                    >
+                      <span className="truncate">{item.label}</span>
+                      <span className="flex-none text-[12px] text-ink-faint">{railCounts[item.id]}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
+        </nav>
+        <p className="mt-6 hidden text-[12px] leading-relaxed text-ink-faint md:block">
+          {startedCount} {startedCount === 1 ? 'studie' : 'studies'} begonnen, {completedCount} afgerond van de {ENTRIES.length}.
+        </p>
+      </aside>
+
+      <div className="flex min-w-0 flex-1 flex-col gap-[18px]">
+        {/* Search on the left, the coarse type pills on the right - the same
+            row the mock puts them in. */}
+        <div className="flex flex-none flex-wrap items-center gap-3">
+          <div className="search-field flex h-[46px] w-full max-w-[440px] flex-1 items-center gap-[10px] rounded-[12px] border border-line-strong bg-surface px-[15px] shadow-field">
+            <Search size={18} strokeWidth={1.9} className="flex-none text-ink-muted" />
+            <input
+              type="search"
+              value={query}
+              onChange={event => changeQuery(event.target.value)}
+              placeholder="Bijbelboek, persoon of thema"
+              aria-label="Zoek een studie"
+              className="min-w-0 flex-1 border-0 bg-transparent text-[14px] text-ink outline-none placeholder:text-ink-muted"
+            />
+            <span className="flex-none rounded-[5px] border border-line px-[5px] py-[2px] font-mono text-[10.5px] font-semibold text-ink-faint">
+              ⌘K
+            </span>
+          </div>
+          <div className="flex flex-none flex-wrap gap-[9px]">
+            {TYPE_PILLS.map(item => (
+              <Chip
+                key={item.label}
+                label={item.label}
+                active={item.value === typeFilter}
+                onClick={() => changeTypeFilter(item.value)}
+              />
             ))}
           </div>
-        </>
-      )}
-
-      <SectionHeading
-        title={searchResults === null ? 'Alle studies' : `${searchResults.length} ${searchResults.length === 1 ? 'studie' : 'studies'} gevonden`}
-        meta={
-          searchResults === null
-            ? `${ENTRIES.length} studies${startedCount > 0 ? ` · ${startedCount} begonnen` : ''}`
-            : undefined
-        }
-        action={searchResults === null ? { label: 'Per bijbelboek', href: '/bijbelboeken' } : undefined}
-        className="flex-none"
-      />
-
-      {/* The kind filter sits directly over the grid it narrows. */}
-      {searchResults === null && (
-        <div className="flex flex-none flex-wrap gap-[9px]">
-          {KINDS.map(item => (
-            <Chip
-              key={item.label}
-              label={item.label}
-              active={item.value === kind}
-              onClick={() => changeKind(item.value)}
-            />
-          ))}
         </div>
-      )}
 
-      {/* A grid of compact cards rather than full-width rows: a study is a
-          title, a meta line and its state, which never needed 1000 px. Paged
-          client-side in steps of twelve so the first screen stays light. */}
-      {rows.length === 0 ? (
-        <Card className="flex-none">
-          <p className="px-[18px] py-6 text-[13.5px] leading-relaxed text-ink-muted">
-            {searchResults
-              ? `Niets gevonden voor "${query.trim()}". Probeer de naam van een bijbelboek, een persoon of een thema.`
-              : 'Geen studie past bij dit filter.'}
-          </p>
-        </Card>
-      ) : (
-        <div className="grid flex-none grid-cols-1 gap-[14px] md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {visibleRows.map(entry => (
-            <CatalogueCard key={entry.study.id} entry={entry} status={statusFor(entry.study)} />
-          ))}
-        </div>
-      )}
+        {searchResults === null && bezigMet.length > 0 && (
+          <div className="flex flex-none flex-col gap-[10px]">
+            <div className="flex items-baseline gap-3">
+              <span className="text-[13px] font-semibold text-ink">Je bent bezig met</span>
+              <span className="text-[12.5px] text-ink-faint">
+                {bezigMet.length} {bezigMet.length === 1 ? 'studie' : 'studies'}
+              </span>
+              <div className="flex-1" />
+              {bezigMet.length > 3 && (
+                <button
+                  type="button"
+                  onClick={() => setShowAllBezig(v => !v)}
+                  className="text-[13px] font-semibold text-teal no-underline hover:text-teal-dark dark:text-teal-400"
+                >
+                  {showAllBezig ? 'Minder' : `Alle ${bezigMet.length}`}
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-3">
+              {bezigVisible.map(entry => {
+                const status = statusFor(entry.study)
+                const subtitle = status.resumeDay != null
+                  ? `les ${status.resumeDay} van ${entry.lessonCount}`
+                  : `${status.done} van ${entry.lessonCount} lessen`
+                return (
+                  <Link
+                    key={entry.study.id}
+                    href={`/studie/${entry.study.id}`}
+                    data-track="study_resume"
+                    className="flex min-w-[240px] flex-1 items-center gap-[13px] rounded-card border border-line bg-surface px-[15px] py-[13px] no-underline transition-colors hover:border-line-strong sm:flex-none sm:basis-[280px]"
+                  >
+                    <div
+                      className="flex h-11 w-11 flex-none items-center justify-center rounded-full text-[11px] font-bold text-teal-dark dark:text-teal-400"
+                      style={{
+                        background: `conic-gradient(var(--teal) 0 ${status.pct}%, var(--line) ${status.pct}% 100%)`,
+                      }}
+                    >
+                      <span className="flex h-[34px] w-[34px] items-center justify-center rounded-full bg-surface">
+                        {status.pct}%
+                      </span>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-[14px] font-bold text-ink">{entry.study.title}</div>
+                      <div className="mt-[2px] truncate text-[12px] text-ink-faint">{subtitle}</div>
+                    </div>
+                    <span className="flex-none text-[13px] font-semibold text-teal dark:text-teal-400">Verder ›</span>
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        )}
 
-      {rows.length > visibleRows.length && (
-        <div className="flex flex-none flex-col items-center gap-[6px] pt-1">
-          <button
-            type="button"
-            onClick={() => setVisibleCount(count => count + LIST_PAGE_SIZE)}
-            className="inline-flex h-10 items-center rounded-btn border border-line bg-surface px-5 text-[14px] font-semibold text-teal transition-colors dark:text-teal-400 hover:border-line-strong"
-          >
-            Meer tonen
-          </button>
-          <span className="text-[12px] text-ink-faint">
-            {visibleRows.length} van {rows.length} getoond
-          </span>
+        <div className="flex flex-none flex-wrap items-baseline gap-3">
+          <h2 className="text-[16px] font-bold text-ink">{listTitle}</h2>
+          {listMeta && <span className="text-[12.5px] text-ink-faint">{listMeta}</span>}
+          <div className="flex-1" />
+          {searchResults === null && (
+            <select
+              value={sort}
+              onChange={event => setSort(event.target.value as 'canoniek' | 'alfabetisch')}
+              aria-label="Sorteer studies"
+              className="rounded-btn border border-line bg-surface px-3 py-[7px] text-[13px] font-medium text-ink-body outline-none"
+            >
+              <option value="canoniek">Canonieke volgorde</option>
+              <option value="alfabetisch">Alfabetisch</option>
+            </select>
+          )}
         </div>
-      )}
+
+        {rows.length === 0 ? (
+          <Card className="flex-none">
+            <p className="px-[18px] py-6 text-[13.5px] leading-relaxed text-ink-muted">
+              {searchResults
+                ? `Niets gevonden voor "${query.trim()}". Probeer de naam van een bijbelboek, een persoon of een thema.`
+                : 'Geen studie past bij dit filter.'}
+            </p>
+          </Card>
+        ) : (
+          <div className="grid flex-none grid-cols-1 gap-[14px] sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {visibleRows.map(entry => (
+              <CatalogueCard key={entry.study.id} entry={entry} status={statusFor(entry.study)} />
+            ))}
+          </div>
+        )}
+
+        {rows.length > visibleRows.length && (
+          <div className="flex flex-none flex-col items-center gap-[6px] pt-1">
+            <button
+              type="button"
+              onClick={() => setVisibleCount(count => count + LIST_PAGE_SIZE)}
+              className="inline-flex h-10 items-center rounded-btn border border-line bg-surface px-5 text-[14px] font-semibold text-teal transition-colors dark:text-teal-400 hover:border-line-strong"
+            >
+              Meer tonen
+            </button>
+            <span className="text-[12px] text-ink-faint">
+              {visibleRows.length} van {rows.length} getoond
+            </span>
+          </div>
+        )}
+
+        <p className="mt-2 text-[12px] leading-relaxed text-ink-faint md:hidden">
+          {startedCount} {startedCount === 1 ? 'studie' : 'studies'} begonnen, {completedCount} afgerond van de {ENTRIES.length}.
+        </p>
+      </div>
     </div>
   )
 }
 
 /**
- * One study in the "Alle studies" grid.
- *
- * The kit's StudyCard in shape and tokens (banner, two-line title, meta), with
- * the two things a catalogue card needs that StudyCard has no slot for: the
- * `study_card` tracking hook and the action word ("Start", "Verder",
- * "Herhalen") beside the progress. The banner is shorter than the featured
- * shelf's, so a row of four stays compact.
+ * One study in the grid: the genre label and title baked into the banner
+ * itself (as the mock draws it), a lesson-count meta line, and the action
+ * word beside a progress bar.
  */
 function CatalogueCard({ entry, status }: { entry: Entry; status: Status }) {
   const action = status.completed ? 'Herhalen' : status.started ? 'Verder' : 'Start'
   const lessons = `${entry.lessonCount} ${entry.lessonCount === 1 ? 'les' : 'lessen'}`
+  const metaRight = status.completed
+    ? 'Volledig gelezen'
+    : status.resumeDay != null
+      ? `les ${status.resumeDay} van ${entry.lessonCount}`
+      : `${lessons} · ±${entry.avgMinutes} min`
+
   return (
     <Link
       href={`/studies/${entry.study.id}`}
       data-track="study_card"
       className="flex min-w-0 flex-col overflow-hidden rounded-card border border-line bg-surface no-underline transition-colors hover:border-line-strong"
     >
-      <div className="relative h-[72px] flex-none overflow-hidden">
+      <div className="relative h-[112px] flex-none overflow-hidden">
         <StudyArtwork
           id={entry.study.id}
           kind={entry.study.type}
-          ratio={3.4}
-          quiet
+          ratio={2.1}
           className="h-full w-full"
         />
-        {status.started && (
-          <span className="absolute left-[10px] top-[10px] rounded-full bg-surface px-[8px] py-[2px] text-[10.5px] font-semibold text-ink-body">
-            {status.completed ? 'Afgerond' : 'Bezig'}
+        {status.completed ? (
+          <span className="absolute right-[10px] top-[10px] inline-flex items-center gap-1 rounded-full bg-[var(--success-fill)] px-[8px] py-[3px] text-[10.5px] font-semibold text-white">
+            <Check size={11} strokeWidth={2.5} /> Afgerond
           </span>
-        )}
+        ) : status.started ? (
+          <span className="absolute right-[10px] top-[10px] rounded-full bg-white/92 px-[8px] py-[3px] text-[10.5px] font-bold text-ink">
+            {status.pct}%
+          </span>
+        ) : null}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 px-3 pb-[9px]">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.8px] text-white/85">{entry.kind}</div>
+          <div className="mt-[1px] truncate text-[15px] font-bold text-white">{entry.study.title}</div>
+        </div>
       </div>
-      <div className="flex flex-1 flex-col px-[14px] pb-3 pt-[11px]">
-        <div className="line-clamp-2 text-[14px] font-bold leading-[1.35] text-ink">{entry.study.title}</div>
-        <div className="mt-[4px] truncate text-[11.5px] text-ink-faint">
-          {entry.kind} · {lessons} · ±{entry.avgMinutes} min
-        </div>
-        <div className="flex-1" />
-        <div className="mt-[10px] flex items-center gap-3">
-          <div className="min-w-0 flex-1">
-            {status.started && (
-              <ProgressBar value={status.completed ? 100 : status.pct} height={4} />
-            )}
-          </div>
-          <span className="flex-none text-[13px] font-semibold text-teal dark:text-teal-400">{action}</span>
-        </div>
+      <div className="flex flex-1 items-center gap-3 px-[14px] py-[11px]">
+        <span className="min-w-0 flex-1 truncate text-[12px] text-ink-faint">{metaRight}</span>
+        <span className="flex-none text-[13px] font-semibold text-teal dark:text-teal-400">{action} ›</span>
       </div>
     </Link>
   )
