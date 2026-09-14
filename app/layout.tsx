@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+﻿import type { Metadata, Viewport } from "next";
 import { Inter, Lora, Merriweather } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "../components/providers/theme-provider";
@@ -59,6 +59,16 @@ const ROOT_OG_IMAGE = ogImageUrl({
   subtitle:
     "Lees en bestudeer de Bijbel met commentaren, grondtekst, begeleide studies en een AI-assistent.",
 });
+
+/**
+ * Explicit so the phone layout never depends on a framework default: the page
+ * is laid out at the device width and starts unzoomed. No maximumScale - pinch
+ * zoom stays available.
+ */
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
 
 /**
  * Site-wide defaults. Individual routes override title/description/canonical
@@ -210,7 +220,7 @@ export default async function RootLayout({
                   navbar, the profile, the studio and the lesson card alike.
                   Idle when nobody is signed in. See levensboom-provider.tsx. */}
               <LevensboomProvider enabled={Boolean(session?.user)} userKey={session?.user?.email ?? null}>
-                {/* Page views and clicks for /admin/insights. Renders nothing and
+                {/* Page views and clicks for /beheer/inzichten. Renders nothing and
                     never blocks - see components/providers/AnalyticsTracker.tsx. */}
                 <Suspense fallback={null}>
                   <AnalyticsTracker />

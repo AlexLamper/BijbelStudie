@@ -239,7 +239,7 @@ export default function ProfilePage() {
                       type="button"
                       onClick={() => setEditing("name")}
                       aria-label="Naam bewerken"
-                      className="flex-none rounded-[6px] p-1 text-ink-muted transition-colors hover:bg-line-soft hover:text-ink-body"
+                      className="flex-none rounded-[6px] p-1 text-ink-muted max-md:p-2 transition-colors hover:bg-line-soft hover:text-ink-body"
                     >
                       <Pencil size={17} />
                     </button>
@@ -344,7 +344,16 @@ export default function ProfilePage() {
               <div className="text-[14.5px] font-bold text-ink">Je boom</div>
               <div className="mt-3 h-px bg-line" />
               <div className="mt-[13px] flex justify-center">
-                <TreeAvatar size={112} ring={4} level={level} levelStyle="dot" />
+                {/* The disc is a second way into the studio, next to "Naar je boom". The
+                    focus ring is a box-shadow on a rounded-full link, so it follows the
+                    circle instead of drawing a square outline. */}
+                <Link
+                  href="/profiel/boom"
+                  aria-label="Open je boom"
+                  className="flex cursor-pointer rounded-full outline-none transition-transform duration-150 hover:scale-[1.03] focus-visible:ring-2 focus-visible:ring-teal focus-visible:ring-offset-2 focus-visible:ring-offset-surface motion-reduce:transition-none motion-reduce:hover:scale-100"
+                >
+                  <TreeAvatar size={112} ring={4} level={level} levelStyle="dot" />
+                </Link>
               </div>
               <div className="mt-[14px] text-center text-[14.5px] font-bold text-ink">
                 {stageName ? `${stageName} · niveau ${level}` : `Niveau ${level}`}

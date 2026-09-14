@@ -25,7 +25,7 @@ const TEAL_DEEP = "#0F766E"
 const NOTICE = "mb-5 flex items-start gap-3 rounded-xl p-4 backdrop-blur-md"
 
 const ACTION =
-  "press mt-2.5 inline-flex h-8 items-center gap-1.5 rounded-md px-3.5 text-xs font-semibold text-white outline-none transition-colors focus-visible:ring-2 focus-visible:ring-white disabled:opacity-60"
+  "press mt-2.5 inline-flex h-8 max-md:h-10 items-center gap-1.5 rounded-md px-3.5 text-xs max-md:text-sm font-semibold text-white outline-none transition-colors focus-visible:ring-2 focus-visible:ring-white disabled:opacity-60"
 
 interface BillingState {
   subscribed: boolean
@@ -195,7 +195,7 @@ export function BillingNotices() {
         <button
           onClick={dismiss}
           aria-label="Sluiten"
-          className="absolute right-3 top-3 rounded-md text-white/60 outline-none transition-colors hover:text-white focus-visible:ring-2 focus-visible:ring-white"
+          className="absolute right-3 top-3 max-md:right-1 max-md:top-1 max-md:flex max-md:h-10 max-md:w-10 max-md:items-center max-md:justify-center rounded-md text-white/60 outline-none transition-colors hover:text-white focus-visible:ring-2 focus-visible:ring-white"
         >
           <X size={14} aria-hidden />
         </button>

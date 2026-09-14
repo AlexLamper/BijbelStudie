@@ -18,6 +18,7 @@ import { BASE_URL } from "../lib/seo/constants";
 export default function robots(): MetadataRoute.Robots {
   const disallow = [
     "/api/",
+    "/beheer",
     "/admin",
     "/inloggen",
     "/registreren",

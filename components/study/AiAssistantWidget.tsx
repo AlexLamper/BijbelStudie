@@ -43,6 +43,8 @@ export default function AiAssistantWidget({ onAsk, className = '' }: AiAssistant
       <div
         className={[
           'fixed z-40 bottom-20 right-4 sm:bottom-24 sm:right-6',
+          // Below md the shell has a tab bar across the bottom; sit above it.
+          'max-md:bottom-[calc(var(--mobile-tabbar-h,0px)+76px)]',
           'w-[calc(100vw-2rem)] max-w-[340px]',
           'rounded-2xl border border-gray-200 dark:border-border bg-white dark:bg-card shadow-2xl',
           'transition-all duration-200 origin-bottom-right',
@@ -66,7 +68,7 @@ export default function AiAssistantWidget({ onAsk, className = '' }: AiAssistant
             <button
               onClick={() => setOpen(false)}
               aria-label="Sluiten"
-              className="ml-auto flex items-center justify-center w-7 h-7 rounded-md text-gray-500 dark:text-gray-400 outline-none hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-secondary transition-colors focus-visible:ring-2 focus-visible:ring-[#0D9488]"
+              className="ml-auto flex items-center justify-center w-7 h-7 max-md:w-10 max-md:h-10 rounded-md text-gray-500 dark:text-gray-400 outline-none hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-secondary transition-colors focus-visible:ring-2 focus-visible:ring-[#0D9488]"
             >
               <X size={15} />
             </button>
@@ -85,7 +87,7 @@ export default function AiAssistantWidget({ onAsk, className = '' }: AiAssistant
               onKeyDown={handleKeyDown}
               maxLength={MAX_MESSAGE_LENGTH}
               placeholder="Stel een vraag over de Bijbel…"
-              className="flex-1 resize-none rounded-lg border border-gray-200 dark:border-border bg-white dark:bg-background px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#0D9488]/40 focus:border-[#0D9488]"
+              className="flex-1 resize-none rounded-lg border border-gray-200 dark:border-border bg-white dark:bg-background px-3 py-2 text-sm max-md:text-[16px] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#0D9488]/40 focus:border-[#0D9488]"
             />
             <button
               onClick={submit}
@@ -115,6 +117,7 @@ export default function AiAssistantWidget({ onAsk, className = '' }: AiAssistant
           // teal glow under it. The one element in this redesign that carries a
           // shadow besides the streak badge and the Studies search field.
           'fixed bottom-5 right-5 z-40 flex h-[52px] w-[52px] items-center justify-center rounded-full',
+          'max-md:bottom-[calc(var(--mobile-tabbar-h,0px)+12px)] max-md:right-4 max-md:h-12 max-md:w-12',
           'bg-teal text-white shadow-fab outline-none transition-opacity duration-200 hover:opacity-90',
           className,
         ].join(' ')}

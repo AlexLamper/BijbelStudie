@@ -2,25 +2,22 @@
 
 import { useState } from "react"
 import { AlertTriangle, CheckCircle2, RefreshCw, Wrench } from "lucide-react"
-import { SkeletonBlock } from "../ui/skeletons"
-/* The three admin sub-routes still wear the immersive surfaces in
-   components/admin/adminSurface.ts; this card is /beheer's only, so it is
-   written in the redesign's light tokens instead. */
-const DATA_PANEL = "rounded-card border border-line bg-surface"
-const DATA_INSET = "rounded-[10px] border border-line bg-sunken"
-const ROW_LINE = "border-line-soft"
-const TABLE_HEAD = "text-left text-[10.5px] font-semibold uppercase tracking-[0.8px] text-ink-faint"
-const ADMIN_BUTTON =
-  "inline-flex items-center gap-2 rounded-[9px] border border-line bg-surface px-3 py-2 text-[12.5px] font-medium text-ink-body no-underline outline-none transition-colors hover:bg-line-soft disabled:opacity-50"
-/* Status hues: the light palette's values on a white page, one step up the
-   scale on the dark card (set as custom properties on the section below). */
-const WARN = "var(--bh-warn)"
-const DANGER = "var(--bh-danger)"
-const GOOD = "var(--bh-good)"
-const HUE_VARS =
-  "[--bh-warn:#D97706] [--bh-danger:#DC2626] [--bh-good:#047857] dark:[--bh-warn:#FBBF24] dark:[--bh-danger:#F87171] dark:[--bh-good:#34D399]"
-/** `color` at the given alpha, for a tinted ground behind that same hue. */
-const tint = (color: string, pct: number) => `color-mix(in srgb, ${color} ${pct}%, transparent)`
+import { Skeleton } from "../kit/primitives"
+import {
+  ADMIN_BUTTON,
+  ADMIN_PRIMARY,
+  CARD_SUBTITLE,
+  CARD_TITLE,
+  DANGER,
+  GOOD,
+  HUE_VARS,
+  INSET as DATA_INSET,
+  PANEL as DATA_PANEL,
+  ROW_LINE,
+  TABLE_HEAD,
+  WARN,
+  tint,
+} from "./adminSurface"
 
 /**
  * Stripe <-> database health, on the admin dashboard.
@@ -32,11 +29,10 @@ const tint = (color: string, pct: number) => `color-mix(in srgb, ${color} ${pct}
  * visible; the full Stripe reconciliation is a button, because it walks the
  * Stripe API and should not run on every dashboard render.
  *
- * Restyled for the immersive shell and nothing more: the card is a near-opaque
- * plate so a mismatch table stays exactly as readable as it was on white, the
- * status hues moved one step up the scale to clear 4.5:1 on that plate, and the
- * confirmation before `apply()` is unchanged - same wording, same endpoint,
- * same disabled rules.
+ * Presentation only: surfaces, controls and hues come from adminSurface.ts (the
+ * AppShell tokens, with a dark step for each status hue); the confirmation
+ * before `apply()` is unchanged - same wording, same endpoint, same disabled
+ * rules.
  */
 
 const AMBER = WARN
@@ -172,24 +168,22 @@ export default function BillingHealthCard({
   const webhookHealth = report?.webhookHealth
 
   return (
-    <section className={`p-5 ${DATA_PANEL} ${HUE_VARS}`} aria-labelledby="beheer-stripe">
-      {/* Its own heading, not the scene's SectionHeading: that one is white
-          type for a dark landscape, and this card is a surface. */}
-      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <h2 id="beheer-stripe" className="min-w-0 text-base font-semibold tracking-tight text-ink">
+    <section className={`flex-none p-4 sm:p-[17px] ${DATA_PANEL} ${HUE_VARS}`} aria-labelledby="beheer-stripe">
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <h2 id="beheer-stripe" className={`min-w-0 ${CARD_TITLE}`}>
           Abonnementen &amp; Stripe
         </h2>
         <button onClick={check} disabled={checking || applying} className={ADMIN_BUTTON}>
-          <RefreshCw size={12} className={checking ? "animate-spin" : undefined} aria-hidden />
+          <RefreshCw size={14} className={checking ? "animate-spin" : undefined} aria-hidden />
           {checking ? "Bezig…" : "Controleer Stripe"}
         </button>
       </div>
-      <p className="mt-1.5 text-sm leading-relaxed text-ink-muted">
+      <p className={CARD_SUBTITLE}>
         Vergelijkt wat Stripe factureert met wat de database toekent
       </p>
 
       {/* Always-on cheap signals, straight from the stats endpoint. */}
-      <dl className="mb-4 mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+      <dl className="mb-4 mt-4 grid grid-cols-2 gap-[13px] md:grid-cols-4">
         <Stat
           label="Actief"
           value={billing?.byStatus?.active}
@@ -250,12 +244,10 @@ export default function BillingHealthCard({
                   <span
                     className="mr-1.5 inline-block rounded px-1.5 py-0.5 text-[10px] font-bold"
                     style={{
-                      backgroundColor:
-                        webhookHealth.status === "ok"
-                          ? "rgba(45,212,191,0.18)"
-                          : webhookHealth.status === "warn"
-                            ? "rgba(251,191,36,0.18)"
-                            : "rgba(248,113,113,0.18)",
+                      backgroundColor: tint(
+                        webhookHealth.status === "ok" ? GOOD : webhookHealth.status === "warn" ? AMBER : RED,
+                        16,
+                      ),
                       color:
                         webhookHealth.status === "ok"
                           ? GOOD
@@ -306,8 +298,8 @@ export default function BillingHealthCard({
             </Banner>
           ) : (
             <>
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs">
+              <div className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+                <table className="w-full min-w-[560px] text-xs">
                   <thead>
                     <tr className={`border-b ${ROW_LINE} ${TABLE_HEAD}`}>
                       <th scope="col" className="py-1.5 pr-3 font-semibold">Account</th>
@@ -372,9 +364,9 @@ export default function BillingHealthCard({
                 <button
                   onClick={apply}
                   disabled={applying || report.mismatches.every(m => !m.userId)}
-                  className="press inline-flex items-center gap-1.5 rounded-[9px] bg-teal px-3 py-2 text-[12.5px] font-semibold text-white outline-none transition-opacity hover:opacity-90 disabled:opacity-50"
+                  className={`press ${ADMIN_PRIMARY}`}
                 >
-                  <Wrench size={12} aria-hidden />
+                  <Wrench size={14} aria-hidden />
                   {applying ? "Bezig…" : "Herstel op basis van Stripe"}
                 </button>
               </div>
@@ -401,16 +393,16 @@ function Stat({
 }) {
   return (
     <div className={`p-3 ${DATA_INSET}`} title={hint}>
-      <dt className="text-[10px] font-semibold uppercase tracking-[0.1em] text-ink-faint">
+      <dt className="mb-1 text-[10.5px] font-semibold uppercase tracking-[0.8px] text-ink-faint">
         {label}
       </dt>
       {loading ? (
-        <dd className="mt-1">
-          <SkeletonBlock className="h-6 w-10 bg-line-soft dark:bg-line-soft" />
+        <dd>
+          <Skeleton className="h-5 w-10" />
         </dd>
       ) : (
         <dd
-          className="text-xl font-semibold leading-tight tabular-nums text-ink"
+          className="text-[18px] font-bold leading-tight tabular-nums text-ink"
           style={color ? { color } : undefined}
         >
           {(value ?? 0).toLocaleString("nl-NL")}
@@ -441,7 +433,7 @@ function Banner({
   const color = tone === "ok" ? GOOD : tone === "warn" ? AMBER : RED
   return (
     <div
-      className="mt-3 rounded-lg px-3 py-2 text-xs leading-relaxed"
+      className="mt-3 rounded-[9px] px-3 py-2 text-[12.5px] leading-relaxed"
       style={{ backgroundColor: tint(color, 12), color }}
     >
       {children}

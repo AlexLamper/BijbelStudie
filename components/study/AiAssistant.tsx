@@ -509,7 +509,7 @@ export default function AiAssistant({
 
       {/* Input area / quota CTA - pb-6 clears the decorative bottom gradient */}
       {!notConfigured && (
-        <div className="flex-none px-3 sm:px-4 pb-6 pt-1 relative z-20 bg-white dark:bg-background">
+        <div className="flex-none px-3 sm:px-4 pb-6 pt-1 relative z-20 bg-white dark:bg-background max-md:pb-4">
           {quotaHit && !quota?.unlimited ? (
             <UpgradePrompt
               surface="ai_limit"
@@ -537,13 +537,13 @@ export default function AiAssistant({
                   maxLength={MAX_MESSAGE_LENGTH}
                   placeholder="Stel een vraag over de Bijbel…"
                   disabled={loading}
-                  className="flex-1 resize-none rounded-lg border border-gray-200 dark:border-border bg-white dark:bg-card px-3 py-2 text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#0D9488]/40 focus:border-[#0D9488] disabled:opacity-60"
+                  className="flex-1 resize-none rounded-lg border border-gray-200 dark:border-border bg-white dark:bg-card px-3 py-2 text-sm max-md:text-[16px] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#0D9488]/40 focus:border-[#0D9488] disabled:opacity-60"
                 />
                 <button
                   onClick={() => sendMessage(input)}
                   disabled={loading || input.trim().length === 0}
                   aria-label="Versturen"
-                  className="flex-shrink-0 h-9 w-9 flex items-center justify-center rounded-md text-white bg-[#0D9488] hover:bg-[#0f766e] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="flex-shrink-0 h-9 w-9 max-md:h-10 max-md:w-10 flex items-center justify-center rounded-md text-white bg-[#0D9488] hover:bg-[#0f766e] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {loading ? (
                     <Loader2 size={16} className="animate-spin" />

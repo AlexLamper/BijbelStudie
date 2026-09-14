@@ -12,8 +12,8 @@ import { Card, Skeleton } from "../../components/kit/primitives";
 export default function DashboardLoading() {
   return (
     <AppShell title="Dashboard">
-      <div role="status" aria-label="Dashboard laden" className="flex min-h-full gap-5">
-        <div className="flex min-w-0 flex-1 flex-col gap-[18px]">
+      <div role="status" aria-label="Dashboard laden" className="flex min-h-full gap-5 max-md:flex-col">
+        <div className="flex min-w-0 flex-1 flex-col gap-[18px] max-md:flex-none">
           <Skeleton className="h-[218px] rounded-card" />
           <Skeleton className="h-[188px] rounded-card" />
           <Skeleton className="h-4 w-48" />
@@ -23,7 +23,7 @@ export default function DashboardLoading() {
             ))}
           </div>
         </div>
-        <aside className="flex w-[320px] flex-none flex-col gap-4">
+        <aside className="flex w-[320px] flex-none flex-col gap-4 max-md:w-full">
           <Card className="flex-none p-[18px]">
             <Skeleton className="h-16 w-full" />
           </Card>

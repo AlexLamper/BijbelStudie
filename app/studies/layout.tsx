@@ -27,7 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * The wrapper. It was `h-screen ... overflow-hidden` with the page scrolling in
  * a box inside it, and the scene's depth engine measures `window.scrollY`.
  * Inside such a box the landscape never moves. The DOCUMENT has to scroll -
- * the same shape as app/dashboard/layout.tsx and app/admin/layout.tsx.
+ * the same shape as app/dashboard/layout.tsx and app/beheer/layout.tsx.
  *
  * The header and the sidebar. Both pages render them through SceneShell, and
  * they render them for everyone: the bar shows a guest an Inloggen button

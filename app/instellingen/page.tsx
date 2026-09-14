@@ -84,29 +84,31 @@ const CONTROL_H = "h-9"
 const FIELD =
   "rounded-[9px] border border-line bg-surface text-[13px] font-medium text-ink-body outline-none transition-colors hover:border-line-strong focus-visible:border-teal disabled:cursor-not-allowed disabled:opacity-60"
 
-const SEG_TRACK = `inline-flex ${CONTROL_H} items-center rounded-[9px] border border-line bg-surface p-[3px]`
+// Below md the track may scroll sideways rather than push the card wider.
+const SEG_TRACK = `inline-flex ${CONTROL_H} items-center rounded-[9px] border border-line bg-surface p-[3px] max-md:max-w-full max-md:overflow-x-auto`
 const SEG_ITEM =
-  "flex h-[28px] items-center gap-1.5 rounded-[7px] px-3 text-[12.5px] font-medium outline-none transition-colors"
+  "flex h-[28px] items-center gap-1.5 rounded-[7px] px-3 text-[12.5px] font-medium outline-none transition-colors max-md:flex-none max-md:whitespace-nowrap"
 const SEG_ON = "bg-teal font-semibold text-white"
 const SEG_OFF = "text-ink-muted hover:bg-line-soft hover:text-ink-body"
 
 /** A closing line of explanation under a panel's rows. */
 const FOOTNOTE = "mt-4 border-t border-line-soft pt-4 text-[12px] leading-relaxed text-ink-muted"
 
-type Section = "weergave" | "lezen" | "meldingen" | "account" | "abonnement" | "over"
+type Section = "lezen" | "meldingen" | "account" | "abonnement" | "over"
 
 /**
  * The section buttons across the top of the page.
  *
  * The design draws seven: Weergave · Leesweergave · Meldingen · Account ·
- * Abonnement · Privacy · Over. Six are here. Privacy has no settings of its own
+ * Abonnement · Privacy · Over. Five are here. Weergave (the theme) was folded
+ * into Leesweergave as its first card - one control did not earn its own
+ * button. Privacy has no settings of its own
  * on the web - the one privacy control that exists is "Openbaar profiel", which
  * belongs to the tree and therefore sits under Account with it, and the policy
  * itself is a page, which is under Over with the other documents. Say the word
  * and it can become a seventh button that repeats those two.
  */
 const SECTIONS: { id: Section; label: string }[] = [
-  { id: "weergave", label: "Weergave" },
   { id: "lezen", label: "Leesweergave" },
   { id: "meldingen", label: "Meldingen" },
   { id: "account", label: "Account" },
@@ -131,7 +133,7 @@ export default function SettingsPage() {
   const { settings, updateSettings, loading: settingsLoading } = useGeneralSettings()
   const { preferences, updatePreferences } = useReadingPreferences()
   const { theme, setTheme, resolvedTheme } = useTheme()
-  const [section, setSection] = useState<Section>("weergave")
+  const [section, setSection] = useState<Section>("lezen")
   const [commentaries, setCommentaries] = useState<OptionItem[]>([])
   const [commentariesLoading, setCommentariesLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
@@ -221,7 +223,7 @@ export default function SettingsPage() {
       <div className="flex min-h-full flex-col gap-[18px]">
         {/* The sections, as a row of buttons above the panels. */}
         <div
-          className="flex flex-none items-center gap-1 self-start rounded-[12px] border border-line bg-surface p-[5px]"
+          className="flex flex-none items-center gap-1 self-start rounded-[12px] border border-line bg-surface p-[5px] max-md:max-w-full max-md:overflow-x-auto"
           role="tablist"
           aria-label="Instellingen"
         >
@@ -235,7 +237,7 @@ export default function SettingsPage() {
                 aria-selected={active}
                 onClick={() => setSection(item.id)}
                 className={[
-                  "flex h-9 items-center rounded-[9px] px-[14px] text-[13.5px] transition-colors",
+                  "flex h-9 items-center rounded-[9px] px-[14px] text-[13.5px] transition-colors max-md:flex-none max-md:whitespace-nowrap",
                   active ? "bg-teal font-semibold text-white" : "font-medium text-ink-muted hover:bg-line-soft hover:text-ink-body",
                 ].join(" ")}
               >
@@ -245,10 +247,11 @@ export default function SettingsPage() {
           })}
         </div>
 
-        <div className="flex min-h-0 flex-1 gap-[18px]">
+        {/* Below md the rail drops under the panels, full width. */}
+        <div className="flex min-h-0 flex-1 gap-[18px] max-md:flex-col">
           {/* ── The panels ───────────────────────────────────────── */}
           <div className="flex min-w-0 flex-1 flex-col gap-[18px]">
-            {section === "weergave" && (
+            {section === "lezen" && (
               <SectionCard title="Weergave">
                 <Row label="Thema" hint="Volgt je systeem als je 'Systeem' kiest.">
                   {mounted && (
@@ -505,7 +508,7 @@ export default function SettingsPage() {
           </div>
 
           {/* ── The rail ─────────────────────────────────────────── */}
-          <aside className="flex w-[330px] flex-none flex-col gap-[18px]">
+          <aside className="flex w-[330px] flex-none flex-col gap-[18px] max-md:w-full">
             <Card className="flex-none p-[18px]">
               <div className="text-[10.5px] font-semibold uppercase tracking-[1.1px] text-ink-faint">Voorbeeld</div>
               <div className="mt-[11px] rounded-[12px] border border-line bg-sunken px-[18px] py-4">
@@ -616,7 +619,7 @@ function Row({
         )}
         {hint && <p className="mt-[3px] text-[12px] leading-relaxed text-ink-faint">{hint}</p>}
       </div>
-      <div className="flex flex-shrink-0 items-center sm:justify-end">{children}</div>
+      <div className="flex flex-shrink-0 items-center sm:justify-end max-md:min-w-0 max-md:max-w-full">{children}</div>
     </div>
   )
 }

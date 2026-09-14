@@ -10,13 +10,13 @@ export default function InstellingenLoading() {
   return (
     <AppShell title="Instellingen">
       <div role="status" aria-label="Instellingen laden" className="flex min-h-full flex-col gap-[18px]">
-        <Skeleton className="h-[46px] w-[560px] rounded-[12px]" />
-        <div className="flex min-h-0 flex-1 gap-[18px]">
+        <Skeleton className="h-[46px] w-[470px] rounded-[12px] max-md:w-full" />
+        <div className="flex min-h-0 flex-1 gap-[18px] max-md:flex-col">
           <div className="flex min-w-0 flex-1 flex-col gap-[18px]">
             <Skeleton className="h-[180px] rounded-card" />
             <Skeleton className="h-[240px] rounded-card" />
           </div>
-          <aside className="flex w-[330px] flex-none flex-col gap-[18px]">
+          <aside className="flex w-[330px] flex-none flex-col gap-[18px] max-md:w-full">
             <Skeleton className="h-[240px] rounded-card" />
             <Skeleton className="h-[140px] rounded-card" />
           </aside>

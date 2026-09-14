@@ -31,7 +31,7 @@ interface NotesLayoutProps {
  * overflow-hidden` box with the page scrolling inside it, and the scene's depth
  * engine measures `window.scrollY`. Inside such a box the landscape never
  * moves. The DOCUMENT has to scroll, which is why this is providers only - the
- * same shape as app/dashboard/layout.tsx and app/admin/layout.tsx.
+ * same shape as app/dashboard/layout.tsx and app/beheer/layout.tsx.
  *
  * `authOptions` is still required, not optional. Without it NextAuth returns
  * only the default session ({name, email, image}) and skips the `session`

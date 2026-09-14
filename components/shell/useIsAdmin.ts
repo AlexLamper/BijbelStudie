@@ -10,7 +10,7 @@ import { useSession } from "next-auth/react";
  * the 64 px lesson rail ask it the same way: the session flag first, then one
  * /api/user call for accounts whose JWT predates that flag. This is a redesign
  * of the presentation layer, not of who sees the admin link - the guard itself
- * still lives in app/admin/layout.tsx.
+ * still lives in app/beheer/layout.tsx.
  */
 export function useIsAdmin(): boolean {
   const { data: session, status } = useSession();

@@ -120,7 +120,7 @@ const PREFIXES: [string, RouteKey][] = [
   ['/groepen/', 'groepen_detail'],
   ['/hulpbronnen/', 'hulpbronnen_detail'],
   ['/bijbelboeken/', 'bijbelboeken_detail'],
-  ['/admin', 'admin'],
+  ['/beheer', 'admin'],
 ];
 
 export function toRouteKey(pathname: unknown): RouteKey {

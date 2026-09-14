@@ -663,7 +663,7 @@ export function OnboardingModal({
                             // controls - see CLICK_TARGETS in lib/analyticsRoutes.ts,
                             // where both values are registered. A preview run is
                             // not instrumented: an admin clicking through the flow
-                            // must not land in the onboarding funnel on /admin/insights.
+                            // must not land in the onboarding funnel on /beheer/inzichten.
                             data-track={preview ? undefined : o.track}
                             className={cn(
                               cardClass(active),

@@ -72,7 +72,15 @@ export function ScrollEffects() {
       }
     }
 
+    // The phone menu is a native <details>: close it once a link inside is used.
+    const menu = document.getElementById("landing-mobile-menu") as HTMLDetailsElement | null
+    const closeMenu = (event: Event) => {
+      if (menu && (event.target as HTMLElement | null)?.closest("a")) menu.open = false
+    }
+    menu?.addEventListener("click", closeMenu)
+
     return () => {
+      menu?.removeEventListener("click", closeMenu)
       stuckObserver?.disconnect()
       revealObserver?.disconnect()
       // Leaving `js-reveal` behind would strand any still-hidden block at

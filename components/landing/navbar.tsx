@@ -12,7 +12,7 @@ export function Header() {
 
   return (
     <header className="border-b border-border bg-white/90 dark:bg-background/95 backdrop-blur-md sticky top-0 z-50">
-      <div className="container mx-auto px-6 lg:px-8">
+      <div className="container mx-auto px-4 md:px-6 lg:px-8">
         <div className="relative flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5">
@@ -60,7 +60,9 @@ export function Header() {
             <Button
               variant="ghost"
               size="sm"
-              className="md:hidden px-2"
+              className="md:hidden h-10 w-10 px-2"
+              aria-label="Menu"
+              aria-expanded={isMenuOpen}
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -78,7 +80,7 @@ export function Header() {
                 { href: "#pricing", label: "Prijzen" },
                 { href: "#faq", label: "FAQ" },
               ].map(({ href, label }) => (
-                <Link key={href} href={href} className="text-sm text-muted-foreground hover:text-foreground">
+                <Link key={href} href={href} onClick={() => setIsMenuOpen(false)} className="flex min-h-10 items-center text-base text-muted-foreground hover:text-foreground">
                   {label}
                 </Link>
               ))}

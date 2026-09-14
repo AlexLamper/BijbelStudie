@@ -17,9 +17,11 @@ import { useTranslation } from '../../app/i18n/client';
 interface ReadingPreferencesMenuProps {
   preferences: ReadingPreferences;
   onUpdate: (prefs: Partial<ReadingPreferences>) => void;
+  /** Extra classes on the trigger - the /lezen toolbar orders it below md. */
+  triggerClassName?: string;
 }
 
-export function ReadingPreferencesMenu({ preferences, onUpdate }: ReadingPreferencesMenuProps) {
+export function ReadingPreferencesMenu({ preferences, onUpdate, triggerClassName = '' }: ReadingPreferencesMenuProps) {
   const { t } = useTranslation('preferences');
 
   const fontSizes = ['sm', 'base', 'lg', 'xl'];
@@ -67,7 +69,7 @@ export function ReadingPreferencesMenu({ preferences, onUpdate }: ReadingPrefere
           type="button"
           title={t('reading_preferences')}
           aria-label={t('reading_preferences')}
-          className="flex h-9 w-9 flex-none items-center justify-center rounded-[9px] border border-line bg-white text-ink-body transition-colors hover:bg-line-soft dark:border-border dark:bg-secondary dark:text-foreground dark:hover:bg-secondary/70"
+          className={`flex h-9 w-9 flex-none items-center justify-center rounded-[9px] border border-line bg-white text-ink-body transition-colors hover:bg-line-soft dark:border-border dark:bg-secondary dark:text-foreground dark:hover:bg-secondary/70 max-md:h-10 max-md:w-10 ${triggerClassName}`}
         >
           <Type size={17} strokeWidth={1.9} />
         </button>

@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react"
 import { useSession, signOut } from "next-auth/react"
 import { useRouter, usePathname } from "next/navigation"
-import { LogOut, User, Settings, Menu } from "lucide-react"
+import { LogOut, User, Settings } from "lucide-react"
 import { Button } from "../ui/button"
 import { motion, AnimatePresence } from "framer-motion"
 import { SidebarTrigger } from "../ui/sidebar"
@@ -13,6 +13,7 @@ import { SubscriptionBadge } from "../subscription-badge"
 import Link from "next/link"
 import Image from "next/image"
 import NavTreeAvatar from "../levensboom/NavTreeAvatar"
+import { MobileMenuButton } from "../shell/MobileNav"
 
 /**
  * The same green "Studie" wears everywhere else in the wordmark (the sidebar's
@@ -131,9 +132,7 @@ export function Header({ title, variant = "default" }: HeaderProps) {
   const router = useRouter()
   const pathname = usePathname()
   const [isProfileOpen, setIsProfileOpen] = useState(false)
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const profileRef = useRef<HTMLDivElement>(null)
-  const menuRef = useRef<HTMLDivElement>(null)
   const [userImage, setUserImage] = useState<string | null>(null)
   const [isSubscribed, setIsSubscribed] = useState(false)
   const [mounted, setMounted] = useState(false)
@@ -157,7 +156,6 @@ export function Header({ title, variant = "default" }: HeaderProps) {
     if (!mounted) return
     function handleClickOutside(event: MouseEvent) {
       if (profileRef.current && !profileRef.current.contains(event.target as Node)) setIsProfileOpen(false)
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) setIsMenuOpen(false)
     }
     document.addEventListener("mousedown", handleClickOutside)
     return () => document.removeEventListener("mousedown", handleClickOutside)
@@ -187,16 +185,21 @@ export function Header({ title, variant = "default" }: HeaderProps) {
             : "flex items-center justify-between px-4 sm:px-6 h-14 border-b border-border bg-white dark:bg-background sticky top-0 z-50"
         }
       >
-        <div className="flex items-center gap-3">
-          {!scene && <SidebarTrigger className="text-muted-foreground hover:text-foreground" />}
+        <div className="flex items-center gap-3 max-md:min-w-0">
+          {/* Below md the menu button opens the app sidebar as a drawer. */}
+          <MobileMenuButton className="-ml-2 text-foreground" />
+          {!scene && <SidebarTrigger className="text-muted-foreground hover:text-foreground max-md:hidden" />}
           {scene ? (
-            <p className="text-base font-semibold text-foreground">{getPageTitle()}</p>
+            <p className="text-base font-semibold text-foreground max-md:truncate">{getPageTitle()}</p>
           ) : (
-            <h1 className="text-base font-semibold text-foreground">{getPageTitle()}</h1>
+            <h1 className="text-base font-semibold text-foreground max-md:truncate">{getPageTitle()}</h1>
           )}
         </div>
-        <div className="flex items-center gap-3">
-          <Wordmark scene={scene} />
+        <div className="flex items-center gap-3 max-md:flex-none">
+          {/* The drawer carries the brand on a phone; the bar keeps the room. */}
+          <span className="contents max-sm:hidden">
+            <Wordmark scene={scene} />
+          </span>
           {!scene && <ModeToggle />}
           <Link
             href={`/inloggen?next=${encodeURIComponent(pathname || "/")}`}
@@ -222,11 +225,13 @@ export function Header({ title, variant = "default" }: HeaderProps) {
       }
     >
       {/* Left: sidebar trigger + page title, or - on a scene - the wordmark */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 max-md:min-w-0">
+        {/* Below md the menu button opens the app sidebar as a drawer. */}
+        <MobileMenuButton className="-ml-2 text-foreground" />
         {/* The trigger opens the sidebar column, and a scene screen has no
             column to open - its rail floats and names one icon at a time on
             hover. A button that visibly does nothing is worse than no button. */}
-        {!scene && <SidebarTrigger className="text-muted-foreground hover:text-foreground" />}
+        {!scene && <SidebarTrigger className="text-muted-foreground hover:text-foreground max-md:hidden" />}
         {/*
           The mark sits on the RIGHT of this bar (see `Wordmark`), where the
           owner asked for it. So the left keeps the page's name. On a scene page
@@ -236,9 +241,9 @@ export function Header({ title, variant = "default" }: HeaderProps) {
           name stays the h1.
         */}
         {scene ? (
-          <p className="text-base font-semibold text-foreground">{getPageTitle()}</p>
+          <p className="text-base font-semibold text-foreground max-md:truncate">{getPageTitle()}</p>
         ) : (
-          <h1 className="text-base font-semibold text-foreground">{getPageTitle()}</h1>
+          <h1 className="text-base font-semibold text-foreground max-md:truncate">{getPageTitle()}</h1>
         )}
       </div>
 
@@ -349,52 +354,15 @@ export function Header({ title, variant = "default" }: HeaderProps) {
         </div>
       </div>
 
-      {/* Mobile: the wordmark, the tree, then the menu. */}
-      <div className="md:hidden relative flex items-center gap-1" ref={menuRef}>
-        <Wordmark scene={scene} />
+      {/* Mobile: the wordmark and the tree. The menu is the drawer button on
+          the left of the bar (components/shell/MobileNav.tsx). */}
+      <div className="md:hidden relative flex flex-none items-center gap-1">
+        <span className="contents max-sm:hidden">
+          <Wordmark scene={scene} />
+        </span>
         <Link href="/profiel/boom" aria-label="Mijn voortgang" className="inline-flex items-center p-1">
           <NavTreeAvatar size={26} fallback={null} />
         </Link>
-        <Button variant="ghost" size="sm" className="p-2" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-          <Menu className="w-5 h-5" />
-        </Button>
-        <AnimatePresence>
-          {isMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: -6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.12 }}
-              className={MENU_PANEL}
-            >
-              {!scene && (
-                <div className="px-3 py-2 border-b border-border">
-                  <ModeToggle />
-                </div>
-              )}
-              <Button variant="ghost" className={MENU_ITEM}
-                onClick={() => { router.push("/profiel"); setIsMenuOpen(false) }}>
-                <User className="h-4 w-4 mr-2 text-muted-foreground" /> Profiel
-              </Button>
-              <Button variant="ghost" className={MENU_ITEM}
-                onClick={() => { router.push("/profiel/boom"); setIsMenuOpen(false) }}>
-                <span className="mr-2 inline-flex h-4 w-4 items-center justify-center">
-                  <NavTreeAvatar size={16} showLevel={false} fallback={<User className="h-4 w-4 text-muted-foreground" />} />
-                </span>
-                Mijn voortgang
-              </Button>
-              <Button variant="ghost" className={MENU_ITEM}
-                onClick={() => { router.push("/instellingen"); setIsMenuOpen(false) }}>
-                <Settings className="h-4 w-4 mr-2 text-muted-foreground" /> Instellingen
-              </Button>
-              <div className="border-t border-border my-1" />
-              <Button variant="ghost" className={scene ? MENU_SIGN_OUT_SCENE : MENU_SIGN_OUT}
-                onClick={() => signOut({ callbackUrl: "/" })}>
-                <LogOut className="h-4 w-4 mr-2" /> Uitloggen
-              </Button>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
     </header>
   )

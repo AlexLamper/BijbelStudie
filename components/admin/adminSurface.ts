@@ -1,105 +1,90 @@
 /**
- * The admin section's surfaces and status colours, in one file.
+ * The admin section's surfaces, controls and status colours, in one file.
  *
- * The three admin screens sit in the same immersive shell as the dashboard, but
- * they carry something no other screen does: dense operational data. A revenue
- * figure, a Stripe status and a table of accounts have to be read exactly, and
- * a landscape running behind a table of accounts is actively hostile to that.
- *
- * So admin keeps the world and gives up the picture. `DATA_PANEL` is a
- * near-opaque plate in the shell's own ground colour (SCENE_BG): the scene is
- * still there at the edges of the page and behind the heading, but the moment
- * a figure or a row appears it sits on something the reader can trust. That is
- * a deliberate departure from PANEL/PANEL_DEEP in components/scene/tokens.ts,
- * which are tuned to let the landscape through - here it must not.
- *
- * Everything is a literal value for the same reason the scene tokens are: a
- * theme token flips with the reader's light/dark setting and the landscape does
- * not. The teal values are NOT restated here - import them from
- * components/scene/tokens.ts.
- *
- * `8, 26, 29` in the two plate values IS `SCENE_BG`. Tailwind reads class names
- * as literal text and never generates a class built from a constant, so this is
- * the one place the ground is written out - and it moves by hand the day
- * SCENE_BG moves.
+ * The four admin screens sit in the same AppShell as /profiel, /instellingen and
+ * /dashboard, and they are drawn from the same token names (ink, line, surface,
+ * sunken - see tailwind.config.ts and app/globals.css). Those tokens flip with
+ * the reader's light/dark setting, so nothing here needs a `dark:` variant of
+ * its own except the status and series hues, which are literals and therefore
+ * carry an explicit dark step (HUE_VARS).
  *
  * No imports and no "use client": plain strings.
  */
 
 /* -- Surfaces -------------------------------------------------- */
 
-/**
- * The working plate for a table, a chart or a block of figures. 92% of the
- * shell's ground: white type measures well over 12:1 on it against any sky, and
- * a hairline of the landscape still shows through the edges so the page has not
- * left the world it belongs to.
- */
-export const DATA_PANEL =
-  "rounded-2xl bg-[rgba(8,26,29,0.92)] ring-1 ring-white/15 shadow-[0_24px_60px_-32px_rgba(0,0,0,0.9)]"
+/** A card: a table, a chart, a block of figures. Same as kit `Card`. */
+export const PANEL = "rounded-card border border-line bg-surface"
 
-/**
- * The lighter plate, for a figure that only has to hold two lines - a KPI, a
- * counter. Still opaque enough that a number never sits on moving colour.
- */
-export const DATA_TILE = "rounded-xl bg-[rgba(8,26,29,0.82)] ring-1 ring-white/15"
+/** An inset block INSIDE a panel - a mini stat, a webhook readout. */
+export const INSET = "rounded-[10px] border border-line bg-sunken"
 
-/**
- * An inset block INSIDE a DATA_PANEL - a mini stat, a webhook readout. A film
- * of white rather than a second plate, so a panel does not become a box of
- * boxes.
- */
-export const DATA_INSET = "rounded-lg bg-white/[0.04] ring-1 ring-white/10"
-
-/** A table header row on the plate. */
+/** A table header cell's type. */
 export const TABLE_HEAD =
-  "text-left text-[10px] font-semibold uppercase tracking-[0.12em] text-white/55"
+  "text-left text-[10.5px] font-semibold uppercase tracking-[0.8px] text-ink-faint"
 
 /** The hairline between two rows of data. */
-export const ROW_LINE = "border-white/10"
+export const ROW_LINE = "border-line-soft"
+
+/** A card title inside a panel. */
+export const CARD_TITLE = "text-[14.5px] font-bold text-ink"
+
+/** The line of explanation under a card title. */
+export const CARD_SUBTITLE = "mt-1 text-[12.5px] leading-relaxed text-ink-muted"
 
 /* -- Controls -------------------------------------------------- */
 
-/**
- * A secondary control on the plate: refresh, a filter that is not active, a
- * link to another admin screen. Outlined rather than filled, so the one filled
- * control on a screen is the one that matters.
- */
+/** A secondary control: refresh, export, a link to another admin screen. */
 export const ADMIN_BUTTON =
-  "inline-flex items-center gap-2 rounded-lg border border-white/25 bg-black/40 px-3 py-2 text-xs font-medium text-white no-underline outline-none transition-colors hover:bg-black/60 focus-visible:ring-2 focus-visible:ring-white disabled:opacity-50"
+  "inline-flex h-[34px] flex-none items-center justify-center gap-2 rounded-[9px] border border-line bg-surface px-3 text-[12.5px] font-medium text-ink-body no-underline outline-none transition-colors hover:bg-line-soft focus-visible:ring-2 focus-visible:ring-teal disabled:opacity-50"
 
-/**
- * The same control at chip size, for a row of filters. A separate constant
- * rather than ADMIN_BUTTON with the padding overridden: two padding utilities
- * on one element are resolved by the order Tailwind emits them, not by the
- * order they are written, so overriding is a coin toss.
- */
-export const ADMIN_CHIP =
-  "inline-flex items-center gap-1.5 rounded-lg border border-white/25 bg-black/40 px-3 py-1.5 text-xs font-medium text-white outline-none transition-colors hover:bg-black/60 focus-visible:ring-2 focus-visible:ring-white"
+/** The one filled control on a screen. */
+export const ADMIN_PRIMARY =
+  "inline-flex h-[34px] flex-none items-center justify-center gap-2 rounded-[9px] bg-teal px-[14px] text-[12.5px] font-semibold text-white no-underline outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-teal focus-visible:ring-offset-2 disabled:opacity-50"
 
-/** The chip in its selected state: the one filled thing in the row. */
-export const ADMIN_CHIP_ACTIVE =
-  "inline-flex items-center gap-1.5 rounded-lg border border-transparent px-3 py-1.5 text-xs font-semibold text-white outline-none transition-colors focus-visible:ring-2 focus-visible:ring-white"
+/** A select or text field, 34 px like the buttons beside it. */
+export const ADMIN_FIELD =
+  "h-[34px] rounded-[9px] border border-line bg-surface px-3 text-[12.5px] font-medium text-ink-body outline-none transition-colors hover:border-line-strong focus-visible:border-teal disabled:opacity-60"
 
-/* -- Status colours on a dark ground ---------------------------- */
+/** A segmented row of options (filters, the period switch) - as /instellingen. */
+export const SEG_TRACK = "inline-flex max-w-full flex-wrap items-center gap-[2px] rounded-[9px] border border-line bg-surface p-[3px]"
+export const SEG_ITEM =
+  "flex h-[28px] items-center gap-1.5 whitespace-nowrap rounded-[7px] px-3 text-[12.5px] font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-teal"
+export const SEG_ON = "bg-teal font-semibold text-white"
+export const SEG_OFF = "text-ink-muted hover:bg-line-soft hover:text-ink-body"
+
+/** The small back link above a sub-screen. */
+export const BACK_LINK =
+  "inline-flex items-center gap-1 text-[12.5px] font-semibold text-ink-muted no-underline transition-colors hover:text-ink"
+
+/* -- Status and series colours ---------------------------------- */
 
 /*
- * The light-page palette this section used - #D97706, #16A34A, #DC2626, #0EA5E9
- * - is drawn for #4B5563-on-white and drops under 3:1 on a dark plate, which is
- * exactly the wrong place to lose a warning. These are the same hues one step
- * up, each measured to clear 4.5:1 on DATA_PANEL.
+ * Literal hues cannot follow the token flip, so each is a custom property with
+ * a light value (drawn for white) and a dark value (one step up the scale, so
+ * it still clears 4.5:1 on the dark surface). Put HUE_VARS on the page's (or
+ * card's) outer element; everything inside reads the variables.
  */
+export const HUE_VARS =
+  "[--ad-warn:#B45309] [--ad-danger:#DC2626] [--ad-good:#047857] [--ad-teal:#0D9488] [--ad-sky:#0284C7] [--ad-violet:#7C3AED] dark:[--ad-warn:#FBBF24] dark:[--ad-danger:#F87171] dark:[--ad-good:#34D399] dark:[--ad-teal:#2DD4BF] dark:[--ad-sky:#38BDF8] dark:[--ad-violet:#C4B5FD]"
 
 /** Something needs attention but nothing is broken: "zegt op", a paused plan. */
-export const WARN = "#FBBF24"
+export const WARN = "var(--ad-warn)"
 
 /** Something is wrong and costs money or access: a missed webhook, a mismatch. */
-export const DANGER = "#F87171"
+export const DANGER = "var(--ad-danger)"
 
 /** Confirmed good, money in: reconciled, entitled, revenue. */
-export const GOOD = "#4ADE80"
+export const GOOD = "var(--ad-good)"
+
+/** The brand series in a chart. */
+export const SERIES_TEAL = "var(--ad-teal)"
 
 /** A neutral second series in a chart, never a status. */
-export const SERIES_SKY = "#38BDF8"
+export const SERIES_SKY = "var(--ad-sky)"
 
 /** A neutral third series in a chart, never a status. */
-export const SERIES_VIOLET = "#C4B5FD"
+export const SERIES_VIOLET = "var(--ad-violet)"
+
+/** `color` at the given alpha, for a tinted ground behind that same hue. */
+export const tint = (color: string, pct: number) => `color-mix(in srgb, ${color} ${pct}%, transparent)`

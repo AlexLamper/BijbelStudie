@@ -164,7 +164,7 @@ function RailAdminLink() {
   }, [session, status])
 
   if (!isAdmin) return null
-  return <RailLink url="/admin" title="Beheer" icon={ShieldCheck} />
+  return <RailLink url="/beheer" title="Beheer" icon={ShieldCheck} />
 }
 
 /**
@@ -391,7 +391,7 @@ function AdminLink() {
   }, [session, status])
 
   if (!isAdmin) return null
-  return <NavLink url="/admin" title="Beheer" icon={ShieldCheck} />
+  return <NavLink url="/beheer" title="Beheer" icon={ShieldCheck} />
 }
 
 export function AppSidebar({ ...props }) {

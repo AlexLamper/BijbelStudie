@@ -141,7 +141,7 @@ const pageConfigs: Record<string, PageMetadataConfig> = {
   admin: {
     title: 'Beheer',
     description: 'Beheeromgeving van BijbelStudie.',
-    path: '/admin',
+    path: '/beheer',
     type: 'website',
     indexable: false
   },

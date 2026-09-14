@@ -5,7 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
-import { MoreHorizontal, LogOut } from "lucide-react";
+import { MoreHorizontal, LogOut, X } from "lucide-react";
 import { useLevensboom } from "../../hooks/useLevensboom";
 import { useIsPro } from "../../hooks/useIsPro";
 import { NAV_GROUPS, isNavActive, type NavItem } from "./nav";
@@ -24,15 +24,20 @@ import { useIsAdmin } from "./useIsAdmin";
  * tailwind.config.ts; there is no hex literal in this file.
  */
 
-function NavRow({ item, active }: { item: NavItem; active: boolean }) {
+function NavRow({ item, active, drawer = false }: { item: NavItem; active: boolean; drawer?: boolean }) {
   const Icon = item.icon;
   return (
     <Link
       href={item.url}
-      data-tour={item.tourId}
+      // The guided tour looks rows up by data-tour; the drawer copy must not
+      // shadow the column's.
+      data-tour={drawer ? undefined : item.tourId}
       data-track={item.tourId ? item.tourId.replace(/^nav-/, "sidebar_") : undefined}
+      aria-current={drawer && active ? "page" : undefined}
       className={[
-        "flex items-center gap-[11px] h-[38px] rounded-[9px] px-[11px] no-underline transition-colors",
+        "flex items-center gap-[11px] rounded-[9px] px-[11px] no-underline transition-colors",
+        // 44 px touch rows in the mobile drawer; the column keeps the design's 38.
+        drawer ? "h-11" : "h-[38px]",
         active ? "bg-[var(--teal-wash)]" : "hover:bg-line-soft",
       ].join(" ")}
     >
@@ -115,32 +120,75 @@ function AccountMenu() {
   );
 }
 
-export default function Sidebar({ active }: { active?: string }) {
+/**
+ * `variant="drawer"` is the same sidebar inside the mobile drawer
+ * (components/shell/MobileNav.tsx): full width of its panel, a close button in
+ * the brand row, 44 px rows and a direct Uitloggen. The default column is
+ * hidden below md, where the drawer and the tab bar take over.
+ */
+export default function Sidebar({
+  active,
+  variant = "column",
+  onClose,
+}: {
+  active?: string;
+  variant?: "column" | "drawer";
+  onClose?: () => void;
+}) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const { data: tree } = useLevensboom();
   const isAdmin = useIsAdmin();
   const isPro = useIsPro();
+  const drawer = variant === "drawer";
 
   const showTreeSub = pathname === "/profiel" || pathname === "/profiel/boom";
 
+  const brand = (
+    <Link
+      href="/dashboard"
+      className={
+        drawer
+          ? "flex min-w-0 flex-1 items-center gap-[10px] no-underline"
+          : "flex h-topbar flex-none items-center gap-[10px] border-b border-line px-[18px] no-underline"
+      }
+    >
+      <Image
+        src="/app-icon.png"
+        alt=""
+        width={30}
+        height={30}
+        className="block rounded-[8px]"
+        priority
+      />
+      <span className="text-[15.5px] font-bold tracking-[-0.2px] text-ink">BijbelStudie</span>
+    </Link>
+  );
+
   return (
-    <aside className="flex w-sidebar flex-none flex-col overflow-hidden border-r border-line bg-surface">
+    <aside
+      className={
+        drawer
+          ? "flex h-full w-full flex-col overflow-hidden bg-surface"
+          : "flex w-sidebar flex-none flex-col overflow-hidden border-r border-line bg-surface max-md:hidden"
+      }
+    >
       {/* Brand - 64 px, exactly the top bar's height, so the two rules meet */}
-      <Link
-        href="/dashboard"
-        className="flex h-topbar flex-none items-center gap-[10px] border-b border-line px-[18px] no-underline"
-      >
-        <Image
-          src="/app-icon.png"
-          alt=""
-          width={30}
-          height={30}
-          className="block rounded-[8px]"
-          priority
-        />
-        <span className="text-[15.5px] font-bold tracking-[-0.2px] text-ink">BijbelStudie</span>
-      </Link>
+      {drawer ? (
+        <div className="flex h-14 flex-none items-center gap-2 border-b border-line pl-[18px] pr-2">
+          {brand}
+          <button
+            type="button"
+            aria-label="Menu sluiten"
+            onClick={onClose}
+            className="flex h-10 w-10 flex-none items-center justify-center rounded-btn text-ink-muted hover:bg-line-soft"
+          >
+            <X size={20} strokeWidth={1.9} />
+          </button>
+        </div>
+      ) : (
+        brand
+      )}
 
       {/* Navigation */}
       <nav className="flex flex-1 flex-col gap-[2px] overflow-y-auto px-[10px] py-[12px]">
@@ -153,14 +201,15 @@ export default function Sidebar({ active }: { active?: string }) {
               </div>
               {group.items.map((item) => (
                 <Fragment key={item.url}>
-                  <NavRow item={item} active={isNavActive(pathname, item.url, active)} />
+                  <NavRow item={item} active={isNavActive(pathname, item.url, active)} drawer={drawer} />
                   {/* The tree only appears where it belongs: under Profiel, and
                       only while the reader is on one of those two screens. */}
                   {item.url === "/profiel" && showTreeSub && (
                     <Link
                       href="/profiel/boom"
                       className={[
-                        "flex h-[32px] items-center rounded-[8px] pl-[40px] pr-[11px] text-[12.5px] no-underline transition-colors",
+                        "flex items-center rounded-[8px] pl-[40px] pr-[11px] text-[12.5px] no-underline transition-colors",
+                        drawer ? "h-10" : "h-[32px]",
                         pathname === "/profiel/boom"
                           ? "bg-[var(--teal-wash-2)] font-semibold text-teal-dark dark:text-teal-400"
                           : "font-medium text-ink-body hover:bg-line-soft",
@@ -179,7 +228,13 @@ export default function Sidebar({ active }: { active?: string }) {
       {/* Account. /studies and /lezen are open to visitors without an account,
           so the foot has two shapes: the account, or the way in. */}
       {session?.user ? (
-        <div className="flex flex-none items-center gap-[8px] border-t border-line py-[11px] pl-[21px] pr-[11px]">
+        <div
+          className={
+            drawer
+              ? "flex flex-none items-center gap-[8px] border-t border-line pb-[calc(11px+env(safe-area-inset-bottom))] pl-[21px] pr-[11px] pt-[11px]"
+              : "flex flex-none items-center gap-[8px] border-t border-line py-[11px] pl-[21px] pr-[11px]"
+          }
+        >
           {/* No avatar here: the top bar already carries the account circle.
               The text starts on the nav rows' own left edge (10 px nav padding
               + 11 px row padding), and the level lives in the line under the
@@ -193,10 +248,29 @@ export default function Sidebar({ active }: { active?: string }) {
               {tree?.level != null ? ` · niveau ${tree.level}` : ""}
             </div>
           </div>
-          <AccountMenu />
+          {drawer ? (
+            // Profiel and Instellingen are rows above; in the drawer the only
+            // thing the overflow menu would add is the way out, so it is direct.
+            <button
+              type="button"
+              onClick={() => signOut({ callbackUrl: "/" })}
+              className="flex h-10 flex-none items-center gap-2 rounded-btn px-3 text-[13px] font-medium text-danger hover:bg-line-soft dark:text-red-400"
+            >
+              <LogOut size={15} />
+              Uitloggen
+            </button>
+          ) : (
+            <AccountMenu />
+          )}
         </div>
       ) : (
-        <div className="flex-none border-t border-line p-[11px]">
+        <div
+          className={
+            drawer
+              ? "flex-none border-t border-line p-[11px] pb-[calc(11px+env(safe-area-inset-bottom))]"
+              : "flex-none border-t border-line p-[11px]"
+          }
+        >
           <p className="px-1 text-[11.5px] leading-snug text-ink-faint">
             Bewaar je voortgang met een gratis account.
           </p>

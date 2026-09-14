@@ -13,7 +13,7 @@ export async function OPTIONS() {
 /**
  * GET /api/v1/admin/insights?days=7|30|90
  *
- * Same aggregates as /admin/insights on the website. `days` is clamped to
+ * Same aggregates as /beheer/inzichten on the website. `days` is clamped to
  * 7..365 by the shared helper.
  */
 export async function GET(req: NextRequest) {

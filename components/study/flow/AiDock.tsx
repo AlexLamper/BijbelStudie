@@ -159,7 +159,9 @@ export default function AiDock({
         className={[
           `${PANEL_FLAT} ${RULE} flex flex-col`,
           'animate-panel-up lg:animate-none',
-          'fixed z-50 inset-x-0 bottom-0 h-[75vh] rounded-t-2xl border-t',
+          // Below md: taller, in dynamic viewport units so the browser's own
+          // toolbar never hides the input, and clear of the home indicator.
+          'fixed z-50 inset-x-0 bottom-0 h-[75vh] rounded-t-2xl border-t max-md:h-[85dvh] max-md:pb-[env(safe-area-inset-bottom)]',
           push
             ? // Static and fixed-width, so the clipping parent can animate around
               // it without the header and the message list reflowing mid-slide.
@@ -183,7 +185,7 @@ export default function AiDock({
             type="button"
             onClick={() => onOpenChange(false)}
             aria-label="Sluiten"
-            className={`h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-les-card ${INK_FAINT} hover:text-les-ink ${FOCUS_RING}`}
+            className={`h-8 w-8 max-md:h-10 max-md:w-10 inline-flex items-center justify-center rounded-md hover:bg-les-card ${INK_FAINT} hover:text-les-ink ${FOCUS_RING}`}
           >
             <X size={16} />
           </button>

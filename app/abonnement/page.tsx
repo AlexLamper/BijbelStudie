@@ -152,7 +152,7 @@ function PlanCard({
       <button
         onClick={() => onSelect(interval)}
         disabled={busy}
-        className={`press flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[#0F766E] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-surface disabled:opacity-60 ${
+        className={`press flex w-full min-h-11 items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[#0F766E] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-surface disabled:opacity-60 ${
           recommended ? "" : "border border-line-strong bg-surface text-ink-body"
         }`}
         style={recommended ? { backgroundColor: TEAL_DEEP, color: "#fff" } : undefined}
@@ -179,7 +179,7 @@ function PricingSkeleton() {
         <SceneSkeleton className="h-12 w-[24rem] max-w-full" />
         <SceneSkeleton className="h-4 w-[20rem] max-w-full" />
       </div>
-      <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-2">
         <SceneSkeleton className="h-80 rounded-3xl" />
         <SceneSkeleton className="h-80 rounded-3xl" />
       </div>
@@ -366,7 +366,7 @@ function SubscribePageInner() {
         <div className="pt-5">
           <Link
             href="/"
-            className="rounded-md text-sm font-bold tracking-tight text-white no-underline outline-none transition-colors hover:text-white/80 focus-visible:ring-2 focus-visible:ring-white"
+            className="max-md:inline-flex max-md:min-h-10 max-md:items-center rounded-md text-sm font-bold tracking-tight text-white no-underline outline-none transition-colors hover:text-white/80 focus-visible:ring-2 focus-visible:ring-white"
           >
             BijbelStudie
           </Link>
@@ -385,7 +385,7 @@ function SubscribePageInner() {
           <ProBadge size="md" label="BijbelStudie Pro" />
           <h1
             id="abonnement-titel"
-            className="mt-5 text-4xl font-semibold leading-[1.05] tracking-tight text-white drop-shadow-sm sm:text-5xl xl:text-6xl"
+            className="mt-5 text-4xl font-semibold leading-[1.05] tracking-tight text-white drop-shadow-sm break-words max-[380px]:text-[2rem] sm:text-5xl xl:text-6xl"
           >
             Alles wat je nodig hebt<br />voor serieuze bijbelstudie.
           </h1>
@@ -399,7 +399,7 @@ function SubscribePageInner() {
           Annual first, in the DOM as well as visually, so it also leads on
           mobile. */}
       <div className="scene-horizon -mt-16">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 max-md:gap-6 md:grid-cols-2">
           <PlanCard
             interval="annual"
             recommended={RECOMMENDED === "annual"}
@@ -421,7 +421,7 @@ function SubscribePageInner() {
             nothing about price, saving or discount on purpose: every claim on
             this page is fixed by the EU Omnibus rules and none of them moved. */}
         <SectionHeading id="abonnement-zeker" title="Goed om te weten" rule />
-        <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-3">
           {REASSURANCE.map(({ title, body }) => (
             <Panel key={title} className="p-4">
               <p className="text-sm font-semibold text-white">{title}</p>

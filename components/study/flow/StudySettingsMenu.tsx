@@ -64,7 +64,7 @@ function Segmented<T extends string>({
               onClick={() => onChange(option.value)}
               aria-pressed={active}
               className={[
-                'flex-1 h-8 rounded-md font-semibold transition-colors',
+                'flex-1 h-8 rounded-md font-semibold transition-colors max-md:h-10',
                 FOCUS_RING,
                 sizes ? sizes[index] : 'text-[12px]',
                 active ? 'bg-les-bg text-les-accent shadow-sm' : `${INK_FAINT} hover:text-les-ink`,
@@ -211,7 +211,7 @@ export default function StudySettingsMenu({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -8, scale: 0.97 }}
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className={`absolute z-50 top-full mt-1.5 right-3 sm:right-5 w-[min(92vw,300px)] max-h-[min(70vh,520px)] overflow-y-auto ${PANEL_SOLID} shadow-[0_40px_80px_-32px_rgba(0,0,0,0.85)] p-3 space-y-3.5`}
+            className={`absolute z-50 top-full mt-1.5 right-3 sm:right-5 w-[min(92vw,300px)] max-h-[min(70vh,520px)] max-md:right-2 max-md:max-h-[calc(100dvh-80px)] overflow-y-auto ${PANEL_SOLID} shadow-[0_40px_80px_-32px_rgba(0,0,0,0.85)] p-3 space-y-3.5`}
           >
             <div>
               <label
@@ -225,7 +225,7 @@ export default function StudySettingsMenu({
                 value={version}
                 onChange={(event) => onVersionChange(event.target.value)}
                 data-track="study_settings_version"
-                className={`h-9 w-full cursor-pointer rounded-lg border border-les-card-line bg-les-bg px-2.5 text-[13px] text-les-ink ${FOCUS_RING}`}
+                className={`h-9 w-full cursor-pointer rounded-lg border border-les-card-line bg-les-bg px-2.5 text-[13px] text-les-ink max-md:h-10 max-md:text-[16px] ${FOCUS_RING}`}
               >
                 {languages.map((language) => (
                   <optgroup

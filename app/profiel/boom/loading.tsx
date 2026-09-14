@@ -8,15 +8,18 @@ import AppShell from '../../../components/shell/AppShell';
  */
 export default function BoomLoading() {
   return (
-    <AppShell title="Levensboom" padded={false}>
+    <AppShell title="Je boom" padded={false}>
+      {/* Same stacking as LevensboomStudio: one scrolling column below md,
+          `display: contents` (the old two-pane row) from md up. */}
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden md:contents">
       <div
         role="status"
         aria-label="Je boom laden"
-        className="min-w-0 flex-1"
+        className="min-w-0 flex-1 max-md:h-[60svh] max-md:min-h-[400px] max-md:flex-none"
         style={{ backgroundImage: 'var(--grad-tree-scene)' }}
       />
       <aside
-        className="flex w-[446px] flex-none flex-col overflow-hidden"
+        className="flex w-[446px] flex-none flex-col overflow-hidden max-md:w-full"
         style={{ backgroundColor: 'var(--panel-dark)' }}
       >
         <div className="h-14 flex-none" style={{ borderBottom: '1px solid rgba(255,255,255,.1)' }} />
@@ -26,6 +29,7 @@ export default function BoomLoading() {
           ))}
         </div>
       </aside>
+      </div>
     </AppShell>
   );
 }

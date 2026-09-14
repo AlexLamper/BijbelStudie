@@ -2,7 +2,18 @@
 
 import Link from "next/link"
 import { useCallback, useEffect, useState } from "react"
-import { ArrowLeft, MessageSquare, RefreshCw } from "lucide-react"
+import { ChevronLeft, RefreshCw } from "lucide-react"
+import AppShell from "../../../components/shell/AppShell"
+import { Card, Skeleton } from "../../../components/kit/primitives"
+import {
+  ADMIN_BUTTON,
+  ADMIN_FIELD,
+  BACK_LINK,
+  CARD_SUBTITLE,
+  CARD_TITLE,
+  ROW_LINE,
+  TABLE_HEAD,
+} from "../../../components/admin/adminSurface"
 
 
 interface FeedbackRow {
@@ -70,6 +81,14 @@ function formatDate(iso: string): string {
   return new Date(iso).toLocaleString("nl-NL", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })
 }
 
+/**
+ * Feedback, in the AppShell.
+ *
+ * Restyle only: the list request and its three filters, the once-loaded
+ * per-lesson rollup and the status PATCH are exactly as they were. The filters
+ * sit in one bar above the content; the per-lesson table scrolls sideways
+ * inside its card below `md`, never the page.
+ */
 export default function AdminFeedbackPage() {
   const [rows, setRows] = useState<FeedbackRow[]>([])
   const [counts, setCounts] = useState<FeedbackResponse["counts"] | null>(null)
@@ -143,37 +162,31 @@ export default function AdminFeedbackPage() {
   }, [])
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="px-6 xl:px-10 pt-7 pb-5 border-b border-border bg-background flex-shrink-0">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div>
-            <Link href="/admin" className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground mb-2">
-              <ArrowLeft size={12} /> Beheer
+    <AppShell title="Feedback" active="/beheer">
+      <div className="flex flex-col gap-4">
+        {/* -- The way back, what this is, and the refresh ----------------- */}
+        <div className="flex flex-none flex-wrap items-center gap-x-4 gap-y-3">
+          <div className="min-w-0 flex-1">
+            <Link href="/beheer" className={BACK_LINK}>
+              <ChevronLeft size={15} aria-hidden /> Beheer
             </Link>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-foreground">Feedback</h1>
-              <span
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-teal/10 text-teal dark:text-teal-400"
-              >
-                <MessageSquare size={11} /> {total}
-              </span>
-            </div>
-            <p className="text-sm text-muted-foreground mt-0.5">Alles wat gebruikers hebben teruggestuurd, nieuwste eerst</p>
+            <p className="mt-1 text-[12.5px] text-ink-muted">
+              Alles wat gebruikers hebben teruggestuurd, nieuwste eerst ·{" "}
+              <span className="font-semibold text-ink tabular-nums">{total}</span> in totaal
+            </p>
           </div>
-          <button
-            onClick={() => void load()}
-            disabled={loading}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-colors border border-border bg-white dark:bg-card hover:bg-gray-50 dark:hover:bg-secondary text-foreground disabled:opacity-60"
-          >
-            <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Vernieuwen
+          <button onClick={() => void load()} disabled={loading} className={ADMIN_BUTTON}>
+            <RefreshCw size={14} className={loading ? "animate-spin" : ""} aria-hidden /> Vernieuwen
           </button>
         </div>
 
-        <div className="flex flex-wrap gap-2 mt-4">
+        {/* -- Filters ------------------------------------------------------ */}
+        <Card className="flex flex-none flex-col gap-2 p-3 sm:flex-row sm:flex-wrap sm:items-center">
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="h-9 px-3 rounded-lg border border-border bg-white dark:bg-card text-xs text-foreground"
+            aria-label="Filter op status"
+            className={`w-full cursor-pointer sm:w-auto ${ADMIN_FIELD}`}
           >
             <option value="">Alle statussen</option>
             {Object.entries(STATUS_LABELS).map(([value, label]) => (
@@ -185,7 +198,8 @@ export default function AdminFeedbackPage() {
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="h-9 px-3 rounded-lg border border-border bg-white dark:bg-card text-xs text-foreground"
+            aria-label="Filter op categorie"
+            className={`w-full cursor-pointer sm:w-auto ${ADMIN_FIELD}`}
           >
             <option value="">Alle categorieën</option>
             {Object.entries(CATEGORY_LABELS).map(([value, label]) => (
@@ -197,7 +211,8 @@ export default function AdminFeedbackPage() {
           <select
             value={touchpointFilter}
             onChange={(e) => setTouchpointFilter(e.target.value)}
-            className="h-9 px-3 rounded-lg border border-border bg-white dark:bg-card text-xs text-foreground"
+            aria-label="Filter op bron"
+            className={`w-full cursor-pointer sm:w-auto ${ADMIN_FIELD}`}
           >
             <option value="">Alle bronnen</option>
             {Object.entries(TOUCHPOINT_LABELS).map(([value, label]) => (
@@ -206,98 +221,100 @@ export default function AdminFeedbackPage() {
               </option>
             ))}
           </select>
-        </div>
-      </div>
+        </Card>
 
-      <div className="flex-1 overflow-y-auto px-6 xl:px-10 py-6">
         {lessonRows.length > 0 && (
-          <section className="mb-6 rounded-xl border border-border bg-white dark:bg-card">
-            <div className="border-b border-border px-4 py-3">
-              <h2 className="text-sm font-bold text-foreground">Per les</h2>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Waar de antwoorden vandaan komen. Veel &quot;nee&quot; op &quot;ging deze quiz over wat
-                je net gelezen had&quot; betekent dat de quizkoppeling van die les niet klopt.
-              </p>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs">
-                <thead>
-                  <tr className="text-left text-muted-foreground">
-                    <th className="px-4 py-2 font-semibold">Studie</th>
-                    <th className="px-4 py-2 font-semibold">Les</th>
-                    <th className="px-4 py-2 font-semibold tabular-nums">Antwoorden</th>
-                    <th className="px-4 py-2 font-semibold">Vragen</th>
-                    <th className="px-4 py-2 font-semibold">Keuzes</th>
-                    <th className="px-4 py-2 font-semibold">Laatste</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {lessonRows.map((row) => (
-                    <tr key={`${row.studyId}-${row.lessonDay ?? "x"}`} className="border-t border-border">
-                      <td className="px-4 py-2 font-medium text-foreground">{row.studyId}</td>
-                      <td className="px-4 py-2 tabular-nums text-foreground">{row.lessonDay ?? "-"}</td>
-                      <td className="px-4 py-2 tabular-nums text-foreground">{row.total}</td>
-                      <td className="px-4 py-2 text-muted-foreground">
-                        {Object.entries(row.prompts)
-                          .map(([id, n]) => `${id} (${n})`)
-                          .join(", ")}
-                      </td>
-                      <td className="px-4 py-2 text-muted-foreground">
-                        {Object.entries(row.choices)
-                          .map(([key, n]) => `${key} (${n})`)
-                          .join(", ") || "-"}
-                      </td>
-                      <td className="px-4 py-2 text-muted-foreground">{formatDate(row.lastAt)}</td>
+          <Card className="flex-none overflow-hidden">
+            <section aria-labelledby="feedback-per-les">
+              <div className="px-4 pb-3 pt-[14px] sm:px-5">
+                <h2 id="feedback-per-les" className={CARD_TITLE}>Per les</h2>
+                <p className={CARD_SUBTITLE}>
+                  Waar de antwoorden vandaan komen. Veel &quot;nee&quot; op &quot;ging deze quiz over wat
+                  je net gelezen had&quot; betekent dat de quizkoppeling van die les niet klopt.
+                </p>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[720px] text-[12.5px]">
+                  <thead>
+                    <tr className={`border-t ${ROW_LINE} ${TABLE_HEAD}`}>
+                      <th scope="col" className="px-4 py-[10px] font-semibold sm:px-5">Studie</th>
+                      <th scope="col" className="px-3 py-[10px] font-semibold">Les</th>
+                      <th scope="col" className="px-3 py-[10px] font-semibold tabular-nums">Antwoorden</th>
+                      <th scope="col" className="px-3 py-[10px] font-semibold">Vragen</th>
+                      <th scope="col" className="px-3 py-[10px] font-semibold">Keuzes</th>
+                      <th scope="col" className="px-4 py-[10px] font-semibold sm:px-5">Laatste</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
+                  </thead>
+                  <tbody>
+                    {lessonRows.map((row) => (
+                      <tr key={`${row.studyId}-${row.lessonDay ?? "x"}`} className={`border-t align-top ${ROW_LINE}`}>
+                        <td className="px-4 py-2.5 font-semibold text-ink sm:px-5">{row.studyId}</td>
+                        <td className="px-3 py-2.5 tabular-nums text-ink-body">{row.lessonDay ?? "-"}</td>
+                        <td className="px-3 py-2.5 tabular-nums text-ink-body">{row.total}</td>
+                        <td className="px-3 py-2.5 text-ink-muted">
+                          {Object.entries(row.prompts)
+                            .map(([id, n]) => `${id} (${n})`)
+                            .join(", ")}
+                        </td>
+                        <td className="px-3 py-2.5 text-ink-muted">
+                          {Object.entries(row.choices)
+                            .map(([key, n]) => `${key} (${n})`)
+                            .join(", ") || "-"}
+                        </td>
+                        <td className="whitespace-nowrap px-4 py-2.5 text-ink-muted sm:px-5">{formatDate(row.lastAt)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </Card>
         )}
 
         {error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300 mb-4">
-            {error}
+          <div role="alert" className="flex-none rounded-card border border-danger/40 bg-surface p-4">
+            <p className="text-[13.5px] leading-relaxed text-danger dark:text-red-400">{error}</p>
           </div>
         )}
 
         {loading ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-24 rounded-xl animate-pulse bg-gray-100 dark:bg-secondary" />
+              <Skeleton key={i} className="h-24 w-full" />
             ))}
           </div>
         ) : rows.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Geen feedback voor deze filters.</p>
+          <Card className="flex-none px-5 py-10 text-center">
+            <p className="text-[13px] text-ink-muted">Geen feedback voor deze filters.</p>
+          </Card>
         ) : (
           <div className="flex flex-col gap-3">
             {rows.map((row) => (
-              <div key={row._id} className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-4">
-                <div className="flex items-start justify-between gap-4 flex-wrap">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <span className="text-[11px] font-semibold uppercase tracking-wide text-teal dark:text-teal-400">
+              <Card key={row._id} className="flex-none p-4 sm:p-[17px]">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+                  <div className="min-w-0 flex-1">
+                    <div className="mb-[6px] flex flex-wrap items-center gap-2">
+                      <span className="text-[11px] font-semibold uppercase tracking-[0.8px] text-teal-dark dark:text-teal-400">
                         {TOUCHPOINT_LABELS[row.touchpoint] ?? row.touchpoint}
                       </span>
-                      <span className="text-[11px] px-1.5 py-0.5 rounded-full bg-gray-100 dark:bg-secondary text-gray-600 dark:text-muted-foreground">
+                      <span className="rounded-full bg-line-soft px-[7px] py-[2px] text-[11px] font-semibold text-ink-muted">
                         {CATEGORY_LABELS[row.category] ?? row.category}
                       </span>
                       {row.rating != null && (
-                        <span className="text-[11px] text-gray-500 dark:text-muted-foreground">{row.rating} / 5</span>
+                        <span className="text-[11.5px] text-ink-faint tabular-nums">{row.rating} / 5</span>
                       )}
                     </div>
-                    <p className="text-sm text-foreground whitespace-pre-wrap break-words">{row.message}</p>
+                    <p className="whitespace-pre-wrap break-words text-[13.5px] leading-[1.6] text-ink">{row.message}</p>
                     {row.answers.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 mt-2">
+                      <div className="mt-2 flex flex-wrap gap-1.5">
                         {row.answers.map((a, i) => (
-                          <span key={i} className="text-[11px] px-1.5 py-0.5 rounded-full bg-gray-50 dark:bg-secondary/50 border border-gray-200 dark:border-border text-gray-600 dark:text-muted-foreground">
+                          <span key={i} className="max-w-full break-words rounded-full border border-line bg-sunken px-[7px] py-[2px] text-[11px] text-ink-muted">
                             {a.key}: {a.value}
                           </span>
                         ))}
                       </div>
                     )}
-                    <p className="text-[11px] text-muted-foreground mt-2">
+                    <p className="mt-2 break-words text-[11.5px] text-ink-faint">
                       {formatDate(row.createdAt)}
                       {row.name || row.contactName ? ` · ${row.name || row.contactName}` : ""}
                       {row.email || row.contactEmail ? ` (${row.email || row.contactEmail})` : ""}
@@ -308,7 +325,8 @@ export default function AdminFeedbackPage() {
                     value={row.status}
                     disabled={pendingId === row._id}
                     onChange={(e) => void setStatus(row._id, e.target.value)}
-                    className="h-8 px-2 rounded-lg border border-border bg-white dark:bg-card text-xs text-foreground flex-shrink-0"
+                    aria-label="Status"
+                    className={`w-full flex-shrink-0 cursor-pointer sm:w-auto ${ADMIN_FIELD}`}
                   >
                     {Object.entries(STATUS_LABELS).map(([value, label]) => (
                       <option key={value} value={value}>
@@ -317,11 +335,11 @@ export default function AdminFeedbackPage() {
                     ))}
                   </select>
                 </div>
-              </div>
+              </Card>
             ))}
           </div>
         )}
       </div>
-    </div>
+    </AppShell>
   )
 }

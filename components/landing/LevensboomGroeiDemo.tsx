@@ -135,7 +135,7 @@ export default function LevensboomGroeiDemo({ seed, initialSvg }: { seed: string
           <span className="rounded-full bg-black/45 px-3 py-1 text-sm font-semibold text-white backdrop-blur">{stage.name}</span>
         </div>
         {unlocked.length > 0 && (
-          <span className="pointer-events-none absolute right-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold shadow" style={{ color: TEAL }}>
+          <span className="pointer-events-none absolute right-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold shadow max-md:left-3 max-md:w-fit max-md:ml-auto max-md:text-[11px]" style={{ color: TEAL }}>
             Nieuw: {unlocked.map((item) => item.name).join(', ')}
           </span>
         )}
@@ -167,7 +167,7 @@ export default function LevensboomGroeiDemo({ seed, initialSvg }: { seed: string
                 key={s.id}
                 type="button"
                 onClick={() => take(s.from)}
-                className="rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-colors"
+                className="rounded-full border px-2.5 py-1 text-[11px] font-semibold transition-colors max-md:min-h-9 max-md:px-3 max-md:text-xs"
                 style={{
                   color: active ? '#FFFFFF' : 'var(--ink-muted)',
                   backgroundColor: active ? TEAL : 'transparent',

@@ -221,7 +221,7 @@ export default function StepDepth({
           {active.blurb}
         </p>
 
-        <div className="px-[18px] py-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
+        <div className="px-[18px] py-4 max-md:px-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
           {panel === 'media' &&
             (showMedia ? (
               <GeoImages book={book} chapter={chapter} variant="panel" fallbackToBook />
@@ -243,7 +243,7 @@ export default function StepDepth({
             It hands off to the same assistant the header opens, so the answer
             lands in the conversation that travels with the lesson. */}
         {onAskAi && (
-          <div className={`flex-none border-t px-[18px] py-3 ${RULE}`}>
+          <div className={`flex-none border-t px-[18px] py-3 ${RULE} max-md:px-4 max-md:pb-6`}>
             <div className="flex gap-2">
               <input
                 id="depth-ai"
@@ -257,7 +257,7 @@ export default function StepDepth({
                 }}
                 aria-label="Vraag het de AI-assistent"
                 placeholder={`Vraag iets over ${book} ${chapter}...`}
-                className={`h-[42px] min-w-0 flex-1 rounded-btn border border-les-card-line bg-les-input px-3 text-[13.5px] text-les-ink placeholder:text-les-faint ${FOCUS_RING}`}
+                className={`h-[42px] min-w-0 flex-1 rounded-btn border border-les-card-line bg-les-input px-3 text-[13.5px] max-md:text-[16px] text-les-ink placeholder:text-les-faint ${FOCUS_RING}`}
               />
               <button
                 type="button"

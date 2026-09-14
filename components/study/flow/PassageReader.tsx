@@ -212,7 +212,10 @@ export default function PassageReader({
                 <VerseMarkers annotation={marks} />
               </p>
 
-              <div className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
+              {/* Hover controls. Below md there is no hover: a tap on a phone left
+                    them stuck over the end of the verse, and the tap itself
+                    already opens the note dialog they lead to. */}
+                  <div className="max-md:hidden absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
                 <SpeakButton
                   compact
                   showSettings={false}

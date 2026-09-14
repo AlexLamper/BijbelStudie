@@ -83,7 +83,7 @@ export function UpgradePrompt({
 
       <button
         onClick={handleClick}
-        className="px-5 h-9 rounded-md text-sm font-semibold text-white transition-opacity hover:opacity-90"
+        className="px-5 h-9 max-md:h-10 rounded-md text-sm font-semibold text-white transition-opacity hover:opacity-90"
         style={{ backgroundColor: TEAL }}
       >
         {cta}

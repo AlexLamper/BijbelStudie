@@ -10,7 +10,7 @@ import { ROUTE_LABELS, type RouteKey } from "./analyticsRoutes";
 import { ALL_STUDIES } from "./bookStudies";
 
 /**
- * Everything /admin/insights renders.
+ * Everything /beheer/inzichten renders.
  *
  * Three groups, because they answer different questions and come from different
  * places:

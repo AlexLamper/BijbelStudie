@@ -32,7 +32,7 @@ const tabId = (id: Tab) => `boom-tab-${id}`;
 
 /** The two pills over the scene, top left. */
 const SCENE_PILL =
-  'inline-flex items-center gap-[6px] rounded-full px-[14px] py-2 text-[12.5px] font-semibold text-white no-underline outline-none transition-opacity hover:opacity-90 disabled:opacity-60';
+  'inline-flex items-center gap-[6px] rounded-full px-[14px] py-2 max-md:py-[10px] text-[12.5px] font-semibold text-white no-underline outline-none transition-opacity hover:opacity-90 disabled:opacity-60';
 
 const SCENE_PILL_STYLE = { backgroundColor: 'rgba(17,24,39,.72)' } as const;
 
@@ -196,9 +196,66 @@ export default function LevensboomStudio() {
       />
     ) : null;
 
+  /* -- The level card -------------------------------------------- */
+  const levelCard =
+    data && tree ? (
+      <div
+        className="absolute bottom-[26px] left-[26px] z-10 w-[352px] rounded-panel p-4 max-md:static max-md:w-full"
+        style={{ backgroundColor: 'var(--panel-card)', border: '1px solid var(--panel-border)' }}
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex h-[58px] w-[58px] flex-none flex-col items-center justify-center rounded-[11px] bg-teal">
+            <span className="text-[10px] font-bold tracking-[0.9px] text-white/80">NIVEAU</span>
+            <span className="text-[22px] font-bold leading-none text-white tabular-nums">{data.level}</span>
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[17px] font-bold text-white">{tree.stage.name}</p>
+            <p className="mt-[2px] text-[13px] text-white/70">
+              Nog <span className="font-bold">{Math.max(0, data.xpForNextLevel - data.xpIntoLevel)} XP</span> tot niveau {data.level + 1}
+            </p>
+          </div>
+        </div>
+
+        {/* The XP bar, with the figure inside the fill. */}
+        <div
+          className="relative mt-3 h-[22px] overflow-hidden rounded-full"
+          style={{ backgroundColor: 'rgba(255,255,255,.14)' }}
+          role="progressbar"
+          aria-valuenow={data.progressPercentage}
+          aria-valuemin={0}
+          aria-valuemax={100}
+        >
+          <div className="h-full rounded-full bg-teal" style={{ width: `${data.progressPercentage}%` }} />
+          <span className="absolute inset-0 flex items-center justify-center text-[11.5px] font-bold text-white tabular-nums">
+            {data.xpIntoLevel} / {data.xpForNextLevel} XP
+          </span>
+        </div>
+        <div className="mt-[6px] flex justify-between text-[11px] text-white/60">
+          <span>Niveau {data.level}</span>
+          <span>Niveau {data.level + 1}</span>
+        </div>
+
+        <div className="my-3 h-px" style={{ backgroundColor: 'rgba(255,255,255,.14)' }} />
+
+        {tree.nextUnlock && (
+          <p className="text-[12px] text-white/70">
+            Hierna ontgrendel je →{' '}
+            <span className="font-semibold text-teal-bright">
+              {tree.nextUnlock.name} · niveau {tree.nextUnlock.level}
+            </span>
+          </p>
+        )}
+        {tree.stage.nextName && tree.stage.nextLevel != null && (
+          <p className="mt-1 text-[12px] text-white/70">
+            Volgende fase → <span className="font-semibold text-white">{tree.stage.nextName} · niveau {tree.stage.nextLevel}</span>
+          </p>
+        )}
+      </div>
+    ) : null;
+
   /* -- The scene ------------------------------------------------- */
   const scene = (
-    <div className="relative min-w-0 flex-1 overflow-hidden">
+    <div className="relative min-w-0 flex-1 overflow-hidden max-md:h-[60svh] max-md:min-h-[400px] max-md:flex-none">
       <StudioStage
         tree={
           tree && draw && data && !tree.disabled
@@ -217,7 +274,7 @@ export default function LevensboomStudio() {
       />
 
       {/* Two pills, top left. */}
-      <div className="absolute left-[26px] top-[22px] z-10 flex gap-2">
+      <div className="absolute left-[26px] top-[22px] z-10 flex gap-2 max-md:left-4 max-md:top-4">
         <Link href="/profiel" className={SCENE_PILL} style={SCENE_PILL_STYLE}>
           <ArrowLeft size={14} aria-hidden />
           Profiel
@@ -229,76 +286,24 @@ export default function LevensboomStudio() {
       </div>
 
       {/* The heading, straight onto the picture. */}
-      <div className="absolute left-[26px] top-[86px] z-10">
+      <div className="absolute left-[26px] top-[86px] z-10 max-md:left-4 max-md:top-[76px]">
         <p className="text-[11.5px] font-bold uppercase tracking-[1.4px] text-teal-bright">Voortgang</p>
         <h1
-          className="mt-1 text-[40px] font-bold tracking-[-0.8px] text-white"
+          className="mt-1 text-[40px] font-bold tracking-[-0.8px] text-white max-md:text-[32px]"
           style={{ textShadow: '0 2px 6px rgba(0,0,0,.3)' }}
         >
           Je boom
         </h1>
       </div>
 
-      {/* Where the reader stands. */}
-      {data && tree && (
-        <div
-          className="absolute bottom-[26px] left-[26px] z-10 w-[352px] rounded-panel p-4"
-          style={{ backgroundColor: 'var(--panel-card)', border: '1px solid var(--panel-border)' }}
-        >
-          <div className="flex items-center gap-3">
-            <div className="flex h-[58px] w-[58px] flex-none flex-col items-center justify-center rounded-[11px] bg-teal">
-              <span className="text-[10px] font-bold tracking-[0.9px] text-white/80">NIVEAU</span>
-              <span className="text-[22px] font-bold leading-none text-white tabular-nums">{data.level}</span>
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-[17px] font-bold text-white">{tree.stage.name}</p>
-              <p className="mt-[2px] text-[13px] text-white/70">
-                Nog <span className="font-bold">{Math.max(0, data.xpForNextLevel - data.xpIntoLevel)} XP</span> tot niveau {data.level + 1}
-              </p>
-            </div>
-          </div>
-
-          {/* The XP bar, with the figure inside the fill. */}
-          <div
-            className="relative mt-3 h-[22px] overflow-hidden rounded-full"
-            style={{ backgroundColor: 'rgba(255,255,255,.14)' }}
-            role="progressbar"
-            aria-valuenow={data.progressPercentage}
-            aria-valuemin={0}
-            aria-valuemax={100}
-          >
-            <div className="h-full rounded-full bg-teal" style={{ width: `${data.progressPercentage}%` }} />
-            <span className="absolute inset-0 flex items-center justify-center text-[11.5px] font-bold text-white tabular-nums">
-              {data.xpIntoLevel} / {data.xpForNextLevel} XP
-            </span>
-          </div>
-          <div className="mt-[6px] flex justify-between text-[11px] text-white/60">
-            <span>Niveau {data.level}</span>
-            <span>Niveau {data.level + 1}</span>
-          </div>
-
-          <div className="my-3 h-px" style={{ backgroundColor: 'rgba(255,255,255,.14)' }} />
-
-          {tree.nextUnlock && (
-            <p className="text-[12px] text-white/70">
-              Hierna ontgrendel je →{' '}
-              <span className="font-semibold text-teal-bright">
-                {tree.nextUnlock.name} · niveau {tree.nextUnlock.level}
-              </span>
-            </p>
-          )}
-          {tree.stage.nextName && tree.stage.nextLevel != null && (
-            <p className="mt-1 text-[12px] text-white/70">
-              Volgende fase → <span className="font-semibold text-white">{tree.stage.nextName} · niveau {tree.stage.nextLevel}</span>
-            </p>
-          )}
-        </div>
-      )}
+      {/* Where the reader stands. Below md it moves under the picture (see
+          the end of the scroller) so it does not cover the tree on a phone. */}
+      {levelCard && <div className="max-md:hidden">{levelCard}</div>}
 
       {/* Notices sit over the scene, under the heading; the locked card joins
           them at the foot of the same stack. */}
       {(notice || lockedCard || (tree && tree.wilting) || (tree && tree.disabled)) && (
-        <div className="absolute left-[26px] right-[26px] top-[170px] z-10 flex flex-col gap-2">
+        <div className="absolute left-[26px] right-[26px] top-[170px] z-10 flex flex-col gap-2 max-md:left-4 max-md:right-4 max-md:top-[150px]">
           {tree?.wilting && (
             <p
               className="max-w-[420px] rounded-[10px] px-3 py-2 text-[12px] font-medium text-white"
@@ -354,7 +359,7 @@ export default function LevensboomStudio() {
   /* -- The panel ------------------------------------------------- */
   const panel = (
     <aside
-      className="flex w-[446px] flex-none flex-col overflow-hidden"
+      className="flex w-[446px] flex-none flex-col overflow-hidden max-md:w-full max-md:overflow-visible"
       style={{ backgroundColor: 'var(--panel-dark)' }}
     >
       <h2 className="sr-only">Je boom aanpassen</h2>
@@ -404,7 +409,7 @@ export default function LevensboomStudio() {
         id="boom-tabpaneel"
         role="tabpanel"
         aria-labelledby={tabId(tab)}
-        className="min-h-0 flex-1 overflow-y-auto px-5 py-4"
+        className="min-h-0 flex-1 overflow-y-auto px-5 py-4 max-md:flex-none max-md:overflow-visible max-md:pb-8"
       >
         {loading || !data || !tree ? (
           <div className="grid grid-cols-2 gap-[14px]">
@@ -434,7 +439,7 @@ export default function LevensboomStudio() {
                       type="button"
                       onClick={() => void setPrefs({ timeOfDay: opt.id })}
                       aria-pressed={active}
-                      className={`px-3 py-[7px] text-[12px] font-semibold outline-none transition-colors ${
+                      className={`px-3 py-[7px] max-md:py-[10px] text-[12px] font-semibold outline-none transition-colors ${
                         active ? 'bg-teal text-white' : 'text-white/65 hover:text-white'
                       }`}
                     >
@@ -467,9 +472,20 @@ export default function LevensboomStudio() {
   );
 
   return (
-    <AppShell title="Levensboom" padded={false}>
-      {scene}
-      {panel}
+    <AppShell title="Je boom" padded={false}>
+      {/* Phones: the scene, the level card and the panel stack in one column
+          that scrolls on its own. From md up the wrapper is `display: contents`,
+          so the scene and the panel are the shell's flex children exactly as
+          before. */}
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden md:contents">
+        {scene}
+        {levelCard && (
+          <div className="flex-none px-4 py-4 md:hidden" style={{ backgroundColor: 'var(--panel-dark)' }}>
+            {levelCard}
+          </div>
+        )}
+        {panel}
+      </div>
 
       {celebrate !== null && tree && (
         <LevelUpDialog

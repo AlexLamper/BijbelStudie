@@ -114,7 +114,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/studies", req.url));
   }
 
-  // Only /admin is closed at the edge. Everything else is open to a guest:
+  // Only /beheer is closed at the edge. Everything else is open to a guest:
   //
   //  - /studies and /hulpbronnen are the crawlable SEO surface (pro content
   //    inside /hulpbronnen/:slug is gated server-side).
@@ -133,7 +133,7 @@ export async function middleware(req: NextRequest) {
   //
   // The old English entries (/study, /notes, /plans, ...) are long gone: after
   // the rename they prefix-matched nothing.
-  const protectedRoutes = ["/admin"];
+  const protectedRoutes = ["/beheer"];
   // Match the route itself or a path segment under it - never a bare prefix.
   // `"/studies".startsWith("/studie")` is true, so the plain prefix test sent
   // every anonymous visitor (and Googlebot) on /studies back to "/", which is

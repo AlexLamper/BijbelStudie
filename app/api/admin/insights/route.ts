@@ -3,7 +3,7 @@ import { requireAdmin } from "../../../../lib/adminGuard";
 import { adminInsightsPayload } from "../../../../lib/adminInsights";
 
 /**
- * Everything /admin/insights renders. The aggregations live in
+ * Everything /beheer/inzichten renders. The aggregations live in
  * lib/adminInsights, shared with /api/v1/admin/insights.
  */
 export const dynamic = "force-dynamic";

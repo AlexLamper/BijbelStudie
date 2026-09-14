@@ -512,7 +512,7 @@ export default function StepQuiz({
                     onClick={() => choose(question.id, answer.id)}
                     aria-pressed={isPicked}
                     className={[
-                      'flex w-full items-center gap-[14px] rounded-[12px] border px-[17px] py-[15px] text-left transition-all duration-200',
+                      'flex w-full items-center gap-[14px] rounded-[12px] border px-[17px] py-[15px] text-left transition-all duration-200 max-md:gap-3 max-md:px-[14px]',
                       FOCUS_RING,
                       !frame ? 'border-les-card-line bg-les-card' : '',
                       reviewing || advancing
@@ -580,7 +580,7 @@ export default function StepQuiz({
                         type="button"
                         disabled={signalSending === question.id}
                         onClick={() => void sendQuizSignal(question.id, false, chip.key, result.correct)}
-                        className="press h-7 px-2.5 rounded-full border border-gray-200 dark:border-border text-[11.5px] text-gray-600 dark:text-muted-foreground hover:bg-gray-50 dark:hover:bg-secondary"
+                        className="press h-7 max-md:h-9 px-2.5 rounded-full border border-gray-200 dark:border-border text-[11.5px] text-gray-600 dark:text-muted-foreground hover:bg-gray-50 dark:hover:bg-secondary"
                       >
                         {chip.label}
                       </button>
@@ -593,7 +593,7 @@ export default function StepQuiz({
                       type="button"
                       disabled={signalSending === question.id}
                       onClick={() => void sendQuizSignal(question.id, true, null, result.correct)}
-                      className="press h-7 px-3 rounded-full border border-gray-200 dark:border-border text-[11.5px] font-semibold text-gray-700 dark:text-foreground hover:bg-gray-50 dark:hover:bg-secondary"
+                      className="press h-7 max-md:h-9 px-3 rounded-full border border-gray-200 dark:border-border text-[11.5px] font-semibold text-gray-700 dark:text-foreground hover:bg-gray-50 dark:hover:bg-secondary"
                     >
                       Ja
                     </button>
@@ -601,7 +601,7 @@ export default function StepQuiz({
                       type="button"
                       disabled={signalSending === question.id}
                       onClick={() => setSignalOpenReasonFor(question.id)}
-                      className="press h-7 px-3 rounded-full border border-gray-200 dark:border-border text-[11.5px] font-semibold text-gray-700 dark:text-foreground hover:bg-gray-50 dark:hover:bg-secondary"
+                      className="press h-7 max-md:h-9 px-3 rounded-full border border-gray-200 dark:border-border text-[11.5px] font-semibold text-gray-700 dark:text-foreground hover:bg-gray-50 dark:hover:bg-secondary"
                     >
                       Nee
                     </button>
@@ -619,7 +619,7 @@ export default function StepQuiz({
             onClick={back}
             disabled={index === 0}
             className={[
-              'press inline-flex items-center gap-1.5 h-9 px-3 rounded-lg text-[13px] font-medium transition-colors',
+              'press inline-flex items-center gap-1.5 h-9 px-3 rounded-lg text-[13px] font-medium transition-colors max-md:h-10',
               FOCUS_RING,
               index === 0
                 ? 'text-transparent pointer-events-none'
@@ -638,7 +638,7 @@ export default function StepQuiz({
                 setDirection(1);
                 setIndex((current) => current + 1);
               }}
-              className="press inline-flex items-center gap-1.5 h-9 px-4 rounded-lg text-[13px] font-semibold text-white transition-opacity hover:opacity-90 outline-none focus-visible:ring-2 focus-visible:ring-white"
+              className="press inline-flex items-center gap-1.5 h-9 max-md:h-10 px-4 rounded-lg text-[13px] font-semibold text-white transition-opacity hover:opacity-90 outline-none focus-visible:ring-2 focus-visible:ring-white"
               style={{ backgroundColor: 'var(--teal)' }}
             >
               Volgende vraag
@@ -650,7 +650,7 @@ export default function StepQuiz({
               type="button"
               onClick={retry}
               data-track="study_quiz_retry"
-              className={`press inline-flex h-9 items-center gap-1.5 rounded-lg border border-les-card-line px-3 text-[13px] font-semibold ${INK} hover:bg-les-card ${FOCUS_RING}`}
+              className={`press inline-flex h-9 max-md:h-10 items-center gap-1.5 rounded-lg border border-les-card-line px-3 text-[13px] font-semibold ${INK} hover:bg-les-card ${FOCUS_RING}`}
             >
               <RotateCcw size={14} /> Opnieuw proberen
             </button>
