@@ -11,7 +11,7 @@
  * load-bearing. The app calls POST /api/v1/sync-premium on every launch, which
  * asks RevenueCat for the truth and writes `storePremium` from the answer.
  * RevenueCat has never heard of this account, so a `storePremium` grant would
- * be reset to false the second time the reviewer opened the app — Pro on the
+ * be reset to false the second time the reviewer opened the app - Pro on the
  * first launch, gone on the next. `applyStorePremium` deliberately never
  * touches `subscribed`, so a grant made here survives every sync.
  *
@@ -24,7 +24,7 @@
  *   REVIEW_PASSWORD='...' node scripts/ensure-review-account.mjs --write # apply
  *
  * REVIEW_PASSWORD must match what App Store Connect shows under App Review
- * Information. It is never stored here — see the constant below.
+ * Information. It is never stored here - see the constant below.
  *
  * Database: the deployed site reads and writes `scriptura`, NOT the database
  * named in the local .env.local URI. Writing to the wrong one looks like a

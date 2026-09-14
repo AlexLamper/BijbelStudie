@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
+import { normaliseDashes } from "./textFormat";
 
 // "gemini-2.5-flash" and "gemini-2.0-flash" are no longer available to new API
 // projects; the -latest alias currently resolves to the newest flash model
@@ -189,7 +190,8 @@ export async function generateChatReply({
     for (let attempt = 0; attempt < tries; attempt++) {
       try {
         const result = await call(model);
-        return { text: result.text, model, usage: readUsage(result.usageMetadata) };
+        const text = result.text === undefined ? undefined : normaliseDashes(result.text);
+        return { text, model, usage: readUsage(result.usageMetadata) };
       } catch (err) {
         lastError = err;
         // Out of quota for the day: no retry can help, move to the next bucket.
@@ -268,7 +270,8 @@ export async function* streamChatReply({
           const text = chunk.text;
           if (text) {
             emitted = true;
-            yield text;
+            // The prompt forbids the em dash; this is the guarantee.
+            yield normaliseDashes(text);
           }
         }
 

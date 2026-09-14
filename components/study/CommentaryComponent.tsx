@@ -509,7 +509,7 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
                 }
               }}
               aria-label="Commentaarbron"
-              className="h-full w-full cursor-pointer appearance-none truncate rounded-[9px] bg-transparent pl-[11px] pr-7 text-[13px] font-medium text-ink-body outline-none dark:text-foreground max-md:text-[16px]"
+              className="h-full w-full cursor-pointer appearance-none truncate rounded-[9px] bg-transparent pl-[11px] pr-7 text-[13px] font-medium text-ink-body outline-none dark:text-foreground dark:[color-scheme:dark] max-md:text-[16px]"
             >
               {availableSources.length > 0 ? (
                 sortedLanguages.map(lang => (

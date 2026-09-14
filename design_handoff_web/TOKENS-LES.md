@@ -1,4 +1,4 @@
-# Tokens — lesflow
+# Tokens - lesflow
 
 De lesschermen bestaan in **licht** en **donker**. Zelfde maten, zelfde componenten, ander palet. Bouw één set componenten en stuur ze met een thema-attribuut aan (`data-theme="dark"` op de leswrapper of `.dark` van Tailwind).
 

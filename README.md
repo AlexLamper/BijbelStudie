@@ -111,7 +111,7 @@ Bijdragen zijn van harte welkom! Om mee te doen:
 2. Voer je wijzigingen door met duidelijke commitberichten.  
 3. Dien een pull request in met een beschrijving van je bijdrage.
 
-> *Elke bijdrage helpt BijbelStudie te verbeteren — bedankt!*
+> *Elke bijdrage helpt BijbelStudie te verbeteren - bedankt!*
 
 ## Sponsors
 
@@ -175,4 +175,4 @@ Voor vragen of feedback:
 
 ---
 
-Bedankt voor het verkennen van *BijbelStudie* — we hopen dat het je bijbelstudie-ervaring verrijkt.
+Bedankt voor het verkennen van *BijbelStudie* - we hopen dat het je bijbelstudie-ervaring verrijkt.

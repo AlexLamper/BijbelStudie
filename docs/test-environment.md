@@ -5,7 +5,7 @@ How to exercise a change on a real deployment before it reaches anyone.
 **Setup required: none.** Vercel already builds every branch to its own URL, and
 this project deliberately runs those previews against the same database as the
 live site. What was added is the ability to tell, at a glance and from a script,
-*which* deployment you are looking at — plus a `staging` branch convention so
+*which* deployment you are looking at - plus a `staging` branch convention so
 there is a fixed place to merge into before `main`.
 
 ---
@@ -20,7 +20,7 @@ there is a fixed place to merge into before `main`.
 | Badge | red `LIVE DATA · scriptura · <branch>` | none |
 
 So a preview is a **safe place to test code**, and **not** a safe place to test
-data. New routes, new UI, a migration you can undo, the Levensboom rendering —
+data. New routes, new UI, a migration you can undo, the Levensboom rendering -
 all fine. What is not fine is anything you would not want to happen for real:
 mass deletes, a script over every user, testing the cancellation flow on a live
 subscription.
@@ -28,7 +28,7 @@ subscription.
 That is a deliberate trade. One small cluster, one developer, and testing with
 your own real account is how this app actually gets exercised. A second database
 would mean a second set of secrets to keep in step, an empty account to
-re-create every time, and no realistic content — for a risk that a solo project
+re-create every time, and no realistic content - for a risk that a solo project
 mostly does not run.
 
 The badge exists so the trade stays visible while you work. "The notes I just
@@ -128,7 +128,7 @@ Confirm with `/api/health` that `env` is `production`.
 
 Everything needed is already in place; it is two dashboard steps and one flag.
 
-1. **Atlas** — nothing to create. Mongo makes a database on first write. Copy
+1. **Atlas** - nothing to create. Mongo makes a database on first write. Copy
    the production connection string and change only the path segment:
 
    ```
@@ -136,7 +136,7 @@ Everything needed is already in place; it is two dashboard steps and one flag.
                                   ^^^^^^^^^ becomes scriptura_staging
    ```
 
-2. **Vercel → Settings → Environment Variables** — click **Add New**, key
+2. **Vercel → Settings → Environment Variables** - click **Add New**, key
    `MONGODB_URI`, paste the new value, tick **Preview only**. Vercel holds one
    value per environment, so the existing Production value is untouched. (Your
    current row is scoped to Production *and* Preview; adding a Preview-only row
@@ -187,7 +187,7 @@ It is `scriptura`, confirmed against a live preview's `/api/health` on
   This is also why you should always open staging by its branch URL.
 
   Until then, **email/password sign-in works on a preview with no setup at all**
-  — it needs no external redirect registration. That is the path of least
+  - it needs no external redirect registration. That is the path of least
   resistance for testing.
 - **Store purchases.** The paywall renders, but a purchase will not unlock Pro
   unless the RevenueCat values point at a sandbox project.

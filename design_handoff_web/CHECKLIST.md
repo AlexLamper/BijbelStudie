@@ -2,12 +2,12 @@
 
 Meet op een viewport van **1440 × 900**. Een punt is goed of niet goed; "ziet er ongeveer zo uit" bestaat niet. Neem de screenshot ernaast.
 
-## Shell — geldt op alle negen routes
+## Shell - geldt op alle negen routes
 
-- [ ] Zijbalk is **196 px** breed (197 inclusief rand) — op alle negen identiek
+- [ ] Zijbalk is **196 px** breed (197 inclusief rand) - op alle negen identiek
 - [ ] Kopbalk is **64 px** hoog, wit, 1 px onderrand `#E5E7EB`
 - [ ] Kopbalk heeft precies **vijf** onderdelen: titel · spacer · zoekveld 260 px · bel 38 px · profiel 34 px
-- [ ] Kopbalk toont **alleen de paginatitel** — geen subtitel, datum, breadcrumb of telling
+- [ ] Kopbalk toont **alleen de paginatitel** - geen subtitel, datum, breadcrumb of telling
 - [ ] Zoekveld: overal dezelfde breedte, placeholder overal exact "Zoek vers, studie of notitie", `⌘K` tegen de rechterrand
 - [ ] Streakbadge is een sibling van de avatarcirkel en wordt niet afgeknipt; wit met het cijfer in `#0F766E`
 - [ ] Het juiste zijbalkitem is actief per route; subitem Levensboom alleen op `/profiel` en `/profiel/boom`
@@ -21,7 +21,7 @@ Meet op een viewport van **1440 × 900**. Een punt is goed of niet goed; "ziet e
 - [ ] **Geen witte tekst op goud.** Elk `#CA9A16`-vlak heeft `#422E04`
 - [ ] Groeicijfers in Beheer zijn `#047857`, niet `#059669`
 - [ ] Alle lopende tekst haalt 4,5:1; `#9CA3AF` alleen voor meta op 11 px en groter
-- [ ] Inter voor UI, Lora voor bijbeltekst en versfragmenten — nergens omgekeerd
+- [ ] Inter voor UI, Lora voor bijbeltekst en versfragmenten - nergens omgekeerd
 
 ## Per route
 
@@ -38,12 +38,12 @@ Meet op een viewport van **1440 × 900**. Een punt is goed of niet goed; "ziet e
 - [ ] Zoekveld is **440 px**, niet de volle breedte, en zichtbaar als veld (witte vulling, rand `#D1D5DB`)
 - [ ] Vier kaarten in "Nieuw deze maand", afbeeldinghoogte 88
 - [ ] "Per bijbelboek →" staat rechts uitgelijnd naast "Alle studies"
-- [ ] Vijf lijstrijen, allemaal **heel** — geen rij die door de kaartrand wordt gesneden
+- [ ] Vijf lijstrijen, allemaal **heel** - geen rij die door de kaartrand wordt gesneden
 
 **`/lezen`**
 - [ ] Body heeft **geen** padding; de panelen raken de schermrand, geen radius, geen kaartranden
 - [ ] Werkbalk begint links met de leesvoorkeuren-knop, daarna de scheidingslijn
-- [ ] Voorlezen is een **icoonknop van 32 px**, geen knop met label — in beide panelen
+- [ ] Voorlezen is een **icoonknop van 32 px**, geen knop met label - in beide panelen
 - [ ] Geen hoofdstuknavigatie onderin het leespaneel
 - [ ] Beide panelen: inhoud is hoger dan het paneel, zodat de vervaging van 96 px op echte tekst valt
 - [ ] Vijf tabs passen binnen het rechterpaneel; AI-assistent heeft een donkergroen sterretje; Grondtekst heeft een PRO-label
@@ -70,7 +70,7 @@ Meet op een viewport van **1440 × 900**. Een punt is goed of niet goed; "ziet e
 - [ ] Rechterpaneel is **446 px** en `#152229`
 - [ ] Zes keuzetegels in twee kolommen, met de drie toestanden gekozen / beschikbaar / vergrendeld
 - [ ] Niveaukaart linksonder met de XP-balk van 22 px en het label in de vulling
-- [ ] De boom komt uit de bestaande component — niet uit het prototype nagebouwd
+- [ ] De boom komt uit de bestaande component - niet uit het prototype nagebouwd
 
 **`/instellingen`**
 - [ ] Secties staan als **knoppenrij boven** de panelen, niet als lijst links
@@ -90,14 +90,14 @@ Meet op een viewport van **1440 × 900**. Een punt is goed of niet goed; "ziet e
 - [ ] Lessenlijst heeft een doorlopende verticale lijn en drie toestanden (afgerond / nu / nog te doen)
 - [ ] Rail 326 px met "Verder waar je was" en "Over deze studie"
 
-**Lesflow — geldt op alle vijf**
+**Lesflow - geldt op alle vijf**
 - [ ] Zijbalk is de **gewone zijbalk, ingeklapt**: 64 px, app-icoon in een kop van 64 px, dezelfde itemvolgorde met scheidingslijntjes, avatar onderaan
 - [ ] Kopbalk 52 px: sluitknop links; gecentreerd de lestitel met het stappen-glyph erachter en daaronder "Les 7 van 40 · stap N van 4"; rechts drie knoppen plus de teal AI-pil
 - [ ] Stappenpaneel 212 px met vijf stappen; actief met 2 px teal linkerrand, afgerond met een vinkje
 - [ ] Meta onderaan het stappenpaneel: Gedeelte · Tijd · Van de studie
 - [ ] Voet 68 px: Vorige links (niet op stap 1), stapnaam in het midden, primaire knop rechts; op stap 4 heet die "Les afronden"
 - [ ] Licht en donker gebruiken dezelfde componenten, alleen andere tokens
-- [ ] Op donker zijn kopjes en links `#2DD4BF`, op licht `#0F766E` — nergens `#0D9488` als kleine tekst op wit
+- [ ] Op donker zijn kopjes en links `#2DD4BF`, op licht `#0F766E` - nergens `#0D9488` als kleine tekst op wit
 
 **Per stap**
 - [ ] Stap 1: leesmaat 640 px, Lora 17.5/1.85, vervaging van 88 px die op **echte tekst** valt
@@ -106,7 +106,7 @@ Meet op een viewport van **1440 × 900**. Een punt is goed of niet goed; "ziet e
 - [ ] Stap 4: vijf voortgangssegmenten; antwoorden met letterblok; gekozen optie in teal
 - [ ] Afronding: geen stappenpaneel en geen voet; scène met 3 px gouden rand; vier tegels; volgende les
 
-## Functioneel — na elke route
+## Functioneel - na elke route
 
 - [ ] Geen bestand buiten de presentatielaag gewijzigd (`git diff --stat` bevat geen `api/`, geen schema, geen middleware)
 - [ ] Alles wat vóór de wijziging werkte, werkt nog: inloggen, lezen, een notitie maken, een les afronden, de adminpagina alleen als beheerder

@@ -23,8 +23,8 @@ import { studyPhotoFor } from '../../lib/studyPhotos'
  *
  * No `"use client"`: nothing here holds state, so the same component renders
  * from a server component and from the client catalogue alike. Its callers are
- * the /studies list rows and the featured cards; the study detail page draws no
- * picture of its own - the scene behind it is that study's view.
+ * the /studies list rows, the featured cards and the banner on /studies/[id], so
+ * a study's card and its detail page always show the same picture.
  *
  * `ratio` is the point. The picture is COMPOSED at the ratio it will be drawn
  * at rather than authored at 16:6 and then `object-cover`-cropped into a 96x64

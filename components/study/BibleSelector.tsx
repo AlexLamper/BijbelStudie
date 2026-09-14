@@ -51,7 +51,7 @@ function SelectBox({
 }) {
   return (
     <div
-      className={`relative flex h-9 flex-none items-center rounded-[9px] border border-line bg-surface max-md:h-10 ${className} ${
+      className={`relative flex h-9 flex-none items-center rounded-[9px] border border-line bg-surface dark:border-border dark:bg-secondary max-md:h-10 ${className} ${
         disabled ? 'opacity-50' : ''
       }`}
     >
@@ -61,7 +61,7 @@ function SelectBox({
         disabled={disabled}
         title={title}
         aria-label={title}
-        className={`h-full w-full cursor-pointer appearance-none truncate rounded-[9px] bg-transparent pl-[11px] pr-7 text-[13px] text-ink-body outline-none max-md:text-[16px] ${
+        className={`h-full w-full cursor-pointer appearance-none truncate rounded-[9px] bg-transparent pl-[11px] pr-7 text-[13px] text-ink-body outline-none dark:text-foreground dark:[color-scheme:dark] max-md:text-[16px] ${
           bold ? 'font-semibold' : 'font-medium'
         }`}
       >
@@ -70,7 +70,7 @@ function SelectBox({
       <ChevronDown
         size={15}
         strokeWidth={2}
-        className="pointer-events-none absolute right-[9px] text-ink-muted"
+        className="pointer-events-none absolute right-[9px] text-ink-muted dark:text-muted-foreground"
       />
     </div>
   );

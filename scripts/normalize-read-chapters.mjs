@@ -25,7 +25,7 @@
  * readChaptersCanon.test.ts` guards that the two stay in step.
  *
  * ENVIRONMENT. Ambient MONGODB_URI wins; `.env.local` is the fallback for local
- * runs. Idempotent — running it twice changes nothing the second time.
+ * runs. Idempotent - running it twice changes nothing the second time.
  */
 
 import fs from 'fs';
@@ -167,7 +167,7 @@ if (!uri) {
   process.exit(1);
 }
 console.log(
-  `${APPLY ? 'APPLY' : 'DRY RUN'} — ${uri.replace(/\/\/[^@]*@/, '//<redacted>@').slice(0, 80)}…`,
+  `${APPLY ? 'APPLY' : 'DRY RUN'} - ${uri.replace(/\/\/[^@]*@/, '//<redacted>@').slice(0, 80)}…`,
 );
 
 const sameMap = (a, b) => {

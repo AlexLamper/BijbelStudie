@@ -10,6 +10,7 @@ import StudyMaterialsSection from '../../components/study/StudyMaterialsSection'
 import AiAssistantWidget from '../../components/study/AiAssistantWidget';
 import { BookOpen, CheckCircle, ChevronLeft, ChevronRight, X, Trophy, MessageCircle } from 'lucide-react';
 import { toast } from '../../hooks/use-toast';
+import { normaliseDashes } from '../../lib/textFormat';
 import AppShell from '../../components/shell/AppShell';
 
 const COMPLETED_KEY = 'bijbelstudie_completed_studies';
@@ -34,7 +35,7 @@ interface ActiveStudy {
 
 function parseVerseRange(vr?: string): { start: number; end: number } | undefined {
   if (!vr) return undefined;
-  const parts = vr.split(/[-–—]/);
+  const parts = normaliseDashes(vr).split(/[-–]/);
   const start = parseInt(parts[0], 10);
   const end   = parseInt(parts[parts.length - 1], 10);
   if (isNaN(start) || isNaN(end)) return undefined;

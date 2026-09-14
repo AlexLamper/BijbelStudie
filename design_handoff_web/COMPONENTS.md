@@ -18,4 +18,4 @@ Bouw deze in fase 2, vóór de routes. Elke pagina gebruikt ze; geen pagina schr
 | `HeatGrid` | `levels: number[]`, `columns` | Raster met `gap:5`, vierkante tegels (`padding-top:100%`), radius 4, kleur uit de vijf heat-stappen. |
 | `WeekBars` | `values: number[]`, `todayIndex` | Staven `flex-1`, radius `7px 7px 0 0`, hoogte max 76 px, kleuren `--bar-*`. Labels Zo–Za Inter 11.5; vandaag 600 `teal-dark`. |
 | `Tabs` | `items`, `value`, `onChange`, `variant` | `underline` (actief `teal` + 2 px onderstreping) of `segmented` (actief `teal` vlak, radius 9). |
-| `FadeBottom` | — | `absolute inset-x-0 bottom-0 h-24` met `linear-gradient(rgba(255,255,255,0),#fff 78%)`, `pointer-events-none`. Alleen in de leespanelen. |
+| `FadeBottom` | - | `absolute inset-x-0 bottom-0 h-24` met `linear-gradient(rgba(255,255,255,0),#fff 78%)`, `pointer-events-none`. Alleen in de leespanelen. |

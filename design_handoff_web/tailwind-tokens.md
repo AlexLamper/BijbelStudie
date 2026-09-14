@@ -1,6 +1,6 @@
 # Tailwind-extensie
 
-Als het project Tailwind gebruikt, hang de tokens hieraan op. Gebruik daarna uitsluitend deze namen — geen `text-[#0D9488]` in de pagina's.
+Als het project Tailwind gebruikt, hang de tokens hieraan op. Gebruik daarna uitsluitend deze namen - geen `text-[#0D9488]` in de pagina's.
 
 ```ts
 // tailwind.config.ts

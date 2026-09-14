@@ -331,6 +331,18 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+  /* Native controls (select popups, scrollbars, date pickers) take their
+     palette from `color-scheme`, not from Tailwind classes. next-themes sets it
+     inline on <html>, but only once hydrated; this keeps it tied to `.dark`.
+     Options get explicit colours for the browsers (Chrome/Edge on Windows)
+     that paint the popup from the option's own background. In the base layer,
+     so a component's own option classes still win. */
+  .dark { color-scheme: dark; }
+  .dark select option,
+  .dark select optgroup {
+    background-color: hsl(var(--card));
+    color: hsl(var(--card-foreground));
+  }
 }
 
 /* Phones only (below Tailwind's md). One element wider than the screen used to

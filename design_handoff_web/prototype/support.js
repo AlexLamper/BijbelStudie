@@ -1,4 +1,4 @@
-// GENERATED from dc-runtime/src/*.ts — do not edit. Rebuild with `cd dc-runtime && bun run build`.
+// GENERATED from dc-runtime/src/*.ts - do not edit. Rebuild with `cd dc-runtime && bun run build`.
 "use strict";
 (() => {
   var __defProp = Object.defineProperty;
@@ -114,7 +114,7 @@
     .sc-logic-error{position:absolute;top:8px;left:8px;z-index:2147483647;max-width:60ch;
       padding:6px 10px;background:#b00020;color:#fff;font:12px/1.4 ui-monospace,monospace;
       border-radius:4px;white-space:pre-wrap;pointer-events:none}
-    /* Mirrors PRINT_BASELINE_CSS in apps/web deck-stage-export.ts \u2014 keep both
+    /* Mirrors PRINT_BASELINE_CSS in apps/web deck-stage-export.ts - keep both
        in sync until dc-runtime regains a build step. */
     @media print {
       @page { margin: 0.5cm; }
@@ -590,7 +590,7 @@
             }
             warnUnresolved(
               ctx,
-              "{{ " + p.trim() + " }} never resolved \u2014 rendered as empty"
+              "{{ " + p.trim() + " }} never resolved - rendered as empty"
             );
             return null;
           }
@@ -730,7 +730,7 @@
         style: hostStyle || { display: "contents" }
       } : null;
       if (!C) {
-        const error = urlBindable ? "x-import `from` cannot contain {{ \u2026 }} \u2014 module URLs are resolved at parse time; use a literal URL" : host.resolveExternalError(url, name);
+        const error = urlBindable ? "x-import `from` cannot contain {{ \u2026 }} - module URLs are resolved at parse time; use a literal URL" : host.resolveExternalError(url, name);
         const ph = host.placeholder({
           key: wrapper ? void 0 : key,
           name,
@@ -894,7 +894,7 @@
         __publicField(this, "__name");
         __publicField(this, "__sub");
         __publicField(this, "__needsDidMount", false);
-        /** Snapshot of the registry's streaming flags taken at render time —
+        /** Snapshot of the registry's streaming flags taken at render time -
          *  builders read it off the RenderCtx (this) to pick placeholder vs
          *  render-nothing for unresolved values. */
         __publicField(this, "__streamingNow", false);
@@ -907,7 +907,7 @@
         __publicField(this, "__failedLogic", null);
         __publicField(this, "__failedUserProps", null);
         __publicField(this, "__failedVer", -1);
-        /** Per-instance constructor error — kept here (not on the registry entry)
+        /** Per-instance constructor error - kept here (not on the registry entry)
          *  so one instance's successful construct can't hide a sibling's failure,
          *  and a construct can never wipe an eval error `updateJs` recorded on
          *  `r.logicError`. */
@@ -936,7 +936,7 @@
         );
       }
       /** Instantiate the logic class (or the no-op base) and adopt `prevState`
-       *  over its initial state — used both at mount and on hot-swap. */
+       *  over its initial state - used both at mount and on hot-swap. */
       __makeLogic(Logic, prevState) {
         const L = Logic || StreamableLogic;
         try {
@@ -958,7 +958,7 @@
         if (prevState)
           this.logic.state = { ...this.logic.state || {}, ...prevState };
       }
-      /** The props the author's logic + template see — internal __-prefixed
+      /** The props the author's logic + template see - internal __-prefixed
        *  wiring stripped. */
       __userProps() {
         const { __name, __hintSize, __tplId, __hostStyle, ...rest } = this.props;
@@ -1231,7 +1231,7 @@
         console.info(
           "[dc-runtime] x-import: loaded",
           url,
-          "\u2014 exports:",
+          "- exports:",
           Object.keys(module.exports),
           "window globals:",
           Object.keys(globals)
@@ -1271,7 +1271,7 @@
           url,
           "loaded but has no component named",
           JSON.stringify(name),
-          "\u2014 available exports:",
+          "- available exports:",
           Object.keys(mod),
           "window globals:",
           Object.keys(globals),
@@ -1332,7 +1332,7 @@
             url,
             "loaded but no custom element",
             JSON.stringify(name),
-            "is registered and window." + name + " is not a function \u2014 rendering <" + name + "> as an unknown element."
+            "is registered and window." + name + " is not a function - rendering <" + name + "> as an unknown element."
           );
         }
       }
@@ -1655,7 +1655,7 @@
             url,
             "returned",
             res2.status,
-            "\u2014 the reference renders as an empty placeholder."
+            "- the reference renders as an empty placeholder."
           );
           return "";
         }
@@ -1667,7 +1667,7 @@
           console.error(
             '[dc-runtime] sibling fetch for "' + name + '":',
             url,
-            "has no <x-dc> block \u2014 not a Design Component."
+            "has no <x-dc> block - not a Design Component."
           );
           return;
         }
@@ -1715,7 +1715,7 @@
         console.error(
           "[dc-runtime] logic class eval FAILED for",
           name,
-          "\u2014 the template renders with props only.",
+          "- the template renders with props only.",
           e
         );
         r.logicError = name + ": " + (e instanceof Error && e.message ? e.message : String(e));
@@ -1876,16 +1876,16 @@
       },
       __dcStreaming: (name) => streams.live(name),
       __dcSetProps: (name, overrides) => runtime.setProps(name, overrides),
-      /** Name of the component currently mounted as the page root — DC tools
+      /** Name of the component currently mounted as the page root - DC tools
        *  push their template-stream here when targeting "the open page". */
       __dcRootName: () => rootName,
-      /** Editor bridge — the encoded, `data-dc-tpl`-annotated template source.
+      /** Editor bridge - the encoded, `data-dc-tpl`-annotated template source.
        *  The host editor parses this into its own template DOM so it can map a
        *  rendered node (carrying the same `data-dc-tpl`) back to the source
        *  node that emitted it. Returns the encoded form (`sc-camel-*` attrs,
        *  `<sc-raw-*>`/`<sc-helmet>` tags); the editor decodes on serialize. */
       __dcAnnotatedTemplate: (name) => runtime.annotatedTemplate(name),
-      /** Editor bridge — the *original* (decoded) template source. */
+      /** Editor bridge - the *original* (decoded) template source. */
       __dcTemplateSource: (name) => runtime.templateSource(name),
       __dcBoot: () => {
         rootName = boot(runtime, document) ?? rootName;

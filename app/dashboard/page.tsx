@@ -281,7 +281,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="mt-[6px] text-[22px] font-bold leading-[1.25] tracking-[-0.3px] text-ink [overflow-wrap:anywhere] max-md:text-[19px]">
                   {resume
-                    ? `${resume.title} · les ${resume.day}${resume.lessonTitle ? ` — ${resume.lessonTitle}` : ""}`
+                    ? `${resume.title} · les ${resume.day}${resume.lessonTitle ? ` - ${resume.lessonTitle}` : ""}`
                     : lastRead
                       ? `${lastRead.book} ${lastRead.chapter}`
                       : "Kies een hoofdstuk of een studie"}

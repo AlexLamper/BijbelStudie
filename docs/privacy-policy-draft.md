@@ -1,4 +1,4 @@
-# Privacybeleid — concept voor juridische review
+# Privacybeleid - concept voor juridische review
 
 **Status: NIET PUBLICEREN zonder review.** Dit is een concept dat de feitelijke
 gegevensstromen van de app beschrijft, zodat een jurist het kan omzetten in een
@@ -71,7 +71,7 @@ verwijs naar de DPA's.»
 
 | Gegeven | Termijn | Waar geregeld |
 |---|---|---|
-| Account en voortgang | zolang het account bestaat, «+ x maanden na laatste login» | — |
+| Account en voortgang | zolang het account bestaat, «+ x maanden na laatste login» | - |
 | Archiefkopie na accountverwijdering | **90 dagen**, daarna verwijderd | `models/DeletedAccount.js`, `scripts/purge-deleted-accounts.mjs` |
 | Facturen en betaalgegevens | 7 jaar (fiscale bewaarplicht) | Stripe |
 | AI-vragen en -antwoorden | «termijn kiezen; nu onbeperkt» | `AiUsage`, `AiAnswer` |
@@ -90,7 +90,7 @@ De kopie van een adminaccount blijft staan tot die handmatig wordt verwijderd.
 Inzage, rectificatie, verwijdering, beperking, bezwaar, overdraagbaarheid, en
 het recht een klacht in te dienen bij de Autoriteit Persoonsgegevens.
 Verwijderen kan de gebruiker zelf: Profiel → Account verwijderen (in de app).
-«Web: er is nog geen selfservice-verwijdering op de website — of toevoegen, of
+«Web: er is nog geen selfservice-verwijdering op de website - of toevoegen, of
 in het beleid vermelden dat het per e-mail gaat.»
 
 ## 7. Cookies

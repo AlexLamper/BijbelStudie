@@ -1,4 +1,5 @@
 import type { CuratedStudy, Lesson } from './data/curated-studies';
+import { normaliseDashes } from './textFormat';
 import type { LessonContent } from './data/study-lessons/types';
 
 /**
@@ -86,7 +87,7 @@ export function stepPosition(steps: StepKey[], current: StepKey): number {
  */
 export function parseVerseRange(verseRange?: string): { start: number; end: number } | undefined {
   if (!verseRange) return undefined;
-  const parts = verseRange.split(/[-–—]/);
+  const parts = normaliseDashes(verseRange).split(/[-–]/);
   const start = parseInt(parts[0], 10);
   const end = parseInt(parts[parts.length - 1], 10);
   if (isNaN(start) || isNaN(end)) return undefined;

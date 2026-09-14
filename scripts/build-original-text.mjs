@@ -58,7 +58,7 @@ const GREEK_FILES = [
 ];
 
 // Ref looks like "Job.1.1#01=L", "1Co.13.4#03=NKO", or "Gen.32.1(32.2)#01=L"
-// (the parenthetical is the Hebrew-versification alternative — we keep the English ref before it)
+// (the parenthetical is the Hebrew-versification alternative - we keep the English ref before it)
 const REF_RE = /^([1-3]?[A-Z][a-z]{1,3})\.(\d+)\.(\d+)(?:\([^)]*\))?#\d+(?:=.+)?$/;
 
 /** Strip dStrong markup → first Strong's number found, e.g. "H9003/{H0776G}\H9014" → "H0776" */
@@ -97,7 +97,7 @@ function cleanGloss(s) {
 async function parseFile(filepath, kind /* 'H' | 'G' */) {
   console.log(`Parsing ${path.basename(filepath)}...`);
   if (!fs.existsSync(filepath)) {
-    console.warn(`  MISSING: ${filepath} — skipping`);
+    console.warn(`  MISSING: ${filepath} - skipping`);
     return {};
   }
 
@@ -180,7 +180,7 @@ async function main() {
   }
 
   fs.writeFileSync(path.join(OUT, 'index.json'), JSON.stringify(index, null, 2));
-  console.log(`\nDone — wrote ${totalFiles} chapter files + index.json to ${OUT}`);
+  console.log(`\nDone - wrote ${totalFiles} chapter files + index.json to ${OUT}`);
 }
 
 main().catch(err => {

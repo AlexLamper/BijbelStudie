@@ -1,6 +1,7 @@
 import { BIBLE_BOOKS, readerBookName, type BibleBook } from './content/bibleBooks';
 import { curatedStudies, type CuratedStudy, type Lesson } from './data/curated-studies';
 import { studyPhotoFor } from './studyPhotos';
+import { normaliseDashes } from './textFormat';
 
 /**
  * Banner for a generated book study: its cover photo from `lib/studyPhotos.ts`.
@@ -58,7 +59,7 @@ const MINUTES_PER_CHAPTER = 10;
 /** The outline section a chapter falls in, for a lesson title with meaning. */
 function sectionFor(book: BibleBook, chapter: number): string | null {
   for (const section of book.outline) {
-    const [rawStart, rawEnd] = section.range.split(/[-–—]/);
+    const [rawStart, rawEnd] = normaliseDashes(section.range).split(/[-–]/);
     const start = parseInt(rawStart, 10);
     const end = parseInt(rawEnd ?? rawStart, 10);
     if (Number.isNaN(start)) continue;

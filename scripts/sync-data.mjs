@@ -77,7 +77,7 @@ function parseTar(buf) {
 
 async function fetchTarball() {
   const apiUrl = `https://api.github.com/repos/${REPO}/tarball/${BRANCH}`;
-  // redirect:'follow' — undici (Node fetch) drops the Authorization header on a
+  // redirect:'follow' - undici (Node fetch) drops the Authorization header on a
   // cross-origin redirect (api.github.com -> codeload.github.com) per the Fetch
   // spec, so the CDN never sees our token (which would otherwise 400). That is
   // exactly the behaviour we want; do NOT re-add auth to the redirected request.
@@ -99,7 +99,7 @@ async function fetchTarball() {
 
 async function main() {
   if (!TOKEN) {
-    log('GITHUB_TOKEN not set — skipping sync (using whatever is already on disk).');
+    log('GITHUB_TOKEN not set - skipping sync (using whatever is already on disk).');
     log('On Vercel this token MUST be set or restricted translations will be missing.');
     return; // don't break local/contributor builds
   }
@@ -129,7 +129,7 @@ async function main() {
   if (written === 0) {
     throw new Error(`No matching files written. Check GITHUB_DATA_SUBDIR/FILES against the repo contents.`);
   }
-  log(`done — ${written} file(s) synced.`);
+  log(`done - ${written} file(s) synced.`);
 }
 
 main().catch(err => {

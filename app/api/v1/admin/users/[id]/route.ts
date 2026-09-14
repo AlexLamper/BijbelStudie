@@ -18,7 +18,7 @@ export async function OPTIONS() {
 }
 
 /**
- * PATCH /api/v1/admin/users/:id — `{ isAdmin?: boolean, subscribed?: boolean }`.
+ * PATCH /api/v1/admin/users/:id - `{ isAdmin?: boolean, subscribed?: boolean }`.
  * Everything else in the body is ignored by the shared helper.
  */
 export async function PATCH(req: NextRequest, { params }: RouteContext) {
@@ -35,7 +35,7 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
   }
 }
 
-/** DELETE /api/v1/admin/users/:id — removes the account and its notes. */
+/** DELETE /api/v1/admin/users/:id - removes the account and its notes. */
 export async function DELETE(req: NextRequest, { params }: RouteContext) {
   try {
     const guard = await requireAdminApi(req);

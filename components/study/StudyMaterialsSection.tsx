@@ -2,10 +2,12 @@
 
 import React, { useState } from 'react';
 import { MessageSquare } from 'lucide-react';
+import { useSession } from 'next-auth/react';
 import TabComponent from './TabComponent';
 import { FadeBottom } from '../kit/primitives';
 
 import { ReadingPreferences } from '../../hooks/useReadingPreferences';
+import { useIsPro } from '../../hooks/useIsPro';
 
 interface StudyMaterialsSectionProps {
   selectedBook: string;
@@ -48,15 +50,23 @@ export default function StudyMaterialsSection({
   const activeTab = activeTabProp ?? internalTab;
   const setActiveTab = onActiveTabChange ?? setInternalTab;
 
+  // The PRO mark on Grondtekst is an upsell, so a Pro reader never sees it.
+  // Same flag OriginalText gates the verses on (session.user.isSubscribed via
+  // useIsPro), so mark and access cannot disagree. Held back while the session
+  // is still loading so a Pro reader never sees it flash in and out.
+  const { status: sessionStatus } = useSession();
+  const isPro = useIsPro();
+  const showProMark = sessionStatus !== 'loading' && !isPro;
+
   /**
    * The five tabs, in the design's order and with its two marks: a PRO label on
-   * Grondtekst, and a filled star on the AI assistant. Only Commentaar carries
+   * Grondtekst (not for Pro readers), and a filled star on the AI assistant. Only Commentaar carries
    * an icon - the rest are words, so the row fits the 446 px pane without
    * wrapping (design_handoff_web/PAGES.md §3).
    */
   const tabs = [
     { id: 'commentary', label: t('tabs.commentary'),   icon: true,  isPro: false, star: false },
-    { id: 'original',   label: t('tabs.original'),     icon: false, isPro: true,  star: false },
+    { id: 'original',   label: t('tabs.original'),     icon: false, isPro: showProMark, star: false },
     { id: 'historical', label: t('tabs.general_info'), icon: false, isPro: false, star: false },
     { id: 'notes',      label: t('tabs.notes'),        icon: false, isPro: false, star: false },
     { id: 'ai',         label: 'AI-assistent',         icon: false, isPro: false, star: true  },

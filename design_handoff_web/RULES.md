@@ -1,6 +1,6 @@
 # Harde regels
 
-## 1. Alleen layout en weergave — niets functioneel
+## 1. Alleen layout en weergave - niets functioneel
 
 Dit is een herontwerp van de presentatielaag. Alles wat vandaag werkt, werkt daarna precies zo. **Raak niet aan:**
 
@@ -8,7 +8,7 @@ Dit is een herontwerp van de presentatielaag. Alles wat vandaag werkt, werkt daa
 - data fetching, queries, ORM/Prisma-schema's, migraties
 - auth, middleware, rechten, de admin-afscherming
 - state management, context providers, hooks met business logic
-- routing en URL's — met één uitzondering: er komt geen nieuwe route bij, alle negen bestaan al
+- routing en URL's - met één uitzondering: er komt geen nieuwe route bij, alle negen bestaan al
 - `.env`, config, build setup
 
 **Wel veranderen:** de JSX-boom binnen een pagina, componentopdeling voor presentatie, classNames, spacing, kleur, typografie, iconen, koppen, en de volgorde waarin bestaande onderdelen op het scherm staan.
@@ -17,7 +17,7 @@ Werkwijze per pagina: laat de bestaande data-aanroepen en hooks staan zoals ze z
 
 ## 2. Botst het ontwerp met bestaand gedrag? Het gedrag wint.
 
-Meld het en pas het ontwerp aan. Herschrijf nooit werkende logica om een mock te laten kloppen. Verwijder ook geen functie omdat die niet in een mock staat — de mocks tonen één toestand van een scherm, niet de volledige functieset.
+Meld het en pas het ontwerp aan. Herschrijf nooit werkende logica om een mock te laten kloppen. Verwijder ook geen functie omdat die niet in een mock staat - de mocks tonen één toestand van een scherm, niet de volledige functieset.
 
 ## 3. Twee plekken waar de UI nieuwe data nodig heeft
 

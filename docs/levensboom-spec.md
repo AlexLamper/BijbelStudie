@@ -1,11 +1,11 @@
-# Levensboom — generation spec
+# Levensboom - generation spec
 
 The contract between `lib/levensboom/*.ts` (web) and
 `lib/features/levensboom/domain/*.dart` (app). Both implementations must
 produce the *same tree* for the same inputs; the parity fixtures in
 `tests/levensboom.test.ts` and `test/levensboom_parity_test.dart` assert that.
 
-Nothing about the tree's *shape* is stored — the tree is a pure function of
+Nothing about the tree's *shape* is stored - the tree is a pure function of
 values the server already has, plus the species the reader picked.
 
 ---
@@ -25,7 +25,7 @@ values the server already has, plus the species the reader picked.
 | `animal` | §9 id | `User.levensboom.animal`, after the unlock check |
 
 Only the first five reach the generator. `season`, `timeOfDay`, `scene` and
-`animal` affect **palette and render-only layers** — never geometry. That
+`animal` affect **palette and render-only layers** - never geometry. That
 keeps the parity test independent of the clock and of the studio.
 
 ## 2. Coordinate space
@@ -73,7 +73,7 @@ ground animals stand). Neither can shift a branch.
 ### 4.1 Growth stages
 
 ```
-growth   = 1 - 1 / (1 + (level - 1) / 6)    # 0 at level 1, asymptotic — never "done"
+growth   = 1 - 1 / (1 + (level - 1) / 6)    # 0 at level 1, asymptotic - never "done"
 maxDepth = min(7, round(7 * growth))        # 0 at level 1 (the stem only)
 trunkLen = (4 + 36 * growth) * sp.trunkLenMul
 trunkW   = (0.8 + 6.2 * growth) * sp.trunkWidthMul
@@ -82,7 +82,7 @@ leafCount = maxDepth == 0 ? 2 : max(2, round((3 + 7 * growth) * sp.leafCountMul)
 MAX_BRANCHES = 900, MAX_LEAVES = 1400       # hard stops, see below
 ```
 
-Level 1 is exactly zero growth: a 4-unit stem with one leaf either side — the
+Level 1 is exactly zero growth: a 4-unit stem with one leaf either side - the
 **kiem**. The named stages are level bands (`lib/levensboom/stages.ts`,
 `domain/stages.dart`), served in the API as `stage`:
 
@@ -99,14 +99,14 @@ and `MAX_LEAVES` before each leaf, so neither can desync the two streams.
 
 ### 4.2 Draw order (this *is* the RNG order)
 
-1. `lean = (rand() * 2 - 1) * 6 * sp.leanMul` — degrees, applied to the trunk only.
-2. `grow(50, 88, -90 + lean, trunkLen, trunkW, depth = 0)` — `recurse` for
+1. `lean = (rand() * 2 - 1) * 6 * sp.leanMul` - degrees, applied to the trunk only.
+2. `grow(50, 88, -90 + lean, trunkLen, trunkW, depth = 0)` - `recurse` for
    `branching` and `conical` forms, `growPalm` for `palm`.
 3. If the `twin` trait is unlocked (level ≥ 16), a second, smaller trunk:
    `grow(50 + side * 6, 88, -90 + lean + side * 14, trunkLen * 0.62,
    trunkW * 0.55, 1)` where `side = rand() < 0.5 ? -1 : 1` is drawn **after**
    the main tree finishes.
-4. Blossom, fruit and perch placement (§4.5) — after all branches, no draws.
+4. Blossom, fruit and perch placement (§4.5) - after all branches, no draws.
 
 ### 4.3 `recurse(x0, y0, angle, len, width, depth, leader = true)`
 
@@ -217,10 +217,10 @@ Fronds are ordinary leaves with a large `size`; the renderer draws the blade.
 
 Set once the whole tree exists (no draws):
 
-- **visible** — `hardiness <= 0.55 + 0.45 * health`. A wilting tree sheds a
+- **visible** - `hardiness <= 0.55 + 0.45 * health`. A wilting tree sheds a
   scatter of leaves rather than a block, and the same leaves come back on
   recovery because `hardiness` is seeded.
-- **open** — `bloomOrder < ceil(leafCount * (0.5 + 0.5 * frac))`. The rest are
+- **open** - `bloomOrder < ceil(leafCount * (0.5 + 0.5 * frac))`. The rest are
   drawn as buds: earning XP visibly unfurls leaves without a level-up.
 - **Blossom** (species `seasonal` from level 5, or `always`): every 9th visible
   leaf, up to `round(6 + 10 * growth)`. Drawn only when the palette has a
@@ -228,9 +228,9 @@ Set once the whole tree exists (no draws):
 - **Fruit** (`level ≥ 8`): `fruitCount(level)` of them (§6), taken from the
   *highest* visible leaves (sort by `y` ascending, ties by `bloomOrder`, stride
   `floor(n / count)`), so fruit hangs in the canopy rather than at the trunk.
-- **Perch** — the visible leaf nearest `(62, 40)`. Always computed; whether a
+- **Perch** - the visible leaf nearest `(62, 40)`. Always computed; whether a
   bird or a dove sits on it is the animal pick (§9).
-- **Bounds** — `minX/maxX/minY` over all branch ends and visible leaves, each
+- **Bounds** - `minX/maxX/minY` over all branch ends and visible leaves, each
   leaf padded by 3 (a frond by `size * 2.8`); `maxY = 88 + 8` so the frame
   always includes a band of earth.
 
@@ -245,7 +245,7 @@ health = daysSinceActive <= 1 -> 1.0
 ```
 
 Never below `0.3`: no dead tree, no guilt. A user with no `lastStreakDate` at
-all reads as `1.0` — a brand-new account starts healthy.
+all reads as `1.0` - a brand-new account starts healthy.
 
 Recovery is immediate: any XP event moves `lastStreakDate` to today through the
 existing streak flow, so the next `GET /api/v1/gamification` returns `1.0` and
@@ -269,7 +269,7 @@ One table, three copies that must agree: `lib/levensboom/traits.ts`,
 The bird and the fireflies that used to be traits are animals in the catalog
 (§9) now. The old `canopy` trait is the `zaailing` → `jonge boom` stage.
 
-`fruitCount(level) = clamp(floor((level - 8) / 2) + 1, 0, 9)` — one fruit at
+`fruitCount(level) = clamp(floor((level - 8) / 2) + 1, 0, 9)` - one fruit at
 level 8, then one every second level, ending at nine.
 
 The nine are Galatians 5:22–23 in order, and they are the app's language for a
@@ -278,7 +278,7 @@ geloof, zachtmoedigheid, zelfbeheersing**.
 
 ## 7. Palette
 
-Pure function of `season`, `timeOfDay`, `health`, `scene` and `species` — no
+Pure function of `season`, `timeOfDay`, `health`, `scene` and `species` - no
 RNG. Sky is a two-stop vertical gradient; every other colour is a flat hex.
 
 | timeOfDay | sky top | sky bottom | glow | light |
@@ -292,8 +292,8 @@ RNG. Sky is a two-stop vertical gradient; every other colour is a flat hex.
 |---|---|---|---|---|
 | spring | `#6FBF73` | `#8FD694` | `#F7B8CE` | `#4E7C43` |
 | summer | `#3F8F4F` | `#57A862` | `#F2A2C0` | `#43703C` |
-| autumn | `#C9772E` | `#E0A03C` | — | `#6B5A32` |
-| winter | `#7D8B7A` | `#9AA79A` | — | `#5B6660` |
+| autumn | `#C9772E` | `#E0A03C` | - | `#6B5A32` |
+| winter | `#7D8B7A` | `#9AA79A` | - | `#5B6660` |
 
 Bark is `#4A3A2E`, lit edge `#6B5442`; night desaturates everything by mixing
 25 % toward `#1B2340`. Wilt mixes the leaf colours `(1 - health) * 0.4` toward
@@ -327,8 +327,8 @@ behind the tree. `sterrennacht` forces `night`. The table is
 
 ### 7.3 Seasonal and celebration layers (renderer-only)
 
-Deliberately **not** in the generator: they would make the geometry — and so
-the parity fixtures — depend on the clock.
+Deliberately **not** in the generator: they would make the geometry - and so
+the parity fixtures - depend on the clock.
 
 | Layer | When | How |
 |---|---|---|
@@ -367,7 +367,7 @@ same `branches.length`, `leaves.length`, open leaves, `blossoms.length`,
 | 10 | 0.9 |
 | 18 | 0.25 |
 
-plus the first eight values of `mulberry32(fnv1a32(seed))` to nine decimals —
+plus the first eight values of `mulberry32(fnv1a32(seed))` to nine decimals -
 that catches an RNG drift before the geometry has a chance to hide it. The
 numbers live in the two test files; reprint them from TypeScript and paste
 into Dart whenever the generator changes.

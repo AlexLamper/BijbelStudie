@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getServerSession } from 'next-auth';
-import { BookOpen, Clock, Layers, TrendingUp, type LucideIcon } from 'lucide-react';
+import { ArrowLeft, BookOpen, Clock, Layers, TrendingUp, type LucideIcon } from 'lucide-react';
 
 import { authOptions } from '../../../lib/authOptions';
 import connectMongoDB from '../../../lib/mongodb';
@@ -15,6 +15,8 @@ import { findStudy, getEnrollment } from '../../../lib/studyEnrollmentService';
 import AppShell from '../../../components/shell/AppShell';
 import { Card } from '../../../components/kit/primitives';
 import { bannerGradient } from '../../../components/kit/primitives';
+import { studyPhotoFor } from '../../../lib/studyPhotos';
+import StudyArtwork from '../StudyArtwork';
 import StudySetupProvider, { StudyActionBar, StudySettingsButton } from './StudyOnboardingForm';
 import LessonList from './LessonList';
 
@@ -153,6 +155,7 @@ export default async function StudyDetailPage({ params }: PageProps) {
     language: version.language,
   }));
   const minutes = estimateStudyMinutes(study);
+  const hasPhoto = studyPhotoFor(study.id) !== null;
   const resumeHref = `/studie/${study.id}/${resumeDay}${resumeStep ? `?stap=${resumeStep}` : ''}`;
   const books = [...new Set(study.lessons.map((lesson) => lesson.book))];
   const lessonsTotal = study.lessons.length;
@@ -213,25 +216,61 @@ export default async function StudyDetailPage({ params }: PageProps) {
     >
       <AppShell title={study.title} active="/studies">
         <div className="flex min-h-full flex-col gap-4">
-          {/* The banner. A gradient plate rather than artwork, per RULES.md §4:
-              the design draws one here and the server has no cover image for a
-              study - `StudyArtwork` draws the catalogue rows instead. */}
+          {/* Back to the catalogue. A real link rather than history.back():
+              plenty of visitors land here straight from search or a shared
+              link, with nothing behind them to go back to. The arrow names the
+              direction of travel. */}
+          <Link
+            href="/studies"
+            className="-mb-1 inline-flex min-h-9 flex-none items-center gap-1.5 self-start rounded-md text-[13px] font-semibold text-teal no-underline outline-none transition-colors hover:text-teal-dark focus-visible:ring-2 focus-visible:ring-teal dark:text-teal-400 dark:hover:text-teal-300"
+          >
+            <ArrowLeft size={15} strokeWidth={2.2} aria-hidden />
+            Terug naar studies
+          </Link>
+
+          {/* The banner. The study's own cover - the same `StudyArtwork` its
+              card on /studies shows (photo from lib/studyPhotos.ts over its
+              seeded horizon) - under a slate wash that deepens towards the foot,
+              where the title sits. A study without a photo keeps the gradient
+              plate it always had. */}
           <div
             className="relative flex h-[142px] flex-none flex-col justify-end overflow-hidden rounded-card px-[24px] pb-[18px] pt-[32px] max-md:h-auto max-md:min-h-[142px] max-md:px-[18px] max-md:pr-[52px]"
             style={{ background: bannerGradient(study.id) }}
           >
+            {hasPhoto && (
+              <>
+                <div className="pointer-events-none absolute inset-0">
+                  <StudyArtwork
+                    id={study.id}
+                    kind={study.type}
+                    ratio={5}
+                    size="banner"
+                    quiet
+                    className="h-full w-full"
+                  />
+                </div>
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0"
+                  style={{
+                    backgroundImage:
+                      'linear-gradient(180deg, rgba(15,23,42,0.28) 0%, rgba(15,23,42,0.34) 40%, rgba(15,23,42,0.8) 100%)',
+                  }}
+                />
+              </>
+            )}
             <StudySettingsButton className="absolute right-[10px] top-[10px] z-10" />
-            <div className="mt-[10px] flex items-center gap-1.5 text-[11.5px] text-white/70 max-md:min-w-0">
+            <div className="relative mt-[10px] flex items-center gap-1.5 text-[11.5px] text-white/70 max-md:min-w-0">
               <Link href="/studies" className="text-white/70 no-underline hover:text-white max-md:flex-none">
                 Studies
               </Link>
               <span aria-hidden>&rsaquo;</span>
               <span className="font-semibold text-white max-md:min-w-0 max-md:truncate">{study.title}</span>
             </div>
-            <h1 className="mt-1.5 text-[25px] font-bold leading-none tracking-[-0.5px] text-white max-md:text-[22px] max-md:leading-tight">
+            <h1 className="relative mt-1.5 text-[25px] font-bold leading-none tracking-[-0.5px] text-white max-md:text-[22px] max-md:leading-tight">
               {study.title}
             </h1>
-            <div className="mt-2.5 flex flex-wrap gap-1.5">
+            <div className="relative mt-2.5 flex flex-wrap gap-1.5">
               <span className="rounded-full bg-white px-[9px] py-[3px] text-[11px] font-semibold text-teal-dark">
                 {TYPE_LABEL[study.type] ?? study.type}
               </span>
