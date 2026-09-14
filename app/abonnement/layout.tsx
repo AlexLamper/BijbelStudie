@@ -36,7 +36,7 @@ function pricingGraph() {
       path: "/abonnement",
       name: "Prijzen en abonnement",
       description:
-        "BijbelStudie is gratis te gebruiken, inclusief het KingComments-commentaar. Pro ontgrendelt Matthew Henry, Dachsel en Meyer, 200 AI-vragen per dag en de volledige grondtekst.",
+        "BijbelStudie is gratis te gebruiken, inclusief KingComments. Pro ontgrendelt Matthew Henry, Calvijn, Dachsel en Meyer, 200 AI-vragen per dag en de grondtekst.",
       breadcrumbId: `${url}#breadcrumb`,
     }),
     breadcrumbNode(CRUMBS, url),
@@ -45,7 +45,7 @@ function pricingGraph() {
       "@id": `${url}#product`,
       name: "BijbelStudie Pro",
       description:
-        "De commentaren van Matthew Henry, Dachsel en Meyer, 200 AI-vragen per dag en de volledige Hebreeuwse en Griekse grondtekst, boven op alles wat gratis blijft - inclusief KingComments.",
+        "De commentaren van Matthew Henry, Calvijn, Dachsel en Meyer, 200 AI-vragen per dag en de volledige Hebreeuwse en Griekse grondtekst, boven op alles wat gratis blijft - inclusief KingComments.",
       brand: { "@id": ORG_ID },
       url,
       offers: [

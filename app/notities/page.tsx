@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import {
   Search, Plus, Edit, Trash2, ChevronDown, MoreHorizontal, Lock,
 } from "lucide-react"
@@ -12,6 +13,7 @@ import {
 import { EditNoteModal } from "../../components/study/EditNoteModal"
 import AppShell from "../../components/shell/AppShell"
 import { Card, Skeleton } from "../../components/kit/primitives"
+import SavedStudies from "./SavedStudies"
 
 interface Note {
   _id: string
@@ -49,11 +51,14 @@ const HIGHLIGHT_HEX: Record<string, string> = {
   pink: "#FCE7F3", purple: "#E9D5FF", orange: "#FED7AA",
 }
 
-/** The three tabs, mapped onto the `type` filter /api/notes already takes. */
+/** The note tabs map onto the `type` filter /api/notes already takes;
+ *  "saved" is not a note filter but the studies saved on /studies/[id]. */
+const SAVED_TAB = "saved"
 const TABS: { value: string; label: string }[] = [
   { value: "all", label: "Alles" },
   { value: "note", label: "Notities" },
   { value: "highlight", label: "Markeringen" },
+  { value: SAVED_TAB, label: "Bewaard" },
 ]
 
 /**
@@ -69,9 +74,10 @@ const TABS: { value: string; label: string }[] = [
  * removal). What changed is what those values render as, plus two things worth
  * naming:
  *
- * - "Bladwijzers" is the design's third tab and the web has no bookmark source
- *   (only the mobile API has one), so the row is the two filters that do exist
- *   plus "Alles".
+ * - "Bladwijzers" is the design's third tab and the web has no verse-bookmark
+ *   source (only the mobile API has one). The fourth tab, "Bewaard", lists the
+ *   studies saved with Bewaren on /studies/[id] (SavedStudies.tsx) and is
+ *   reachable directly as /notities?tab=bewaard.
  * - "Exporteren" writes a text file in the browser from the notes already on
  *   screen. There is no export endpoint and this adds none; the card says so in
  *   as many words.
@@ -95,6 +101,16 @@ export default function NotesPage() {
 
   const uniqueBooks = Array.from(new Set(notes.map(n => n.book))).sort()
   const uniqueTags  = Array.from(new Set(notes.flatMap(n => n.tags))).sort()
+
+  const showSaved = selectedType === SAVED_TAB
+
+  // Deep link from the study page: /notities?tab=bewaard. Read after mount
+  // rather than through useSearchParams, which would need a Suspense boundary.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("tab") === "bewaard") {
+      setSelectedType(SAVED_TAB)
+    }
+  }, [])
 
   useEffect(() => {
     if (status === "loading") return
@@ -125,7 +141,9 @@ export default function NotesPage() {
     }
   }, [selectedBook, selectedTag, selectedType, currentPage])
 
-  useEffect(() => { if (session) fetchNotes() }, [session, fetchNotes])
+  useEffect(() => {
+    if (session && selectedType !== SAVED_TAB) fetchNotes()
+  }, [session, selectedType, fetchNotes])
 
   const filtered = useMemo(() => {
     const needle = searchTerm.toLowerCase()
@@ -224,7 +242,15 @@ export default function NotesPage() {
                 <button
                   key={tab.value}
                   type="button"
-                  onClick={() => { setSelectedType(tab.value); setCurrentPage(1) }}
+                  onClick={() => {
+                    setSelectedType(tab.value)
+                    setCurrentPage(1)
+                    const url = new URL(window.location.href)
+                    if (tab.value === SAVED_TAB) url.searchParams.set("tab", "bewaard")
+                    else url.searchParams.delete("tab")
+                    window.history.replaceState(null, "", url)
+                  }}
+                  aria-pressed={active}
                   className={[
                     "border-b-2 pb-[13px] pt-4 text-[14px] transition-colors",
                     active
@@ -237,9 +263,13 @@ export default function NotesPage() {
               )
             })}
             <div className="flex-1 max-md:hidden" />
-            {!loading && <span className="text-[12.5px] text-ink-faint tabular-nums max-md:basis-full max-md:pb-3">{rowLabel}</span>}
+            {!loading && !showSaved && <span className="text-[12.5px] text-ink-faint tabular-nums max-md:basis-full max-md:pb-3">{rowLabel}</span>}
           </div>
 
+          {showSaved ? (
+            <SavedStudies />
+          ) : (
+          <>
           {error && (
             <div role="alert" className="border-b border-line px-[22px] py-4 max-md:px-4 text-[13.5px] text-danger">
               {error}
@@ -375,6 +405,8 @@ export default function NotesPage() {
               )}
             </div>
           )}
+          </>
+          )}
         </Card>
 
         {/* ── The rail ─────────────────────────────────────────────── */}
@@ -388,6 +420,21 @@ export default function NotesPage() {
             Nieuwe notitie
           </button>
 
+          {showSaved ? (
+          <Card className="flex-none p-[18px]">
+            <div className="text-[14px] font-semibold text-ink">Bewaarde studies</div>
+            <p className="mt-[6px] text-[12.5px] leading-[1.55] text-ink-muted">
+              Studies die je op een studiepagina bewaart, staan hier. Zo vind je ze terug zonder er meteen aan te beginnen.
+            </p>
+            <Link
+              href="/studies"
+              className="mt-3 flex h-9 w-full items-center justify-center rounded-[9px] border border-line text-[13px] font-semibold text-ink-body no-underline transition-colors hover:bg-line-soft max-md:h-11"
+            >
+              Alle studies
+            </Link>
+          </Card>
+          ) : (
+          <>
           <Card className="flex-none p-[18px]">
             {/* The search lives here rather than in a toolbar of its own: the
                 design gives this page one rail for narrowing the list, and this
@@ -482,6 +529,8 @@ export default function NotesPage() {
               Downloaden
             </button>
           </Card>
+          </>
+          )}
         </aside>
       </div>
 

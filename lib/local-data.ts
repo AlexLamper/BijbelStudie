@@ -1,5 +1,6 @@
 import { getBookNameVariants, getBookNameFromNumber, BIBLE_BOOKS_ORDER, normalizeBookName } from './book-mapping';
 import { headers } from 'next/headers';
+import { fetchRemoteCommentary, remoteCommentaryId } from './commentaryRemote';
 
 // Interfaces
 interface FlatVerse {
@@ -494,7 +495,15 @@ export async function getChapter(version: string, bookName: string, chapterNumbe
 }
 
 export async function getCommentary(source: string, bookName: string, chapterNumber: number) {
-    const result = await getChapter(source, bookName, chapterNumber);
+    // Pro commentaries live in BijbelAPI, not in this deployment (see
+    // lib/commentaryRemote.ts). A local file is only a fallback when BijbelAPI
+    // is unreachable, which in practice means a dev machine with ./private data.
+    const remoteId = typeof window === 'undefined' ? remoteCommentaryId(source) : null;
+    if (remoteId) {
+        const remote = await fetchRemoteCommentary(remoteId, bookName, chapterNumber);
+        if (remote.ok) return remote.verses;
+    }
+    const result = await getChapter(remoteId ?? source, bookName, chapterNumber);
     return result ? result.verses : null;
 }
 

@@ -134,8 +134,10 @@ export default function TopBar({ title }: { title: string }) {
   );
 }
 
-const MENU_ITEM =
-  "flex w-full items-center gap-2.5 rounded-[7px] px-2.5 py-2 text-left text-[13.5px] font-medium text-ink-body no-underline outline-none transition-colors hover:bg-line-soft focus-visible:bg-line-soft focus-visible:ring-2 focus-visible:ring-[#0D9488]";
+const MENU_ITEM_BASE =
+  "flex w-full items-center gap-2.5 rounded-[7px] px-2.5 py-2 text-left text-[13.5px] font-medium no-underline outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[#0D9488]";
+const MENU_ITEM = `${MENU_ITEM_BASE} text-ink-body hover:bg-line-soft focus-visible:bg-line-soft`;
+const MENU_ITEM_DANGER = `${MENU_ITEM_BASE} text-red-600 hover:bg-red-50 focus-visible:bg-red-50 dark:text-red-400 dark:hover:bg-red-500/10 dark:focus-visible:bg-red-500/10`;
 
 /**
  * The account circle opens a small menu instead of going straight to /profiel:
@@ -252,10 +254,10 @@ function AccountMenu() {
           <button
             type="button"
             role="menuitem"
-            className={MENU_ITEM}
+            className={MENU_ITEM_DANGER}
             onClick={() => signOut({ callbackUrl: "/" })}
           >
-            <LogOut size={16} strokeWidth={1.9} className="flex-none text-ink-muted" aria-hidden />
+            <LogOut size={16} strokeWidth={1.9} className="flex-none" aria-hidden />
             Uitloggen
           </button>
         </div>

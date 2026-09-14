@@ -120,7 +120,7 @@ export function freeMonthsOnAnnual(): number {
  * PREMIUM_DAILY_CAP = 200 per day.
  */
 export const PRO_FEATURES = [
-  "Matthew Henry, Dachsel en Meyer volledig",
+  "Matthew Henry, Calvijn, Dachsel en Meyer volledig",
   "200 AI-vragen per dag, i.p.v. 5",
   "Grondtekst: Hebreeuws en Grieks",
   "Prioriteit bij ondersteuning",

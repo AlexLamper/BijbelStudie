@@ -79,15 +79,12 @@ scripts/*.cmt.mybible
 !/public/data/bibles/canisiusbijbel
 !/public/data/bibles/canisiusbijbel/**
 
-# Commentaries - committed translations
+# Commentaries - only KingComments ships in this repo. Matthew Henry, Dachsel
+# and Calvijn are Pro and served per chapter from BijbelAPI
+# (lib/commentaryRemote.ts); a copy under /public would be a free download.
 /public/data/commentaries/*
 !/public/data/commentaries/kingcomments_nl
 !/public/data/commentaries/kingcomments_nl/**
-!/public/data/commentaries/calvijn_nl.json
-# Karl August Dachsel (d. 1893, public domain). Listed in manifest.json, so it
-# must ship with the deployment or /api/commentary 404s for it on Vercel.
-!/public/data/commentaries/dachsel
-!/public/data/commentaries/dachsel/**
 
 # Original-language (Hebrew/Greek) text - built locally from STEPBible CC BY data
 # (see scripts/build-original-text.mjs)

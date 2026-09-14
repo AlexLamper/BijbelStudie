@@ -545,13 +545,13 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
                   Pro-commentaar
                 </h3>
                 <p className="text-muted-foreground text-sm">
-                  Matthew Henry, Karl August Dachsel en Heinrich Meyer horen bij Pro. KingComments blijft voor iedereen gratis.
+                  Matthew Henry, Johannes Calvijn, Karl August Dachsel en Heinrich Meyer horen bij Pro. KingComments blijft voor iedereen gratis.
                 </p>
               </div>
               <UpgradePrompt
                 surface="commentary"
                 title="Pro-commentaar"
-                body="Matthew Henry, Dachsel en Meyer zijn onderdeel van Pro. KingComments leest u gratis, volledig."
+                body="Matthew Henry, Calvijn, Dachsel en Meyer zijn onderdeel van Pro. KingComments leest u gratis, volledig."
                 cta="Commentaren ontgrendelen"
                 compact
               />

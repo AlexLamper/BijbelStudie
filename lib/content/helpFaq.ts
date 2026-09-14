@@ -54,7 +54,7 @@ export const HELP_TOPICS: HelpTopic[] = [
       },
       {
         q: "Welke bijbelcommentaren zijn beschikbaar?",
-        a: "KingComments (Ger de Koning), Matthew Henry in Nederlandse vertaling, Karl August Dachsel en Heinrich Meyer, allemaal per vers te raadplegen naast de bijbeltekst. KingComments is gratis en volledig te lezen; de overige commentaren horen bij het Pro-abonnement.",
+        a: "KingComments (Ger de Koning), Matthew Henry in Nederlandse vertaling, Johannes Calvijn, Karl August Dachsel en Heinrich Meyer, allemaal per vers te raadplegen naast de bijbeltekst. KingComments is gratis en volledig te lezen; de overige commentaren horen bij het Pro-abonnement.",
       },
       {
         q: "Kan ik naar de gesproken tekst luisteren?",
@@ -126,7 +126,7 @@ export const HELP_TOPICS: HelpTopic[] = [
       },
       {
         q: "Wat krijg ik met Pro?",
-        a: "Toegang tot de overige bijbelcommentaren - Matthew Henry, Dachsel en Meyer - naast het gratis KingComments, 200 AI-vragen per dag in plaats van vijf, en de volledige Hebreeuwse en Griekse grondtekst.",
+        a: "Toegang tot de overige bijbelcommentaren - Matthew Henry, Calvijn, Dachsel en Meyer - naast het gratis KingComments, 200 AI-vragen per dag in plaats van vijf, en de volledige Hebreeuwse en Griekse grondtekst.",
       },
       {
         q: "Hoe zeg ik mijn abonnement op?",

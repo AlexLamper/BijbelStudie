@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
   BookOpen,
   Bookmark,
@@ -576,6 +577,16 @@ export function StudySaveShareButtons() {
       <p role="status" aria-live="polite" className="mt-2 text-center text-[12px] text-slate-500 empty:hidden dark:text-ink-muted">
         {note}
       </p>
+      {/* Where a saved study turns up again. Only once it is saved, so the
+          card stays quiet for everyone else. */}
+      {!guest && saved && !note && (
+        <p className="mt-2 text-center text-[12px] text-slate-500 dark:text-ink-muted">
+          Terug te vinden bij{' '}
+          <Link href="/notities?tab=bewaard" className="font-semibold text-[#0D9488] underline-offset-2 hover:underline dark:text-teal-400">
+            Notities, Bewaard
+          </Link>
+        </p>
+      )}
     </div>
   );
 }

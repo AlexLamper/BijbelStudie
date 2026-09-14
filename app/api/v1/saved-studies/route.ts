@@ -3,6 +3,7 @@ import { corsPreflight, errorV1, handleV1Error, jsonV1 } from '../../../../lib/a
 import connectMongoDB from '../../../../lib/mongodb';
 import User from '../../../../models/User';
 import { findStudy } from '../../../../lib/studyEnrollmentService';
+import { resolveSavedStudies } from '../../../../lib/savedStudies';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -11,7 +12,14 @@ export async function OPTIONS() {
   return corsPreflight();
 }
 
-/** The ids of the studies this account has saved. */
+/**
+ * The ids of the studies this account has saved.
+ *
+ * `?expand=1` adds `studies`: the same ids resolved to card data, newest save
+ * first, skipping ids whose study no longer exists. Studies are static data, so
+ * this is the same single projected read plus in-memory lookups. Without the
+ * flag the response is unchanged for existing clients.
+ */
 export async function GET(req: Request) {
   try {
     const auth = await requireUser(req);
@@ -20,7 +28,12 @@ export async function GET(req: Request) {
       .select('savedStudies')
       .lean<{ savedStudies?: string[] | null } | null>();
     if (!row) return errorV1('NOT_FOUND', 404);
-    return jsonV1({ savedStudies: Array.isArray(row.savedStudies) ? row.savedStudies : [] });
+    const savedStudies = Array.isArray(row.savedStudies) ? row.savedStudies : [];
+    const expand = new URL(req.url).searchParams.get('expand');
+    if (expand === '1' || expand === 'true') {
+      return jsonV1({ savedStudies, studies: resolveSavedStudies(savedStudies) });
+    }
+    return jsonV1({ savedStudies });
   } catch (error) {
     return handleV1Error(error);
   }

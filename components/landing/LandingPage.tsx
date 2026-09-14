@@ -553,6 +553,7 @@ const ENGLISH_TRANSLATIONS = 5
 const COMMENTARIES = [
   { name: "KingComments",        author: "Ger de Koning", note: "Eigentijds Nederlandstalig commentaar op de hele Bijbel, vers voor vers",  free: true  },
   { name: "Matthew Henry",       author: "1662-1714",     note: "Het bekendste commentaar op de hele Bijbel, in Nederlandse vertaling",     free: false },
+  { name: "Johannes Calvijn",    author: "1509-1564",     note: "Het commentaar van de reformator op de meeste bijbelboeken, in Nederlandse vertaling", free: false },
   { name: "Karl August Dachsel", author: "1818-1893",     note: "Uitvoerig vers-voor-vers commentaar met veel aandacht voor de grondtekst", free: false },
   { name: "Heinrich Meyer",      author: "1800-1873",     note: "Kritisch-exegetisch commentaar op het Nieuwe Testament",                   free: false },
 ]
@@ -617,7 +618,7 @@ function BibleLibrary() {
         <SectionHeader
           label="Bibliotheek"
           title="Vertalingen en commentaren op één plek"
-          subtitle="Vier Nederlandse vertalingen naast elkaar, en bij elk vers de uitleg van vier commentaren."
+          subtitle="Vier Nederlandse vertalingen naast elkaar, en bij elk vers de uitleg van vijf commentaren."
         />
 
         <FadeUp className="mx-auto max-w-4xl">
@@ -633,7 +634,7 @@ function BibleLibrary() {
             <LibraryGroup
               label="Commentaren"
               items={COMMENTARIES.map(({ name, author, note }) => ({ name, meta: author, note }))}
-              footnote="KingComments is voor iedereen gratis en volledig te lezen; de overige drie horen bij Pro."
+              footnote="KingComments is voor iedereen gratis en volledig te lezen; de overige vier horen bij Pro."
             />
           </div>
 
@@ -772,7 +773,7 @@ function Pricing() {
     "Alles in het gratis plan",
     "200 AI-vragen per dag, i.p.v. 5",
     "Matthew Henry commentaar (NL)",
-    "Karl August Dachsel en Heinrich Meyer",
+    "Calvijn, Dachsel en Meyer",
     "Grondtekst: Hebreeuws en Grieks",
     "Prioriteitsondersteuning",
   ]
