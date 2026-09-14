@@ -13,6 +13,10 @@ const nextConfig: NextConfig = {
   // /studies, which made the whole Leesplannen page unreachable from the sidebar.
   async redirects() {
     return [
+      { source: "/admin",                 destination: "/beheer",                  permanent: true },
+      { source: "/admin/users",           destination: "/beheer/gebruikers",       permanent: true },
+      { source: "/admin/insights",        destination: "/beheer/inzichten",        permanent: true },
+      { source: "/admin/:path*",          destination: "/beheer/:path*",           permanent: true },
       { source: "/study",                 destination: "/studie",                  permanent: true },
       { source: "/study/:path*",          destination: "/studie/:path*",           permanent: true },
       { source: "/read",                  destination: "/lezen",                   permanent: true },

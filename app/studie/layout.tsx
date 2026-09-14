@@ -64,8 +64,17 @@ export default async function StudyLayout({
     <div className="relative flex h-[100dvh] w-full min-w-0 overflow-hidden bg-les-bg text-les-ink antialiased">
       <SessionProvider session={session}>
         {/* The app's sidebar, collapsed to 64 px of icons. Same items, same
-            order - see components/shell/nav.ts. */}
-        <LessonRail />
+            order - see components/shell/nav.ts.
+
+            `contents` from md up, so the wrapper is invisible to the flex row
+            and the rail lays out exactly as it did without it. Below md the
+            rail is gone: a hover strip of unlabelled icons takes 64 px from a
+            375 px phone and never names itself on touch. The lesson's own
+            header opens the same items as a sheet there
+            (components/study/flow/LessonNavSheet.tsx). */}
+        <div className="contents max-md:hidden">
+          <LessonRail />
+        </div>
 
         {/* No padding at any width. The lesson runs to the edge of what is left
             of the viewport once the rail has taken its strip. */}

@@ -1,11 +1,9 @@
 import Link from "next/link"
-import Image from "next/image"
 import { Metadata } from "next";
 import { cookies } from "next/headers";
-import { ArrowLeft, Shield } from "lucide-react";
 import { cookieName, fallbackLng } from "../i18n/settings";
 import { generatePageMetadata } from "../../lib/pageMetadata";
-import { Footer } from "../../components/landing/footer";
+import { PublicFrame, NumberedSections } from "../../components/content/PublicFrame";
 
 export async function generateMetadata(): Promise<Metadata> {
   const cookieStore = await cookies();
@@ -50,69 +48,21 @@ const sections = [
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-line bg-white/85 backdrop-blur-md dark:bg-neutral-900/85">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
-          <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-            <Image src="/images/icon-192.png" alt="" width={26} height={26} className="rounded-md" priority />
-            <span className="font-bold text-base text-ink">
-              Bijbel<span className="text-teal-700 dark:text-teal-400">Studie</span>
-            </span>
-          </Link>
-          <Link href="/"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-ink-muted hover:text-ink transition-colors">
-            <ArrowLeft className="h-4 w-4 flex-shrink-0" />
-            Terug naar home
-          </Link>
-        </div>
-      </header>
+    <PublicFrame
+      eyebrow="Privacy"
+      title="Privacybeleid"
+      lead="Hoe wij uw gegevens verzamelen, gebruiken en beschermen."
+    >
+      <NumberedSections sections={sections} />
 
-      <main className="flex-grow">
-        {/* Title */}
-        <section className="border-b border-line bg-surface">
-          <div className="max-w-4xl mx-auto px-6 py-14 lg:py-16 text-center">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-teal-faint mb-5">
-              <Shield className="h-3.5 w-3.5 text-teal-600 dark:text-teal-400" />
-              <span className="text-xs font-bold uppercase tracking-widest text-teal-700 dark:text-teal-400">Privacy</span>
-            </div>
-            <h1 className="text-3xl lg:text-4xl font-extrabold tracking-tight text-ink">
-              Privacybeleid
-            </h1>
-            <p className="mt-4 text-base text-ink-muted">
-              Hoe wij uw gegevens verzamelen, gebruiken en beschermen.
-            </p>
-          </div>
-        </section>
-
-        {/* Content */}
-        <section className="py-14 lg:py-16">
-          <div className="max-w-4xl mx-auto px-6">
-            <div className="bg-surface rounded-2xl border border-line shadow-sm p-7 lg:p-10 space-y-9">
-              {sections.map((s, i) => (
-                <div key={s.title}>
-                  <h2 className="flex items-center gap-3 text-lg font-bold text-ink mb-3">
-                    <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-teal-faint text-teal-700 dark:text-teal-400 text-sm font-bold tabular-nums">
-                      {i + 1}
-                    </span>
-                    {s.title}
-                  </h2>
-                  <p className="text-sm leading-relaxed text-gray-600 dark:text-ink-body sm:pl-10">{s.body}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="text-center mt-10">
-              <Link href="/"
-                className="inline-flex items-center justify-center gap-2 font-semibold text-white px-7 py-3 rounded-xl bg-teal-700 hover:bg-teal-800 transition-colors">
-                Terug naar home
-              </Link>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <Footer />
-    </div>
+      <div className="mt-3 flex justify-center">
+        <Link
+          href="/"
+          className="inline-flex h-11 w-full items-center justify-center rounded-btn bg-teal px-5 text-[14px] font-semibold text-white no-underline transition-opacity hover:opacity-90 sm:w-auto"
+        >
+          Terug naar home
+        </Link>
+      </div>
+    </PublicFrame>
   )
 }

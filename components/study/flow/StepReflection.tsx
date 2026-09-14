@@ -233,7 +233,7 @@ export default function StepReflection({
         maxLength={MAX_CHARS}
         placeholder={reflection.placeholder ?? 'Schrijf hier je antwoord...'}
         aria-label="Je reflectie"
-        className={`mt-2 h-[250px] w-full resize-y rounded-[12px] border border-les-card-line bg-les-card px-[17px] py-[15px] text-[14.5px] leading-[1.7] text-les-ink placeholder:text-les-faint ${FOCUS_RING}`}
+        className={`mt-2 h-[250px] w-full resize-y rounded-[12px] border border-les-card-line bg-les-card px-[17px] py-[15px] text-[14.5px] max-md:h-[200px] max-md:px-[14px] max-md:text-[16px] leading-[1.7] text-les-ink placeholder:text-les-faint ${FOCUS_RING}`}
       />
 
       <div className={`mt-2 flex items-center justify-between text-[12px] ${INK_FAINT}`}>

@@ -22,7 +22,8 @@ const ACCOUNT_ONLY_ROUTES = [
   "/instellingen",
   "/groepen",
   "/feedback",
-  "/admin",
+  "/beheer",
+  "/admin", // old name, 308s to /beheer
   "/inloggen",
   "/registreren",
 ];

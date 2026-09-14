@@ -50,7 +50,7 @@ export const NAV_GROUPS: { label: string; items: NavItem[]; adminOnly?: boolean 
   {
     label: "Beheer",
     adminOnly: true,
-    items: [{ title: "Beheer", url: "/admin", icon: Shield, badge: "admin" }],
+    items: [{ title: "Beheer", url: "/beheer", icon: Shield, badge: "admin" }],
   },
 ];
 

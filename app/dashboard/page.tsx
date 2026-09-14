@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { ArrowRight, BookOpen, ChartNoAxesColumn } from "lucide-react"
 import { CHAPTER_COUNTS } from "../../lib/data/bible-chapter-counts"
@@ -115,8 +115,100 @@ function useResumeStudy() {
   }
 }
 
+/**
+ * Whether a second row of studies fits under "Aanbevolen voor jou" without
+ * making the page scroll - true only on a tall viewport (a 27" at 1440, a
+ * portrait monitor), never on a laptop, where the work column already reaches
+ * the foot of the screen.
+ *
+ * Measured, not a `min-height` media query: the verse card grows with the
+ * verse and a billing notice can sit above it, so a fixed breakpoint would
+ * either leave the gap or push the page into a scroll. The extra row is the
+ * same heading + grid as the recommended one, so its height is theirs - read
+ * off the DOM, no guess. The recommended grid's bottom does not move when the
+ * row appears, so the answer is stable and there is no flip-flop.
+ *
+ * Starts false, so the server HTML and a laptop never paint the row at all.
+ * Below md the page scrolls anyway and the row never shows.
+ */
+function useSpareRow() {
+  const columnRef = useRef<HTMLDivElement>(null)
+  const gridRef = useRef<HTMLDivElement>(null)
+  const [show, setShow] = useState(false)
+
+  useEffect(() => {
+    const column = columnRef.current
+    const grid = gridRef.current
+    // column -> page root -> AppShell's padded scrolling body
+    const scroller = column?.parentElement?.parentElement
+    const heading = grid?.previousElementSibling as HTMLElement | null | undefined
+    if (!column || !grid || !scroller || !heading) return
+
+    const wide = window.matchMedia("(min-width: 768px)")
+    const measure = () => {
+      if (!wide.matches) return setShow(false)
+      const sc = getComputedStyle(scroller)
+      const available = scroller.clientHeight - parseFloat(sc.paddingTop) - parseFloat(sc.paddingBottom)
+      const gap = parseFloat(getComputedStyle(column).rowGap) || 0
+      const used = grid.getBoundingClientRect().bottom - column.getBoundingClientRect().top
+      const need = gap + heading.offsetHeight + gap + grid.offsetHeight
+      setShow(available - used >= need)
+    }
+
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(scroller)
+    ro.observe(column)
+    wide.addEventListener("change", measure)
+    return () => {
+      ro.disconnect()
+      wide.removeEventListener("change", measure)
+    }
+  }, [])
+
+  return { columnRef, gridRef, show }
+}
+
+/** The recommended-row cards; the spare row renders the very same card. */
+function StudyCards({ studies }: { studies: typeof curatedStudies }) {
+  return (
+    <>
+      {studies.map(study => (
+        <StudyCard
+          key={study.id}
+          href={`/studies/${study.id}`}
+          title={study.title}
+          meta={`${study.type} · ${study.lessons.length} lessen`}
+          imageHeight={96}
+          // The banner is the study's own drawn horizon, not a gradient
+          // plate: `lib/studyArt.ts` already owns that picture and
+          // /studies renders the same one, so the two agree.
+          art={
+            <StudyArtwork
+              id={study.id}
+              kind={study.type}
+              ratio={2.8}
+              quiet
+              className="h-full w-full"
+            />
+          }
+        />
+      ))}
+    </>
+  )
+}
+
+/**
+ * The card grid: the design's 1 / 2 / 4 columns from md up; below md one
+ * horizontally scrolling row of snap-aligned cards, so four studies do not
+ * stack into a phone's worth of scrolling.
+ */
+const STUDY_GRID =
+  "grid grid-cols-1 gap-[14px] sm:grid-cols-2 xl:grid-cols-4 max-md:flex max-md:snap-x max-md:overflow-x-auto max-md:pb-1 max-md:[&>*]:w-[min(78%,280px)] max-md:[&>*]:flex-none max-md:[&>*]:snap-start"
+
 export default function DashboardPage() {
   const d = useDashboardData()
+  const spare = useSpareRow()
   const tree = useTreeSummary()
   const { resume, loading: resumeLoading } = useResumeStudy()
   // Hold the card until both sources have answered, so it never flips from the
@@ -142,12 +234,20 @@ export default function DashboardPage() {
 
   // Four: one full row of four on a wide screen, a clean 2 x 2 below it.
   const recommended = curatedStudies.slice(0, 4)
+  // The tall-screen spare row: the next curated studies, from the same static
+  // list (no request), never one already above and never the study the reader
+  // is in the middle of. There is no popularity signal to rank by, so the
+  // title does not claim one.
+  const moreStudies = curatedStudies
+    .slice(4)
+    .filter(study => resume?.href !== `/studie/${study.id}`)
+    .slice(0, 4)
 
   return (
     <AppShell title="Dashboard">
-      <div className="flex min-h-full gap-5">
+      <div className="flex min-h-full gap-5 max-md:flex-col">
         {/* ── The work ─────────────────────────────────────────────── */}
-        <div className="flex min-w-0 flex-1 flex-col gap-[18px]">
+        <div ref={spare.columnRef} className="flex min-w-0 flex-1 flex-col gap-[18px] max-md:flex-none">
           {/* A flex gap is not created for a `display:none` child, so on the
               usual screen - where there is no billing notice - the verse still
               starts flush with the rail beside it. */}
@@ -165,7 +265,7 @@ export default function DashboardPage() {
               Three states, most specific first: a running study lesson (from
               the enrolment), else the last chapter read, else a start. */}
           {continueLoading ? (
-            <Card className="flex flex-none flex-wrap items-center gap-x-8 gap-y-4 px-6 py-5">
+            <Card className="flex flex-none flex-wrap items-center gap-x-8 gap-y-4 px-6 py-5 max-md:px-5">
               <div className="min-w-[min(100%,240px)] flex-1" aria-busy="true">
                 <div className="h-[11px] w-[130px] animate-pulse rounded bg-line-soft" />
                 <div className="mt-[10px] h-[24px] w-[min(100%,300px)] animate-pulse rounded bg-line-soft" />
@@ -174,12 +274,12 @@ export default function DashboardPage() {
               <div className="h-12 w-[180px] flex-none animate-pulse rounded-btn bg-line-soft" />
             </Card>
           ) : (
-            <Card className="flex flex-none flex-wrap items-center gap-x-8 gap-y-4 px-6 py-5">
+            <Card className="flex flex-none flex-wrap items-center gap-x-8 gap-y-4 px-6 py-5 max-md:px-5">
               <div className="min-w-[min(100%,240px)] flex-1">
                 <div className="text-[11px] font-semibold uppercase tracking-[1.4px] text-teal dark:text-teal-400">
                   {resume || lastRead ? "Verder waar je was" : "Begin waar je wilt"}
                 </div>
-                <div className="mt-[6px] text-[22px] font-bold leading-[1.25] tracking-[-0.3px] text-ink [overflow-wrap:anywhere]">
+                <div className="mt-[6px] text-[22px] font-bold leading-[1.25] tracking-[-0.3px] text-ink [overflow-wrap:anywhere] max-md:text-[19px]">
                   {resume
                     ? `${resume.title} · les ${resume.day}${resume.lessonTitle ? ` — ${resume.lessonTitle}` : ""}`
                     : lastRead
@@ -207,7 +307,7 @@ export default function DashboardPage() {
                 )}
               </div>
 
-              <div className="flex flex-none flex-wrap items-center gap-x-5 gap-y-2">
+              <div className="flex flex-none flex-wrap items-center gap-x-5 gap-y-2 max-md:w-full">
                 {/* The old card's second door to /studie stays wherever the card
                     is not already about a study. */}
                 {!resume && (
@@ -221,7 +321,7 @@ export default function DashboardPage() {
                 <Link
                   href={resume ? resume.href : readingHref}
                   data-track={resume ? "study_resume" : undefined}
-                  className="inline-flex h-12 items-center gap-[10px] rounded-[12px] bg-teal px-[22px] text-[15px] font-semibold text-white no-underline transition-colors hover:bg-teal-dark"
+                  className="inline-flex h-12 items-center gap-[10px] rounded-[12px] bg-teal px-[22px] text-[15px] font-semibold text-white no-underline transition-colors hover:bg-teal-dark max-md:flex-1 max-md:justify-center"
                 >
                   {resume
                     ? `Verder met les ${resume.day}`
@@ -244,33 +344,24 @@ export default function DashboardPage() {
               fixed chrome. At xl (1280) that leaves ~690 px, ~160 px a card at
               four across, still room for a two-line title and the meta line;
               under xl four would crush them, so it stays at two. */}
-          <div className="grid grid-cols-1 gap-[14px] sm:grid-cols-2 xl:grid-cols-4">
-            {recommended.map(study => (
-              <StudyCard
-                key={study.id}
-                href={`/studies/${study.id}`}
-                title={study.title}
-                meta={`${study.type} · ${study.lessons.length} lessen`}
-                imageHeight={96}
-                // The banner is the study's own drawn horizon, not a gradient
-                // plate: `lib/studyArt.ts` already owns that picture and
-                // /studies renders the same one, so the two agree.
-                art={
-                  <StudyArtwork
-                    id={study.id}
-                    kind={study.type}
-                    ratio={2.8}
-                    quiet
-                    className="h-full w-full"
-                  />
-                }
-              />
-            ))}
+          <div ref={spare.gridRef} className={STUDY_GRID}>
+            <StudyCards studies={recommended} />
           </div>
+
+          {/* Only when the screen has room left for it (see useSpareRow);
+              unrendered otherwise, so it adds no flex gap on a laptop. */}
+          {spare.show && moreStudies.length > 0 && (
+            <>
+              <SectionHeading title="Meer om te ontdekken" />
+              <div className={STUDY_GRID}>
+                <StudyCards studies={moreStudies} />
+              </div>
+            </>
+          )}
         </div>
 
         {/* ── The rail ─────────────────────────────────────────────── */}
-        <aside className="flex w-[320px] flex-none flex-col gap-4">
+        <aside className="flex w-[320px] flex-none flex-col gap-4 max-md:w-full">
           {/* Je boom.
               PAGES.md §1 puts "Bekijken →" at the far right of the avatar row,
               but in a 320 px card that row leaves the title about 110 px:

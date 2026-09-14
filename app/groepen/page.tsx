@@ -34,7 +34,7 @@ const BG_TEAL = "rgba(13,148,136,0.08)"
 
 /** A control on the landscape: quiet glass, white type, a real focus ring. */
 const SCENE_FIELD =
-  "w-full rounded-lg border border-white/20 bg-black/30 px-3 py-2 text-sm text-white outline-none transition-colors placeholder:text-white/50 hover:bg-black/40 focus-visible:ring-2 focus-visible:ring-white"
+  "w-full rounded-lg border border-white/20 bg-black/30 px-3 py-2 text-sm text-white outline-none max-md:min-h-11 max-md:text-base transition-colors placeholder:text-white/50 hover:bg-black/40 focus-visible:ring-2 focus-visible:ring-white"
 
 /* ── One group, as a line in the ledger ─────────────────────────── */
 /**
@@ -69,7 +69,7 @@ function GroupRow({ group, isMember, onJoin }: {
 
         <h3 className="mt-1 truncate text-base font-semibold text-white">{group.name}</h3>
         {group.description && (
-          <p className="mt-0.5 line-clamp-2 text-sm leading-relaxed text-white/70">{group.description}</p>
+          <p className="mt-0.5 line-clamp-2 break-words text-sm leading-relaxed text-white/70">{group.description}</p>
         )}
 
         <div className="mt-2 flex items-center gap-2">
@@ -91,12 +91,12 @@ function GroupRow({ group, isMember, onJoin }: {
       <div className="mt-3 flex-shrink-0 sm:mt-0">
         {isMember ? (
           <Link href={`/groepen/${group._id}`}
-            className="inline-flex items-center gap-1 rounded-md text-sm font-semibold text-white no-underline underline-offset-4 outline-none transition-colors hover:underline focus-visible:ring-2 focus-visible:ring-white">
+            className="inline-flex items-center gap-1 rounded-md text-sm font-semibold text-white no-underline max-md:min-h-10 underline-offset-4 outline-none transition-colors hover:underline focus-visible:ring-2 focus-visible:ring-white">
             Bekijken <ChevronRight size={14} aria-hidden />
           </Link>
         ) : (
           <button onClick={() => onJoin(group)}
-            className="press inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold text-white outline-none transition-colors hover:bg-[#115E59] focus-visible:ring-2 focus-visible:ring-white"
+            className="press inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold text-white outline-none max-md:min-h-10 max-md:px-4 max-md:text-sm transition-colors hover:bg-[#115E59] focus-visible:ring-2 focus-visible:ring-white"
             style={{ backgroundColor: TEAL_DEEP }}>
             <UserPlus size={12} aria-hidden /> Deelnemen
           </button>
@@ -147,13 +147,13 @@ function JoinModal({ group, onClose, onJoined }: {
             value={code} onChange={e => setCode(e.target.value.toUpperCase())}
             placeholder="Bijv. ABC123"
             maxLength={6}
-            className="w-full px-3 py-2.5 border border-border rounded-lg text-sm font-mono tracking-widest text-center bg-background text-foreground focus:outline-none focus:ring-2 mb-3"
+            className="w-full px-3 py-2.5 border border-border rounded-lg text-sm max-md:text-base font-mono tracking-widest text-center bg-background text-foreground focus:outline-none focus:ring-2 mb-3"
             style={{ "--tw-ring-color": IC } as React.CSSProperties}
           />
         )}
         {error && <p className="text-sm text-destructive mb-3">{error}</p>}
         <button onClick={handleJoin} disabled={loading || (!group.isPublic && code.length < 6)}
-          className="press w-full py-2.5 rounded-lg text-sm font-semibold text-white transition-colors disabled:opacity-50"
+          className="press w-full py-2.5 max-md:min-h-11 rounded-lg text-sm font-semibold text-white transition-colors disabled:opacity-50"
           style={{ backgroundColor: TEAL_DEEP }}>
           {loading ? "Bezig..." : "Deelnemen"}
         </button>
@@ -203,7 +203,7 @@ function CreateModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
             <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">Naam *</label>
             <input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
               placeholder="Bijv. Zondagsgroep Amsterdam"
-              className="w-full px-3 py-2.5 border border-border rounded-lg text-sm bg-background text-foreground focus:outline-none focus:ring-2"
+              className="w-full px-3 py-2.5 border border-border rounded-lg text-sm max-md:text-base bg-background text-foreground focus:outline-none focus:ring-2"
               style={{ "--tw-ring-color": IC } as React.CSSProperties}
             />
           </div>
@@ -212,11 +212,11 @@ function CreateModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
             <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
               placeholder="Vertel iets over de groep..."
               rows={3}
-              className="w-full px-3 py-2.5 border border-border rounded-lg text-sm bg-background text-foreground focus:outline-none focus:ring-2 resize-none"
+              className="w-full px-3 py-2.5 border border-border rounded-lg text-sm max-md:text-base bg-background text-foreground focus:outline-none focus:ring-2 resize-none"
               style={{ "--tw-ring-color": IC } as React.CSSProperties}
             />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 max-[380px]:grid-cols-1">
             <button
               type="button"
               aria-pressed={form.isPublic}
@@ -261,11 +261,11 @@ function CreateModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
 
         <div className="flex gap-3 mt-5">
           <button onClick={onClose}
-            className="press flex-1 py-2.5 rounded-xl border border-border text-sm font-semibold text-foreground hover:bg-muted transition-colors">
+            className="press flex-1 py-2.5 max-md:min-h-11 rounded-xl border border-border text-sm font-semibold text-foreground hover:bg-muted transition-colors">
             Annuleren
           </button>
           <button onClick={handleCreate} disabled={loading}
-            className="press flex-1 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-50 transition-colors"
+            className="press flex-1 py-2.5 max-md:min-h-11 rounded-xl text-sm font-semibold text-white disabled:opacity-50 transition-colors"
             style={{ backgroundColor: TEAL_DEEP }}>
             {loading ? "Aanmaken..." : "Aanmaken"}
           </button>
@@ -310,7 +310,7 @@ function InviteJoinBar({ onJoined }: { onJoined: () => void }) {
           onKeyDown={e => e.key === "Enter" && handleJoin()}
         />
         <button onClick={handleJoin} disabled={loading || code.length < 6}
-          className="press flex-shrink-0 rounded-lg px-4 py-2 text-sm font-semibold text-white outline-none transition-colors hover:bg-[#115E59] focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-50"
+          className="press flex-shrink-0 rounded-lg px-4 py-2 text-sm font-semibold text-white outline-none max-md:min-h-11 transition-colors hover:bg-[#115E59] focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-50"
           style={{ backgroundColor: TEAL_DEEP }}>
           {loading ? "..." : "Deelnemen"}
         </button>
@@ -423,7 +423,7 @@ export default function GroepenPage() {
 
       {/* -- The horizon: the two ways in ------------------------------- */}
       <div className="scene-horizon">
-        <div className={`grid gap-4 p-4 shadow-lg shadow-black/20 sm:grid-cols-2 sm:gap-6 sm:p-5 ${TILE}`}>
+        <div className={`grid gap-4 p-4 shadow-lg shadow-black/20 md:grid-cols-2 sm:gap-6 sm:p-5 ${TILE}`}>
           <InviteJoinBar onJoined={loadGroups} />
 
           <div className="min-w-0">
@@ -438,10 +438,10 @@ export default function GroepenPage() {
                 />
               </div>
 
-              <div className="flex flex-shrink-0 gap-1 rounded-lg border border-white/20 bg-black/30 p-1">
+              <div className="flex flex-shrink-0 gap-1 rounded-lg border border-white/20 bg-black/30 p-1 max-md:w-full">
                 {(["discover", "mine"] as const).map(t => (
                   <button key={t} onClick={() => setTab(t)} aria-pressed={tab === t}
-                    className={`rounded-md px-3 py-1.5 text-xs font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-white ${
+                    className={`rounded-md px-3 py-1.5 text-xs font-semibold outline-none max-md:min-h-9 max-md:flex-1 max-md:text-sm transition-colors focus-visible:ring-2 focus-visible:ring-white ${
                       tab === t ? "bg-white text-gray-900" : "text-white/70 hover:text-white"
                     }`}>
                     {t === "discover" ? "Ontdekken" : `Mijn groepen (${myGroups.length})`}
@@ -486,7 +486,7 @@ export default function GroepenPage() {
               groepen zijn - probeer het opnieuw.
             </p>
             <button onClick={loadGroups}
-              className="press mt-5 inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white outline-none transition-colors hover:bg-[#115E59] focus-visible:ring-2 focus-visible:ring-white"
+              className="press mt-5 inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm max-md:min-h-11 font-semibold text-white outline-none transition-colors hover:bg-[#115E59] focus-visible:ring-2 focus-visible:ring-white"
               style={{ backgroundColor: TEAL_DEEP }}>
               <RefreshCw size={15} aria-hidden /> Opnieuw proberen
             </button>
@@ -522,7 +522,7 @@ export default function GroepenPage() {
                   </dl>
                 </div>
                 <button onClick={() => setShowCreate(true)}
-                  className="press mt-6 inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white outline-none transition-colors hover:bg-[#115E59] focus-visible:ring-2 focus-visible:ring-white"
+                  className="press mt-6 inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm max-md:min-h-11 font-semibold text-white outline-none transition-colors hover:bg-[#115E59] focus-visible:ring-2 focus-visible:ring-white"
                   style={{ backgroundColor: TEAL_DEEP }}>
                   <Plus size={15} aria-hidden /> Groep aanmaken
                 </button>

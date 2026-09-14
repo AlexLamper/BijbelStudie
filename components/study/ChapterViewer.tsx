@@ -276,7 +276,10 @@ export default function ChapterViewer({
                     </span>
                     <VerseMarkers annotation={marks} />
                   </p>
-                  <div className="absolute right-0 top-0 flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+                  {/* Hover controls. Below md there is no hover: a tap on a phone left
+                    them stuck over the end of the verse, and the tap itself
+                    already opens the note dialog they lead to. */}
+                  <div className="max-md:hidden absolute right-0 top-0 flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
                     <SpeakButton
                       compact
                       showSettings={false}

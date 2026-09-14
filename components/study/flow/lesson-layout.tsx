@@ -78,11 +78,11 @@ export const INK_MUTED = 'text-les-body';
 export const INK_FAINT = 'text-les-faint';
 
 /** The 88 px wash at the foot of a lesson column, from the theme's own token. */
-export function LesFade({ height = 88 }: { height?: number }) {
+export function LesFade({ height = 88, className = '' }: { height?: number; className?: string }) {
   return (
     <div
       aria-hidden
-      className="pointer-events-none absolute inset-x-0 bottom-0"
+      className={`pointer-events-none absolute inset-x-0 bottom-0 ${className}`}
       style={{ height, background: 'var(--les-fade)' }}
     />
   );
@@ -127,6 +127,12 @@ export function Marginal({
  * The rail becomes a stacked block below `xl`, where the step panel is already
  * taking 212 px off the left and a third column would squeeze the reading
  * measure below anything worth reading.
+ *
+ * BELOW md THE WHOLE PAGE IS ONE SCROLLER. Stacked under a column that scrolls
+ * on its own, the rail kept its full height pinned to the foot of the frame -
+ * on a phone, four margin notes left the passage a strip about 80 px tall. So
+ * there the column gives up its own scroller and the rail simply follows the
+ * text, the way a printed page puts its notes after the chapter.
  */
 export default function LessonLayout({
   eyebrow,
@@ -156,10 +162,10 @@ export default function LessonLayout({
   padTop?: number;
 }) {
   return (
-    <div className="flex h-full min-h-0 flex-col xl:flex-row">
-      <div className="relative flex min-h-0 flex-1 flex-col">
+    <div className="flex h-full min-h-0 flex-col xl:flex-row max-md:block max-md:overflow-y-auto max-md:overscroll-contain">
+      <div className="relative flex min-h-0 flex-1 flex-col max-md:block">
         <div
-          className="min-h-0 flex-1 overflow-y-auto px-5 pb-24 sm:px-[34px]"
+          className="min-h-0 flex-1 overflow-y-auto px-5 pb-24 sm:px-[34px] max-md:overflow-visible max-md:px-4 max-md:pb-8"
           style={{ paddingTop: padTop }}
         >
           <div className="min-w-0" style={measure === 'none' ? undefined : { maxWidth: measure }}>
@@ -173,13 +179,13 @@ export default function LessonLayout({
             {children}
           </div>
         </div>
-        <LesFade />
+        <LesFade className="max-md:hidden" />
       </div>
 
       {/* What supports the text stands beside it, never under it - until there
           is no room for a third column, and then it stacks. */}
       {aside ? (
-        <aside className="flex flex-none flex-col gap-[14px] border-t border-les-line px-[22px] py-5 xl:w-[262px] xl:overflow-y-auto xl:border-t-0 xl:pb-6 xl:pt-[26px]">
+        <aside className="flex flex-none flex-col gap-[14px] border-t border-les-line px-[22px] py-5 max-md:px-4 max-md:pb-8 xl:w-[262px] xl:overflow-y-auto xl:border-t-0 xl:pb-6 xl:pt-[26px]">
           {aside}
         </aside>
       ) : null}

@@ -31,7 +31,7 @@ type Tab = "discussie" | "notities" | "voortgang" | "leden"
 
 /** A field on the landscape: quiet glass, white type, a real focus ring. */
 const SCENE_FIELD =
-  "w-full rounded-md border border-white/20 bg-black/30 px-2.5 py-1.5 text-xs text-white outline-none transition-colors placeholder:text-white/50 focus-visible:ring-2 focus-visible:ring-white"
+  "w-full rounded-md border border-white/20 bg-black/30 px-2.5 py-1.5 text-xs text-white outline-none max-md:min-h-11 max-md:px-3 max-md:text-base transition-colors placeholder:text-white/50 focus-visible:ring-2 focus-visible:ring-white"
 
 /* ── Helpers ────────────────────────────────────────────────────── */
 /**
@@ -105,19 +105,19 @@ function AssignmentCard({
             <p className="mt-0.5 text-xs text-white/60">Deadline: {formatDate(assignment.dueDate)}</p>
           )}
           <Link
-            href={`/study?book=${encodeURIComponent(assignment.book)}&chapter=${assignment.chapter}&version=statenvertaling`}
-            className="press mt-3 inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold text-white no-underline outline-none transition-colors hover:bg-[#115E59] focus-visible:ring-2 focus-visible:ring-white"
+            href={`/lezen?book=${encodeURIComponent(assignment.book)}&chapter=${assignment.chapter}&version=statenvertaling`}
+            className="press mt-3 inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold text-white no-underline max-md:min-h-10 max-md:px-4 max-md:text-sm outline-none transition-colors hover:bg-[#115E59] focus-visible:ring-2 focus-visible:ring-white"
             style={{ backgroundColor: TEAL_DEEP }}>
             Lees nu
           </Link>
           {isLeader && (
             <div className="mt-3 flex items-center gap-4">
               <button onClick={() => setShowForm(true)}
-                className="rounded text-xs font-medium text-white/60 outline-none transition-colors hover:text-white focus-visible:ring-2 focus-visible:ring-white">
+                className="max-md:min-h-10 rounded text-xs font-medium text-white/60 outline-none transition-colors hover:text-white focus-visible:ring-2 focus-visible:ring-white">
                 Wijzigen
               </button>
               <button onClick={handleDelete}
-                className="rounded text-xs font-medium text-red-300 outline-none transition-colors hover:text-red-200 focus-visible:ring-2 focus-visible:ring-white">
+                className="max-md:min-h-10 rounded text-xs font-medium text-red-300 outline-none transition-colors hover:text-red-200 focus-visible:ring-2 focus-visible:ring-white">
                 Verwijderen
               </button>
             </div>
@@ -144,13 +144,13 @@ function AssignmentCard({
             className={`${SCENE_FIELD} [color-scheme:dark]`} />
           <div className="flex gap-2">
             <button onClick={handleSave} disabled={saving || !book.trim() || !chapter.trim()}
-              className="press flex-1 rounded-md py-1.5 text-xs font-semibold text-white outline-none transition-colors hover:bg-[#115E59] focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-50"
+              className="press flex-1 rounded-md py-1.5 text-xs max-md:min-h-11 max-md:text-sm font-semibold text-white outline-none transition-colors hover:bg-[#115E59] focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-50"
               style={{ backgroundColor: TEAL_DEEP }}>
               {saving ? "..." : "Opslaan"}
             </button>
             {showForm && (
               <button onClick={() => setShowForm(false)}
-                className="rounded-md border border-white/20 px-3 py-1.5 text-xs font-medium text-white/80 outline-none transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white">
+                className="rounded-md border border-white/20 px-3 py-1.5 text-xs max-md:min-h-11 max-md:text-sm font-medium text-white/80 outline-none transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white">
                 Annuleren
               </button>
             )}
@@ -261,7 +261,7 @@ export default function GroupDetailPage() {
       <section aria-labelledby="groep-titel" className="pb-10 pt-6">
         <div className="scene-sky">
           <Link href="/groepen"
-            className="inline-flex items-center gap-1.5 rounded-md text-xs font-semibold text-white/70 no-underline underline-offset-4 outline-none transition-colors hover:text-white hover:underline focus-visible:ring-2 focus-visible:ring-white">
+            className="inline-flex items-center gap-1.5 rounded-md text-xs font-semibold text-white/70 no-underline max-md:min-h-10 underline-offset-4 outline-none transition-colors hover:text-white hover:underline focus-visible:ring-2 focus-visible:ring-white">
             <ArrowLeft size={12} aria-hidden /> Terug naar groepen
           </Link>
 
@@ -274,11 +274,11 @@ export default function GroupDetailPage() {
                   : <Lock size={11} aria-hidden />}
                 {group.isPublic ? "Openbare groep" : "Privégroep"}
               </p>
-              <h1 id="groep-titel" className="mt-2 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+              <h1 id="groep-titel" className="mt-2 break-words text-3xl font-semibold tracking-tight text-white sm:text-4xl">
                 {group.name}
               </h1>
               {group.description && (
-                <p className="mt-3 text-sm leading-relaxed text-white/80">{group.description}</p>
+                <p className="mt-3 break-words text-sm leading-relaxed text-white/80">{group.description}</p>
               )}
               <p className="mt-3 text-xs text-white/60">
                 {group.members.length} {group.members.length === 1 ? "lid" : "leden"}
@@ -287,10 +287,10 @@ export default function GroupDetailPage() {
               </p>
             </div>
 
-            <div className="flex flex-shrink-0 items-center gap-2">
+            <div className="flex flex-shrink-0 max-md:flex-wrap items-center gap-2">
               {group.inviteCode && (
                 <button onClick={handleCopyCode}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-white/20 bg-black/30 px-3 py-2 text-xs font-semibold text-white outline-none transition-colors hover:bg-black/50 focus-visible:ring-2 focus-visible:ring-white">
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-white/20 bg-black/30 px-3 py-2 text-xs font-semibold text-white outline-none max-md:min-h-10 transition-colors hover:bg-black/50 focus-visible:ring-2 focus-visible:ring-white">
                   {copied
                     ? <Check size={12} aria-hidden style={{ color: TEAL_ON_DARK }} />
                     : <Copy size={12} aria-hidden />}
@@ -298,7 +298,7 @@ export default function GroupDetailPage() {
                 </button>
               )}
               <button onClick={handleLeave} disabled={leaving}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-white/20 bg-black/30 px-3 py-2 text-xs font-semibold text-red-200 outline-none transition-colors hover:bg-black/50 hover:text-red-100 focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-50">
+                className="inline-flex items-center gap-1.5 rounded-lg border border-white/20 bg-black/30 px-3 py-2 text-xs font-semibold text-red-200 max-md:min-h-10 outline-none transition-colors hover:bg-black/50 hover:text-red-100 focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-50">
                 <LogOut size={12} aria-hidden />
                 Verlaten
               </button>
@@ -312,7 +312,7 @@ export default function GroupDetailPage() {
         <div className={`flex w-fit max-w-full gap-1 overflow-x-auto p-1.5 shadow-lg shadow-black/20 ${TILE}`}>
           {TABS.map(tab => (
             <button key={tab.id} onClick={() => setActiveTab(tab.id)} aria-pressed={activeTab === tab.id}
-              className={`flex-shrink-0 rounded-lg px-4 py-2 text-sm font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-white ${
+              className={`flex-shrink-0 rounded-lg px-4 py-2 text-sm font-semibold outline-none max-md:px-3 transition-colors focus-visible:ring-2 focus-visible:ring-white ${
                 activeTab === tab.id ? "bg-white text-gray-900" : "text-white/70 hover:text-white"
               }`}>
               {tab.label}

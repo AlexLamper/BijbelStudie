@@ -653,12 +653,12 @@ export default function StudyFlowDemo({ lesson }: { lesson: DemoLesson }) {
                   go(index - 1);
                 }}
                 disabled={index === 0}
-                className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-[11.5px] font-medium ${index === 0 ? 'pointer-events-none border-transparent text-transparent' : 'bg-surface shadow-sm hover:bg-sunken'}`}
+                className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-[11.5px] font-medium max-md:min-h-9 max-md:text-[12.5px] ${index === 0 ? 'pointer-events-none border-transparent text-transparent' : 'bg-surface shadow-sm hover:bg-sunken'}`}
                 style={index === 0 ? undefined : { borderColor: 'var(--line-strong)', color: TEXT }}
               >
                 <ArrowLeft size={13} aria-hidden /> Vorige
               </button>
-              <span className="text-[10.5px]" style={{ color: MUTED }}>
+              <span className="text-[10.5px] max-sm:hidden" style={{ color: MUTED }}>
                 {STEP_LABEL[frame]}
               </span>
               <button
@@ -667,7 +667,7 @@ export default function StudyFlowDemo({ lesson }: { lesson: DemoLesson }) {
                   event.stopPropagation();
                   go(index + 1);
                 }}
-                className="press inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-[11.5px] font-semibold text-white"
+                className="press inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-[11.5px] font-semibold text-white max-md:min-h-9 max-md:text-[12.5px]"
                 style={{ backgroundColor: TEAL }}
               >
                 {nextLabel} <ArrowRight size={13} aria-hidden />
@@ -692,7 +692,7 @@ export default function StudyFlowDemo({ lesson }: { lesson: DemoLesson }) {
               type="button"
               onClick={() => setHeld((value) => !value)}
               aria-pressed={held}
-              className="inline-flex h-8 items-center gap-1.5 rounded-lg border bg-surface px-3 text-[12px] font-semibold transition-colors hover:bg-sunken"
+              className="inline-flex h-8 flex-none items-center gap-1.5 rounded-lg border bg-surface px-3 text-[12px] font-semibold transition-colors hover:bg-sunken max-md:h-10"
               style={{ borderColor: BORDER, color: TEXT }}
             >
               {held ? <Play size={12} aria-hidden /> : <Pause size={12} aria-hidden />}
@@ -716,7 +716,7 @@ export default function StudyFlowDemo({ lesson }: { lesson: DemoLesson }) {
                 type="button"
                 onClick={() => go(i)}
                 aria-current={active ? 'step' : undefined}
-                className="flex w-full items-start gap-3 rounded-xl border px-3 py-2 text-left transition-colors lg:px-3.5 lg:py-3"
+                className="flex w-full items-start gap-3 rounded-xl border px-3 py-2 text-left transition-colors max-md:min-h-10 max-md:items-center lg:px-3.5 lg:py-3"
                 style={{
                   borderColor: active ? 'rgba(13,148,136,0.45)' : BORDER,
                   backgroundColor: active ? 'rgba(13,148,136,0.06)' : 'var(--surface)',

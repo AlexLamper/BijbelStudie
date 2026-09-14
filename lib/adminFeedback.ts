@@ -2,7 +2,7 @@ import connectMongoDB from "./mongodb";
 import Feedback from "../models/Feedback";
 
 /**
- * The read-out behind `/admin/feedback` and `GET /api/admin/feedback`.
+ * The read-out behind `/beheer/feedback` and `GET /api/admin/feedback`.
  *
  * Phase 1 of FEEDBACK_PLAN.md scopes this deliberately small: a filterable
  * list, nothing else. No themes UI, no sentiment scoring, no charts - those

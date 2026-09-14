@@ -91,7 +91,7 @@ function ReactionBar({
     <div className="flex items-center gap-1 flex-wrap relative">
       {Object.entries(grouped).map(([emoji, { count, mine }]) => (
         <button key={emoji} onClick={() => toggle(emoji)}
-          className={`flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-xs border transition-colors ${
+          className={`flex items-center gap-0.5 px-1.5 py-0.5 max-md:min-h-8 max-md:px-2.5 rounded-full text-xs border transition-colors ${
             mine ? "bg-teal/10 border-teal/30 text-teal dark:text-teal-400" : "bg-sunken border-line text-ink-muted"
           }`}>
           {emoji} {count}
@@ -99,13 +99,13 @@ function ReactionBar({
       ))}
       <div className="relative">
         <button onClick={() => setShowPicker(v => !v)}
-          className="text-xs px-1.5 py-0.5 rounded-full border border-gray-200 dark:border-border text-gray-400 hover:text-gray-600 dark:hover:text-foreground transition-colors">
+          className="text-xs px-1.5 py-0.5 max-md:min-h-8 max-md:min-w-8 max-md:text-sm rounded-full border border-gray-200 dark:border-border text-gray-400 hover:text-gray-600 dark:hover:text-foreground transition-colors">
           +
         </button>
         {showPicker && (
-          <div className="absolute bottom-7 left-0 flex gap-1 bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-2 shadow-lg z-10">
+          <div className="absolute bottom-7 left-0 flex gap-1 max-md:bottom-10 max-md:grid max-md:grid-cols-4 bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-2 shadow-lg z-10">
             {EMOJI_PICKER.map(e => (
-              <button key={e} onClick={() => toggle(e)} className="hover:scale-125 transition-transform text-base">
+              <button key={e} onClick={() => toggle(e)} className="hover:scale-125 transition-transform text-base max-md:h-10 max-md:w-10 max-md:text-xl">
                 {e}
               </button>
             ))}
@@ -145,7 +145,7 @@ function ReplyThread({
   if (loading) return <div className="ml-10 mt-2 h-4 bg-gray-100 dark:bg-secondary rounded skeleton-pulse w-2/3" />
 
   return (
-    <div className="ml-10 mt-2 space-y-2 border-l-2 border-gray-100 dark:border-border pl-3">
+    <div className="ml-10 max-md:ml-4 mt-2 space-y-2 border-l-2 border-gray-100 dark:border-border pl-3">
       {replies.map(r => (
         <div key={r._id} className="flex items-start gap-2">
           {r.userId ? <Avatar name={r.userId.name} size={6} card={r.userId.levensboom} /> : <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-secondary" />}
@@ -158,10 +158,10 @@ function ReplyThread({
                   <span className="text-xs font-semibold text-gray-700 dark:text-foreground">{r.userId?.name}</span>
                   <span className="text-[10px] text-gray-400">{relativeTime(r.createdAt)}</span>
                 </div>
-                <p className="text-sm text-gray-700 dark:text-foreground/80 leading-relaxed">{r.content}</p>
+                <p className="text-sm text-gray-700 dark:text-foreground/80 leading-relaxed break-words">{r.content}</p>
                 {(r.userId?._id === currentUserId || currentUserRole === "leader") && (
                   <button onClick={() => handleDelete(r._id)}
-                    className="mt-0.5 text-[10px] text-gray-400 hover:text-red-500 transition-colors">
+                    className="mt-0.5 text-[10px] max-md:min-h-8 max-md:text-xs text-gray-400 hover:text-red-500 transition-colors">
                     Verwijderen
                   </button>
                 )}
@@ -194,7 +194,7 @@ function MessageCard({
     "bg-white dark:bg-card border-gray-200 dark:border-border"
 
   return (
-    <div className={`rounded-xl p-4 border ${cardBg}`}>
+    <div className={`rounded-xl p-4 max-md:p-3 border ${cardBg}`}>
       {msg.deletedAt ? (
         <p className="text-sm text-gray-400 dark:text-muted-foreground italic">Dit bericht is verwijderd.</p>
       ) : (
@@ -212,7 +212,7 @@ function MessageCard({
                   {msg.verseRef.book} {msg.verseRef.chapter}{msg.verseRef.verse ? `:${msg.verseRef.verse}` : ""}
                 </p>
               )}
-              <p className="text-sm text-gray-800 dark:text-foreground leading-relaxed whitespace-pre-wrap">
+              <p className="text-sm text-gray-800 dark:text-foreground leading-relaxed whitespace-pre-wrap break-words">
                 {msg.content}
               </p>
 
@@ -225,20 +225,21 @@ function MessageCard({
                   onUpdate={onReactionUpdate}
                 />
                 <button onClick={() => { onReply(msg) }}
-                  className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 dark:hover:text-foreground transition-colors">
+                  className="flex items-center gap-1 max-md:min-h-8 text-xs text-gray-400 hover:text-gray-600 dark:hover:text-foreground transition-colors">
                   <Reply size={11} /> Antwoord
                 </button>
                 {localReplyCount > 0 && (
                   <button onClick={() => setShowReplies(v => !v)}
-                    className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 dark:hover:text-foreground transition-colors">
+                    className="flex items-center gap-1 max-md:min-h-8 text-xs text-gray-400 hover:text-gray-600 dark:hover:text-foreground transition-colors">
                     <ChevronDown size={11} className={showReplies ? "rotate-180" : ""} />
                     {localReplyCount} {localReplyCount === 1 ? "antwoord" : "antwoorden"}
                   </button>
                 )}
                 {(msg.userId?._id === currentUserId || currentUserRole === "leader") && (
                   <button onClick={() => onDelete(msg._id)}
-                    className="ml-auto flex items-center gap-1 text-xs text-gray-400 hover:text-red-500 transition-colors">
-                    <Trash2 size={10} />
+                    aria-label="Bericht verwijderen"
+                    className="ml-auto flex items-center gap-1 max-md:h-9 max-md:w-9 max-md:justify-center text-xs text-gray-400 hover:text-red-500 transition-colors">
+                    <Trash2 size={10} className="max-md:h-4 max-md:w-4" />
                   </button>
                 )}
               </div>
@@ -375,7 +376,7 @@ export default function DiscussieTab({
       {/* "Load older" */}
       {hasMore && (
         <button onClick={handleLoadMore} disabled={loadingMore}
-          className="text-xs font-medium text-center py-2 text-gray-400 dark:text-muted-foreground hover:text-gray-600 dark:hover:text-foreground transition-colors">
+          className="text-xs max-md:min-h-10 font-medium text-center py-2 text-gray-400 dark:text-muted-foreground hover:text-gray-600 dark:hover:text-foreground transition-colors">
           {loadingMore ? "Laden..." : "Oudere berichten laden"}
         </button>
       )}
@@ -425,7 +426,7 @@ export default function DiscussieTab({
       <div ref={bottomRef} />
 
       {/* Composer */}
-      <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-4 space-y-3 sticky bottom-4">
+      <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-4 max-md:p-3 space-y-3 sticky bottom-4">
         {/* Reply-to banner */}
         {replyTo && (
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs"
@@ -434,7 +435,7 @@ export default function DiscussieTab({
             <span className="text-gray-600 dark:text-muted-foreground">
               Antwoord op <span className="font-semibold text-gray-800 dark:text-foreground">{replyTo.userId?.name}</span>
             </span>
-            <button onClick={() => setReplyTo(null)} className="ml-auto text-gray-400 hover:text-gray-600 dark:hover:text-foreground">
+            <button onClick={() => setReplyTo(null)} aria-label="Antwoord annuleren" className="ml-auto max-md:-my-1 max-md:flex max-md:h-8 max-md:w-8 max-md:items-center max-md:justify-center text-gray-400 hover:text-gray-600 dark:hover:text-foreground">
               <X size={12} />
             </button>
           </div>
@@ -446,7 +447,7 @@ export default function DiscussieTab({
           onKeyDown={e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) handleSubmit() }}
           placeholder={replyTo ? `Antwoord op ${replyTo.userId?.name}...` : "Schrijf een bericht..."}
           rows={3}
-          className="w-full text-sm bg-transparent border-0 resize-none focus:outline-none text-gray-900 dark:text-foreground placeholder:text-gray-400 dark:placeholder:text-muted-foreground"
+          className="w-full text-sm max-md:text-base bg-transparent border-0 resize-none focus:outline-none text-gray-900 dark:text-foreground placeholder:text-gray-400 dark:placeholder:text-muted-foreground"
           maxLength={2000}
         />
 
@@ -455,7 +456,7 @@ export default function DiscussieTab({
             {/* Type pills */}
             {!replyTo && MSG_TYPES.map(({ type, label }) => (
               <button key={type} onClick={() => setType(type)}
-                className={`text-xs px-2.5 py-1 rounded-full border font-medium transition-colors ${
+                className={`text-xs px-2.5 py-1 max-md:min-h-9 max-md:px-3 rounded-full border font-medium transition-colors ${
                   composerType === type ? "bg-teal border-teal text-white" : "bg-transparent border-line text-ink-muted"
                 }`}>
                 {label}
@@ -464,7 +465,7 @@ export default function DiscussieTab({
 
             {/* Verse ref toggle */}
             <button onClick={() => setShowVI(v => !v)}
-              className="flex items-center gap-1 text-xs px-2 py-1 rounded-full border text-gray-500 dark:text-muted-foreground border-gray-200 dark:border-border hover:text-gray-700 dark:hover:text-foreground transition-colors">
+              className="flex items-center gap-1 text-xs px-2 py-1 max-md:min-h-9 max-md:px-3 rounded-full border text-gray-500 dark:text-muted-foreground border-gray-200 dark:border-border hover:text-gray-700 dark:hover:text-foreground transition-colors">
               <BookOpen size={10} />
               {showVerseInput ? "Verwijzing verbergen" : "Bijbelverwijzing"}
             </button>
@@ -473,7 +474,7 @@ export default function DiscussieTab({
           <button
             onClick={handleSubmit}
             disabled={!composerText.trim() || submitting}
-            className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold text-white disabled:opacity-40 transition-opacity hover:opacity-90"
+            className="flex items-center gap-1.5 px-4 py-1.5 max-md:min-h-10 max-md:ml-auto rounded-lg text-sm font-semibold text-white disabled:opacity-40 transition-opacity hover:opacity-90"
             style={{ backgroundColor: "#0D9488" }}>
             <Send size={13} />
             {submitting ? "..." : "Versturen"}
@@ -483,28 +484,28 @@ export default function DiscussieTab({
         {/* Verse reference inputs */}
         {showVerseInput && (
           <div className="flex items-end gap-2 pt-1 border-t border-gray-100 dark:border-border">
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <label className="text-[10px] text-gray-400 dark:text-muted-foreground block mb-1">Boek</label>
               <input value={verseBook} onChange={e => setVerseBook(e.target.value)}
                 placeholder="bijv. Johannes"
-                className="w-full px-2 py-1.5 border border-gray-200 dark:border-border rounded-md text-xs bg-white dark:bg-card text-gray-900 dark:text-foreground focus:outline-none" />
+                className="w-full px-2 py-1.5 max-md:min-h-10 max-md:text-base border border-gray-200 dark:border-border rounded-md text-xs bg-white dark:bg-card text-gray-900 dark:text-foreground focus:outline-none" />
             </div>
-            <div className="w-16">
+            <div className="w-16 max-md:w-[4.5rem]">
               <label className="text-[10px] text-gray-400 dark:text-muted-foreground block mb-1">Hfdst.</label>
               <input type="number" value={verseChapter} onChange={e => setVerseChapter(e.target.value)}
                 placeholder="3"
-                className="w-full px-2 py-1.5 border border-gray-200 dark:border-border rounded-md text-xs bg-white dark:bg-card text-gray-900 dark:text-foreground focus:outline-none" />
+                className="w-full px-2 py-1.5 max-md:min-h-10 max-md:text-base border border-gray-200 dark:border-border rounded-md text-xs bg-white dark:bg-card text-gray-900 dark:text-foreground focus:outline-none" />
             </div>
-            <div className="w-16">
+            <div className="w-16 max-md:w-[4.5rem]">
               <label className="text-[10px] text-gray-400 dark:text-muted-foreground block mb-1">Vers</label>
               <input type="number" value={verseVerse} onChange={e => setVerseVerse(e.target.value)}
                 placeholder="16"
-                className="w-full px-2 py-1.5 border border-gray-200 dark:border-border rounded-md text-xs bg-white dark:bg-card text-gray-900 dark:text-foreground focus:outline-none" />
+                className="w-full px-2 py-1.5 max-md:min-h-10 max-md:text-base border border-gray-200 dark:border-border rounded-md text-xs bg-white dark:bg-card text-gray-900 dark:text-foreground focus:outline-none" />
             </div>
           </div>
         )}
 
-        <p className="text-[10px] text-gray-300 dark:text-muted-foreground/50 text-right">{composerText.length}/2000 · Ctrl+Enter om te versturen</p>
+        <p className="text-[10px] text-gray-300 dark:text-muted-foreground/50 text-right">{composerText.length}/2000<span className="max-md:hidden"> · Ctrl+Enter om te versturen</span></p>
       </div>
     </div>
   )

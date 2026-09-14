@@ -1,38 +1,50 @@
 "use client";
 
-import { Header } from "../../components/landing/navbar";
-import { Footer } from "../../components/landing/footer";
-import { useTranslation } from "../i18n/client";
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
+import Link from "next/link";
 import { Mail } from "lucide-react";
+import { useTranslation } from "../i18n/client";
+import { PublicFrame } from "../../components/content/PublicFrame";
+import { CONTACT_EMAIL } from "../../lib/seo/constants";
 
 export default function ContactPage() {
-	const { t } = useTranslation("contact");
+  const { t } = useTranslation("contact");
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-background flex flex-col">
-      <Header />
-      <main className="flex-grow container mx-auto px-6 lg:px-8 py-12">
-        <div className="max-w-2xl mx-auto">
-          <h1 className="text-4xl font-bold text-ink mb-6 text-center">{t("title")}</h1>
-          <p className="text-lg text-gray-600 dark:text-ink-muted mb-12 text-center">{t("description")}</p>
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("contact_info")}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-start space-x-3">
-                <Mail className="w-5 h-5 text-brand mt-1" />
-                <div>
-                  <h3 className="font-medium text-ink">{t("email")}</h3>
-                  <p className="text-gray-600 dark:text-ink-muted">info@bijbelstudie.io</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+    <PublicFrame eyebrow="Contact" title={t("title")} lead={t("description")}>
+      <div className="rounded-card border border-line bg-surface px-4 py-5 sm:px-[22px]">
+        <h2 className="text-[16.5px] font-bold text-ink">{t("contact_info")}</h2>
+
+        <div className="mt-4 flex items-center gap-3 border-t border-line-soft pt-4">
+          {/* Identifies the row as an e-mail address. */}
+          <span className="flex h-9 w-9 flex-none items-center justify-center rounded-[10px] bg-teal-faint text-teal dark:text-teal-400">
+            <Mail size={17} aria-hidden />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-[12px] text-ink-muted">{t("email")}</p>
+            <a
+              href={`mailto:${CONTACT_EMAIL}`}
+              className="block break-all text-[14.5px] font-semibold text-ink no-underline hover:text-teal dark:hover:text-teal-400"
+            >
+              {CONTACT_EMAIL}
+            </a>
+          </div>
         </div>
-      </main>
-      <Footer />
-    </div>
+
+        <a
+          href={`mailto:${CONTACT_EMAIL}`}
+          className="mt-4 flex h-[38px] w-full items-center justify-center rounded-[9px] border border-line text-[13px] font-semibold text-ink-body no-underline transition-colors hover:bg-line-soft sm:inline-flex sm:w-auto sm:px-5"
+        >
+          Mail het team
+        </a>
+      </div>
+
+      <p className="px-1 text-[12.5px] leading-[1.6] text-ink-faint">
+        Een vraag over je account of abonnement? Kijk eerst bij{" "}
+        <Link href="/help" className="font-semibold text-teal no-underline hover:text-teal-dark dark:text-teal-400 dark:hover:text-teal-300">
+          Help
+        </Link>
+        .
+      </p>
+    </PublicFrame>
   );
 }

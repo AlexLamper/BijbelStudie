@@ -66,7 +66,7 @@ export default function StudyMaterialsSection({
     <section className="flex h-full min-w-0 flex-col overflow-hidden bg-surface">
 
       {/* Tab bar - 56 px, underline style, the pane's only hairline. */}
-      <div className="flex h-14 flex-none items-stretch gap-[14px] overflow-x-auto border-b border-line px-4">
+      <div className="flex h-14 flex-none items-stretch gap-[14px] overflow-x-auto border-b border-line px-4 max-md:h-12 max-md:gap-4 max-md:overscroll-x-contain">
         {tabs.map(({ id, label, icon, isPro, star }) => {
           const active = activeTab === id;
           return (

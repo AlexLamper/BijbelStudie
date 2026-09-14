@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 
 /**
- * Page views and clicks, for /admin/insights.
+ * Page views and clicks, for /beheer/inzichten.
  *
  * Two listeners and nothing else. Mounted once in the root layout.
  *

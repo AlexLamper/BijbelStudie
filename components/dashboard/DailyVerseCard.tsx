@@ -285,7 +285,7 @@ export default function DailyVerseCard({
         }}
       />
 
-      <div className="relative z-[1] flex flex-1 flex-col px-[26px] pb-5 pt-[22px]">
+      <div className="relative z-[1] flex flex-1 flex-col px-[26px] pb-5 pt-[22px] max-md:px-5">
         {/* One eyebrow carries both the label and the reference, so the verse
             itself is the next thing the eye lands on. */}
         <p className="text-[10.5px] font-semibold uppercase tracking-[1.5px] text-white/[0.82]">

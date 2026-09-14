@@ -9,6 +9,7 @@ import {
   type BookGenre,
 } from "../../lib/content/bibleBooks";
 import { ContentShell, RelatedLinks } from "../../components/content/ContentShell";
+import { Card } from "../../components/kit/primitives";
 import { JsonLd } from "../../components/seo/JsonLd";
 import { absoluteUrl } from "../../lib/seo/constants";
 import {
@@ -79,24 +80,24 @@ export default function BijbelboekenPage() {
   return (
     <ContentShell crumbs={CRUMBS}>
       <JsonLd data={pageGraph} />
-      <div className="max-w-4xl mx-auto px-6 py-12 lg:py-16">
+      <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12 lg:py-16">
         <header className="mb-10">
           <p
-            className="text-xs font-bold uppercase tracking-widest mb-3 text-teal-dark dark:text-teal-400"
+            className="mb-2 text-[10.5px] font-semibold uppercase tracking-[1.1px] text-teal-dark dark:text-teal-400"
           >
             Naslag
           </p>
-          <h1 className="text-3xl lg:text-4xl font-extrabold tracking-tight leading-tight text-gray-900 dark:text-foreground">
+          <h1 className="text-[28px] font-bold leading-tight tracking-[-0.5px] text-ink sm:text-[34px]">
             De 66 bijbelboeken op een rij
           </h1>
-          <p className="mt-4 text-lg leading-relaxed text-gray-600 dark:text-muted-foreground">
+          <p className="mt-3 text-[15px] leading-[1.7] text-ink-muted sm:text-[16px]">
             Van Genesis tot Openbaring: per boek de schrijver, de ontstaanstijd,
             het genre, het kernthema en de hoofdlijn - plus studievragen om er
             zelf mee aan de slag te gaan.
           </p>
         </header>
 
-        <div className="grid grid-cols-3 gap-3 mb-12">
+        <div className="mb-10 grid grid-cols-3 gap-2 sm:mb-12 sm:gap-[13px]">
           <Stat label="Boeken" value="66" />
           <Stat label="Oude Testament" value={String(ot.length)} />
           <Stat label="Nieuwe Testament" value={String(nt.length)} />
@@ -115,16 +116,16 @@ export default function BijbelboekenPage() {
         />
 
         <section id="veelgestelde-vragen" className="mt-16 scroll-mt-24">
-          <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-foreground">
+          <h2 className="mb-4 text-[19px] font-bold tracking-[-0.2px] text-ink sm:text-[21px]">
             Veelgestelde vragen over de bijbelboeken
           </h2>
-          <div className="space-y-5">
-            {FAQS.map(faq => (
-              <div key={faq.q}>
-                <h3 className="font-bold text-base text-gray-900 dark:text-foreground">
+          <div className="rounded-card border border-line bg-surface px-4 py-1 sm:px-[22px]">
+            {FAQS.map((faq, i) => (
+              <div key={faq.q} className={`py-4 ${i === 0 ? "" : "border-t border-line-soft"}`}>
+                <h3 className="text-[14.5px] font-bold text-ink">
                   {faq.q}
                 </h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-gray-600 dark:text-muted-foreground">
+                <p className="mt-1.5 text-[13.5px] leading-[1.7] text-ink-body">
                   {faq.a}
                 </p>
               </div>
@@ -163,16 +164,14 @@ export default function BijbelboekenPage() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div
-      className="rounded-xl border bg-surface p-4 text-center border-line"
-    >
-      <div className="text-2xl font-extrabold tabular-nums text-teal-dark dark:text-teal-400">
+    <Card className="px-3 py-3 text-center sm:px-[17px] sm:py-[15px]">
+      <div className="text-[22px] font-bold tracking-[-0.5px] tabular-nums text-teal-dark dark:text-teal-400 sm:text-[25px]">
         {value}
       </div>
-      <div className="text-xs mt-0.5 text-gray-500 dark:text-muted-foreground">
+      <div className="mt-[2px] text-[11px] leading-tight text-ink-muted sm:text-[12px]">
         {label}
       </div>
-    </div>
+    </Card>
   );
 }
 
@@ -189,8 +188,8 @@ function TestamentSection({
 
   return (
     <section className="mb-14">
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-foreground">{title}</h2>
-      <p className="mt-2 mb-6 text-sm leading-relaxed text-gray-600 dark:text-muted-foreground">
+      <h2 className="text-[19px] font-bold tracking-[-0.2px] text-ink sm:text-[21px]">{title}</h2>
+      <p className="mb-6 mt-2 text-[13.5px] leading-[1.7] text-ink-muted">
         {description}
       </p>
 
@@ -208,7 +207,7 @@ function TestamentSection({
 function GenreGroup({ genre, books }: { genre: BookGenre; books: BibleBook[] }) {
   return (
     <div className="mb-7">
-      <h3 className="text-xs font-bold uppercase tracking-widest mb-3 text-gray-500 dark:text-muted-foreground">
+      <h3 className="mb-3 text-[10.5px] font-semibold uppercase tracking-[1.1px] text-ink-faint">
         {genre}
         <span className="ml-2 font-medium normal-case tracking-normal">
           ({books.length})
@@ -219,7 +218,7 @@ function GenreGroup({ genre, books }: { genre: BookGenre; books: BibleBook[] }) 
           <li key={book.slug}>
             <Link
               href={`/bijbelboeken/${book.slug}`}
-              className="group flex items-baseline gap-3 rounded-lg border bg-surface px-4 py-3 transition-colors hover:border-teal-500 no-underline border-line"
+              className="group flex items-baseline gap-3 rounded-btn border border-line bg-surface px-4 py-3 no-underline transition-colors hover:border-line-strong"
             >
               <span
                 className="text-[10px] font-bold tabular-nums shrink-0 w-5 text-teal-dark dark:text-teal-400"
@@ -228,10 +227,10 @@ function GenreGroup({ genre, books }: { genre: BookGenre; books: BibleBook[] }) 
                 {book.position}
               </span>
               <span className="min-w-0">
-                <span className="font-semibold text-sm block text-gray-900 dark:text-foreground group-hover:underline">
+                <span className="block text-[14px] font-semibold text-ink group-hover:text-teal-dark dark:group-hover:text-teal-400">
                   {book.name}
                 </span>
-                <span className="text-xs mt-0.5 block text-gray-500 dark:text-muted-foreground">
+                <span className="mt-0.5 block text-[12px] text-ink-faint">
                   {book.chapters} {book.chapters === 1 ? "hoofdstuk" : "hoofdstukken"} · {book.theme}
                 </span>
               </span>

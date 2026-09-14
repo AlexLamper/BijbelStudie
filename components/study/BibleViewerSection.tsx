@@ -37,7 +37,7 @@ interface BibleViewerSectionProps {
 
 /** A 36 px square control in the toolbar: white, hairline border, radius 9. */
 const TOOL_BTN =
-  'flex h-9 w-9 flex-none items-center justify-center rounded-[9px] border border-line bg-surface text-ink-body transition-colors hover:bg-line-soft disabled:cursor-not-allowed disabled:opacity-40';
+  'flex h-9 w-9 flex-none items-center justify-center rounded-[9px] border border-line bg-surface text-ink-body transition-colors hover:bg-line-soft disabled:cursor-not-allowed disabled:opacity-40 max-md:h-10 max-md:w-10';
 
 export default function BibleViewerSection({
   selectedBook,
@@ -96,21 +96,30 @@ export default function BibleViewerSection({
     <SpokenTextScope>
       <section className="flex h-full min-w-0 flex-col bg-surface">
         {/* Toolbar - 56 px, in the design's order: reading preferences, a rule,
-            then the chapter controls, and read-aloud alone on the right. */}
+            then the chapter controls, and read-aloud alone on the right.
+
+            Below md that single row is 600-odd px of fixed-width boxes, so it
+            wraps into two with `order`: translation, type and read-aloud on
+            top; previous, book, chapter and next underneath. The DOM order -
+            and with it the md+ row - is untouched. */}
         <div
           data-tour="bible-selector"
-          className="flex h-14 flex-none items-center gap-[9px] border-b border-line px-4"
+          className="flex h-14 flex-none items-center gap-[9px] border-b border-line px-4 max-md:h-auto max-md:flex-wrap max-md:gap-x-2 max-md:gap-y-0 max-md:px-3 max-md:py-2"
         >
-          <ReadingPreferencesMenu preferences={preferences} onUpdate={onUpdatePreferences} />
+          <ReadingPreferencesMenu
+            preferences={preferences}
+            onUpdate={onUpdatePreferences}
+            triggerClassName="max-md:order-2"
+          />
 
-          <div className="mx-[2px] h-[22px] w-px flex-none bg-line" />
+          <div className="mx-[2px] h-[22px] w-px flex-none bg-line max-md:hidden" />
 
           <button
             onClick={onPreviousChapter}
             disabled={selectedChapter <= 1}
             title={t('previous_chapter')}
             aria-label={t('previous_chapter')}
-            className={TOOL_BTN}
+            className={`${TOOL_BTN} max-md:order-5`}
           >
             <ChevronLeft size={17} strokeWidth={2} />
           </button>
@@ -136,12 +145,13 @@ export default function BibleViewerSection({
             disabled={selectedChapter >= maxChapter}
             title={t('next_chapter')}
             aria-label={t('next_chapter')}
-            className={TOOL_BTN}
+            className={`${TOOL_BTN} max-md:order-8`}
           >
             <ChevronRight size={17} strokeWidth={2} />
           </button>
 
-          <div className="flex-1" />
+          {/* The spacer; below md, the line break between the two rows. */}
+          <div className="flex-1 max-md:order-4 max-md:h-2 max-md:basis-full" />
 
           {/* An icon button, never a labelled one: the toolbar is already five
               controls wide and the glyph says it. */}
@@ -150,7 +160,7 @@ export default function BibleViewerSection({
             showSettings={false}
             getText={() => chapterText}
             label="Lees hoofdstuk voor"
-            className="h-8 w-8 flex-none rounded-lg text-teal dark:text-teal-400 hover:bg-line-soft"
+            className="h-8 w-8 flex-none rounded-lg text-teal dark:text-teal-400 hover:bg-line-soft max-md:order-3 max-md:h-10 max-md:w-10"
             icon={<Volume2 size={17} strokeWidth={1.9} />}
           />
         </div>
@@ -158,7 +168,7 @@ export default function BibleViewerSection({
         {/* The chapter line. It sits ABOVE the scroller, so it stays put while
             the passage moves under it. */}
         {selectedBook && selectedChapter ? (
-          <div className="flex flex-none items-center px-[30px] pt-[14px]">
+          <div className="flex flex-none items-center px-[30px] pt-[14px] max-md:px-4">
             <div className="flex-1 text-[12px] font-bold uppercase tracking-[1.3px] text-ink-muted">
               {selectedBook} {selectedChapter}
             </div>
@@ -179,7 +189,7 @@ export default function BibleViewerSection({
         {/* The passage. Absolute scroller inside a relative box, so the fade at
             its foot lies over real text rather than pushing it up. */}
         <div className="relative min-h-0 flex-1">
-          <div className="absolute inset-0 overflow-y-auto px-[30px] pb-32 pt-[14px]">
+          <div className="absolute inset-0 overflow-y-auto px-[30px] pb-32 pt-[14px] max-md:px-4">
             {selectedBook && selectedChapter && selectedVersion ? (
               <ChapterViewer
                 version={selectedVersion}

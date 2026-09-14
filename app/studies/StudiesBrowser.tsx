@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { ChevronLeft, ChevronRight, Search } from 'lucide-react'
 import type { CuratedStudy } from '../../lib/data/curated-studies'
 import { CATALOGUE_ENTRIES, isBookStudyId } from '../../lib/bookStudies'
-import { Card, Chip, SectionHeading, StudyCard, ListRow } from '../../components/kit/primitives'
+import { Card, Chip, SectionHeading, StudyCard, ProgressBar } from '../../components/kit/primitives'
 import StudyArtwork from './StudyArtwork'
 
 const COMPLETED_KEY = 'bijbelstudie_completed_studies'
@@ -14,7 +14,8 @@ const COMPLETED_KEY = 'bijbelstudie_completed_studies'
 // The study catalogue (design_handoff_web/PAGES.md §2): one column at full
 // width - a 440 px search field, the kind filters as pills, the study you are
 // in, a sideways-scrolling row of featured cards, and then every study as a
-// list row, ten at a time, down the page.
+// compact card in a responsive grid (1/2/3/4 columns), twelve at a time, with
+// the kind pills directly above it.
 //
 // The data layer below is the one this screen already had: the same
 // localStorage key, the same two endpoints, the same `statusFor`. Nothing was
@@ -92,8 +93,11 @@ const ENTRIES: Entry[] = CATALOGUE_ENTRIES.map(
  */
 const FEATURED_COUNT = 10
 
-/** How many rows "Alle studies" shows at first, and adds per "Meer tonen". */
-const LIST_PAGE_SIZE = 10
+/**
+ * How many cards "Alle studies" shows at first, and adds per "Meer tonen".
+ * Twelve so every page fills whole rows at two, three and four columns.
+ */
+const LIST_PAGE_SIZE = 12
 
 /**
  * The featured cards: the HAND-AUTHORED studies, in catalogue order.
@@ -262,7 +266,7 @@ export default function StudiesBrowser() {
     <div className="flex flex-col gap-[13px]">
       {/* The search is a real field here, not the bar's grey plate: this is the
           fastest way through seventy-seven studies. */}
-      <div className="flex h-[46px] w-full max-w-[440px] flex-none items-center gap-[10px] rounded-[12px] border border-line-strong bg-surface px-[15px] shadow-field">
+      <div className="search-field flex h-[46px] w-full max-w-[440px] flex-none items-center gap-[10px] rounded-[12px] border border-line-strong bg-surface px-[15px] shadow-field">
         <Search size={18} strokeWidth={1.9} className="flex-none text-ink-muted" />
         <input
           type="search"
@@ -276,19 +280,6 @@ export default function StudiesBrowser() {
           ⌘K
         </span>
       </div>
-
-      {searchResults === null && (
-        <div className="flex flex-none flex-wrap gap-[9px]">
-          {KINDS.map(item => (
-            <Chip
-              key={item.label}
-              label={item.label}
-              active={item.value === kind}
-              onClick={() => changeKind(item.value)}
-            />
-          ))}
-        </div>
-      )}
 
       {searchResults === null && resume && (
         // A resume card with room for a long title, capped so that on a wide
@@ -403,51 +394,38 @@ export default function StudiesBrowser() {
         className="flex-none"
       />
 
-      {/* The list grows with the page and the page scrolls; it is paged
-          client-side in steps of ten so the first screen stays light. */}
-      <Card className="flex-none overflow-hidden">
-        {rows.length === 0 ? (
+      {/* The kind filter sits directly over the grid it narrows. */}
+      {searchResults === null && (
+        <div className="flex flex-none flex-wrap gap-[9px]">
+          {KINDS.map(item => (
+            <Chip
+              key={item.label}
+              label={item.label}
+              active={item.value === kind}
+              onClick={() => changeKind(item.value)}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* A grid of compact cards rather than full-width rows: a study is a
+          title, a meta line and its state, which never needed 1000 px. Paged
+          client-side in steps of twelve so the first screen stays light. */}
+      {rows.length === 0 ? (
+        <Card className="flex-none">
           <p className="px-[18px] py-6 text-[13.5px] leading-relaxed text-ink-muted">
             {searchResults
               ? `Niets gevonden voor "${query.trim()}". Probeer de naam van een bijbelboek, een persoon of een thema.`
               : 'Geen studie past bij dit filter.'}
           </p>
-        ) : (
-          <div>
-            {visibleRows.map((entry, index) => {
-              const status = statusFor(entry.study)
-              const action = status.completed ? 'Herhalen' : status.started ? 'Verder' : 'Start'
-              return (
-                <Link
-                  key={entry.study.id}
-                  href={`/studies/${entry.study.id}`}
-                  data-track="study_card"
-                  className="block no-underline transition-colors hover:bg-line-soft"
-                >
-                  <ListRow
-                    first={index === 0}
-                    art={
-                      <StudyArtwork
-                        id={entry.study.id}
-                        kind={entry.study.type}
-                        ratio={1}
-                        quiet
-                        className="h-full w-full"
-                      />
-                    }
-                    title={entry.study.title}
-                    meta={`${entry.kind} · ${entry.lessonCount} ${entry.lessonCount === 1 ? 'les' : 'lessen'}${
-                      status.started ? '' : ` · ±${entry.avgMinutes} min`
-                    }`}
-                    progress={status.started ? (status.completed ? 100 : status.pct) : undefined}
-                    action={<span className="text-[13px] font-semibold text-teal dark:text-teal-400">{action}</span>}
-                  />
-                </Link>
-              )
-            })}
-          </div>
-        )}
-      </Card>
+        </Card>
+      ) : (
+        <div className="grid flex-none grid-cols-1 gap-[14px] md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {visibleRows.map(entry => (
+            <CatalogueCard key={entry.study.id} entry={entry} status={statusFor(entry.study)} />
+          ))}
+        </div>
+      )}
 
       {rows.length > visibleRows.length && (
         <div className="flex flex-none flex-col items-center gap-[6px] pt-1">
@@ -464,5 +442,56 @@ export default function StudiesBrowser() {
         </div>
       )}
     </div>
+  )
+}
+
+/**
+ * One study in the "Alle studies" grid.
+ *
+ * The kit's StudyCard in shape and tokens (banner, two-line title, meta), with
+ * the two things a catalogue card needs that StudyCard has no slot for: the
+ * `study_card` tracking hook and the action word ("Start", "Verder",
+ * "Herhalen") beside the progress. The banner is shorter than the featured
+ * shelf's, so a row of four stays compact.
+ */
+function CatalogueCard({ entry, status }: { entry: Entry; status: Status }) {
+  const action = status.completed ? 'Herhalen' : status.started ? 'Verder' : 'Start'
+  const lessons = `${entry.lessonCount} ${entry.lessonCount === 1 ? 'les' : 'lessen'}`
+  return (
+    <Link
+      href={`/studies/${entry.study.id}`}
+      data-track="study_card"
+      className="flex min-w-0 flex-col overflow-hidden rounded-card border border-line bg-surface no-underline transition-colors hover:border-line-strong"
+    >
+      <div className="relative h-[72px] flex-none overflow-hidden">
+        <StudyArtwork
+          id={entry.study.id}
+          kind={entry.study.type}
+          ratio={3.4}
+          quiet
+          className="h-full w-full"
+        />
+        {status.started && (
+          <span className="absolute left-[10px] top-[10px] rounded-full bg-surface px-[8px] py-[2px] text-[10.5px] font-semibold text-ink-body">
+            {status.completed ? 'Afgerond' : 'Bezig'}
+          </span>
+        )}
+      </div>
+      <div className="flex flex-1 flex-col px-[14px] pb-3 pt-[11px]">
+        <div className="line-clamp-2 text-[14px] font-bold leading-[1.35] text-ink">{entry.study.title}</div>
+        <div className="mt-[4px] truncate text-[11.5px] text-ink-faint">
+          {entry.kind} · {lessons} · ±{entry.avgMinutes} min
+        </div>
+        <div className="flex-1" />
+        <div className="mt-[10px] flex items-center gap-3">
+          <div className="min-w-0 flex-1">
+            {status.started && (
+              <ProgressBar value={status.completed ? 100 : status.pct} height={4} />
+            )}
+          </div>
+          <span className="flex-none text-[13px] font-semibold text-teal dark:text-teal-400">{action}</span>
+        </div>
+      </div>
+    </Link>
   )
 }

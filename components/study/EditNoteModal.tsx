@@ -219,7 +219,7 @@ export function EditNoteModal({
         {/* Note Type Selection */}
         <div>
           <label className="block text-sm font-medium mb-2">{t("note_type_label")}</label>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button
               type="button"
               variant={noteType === "note" ? "default" : "outline"}
@@ -254,14 +254,14 @@ export function EditNoteModal({
               <Palette className="h-4 w-4 inline mr-1" />
               {t("highlight_color_label")}
             </label>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {highlightColors.map((color) => (
                 <button
                   key={color.name}
                   type="button"
                   onClick={() => setSelectedColor(color.name)}
                   aria-pressed={selectedColor === color.name}
-                  className={`w-8 h-8 rounded-full border-2 outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:ring-offset-card focus-visible:ring-[#0D9488] ${color.class} ${
+                  className={`w-8 h-8 max-md:w-10 max-md:h-10 rounded-full border-2 outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:ring-offset-card focus-visible:ring-[#0D9488] ${color.class} ${
                     selectedColor === color.name ? "ring-2 ring-offset-1 ring-[#0D9488] dark:ring-offset-card" : ""
                   }`}
                   title={color.name}
@@ -323,6 +323,7 @@ export function EditNoteModal({
               onClick={handleAddTag}
               variant="outline"
               size="sm"
+              className="max-md:h-10"
             >
               {t("add_tag")}
             </Button>
@@ -373,7 +374,7 @@ export function EditNoteModal({
                     <select
                       value={selectedGroupId}
                       onChange={e => setGroupId(e.target.value)}
-                      className="w-full mt-1.5 px-3 py-2 border border-gray-200 dark:border-border rounded-lg text-sm bg-white dark:bg-card text-gray-900 dark:text-foreground focus:outline-none"
+                      className="w-full mt-1.5 px-3 py-2 max-md:min-h-11 max-md:text-base border border-gray-200 dark:border-border rounded-lg text-sm bg-white dark:bg-card text-gray-900 dark:text-foreground focus:outline-none"
                     >
                       <option value="">Kies een groep...</option>
                       {myGroups.map(g => (
@@ -395,7 +396,7 @@ export function EditNoteModal({
         )}
 
         {/* Action Buttons */}
-        <div className="flex gap-3 justify-end pt-4 border-t border-gray-200 dark:border-border">
+        <div className="flex flex-wrap gap-3 justify-end pt-4 border-t border-gray-200 dark:border-border">
           <Button
             onClick={handleClose}
             variant="outline"

@@ -9,7 +9,7 @@ import { archiveAccount, isProtectedAccount } from "./accountArchive";
 import { normaliseEmail } from "./userLookup";
 
 /**
- * The user list behind /admin/users and /api/v1/admin/users.
+ * The user list behind /beheer/gebruikers and /api/v1/admin/users.
  *
  * Both callers pass the raw query values; the clamping and the regex escaping
  * live here so neither route can forget them.

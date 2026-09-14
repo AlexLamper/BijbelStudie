@@ -13,7 +13,7 @@ export async function OPTIONS() {
 /**
  * GET /api/v1/admin/users?q=&limit=
  *
- * The same rows as /admin/users on the website. This response carries every
+ * The same rows as /beheer/gebruikers on the website. This response carries every
  * account's email, so the admin check is not optional here in any sense.
  */
 export async function GET(req: NextRequest) {

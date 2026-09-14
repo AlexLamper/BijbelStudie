@@ -3,27 +3,28 @@
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import {
-  Search, ShieldCheck, Sparkles, MoreVertical,
-  Trash2, ShieldOff, ShieldPlus, UserX, X,
-  AlertTriangle, RefreshCw, Apple, Smartphone,
+  Search, ShieldCheck, MoreVertical,
+  Trash2, ShieldOff, ShieldPlus, UserCheck, UserX, X,
+  AlertTriangle, RefreshCw, Apple, Smartphone, ChevronLeft,
 } from "lucide-react"
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuTrigger, DropdownMenuSeparator,
 } from "../../../components/ui/dropdown-menu"
-import { Input } from "../../../components/ui/input"
-import { ProBadge } from "../../../components/ui/ProBadge"
-import SceneShell from "../../../components/scene/SceneShell"
-import { SceneSkeleton, SectionHeading } from "../../../components/scene/pieces"
-import { EYEBROW, SCENE_BG_RGB, TEAL_DEEP, TEAL_ON_DARK } from "../../../components/scene/tokens"
+import AppShell from "../../../components/shell/AppShell"
+import { Card, Skeleton } from "../../../components/kit/primitives"
 import {
-  ADMIN_CHIP,
-  ADMIN_CHIP_ACTIVE,
+  BACK_LINK,
   DANGER,
-  DATA_PANEL,
+  HUE_VARS,
   ROW_LINE,
+  SEG_ITEM,
+  SEG_OFF,
+  SEG_ON,
+  SEG_TRACK,
   TABLE_HEAD,
   WARN,
+  tint,
 } from "../../../components/admin/adminSurface"
 
 interface AdminUser {
@@ -55,8 +56,9 @@ interface AdminUser {
 
 type Filter = "all" | "pro" | "free" | "admin"
 
-/** A neutral chip on the plate: GRATIS, ZEGT OP, the store a Pro came from. */
-const FLAG = "inline-flex items-center gap-1 rounded-full bg-white/10 px-1.5 py-0.5 text-[10px] font-bold text-white/75"
+/** A neutral chip: GRATIS, ZEGT OP, the store a Pro came from. */
+const FLAG =
+  "inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-line-soft px-[7px] py-[2px] text-[10.5px] font-semibold text-ink-muted"
 
 function formatDate(d?: string): string {
   if (!d) return "-"
@@ -64,21 +66,19 @@ function formatDate(d?: string): string {
 }
 
 /**
- * Gebruikersbeheer, in the immersive shell.
+ * Gebruikersbeheer, in the AppShell.
  *
- * This is the densest screen in the product and the only one with a destructive
- * action on it, so it gets the least picture of anything: a heading set into the
- * landscape, and from the filter bar down a single near-opaque plate that the
- * table lives on. The table scrolls inside its own container - the page body
- * never scrolls sideways.
+ * The densest screen in the product and the only one with a destructive action
+ * on it. From `md` up the accounts are a table inside one card; below `md` the
+ * same rows stack as compact list items, so the page body never scrolls
+ * sideways.
  *
  * NOTHING about behaviour changed here. `deleteUser` still asks the same
  * question with the same words, still calls DELETE /api/admin/users/[id], and
  * still leaves the server-side guards - archive-before-delete in
  * lib/accountArchive.ts and the rule that an admin account cannot be deleted at
  * all - to do their work. `patchUser` and `reconcileUser` are untouched too.
- * The destructive menu item is if anything louder than it was: it keeps its
- * icon, its separator and its red type.
+ * The destructive menu item keeps its icon, its separator and its red type.
  */
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<AdminUser[]>([])
@@ -210,276 +210,302 @@ export default function AdminUsersPage() {
     admin: users.filter(u => u.isAdmin).length,
   }), [users])
 
+  const actions = (u: AdminUser) => (
+    <UserActions
+      user={u}
+      busy={pendingId === u._id}
+      onPatch={patchUser}
+      onReconcile={reconcileUser}
+      onDelete={deleteUser}
+    />
+  )
+
   return (
-    <SceneShell backdrop="reader" header rail>
-      {/* -- The sky --------------------------------------------------- */}
-      <section aria-labelledby="gebruikers-titel" className="pb-8 pt-6">
-        <div className="scene-sky max-w-[46rem]">
-          <Link
-            href="/admin"
-            className="text-xs font-medium text-white/70 no-underline outline-none transition-colors hover:text-white focus-visible:ring-2 focus-visible:ring-white"
-          >
-            ← Terug naar overzicht
+    <AppShell title="Gebruikersbeheer" active="/beheer">
+      <div className={`flex flex-col gap-4 ${HUE_VARS}`}>
+        {/* -- What this is, and the way back ------------------------------ */}
+        <div className="flex flex-none flex-wrap items-center gap-x-4 gap-y-1">
+          <Link href="/beheer" className={BACK_LINK}>
+            <ChevronLeft size={15} aria-hidden /> Beheer
           </Link>
-          <p className={`${EYEBROW} mt-4`} style={{ color: TEAL_ON_DARK }}>
-            Admin
-          </p>
-          <h1
-            id="gebruikers-titel"
-            className="mt-2 text-3xl font-semibold tracking-tight text-white sm:text-4xl"
-          >
-            Gebruikersbeheer
-          </h1>
+          <div className="flex-1" />
           {loading ? (
-            <SceneSkeleton className="mt-3 h-4 w-64" />
+            <Skeleton className="h-4 w-56" />
           ) : (
-            <p className="content-in mt-3 text-sm tabular-nums text-white/80">
+            <p className="text-[12px] text-ink-faint tabular-nums">
               {`${counts.all} gebruikers · ${counts.pro} Pro · ${counts.admin} admin${counts.admin === 1 ? "" : "s"}`}
             </p>
           )}
         </div>
-      </section>
 
-      {/* -- The desk: from here down nothing is translucent ------------ */}
-      <div className="pb-20">
-        <section className={`p-4 sm:p-5 ${DATA_PANEL}`} aria-labelledby="gebruikers-lijst">
-          <SectionHeading
-            id="gebruikers-lijst"
-            title="Alle accounts"
-            subtitle="Zoek, filter en beheer rechten en abonnementen"
-          />
-
-          {/* Filters bar */}
-          <div className="mt-4 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-            <div className="relative max-w-md flex-1">
-              {/* Names the field; not decoration. */}
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/55" aria-hidden />
-              <Input
-                placeholder="Zoek op naam of e-mail..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                aria-label="Zoek op naam of e-mail"
-                className="border-white/25 bg-black/40 pl-9 text-white placeholder:text-white/55 focus-visible:ring-white focus-visible:ring-offset-0"
-              />
+        <Card className="flex-none overflow-hidden">
+          <section aria-labelledby="gebruikers-lijst">
+            <div className="px-4 pt-[14px] sm:px-5">
+              <h2 id="gebruikers-lijst" className="text-[15.5px] font-bold text-ink">Alle accounts</h2>
+              <p className="mt-1 text-[12.5px] text-ink-muted">Zoek, filter en beheer rechten en abonnementen</p>
             </div>
-            <div className="flex flex-wrap items-center gap-1.5">
-              {([
-                { k: "all", label: "Alle", n: counts.all },
-                { k: "pro", label: "Pro", n: counts.pro },
-                { k: "free", label: "Gratis", n: counts.free },
-                { k: "admin", label: "Admins", n: counts.admin },
-              ] as { k: Filter; label: string; n: number }[]).map(opt => {
-                const active = filter === opt.k
-                return (
-                  <button
-                    key={opt.k}
-                    onClick={() => setFilter(opt.k)}
-                    aria-pressed={active}
-                    className={active ? ADMIN_CHIP_ACTIVE : ADMIN_CHIP}
-                    style={active ? { backgroundColor: TEAL_DEEP } : undefined}
-                  >
-                    {opt.label}{" "}
-                    <span className={`tabular-nums ${active ? "text-white/80" : "text-white/60"}`}>· {opt.n}</span>
-                  </button>
-                )
-              })}
-            </div>
-          </div>
 
-          {/* Table */}
-          <div className="mt-4">
+            {/* Filters bar */}
+            <div className="flex flex-col items-stretch gap-3 px-4 py-[14px] sm:flex-row sm:flex-wrap sm:items-center sm:px-5">
+              <div className="flex h-[34px] w-full items-center gap-2 rounded-[9px] bg-line-soft px-[11px] sm:w-[260px]">
+                {/* Names the field; not decoration. */}
+                <Search size={14} className="flex-none text-ink-muted" aria-hidden />
+                <input
+                  placeholder="Zoek op naam of e-mail..."
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  aria-label="Zoek op naam of e-mail"
+                  className="min-w-0 flex-1 border-0 bg-transparent text-[12.5px] text-ink outline-none placeholder:text-ink-faint"
+                />
+              </div>
+              <div className={SEG_TRACK} role="group" aria-label="Filter">
+                {([
+                  { k: "all", label: "Alle", n: counts.all },
+                  { k: "pro", label: "Pro", n: counts.pro },
+                  { k: "free", label: "Gratis", n: counts.free },
+                  { k: "admin", label: "Admins", n: counts.admin },
+                ] as { k: Filter; label: string; n: number }[]).map(opt => {
+                  const active = filter === opt.k
+                  return (
+                    <button
+                      key={opt.k}
+                      onClick={() => setFilter(opt.k)}
+                      aria-pressed={active}
+                      className={`${SEG_ITEM} ${active ? SEG_ON : SEG_OFF}`}
+                    >
+                      {opt.label}
+                      <span className={`tabular-nums ${active ? "text-white/80" : "text-ink-faint"}`}>{opt.n}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
             {loading ? (
-              <div className="space-y-3 py-4">
+              <div className="space-y-3 border-t border-line-soft px-4 py-4 sm:px-5">
                 {[1, 2, 3, 4, 5].map(i => (
-                  <SceneSkeleton key={i} className="h-12 w-full rounded-lg" />
+                  <Skeleton key={i} className="h-11 w-full" />
                 ))}
               </div>
             ) : filtered.length === 0 ? (
-              <div className="px-6 py-16 text-center">
-                <h3 className="text-base font-semibold text-white">Geen gebruikers gevonden</h3>
-                <p className="mt-1 text-sm text-white/70">
+              <div className="border-t border-line-soft px-6 py-14 text-center">
+                <h3 className="text-[14.5px] font-bold text-ink">Geen gebruikers gevonden</h3>
+                <p className="mt-1 text-[13px] text-ink-muted">
                   Pas je zoekopdracht of filters aan.
                 </p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className={`border-b ${ROW_LINE} ${TABLE_HEAD}`}>
-                      <th scope="col" className="px-3 py-2.5 font-semibold">Gebruiker</th>
-                      <th scope="col" className="px-3 py-2.5 font-semibold">Status</th>
-                      <th scope="col" className="hidden px-3 py-2.5 font-semibold md:table-cell">Notities</th>
-                      <th scope="col" className="hidden px-3 py-2.5 font-semibold md:table-cell">Streak</th>
-                      <th scope="col" className="hidden px-3 py-2.5 font-semibold lg:table-cell">Aangemeld</th>
-                      <th scope="col" className="w-px px-3 py-2.5">
-                        <span className="sr-only">Acties</span>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filtered.map(u => {
-                      const busy = pendingId === u._id
-                      return (
+              <>
+                {/* -- Below md: stacked rows ------------------------------- */}
+                <ul className="md:hidden">
+                  {filtered.map(u => (
+                    <li key={u._id} className={`flex items-start gap-3 border-t px-4 py-3 ${ROW_LINE}`}>
+                      <Initial user={u} />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-[13px] font-semibold text-ink">{u.name || "Naamloos"}</p>
+                        <p className="mt-[2px] truncate text-[11.5px] text-ink-faint">{u.email}</p>
+                        <div className="mt-2">
+                          <StatusFlags user={u} />
+                        </div>
+                        <p className="mt-2 text-[11.5px] text-ink-muted tabular-nums">
+                          {`${u.noteCount} notities · ${u.streak} reeks · ${formatDate(u.createdAt)}`}
+                        </p>
+                      </div>
+                      <div className="flex-none">{actions(u)}</div>
+                    </li>
+                  ))}
+                </ul>
+
+                {/* -- md and up: the table --------------------------------- */}
+                <div className="hidden overflow-x-auto md:block">
+                  <table className="w-full">
+                    <thead>
+                      <tr className={`border-t ${ROW_LINE} ${TABLE_HEAD}`}>
+                        <th scope="col" className="px-5 py-[10px] font-semibold">Gebruiker</th>
+                        <th scope="col" className="px-3 py-[10px] font-semibold">Status</th>
+                        <th scope="col" className="px-3 py-[10px] font-semibold">Notities</th>
+                        <th scope="col" className="px-3 py-[10px] font-semibold">Reeks</th>
+                        <th scope="col" className="hidden px-3 py-[10px] font-semibold lg:table-cell">Aangemeld</th>
+                        <th scope="col" className="w-px px-5 py-[10px]">
+                          <span className="sr-only">Acties</span>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filtered.map(u => (
                         <tr
                           key={u._id}
-                          className={`border-b last:border-b-0 transition-colors hover:bg-white/[0.06] ${ROW_LINE}`}
+                          className={`border-t transition-colors hover:bg-sunken ${ROW_LINE}`}
                         >
-                          <td className="px-3 py-3">
-                            <div className="flex min-w-0 items-center gap-3">
-                              <span
-                                aria-hidden
-                                className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white ring-1 ring-white/20"
-                                style={{ backgroundColor: "rgba(13,148,136,0.35)" }}
-                              >
-                                {(u.name || u.email).slice(0, 1).toUpperCase()}
-                              </span>
+                          <td className="max-w-[280px] px-5 py-3">
+                            <div className="flex min-w-0 items-center gap-[11px]">
+                              <Initial user={u} />
                               <div className="min-w-0">
-                                <p className="truncate font-semibold text-white">{u.name || "Naamloos"}</p>
-                                <p className="truncate text-xs text-white/65">{u.email}</p>
+                                <p className="truncate text-[13px] font-semibold text-ink">{u.name || "Naamloos"}</p>
+                                <p className="mt-[2px] truncate text-[11.5px] text-ink-faint">{u.email}</p>
                               </div>
                             </div>
                           </td>
                           <td className="px-3 py-3">
-                            <div className="flex flex-wrap items-center gap-1.5">
-                              {u.isPro ? (
-                                <ProBadge size="xs" className="text-[10px]" />
-                              ) : (
-                                <span className={FLAG}>GRATIS</span>
-                              )}
-                              {u.isComped && (
-                                <span
-                                  title="Pro zonder betaling - reviewaccount of handmatig toegekend. Telt niet mee in MRR."
-                                  className={FLAG}
-                                >
-                                  GRATIS
-                                </span>
-                              )}
-                              {u.storePremium && (
-                                <span className={FLAG}>
-                                  {u.storePremiumPlatform === "apple" ? <Apple size={9} aria-hidden /> : <Smartphone size={9} aria-hidden />}
-                                  {u.storePremiumPlatform === "apple" ? "APPLE" : "GOOGLE"}
-                                </span>
-                              )}
-                              {u.subscriptionStatus && u.subscriptionStatus !== "active" && (
-                                <span
-                                  className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-bold"
-                                  style={{ backgroundColor: "rgba(251,191,36,0.18)", color: WARN }}
-                                >
-                                  {u.subscriptionStatus.toUpperCase()}
-                                </span>
-                              )}
-                              {u.cancelAtPeriodEnd && <span className={FLAG}>ZEGT OP</span>}
-                              {/* The signal that would have caught the missed webhook:
-                                  money changed hands, nothing granted access. */}
-                              {u.needsReconcile && (
-                                <span
-                                  title="Stripe-klant zonder abonnementsstatus - controleer of deze gebruiker betaalt"
-                                  className="inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-bold"
-                                  style={{ backgroundColor: "rgba(248,113,113,0.2)", color: DANGER }}
-                                >
-                                  <AlertTriangle size={9} aria-hidden /> CONTROLEER
-                                </span>
-                              )}
-                              {u.isAdmin && (
-                                <span
-                                  className="inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-bold"
-                                  style={{ backgroundColor: "rgba(45,212,191,0.18)", color: TEAL_ON_DARK }}
-                                >
-                                  <ShieldCheck size={9} aria-hidden /> ADMIN
-                                </span>
-                              )}
-                            </div>
+                            <StatusFlags user={u} />
                           </td>
-                          <td className="hidden px-3 py-3 tabular-nums text-white/85 md:table-cell">{u.noteCount}</td>
-                          <td className="hidden px-3 py-3 tabular-nums text-white/85 md:table-cell">{u.streak}</td>
-                          <td className="hidden whitespace-nowrap px-3 py-3 tabular-nums text-white/65 lg:table-cell">{formatDate(u.createdAt)}</td>
-                          <td className="px-3 py-3 text-right">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <button
-                                  disabled={busy}
-                                  aria-label={`Acties voor ${u.name || u.email}`}
-                                  className="inline-flex h-8 w-8 items-center justify-center rounded-md text-white/70 outline-none transition-colors hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white disabled:opacity-50"
-                                >
-                                  <MoreVertical size={15} aria-hidden />
-                                </button>
-                              </DropdownMenuTrigger>
-                              {/* The menu keeps the app's own popover surface on
-                                  purpose: it is a floating control layer, not
-                                  something sitting on the landscape, and the
-                                  destructive item's `text-destructive` is the
-                                  colour the rest of the product uses to mean
-                                  "this one deletes". Nothing here is restyled. */}
-                              <DropdownMenuContent align="end" className="w-52">
-                                {u.isAdmin ? (
-                                  <DropdownMenuItem onClick={() => patchUser(u._id, { isAdmin: false })}>
-                                    <ShieldOff className="mr-2 h-4 w-4" /> Admin-rechten intrekken
-                                  </DropdownMenuItem>
-                                ) : (
-                                  <DropdownMenuItem onClick={() => patchUser(u._id, { isAdmin: true })}>
-                                    <ShieldPlus className="mr-2 h-4 w-4" /> Tot admin maken
-                                  </DropdownMenuItem>
-                                )}
-                                {u.hasStripe && (
-                                  <DropdownMenuItem onClick={() => reconcileUser(u)}>
-                                    <RefreshCw className="mr-2 h-4 w-4" /> Synchroniseren met Stripe
-                                  </DropdownMenuItem>
-                                )}
-                                {u.subscribed ? (
-                                  <DropdownMenuItem onClick={() => patchUser(u._id, { subscribed: false })}>
-                                    <UserX className="mr-2 h-4 w-4" /> Pro handmatig deactiveren
-                                  </DropdownMenuItem>
-                                ) : (
-                                  <DropdownMenuItem onClick={() => patchUser(u._id, { subscribed: true })}>
-                                    <Sparkles className="mr-2 h-4 w-4" /> Pro handmatig activeren
-                                  </DropdownMenuItem>
-                                )}
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => deleteUser(u)} className="text-destructive focus:text-destructive">
-                                  <Trash2 className="mr-2 h-4 w-4" /> Verwijderen
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </td>
+                          <td className="px-3 py-3 text-[12.5px] tabular-nums text-ink-body">{u.noteCount}</td>
+                          <td className="px-3 py-3 text-[12.5px] tabular-nums text-ink-body">{u.streak}</td>
+                          <td className="hidden whitespace-nowrap px-3 py-3 text-[12.5px] tabular-nums text-ink-muted lg:table-cell">{formatDate(u.createdAt)}</td>
+                          <td className="px-5 py-3 text-right">{actions(u)}</td>
                         </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
-          </div>
-        </section>
+          </section>
+        </Card>
       </div>
 
       {/* Toast */}
       {toast && (
-        <div className="animate-in fade-in slide-in-from-bottom-2 fixed bottom-6 right-6 z-50" role="status">
+        <div
+          className="animate-in fade-in slide-in-from-bottom-2 fixed bottom-4 left-4 right-4 z-50 flex justify-end sm:bottom-6 sm:left-auto sm:right-6"
+          role="status"
+        >
           <div
-            className="flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm"
-            style={
-              toast.type === "ok"
-                ? {
-                    backgroundColor: `rgba(${SCENE_BG_RGB},0.96)`,
-                    color: "#FFFFFF",
-                    boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.18), 0 18px 40px -18px rgba(0,0,0,0.9)",
-                  }
-                : {
-                    backgroundColor: "rgba(30,10,12,0.96)",
-                    color: DANGER,
-                    boxShadow: "inset 0 0 0 1px rgba(248,113,113,0.45), 0 18px 40px -18px rgba(0,0,0,0.9)",
-                  }
-            }
+            className={`flex max-w-full items-center gap-2 rounded-[10px] border bg-surface px-4 py-2.5 text-[13px] shadow-[0_8px_24px_-10px_rgba(17,24,39,.25)] dark:shadow-[0_8px_24px_-10px_rgba(0,0,0,.6)] ${HUE_VARS} ${
+              toast.type === "ok" ? "border-line text-ink" : "border-danger/40"
+            }`}
+            style={toast.type === "err" ? { color: DANGER } : undefined}
           >
             {toast.type === "ok" ? (
-              <ShieldCheck size={14} style={{ color: TEAL_ON_DARK }} aria-hidden />
+              <ShieldCheck size={14} className="flex-none text-teal dark:text-teal-400" aria-hidden />
             ) : (
-              <X size={14} aria-hidden />
+              <X size={14} className="flex-none" aria-hidden />
             )}
-            {toast.msg}
+            <span className="min-w-0 break-words">{toast.msg}</span>
           </div>
         </div>
       )}
-    </SceneShell>
+    </AppShell>
+  )
+}
+
+/* ── Sub components ───────────────────────────────────────────── */
+
+function Initial({ user }: { user: AdminUser }) {
+  return (
+    <span
+      aria-hidden
+      className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-line-soft text-[12px] font-semibold text-ink-muted"
+    >
+      {(user.name || user.email).slice(0, 1).toUpperCase()}
+    </span>
+  )
+}
+
+function StatusFlags({ user: u }: { user: AdminUser }) {
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      {u.isPro ? (
+        <span className="whitespace-nowrap rounded-full bg-pro-soft px-[7px] py-[2px] text-[10.5px] font-semibold text-gold-ink dark:text-gold-badge">
+          PRO
+        </span>
+      ) : (
+        <span className={FLAG}>GRATIS</span>
+      )}
+      {u.isComped && (
+        <span
+          title="Pro zonder betaling - reviewaccount of handmatig toegekend. Telt niet mee in MRR."
+          className={FLAG}
+        >
+          GRATIS
+        </span>
+      )}
+      {u.storePremium && (
+        <span className={FLAG}>
+          {u.storePremiumPlatform === "apple" ? <Apple size={10} aria-hidden /> : <Smartphone size={10} aria-hidden />}
+          {u.storePremiumPlatform === "apple" ? "APPLE" : "GOOGLE"}
+        </span>
+      )}
+      {u.subscriptionStatus && u.subscriptionStatus !== "active" && (
+        <span
+          className="inline-flex items-center whitespace-nowrap rounded-full px-[7px] py-[2px] text-[10.5px] font-semibold"
+          style={{ backgroundColor: tint(WARN, 14), color: WARN }}
+        >
+          {u.subscriptionStatus.toUpperCase()}
+        </span>
+      )}
+      {u.cancelAtPeriodEnd && <span className={FLAG}>ZEGT OP</span>}
+      {/* The signal that would have caught the missed webhook:
+          money changed hands, nothing granted access. */}
+      {u.needsReconcile && (
+        <span
+          title="Stripe-klant zonder abonnementsstatus - controleer of deze gebruiker betaalt"
+          className="inline-flex items-center gap-1 whitespace-nowrap rounded-full px-[7px] py-[2px] text-[10.5px] font-semibold"
+          style={{ backgroundColor: tint(DANGER, 14), color: DANGER }}
+        >
+          <AlertTriangle size={10} aria-hidden /> CONTROLEER
+        </span>
+      )}
+      {u.isAdmin && (
+        <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-[var(--teal-wash)] px-[7px] py-[2px] text-[10.5px] font-semibold text-teal-dark dark:text-teal-400">
+          <ShieldCheck size={10} aria-hidden /> ADMIN
+        </span>
+      )}
+    </div>
+  )
+}
+
+function UserActions({
+  user: u, busy, onPatch, onReconcile, onDelete,
+}: {
+  user: AdminUser
+  busy: boolean
+  onPatch: (id: string, patch: Partial<Pick<AdminUser, "isAdmin" | "subscribed">>) => void
+  onReconcile: (u: AdminUser) => void
+  onDelete: (u: AdminUser) => void
+}) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          disabled={busy}
+          aria-label={`Acties voor ${u.name || u.email}`}
+          className="inline-flex h-8 w-8 items-center justify-center rounded-btn text-ink-muted outline-none transition-colors hover:bg-line-soft hover:text-ink focus-visible:ring-2 focus-visible:ring-teal disabled:opacity-50"
+        >
+          <MoreVertical size={15} aria-hidden />
+        </button>
+      </DropdownMenuTrigger>
+      {/* The destructive item's `text-destructive` is the colour the rest of
+          the product uses to mean "this one deletes". */}
+      <DropdownMenuContent align="end" className="w-56">
+        {u.isAdmin ? (
+          <DropdownMenuItem onClick={() => onPatch(u._id, { isAdmin: false })}>
+            <ShieldOff className="mr-2 h-4 w-4" /> Admin-rechten intrekken
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem onClick={() => onPatch(u._id, { isAdmin: true })}>
+            <ShieldPlus className="mr-2 h-4 w-4" /> Tot admin maken
+          </DropdownMenuItem>
+        )}
+        {u.hasStripe && (
+          <DropdownMenuItem onClick={() => onReconcile(u)}>
+            <RefreshCw className="mr-2 h-4 w-4" /> Synchroniseren met Stripe
+          </DropdownMenuItem>
+        )}
+        {u.subscribed ? (
+          <DropdownMenuItem onClick={() => onPatch(u._id, { subscribed: false })}>
+            <UserX className="mr-2 h-4 w-4" /> Pro handmatig deactiveren
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem onClick={() => onPatch(u._id, { subscribed: true })}>
+            <UserCheck className="mr-2 h-4 w-4" /> Pro handmatig activeren
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => onDelete(u)} className="text-destructive focus:text-destructive">
+          <Trash2 className="mr-2 h-4 w-4" /> Verwijderen
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }

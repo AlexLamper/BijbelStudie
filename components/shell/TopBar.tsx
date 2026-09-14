@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Search, Bell } from "lucide-react";
 import AccountAvatar from "../kit/AccountAvatar";
+import { MobileMenuButton } from "./MobileNav";
 
 /**
  * The top bar, identical on all nine routes.
@@ -60,9 +61,13 @@ export default function TopBar({ title }: { title: string }) {
   }, [bellOpen]);
 
   return (
-    <header className="flex h-topbar flex-none items-center gap-4 border-b border-line bg-surface px-[28px]">
+    // Below md: 56 px, the menu button (the sidebar as a drawer) before the
+    // title, and no search field or bell - see components/shell/MobileNav.tsx.
+    <header className="flex h-topbar flex-none items-center gap-4 border-b border-line bg-surface px-[28px] max-md:h-14 max-md:gap-2 max-md:pl-2 max-md:pr-4">
+      <MobileMenuButton className="text-ink-body" />
+
       {/* 1. Title */}
-      <h1 className="flex-none text-[18px] font-bold tracking-[-0.2px] text-ink">{title}</h1>
+      <h1 className="flex-none text-[18px] font-bold tracking-[-0.2px] text-ink max-md:min-w-0 max-md:flex-initial max-md:truncate max-md:text-[17px]">{title}</h1>
 
       {/* 2. Spacer */}
       <div className="flex-1" />
@@ -70,7 +75,7 @@ export default function TopBar({ title }: { title: string }) {
       {/* 3. Search. Een echt invoerveld dat nergens heen gaat: de tekst blijft
              in lokale state staan. Het kruisje van Safari en Chrome is
              weggehaald, anders schuift het tussen de tekst en de ⌘K-hint. */}
-      <div className="flex h-[38px] w-[260px] items-center gap-[9px] rounded-btn bg-line-soft px-3 transition-colors focus-within:bg-line">
+      <div className="search-field flex h-[38px] w-[260px] max-md:hidden items-center gap-[9px] rounded-btn bg-line-soft px-3 transition-colors focus-within:bg-line">
         <Search size={17} strokeWidth={1.9} className="flex-none text-ink-muted" />
         <input
           ref={searchRef}
@@ -91,7 +96,7 @@ export default function TopBar({ title }: { title: string }) {
       {status !== "loading" && !session?.user && (
         <Link
           href={`/inloggen?next=${encodeURIComponent(pathname ?? "/")}`}
-          className="flex h-[38px] flex-none items-center rounded-btn bg-teal px-4 text-[13.5px] font-semibold text-white no-underline transition-opacity hover:opacity-90"
+          className="flex h-[38px] flex-none items-center rounded-btn bg-teal px-4 max-md:h-9 max-md:px-3 text-[13.5px] font-semibold text-white no-underline transition-opacity hover:opacity-90"
         >
           Inloggen
         </Link>
@@ -100,7 +105,7 @@ export default function TopBar({ title }: { title: string }) {
       {session?.user && (
         <>
           {/* 4. Notifications */}
-          <div className="relative flex-none" ref={bellRef}>
+          <div className="relative flex-none max-md:hidden" ref={bellRef}>
             <button
               type="button"
               aria-label="Meldingen"

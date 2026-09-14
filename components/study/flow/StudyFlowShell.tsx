@@ -11,6 +11,7 @@ import {
   ListChecks,
   Lock,
   Maximize2,
+  Menu,
   Minimize2,
   Settings2,
   Sparkles,
@@ -32,6 +33,8 @@ import { useLevensboom } from '../../../hooks/useLevensboom';
 import AiDock from './AiDock';
 import StudyExitGuard from './StudyExitGuard';
 import StudySettingsMenu from './StudySettingsMenu';
+import LessonNavSheet from './LessonNavSheet';
+import { useIsMobile } from '../../../hooks/use-mobile';
 import { useReadingPreferences } from '../../../hooks/useReadingPreferences';
 import { playComplete, playSwipe } from '../../../lib/studySound';
 import {
@@ -221,6 +224,20 @@ export default function StudyFlowShell({
   const [aiQuestion, setAiQuestion] = useState<string | null>(null);
   const [outlineOpen, setOutlineOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  /** Below md only: the app navigation as a sheet, standing in for LessonRail. */
+  const [navOpen, setNavOpen] = useState(false);
+  const closeNav = useCallback(() => setNavOpen(false), []);
+  /**
+   * Below md. Gates the phone-only behaviour that classes cannot express - at
+   * md and up every code path below runs exactly as it did before.
+   */
+  const isMobile = useIsMobile();
+  /**
+   * Set when a touch lands somewhere a sideways drag already means something
+   * else - a text field, or a strip that scrolls horizontally (the grondtekst,
+   * a photo row). On a phone that drag must not also turn the page.
+   */
+  const swipeBlockedRef = useRef(false);
   /**
    * The translation actually on screen.
    *
@@ -785,13 +802,32 @@ export default function StudyFlowShell({
             the window centre and took the lesson title with it. Equal `flex-1`
             gutters put the title on the actual midline whatever the right-hand
             cluster grows to. */}
-        <div className="flex h-[52px] items-center gap-3 pl-[10px] pr-[14px]">
-          <div className="flex-1 flex items-center justify-start min-w-0">
+        {/* Below md the three tracks give way to a plain row: the title takes
+            what is left between a 40 px menu button and the controls, because
+            two equal gutters each as wide as the control cluster left the
+            title no room at all on a phone and pushed the bar past the edge. */}
+        <div className="flex h-[52px] items-center gap-3 pl-[10px] pr-[14px] max-md:gap-1 max-md:px-1.5">
+          <div className="flex-1 flex items-center justify-start min-w-0 max-md:flex-none">
+          {/* Phone only: the lesson rail is not on screen below md, so its
+              items - and the way back to the study - open as a sheet. */}
+          <button
+            type="button"
+            onClick={() => {
+              setOutlineOpen(false);
+              setSettingsOpen(false);
+              setNavOpen(true);
+            }}
+            aria-label="Menu"
+            aria-expanded={navOpen}
+            className={`md:hidden h-10 w-10 inline-flex items-center justify-center rounded-md hover:bg-les-card ${INK_FAINT} hover:text-les-ink flex-none ${FOCUS_RING}`}
+          >
+            <Menu size={19} />
+          </button>
           <Link
             href={`/studies/${lesson.study.id}`}
             aria-label="Terug naar de studie"
             title="Terug naar de studie"
-            className={`h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-les-card ${INK_FAINT} hover:text-les-ink no-underline flex-none ${FOCUS_RING}`}
+            className={`max-md:hidden h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-les-card ${INK_FAINT} hover:text-les-ink no-underline flex-none ${FOCUS_RING}`}
           >
             <X size={17} />
           </Link>
@@ -799,7 +835,7 @@ export default function StudyFlowShell({
 
           {/* Lesson navigator. What lessons there are and which are done was
               previously only visible on the detail page, one navigation away. */}
-          <div className="min-w-0 flex-none max-w-[56%]">
+          <div className="min-w-0 flex-none max-w-[56%] max-md:flex-1 max-md:max-w-none">
             <button
               type="button"
               onClick={() => {
@@ -823,7 +859,7 @@ export default function StudyFlowShell({
 
           </div>
 
-          <div className="flex-1 flex items-center justify-end gap-1.5">
+          <div className="flex-1 flex items-center justify-end gap-1.5 max-md:flex-none max-md:gap-1">
             {/* Nothing but the lesson on the glass. Hidden below sm: phone
                 browsers either ignore element fullscreen or hand back a
                 chrome-less view the reader cannot leave. */}
@@ -865,7 +901,7 @@ export default function StudyFlowShell({
               title="Instellingen voor deze sessie"
               aria-label="Instellingen voor deze sessie"
               className={[
-                'press inline-flex h-8 w-8 items-center justify-center rounded-lg transition-colors',
+                'press inline-flex h-8 w-8 items-center justify-center rounded-lg transition-colors max-md:h-10 max-md:w-10',
                 FOCUS_RING,
                 settingsOpen
                   ? `bg-les-nav-active text-les-accent`
@@ -885,7 +921,7 @@ export default function StudyFlowShell({
               // it is the one control on the bar that is a colour rather than a
               // glyph, and it must not change shape when the dock opens.
               className={[
-                'press ml-1 inline-flex h-[30px] flex-none items-center gap-1.5 rounded-full bg-teal px-3 text-[12.5px] font-bold text-white transition-opacity hover:opacity-90',
+                'press ml-1 inline-flex h-[30px] flex-none items-center gap-1.5 rounded-full bg-teal px-3 text-[12.5px] font-bold text-white transition-opacity hover:opacity-90 max-md:ml-0.5 max-md:h-10 max-md:min-w-10 max-md:justify-center',
                 FOCUS_RING,
                 aiOpen ? 'ring-2 ring-teal/40' : '',
               ].join(' ')}
@@ -899,7 +935,9 @@ export default function StudyFlowShell({
         {/* Only where the margin register is not on screen. From lg up the steps
             are the numbered index in the left gutter, and a second progress
             indicator in the header would be the same answer twice. */}
-        <div className="px-4 sm:px-6 pb-3 lg:hidden">
+        {/* Below md the segments get a taller hit area: a 3 px bar with 8 px of
+            padding either side is a 19 px target under a thumb. */}
+        <div className="px-4 sm:px-6 pb-3 lg:hidden max-md:pb-1 max-md:[&_button]:py-3 max-md:[&_button]:-my-2">
           <StudyStepRail
             steps={steps}
             current={step}
@@ -922,6 +960,12 @@ export default function StudyFlowShell({
           fullscreen={fullscreen}
           onToggleFullscreen={toggleFullscreen}
           reduceMotion={reduceMotion}
+        />
+
+        <LessonNavSheet
+          open={navOpen}
+          onClose={closeNav}
+          studyHref={`/studies/${lesson.study.id}`}
         />
 
         {/* The lesson navigator, hung off the header rather than off its trigger.
@@ -1116,7 +1160,18 @@ export default function StudyFlowShell({
             dragDirectionLock
             dragElastic={0.12}
             dragConstraints={{ left: 0, right: 0 }}
+            onPointerDownCapture={(event) => {
+              if (!isMobile) {
+                swipeBlockedRef.current = false;
+                return;
+              }
+              swipeBlockedRef.current = startsInSidewaysRegion(
+                event.target as Element | null,
+                event.currentTarget,
+              );
+            }}
             onDragEnd={(_event, info) => {
+              if (isMobile && swipeBlockedRef.current) return;
               const far = Math.abs(info.offset.x) > 90;
               const fast = Math.abs(info.velocity.x) > 500;
               if (!far && !fast) return;
@@ -1164,8 +1219,10 @@ export default function StudyFlowShell({
       {/* The foot: 68 px, "Vorige" outlined on the left (nothing at all on
           step 1), the step's own name in the middle, and the one primary button
           on the right - "Les afronden" on the last step. */}
+      {/* Below md the foot grows by the home-indicator inset, so the two
+          buttons are never under the bar a phone draws across its bottom. */}
       <footer
-        className={`flex h-[68px] flex-none items-center gap-3 border-t bg-les-bg px-[22px] ${RULE}`}
+        className={`flex h-[68px] flex-none items-center gap-3 border-t bg-les-bg px-[22px] ${RULE} max-md:h-auto max-md:min-h-[64px] max-md:px-4 max-md:pt-[11px] max-md:pb-[max(11px,env(safe-area-inset-bottom))]`}
       >
         <div className="flex-none">
           {canGoBack && (
@@ -1246,4 +1303,25 @@ export default function StudyFlowShell({
       </AnimatePresence>
     </div>
   );
+}
+
+/**
+ * Whether a touch began somewhere a horizontal drag belongs to something other
+ * than the page-turn: a field (moving the caret, selecting a word) or any box
+ * between the target and the step that scrolls sideways. Phone-only; the
+ * caller does not consult it from md up.
+ */
+function startsInSidewaysRegion(target: Element | null, boundary: Element): boolean {
+  let node: Element | null = target;
+  while (node && node !== boundary) {
+    if (node instanceof HTMLElement) {
+      if (node.isContentEditable || /^(input|textarea|select)$/i.test(node.tagName)) return true;
+      if (node.scrollWidth > node.clientWidth + 1) {
+        const overflowX = window.getComputedStyle(node).overflowX;
+        if (overflowX === 'auto' || overflowX === 'scroll') return true;
+      }
+    }
+    node = node.parentElement;
+  }
+  return false;
 }

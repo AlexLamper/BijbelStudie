@@ -217,18 +217,18 @@ export default async function StudyDetailPage({ params }: PageProps) {
               the design draws one here and the server has no cover image for a
               study - `StudyArtwork` draws the catalogue rows instead. */}
           <div
-            className="relative flex h-[142px] flex-none flex-col justify-end overflow-hidden rounded-card px-[24px] pb-[18px] pt-[32px]"
+            className="relative flex h-[142px] flex-none flex-col justify-end overflow-hidden rounded-card px-[24px] pb-[18px] pt-[32px] max-md:h-auto max-md:min-h-[142px] max-md:px-[18px] max-md:pr-[52px]"
             style={{ background: bannerGradient(study.id) }}
           >
             <StudySettingsButton className="absolute right-[10px] top-[10px] z-10" />
-            <div className="mt-[10px] flex items-center gap-1.5 text-[11.5px] text-white/70">
-              <Link href="/studies" className="text-white/70 no-underline hover:text-white">
+            <div className="mt-[10px] flex items-center gap-1.5 text-[11.5px] text-white/70 max-md:min-w-0">
+              <Link href="/studies" className="text-white/70 no-underline hover:text-white max-md:flex-none">
                 Studies
               </Link>
               <span aria-hidden>&rsaquo;</span>
-              <span className="font-semibold text-white">{study.title}</span>
+              <span className="font-semibold text-white max-md:min-w-0 max-md:truncate">{study.title}</span>
             </div>
-            <h1 className="mt-1.5 text-[25px] font-bold leading-none tracking-[-0.5px] text-white">
+            <h1 className="mt-1.5 text-[25px] font-bold leading-none tracking-[-0.5px] text-white max-md:text-[22px] max-md:leading-tight">
               {study.title}
             </h1>
             <div className="mt-2.5 flex flex-wrap gap-1.5">
@@ -253,7 +253,7 @@ export default async function StudyDetailPage({ params }: PageProps) {
           </div>
 
           {/* Four figures, with the unit beside the value rather than under it. */}
-          <div className="flex flex-none gap-[14px]">
+          <div className="grid flex-none grid-cols-2 gap-[10px] md:flex md:gap-[14px]">
             <DetailStat icon={Layers} label="Lessen" value={`${lessonsTotal}`} unit={lessonsTotal === 1 ? 'les' : 'lessen'} />
             <DetailStat icon={Clock} label="Tijd" value={formatStudyMinutes(minutes)} unit="totaal" />
             <DetailStat
@@ -265,7 +265,7 @@ export default async function StudyDetailPage({ params }: PageProps) {
             <DetailStat icon={TrendingUp} label="Voortgang" value={`${pct} %`} unit={`${lessonsDone} van ${lessonsTotal}`} />
           </div>
 
-          <div className="flex min-h-0 flex-1 gap-5">
+          <div className="flex min-h-0 flex-1 gap-5 max-md:flex-col max-md:gap-4">
             {/* The pitch, then the lessons. */}
             <div className="flex min-w-0 flex-1 flex-col gap-4">
               {about.length > 0 && (
@@ -299,8 +299,10 @@ export default async function StudyDetailPage({ params }: PageProps) {
               />
             </div>
 
-            {/* The rail: where you are, and what this study is made of. */}
-            <aside className="flex w-[326px] flex-none flex-col gap-[13px]">
+            {/* The rail: where you are, and what this study is made of. On a
+                phone it stacks above the lessons, so the start button is not
+                forty rows down. */}
+            <aside className="flex w-[326px] flex-none flex-col gap-[13px] max-md:order-first max-md:w-full">
               <Card className="flex-none p-[18px]">
                 <StudyActionBar />
               </Card>
@@ -344,13 +346,13 @@ function DetailStat({
   unit: string;
 }) {
   return (
-    <Card className="flex-1 px-[17px] py-[15px]">
+    <Card className="min-w-0 flex-1 px-[17px] py-[15px] max-md:px-[14px] max-md:py-[12px]">
       <p className="flex items-center gap-1.5 text-[12px] text-ink-muted">
         <Icon aria-hidden size={14} strokeWidth={2} className="flex-none text-teal" />
         {label}
       </p>
-      <p className="mt-[7px] flex items-baseline gap-[7px]">
-        <span className="text-[24px] font-bold tracking-[-0.5px] text-ink tabular-nums">{value}</span>
+      <p className="mt-[7px] flex items-baseline gap-[7px] max-md:flex-wrap max-md:gap-x-[6px] max-md:gap-y-0">
+        <span className="text-[24px] font-bold tracking-[-0.5px] text-ink tabular-nums max-md:text-[20px]">{value}</span>
         <span className="text-[12px] text-ink-faint">{unit}</span>
       </p>
     </Card>

@@ -98,7 +98,7 @@ function useNav(): NavItem[] {
   const { data: session } = useSession()
   const main = studyStyle === "self" ? MAIN_NAV_SELF : MAIN_NAV
   return session?.user?.isAdmin
-    ? [...main, { title: "Beheer", url: "/admin", icon: ShieldCheck }]
+    ? [...main, { title: "Beheer", url: "/beheer", icon: ShieldCheck }]
     : main
 }
 

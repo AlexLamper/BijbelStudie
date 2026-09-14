@@ -317,6 +317,13 @@
   }
 }
 
+/* Phones only (below Tailwind's md). One element wider than the screen used to
+   make the whole page pan sideways. `clip` rather than `hidden`: it creates no
+   scroll container, so `position: sticky` inside keeps working. */
+@media (max-width: 767.98px) {
+  html, body { overflow-x: clip; }
+}
+
 /* Bible text */
 .bible-text {
   font-family: var(--font-lora), Georgia, serif;
@@ -335,6 +342,24 @@
 ::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground) / 0.4); }
 
 :focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }
+
+/* Search fields. The rule above is unlayered and comes after the utilities, so
+   it beat every `outline-none` and drew a square teal box around search inputs,
+   worst on the borderless ones sitting inside a rounded field. A search field
+   shows focus on its own rounded shape instead: teal border plus a soft ring
+   (box-shadow follows border-radius). Borderless inputs inside a wrapper put
+   `search-field` on the wrapper. The ring rule is kept at (0,1,0) so a field
+   that sets its own `focus:ring-*` keeps it. */
+input[type="search"]:focus-visible,
+.search-field input:focus-visible { outline: none; }
+input[type="search"]:focus-visible:not(.search-field *) { border-color: hsl(var(--ring)); }
+:where(input[type="search"]):focus-visible:not(:where(.search-field *)) {
+  box-shadow: 0 0 0 3px hsl(var(--ring) / 0.25);
+}
+.search-field:focus-within {
+  border-color: hsl(var(--ring));
+  box-shadow: 0 0 0 3px hsl(var(--ring) / 0.25);
+}
 
 /* ─── Scroll reveal ─────────────────────────────────────────────
    This started as framer-motion, which served `opacity: 0` in the HTML and

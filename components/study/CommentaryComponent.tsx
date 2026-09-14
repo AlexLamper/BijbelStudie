@@ -482,8 +482,10 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
         {/* Source row - a caps label on the left, then read-aloud as a 32 px
             icon button and the source itself as a 186 px select
             (design_handoff_web/PAGES.md §3). */}
-        <div className="flex flex-none items-center gap-[10px] border-b border-line-soft px-5 py-[11px] dark:border-border">
-          <span className="flex-1 text-[12px] font-semibold uppercase tracking-[1.2px] text-ink-muted dark:text-muted-foreground">
+        {/* Below md the 186 px select gives way and takes what the label and
+            the speak button leave, so the row stops running past the edge. */}
+        <div className="flex flex-none items-center gap-[10px] border-b border-line-soft px-5 py-[11px] dark:border-border max-md:px-4 max-md:py-2">
+          <span className="flex-1 max-md:flex-none text-[12px] font-semibold uppercase tracking-[1.2px] text-ink-muted dark:text-muted-foreground">
             Commentaarbron
           </span>
           {commentary && Object.keys(commentary).length > 0 && !calvinNotice && (
@@ -492,11 +494,11 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
               showSettings={false}
               getText={() => buildCommentaryText(commentary)}
               label="Lees commentaar voor"
-              className="h-8 w-8 flex-none rounded-lg text-teal hover:bg-line-soft"
+              className="h-8 w-8 flex-none rounded-lg text-teal hover:bg-line-soft max-md:ml-auto max-md:h-10 max-md:w-10"
               icon={<Volume2 size={17} strokeWidth={1.9} />}
             />
           )}
-          <div className="relative flex h-9 w-[186px] flex-none items-center rounded-[9px] border border-line bg-white dark:border-border dark:bg-secondary">
+          <div className="relative flex h-9 w-[186px] flex-none items-center rounded-[9px] max-md:h-10 max-md:w-auto max-md:min-w-0 max-md:flex-1 border border-line bg-white dark:border-border dark:bg-secondary">
             <select
               value={selectedSource}
               onChange={(e) => {
@@ -507,7 +509,7 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
                 }
               }}
               aria-label="Commentaarbron"
-              className="h-full w-full cursor-pointer appearance-none truncate rounded-[9px] bg-transparent pl-[11px] pr-7 text-[13px] font-medium text-ink-body outline-none dark:text-foreground"
+              className="h-full w-full cursor-pointer appearance-none truncate rounded-[9px] bg-transparent pl-[11px] pr-7 text-[13px] font-medium text-ink-body outline-none dark:text-foreground max-md:text-[16px]"
             >
               {availableSources.length > 0 ? (
                 sortedLanguages.map(lang => (
@@ -532,7 +534,7 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
         </div>
 
         {/* Content Area */}
-        <CardContent className={`overflow-y-auto px-5 pb-28 pt-[18px] ${height ? 'min-h-0 flex-1' : 'max-h-[600px] lg:max-h-[calc(100vh-300px)]'}`}>
+        <CardContent className={`overflow-y-auto px-5 pb-28 pt-[18px] max-md:px-4 ${height ? 'min-h-0 flex-1' : 'max-h-[600px] lg:max-h-[calc(100vh-300px)]'}`}>
           {isLocked() ? (
             <div className="flex flex-col items-center justify-center py-12 text-center space-y-4">
               <div className="bg-amber-100 dark:bg-amber-900/20 p-4 rounded-full">

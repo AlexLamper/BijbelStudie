@@ -40,7 +40,7 @@ export default function NotitiesTab({ groupId }: { groupId: string }) {
   return (
     <div className="space-y-4">
       {/* CTA */}
-      <div className="flex items-center justify-between p-3.5 rounded-xl"
+      <div className="flex items-center justify-between p-3.5 rounded-xl max-md:flex-col max-md:items-start max-md:gap-2"
         style={{ backgroundColor: "rgba(13,148,136,0.05)", border: "1px solid rgba(13,148,136,0.15)" }}>
         <div className="flex items-center gap-2.5">
           <BookOpen className="h-4 w-4 flex-shrink-0" style={{ color: "#0D9488" }} />
@@ -49,7 +49,7 @@ export default function NotitiesTab({ groupId }: { groupId: string }) {
           </p>
         </div>
         <Link href="/studie"
-          className="flex items-center gap-1 text-xs font-semibold whitespace-nowrap ml-3 flex-shrink-0 text-teal dark:text-teal-400">
+          className="flex items-center gap-1 text-xs font-semibold whitespace-nowrap ml-3 flex-shrink-0 text-teal dark:text-teal-400 max-md:ml-[1.625rem] max-md:min-h-10 max-md:text-sm">
           Open studie <ArrowRight size={12} />
         </Link>
       </div>
@@ -87,7 +87,7 @@ export default function NotitiesTab({ groupId }: { groupId: string }) {
                 <Avatar name={note.userId.name} size={8} card={note.userId.levensboom} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2 mb-1">
-                    <span className="text-sm font-semibold text-gray-900 dark:text-foreground">
+                    <span className="text-sm font-semibold text-gray-900 dark:text-foreground max-md:min-w-0 max-md:truncate">
                       {note.userId.name}
                     </span>
                     <span className="text-xs text-gray-400 dark:text-muted-foreground flex-shrink-0">
@@ -99,7 +99,7 @@ export default function NotitiesTab({ groupId }: { groupId: string }) {
                       {note.verseReference}
                     </p>
                   )}
-                  <p className="text-sm text-gray-700 dark:text-foreground/80 leading-relaxed line-clamp-4">
+                  <p className="text-sm text-gray-700 dark:text-foreground/80 leading-relaxed line-clamp-4 break-words">
                     {note.noteText}
                   </p>
                 </div>

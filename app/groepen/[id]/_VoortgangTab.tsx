@@ -84,7 +84,7 @@ export default function VoortgangTab({ groupId }: { groupId: string }) {
   const doneCount = members.filter(m => m.assignmentDone).length
 
   return (
-    <div className="p-4 space-y-6 content-in">
+    <div className="p-4 max-md:px-0 space-y-6 content-in">
       {assignment && (
         <section>
           <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
@@ -109,14 +109,14 @@ export default function VoortgangTab({ groupId }: { groupId: string }) {
           <ul className="space-y-1.5">
             {members.map(m => (
               <li key={m.id}
-                className="flex items-center justify-between rounded-lg px-3 py-2 bg-gray-50 dark:bg-secondary/40">
-                <span className="text-sm text-gray-800 dark:text-foreground truncate">{m.name}</span>
+                className="flex items-center justify-between max-md:gap-3 rounded-lg px-3 py-2 bg-gray-50 dark:bg-secondary/40">
+                <span className="text-sm text-gray-800 dark:text-foreground truncate max-md:min-w-0">{m.name}</span>
                 {m.assignmentDone ? (
-                  <span className={`flex items-center gap-1 text-xs font-semibold ${TEAL_TEXT}`}>
+                  <span className={`flex max-md:flex-shrink-0 items-center gap-1 text-xs font-semibold ${TEAL_TEXT}`}>
                     <Check size={13} /> Bestudeerd
                   </span>
                 ) : (
-                  <span className="text-xs text-gray-400 dark:text-muted-foreground">Nog niet</span>
+                  <span className="max-md:flex-shrink-0 text-xs text-gray-400 dark:text-muted-foreground">Nog niet</span>
                 )}
               </li>
             ))}
@@ -148,8 +148,8 @@ export default function VoortgangTab({ groupId }: { groupId: string }) {
               const pct = Math.min(100, Math.round((m.challengeCount / challenge.target) * 100))
               return (
                 <li key={m.id}>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm text-gray-800 dark:text-foreground truncate">{m.name}</span>
+                  <div className="flex items-center justify-between max-md:gap-3 mb-1">
+                    <span className="text-sm text-gray-800 dark:text-foreground truncate max-md:min-w-0">{m.name}</span>
                     <span className="text-xs font-semibold text-gray-500 dark:text-muted-foreground tabular-nums">
                       {m.challengeCount} / {challenge.target}
                     </span>

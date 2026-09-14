@@ -197,9 +197,9 @@ export default function NotesPage() {
   if (status === "loading" || !session) {
     return (
       <AppShell title="Notities">
-        <div role="status" aria-label="Notities laden" className="flex min-h-full gap-5">
-          <Skeleton className="min-w-0 flex-1 rounded-card" />
-          <div className="flex w-[300px] flex-none flex-col gap-[14px]">
+        <div role="status" aria-label="Notities laden" className="flex min-h-full gap-5 max-md:flex-col">
+          <Skeleton className="min-w-0 flex-1 rounded-card max-md:min-h-[320px]" />
+          <div className="flex w-[300px] flex-none flex-col gap-[14px] max-md:order-first max-md:w-full">
             <Skeleton className="h-11 rounded-[12px]" />
             <Skeleton className="h-[280px] rounded-card" />
             <Skeleton className="h-[140px] rounded-card" />
@@ -213,11 +213,11 @@ export default function NotesPage() {
 
   return (
     <AppShell title="Notities">
-      <div className="flex min-h-full gap-5">
+      <div className="flex min-h-full gap-5 max-md:flex-col">
         {/* ── The list ─────────────────────────────────────────────── */}
         <Card className="flex min-w-0 flex-1 flex-col overflow-hidden">
           {/* Tabs. Same filter, same values - only the shape changed. */}
-          <div className="flex flex-none items-center gap-[22px] border-b border-line px-[22px]">
+          <div className="flex flex-none items-center gap-[22px] border-b border-line px-[22px] max-md:flex-wrap max-md:gap-x-5 max-md:gap-y-0 max-md:px-4">
             {TABS.map(tab => {
               const active = tab.value === selectedType
               return (
@@ -236,12 +236,12 @@ export default function NotesPage() {
                 </button>
               )
             })}
-            <div className="flex-1" />
-            {!loading && <span className="text-[12.5px] text-ink-faint tabular-nums">{rowLabel}</span>}
+            <div className="flex-1 max-md:hidden" />
+            {!loading && <span className="text-[12.5px] text-ink-faint tabular-nums max-md:basis-full max-md:pb-3">{rowLabel}</span>}
           </div>
 
           {error && (
-            <div role="alert" className="border-b border-line px-[22px] py-4 text-[13.5px] text-danger">
+            <div role="alert" className="border-b border-line px-[22px] py-4 max-md:px-4 text-[13.5px] text-danger">
               {error}
             </div>
           )}
@@ -249,7 +249,7 @@ export default function NotesPage() {
           {loading ? (
             <div role="status" aria-label="Notities laden">
               {[1, 2, 3, 4].map(i => (
-                <div key={i} className="space-y-3 border-b border-line px-[22px] py-[18px]">
+                <div key={i} className="space-y-3 border-b border-line px-[22px] py-[18px] max-md:px-4">
                   <Skeleton className="h-3 w-32" />
                   <Skeleton className="h-4 w-2/3" />
                   <Skeleton className="h-3 w-1/2" />
@@ -257,7 +257,7 @@ export default function NotesPage() {
               ))}
             </div>
           ) : filtered.length === 0 ? (
-            <div className="max-w-[34rem] px-[22px] py-10">
+            <div className="max-w-[34rem] px-[22px] py-10 max-md:px-4">
               <h3 className="text-[15.5px] font-bold text-ink">Geen notities gevonden</h3>
               <p className="mt-2 text-[13.5px] leading-relaxed text-ink-muted">
                 {searchTerm || selectedBook !== "all" || selectedTag !== "all" || selectedType !== "all"
@@ -267,7 +267,7 @@ export default function NotesPage() {
               <button
                 type="button"
                 onClick={() => router.push("/studie")}
-                className="mt-5 inline-flex items-center gap-2 rounded-btn border border-line px-4 py-2.5 text-[13.5px] font-semibold text-ink-body transition-colors hover:bg-line-soft"
+                className="mt-5 inline-flex items-center gap-2 rounded-btn border border-line px-4 py-2.5 max-md:min-h-11 text-[13.5px] font-semibold text-ink-body transition-colors hover:bg-line-soft"
               >
                 <Plus className="h-4 w-4" aria-hidden /> Begin met bestuderen
               </button>
@@ -277,12 +277,12 @@ export default function NotesPage() {
               {filtered.map(note => {
                 const swatch = note.type === "note" ? null : HIGHLIGHT_HEX[note.highlightColor] || null
                 return (
-                  <article key={note._id} className="border-b border-line px-[22px] py-[18px] last:border-b-0">
+                  <article key={note._id} className="border-b border-line px-[22px] py-[18px] last:border-b-0 max-md:px-4">
                     {/* Meta: where it is, when it was written, and the menu. */}
                     <div className="flex items-center gap-[9px]">
-                      <span className="text-[12.5px] font-semibold text-teal dark:text-teal-400">{note.verseReference}</span>
+                      <span className="text-[12.5px] font-semibold text-teal dark:text-teal-400 max-md:min-w-0 max-md:truncate">{note.verseReference}</span>
                       <span className="h-[3px] w-[3px] rounded-full bg-line-strong" />
-                      <time dateTime={note.createdAt} className="text-[12.5px] text-ink-faint">
+                      <time dateTime={note.createdAt} className="text-[12.5px] text-ink-faint max-md:shrink-0">
                         {new Date(note.createdAt).toLocaleDateString("nl-NL", { day: "numeric", month: "long" })}
                       </time>
                       {swatch && (
@@ -305,7 +305,7 @@ export default function NotesPage() {
                           <button
                             type="button"
                             aria-label={`Acties voor notitie bij ${note.verseReference}`}
-                            className="inline-flex h-6 w-6 items-center justify-center rounded-[6px] text-ink-faint transition-colors hover:bg-line-soft hover:text-ink-body"
+                            className="inline-flex h-6 w-6 items-center justify-center rounded-[6px] text-ink-faint max-md:-my-2 max-md:-mr-2 max-md:h-10 max-md:w-10 max-md:shrink-0 transition-colors hover:bg-line-soft hover:text-ink-body"
                           >
                             <MoreHorizontal size={17} aria-hidden />
                           </button>
@@ -333,7 +333,7 @@ export default function NotesPage() {
                     {note.verseText && (
                       <div className="mt-[9px] flex max-w-[720px] items-stretch gap-[10px]">
                         <span className="w-[2px] flex-none bg-teal-soft" />
-                        <p className="font-serif text-[13px] leading-[1.6] text-ink-muted">
+                        <p className="min-w-0 break-words font-serif text-[13px] leading-[1.6] text-ink-muted">
                           {note.verseText}
                         </p>
                       </div>
@@ -351,10 +351,10 @@ export default function NotesPage() {
               })}
 
               {totalPages > 1 && (
-                <nav aria-label="Paginering" className="flex items-center justify-center gap-4 py-6">
+                <nav aria-label="Paginering" className="flex items-center justify-center gap-4 py-6 max-md:gap-2 max-md:px-4">
                   <button
                     type="button"
-                    className="rounded-btn border border-line px-3 py-2 text-[13px] font-semibold text-ink-body transition-colors hover:bg-line-soft disabled:opacity-40"
+                    className="rounded-btn border border-line px-3 py-2 text-[13px] font-semibold text-ink-body transition-colors hover:bg-line-soft disabled:opacity-40 max-md:min-h-10"
                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                     disabled={currentPage === 1}
                   >
@@ -365,7 +365,7 @@ export default function NotesPage() {
                   </span>
                   <button
                     type="button"
-                    className="rounded-btn border border-line px-3 py-2 text-[13px] font-semibold text-ink-body transition-colors hover:bg-line-soft disabled:opacity-40"
+                    className="rounded-btn border border-line px-3 py-2 text-[13px] font-semibold text-ink-body transition-colors hover:bg-line-soft disabled:opacity-40 max-md:min-h-10"
                     onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                     disabled={currentPage === totalPages}
                   >
@@ -378,7 +378,7 @@ export default function NotesPage() {
         </Card>
 
         {/* ── The rail ─────────────────────────────────────────────── */}
-        <aside className="flex w-[300px] flex-none flex-col gap-[14px]">
+        <aside className="flex w-[300px] flex-none flex-col gap-[14px] max-md:order-first max-md:w-full">
           <button
             type="button"
             onClick={() => router.push("/studie")}
@@ -393,7 +393,7 @@ export default function NotesPage() {
                 design gives this page one rail for narrowing the list, and this
                 is what narrows it most. */}
             <label htmlFor="notities-zoeken" className="sr-only">Zoek in je notities</label>
-            <div className="flex h-9 items-center gap-2 rounded-[9px] border border-line px-[11px]">
+            <div className="search-field flex h-9 items-center gap-2 rounded-[9px] border border-line px-[11px] max-md:h-11">
               <Search size={15} className="flex-none text-ink-muted" aria-hidden />
               <input
                 id="notities-zoeken"
@@ -401,14 +401,14 @@ export default function NotesPage() {
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
                 placeholder="Zoek in je notities"
-                className="min-w-0 flex-1 border-0 bg-transparent text-[13px] text-ink outline-none placeholder:text-ink-faint"
+                className="min-w-0 flex-1 border-0 bg-transparent text-[13px] text-ink outline-none placeholder:text-ink-faint max-md:text-base"
               />
             </div>
 
             <div className="mt-[14px] text-[10.5px] font-semibold uppercase tracking-[1.1px] text-ink-faint">
               Filteren
             </div>
-            <div className="mt-[10px] flex flex-col gap-[2px]">
+            <div className="mt-[10px] flex flex-col gap-[2px] max-md:flex-row max-md:flex-wrap max-md:gap-1.5">
               <FilterRow
                 label="Alle notities"
                 count={notes.length}
@@ -432,7 +432,7 @@ export default function NotesPage() {
                 <div className="text-[10.5px] font-semibold uppercase tracking-[1.1px] text-ink-faint">
                   Tags
                 </div>
-                <div className="mt-[10px] flex flex-col gap-[2px]">
+                <div className="mt-[10px] flex flex-col gap-[2px] max-md:flex-row max-md:flex-wrap max-md:gap-1.5">
                   <FilterRow
                     label="Alle tags"
                     active={selectedTag === "all"}
@@ -454,12 +454,12 @@ export default function NotesPage() {
             <div className="text-[10.5px] font-semibold uppercase tracking-[1.1px] text-ink-faint">
               Sorteren
             </div>
-            <div className="relative mt-[10px] flex h-9 items-center rounded-[9px] border border-line">
+            <div className="relative mt-[10px] flex h-9 items-center rounded-[9px] border border-line max-md:h-11">
               <select
                 value={sortOrder}
                 onChange={e => setSortOrder(e.target.value as "new" | "old")}
                 aria-label="Sorteervolgorde"
-                className="h-full w-full cursor-pointer appearance-none rounded-[9px] bg-transparent pl-3 pr-8 text-[13px] font-medium text-ink-body outline-none"
+                className="h-full w-full cursor-pointer appearance-none rounded-[9px] bg-transparent pl-3 pr-8 text-[13px] font-medium text-ink-body outline-none max-md:text-base"
               >
                 <option value="new">Nieuwste eerst</option>
                 <option value="old">Oudste eerst</option>
@@ -477,7 +477,7 @@ export default function NotesPage() {
               type="button"
               onClick={exportNotes}
               disabled={filtered.length === 0}
-              className="mt-3 flex h-9 w-full items-center justify-center rounded-[9px] border border-line text-[13px] font-semibold text-ink-body transition-colors hover:bg-line-soft disabled:opacity-40"
+              className="mt-3 flex h-9 w-full items-center justify-center rounded-[9px] max-md:h-11 border border-line text-[13px] font-semibold text-ink-body transition-colors hover:bg-line-soft disabled:opacity-40"
             >
               Downloaden
             </button>
@@ -512,7 +512,7 @@ function FilterRow({
       type="button"
       onClick={onClick}
       className={[
-        "flex h-[34px] items-center rounded-[8px] px-[11px] text-left transition-colors",
+        "flex h-[34px] items-center rounded-[8px] px-[11px] text-left transition-colors max-md:h-10 max-md:max-w-full max-md:gap-2 max-md:border max-md:border-line",
         active ? "bg-[var(--teal-wash-2)]" : "hover:bg-line-soft",
       ].join(" ")}
     >

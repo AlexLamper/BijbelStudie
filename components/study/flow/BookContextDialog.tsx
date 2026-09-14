@@ -102,7 +102,7 @@ export default function BookContextDialog({
         aria-modal="true"
         aria-label={`Context van ${book}`}
         onClick={(event) => event.stopPropagation()}
-        className={`flex h-[85vh] w-full flex-col rounded-t-2xl sm:h-[78vh] sm:max-w-2xl sm:rounded-2xl ${PANEL_SOLID}`}
+        className={`flex h-[85vh] w-full flex-col rounded-t-2xl max-md:h-[85dvh] max-md:pb-[env(safe-area-inset-bottom)] sm:h-[78vh] sm:max-w-2xl sm:rounded-2xl ${PANEL_SOLID}`}
       >
         <header className={`flex h-14 flex-none items-center justify-between border-b px-5 ${RULE}`}>
           {/* Titled in words; an info mark beside "Context van ..." adds nothing. */}
@@ -113,7 +113,7 @@ export default function BookContextDialog({
             type="button"
             onClick={onClose}
             aria-label="Sluiten"
-            className={`h-8 w-8 flex-none inline-flex items-center justify-center rounded-md hover:bg-les-card ${INK_FAINT} hover:text-les-ink ${FOCUS_RING}`}
+            className={`h-8 w-8 max-md:h-10 max-md:w-10 flex-none inline-flex items-center justify-center rounded-md hover:bg-les-card ${INK_FAINT} hover:text-les-ink ${FOCUS_RING}`}
           >
             <X size={16} />
           </button>

@@ -2,8 +2,9 @@
 
 import Link from "next/link"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { BarChart3, CreditCard, RefreshCw, Search, Settings, Users } from "lucide-react"
+import { BarChart3, CreditCard, MessageSquare, RefreshCw, Search, Settings, Users } from "lucide-react"
 import BillingHealthCard, { type BillingStats } from "../../components/admin/BillingHealthCard"
+import { ADMIN_BUTTON, ADMIN_FIELD, ADMIN_PRIMARY } from "../../components/admin/adminSurface"
 import OnboardingPreviewButton from "../../components/admin/OnboardingPreviewButton"
 import AppShell from "../../components/shell/AppShell"
 import { Card, Skeleton, StatCard } from "../../components/kit/primitives"
@@ -153,13 +154,16 @@ function describeStatsFailure({ status, detail }: FetchResult): string {
  *     not call; the slot holds the subscription breakdown instead, built from
  *     the stats response that is already fetched.
  *   - The table's filter field and its subscription select narrow the rows that
- *     are loaded, client-side. Full search lives on /admin/users.
+ *     are loaded, client-side. Full search lives on /beheer/gebruikers.
  *   - "Gebruiker toevoegen" has no endpoint at all (admin tooling can only
  *     toggle isAdmin/subscribed), so the primary button is the link to
- *     /admin/users instead.
- * The three admin sub-routes (/admin/users, /admin/insights, /admin/feedback)
- * are outside the nine routes in this handoff and still wear the old immersive
- * chrome.
+ *     /beheer/gebruikers instead.
+ * The three admin sub-routes (/beheer/gebruikers, /beheer/inzichten, /beheer/feedback)
+ * wear the same AppShell and the shared admin classes in
+ * components/admin/adminSurface.ts.
+ *
+ * Below `lg` the side-by-side card pairs stack; below `md` the users table
+ * scrolls sideways inside its card, never the page.
  */
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<Stats | null>(null)
@@ -266,18 +270,18 @@ export default function AdminDashboardPage() {
         {/* The one control the design has no row for, kept small: what the
             figures below were read at, and the way to read them again. */}
         <div className="flex flex-none items-center gap-3">
-          <p className="flex-1 text-[12px] text-ink-faint">
+          <p className="min-w-0 flex-1 text-[12px] text-ink-faint">
             {lastUpdated
               ? `Bijgewerkt ${lastUpdated.toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })}`
               : " "}
             {degraded.length > 0 && (
-              <span className="text-warn"> · {degraded.length} cijfer(s) niet leesbaar: {degraded.join(", ")}</span>
+              <span className="text-warn dark:text-orange-400"> · {degraded.length} cijfer(s) niet leesbaar: {degraded.join(", ")}</span>
             )}
           </p>
           <button
             onClick={handleRefresh}
             disabled={refreshing || loading}
-            className="inline-flex h-8 items-center gap-2 rounded-[9px] border border-line bg-surface px-3 text-[12.5px] font-medium text-ink-body transition-colors hover:bg-line-soft disabled:opacity-50"
+            className={ADMIN_BUTTON}
           >
             <RefreshCw size={14} className={refreshing ? "animate-spin" : ""} aria-hidden /> Vernieuwen
           </button>
@@ -285,21 +289,21 @@ export default function AdminDashboardPage() {
 
         {loadError && (
           <div role="alert" className="flex-none rounded-card border border-danger/40 bg-surface p-4">
-            <p className="text-[13.5px] leading-relaxed text-danger">{loadError}</p>
+            <p className="text-[13.5px] leading-relaxed text-danger dark:text-red-400">{loadError}</p>
           </div>
         )}
 
         {/* ── Five figures, MRR first ───────────────────────────────── */}
-        <div className="flex flex-none gap-[13px]">
+        <div className="grid flex-none grid-cols-2 gap-[13px] sm:grid-cols-3 xl:grid-cols-5">
           <StatCard
-            className="flex-1"
+            className="col-span-2 min-w-0 sm:col-span-1"
             label="MRR"
             value={
               // The only figure in this row that is money, in the same green the
               // rest of the page keeps for a gain. A missing MRR stays a plain
               // dash: an unknown amount is not a good number, so it is not green.
               stats?.revenue.mrrEur != null ? (
-                <span className="text-success">
+                <span className="text-success dark:text-emerald-400">
                   {`€ ${stats.revenue.mrrEur.toLocaleString("nl-NL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                 </span>
               ) : (
@@ -307,31 +311,33 @@ export default function AdminDashboardPage() {
               )
             }
           />
-          <StatCard className="flex-1" label="Betalende gebruikers" value={formatNumber(stats?.users.paying)} />
+          <StatCard className="min-w-0" label="Betalende gebruikers" value={formatNumber(stats?.users.paying)} />
           <StatCard
-            className="flex-1"
+            className="min-w-0"
             label="Gebruikers totaal"
             value={formatNumber(stats?.users.total)}
             delta={stats?.users.newLast7d != null ? `+${formatNumber(stats.users.newLast7d)}` : undefined}
           />
           <StatCard
-            className="flex-1"
+            className="min-w-0"
             label="Conversie"
             value={stats?.users.premiumPercent != null ? `${stats.users.premiumPercent.toLocaleString("nl-NL", { maximumFractionDigits: 1 })} %` : "-"}
           />
-          <StatCard className="flex-1" label="Actieve reeksen" value={formatNumber(stats?.users.activeStreak)} />
+          <StatCard className="min-w-0" label="Actieve reeksen" value={formatNumber(stats?.users.activeStreak)} />
         </div>
 
         {/* ── The users table ───────────────────────────────────────── */}
         <Card className="flex-none overflow-hidden">
-          <div className="flex items-center gap-[11px] px-5 py-[14px]">
-            <h2 className="text-[15.5px] font-bold text-ink">Gebruikers beheren</h2>
-            <span className="text-[12px] text-ink-faint tabular-nums">
-              {formatNumber(stats?.users.total)} accounts
-            </span>
-            <div className="flex-1" />
+          <div className="flex flex-wrap items-center gap-[11px] px-4 py-[14px] sm:px-5">
+            <div className="flex min-w-0 items-baseline gap-[11px]">
+              <h2 className="text-[15.5px] font-bold text-ink">Gebruikers beheren</h2>
+              <span className="text-[12px] text-ink-faint tabular-nums">
+                {formatNumber(stats?.users.total)} accounts
+              </span>
+            </div>
+            <div className="hidden flex-1 md:block" />
 
-            <div className="flex h-[34px] w-[210px] items-center gap-2 rounded-[9px] bg-line-soft px-[11px]">
+            <div className="search-field flex h-[34px] w-full items-center gap-2 rounded-[9px] bg-line-soft px-[11px] sm:w-[210px]">
               <Search size={14} className="flex-none text-ink-muted" aria-hidden />
               <input
                 value={userQuery}
@@ -346,7 +352,7 @@ export default function AdminDashboardPage() {
               value={planFilter}
               onChange={e => setPlanFilter(e.target.value as "all" | "pro" | "free")}
               aria-label="Filter op abonnement"
-              className="h-[34px] cursor-pointer rounded-[9px] border border-line bg-surface px-3 text-[12.5px] font-medium text-ink-body outline-none"
+              className={`min-w-0 flex-1 cursor-pointer sm:flex-none ${ADMIN_FIELD}`}
             >
               <option value="all">Alle abonnementen</option>
               <option value="pro">Pro</option>
@@ -357,19 +363,20 @@ export default function AdminDashboardPage() {
               type="button"
               onClick={() => exportUsers(tableRows)}
               disabled={tableRows.length === 0}
-              className="h-[34px] rounded-[9px] border border-line px-3 text-[12.5px] font-medium text-ink-body transition-colors hover:bg-line-soft disabled:opacity-40"
+              className={ADMIN_BUTTON}
             >
               Exporteren
             </button>
 
-            <Link
-              href="/admin/users"
-              className="flex h-[34px] items-center rounded-[9px] bg-teal px-[14px] text-[12.5px] font-semibold text-white no-underline transition-opacity hover:opacity-90"
-            >
+            <Link href="/beheer/gebruikers" className={ADMIN_PRIMARY}>
               Alle gebruikers
             </Link>
           </div>
 
+          {/* Below `md` the five columns cannot share the width, so the rows
+              scroll sideways inside the card - never the page. */}
+          <div className="overflow-x-auto">
+          <div className="min-w-[680px]">
           <div className={`${GRID} px-5 pb-[10px]`}>
             {["Gebruiker", "Abonnement", "Lid sinds", "Laatst actief", "Voortgang"].map(h => (
               <div key={h} className="text-[10.5px] font-semibold uppercase tracking-[0.8px] text-ink-faint">
@@ -402,7 +409,7 @@ export default function AdminDashboardPage() {
                   </div>
                   <div>
                     {pro ? (
-                      <span className="rounded-full bg-pro-soft px-[9px] py-1 text-[11px] font-semibold text-gold-ink">
+                      <span className="rounded-full bg-pro-soft px-[9px] py-1 text-[11px] font-semibold text-gold-ink dark:text-gold-badge">
                         {u.isAdmin ? "Admin" : "Pro"}
                       </span>
                     ) : (
@@ -429,10 +436,12 @@ export default function AdminDashboardPage() {
               )
             })
           )}
+          </div>
+          </div>
         </Card>
 
         {/* ── The two cards under it: siblings, never nested ────────── */}
-        <div className="flex flex-none gap-4">
+        <div className="flex flex-none flex-col gap-4 lg:flex-row">
           {/* The slot the design fills with "Recente feedback". Recent sign-ups
               stood here, but the table above already lists the newest accounts
               and the "Nieuwe gebruikers" chart already counts them. The one
@@ -440,9 +449,9 @@ export default function AdminDashboardPage() {
               top comes from: Stripe, the app stores and hand-granted access are
               three different stories behind one amount, and only this card
               tells them apart. */}
-          <Card className="min-w-0 flex-1 p-[17px]">
-            <div className="flex items-center gap-3">
-              <h2 className="flex-1 text-[14.5px] font-bold text-ink">Abonnementen uitgesplitst</h2>
+          <Card className="min-w-0 flex-1 p-4 sm:p-[17px]">
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <h2 className="flex-1 whitespace-nowrap text-[14.5px] font-bold text-ink">Abonnementen uitgesplitst</h2>
               {!loading && stats?.users.premiumPercent != null && (
                 <span className="text-[12px] text-ink-faint tabular-nums">
                   {stats.users.premiumPercent.toLocaleString("nl-NL", { maximumFractionDigits: 1 })} % van alle accounts betaalt
@@ -454,7 +463,7 @@ export default function AdminDashboardPage() {
             {/* The three ways an account has Pro. The first two are `users.paying`
                 split by channel; the third is access nobody pays for, which is
                 why it is reported here and kept out of every money figure. */}
-            <dl className="mt-3 grid grid-cols-3 gap-[13px]">
+            <dl className="mt-3 grid grid-cols-1 gap-[13px] min-[420px]:grid-cols-3">
               <MiniStat label="Via Stripe" value={formatNumber(stats?.users.stripeSubscribers)} loading={loading} />
               <MiniStat label="Via de app" value={formatNumber(stats?.users.storeSubscribers)} loading={loading} />
               <MiniStat label="Gratis toegang" value={formatNumber(stats?.users.comped)} loading={loading} />
@@ -477,13 +486,13 @@ export default function AdminDashboardPage() {
             </dl>
           </Card>
 
-          <Card className="w-[340px] flex-none p-[14px]">
+          <Card className="w-full flex-none p-[14px] lg:w-[340px]">
             <h2 className="text-[14.5px] font-bold text-ink">Snel naar</h2>
             <div className="mt-[11px] flex flex-col gap-[6px]">
               {[
-                { href: "/admin/users", label: "Gebruikersbeheer", icon: Users },
-                { href: "/admin/insights", label: "Inzichten & analytics", icon: BarChart3 },
-                { href: "/admin/feedback", label: "Feedback", icon: Search },
+                { href: "/beheer/gebruikers", label: "Gebruikersbeheer", icon: Users },
+                { href: "/beheer/inzichten", label: "Inzichten & analytics", icon: BarChart3 },
+                { href: "/beheer/feedback", label: "Feedback", icon: MessageSquare },
                 { href: "/abonnement", label: "Abonnementen", icon: CreditCard },
                 { href: "/instellingen", label: "Mijn instellingen", icon: Settings },
               ].map(({ href, label, icon: Icon }) => (
@@ -506,7 +515,7 @@ export default function AdminDashboardPage() {
                for and RULES.md §2 forbids dropping. ─────────────────── */}
         <BillingHealthCard billing={stats?.billing} loading={loading} />
 
-        <div className="flex flex-none gap-4">
+        <div className="flex flex-none flex-col gap-4 lg:flex-row">
           <ChartCard
             title="Nieuwe gebruikers"
             subtitle="Aanmeldingen per dag (laatste 30 dagen)"
@@ -521,11 +530,11 @@ export default function AdminDashboardPage() {
           />
         </div>
 
-        <div className="flex flex-none gap-4">
-          <Card className="min-w-0 flex-1 p-[17px]">
+        <div className="flex flex-none flex-col gap-4 lg:flex-row">
+          <Card className="min-w-0 flex-1 p-4 sm:p-[17px]">
             <h2 className="text-[14.5px] font-bold text-ink">Content &amp; engagement</h2>
             <p className="mt-1 text-[12.5px] text-ink-muted">Door gebruikers gegenereerde data</p>
-            <div className="mt-3 grid grid-cols-4 gap-[13px]">
+            <div className="mt-3 grid grid-cols-2 gap-[13px] md:grid-cols-4">
               <MiniStat label="Notities" value={formatNumber(stats?.content.notes)} delta={stats ? `+${stats.content.notesLast7d}` : ""} loading={loading} />
               <MiniStat label="Leessessies" value={formatNumber(stats?.content.readingSessions)} delta={stats ? `+${stats.content.sessionsLast7d}` : ""} loading={loading} />
               <MiniStat label="Studiegroepen" value={formatNumber(stats?.content.groups)} loading={loading} />
@@ -533,7 +542,7 @@ export default function AdminDashboardPage() {
             </div>
           </Card>
 
-          <Card className="w-[340px] flex-none p-[17px]">
+          <Card className="w-full flex-none p-4 sm:p-[17px] lg:w-[340px]">
             <h2 className="text-[14.5px] font-bold text-ink">Vandaag</h2>
             <dl className="mt-2">
               <FunnelRow label="Nieuwe aanmeldingen" value={stats?.users.newLast24h} loading={loading} />
@@ -584,7 +593,7 @@ function ChartCard({
 }) {
   const total = chart.data.reduce((s, d) => s + d.count, 0)
   return (
-    <Card className="min-w-0 flex-1 p-[17px]">
+    <Card className="min-w-0 flex-1 p-4 sm:p-[17px]">
       <div className="flex items-baseline gap-3">
         <h2 className="text-[14.5px] font-bold text-ink">{title}</h2>
         <div className="flex-1" />
@@ -635,7 +644,7 @@ function MiniStat({ label, value, delta, loading }: { label: string; value: stri
       ) : (
         <dd className="content-in flex items-baseline gap-1.5">
           <span className="text-[18px] font-bold text-ink tabular-nums">{value}</span>
-          {delta && <span className="text-[11px] font-semibold text-success tabular-nums">{delta}</span>}
+          {delta && <span className="text-[11px] font-semibold text-success tabular-nums dark:text-emerald-400">{delta}</span>}
         </dd>
       )}
     </div>

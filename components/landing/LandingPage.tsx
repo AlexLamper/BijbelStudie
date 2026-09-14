@@ -1,6 +1,6 @@
 import Link from "next/link"
 import Image from "next/image"
-import { ArrowRight, Check } from "lucide-react"
+import { ArrowRight, Check, Menu, X } from "lucide-react"
 import { Footer } from "./footer"
 import { FAQItem } from "./FAQItem"
 import { ScrollEffects } from "./ScrollEffects"
@@ -202,10 +202,39 @@ function Navbar() {
             Inloggen
           </Link>
           <Link href="/inloggen"
-            className="press inline-flex items-center gap-1.5 text-sm font-semibold text-white px-4 py-2.5 rounded-lg bg-teal-700 hover:bg-teal-800 transition-colors whitespace-nowrap">
+            className="press inline-flex items-center gap-1.5 text-sm font-semibold text-white px-4 py-2.5 rounded-lg bg-teal-700 hover:bg-teal-800 transition-colors whitespace-nowrap max-[380px]:px-3">
             Gratis beginnen
-            <ArrowRight className="h-3.5 w-3.5 flex-shrink-0" />
+            <ArrowRight className="h-3.5 w-3.5 flex-shrink-0 max-[380px]:hidden" />
           </Link>
+          {/* Phone menu. A native <details> so the header stays a server
+              component; hidden from md up, where the centred nav shows. */}
+          <details id="landing-mobile-menu" className="group md:hidden">
+            <summary
+              aria-label="Menu"
+              className="flex h-10 w-10 cursor-pointer list-none items-center justify-center rounded-lg transition-colors hover:bg-line-soft [&::-webkit-details-marker]:hidden"
+              style={{ color: T.text }}
+            >
+              <Menu className="h-5 w-5 group-open:hidden" />
+              <X className="hidden h-5 w-5 group-open:block" />
+            </summary>
+            <nav
+              className="absolute inset-x-0 top-16 border-b px-4 py-2 shadow-lg"
+              style={{ borderColor: T.border, backgroundColor: T.page }}
+            >
+              {[
+                { href: "#levensboom", label: "Voortgang" },
+                { href: "#prijzen",    label: "Prijzen" },
+                { href: "#faq",        label: "FAQ" },
+                { href: "/inloggen",   label: "Inloggen" },
+              ].map(({ href, label }) => (
+                <Link key={href} href={href}
+                  className="flex min-h-11 items-center rounded-lg px-3 text-base font-medium transition-colors hover:bg-line-soft"
+                  style={{ color: T.text }}>
+                  {label}
+                </Link>
+              ))}
+            </nav>
+          </details>
         </div>
       </div>
     </header>
@@ -768,7 +797,7 @@ function Pricing() {
                 pair look unbalanced. Both cards sit still. */}
             <FadeUp className="h-full">
               <div
-                className="flex h-full flex-col rounded-2xl border p-8"
+                className="flex h-full flex-col rounded-2xl border p-8 max-md:p-6"
                 style={{ borderColor: T.border, backgroundColor: T.card, boxShadow: SHADOW.card }}
               >
                 <p className="text-[0.6875rem] font-bold uppercase" style={{ color: T.muted, letterSpacing: "0.16em" }}>
@@ -794,7 +823,7 @@ function Pricing() {
 
             <FadeUp className="h-full">
               <div
-                className="relative flex h-full flex-col overflow-hidden rounded-2xl p-8"
+                className="relative flex h-full flex-col overflow-hidden rounded-2xl p-8 max-md:p-6"
                 style={{
                   backgroundColor: T.sidebar,
                   boxShadow: "0 24px 48px -24px rgba(15,23,42,0.45)",
@@ -802,7 +831,7 @@ function Pricing() {
               >
                 <div aria-hidden className="absolute top-0 right-0 w-40 h-40 rounded-full opacity-10"
                   style={{ background: `radial-gradient(circle, ${T.teal}, transparent)`, transform: "translate(30%, -30%)" }} />
-                <div className="absolute -top-px left-8">
+                <div className="absolute -top-px left-8 max-md:left-6">
                   <span className="text-[11px] font-bold px-3 py-1 rounded-b-lg"
                     style={{ backgroundColor: T.tealDark, color: "white" }}>
                     Meest populair

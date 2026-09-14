@@ -162,11 +162,11 @@ function MiniStudyBar({
         </span>
         <button
           onClick={onDismiss}
-          className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded text-ink-faint transition-colors hover:bg-line hover:text-ink-body"
+          className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded text-ink-faint transition-colors hover:bg-line hover:text-ink-body max-md:-my-2 max-md:h-9 max-md:w-9"
           title="Studiebalk verbergen"
           aria-label="Studiebalk verbergen"
         >
-          <X size={11} />
+          <X size={11} className="max-md:h-4 max-md:w-4" />
         </button>
       </div>
 
@@ -184,11 +184,11 @@ function MiniStudyBar({
       </div>
 
       {/* Row 3: actions - prev (ghost) + primary (filled) */}
-      <div className="flex items-center justify-end gap-1.5 px-2 pb-2">
+      <div className="flex items-center justify-end gap-1.5 px-2 pb-2 max-md:gap-2 max-md:px-3">
         <button
           onClick={() => onGoto(lessonIdx - 1)}
           disabled={lessonIdx === 0}
-          className="flex h-7 items-center gap-0.5 rounded-md px-2 text-[10.5px] font-medium text-ink-body transition-colors hover:bg-line disabled:cursor-not-allowed disabled:opacity-30"
+          className="flex h-7 items-center gap-0.5 rounded-md px-2 text-[10.5px] font-medium text-ink-body transition-colors hover:bg-line disabled:cursor-not-allowed disabled:opacity-30 max-md:h-10 max-md:px-3 max-md:text-[13px]"
           title="Vorige les"
           aria-label="Vorige les"
         >
@@ -197,7 +197,7 @@ function MiniStudyBar({
 
         <button
           onClick={handlePrimary}
-          className="inline-flex h-7 items-center gap-1 whitespace-nowrap rounded-md bg-teal px-3 text-[11px] font-semibold text-white outline-none transition-opacity hover:opacity-90"
+          className="inline-flex h-7 items-center gap-1 whitespace-nowrap rounded-md bg-teal px-3 text-[11px] font-semibold text-white outline-none transition-opacity hover:opacity-90 max-md:h-10 max-md:px-4 max-md:text-[13px]"
           title={primaryLabel}
         >
           {isLast && isDone ? <Trophy size={12} /> : <CheckCircle size={12} />}
@@ -509,16 +509,21 @@ function StudyPageInner() {
 
       {/* Hide the floating widget whenever the AI tab itself is visible:
           on lg+ the materials pane is always shown; below lg only when the
-          user is on the 'materials' pane. */}
+          user is on the 'materials' pane.
+
+          Below md it also steps aside while the study bar is up: a phone shows
+          one pane at full width, so the launcher landed on the bar's primary
+          button. The AI tab stays one tap away under "Studie". */}
       <AiAssistantWidget
         onAsk={handleAiAsk}
-        className={
+        className={[
           materialsTab === 'ai'
             ? mobileView === 'materials'
               ? 'hidden'
               : 'lg:hidden'
-            : ''
-        }
+            : '',
+          studyBar ? 'max-md:hidden' : '',
+        ].join(' ')}
       />
     </>
   );
