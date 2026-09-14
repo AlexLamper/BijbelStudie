@@ -84,18 +84,22 @@ scripts/*.cmt.mybible
 !/public/data/commentaries/kingcomments_nl
 !/public/data/commentaries/kingcomments_nl/**
 !/public/data/commentaries/calvijn_nl.json
+# Karl August Dachsel (d. 1893, public domain). Listed in manifest.json, so it
+# must ship with the deployment or /api/commentary 404s for it on Vercel.
+!/public/data/commentaries/dachsel
+!/public/data/commentaries/dachsel/**
 
-# Original-language (Hebrew/Greek) text — built locally from STEPBible CC BY data
+# Original-language (Hebrew/Greek) text - built locally from STEPBible CC BY data
 # (see scripts/build-original-text.mjs)
 # NOTE: keep generated /public/data/original files in source control for production deployments.
 
 CLAUDE.md
 .ignore
 
-# Generated video scripts — local reference only, not in repo
+# Generated video scripts - local reference only, not in repo
 /video-scripts/
 
-# Internal planning / setup docs — not needed in repo
+# Internal planning / setup docs - not needed in repo
 *_PLAN.md
 *_SETUP.md
 *_MIGRATION.md
@@ -104,5 +108,5 @@ DOMAIN_MIGRATION.md
 MONETISATION_SETUP.md
 STUDY_FLOW_SETUP.md
 
-# Prompt for Claude Design (end-card animation) — local reference only
+# Prompt for Claude Design (end-card animation) - local reference only
 /CLAUDE_DESIGN_ENDCARD_PROMPT.md
