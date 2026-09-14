@@ -15,15 +15,22 @@ import { proRingGrant } from './levensboom/proRing';
 
 export const PRO_ENTITLEMENT_ID = process.env.REVENUECAT_PRO_ENTITLEMENT_ID ?? 'pro';
 
+// Shape of GET /v1/subscribers/{id}. `entitlements` is a flat map keyed by
+// entitlement identifier and includes EXPIRED entitlements too - there is no
+// `active` sub-object (that is the SDK's CustomerInfo, not the REST API).
+// Activeness has to be derived from the dates, and the store lives on the
+// matching subscription, not on the entitlement.
 type SubscriberEntitlement = {
   expires_date?: string | null;
-  expires_date_ms?: number | null;
-  store?: string | null;
+  grace_period_expires_date?: string | null;
+  product_identifier?: string | null;
 };
 
 type SubscriberResponse = {
   subscriber?: {
-    entitlements?: { active?: Record<string, SubscriberEntitlement | undefined> };
+    entitlements?: Record<string, SubscriberEntitlement | undefined>;
+    subscriptions?: Record<string, { store?: string | null } | undefined>;
+    non_subscriptions?: Record<string, Array<{ store?: string | null }> | undefined>;
   };
 };
 
@@ -33,14 +40,49 @@ export type StorePremiumPatch = {
   storePremiumExpiresAt: Date | null;
 };
 
-function parseExpires(ent: SubscriberEntitlement | undefined): Date | null {
-  if (!ent) return null;
-  if (ent.expires_date) {
-    const d = new Date(ent.expires_date);
-    return Number.isNaN(d.getTime()) ? null : d;
-  }
-  if (typeof ent.expires_date_ms === 'number') return new Date(ent.expires_date_ms);
-  return null;
+function parseDate(value: string | null | undefined): Date | null {
+  if (!value) return null;
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+/**
+ * Latest moment the entitlement grants access, or null for a lifetime grant.
+ * A billing grace period extends access past `expires_date`.
+ */
+function accessUntil(ent: SubscriberEntitlement): Date | null {
+  if (!ent.expires_date) return null;
+  const expires = parseDate(ent.expires_date);
+  const grace = parseDate(ent.grace_period_expires_date);
+  if (grace && (!expires || grace > expires)) return grace;
+  return expires;
+}
+
+/** Pure parse of a v1 subscriber response, exported for tests. */
+export function storePremiumFromSubscriber(
+  data: SubscriberResponse,
+  now: Date = new Date(),
+): StorePremiumPatch {
+  const subscriber = data.subscriber;
+  const ent = subscriber?.entitlements?.[PRO_ENTITLEMENT_ID];
+  if (!ent) return { storePremium: false, storePremiumPlatform: null, storePremiumExpiresAt: null };
+
+  const until = accessUntil(ent);
+  // An unparseable expires_date counts as expired, never as lifetime.
+  const unparseable = Boolean(ent.expires_date) && !until;
+  const active = !unparseable && (until === null || until > now);
+  if (!active) return { storePremium: false, storePremiumPlatform: null, storePremiumExpiresAt: null };
+
+  const productId = ent.product_identifier ?? '';
+  const store =
+    subscriber?.subscriptions?.[productId]?.store ??
+    subscriber?.non_subscriptions?.[productId]?.at(-1)?.store;
+
+  return {
+    storePremium: true,
+    storePremiumPlatform: storeToPlatform(store),
+    storePremiumExpiresAt: until,
+  };
 }
 
 function storeToPlatform(store: string | null | undefined): 'apple' | 'google' | null {
@@ -67,14 +109,7 @@ export async function fetchStorePremiumFromRevenueCat(
     throw new Error(`RevenueCat API ${res.status}: ${text.slice(0, 500)}`);
   }
 
-  const data = (await res.json()) as SubscriberResponse;
-  const ent = data.subscriber?.entitlements?.active?.[PRO_ENTITLEMENT_ID];
-
-  return {
-    storePremium: Boolean(ent),
-    storePremiumPlatform: ent ? storeToPlatform(ent.store) : null,
-    storePremiumExpiresAt: ent ? parseExpires(ent) : null,
-  };
+  return storePremiumFromSubscriber((await res.json()) as SubscriberResponse);
 }
 
 export type RevenueCatWebhookEvent = {
