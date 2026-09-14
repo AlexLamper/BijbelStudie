@@ -1,7 +1,0 @@
-{
-  "greeting": "Hallo!",
-  "loading": "Bijbelvers wordt geladen…",
-  "fetch_failed": "Laden van vers mislukt",
-  "unsupported_language": "Taal nog niet ondersteund.",
-  "api_endpoint": "https://www.bijbel-api.nl/api/daytext"
-}

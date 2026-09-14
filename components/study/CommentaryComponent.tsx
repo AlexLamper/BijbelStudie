@@ -160,7 +160,7 @@ function formatDachselText(raw: string): string {
       const inner = verseMatch[1]
         .replace(/^\d+\.\s*/, '')          // strip leading "1. "
         .replace(/(?<=[\s,])(\d{1,2})\)(?=[\s,])/g,
-          '<sup style="color:#0D9488;font-weight:600;margin-left:1px">$1</sup>');
+          '<sup style="color:var(--les-mark,#0D9488);font-weight:600;margin-left:1px">$1</sup>');
       verseHtml = `<blockquote style="border-left:3px solid #0D9488;padding:0.6em 1em;margin:0.75em 0;background:rgba(13,148,136,0.05);border-radius:0 6px 6px 0;font-style:italic;line-height:1.75">${inner}</blockquote>`;
       continue;
     }
@@ -189,7 +189,7 @@ function formatDachselText(raw: string): string {
         .map((l, i) => i === 0 ? l : `<p ${P} style="margin-top:0.5em;line-height:1.75">${l}</p>`)
         .join('');
       return `<div style="margin-top:0.6em;padding-left:1.5em;position:relative">
-        <sup style="position:absolute;left:0;top:0.2em;color:#0D9488;font-weight:700">${fn.num}</sup>
+        <sup style="position:absolute;left:0;top:0.2em;color:var(--les-mark,#0D9488);font-weight:700">${fn.num}</sup>
         <p style="margin:0;line-height:1.75">${text}</p>
       </div>`;
     }).join('');
@@ -210,7 +210,7 @@ function formatHtmlCommentary(raw: string): string {
     // Internal MyBible links (#bBOOK.CH.V) → styled span (not navigable)
     .replace(
       /<a\s[^>]*href="#b[^"]*"[^>]*>(.*?)<\/a>/gi,
-      '<span style="color:#0D9488;font-style:italic;font-weight:500">$1</span>'
+      '<span style="color:var(--les-mark,#0D9488);font-style:italic;font-weight:500">$1</span>'
     )
     // h3 headings: add spacing + weight
     .replace(

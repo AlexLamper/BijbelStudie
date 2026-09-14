@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../lib/authOptions";
 import SessionProvider from "../../components/providers/SessionProvider";
-import { SidebarProvider } from "../../components/ui/sidebar";
 import { cookies } from "next/headers";
 import { cookieName, fallbackLng } from "../i18n/settings";
 import { generatePageMetadata } from "../../lib/pageMetadata";
@@ -120,21 +119,19 @@ export default async function SubscribeLayout({
     <>
       <JsonLd data={pricingGraph()} />
       <SessionProvider session={session}>
-        <SidebarProvider>
-          {/* `gateId` names the hero: the still SVG upgrades to the live canvas
-              only while that screen is on view, and the loop stops past it. The
-              "Je bent al Pro" branch has no such element, and SceneBackdrop
-              leaves the SVG alone when the gate is not on the page. */}
-          <SceneShell
-            svg={sceneSvg()}
-            {...SCENE_TREE}
-            gateId="abonnement-hero"
-            header={signedIn}
-            rail={signedIn}
-          >
-            {children}
-          </SceneShell>
-        </SidebarProvider>
+        {/* `gateId` names the hero: the still SVG upgrades to the live canvas
+            only while that screen is on view, and the loop stops past it. The
+            "Je bent al Pro" branch has no such element, and SceneBackdrop
+            leaves the SVG alone when the gate is not on the page. */}
+        <SceneShell
+          svg={sceneSvg()}
+          {...SCENE_TREE}
+          gateId="abonnement-hero"
+          header={signedIn}
+          rail={signedIn}
+        >
+          {children}
+        </SceneShell>
       </SessionProvider>
     </>
   );

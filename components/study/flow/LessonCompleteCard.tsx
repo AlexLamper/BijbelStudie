@@ -608,7 +608,7 @@ function SignedInCompletion({
         {/* The one short question, when there is one. Below the reward and the
             "Hierna" card, above the CTA row, so "Verder met les N" stays the
             dominant element - the reader must always be able to leave without
-            touching this. See FEEDBACK_PLAN.md section 3.1. */}
+            touching this. */}
         {feedbackPrompt && (
           <PromptCard
             prompt={feedbackPrompt}

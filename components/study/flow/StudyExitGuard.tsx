@@ -40,7 +40,7 @@ export default function StudyExitGuard({
   const [pending, setPending] = useState<string | null>(null);
   /**
    * P1 - "waarom stop je hier?", optional, inside the dialog the reader has
-   * already opened (FEEDBACK_PLAN.md section 3.4). Requested only when the
+   * already opened. Requested only when the
    * dialog actually opens, never on mount: a reader who finishes the lesson
    * normally must not cost a request for a question they will never see.
    */

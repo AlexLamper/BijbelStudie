@@ -1,6 +1,0 @@
-{
-  "daily_verse_title": "Täglicher Bibelvers",
-  "loading": "Laden...",
-  "fetch_failed": "Der tägliche Vers konnte nicht geladen werden.",
-  "api_endpoint": "https://dailyverses.net/getdailyverse.ashx?language=lut&isdaily=1"
-}

@@ -161,7 +161,9 @@ export default function Sidebar({
         className="block rounded-[8px]"
         priority
       />
-      <span className="text-[15.5px] font-bold tracking-[-0.2px] text-ink">BijbelStudie</span>
+      <span className="text-[15.5px] font-bold tracking-[-0.2px] text-ink">
+        Bijbel<span style={{ color: "#0D9488" }}>Studie</span>
+      </span>
     </Link>
   );
 

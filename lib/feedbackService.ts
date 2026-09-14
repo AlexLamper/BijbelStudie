@@ -20,7 +20,6 @@ import { tenureBucket } from './analyticsSchema';
 import {
   choosePrompt,
   findPromptState,
-  microSignalAllowed,
   shownUpdate,
   type FeedbackStateLike,
 } from './feedbackEligibility';
@@ -312,29 +311,4 @@ export async function recordDismiss(
     );
   }
   return true;
-}
-
-/** Permanent, one tap, honoured forever. */
-export async function setOptedOut(userId: string, optedOut: boolean): Promise<void> {
-  await connectMongoDB();
-  await FeedbackState.updateOne(
-    { userId },
-    { $setOnInsert: { userId }, $set: { optedOut } },
-    { upsert: true },
-  );
-}
-
-/** Whether one more one-tap micro-signal may be collected from this reader. */
-export async function canCollectMicroSignal(userId: string): Promise<boolean> {
-  await connectMongoDB();
-  return microSignalAllowed(await readState(userId));
-}
-
-export async function countMicroSignal(userId: string): Promise<void> {
-  await connectMongoDB();
-  await FeedbackState.updateOne(
-    { userId },
-    { $setOnInsert: { userId }, $inc: { microSignalCount: 1 } },
-    { upsert: true },
-  );
 }

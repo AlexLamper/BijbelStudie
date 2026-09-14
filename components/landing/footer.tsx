@@ -61,7 +61,7 @@ export function Footer() {
                 className="h-[26px] w-[26px]"
               />
               <span className="text-base font-bold tracking-tight text-white">
-                Bijbel<span style={{ color: "#0F766E" }}>Studie</span>
+                Bijbel<span style={{ color: "#0D9488" }}>Studie</span>
               </span>
             </Link>
             <p className="max-w-xs text-sm leading-relaxed" style={{ color: FOOTER_MUTED }}>

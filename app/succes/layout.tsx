@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../lib/authOptions";
 import SessionProvider from "../../components/providers/SessionProvider";
-import { SidebarProvider } from "../../components/ui/sidebar";
 import { cookies } from "next/headers";
 import { cookieName, fallbackLng } from "../i18n/settings";
 import { generatePageMetadata } from "../../lib/pageMetadata";
@@ -49,11 +48,9 @@ export default async function SuccessLayout({
 
   return (
     <SessionProvider session={session}>
-      <SidebarProvider>
-        <SceneShell svg={sceneSvg()} {...SCENE_TREE} header={signedIn} rail={signedIn}>
-          {children}
-        </SceneShell>
-      </SidebarProvider>
+      <SceneShell svg={sceneSvg()} {...SCENE_TREE} header={signedIn} rail={signedIn}>
+        {children}
+      </SceneShell>
     </SessionProvider>
   );
 }

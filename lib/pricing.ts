@@ -112,12 +112,6 @@ export function freeMonthsOnAnnual(): number {
   return Math.floor(saving / PLANS.monthly.amountCents);
 }
 
-export function resolvePriceId(interval: BillingInterval): string | undefined {
-  return interval === "annual"
-    ? process.env.NEXT_PUBLIC_STRIPE_ANNUAL_PRICE_ID
-    : process.env.NEXT_PUBLIC_STRIPE_PRICE_ID;
-}
-
 /**
  * Every entry must name something the code actually withholds from a free
  * account. Two claims were removed for failing that test: "Historische context

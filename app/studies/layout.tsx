@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../lib/authOptions";
 import SessionProvider from "../../components/providers/SessionProvider";
-import { SidebarProvider } from "../../components/ui/sidebar";
 import { cookies } from "next/headers";
 import { cookieName, fallbackLng } from "../i18n/settings";
 import { generatePageMetadata } from "../../lib/pageMetadata";
@@ -37,8 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * different scenes.
  *
  * `SessionProvider` stays: the session it hands down is the full one from
- * `authOptions` (isAdmin, isSubscribed, studyStyle), not NextAuth's default,
- * and `SidebarProvider` stays because shared controls read its context.
+ * `authOptions` (isAdmin, isSubscribed, studyStyle), not NextAuth's default.
  */
 export default async function PlansLayout({
   children,
@@ -54,7 +52,7 @@ export default async function PlansLayout({
 
   return (
     <SessionProvider session={session}>
-      <SidebarProvider>{children}</SidebarProvider>
+      {children}
     </SessionProvider>
   );
 }

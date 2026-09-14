@@ -5,8 +5,8 @@ import { grantXp, type GrantResult } from './gamification';
 /**
  * XP for writing an aantekening.
  *
- * "Notes & reflection" is one of the four activities the Levensboom is fed by
- * (TREE_FEATURE_PLAN.md §5.5), and it was the only one with no XP event. It is
+ * "Notes & reflection" is one of the four activities the Levensboom is fed by,
+ * and it was the only one with no XP event. It is
  * also the one that is trivially farmable - a note is a text field and a save
  * button - so the guardrails are the point, not an afterthought:
  *

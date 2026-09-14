@@ -97,22 +97,22 @@ function WordCard({ word, isHebrew }: WordCardProps) {
 
   return (
     <div
-      className="flex flex-col items-center text-center min-w-[64px] px-2 py-1.5 rounded-md hover:bg-teal-50 dark:hover:bg-teal-950/20 transition-colors"
+      className="flex flex-col items-center text-center min-w-[64px] px-2 py-1.5 rounded-md hover:bg-teal-50 dark:hover:bg-teal-400/10 transition-colors"
       dir="ltr"
     >
       <div
-        className="text-2xl leading-snug text-gray-900 dark:text-gray-50 font-medium"
+        className="text-2xl leading-snug text-gray-900 dark:text-foreground font-medium"
         dir={isHebrew ? 'rtl' : 'ltr'}
         lang={isHebrew ? 'he' : 'el'}
         style={{ fontFamily: isHebrew ? HEBREW_STACK : GREEK_STACK }}
       >
         {word.h}
       </div>
-      <div className="text-[10.5px] italic text-gray-500 dark:text-gray-400 mt-0.5 max-w-[140px] truncate" title={word.t}>
+      <div className="text-[10.5px] italic text-gray-500 dark:text-neutral-400 mt-0.5 max-w-[140px] truncate" title={word.t}>
         {word.t || ' '}
       </div>
       <div
-        className="text-[11px] text-gray-700 dark:text-gray-300 leading-tight mt-0.5 max-w-[140px] line-clamp-2"
+        className="text-[11px] text-gray-700 dark:text-neutral-300 leading-tight mt-0.5 max-w-[140px] line-clamp-2"
         title={gloss}
       >
         {gloss}
@@ -122,7 +122,7 @@ function WordCard({ word, isHebrew }: WordCardProps) {
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-1 text-[10px] tabular-nums tracking-wide px-1.5 py-0.5 rounded font-semibold text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-950/40 hover:bg-teal-100 dark:hover:bg-teal-900/60 transition-colors inline-flex items-center gap-0.5"
+          className="mt-1 text-[10px] tabular-nums tracking-wide px-1.5 py-0.5 rounded font-semibold text-teal-700 dark:text-teal-400 bg-teal-50 dark:bg-teal-400/10 hover:bg-teal-100 dark:hover:bg-teal-400/20 transition-colors inline-flex items-center gap-0.5"
           title="Bekijk in Strong's lexicon (biblehub.com)"
         >
           {displayStrong(word.s)}
@@ -146,15 +146,15 @@ function VerseRow({ verseNum, words, isHebrew, highlighted }: VerseRowProps) {
   return (
     <div
       className={[
-        'border-b last:border-b-0 border-gray-100 dark:border-gray-800 py-3 px-1',
+        'border-b last:border-b-0 border-gray-100 dark:border-border py-3 px-1',
         highlighted ? 'bg-amber-50/60 dark:bg-amber-950/20 -mx-2 px-3 rounded-md' : '',
       ].join(' ')}
     >
       <div className="flex items-center gap-2 mb-2">
-        <span className="inline-flex items-center justify-center min-w-[28px] h-6 px-1.5 rounded-full text-[10.5px] font-bold tabular-nums bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200">
+        <span className="inline-flex items-center justify-center min-w-[28px] h-6 px-1.5 rounded-full text-[10.5px] font-bold tabular-nums bg-teal-100 text-teal-800 dark:bg-teal-400/15 dark:text-teal-400">
           {verseNum}
         </span>
-        <span className="text-[10.5px] uppercase tracking-wider text-gray-400 dark:text-gray-500">
+        <span className="text-[10.5px] uppercase tracking-wider text-gray-400 dark:text-neutral-500">
           {words.length} {words.length === 1 ? 'woord' : 'woorden'}
         </span>
       </div>
@@ -261,21 +261,21 @@ export default function OriginalText({ book, chapter, highlightVerses, embedded 
           </p>
         </div>
       ) : (
-        <div className="mb-4 rounded-lg border border-teal-200/70 dark:border-teal-900/50 bg-gradient-to-br from-teal-50/70 to-white dark:from-teal-950/30 dark:to-background p-3">
+        <div className="mb-4 rounded-lg border border-teal-200/70 dark:border-teal-400/20 bg-gradient-to-br from-teal-50/70 to-white dark:from-teal-400/10 dark:to-transparent p-3">
           <div className="flex items-start gap-2.5">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-teal-100 dark:bg-teal-900 flex items-center justify-center">
-              <Languages size={16} className="text-teal-700 dark:text-teal-300" />
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-teal-100 dark:bg-teal-400/15 flex items-center justify-center">
+              <Languages size={16} className="text-teal-700 dark:text-teal-400" />
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-foreground">
                   Grondtekst - {langLabel}
                 </h3>
-                <span className="text-[10px] uppercase tracking-wider font-semibold px-1.5 py-0.5 rounded bg-teal-100 dark:bg-teal-900 text-teal-800 dark:text-teal-200">
+                <span className="text-[10px] uppercase tracking-wider font-semibold px-1.5 py-0.5 rounded bg-teal-100 dark:bg-teal-400/15 text-teal-800 dark:text-teal-400">
                   {testamentLabel}
                 </span>
               </div>
-              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 leading-relaxed">
+              <p className="text-xs text-gray-600 dark:text-neutral-400 mt-1 leading-relaxed">
                 De originele woorden van {book} {chapter} in het {langLabel}, met transliteratie, betekenis
                 en Strong-nummer. Klik op een Strong-nummer voor uitgebreide lexicale informatie.
               </p>
@@ -345,7 +345,7 @@ export default function OriginalText({ book, chapter, highlightVerses, embedded 
             )}
 
             {isSubscribed && (
-              <div className="mt-8 pt-4 border-t border-gray-200 dark:border-gray-800 text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed flex items-start gap-2">
+              <div className="mt-8 pt-4 border-t border-gray-200 dark:border-border text-[11px] text-gray-500 dark:text-neutral-400 leading-relaxed flex items-start gap-2">
                 <Info size={12} className="flex-shrink-0 mt-0.5" />
                 <p>
                   Brontekst: <a

@@ -35,7 +35,9 @@ export function PublicFrame({
             className="flex min-w-0 items-center gap-2 text-[15px] font-bold tracking-[-0.2px] text-ink no-underline"
           >
             <Image src="/images/icon-192.png" alt="" width={26} height={26} className="flex-none rounded-[7px]" priority />
-            <span className="truncate">BijbelStudie</span>
+            <span className="truncate">
+              Bijbel<span style={{ color: "#0D9488" }}>Studie</span>
+            </span>
           </Link>
           <div className="flex-1" />
           <Link

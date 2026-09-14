@@ -55,11 +55,3 @@ export type ActivePlanCard = {
   scheduledDay: number | null;
   today: { book: string; chapter: number; title: string | null }[];
 };
-
-export type XpAward = {
-  awarded: number;
-  xp: number;
-  level: number;
-  levelledUp: boolean;
-  newBadges: string[];
-};

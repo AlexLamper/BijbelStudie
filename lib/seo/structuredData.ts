@@ -229,29 +229,6 @@ export function faqNode(
   };
 }
 
-export function howToNode(opts: {
-  name: string;
-  description: string;
-  pageUrl: string;
-  steps: { name: string; text: string }[];
-  totalTime?: string;
-}): Node {
-  return {
-    "@type": "HowTo",
-    "@id": `${opts.pageUrl}#howto`,
-    name: opts.name,
-    description: opts.description,
-    inLanguage: "nl-NL",
-    ...(opts.totalTime ? { totalTime: opts.totalTime } : {}),
-    step: opts.steps.map((s, i) => ({
-      "@type": "HowToStep",
-      position: i + 1,
-      name: s.name,
-      text: s.text,
-    })),
-  };
-}
-
 export function itemListNode(opts: {
   pageUrl: string;
   items: { name: string; path: string; description?: string }[];

@@ -140,27 +140,4 @@ const connectMongoDB = async (): Promise<typeof mongoose | null> => {
   return cache.conn;
 };
 
-/**
- * `connectMongoDB`, but a failure is an error rather than a `null` nobody reads.
- *
- * Every caller of `connectMongoDB` ignored its return value and went straight to
- * a query, so a failed connect became a ten-second buffer timeout deep inside
- * mongoose - reported to the reader as "Application error: a server-side
- * exception has occurred" with nothing but a digest. Route handlers and pages
- * that use this get a clean, immediate failure they can turn into a 503 or an
- * error boundary instead.
- */
-export class DatabaseUnavailableError extends Error {
-  constructor() {
-    super('De database is nu niet bereikbaar.');
-    this.name = 'DatabaseUnavailableError';
-  }
-}
-
-export async function requireDatabase(): Promise<typeof mongoose> {
-  const conn = await connectMongoDB();
-  if (!conn) throw new DatabaseUnavailableError();
-  return conn;
-}
-
 export default connectMongoDB;

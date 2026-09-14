@@ -28,15 +28,11 @@ export default function AppShell({
   children: React.ReactNode;
 }) {
   return (
-    // `w-full min-w-0` is load-bearing, not belt-and-braces.
-    //
-    // Every one of these routes is wrapped by `SidebarProvider`, which renders
-    // `<div class="flex min-h-svh w-full">` - so the shell is a FLEX ITEM. A
-    // flex item defaults to `flex: 0 1 auto`, which sizes it to its content
-    // instead of to the line, and the whole app rendered at the intrinsic width
-    // of the widest card with a strip of empty page beside it. `w-full` sets the
-    // basis to the line; `min-w-0` lets the body's own truncation work rather
-    // than pushing the shell wider than the viewport.
+    // `w-full min-w-0`: should a parent ever lay the shell out as a flex item,
+    // it still takes the whole line instead of its content's intrinsic width
+    // (which once left a strip of empty page beside the app), and `min-w-0`
+    // lets the body's own truncation work rather than pushing the shell wider
+    // than the viewport.
     //
     // Below md (768 px) the sidebar hides itself, the top bar grows a menu
     // button that opens it as a drawer, and MobileTabBar sits under the body as

@@ -287,7 +287,7 @@ export async function PATCH(req: Request) {
        * One short question, on the screen best placed to ask it.
        *
        * It rides along on this response rather than costing the reward screen
-       * a round trip of its own (FEEDBACK_PLAN.md section 4.4). Conditions,
+       * a round trip of its own. Conditions,
        * narrowest first:
        *
        * - the completion was actually recorded, so a repeat finish never asks

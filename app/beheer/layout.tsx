@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import SessionProvider from "../../components/providers/SessionProvider";
-import { SidebarProvider } from "../../components/ui/sidebar";
 import { cookies } from "next/headers";
 import { cookieName, fallbackLng } from "../i18n/settings";
 import { generatePageMetadata } from "../../lib/pageMetadata";
@@ -58,7 +57,7 @@ export default async function AdminLayout({
 
   return (
     <SessionProvider session={session}>
-      <SidebarProvider>{children}</SidebarProvider>
+      {children}
     </SessionProvider>
   );
 }

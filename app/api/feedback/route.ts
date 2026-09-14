@@ -135,8 +135,7 @@ export async function POST(request: Request) {
   // The per-question quiz signal is a one-tap answer, not a form: it has its
   // own shape, its own (short) synthesised message, and - because it is tied
   // to a specific answer the reader just gave - it requires a signed-in
-  // caller. There is no anonymous path for a prompted response (section 4.5
-  // of FEEDBACK_PLAN.md).
+  // caller. There is no anonymous path for a prompted response.
   if (isQuizSignal) {
     if (!userId) {
       return NextResponse.json({ error: "Niet ingelogd" }, { status: 401 })

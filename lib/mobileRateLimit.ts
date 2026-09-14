@@ -50,8 +50,3 @@ export function clientIp(req: Request): string {
   if (forwarded) return forwarded.split(',')[0].trim();
   return req.headers.get('x-real-ip') ?? 'unknown';
 }
-
-/** Test seam. */
-export function resetRateLimits(): void {
-  buckets.clear();
-}

@@ -34,10 +34,6 @@ export function appEnv(): AppEnv {
   return 'development';
 }
 
-export function isProduction(): boolean {
-  return appEnv() === 'production';
-}
-
 /** True on anything a tester may safely break. */
 export function isTestEnvironment(): boolean {
   return appEnv() !== 'production';

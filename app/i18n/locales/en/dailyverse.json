@@ -1,6 +1,0 @@
-{
-  "daily_verse_title": "Daily Bible Verse",
-  "loading": "Loading...",
-  "fetch_failed": "Failed to fetch the daily verse.",
-  "api_endpoint": "https://dailyverses.net/getdailyverse.ashx?language=niv&isdaily=1"
-}

@@ -11,7 +11,7 @@ function highlightRefs(text: string): string {
   // Highlight Bible references like (Num 1:1-54) or (Gen 3:15)
   return text.replace(
     /\(([A-Z][a-z]{0,5}\.?\s*\d+:\d+[\d:,\s\-–]*)\)/g,
-    '(<span style="color:#0D9488;font-size:0.8em;font-weight:600;white-space:nowrap">$1</span>)'
+    '(<span style="color:var(--les-mark,#0D9488);font-size:0.8em;font-weight:600;white-space:nowrap">$1</span>)'
   );
 }
 

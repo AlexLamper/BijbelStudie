@@ -209,7 +209,7 @@ export default function StudyFlowShell({
   /**
    * The one short question the server decided to ask on this completion, if
    * any. It arrives with the completion response rather than being fetched, so
-   * the reward screen costs no extra round trip - see FEEDBACK_PLAN.md 4.4.
+   * the reward screen costs no extra round trip.
    * Null for a guest (there is nobody to ask) and on all but a small fraction
    * of completions.
    */

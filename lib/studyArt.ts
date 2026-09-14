@@ -4,10 +4,9 @@
  * Every study gets a picture that is generated, not authored: a sky, a land and
  * a ridge line drawn from the same vocabulary the tree stands in
  * (`lib/levensboom/scenes.ts`, `palette.ts`, `backdrop.ts`). One study id in,
- * one stable landscape out, at no asset weight - which is the point. The 85
- * hand-drawn SVGs under /public/images/studies stay exactly where they are:
- * `curatedStudies[].image` is returned verbatim by /api/v1/studies to a shipped
- * Flutter binary and can be added to but never removed or renamed.
+ * one stable landscape out, at no asset weight - which is the point. It sits
+ * under the study's cover photo (`lib/studyPhotos.ts`) as placeholder and
+ * fallback.
  *
  * Two rules this file must never break.
  *
@@ -17,8 +16,6 @@
  *    picture changes at 21:00 is not an identity. Never call `Date` here.
  * 2. **Seeded, never random.** One `seededRng` stream per study, drawn in a
  *    fixed order. Adding a draw shifts every later one, so append at the end.
- *
- * See STUDY_VISUAL_PLAN.md for why this direction was chosen over raster art.
  */
 
 import { hillPath } from './levensboom/backdrop';
@@ -211,51 +208,4 @@ export function studyHorizon(art: StudyArt, width: number, height: number): Stud
     layers,
     stars,
   };
-}
-
-/**
- * An accent from the study's own palette, pushed until it is readable as text
- * or as a rule on the page's ground.
- *
- * `sterrennacht` accents at a pale yellow that vanishes on white; a summer
- * meadow accents at a green that vanishes on slate-950. Mixing toward the
- * ground colour until the contrast clears is what lets a study "have a colour"
- * without any of the 77 producing an invisible one.
- */
-export function readableInk(hex: string, dark = false): string {
-  const target = dark ? '#F8FAFC' : '#0F172A';
-  let colour = hex;
-  for (let i = 0; i < 12 && contrast(colour, dark ? '#0F172A' : '#FFFFFF') < 4.5; i += 1) {
-    colour = mixHex(colour, target, 0.12);
-  }
-  return colour;
-}
-
-function parseHex(hex: string): [number, number, number] {
-  const v = hex.replace('#', '');
-  return [parseInt(v.slice(0, 2), 16), parseInt(v.slice(2, 4), 16), parseInt(v.slice(4, 6), 16)];
-}
-
-function mixHex(a: string, b: string, amount: number): string {
-  const from = parseHex(a);
-  const to = parseHex(b);
-  const t = Math.min(1, Math.max(0, amount));
-  const out = from.map((c, i) => Math.round(c + (to[i] - c) * t));
-  return `#${out.map((c) => c.toString(16).padStart(2, '0')).join('')}`;
-}
-
-function luminance(hex: string): number {
-  const channel = (c: number) => {
-    const s = c / 255;
-    return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
-  };
-  const [r, g, b] = parseHex(hex);
-  return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
-}
-
-/** WCAG contrast ratio between two opaque colours. */
-export function contrast(a: string, b: string): number {
-  const la = luminance(a);
-  const lb = luminance(b);
-  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
 }

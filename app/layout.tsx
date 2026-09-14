@@ -15,6 +15,10 @@ import AnalyticsTracker from "../components/providers/AnalyticsTracker";
 import GuestProgressMigration from "../components/auth/GuestProgressMigration";
 import { JsonLd } from "../components/seo/JsonLd";
 import EnvironmentBanner from "../components/layout/EnvironmentBanner";
+import AppPromoBanner from "../components/layout/AppPromoBanner";
+import { Toaster } from "../components/ui/toaster";
+import { APP_STORE_URL } from "../lib/appStore";
+import { appStoreIdFromUrl } from "../lib/mobilePlatform";
 import {
   BASE_URL,
   SITE_NAME,
@@ -53,6 +57,9 @@ const merriweather = Merriweather({
   display: "swap",
   preload: false,
 });
+
+/** Safari on iOS turns this into its Smart App Banner (apple-itunes-app). */
+const APP_STORE_ID = appStoreIdFromUrl(APP_STORE_URL);
 
 const ROOT_OG_IMAGE = ogImageUrl({
   title: "Bijbelstudie online",
@@ -112,6 +119,7 @@ export const metadata: Metadata = {
   category: "education",
   referrer: "origin-when-cross-origin",
   formatDetection: { telephone: false, address: false, email: false },
+  ...(APP_STORE_ID ? { itunes: { appId: APP_STORE_ID } } : {}),
   // Paste the token from Search Console -> Instellingen -> Eigendomsverificatie
   // -> HTML-tag into GOOGLE_SITE_VERIFICATION. Left out entirely when unset so
   // an empty content="" tag never ships.
@@ -251,6 +259,14 @@ export default async function RootLayout({
             the database, so a test deployment can never be mistaken for the
             live site. */}
         <EnvironmentBanner />
+        {/* Phone browsers Safari's Smart App Banner does not reach (Chrome on
+            iOS, in-app browsers). Client-only, renders nothing on desktop -
+            see components/layout/AppPromoBanner.tsx. */}
+        <AppPromoBanner />
+        {/* Draws every `toast(...)` from hooks/use-toast.ts. Top of the screen
+            on a phone, so it never lands on the promo banner or the tab bar;
+            bottom-right from md up - see components/ui/toast.tsx. */}
+        <Toaster />
         <SpeedInsights />
       </body>
     </html>

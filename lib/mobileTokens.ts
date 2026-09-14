@@ -112,7 +112,3 @@ export async function revokeRefreshToken(rawToken: string): Promise<void> {
 export async function revokeFamily(family: string): Promise<void> {
   await RefreshToken.updateMany({ family, revokedAt: null }, { $set: { revokedAt: new Date() } });
 }
-
-export async function revokeAllForUser(userId: string): Promise<void> {
-  await RefreshToken.updateMany({ userId, revokedAt: null }, { $set: { revokedAt: new Date() } });
-}

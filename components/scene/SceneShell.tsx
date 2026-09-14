@@ -140,10 +140,9 @@ export default function SceneShell({
   const topScrims = hasPicture && !muted
 
   return (
-    // `w-full min-w-0` is load-bearing: several signed-in layouts wrap the page
-    // in a `flex` row (SidebarProvider), and a flex child without them is sized
-    // to its content rather than to the viewport - which is what cut the navbar
-    // and the panels short of the right edge.
+    // `w-full min-w-0`: inside a `flex` row a child without them is sized to its
+    // content rather than to the viewport - which once cut the navbar and the
+    // panels short of the right edge.
     //
     // The ground comes from the token through `style` rather than from a class:
     // Tailwind reads class names as literal text, and a value spliced in from a

@@ -1,5 +1,4 @@
 import SessionProvider from "../providers/SessionProvider"
-import { SidebarProvider } from "../ui/sidebar"
 import AppShell from "../shell/AppShell"
 import GuestGate from "./GuestGate"
 
@@ -28,11 +27,9 @@ export default function GuestGateScene(props: {
 }) {
   return (
     <SessionProvider session={null}>
-      <SidebarProvider>
-        <AppShell title={props.title}>
-          <GuestGate {...props} />
-        </AppShell>
-      </SidebarProvider>
+      <AppShell title={props.title}>
+        <GuestGate {...props} />
+      </AppShell>
     </SessionProvider>
   )
 }

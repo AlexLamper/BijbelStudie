@@ -23,7 +23,6 @@ export const BASE_URL = "https://www.bijbelstudie.io";
 export const SITE_NAME = "BijbelStudie";
 
 export const SITE_LOCALE = "nl_NL";
-export const SITE_LANG = "nl-NL";
 
 /**
  * Twitter/X handle used for `twitter:site`. Kept in one place so a rename does
@@ -42,13 +41,7 @@ export const CONTACT_EMAIL = "info@bijbelstudie.io";
 export const ORG_ID = `${BASE_URL}/#organization`;
 export const WEBSITE_ID = `${BASE_URL}/#website`;
 
-/**
- * Raster OG image. Facebook, LinkedIn, WhatsApp, Slack and X all refuse to
- * render an SVG og:image - the site previously pointed at og-image.svg, so
- * every share unfurled blank. This PNG is the static fallback; most pages get
- * a per-page image from /og instead.
- */
-export const OG_IMAGE_FALLBACK = `${BASE_URL}/og_image.png`;
+/** Size of the per-page OG card rendered by app/og/route.tsx. */
 export const OG_IMAGE_WIDTH = 1200;
 export const OG_IMAGE_HEIGHT = 630;
 

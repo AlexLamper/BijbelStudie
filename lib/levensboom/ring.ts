@@ -28,8 +28,8 @@ const RINGS: Record<string, RingColors> = {
    * `goud` is cut from the same metal as the Pro badge (--grad-pro-badge in
    * app/globals.css): a lit gold falling to one deep gold edge.
    *
-   * `stroke` carries a constraint the other fields do not. Four components -
-   * NavTreeAvatar, MiniTreeAvatar, ProgressTree and levensboom/TreeAvatar -
+   * `stroke` carries a constraint the other fields do not. Three components -
+   * NavTreeAvatar, MiniTreeAvatar and ProgressTree -
    * reuse it as the FILL under the white level number, so it is not only a rim
    * colour, it is a text background. The old #D4A017 put white on gold at
    * 2.38:1, worse than the 2.6:1 the design system explicitly bans. #926C10 is

@@ -10,7 +10,7 @@ import React from 'react';
  * the same components, and only the tokens changing. So nothing in this file is
  * a literal colour any more: every surface is one of the `les-*` names, which
  * resolve through the `--les-*` custom properties in app/globals.css - white and
- * #111827 on light, #0B1E1E and #E9F1F0 under `.dark` (what the reader's Thema
+ * #111827 on light, the app's dark #212121 and #E5E5E5 under `.dark` (what the reader's Thema
  * setting stamps on <html>) or `[data-theme="dark"]`.
  *
  * What that replaced: a hard-coded night palette built on `TILE`, `SCENE_BG` and
@@ -67,10 +67,11 @@ export const READING_SURFACE = 'border-t border-les-line pt-7';
 export const FOCUS_RING = 'outline-none focus-visible:ring-2 focus-visible:ring-teal';
 
 /**
- * The dim behind a dialog, a drawer or an open menu. Neutral ink rather than
- * either ground, so one value is right in both themes.
+ * The dim behind a dialog, a drawer or an open menu: slate ink on the light
+ * lesson, plain black on the dark one like the app's own overlays
+ * (`--les-scrim-rgb` in app/globals.css).
  */
-export const scrim = (alpha: number) => `rgba(17,24,39,${alpha})`;
+export const scrim = (alpha: number) => `rgba(var(--les-scrim-rgb),${alpha})`;
 
 /** Body copy and its two quieter steps down. */
 export const INK = 'text-les-ink';

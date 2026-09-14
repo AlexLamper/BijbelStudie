@@ -54,12 +54,6 @@ export function handleV1Error(error: unknown) {
   if (error instanceof UnauthorizedError) {
     return errorV1('UNAUTHORIZED', 401);
   }
-  // Duck-typed rather than `instanceof PlanError` so this module stays free of
-  // model imports - every v1 route loads it, including the ones with no DB.
-  if (error instanceof Error && error.name === 'PlanError') {
-    const { code, status } = error as Error & { code?: string; status?: number };
-    return errorV1(code ?? 'PLAN_ERROR', status ?? 400, error.message);
-  }
   if (error instanceof SyntaxError) {
     return errorV1('INVALID_JSON', 400);
   }
@@ -137,23 +131,4 @@ export function cachedJsonV1(
   }
 
   return jsonV1(payload, { headers });
-}
-
-export function requireParam(value: string | null | undefined, name: string): string {
-  if (!value) {
-    const err = new Error(`Missing required parameter: ${name}`);
-    (err as { status?: number }).status = 400;
-    throw err;
-  }
-  return value;
-}
-
-export function parsePositiveInt(value: string | null | undefined, name: string): number {
-  const n = Number(value);
-  if (!Number.isInteger(n) || n < 1) {
-    const err = new Error(`Invalid ${name}`);
-    (err as { status?: number }).status = 400;
-    throw err;
-  }
-  return n;
 }

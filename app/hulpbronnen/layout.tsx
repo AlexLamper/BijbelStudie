@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../lib/authOptions";
 import SessionProvider from "../../components/providers/SessionProvider";
-import { SidebarProvider } from "../../components/ui/sidebar";
 import SceneShell from "../../components/scene/SceneShell";
 import { SCENE_TREE, sceneSvg } from "../../components/scene/scene-svg";
 import { generatePageMetadata } from "../../lib/pageMetadata";
@@ -53,8 +52,6 @@ export async function generateMetadata(): Promise<Metadata> {
  * passed, which means no canvas ever mounts. Same reason `header` and `rail`
  * are gated on a session: both read one, and signed out the bar would push a
  * visitor to the sign-in page.
- *
- * `SidebarProvider` stays because the header's own controls read its context.
  */
 export default async function ResourcesLayout({
   children,
@@ -71,11 +68,9 @@ export default async function ResourcesLayout({
 
   return (
     <SessionProvider session={session}>
-      <SidebarProvider>
-        <SceneShell svg={sceneSvg()} {...SCENE_TREE} header={signedIn} rail={signedIn}>
-          {children}
-        </SceneShell>
-      </SidebarProvider>
+      <SceneShell svg={sceneSvg()} {...SCENE_TREE} header={signedIn} rail={signedIn}>
+        {children}
+      </SceneShell>
     </SessionProvider>
   );
 }

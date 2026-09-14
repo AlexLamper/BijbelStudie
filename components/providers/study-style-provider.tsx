@@ -6,7 +6,7 @@ import { createContext, useContext, useMemo, useState } from "react"
  * How the user answered onboarding's "Hoe studeer je het liefst?" question.
  *
  * `guided` = begeleide studies, `self` = zelf lezen. The answer reorders the
- * sidebar's primary navigation (components/layout/app-sidebar.tsx).
+ * primary navigation.
  */
 export type StudyStyle = "guided" | "self"
 

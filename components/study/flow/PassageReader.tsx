@@ -21,7 +21,7 @@ type VerseMap = Record<string, string>;
  * passage used to be laid on the scene's light `PLATE`; it now stands on the
  * same ground as everything around it (see StepWord). Every colour here is one
  * of the `les-*` tokens, so the column is right in BOTH lesson palettes: the
- * scripture is #1F2937 on the white page and #EAF2F1 on the night one, and the
+ * scripture is #1F2937 on the white page and #EDEDED on the dark one, and the
  * verse numbers and the licence line step down from it in the same proportion
  * either way. The shared `SkeletonChapter` is still not used - the local one
  * below follows the lesson's card token instead of the app's.
@@ -154,8 +154,8 @@ export default function PassageReader({
         {/* #F87171 on the window's ground measures 6.6:1; the red-600/700 this
             used to carry was drawn for a white plate and lands under 3:1 here.
             Same pair StepQuiz uses for the same reason. */}
-        <AlertCircle className="mx-auto mb-4 h-9 w-9 text-danger" />
-        <p className="text-[13.5px] text-danger">{error}</p>
+        <AlertCircle className="mx-auto mb-4 h-9 w-9 text-danger dark:text-red-400" />
+        <p className="text-[13.5px] text-danger dark:text-red-400">{error}</p>
       </div>
     );
   }
@@ -191,7 +191,7 @@ export default function PassageReader({
               }
             >
               {/* Scripture in the lesson's own ink: #1F2937 on the light page
-                  and #EAF2F1 on the night one. */}
+                  and #EDEDED on the dark one. */}
               <p className={`${typography} text-les-scripture`}>
                 {prefs.showVerseNumbers && (
                   <sup className="mr-[6px] select-none align-super font-sans text-[11px] font-semibold text-les-faint">

@@ -35,7 +35,7 @@ const UserSchema = new mongoose.Schema(
     // is understanding a small portion, not covering a large one.
     xp: { type: Number, default: 0 },
     level: { type: Number, default: 1 },
-    // Levensboom (TREE_FEATURE_PLAN.md). Nothing about the tree's *shape* lives
+    // Levensboom. Nothing about the tree's *shape* lives
     // here - that is a pure function of xp, level, lastStreakDate and the user
     // id, so an existing account renders its grown tree with no migration. All
     // this holds is "have we celebrated up to here yet" plus the two prefs, so
@@ -50,7 +50,7 @@ const UserSchema = new mongoose.Schema(
       // time-of-day instead of following the device clock. 'auto' keeps the
       // existing clock-based behaviour.
       timeOfDay: { type: String, enum: ['auto', 'dawn', 'day', 'dusk', 'night'], default: 'auto' },
-      // The studio choice (LEVENSBOOM_AVATAR_PLAN.md). Ids from
+      // The studio choice. Ids from
       // lib/levensboom/catalog.ts; whether the account may *use* an id is
       // re-derived on every read, never stored, so a lapsed Pro item falls
       // back by itself and comes straight back on renewal.
@@ -122,8 +122,8 @@ const UserSchema = new mongoose.Schema(
       intent: { type: String },
       // How the user answered onboarding's "Hoe studeer je het liefst?"
       // question: "guided" (begeleide studies) or "self" (zelf lezen). It
-      // decides which item sits directly under Dashboard in the sidebar - see
-      // components/layout/app-sidebar.tsx.
+      // decides which item sits directly under Dashboard in the navigation - see
+      // components/providers/study-style-provider.tsx.
       //
       // Deliberately NOT stored in `intent`, despite the name looking like an
       // exact fit. That field is already taken: the onboarding modal has always

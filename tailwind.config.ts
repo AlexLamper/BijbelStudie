@@ -106,7 +106,7 @@ export default {
         // ── Lesson flow (design_handoff_web/TOKENS-LES.md) ──
         // These resolve through custom properties rather than literals, because
         // the lesson is the one surface that exists in two palettes: the same
-        // class has to paint #FFFFFF on light and #0B1E1E on dark. The values
+        // class has to paint #FFFFFF on light and #212121 on dark. The values
         // live in app/globals.css on `:root` and on `.dark`/[data-theme=dark].
         les: {
           bg: "var(--les-bg)",

@@ -70,7 +70,9 @@ function AuthFrame({ children }: { children: React.ReactNode }) {
         <div className="mx-auto mt-14 w-full max-w-md sm:mt-20">
           <div className="mb-6 flex items-center gap-2.5">
             <Image src="/images/icon-192.png" alt="BijbelStudie" width={28} height={28} className="rounded-md" priority />
-            <span className="text-lg font-bold text-white">BijbelStudie</span>
+            <span className="text-lg font-bold text-white">
+              Bijbel<span style={{ color: "#0D9488" }}>Studie</span>
+            </span>
           </div>
           <div className={`p-7 ${PANEL_DEEP}`}>{children}</div>
         </div>

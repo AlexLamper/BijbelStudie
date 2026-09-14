@@ -250,19 +250,6 @@ export function getPageConfig(pageKey: string): PageMetadataConfig | undefined {
   return pageConfigs[pageKey];
 }
 
-export function getIndexablePaths(): string[] {
-  return Object.values(pageConfigs)
-    .filter(c => c.indexable ?? true)
-    .map(c => c.path);
-}
-
-/** Paths that must be kept out of the index and out of the sitemap. */
-export function getNonIndexablePaths(): string[] {
-  return Object.values(pageConfigs)
-    .filter(c => !(c.indexable ?? true))
-    .map(c => c.path);
-}
-
 /**
  * Robots directives. `max-image-preview: large` is what makes Google show the
  * big thumbnail in Discover and mobile results; `max-snippet: -1` lifts the

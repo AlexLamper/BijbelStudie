@@ -1,7 +1,6 @@
 /**
  * Levensboom - the growing-tree avatar. See docs/levensboom-spec.md for the
- * generation contract the Dart mirror has to match, and
- * LEVENSBOOM_AVATAR_PLAN.md for the avatar system built on top of it.
+ * generation contract the Dart mirror has to match.
  */
 export * from './rng';
 export * from './traits';

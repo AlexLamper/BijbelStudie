@@ -1,6 +1,0 @@
-{
-  "daily_verse_title": "Dagelijkse Bijbeltekst",
-  "loading": "Laden...",
-  "fetch_failed": "Kon de dagelijkse tekst niet ophalen.",
-  "api_endpoint": "https://dailyverses.net/getdailyverse.ashx?language=nbg&isdaily=1"
-}

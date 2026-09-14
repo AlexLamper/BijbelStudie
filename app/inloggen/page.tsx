@@ -158,7 +158,7 @@ function SignInPageInner() {
           <div className="flex items-center gap-2.5">
             <BrandMark />
             <span className="text-lg font-bold text-white">
-              Bijbel<span style={{ color: "#0F766E" }}>Studie</span>
+              Bijbel<span style={{ color: "#0D9488" }}>Studie</span>
             </span>
           </div>
 

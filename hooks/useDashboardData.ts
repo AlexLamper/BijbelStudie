@@ -37,8 +37,6 @@ export const NT_BOOKS: readonly string[] = [
   "Judas", "Openbaring",
 ]
 export const ALL_BOOKS: readonly string[] = [...OT_BOOKS, ...NT_BOOKS]
-/** 1189, computed rather than typed so it can never drift from the counts table. */
-export const TOTAL_CHAPTERS = ALL_BOOKS.reduce((sum, book) => sum + (CHAPTER_COUNTS[book] ?? 0), 0)
 
 export interface LastRead { book: string; chapter: number; version: string }
 export interface WeekDay { label: string; count: number; heightPct: number; isToday: boolean }
@@ -263,5 +261,3 @@ export function useDashboardData() {
     ...derived,
   }
 }
-
-export type DashboardData = ReturnType<typeof useDashboardData>

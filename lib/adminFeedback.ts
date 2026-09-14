@@ -4,11 +4,9 @@ import Feedback from "../models/Feedback";
 /**
  * The read-out behind `/beheer/feedback` and `GET /api/admin/feedback`.
  *
- * Phase 1 of FEEDBACK_PLAN.md scopes this deliberately small: a filterable
- * list, nothing else. No themes UI, no sentiment scoring, no charts - those
- * are later phases. The one thing this must do is make `status` finally
- * mean something, because today no UI ever sets it (see the plan's section
- * 1.1: "the `status` enum has never been set by any UI").
+ * Deliberately small: a filterable list, nothing else. No themes UI, no
+ * sentiment scoring, no charts. The one thing this must do is make `status`
+ * finally mean something, because no UI used to set it.
  */
 
 const STATUSES = ["new", "reviewed", "resolved", "archived"] as const;
@@ -121,7 +119,7 @@ export async function adminFeedbackPayload(filters: AdminFeedbackFilters): Promi
 }
 
 /**
- * View 2 of the read-out (FEEDBACK_PLAN.md section 4.7): the prompted answers,
+ * View 2 of the read-out: the prompted answers,
  * rolled up per study and lesson.
  *
  * The list view answers "what did people say"; this answers "where". A lesson

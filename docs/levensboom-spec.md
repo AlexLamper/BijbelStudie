@@ -5,7 +5,6 @@ The contract between `lib/levensboom/*.ts` (web) and
 produce the *same tree* for the same inputs; the parity fixtures in
 `tests/levensboom.test.ts` and `test/levensboom_parity_test.dart` assert that.
 
-Feature plan: `LEVENSBOOM_AVATAR_PLAN.md` (supersedes `TREE_FEATURE_PLAN.md`).
 Nothing about the tree's *shape* is stored — the tree is a pure function of
 values the server already has, plus the species the reader picked.
 

@@ -18,12 +18,8 @@ import { useIsPro } from "../../hooks/useIsPro";
  * with a white gap for Pro, a hairline for a free account, both read from
  * `useIsPro`. It used to be a gold ring drawn for everyone, which read as a Pro
  * mark on free accounts. The PRO pill itself is not drawn here - on these cards
- * the corner belongs to the level marker.
- *
- * Not the same thing as components/levensboom/TreeAvatar.tsx, which is the old
- * immersive-scene avatar - that one bends the XP bar into a ring, writes its
- * own white caption underneath and links to the studio. Here the caption and
- * the link belong to the card the disc sits in.
+ * the corner belongs to the level marker. The caption and the link belong to
+ * the card the disc sits in.
  */
 export default function TreeAvatar({
   size,

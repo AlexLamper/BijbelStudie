@@ -7,7 +7,7 @@
  * server-side at ask time, stored on every answer (models/Feedback.js), and is
  * what makes an answer readable a year later.
  *
- * Definitions come from FEEDBACK_PLAN.md section 2.6. The ORDER of the checks
+ * The ORDER of the checks
  * is the rule: cancelled beats dormant beats lapsed beats deep beats active
  * beats new, because the more specific state is always the more informative
  * one. A Pro reader who cancelled is `opgezegd`, not `verdiepend`.

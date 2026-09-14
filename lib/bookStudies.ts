@@ -1,60 +1,16 @@
-import { BIBLE_BOOKS, readerBookName, type BibleBook, type BookGenre } from './content/bibleBooks';
+import { BIBLE_BOOKS, readerBookName, type BibleBook } from './content/bibleBooks';
 import { curatedStudies, type CuratedStudy, type Lesson } from './data/curated-studies';
+import { studyPhotoFor } from './studyPhotos';
 
 /**
- * Banner art for a generated book study when the book has no drawing of its own.
+ * Banner for a generated book study: its cover photo from `lib/studyPhotos.ts`.
  *
- * This used to be the only rule: sixty-six books shared eight genre scenes, so
- * every letter looked like every other letter in the catalogue. Each book now
- * has its own scene (see `BOOKS_WITH_OWN_IMAGE`), and genre is what is left for
- * anything that slips through - a book added without art, or a slug renamed
- * without the file following it. Better a wilderness rock than a flat tint.
- *
- * Same 16:6 SVGs as `curatedStudies`, under /images/studies.
+ * '' when a book has no photo (a new book added without one). The web pages
+ * then show the drawn horizon from `lib/studyArt.ts`, and the app paints its
+ * own banner, so an empty value is never a broken image.
  */
-const GENRE_IMAGE: Record<BookGenre, string> = {
-  'Wet': '/images/studies/genre-wet.svg',
-  'Geschiedenis': '/images/studies/genre-geschiedenis.svg',
-  'Poëzie en wijsheid': '/images/studies/genre-poezie.svg',
-  'Grote profeten': '/images/studies/genre-grote-profeten.svg',
-  'Kleine profeten': '/images/studies/genre-kleine-profeten.svg',
-  'Evangelie': '/images/studies/genre-evangelie.svg',
-  'Brief': '/images/studies/genre-brief.svg',
-  'Apocalyptiek': '/images/studies/genre-apocalyptiek.svg',
-};
-
-/**
- * The books that have a banner drawn for them, by slug.
- *
- * Listed rather than derived from `BIBLE_BOOKS`, because the thing that decides
- * this is whether a file exists on disk - and nothing at runtime can see that.
- * A slug in here without `/images/studies/book-<slug>.svg` next to it is a
- * broken image, so the two are kept in step by tests/bookStudies.test.ts.
- */
-const BOOKS_WITH_OWN_IMAGE = new Set([
-  'genesis', 'exodus', 'leviticus', 'numeri', 'deuteronomium',
-  'jozua', 'richteren', 'ruth', '1-samuel', '2-samuel', '1-koningen', '2-koningen',
-  '1-kronieken', '2-kronieken', 'ezra', 'nehemia', 'esther',
-  'job', 'psalmen', 'spreuken', 'prediker', 'hooglied',
-  'jesaja', 'jeremia', 'klaagliederen', 'ezechiel', 'daniel',
-  'hosea', 'joel', 'amos', 'obadja', 'jona', 'micha', 'nahum', 'habakuk',
-  'zefanja', 'haggai', 'zacharia', 'maleachi',
-  'mattheus', 'markus', 'lukas', 'johannes', 'handelingen',
-  'romeinen', '1-corinthiers', '2-corinthiers', 'galaten', 'efeziers',
-  'filippenzen', 'colossenzen', '1-thessalonicenzen', '2-thessalonicenzen',
-  '1-timotheus', '2-timotheus', 'titus', 'filemon', 'hebreeen', 'jakobus',
-  '1-petrus', '2-petrus', '1-johannes', '2-johannes', '3-johannes', 'judas',
-  'openbaring',
-]);
-
-/** Where a book's own banner lives; the slug goes in unchanged. */
-export function bookImagePath(slug: string): string {
-  return `/images/studies/book-${slug}.svg`;
-}
-
-/** A book's own scene, or its genre's, so a study always has a banner. */
 export function bookImage(book: BibleBook): string {
-  return BOOKS_WITH_OWN_IMAGE.has(book.slug) ? bookImagePath(book.slug) : GENRE_IMAGE[book.genre];
+  return studyPhotoFor(bookStudyId(book.slug))?.src ?? '';
 }
 
 /**
@@ -151,8 +107,7 @@ export function generateBookStudy(book: BibleBook): CuratedStudy {
     startBook: readerBookName(book),
     startChapter: 1,
     startVersion: 'statenvertaling',
-    // One banner per book. It used to be '' - which the catalogue rendered as a
-    // flat tint and `/api/v1/studies/catalog` handed the app as an empty string.
+    // One cover photo per book, shared with the web catalogue.
     image: bookImage(book),
     lessons: generateLessons(book),
     about: book.summary.slice(0, 2),
@@ -209,11 +164,6 @@ const BY_ID = new Map(ALL_STUDIES.map((study) => [study.id, study]));
  */
 export function findAnyStudy(studyId: string): CuratedStudy | null {
   return BY_ID.get(studyId) ?? null;
-}
-
-/** The book a generated study id points at, or null for authored ids. */
-export function bookSlugFromStudyId(studyId: string): string | null {
-  return isBookStudyId(studyId) ? studyId.slice(BOOK_STUDY_PREFIX.length) : null;
 }
 
 /**

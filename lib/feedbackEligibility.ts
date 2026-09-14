@@ -6,7 +6,7 @@
  * same reason - a ninety-day cooldown you cannot test in a millisecond is a
  * cooldown nobody will ever verify.
  *
- * The budget itself (FEEDBACK_PLAN.md section 2.5):
+ * The budget itself:
  *
  * | global cooldown        | 14 days                     |
  * | per-prompt cooldown    | from the registry (90+ days) |
@@ -27,8 +27,6 @@ export const GLOBAL_COOLDOWN_DAYS = 14;
 export const MONTHLY_CAP = 1;
 export const ANNUAL_CAP = 4;
 export const DEFAULT_SAMPLE_RATE = 0.25;
-/** The one-tap micro-signal budget, which is outside all of the above. */
-export const MICRO_SIGNAL_LIFETIME_CAP = 25;
 
 const DAY_MS = 86_400_000;
 
@@ -188,12 +186,6 @@ export function choosePrompt(
     return promptId;
   }
   return null;
-}
-
-/** Whether another one-tap micro-signal may be collected from this reader. */
-export function microSignalAllowed(state: FeedbackStateLike): boolean {
-  if (state.optedOut) return false;
-  return Math.max(0, Math.floor(state.microSignalCount ?? 0)) < MICRO_SIGNAL_LIFETIME_CAP;
 }
 
 /**

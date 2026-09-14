@@ -54,7 +54,7 @@ export default async function StudyLayout({
 
   return (
     // The lesson's own ground, from the `--les-*` tokens: white on light and
-    // #0B1E1E on dark, one class either way. The scoped `dark` this used to
+    // the app's dark #212121 on dark, one class either way. The scoped `dark` this used to
     // carry is gone - the whole app is a light product now, so a lesson that
     // forced night was the screen that had not joined the redesign, and the
     // reader's Thema setting decides again (design_handoff_web/TOKENS-LES.md).

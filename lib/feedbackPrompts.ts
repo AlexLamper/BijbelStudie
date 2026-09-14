@@ -37,7 +37,7 @@ export const TOUCHPOINTS = [
 
 export type Touchpoint = (typeof TOUCHPOINTS)[number];
 
-/** Reader states, as defined in FEEDBACK_PLAN.md section 2.6. */
+/** Reader states, resolved by `feedbackSegments.ts`. */
 export const SEGMENTS = ['nieuw', 'actief', 'verdiepend', 'afhakend', 'slapend', 'opgezegd'] as const;
 
 export type Segment = (typeof SEGMENTS)[number];
@@ -206,14 +206,6 @@ export const PROMPTS: Record<string, PromptDef> = {
 export type PromptId = keyof typeof PROMPTS;
 
 export const PROMPT_IDS = Object.keys(PROMPTS) as readonly string[];
-
-export function isPromptId(value: unknown): value is PromptId {
-  return typeof value === 'string' && value in PROMPTS;
-}
-
-export function isSegment(value: unknown): value is Segment {
-  return typeof value === 'string' && (SEGMENTS as readonly string[]).includes(value);
-}
 
 /** Every prompt registered for one surface, in declaration order. */
 export function promptsFor(touchpoint: Touchpoint): PromptId[] {

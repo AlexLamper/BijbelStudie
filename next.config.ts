@@ -106,13 +106,11 @@ const nextConfig: NextConfig = {
     // explicit and survives a Next upgrade.
     optimizePackageImports: [
       "lucide-react",
-      "react-icons",
       "framer-motion",
       "@radix-ui/react-avatar",
       "@radix-ui/react-dialog",
       "@radix-ui/react-dropdown-menu",
       "@radix-ui/react-label",
-      "@radix-ui/react-separator",
       "@radix-ui/react-slot",
       "@radix-ui/react-switch",
       "@radix-ui/react-toast",

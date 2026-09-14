@@ -3,10 +3,9 @@ import type { Faq } from "./homeFaq";
 /**
  * The help centre content, grouped by topic.
  *
- * Written out here rather than pulled from app/i18n/locales/nl/help.json: the
- * site is Dutch-only, the help page needs far more than the three entries that
- * file held, and the FAQPage structured data has to describe text that is
- * literally on the page.
+ * Written out here rather than pulled through i18next: the site is Dutch-only,
+ * and the FAQPage structured data has to describe text that is literally on
+ * the page.
  */
 export interface HelpTopic {
   id: string;

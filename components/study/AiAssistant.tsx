@@ -119,7 +119,7 @@ const markdownComponents = {
   ),
   blockquote: (props: React.HTMLAttributes<HTMLQuoteElement>) => (
     <blockquote
-      className="border-l-2 border-teal-300 dark:border-teal-700 pl-3 italic text-gray-600 dark:text-gray-400 mb-2"
+      className="border-l-2 border-teal-300 dark:border-teal-700 pl-3 italic text-gray-600 dark:text-neutral-400 mb-2"
       {...props}
     />
   ),
@@ -406,16 +406,16 @@ export default function AiAssistant({
       {/* Scrollable area: intro + messages */}
       <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-3 sm:px-4 pt-4 pb-2">
         {/* Intro panel */}
-        <div className="mb-4 rounded-lg border border-teal-200/70 dark:border-teal-900/50 bg-gradient-to-br from-teal-50/70 to-white dark:from-teal-950/30 dark:to-background p-3">
+        <div className="mb-4 rounded-lg border border-teal-200/70 dark:border-teal-400/20 bg-gradient-to-br from-teal-50/70 to-white dark:from-teal-400/10 dark:to-transparent p-3">
           <div className="flex items-start gap-2.5">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-teal-100 dark:bg-teal-900 flex items-center justify-center">
-              <Sparkles size={16} className="text-teal-700 dark:text-teal-300" />
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-teal-100 dark:bg-teal-400/15 flex items-center justify-center">
+              <Sparkles size={16} className="text-teal-700 dark:text-teal-400" />
             </div>
             <div className="min-w-0 flex-1">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-foreground">
                 AI-assistent
               </h3>
-              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 leading-relaxed">
+              <p className="text-xs text-gray-600 dark:text-neutral-400 mt-1 leading-relaxed">
                 Stel vragen over {book ? `${book} ${chapter}` : 'de Bijbel'} of over de Bijbel in
                 het algemeen. Antwoorden kunnen fouten bevatten, toets alles aan de Schrift.
               </p>
@@ -444,7 +444,7 @@ export default function AiAssistant({
                 key={q}
                 onClick={() => sendMessage(q)}
                 disabled={loading}
-                className="text-left text-xs sm:text-sm px-3.5 py-2.5 rounded-lg border border-teal-200/80 dark:border-teal-900/60 text-gray-700 dark:text-gray-300 hover:bg-teal-50 dark:hover:bg-teal-950/30 hover:border-teal-300 dark:hover:border-teal-800 transition-colors disabled:opacity-50"
+                className="text-left text-xs sm:text-sm px-3.5 py-2.5 rounded-lg border border-teal-200/80 dark:border-teal-400/20 text-gray-700 dark:text-neutral-300 hover:bg-teal-50 dark:hover:bg-teal-400/10 hover:border-teal-300 dark:hover:border-teal-400/40 transition-colors disabled:opacity-50"
               >
                 {q}
               </button>
@@ -463,7 +463,7 @@ export default function AiAssistant({
               </div>
             ) : (
               <div key={i} className="content-in flex justify-start">
-                <div className="bg-gray-100 dark:bg-secondary text-gray-900 dark:text-gray-100 rounded-2xl rounded-bl-sm px-3.5 py-2.5 text-sm max-w-[92%] break-words">
+                <div className="bg-gray-100 dark:bg-secondary text-gray-900 dark:text-foreground rounded-2xl rounded-bl-sm px-3.5 py-2.5 text-sm max-w-[92%] break-words">
                   <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                     {m.content}
                   </ReactMarkdown>
@@ -485,7 +485,7 @@ export default function AiAssistant({
                 key={waitStage}
                 role="status"
                 aria-live="polite"
-                className="content-in flex items-start gap-1.5 pt-0.5 text-[11px] leading-relaxed text-gray-500 dark:text-gray-400"
+                className="content-in flex items-start gap-1.5 pt-0.5 text-[11px] leading-relaxed text-gray-500 dark:text-neutral-400"
               >
                 <Loader2
                   size={12}
@@ -509,7 +509,7 @@ export default function AiAssistant({
 
       {/* Input area / quota CTA - pb-6 clears the decorative bottom gradient */}
       {!notConfigured && (
-        <div className="flex-none px-3 sm:px-4 pb-6 pt-1 relative z-20 bg-white dark:bg-background max-md:pb-4">
+        <div className="flex-none px-3 sm:px-4 pb-6 pt-1 relative z-20 bg-surface max-md:pb-4">
           {quotaHit && !quota?.unlimited ? (
             <UpgradePrompt
               surface="ai_limit"
@@ -520,7 +520,7 @@ export default function AiAssistant({
           ) : (
             <>
               {quota && !quota.unlimited && (
-                <div className="text-[11px] text-gray-500 dark:text-gray-400 mb-1.5 px-1">
+                <div className="text-[11px] text-gray-500 dark:text-neutral-400 mb-1.5 px-1">
                   {quota.used} van {quota.cap} vragen vandaag
                 </div>
               )}
@@ -537,7 +537,7 @@ export default function AiAssistant({
                   maxLength={MAX_MESSAGE_LENGTH}
                   placeholder="Stel een vraag over de Bijbel…"
                   disabled={loading}
-                  className="flex-1 resize-none rounded-lg border border-gray-200 dark:border-border bg-white dark:bg-card px-3 py-2 text-sm max-md:text-[16px] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#0D9488]/40 focus:border-[#0D9488] disabled:opacity-60"
+                  className="flex-1 resize-none rounded-lg border border-gray-200 dark:border-border bg-white dark:bg-card px-3 py-2 text-sm max-md:text-[16px] text-gray-900 dark:text-foreground placeholder:text-gray-400 dark:placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#0D9488]/40 focus:border-[#0D9488] disabled:opacity-60"
                 />
                 <button
                   onClick={() => sendMessage(input)}

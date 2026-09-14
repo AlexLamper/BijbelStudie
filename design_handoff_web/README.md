@@ -15,7 +15,6 @@ Negen routes, ontworpen op 1440 × 900, in dezelfde tokens als de mobiele app. D
 | `PAGES.md` | Per route de volledige opbouw met exacte waarden (de negen basisroutes). |
 | `PAGES-STUDIE-EN-LES.md` | Studie-detail en de vijf lesschermen, met de gedeelde chrome van de lesflow. |
 | `TOKENS-LES.md` | De extra tokens van de lesflow, licht en donker naast elkaar. |
-| `PROMPTS.md` | Kant-en-klare prompts, één per route, in de juiste volgorde. |
 | `CHECKLIST.md` | Meetbare acceptatiecriteria. Een pagina is pas af als alles klopt. |
 | `prototype/` | De werkende HTML-prototypes: `BijbelStudie Screens` (alle schermen, licht) en `BijbelStudie Lesschermen donker` (de vijf lesschermen in donkere modus). Open naast je editor. |
 | `screenshots/` | Eén PNG per route op 2×, inclusief studie-detail en de vijf lesschermen. |
@@ -25,8 +24,8 @@ Negen routes, ontworpen op 1440 × 900, in dezelfde tokens als de mobiele app. D
 1. **Fase 0 — tokens.** Zet `tokens.css` (of de Tailwind-extensie) in het project. Niets anders. Geen enkele pagina bouwt met losse hexwaarden.
 2. **Fase 1 — de shell.** Bouw `AppShell`, `Sidebar` en `TopBar` uit `SHELL.md`. Negen routes hangen eraan; één keer goed is negen keer goed. Lever deze fase af en controleer hem tegen `CHECKLIST.md` vóór je verder gaat.
 3. **Fase 2 — de primitieven.** `Card`, `StatCard`, `Chip`, `Pill`, `ProgressBar`, `SectionHeading`, `ListRow`, `StudyCard`, `TreeAvatar`. Zie `COMPONENTS.md`.
-4. **Fase 3 — de routes, één prompt per route.** Volgorde uit `PROMPTS.md`. Niet twee routes in één prompt: dat levert altijd slordiger werk.
-5. **Fase 4 — de lesflow.** Pas als de negen basisroutes staan: studie-detail, daarna de vijf stappen. Zie `PAGES-STUDIE-EN-LES.md` en de prompts in `PROMPTS.md`.
+4. **Fase 3 — de routes, één prompt per route.** Volgorde van `PAGES.md`. Niet twee routes in één prompt: dat levert altijd slordiger werk.
+5. **Fase 4 — de lesflow.** Pas als de negen basisroutes staan: studie-detail, daarna de vijf stappen. Zie `PAGES-STUDIE-EN-LES.md`.
 6. **Fase 5 — nalopen.** `CHECKLIST.md` per route afvinken op 1440 × 900.
 
 ## Waarom één route per prompt

@@ -1,7 +1,0 @@
-{
-  "greeting": "Guten Tag!",
-  "loading": "Vers wird geladen…",
-  "fetch_failed": "Vers konnte nicht geladen werden",
-  "unsupported_language": "Sprache noch nicht unterstützt.",
-  "api_endpoint": "https://some-german-bible-api.example.com/api/daytext"
-}

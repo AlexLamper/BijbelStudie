@@ -132,8 +132,8 @@ export default function BookContextDialog({
             </div>
           ) : error ? (
             <div className="py-10 text-center">
-              <AlertCircle className="mx-auto mb-3 h-8 w-8 text-danger" />
-              <p className="text-[13.5px] text-danger">{error}</p>
+              <AlertCircle className="mx-auto mb-3 h-8 w-8 text-danger dark:text-red-400" />
+              <p className="text-[13.5px] text-danger dark:text-red-400">{error}</p>
             </div>
           ) : summary ? (
             <div

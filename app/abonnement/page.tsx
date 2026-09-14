@@ -270,7 +270,12 @@ function SubscribePageInner() {
     } catch (err) {
       toast({
         title: "Er ging iets mis",
-        description: err instanceof Error ? err.message : "Afrekenen mislukt",
+        // Our own throws above carry Dutch copy; a TypeError is the browser's
+        // English "Failed to fetch" when the request never left.
+        description:
+          err instanceof Error && !(err instanceof TypeError)
+            ? err.message
+            : "Afrekenen mislukt. Controleer je verbinding en probeer het opnieuw.",
         variant: "destructive",
       })
       setLoading(null)

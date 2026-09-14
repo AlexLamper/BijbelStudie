@@ -6,7 +6,6 @@ import { useRouter, usePathname } from "next/navigation"
 import { LogOut, User, Settings } from "lucide-react"
 import { Button } from "../ui/button"
 import { motion, AnimatePresence } from "framer-motion"
-import { SidebarTrigger } from "../ui/sidebar"
 import { ModeToggle } from "../dark-mode-toggle"
 import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar"
 import { SubscriptionBadge } from "../subscription-badge"
@@ -16,11 +15,11 @@ import NavTreeAvatar from "../levensboom/NavTreeAvatar"
 import { MobileMenuButton } from "../shell/MobileNav"
 
 /**
- * The same green "Studie" wears everywhere else in the wordmark (the sidebar's
- * LOGO_GREEN, the landing navbar, the auth pages): #0F766E, the deep end of the
- * brand swatch, so it holds up on a light bar and on the scene's dark one.
+ * The same green "Studie" wears everywhere else in the wordmark (the sidebars,
+ * the landing navbar, the footer, the auth pages): the brand teal #0D9488, in
+ * both themes - it clears ~4.3:1 on the dark surfaces, so no dark-mode step-up.
  */
-const LOGO_GREEN = "#0F766E"
+const LOGO_GREEN = "#0D9488"
 
 /**
  * The wordmark, on the right of the bar.
@@ -30,7 +29,7 @@ const LOGO_GREEN = "#0F766E"
  * unconverted page still has its h1). One component for both the signed-in and
  * the guest bar, so the two can never drift apart.
  */
-function Wordmark({ scene = false }: { scene?: boolean }) {
+function Wordmark() {
   return (
     <Link
       href="/dashboard"
@@ -46,10 +45,7 @@ function Wordmark({ scene = false }: { scene?: boolean }) {
         priority
       />
       <span className="text-[15px] font-bold tracking-tight text-foreground whitespace-nowrap">
-        {/* On the app theme's dark bar #0F766E drops to 3.4:1, so it steps up to
-            teal-400 there. The scene bar keeps the literal: its scoped `dark`
-            is not the reader's theme. */}
-        Bijbel<span className={scene ? undefined : "text-[#0F766E] dark:text-teal-400"} style={scene ? { color: LOGO_GREEN } : undefined}>Studie</span>
+        Bijbel<span style={{ color: LOGO_GREEN }}>Studie</span>
       </span>
     </Link>
   )
@@ -188,7 +184,6 @@ export function Header({ title, variant = "default" }: HeaderProps) {
         <div className="flex items-center gap-3 max-md:min-w-0">
           {/* Below md the menu button opens the app sidebar as a drawer. */}
           <MobileMenuButton className="-ml-2 text-foreground" />
-          {!scene && <SidebarTrigger className="text-muted-foreground hover:text-foreground max-md:hidden" />}
           {scene ? (
             <p className="text-base font-semibold text-foreground max-md:truncate">{getPageTitle()}</p>
           ) : (
@@ -198,7 +193,7 @@ export function Header({ title, variant = "default" }: HeaderProps) {
         <div className="flex items-center gap-3 max-md:flex-none">
           {/* The drawer carries the brand on a phone; the bar keeps the room. */}
           <span className="contents max-sm:hidden">
-            <Wordmark scene={scene} />
+            <Wordmark />
           </span>
           {!scene && <ModeToggle />}
           <Link
@@ -224,14 +219,12 @@ export function Header({ title, variant = "default" }: HeaderProps) {
           : "flex items-center justify-between px-4 sm:px-6 h-14 border-b border-border bg-white dark:bg-background sticky top-0 z-50"
       }
     >
-      {/* Left: sidebar trigger + page title, or - on a scene - the wordmark */}
+      {/* Left: the page title. No desktop sidebar toggle - the sidebar column
+          it opened no longer exists, and a button that visibly does nothing is
+          worse than no button. */}
       <div className="flex items-center gap-3 max-md:min-w-0">
         {/* Below md the menu button opens the app sidebar as a drawer. */}
         <MobileMenuButton className="-ml-2 text-foreground" />
-        {/* The trigger opens the sidebar column, and a scene screen has no
-            column to open - its rail floats and names one icon at a time on
-            hover. A button that visibly does nothing is worse than no button. */}
-        {!scene && <SidebarTrigger className="text-muted-foreground hover:text-foreground max-md:hidden" />}
         {/*
           The mark sits on the RIGHT of this bar (see `Wordmark`), where the
           owner asked for it. So the left keeps the page's name. On a scene page
@@ -249,7 +242,7 @@ export function Header({ title, variant = "default" }: HeaderProps) {
 
       {/* Right: the wordmark, then the desktop controls */}
       <div className="hidden md:flex items-center gap-2">
-        <Wordmark scene={scene} />
+        <Wordmark />
         <div className="w-px h-5 bg-border mx-1" />
         {/* A scene screen paints its own light: the page is the same night
             landscape in either theme, so a light/dark switch on it changes
@@ -358,7 +351,7 @@ export function Header({ title, variant = "default" }: HeaderProps) {
           the left of the bar (components/shell/MobileNav.tsx). */}
       <div className="md:hidden relative flex flex-none items-center gap-1">
         <span className="contents max-sm:hidden">
-          <Wordmark scene={scene} />
+          <Wordmark />
         </span>
         <Link href="/profiel/boom" aria-label="Mijn voortgang" className="inline-flex items-center p-1">
           <NavTreeAvatar size={26} fallback={null} />

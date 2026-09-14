@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../lib/authOptions";
 import SessionProvider from "../../components/providers/SessionProvider";
-import { SidebarProvider } from "../../components/ui/sidebar";
 import GuestGateScene from "../../components/auth/GuestGateScene";
 
 export const metadata: Metadata = {
@@ -49,7 +48,7 @@ export default async function FeedbackLayout({
 
   return (
     <SessionProvider session={session}>
-      <SidebarProvider>{children}</SidebarProvider>
+      {children}
     </SessionProvider>
   );
 }

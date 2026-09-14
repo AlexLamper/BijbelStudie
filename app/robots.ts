@@ -42,7 +42,6 @@ export default function robots(): MetadataRoute.Robots {
     "/feedback",
     "/succes",
     "/geannuleerd",
-    "/preview/",
   ];
 
   return {

@@ -19,9 +19,8 @@ import { RAIL_W, TEAL_ON_DARK } from "./tokens"
  * down the left edge with every icon and its label on show, the same width
  * (RAIL_W, 13rem) at every breakpoint, in every state, forever.
  *
- * Two things are different from the rail /studie uses (`StudyRail` in
- * components/layout/app-sidebar.tsx), because here it sits on a picture rather
- * than on a white page:
+ * Two things are different from a rail on a white page, because here it sits
+ * on a picture:
  *
  *  - It is glass. The rail is a film of white over a blur, so the sky and the
  *    land keep running underneath it; the legibility comes from the page's own
@@ -57,8 +56,8 @@ import { RAIL_W, TEAL_ON_DARK } from "./tokens"
  * horizontally scrollable strip of pills that sticks under the navbar. One list
  * of links, two shapes.
  *
- * The items and the links are the real ones, read off app-sidebar.tsx, in the
- * order that file's `useStudyStyle` puts them in.
+ * The items and the links are the real ones, in the order `useStudyStyle`
+ * puts them in.
  */
 
 interface NavItem {

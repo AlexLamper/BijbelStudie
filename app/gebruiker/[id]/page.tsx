@@ -99,7 +99,7 @@ export default async function PublicProfilePage({ params }: Params) {
       <header className="border-b border-line bg-surface">
         <div className="mx-auto flex h-16 w-full max-w-[600px] items-center gap-3 px-5">
           <Link href="/" className="text-[15px] font-bold tracking-[-0.2px] text-ink no-underline">
-            BijbelStudie
+            Bijbel<span style={{ color: "#0D9488" }}>Studie</span>
           </Link>
           <div className="flex-1" />
           <Link

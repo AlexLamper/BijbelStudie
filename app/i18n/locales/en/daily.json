@@ -1,7 +1,0 @@
-{
-  "greeting": "Hey!",
-  "loading": "Loading verse…",
-  "fetch_failed": "Failed to fetch verse",
-  "unsupported_language": "Language not supported yet.",
-  "api_endpoint": "https://beta.ourmanna.com/api/v1/get/?format=json&order=daily"
-}

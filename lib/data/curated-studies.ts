@@ -1,4 +1,6 @@
-﻿export type StudyType = 'Gedeelte' | 'Persoon' | 'Onderwerp' | 'Boek'
+﻿import { studyPhotoFor } from '../studyPhotos'
+
+export type StudyType = 'Gedeelte' | 'Persoon' | 'Onderwerp' | 'Boek'
 
 /** Which commentary the "type uitleg" setting resolves to. */
 export type StudyDepth = 'kort' | 'diep'
@@ -42,9 +44,12 @@ export interface CuratedStudy {
   startChapter: number
   startVersion: string
   /**
-   * Card banner. These are hand-authored SVGs under /images/studies: at the
-   * 16:6 size the cards render, a photograph is unreadable mush, and the ten
-   * PNGs this replaced weighed 60 MB in the repository between them.
+   * Card banner: the study's cover photo from `lib/studyPhotos.ts`
+   * (`/images/study-photos/u-<id>.webp`), or '' when it has none.
+   *
+   * LEGACY and PERMANENT field: `/api/v1/studies` returns it absolutised to
+   * the shipped Flutter binary, which renders rasters via `Image.network` and
+   * paints its own banner when the value is empty or the request fails.
    */
   image: string
   lessons: Lesson[]
@@ -60,12 +65,8 @@ export interface CuratedStudy {
   suggestedDepth?: StudyDepth
 }
 
-export const BADGE_STYLES: Record<StudyType, { bg: string; color: string }> = {
-  Gedeelte: { bg: 'rgba(13,148,136,0.88)', color: '#fff' },
-  Persoon:  { bg: 'rgba(13,148,136,0.88)', color: '#fff' },
-  Onderwerp:{ bg: 'rgba(13,148,136,0.88)', color: '#fff' },
-  Boek:     { bg: 'rgba(13,148,136,0.88)', color: '#fff' },
-}
+/** A study's cover photo path, or '' so the client paints its own banner. */
+const photo = (id: string): string => studyPhotoFor(id)?.src ?? ''
 
 export const curatedStudies: CuratedStudy[] = [
   {
@@ -77,7 +78,7 @@ export const curatedStudies: CuratedStudy[] = [
     startBook: 'Johannes',
     startChapter: 20,
     startVersion: 'statenvertaling',
-    image: '/images/studies/opstanding.svg',
+    image: photo('opstanding'),
     lessons: [
       { day: 1, title: 'Het lege graf', book: 'Johannes', chapter: 20, verseRange: '1–18', focus: 'Wie waren de eerste getuigen? Wat vonden zij in het graf?' },
       { day: 2, title: '"Mijn Heer en mijn God"', book: 'Johannes', chapter: 20, verseRange: '19–31', focus: 'Waarom twijfelde Thomas? Wat betekent zijn belijdenis voor jou?' },
@@ -93,7 +94,7 @@ export const curatedStudies: CuratedStudy[] = [
     startBook: 'Genesis',
     startChapter: 12,
     startVersion: 'statenvertaling',
-    image: '/images/studies/abraham.svg',
+    image: photo('abraham'),
     lessons: [
       { day: 1, title: 'De roeping uit Ur', book: 'Genesis', chapter: 12, verseRange: '1–9', focus: 'Wat liet Abraham achter? Wat beloofde God hem?' },
       { day: 2, title: 'Het verbond in de nacht', book: 'Genesis', chapter: 15, verseRange: '1–21', focus: 'Hoe sloot God het verbond? Welke rol speelde Abraham?' },
@@ -114,7 +115,7 @@ export const curatedStudies: CuratedStudy[] = [
     startBook: 'Exodus',
     startChapter: 2,
     startVersion: 'statenvertaling',
-    image: '/images/studies/mozes.svg',
+    image: photo('mozes'),
     lessons: [
       { day: 1, title: 'Geboorte en vlucht', book: 'Exodus', chapter: 2, verseRange: '1–25', focus: 'Hoe bewaarde God Mozes? Waarom vluchtte hij naar Midian?' },
       { day: 2, title: 'Het brandende braambos', book: 'Exodus', chapter: 3, verseRange: '1–22', focus: 'Welke naam openbaarde God? Wat was de roeping van Mozes?' },
@@ -137,7 +138,7 @@ export const curatedStudies: CuratedStudy[] = [
     startBook: 'Mattheüs',
     startChapter: 14,
     startVersion: 'statenvertaling',
-    image: '/images/studies/geloof-in-storm.svg',
+    image: photo('geloof-in-storm'),
     lessons: [
       { day: 1, title: 'Petrus op het water', book: 'Mattheüs', chapter: 14, verseRange: '22–36', focus: 'Wanneer begon Petrus te zinken? Wat zegt dit over jouw geloof?' },
       { day: 2, title: 'Jezus stilt de storm', book: 'Markus', chapter: 4, verseRange: '35–41', focus: 'Hoe reageerden de discipelen? Wat voor macht heeft Jezus?' },
@@ -154,7 +155,7 @@ export const curatedStudies: CuratedStudy[] = [
     startBook: 'Genesis',
     startChapter: 6,
     startVersion: 'statenvertaling',
-    image: '/images/studies/noach.svg',
+    image: photo('noach'),
     lessons: [
       { day: 1, title: "Gods opdracht aan Noach", book: 'Genesis', chapter: 6, verseRange: '1–22', focus: 'Waarom vond God genade in Noach? Wat moest hij bouwen?' },
       { day: 2, title: 'De vloed komt', book: 'Genesis', chapter: 7, verseRange: '1–24', focus: 'Hoelang duurde de vloed? Wat bewaarde God in de ark?' },
@@ -172,7 +173,7 @@ export const curatedStudies: CuratedStudy[] = [
     startBook: 'Mattheüs',
     startChapter: 21,
     startVersion: 'statenvertaling',
-    image: '/images/studies/intocht.svg',
+    image: photo('intocht'),
     lessons: [
       { day: 1, title: 'De triomfantelijke intocht', book: 'Mattheüs', chapter: 21, verseRange: '1–11', focus: 'Welke profetie werd vervuld? Wie riep "Hosanna"?' },
       { day: 2, title: 'De tempelreiniging', book: 'Mattheüs', chapter: 21, verseRange: '12–22', focus: 'Waarom dreef Jezus de kooplieden uit? Wat is het huis van God?' },
@@ -191,7 +192,7 @@ export const curatedStudies: CuratedStudy[] = [
     startBook: '1 Samuël',
     startChapter: 16,
     startVersion: 'statenvertaling',
-    image: '/images/studies/david.svg',
+    image: photo('david'),
     lessons: [
       { day: 1, title: 'De zalving van David', book: '1 Samuël', chapter: 16, verseRange: '1–13', focus: 'Waarom koos God David? Wat ziet God wat mensen niet zien?' },
       { day: 2, title: 'David en Goliath', book: '1 Samuël', chapter: 17, verseRange: '32–58', focus: 'Welk vertrouwen had David? Hoe verschilt zijn redenering van Saul?' },
@@ -211,7 +212,7 @@ export const curatedStudies: CuratedStudy[] = [
     startBook: 'Mattheüs',
     startChapter: 5,
     startVersion: 'statenvertaling',
-    image: '/images/studies/bergrede.svg',
+    image: photo('bergrede'),
     lessons: [
       { day: 1, title: 'De Zaligsprekingen', book: 'Mattheüs', chapter: 5, verseRange: '1–12', focus: 'Wie zijn "zalig"? Hoe keert dit de wereld op zijn kop?' },
       { day: 2, title: 'Zout, licht en de wet', book: 'Mattheüs', chapter: 5, verseRange: '13–48', focus: 'Hoe vervult Jezus de wet? Wat betekent dit voor jouw leefstijl?' },
@@ -230,7 +231,7 @@ export const curatedStudies: CuratedStudy[] = [
     startBook: 'Handelingen',
     startChapter: 9,
     startVersion: 'statenvertaling',
-    image: '/images/studies/paulus.svg',
+    image: photo('paulus'),
     lessons: [
       { day: 1, title: 'De bekering op de weg naar Damascus', book: 'Handelingen', chapter: 9, verseRange: '1–22', focus: 'Wat overkwam Paulus? Hoe reageerde de gemeente op zijn bekering?' },
       { day: 2, title: 'Preek op de Areopagus', book: 'Handelingen', chapter: 17, verseRange: '16–34', focus: 'Hoe paste Paulus zijn boodschap aan op zijn Griekse publiek?' },
@@ -249,7 +250,7 @@ export const curatedStudies: CuratedStudy[] = [
     startBook: 'Psalmen',
     startChapter: 1,
     startVersion: 'statenvertaling',
-    image: '/images/studies/psalmen.svg',
+    image: photo('psalmen'),
     lessons: [
       { day: 1, title: 'De weg van de rechtvaardige', book: 'Psalmen', chapter: 1, verseRange: '1–6', focus: 'Wat is het verschil tussen de weg van de rechtvaardige en de goddeloze?' },
       { day: 2, title: 'Mijn God, waarom?', book: 'Psalmen', chapter: 22, verseRange: '1–31', focus: 'Hoe begint de psalm? Hoe eindigt hij? Wat zegt dit over eerlijk bidden?' },
@@ -267,7 +268,7 @@ export const curatedStudies: CuratedStudy[] = [
     startBook: 'Daniël',
     startChapter: 1,
     startVersion: 'statenvertaling',
-    image: '/images/studies/daniel.svg',
+    image: photo('daniel'),
     suggestedRhythm: 'drie-per-week',
     suggestedDepth: 'diep',
     about: [

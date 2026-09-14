@@ -194,10 +194,6 @@ export const CTA_PRIMARY =
 export const CTA_BRAND =
   "press inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white no-underline outline-none transition-colors hover:bg-[#115E59] focus-visible:ring-2 focus-visible:ring-white"
 
-/** A quiet second action: type only, underlined on hover, with a real focus ring. */
-export const CTA_QUIET =
-  "inline-flex items-center gap-1.5 rounded-md text-sm font-semibold text-white/85 no-underline underline-offset-4 outline-none transition-colors hover:text-white hover:underline focus-visible:ring-2 focus-visible:ring-white"
-
 /* -- Gutters --------------------------------------------------- */
 
 /**
@@ -243,9 +239,6 @@ export const SCENE_X = "px-5 sm:px-8 lg:pl-[15.5rem] lg:pr-10 xl:pl-[17rem] xl:p
  * landscape, not more margin.
  */
 export const SCENE_X_EDGE = "px-5 sm:px-8 lg:px-14 xl:px-20"
-
-/** One vertical rhythm for a section below the fold. */
-export const SECTION_Y = "py-[clamp(3.5rem,6vw,6rem)]"
 
 /* -- The rail -------------------------------------------------- */
 
@@ -376,17 +369,6 @@ export const SCENE_ROOM: Record<string, string> = {
   "--input": "189 16% 30%",
   "--ring": "172 66% 50%",
 }
-
-/**
- * The two inks the reading screens pin rather than leave on a token, because a
- * superscript and a required copyright notice are the two places where "one
- * step quieter" must not become "one step unreadable".
- *
- * #BFC9CC measures 11.0:1 on the ground and #A6B3B5 measures 8.6:1 - a clear
- * step below the passage's 18.5:1 and well above the 4.5:1 floor.
- */
-export const VERSE_NUMBER_INK = "#BFC9CC"
-export const ATTRIBUTION_INK = "#A6B3B5"
 
 /* -- Scrims ---------------------------------------------------- */
 

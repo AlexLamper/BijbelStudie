@@ -2,7 +2,6 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../lib/authOptions";
 import SessionProvider from "../../components/providers/SessionProvider";
-import { SidebarProvider } from "../../components/ui/sidebar";
 import GuestGateScene from "../../components/auth/GuestGateScene";
 import { generatePageMetadata } from "../../lib/pageMetadata";
 
@@ -19,8 +18,6 @@ export const metadata: Metadata = generatePageMetadata("profile");
  * are gone for the same reason: a layout can only ADD chrome, and the shell
  * draws its own navbar (`<Header variant="scene" />`) and its own floating rail
  * instead of a sidebar column. Same shape as app/dashboard/layout.tsx.
- *
- * `SidebarProvider` stays because the header's own controls read its context.
  */
 export default async function ProfileLayout({
   children,
@@ -50,7 +47,7 @@ export default async function ProfileLayout({
 
   return (
     <SessionProvider session={session}>
-      <SidebarProvider>{children}</SidebarProvider>
+      {children}
     </SessionProvider>
   );
 }

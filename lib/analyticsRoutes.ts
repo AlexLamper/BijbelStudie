@@ -177,6 +177,9 @@ export const CLICK_TARGETS = [
   'sidebar_pro_cta',
   /** Leaves the web app for the iPhone app - see lib/appStore.ts. */
   'sidebar_appstore',
+  /** Phone-browser app promo - see components/layout/AppPromoBanner.tsx. */
+  'mobile_banner_appstore',
+  'mobile_banner_playstore',
   // Studies
   'study_card',
   'study_start',
@@ -209,9 +212,3 @@ export const CLICK_TARGETS = [
   'onboarding_mode_guided',
   'onboarding_mode_self',
 ] as const;
-
-export type ClickTarget = (typeof CLICK_TARGETS)[number];
-
-export function isClickTarget(value: unknown): value is ClickTarget {
-  return typeof value === 'string' && (CLICK_TARGETS as readonly string[]).includes(value);
-}

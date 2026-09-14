@@ -18,7 +18,7 @@ Read this before converting a page. It is short on purpose.
 | `SceneBackdrop.tsx` | The fixed picture + the four scrims. `SceneShell` renders it; you only choose its mode. |
 | `SceneRail.tsx` | The sidebar replacement: a rail that rests at 64px, widens **into its own gutter** (96px at `lg`, 112px at `xl`) on hover/focus and becomes a pill strip below `lg`. |
 | `SceneShell.tsx` | **What a page uses.** |
-| `pieces.tsx` | `Panel`, `SectionHeading`, `SceneSkeleton`, `GlassStat`, `Total`, `WeekStrip`. No `"use client"` — usable from a server component. |
+| `pieces.tsx` | `Panel`, `SectionHeading`, `SceneSkeleton`. No `"use client"` — usable from a server component. |
 | `scene-svg.ts` | `sceneSvg()` and `SCENE_TREE`: the public scene, rendered to an SVG string **on the server**. Never import this from a client component. |
 
 Motion lives in `app/globals.css`: `.scene-sky` and `.scene-horizon`.
@@ -31,8 +31,8 @@ Motion lives in `app/globals.css`: `.scene-sky` and `.scene-horizon`.
 "use client"
 
 import SceneShell from "../../components/scene/SceneShell"
-import { GlassStat, Panel, SceneSkeleton, SectionHeading } from "../../components/scene/pieces"
-import { EYEBROW, PANEL, TEAL_ON_DARK } from "../../components/scene/tokens"
+import { Panel, SceneSkeleton, SectionHeading } from "../../components/scene/pieces"
+import { EYEBROW, PANEL, TEAL_ON_DARK, TILE } from "../../components/scene/tokens"
 
 export default function NotitiesPage() {
   const { notes, loading } = useNotes()
@@ -51,9 +51,9 @@ export default function NotitiesPage() {
 
       {/* 2. the horizon: what breaks the fold */}
       <div className="scene-horizon -mt-24">
-        <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
-          <GlassStat label="Notities" value={loading ? null : `${notes.length}`} unit="totaal" />
-        </dl>
+        <div className={`px-5 py-4 ${TILE}`}>
+          {loading ? <SceneSkeleton className="h-7 w-14" /> : <p className="text-2xl font-semibold text-white">{notes.length}</p>}
+        </div>
       </div>
 
       {/* 3. the desk: the working panels */}
@@ -76,7 +76,7 @@ signed-in layout already has one.
 `window.scrollY`. Most signed-in layouts wrap the page in
 `h-screen overflow-hidden` with an inner `overflow-y-auto`; inside one of those
 the scene never moves. Strip the layout back to its providers, the way
-`app/dashboard/layout.tsx` does — keep `SessionProvider` and `SidebarProvider`,
+`app/dashboard/layout.tsx` does — keep `SessionProvider`,
 drop the wrapper, the `AppSidebar` and the `Header` (the shell draws its own).
 
 ---
@@ -122,7 +122,7 @@ export default function HulpbronnenPage() {
 | a section of working content | `<Panel className="p-6">` or the `PANEL` class on your own element |
 | a long ledger, a table, an accordion | `PANEL_DEEP` — sparingly; three in a row and the scene is gone |
 | **a list of records** (notes, studies, results) | **no panel.** `<SectionHeading rule action={…} />` and hairline-divided rows — see the two ledgers at the bottom of `app/dashboard/page.tsx`. A list of cards inside a panel is a box inside a box and reads as generic; type straight on the landscape does not. |
-| a figure that breaks the fold | `<GlassStat>` (its surface is `TILE`) |
+| a figure that breaks the fold | the `TILE` class |
 | a component drawn for a white page (a card with `#4B5563` captions) | `PLATE` — lay it on the scene as a lit object rather than forking it |
 | a heading over a section | `<SectionHeading id=… eyebrow=… title=… action=… rule />` |
 | a small label above a figure | the `EYEBROW` class |
@@ -149,10 +149,6 @@ Colour, in one line each:
   measures 3.74:1 and fails; on `#0F766E` it is 5.5:1.
 - `TEAL_ON_DARK` `#2DD4BF` — accents and type on the scene (9.9:1 on the ground).
   Never a fill under white type.
-- `VERSE_NUMBER_INK` `#BFC9CC` (11.0:1) and `ATTRIBUTION_INK` `#A6B3B5` (8.6:1) —
-  the two inks the reading screens pin rather than leave on a token, because a
-  superscript and a required copyright notice are where "one step quieter" must
-  not become "one step unreadable".
 
 Everything else is a literal white or black. **Never a theme token on a scene
 page**: a token flips with the reader's light/dark setting and the landscape

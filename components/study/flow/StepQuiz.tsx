@@ -23,11 +23,12 @@ import type { SerialisedPrompt } from '../../../lib/feedbackPrompts';
  * outline of a wrong answer. Same swatch, the end the ground can hold.
  */
 const RED = '#DC2626';
-const RED_ON_DARK = '#F87171';
+// RED_ON_DARK, #F87171: written as a literal class in the answer frame below so
+// Tailwind can see it.
 const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
 /** Reason chips for "Nee" on the per-question signal - the complete diagnostic
- * vocabulary for a multiple-choice question (FEEDBACK_PLAN.md section 3.2). */
+ * vocabulary for a multiple-choice question. */
 const REASON_CHIPS: { key: string; label: string }[] = [
   { key: 'too_hard', label: 'Te moeilijk' },
   { key: 'unclear', label: 'Onduidelijk' },
@@ -113,7 +114,7 @@ export default function StepQuiz({
 }) {
   /**
    * The per-question "was deze vraag duidelijk?" micro-signal
-   * (FEEDBACK_PLAN.md section 3.2, T2a). One tap, no modal, no eligibility
+   * (T2a). One tap, no modal, no eligibility
    * engine - that is phase 2. Tracked per question id so a reader cannot
    * double-submit by paging back and forth in review.
    */
@@ -167,7 +168,7 @@ export default function StepQuiz({
 
   /**
    * T2b - one question after the quiz, asked at most once and only when the
-   * fatigue budget allows it (FEEDBACK_PLAN.md 3.2). "Ging deze quiz over wat
+   * fatigue budget allows it. "Ging deze quiz over wat
    * je net gelezen had?" is the reader's-side check on the passage matching in
    * lib/data/study-lessons: a run of "Nee" on one lesson means that lesson's
    * quiz slugs are wrong, which is a five-minute fix nobody would otherwise
@@ -494,14 +495,16 @@ export default function StepQuiz({
                 // Deeper washes than the light card carried: 7% teal is a
                 // visible tint on white and nothing at all on the scene ground.
                 // The design's chosen state: a 1 px teal frame on a 6 % teal
-                // wash. Both read on the white page and on the night one.
-                let frame: React.CSSProperties | undefined;
+                // wash. On the dark lesson the teal keyline and wash lift to teal-400,
+                // the app's teal on dark, so the chosen state does not sink into
+                // the #212121 ground.
+                let frame: string | undefined;
                 if (isCorrectOne) {
-                  frame = { borderColor: 'var(--teal)', backgroundColor: 'rgba(13,148,136,0.10)' };
+                  frame = 'border-[#0D9488] bg-[rgba(13,148,136,0.10)] dark:border-teal-400 dark:bg-[rgba(45,212,191,0.12)]';
                 } else if (isWrongPick) {
-                  frame = { borderColor: RED_ON_DARK, backgroundColor: 'rgba(248,113,113,0.12)' };
+                  frame = 'border-[#F87171] bg-[rgba(248,113,113,0.12)]';
                 } else if (isPicked) {
-                  frame = { borderColor: 'var(--teal)', backgroundColor: 'rgba(13,148,136,0.06)' };
+                  frame = 'border-[#0D9488] bg-[rgba(13,148,136,0.06)] dark:border-teal-400 dark:bg-[rgba(45,212,191,0.08)]';
                 }
 
                 return (
@@ -514,12 +517,13 @@ export default function StepQuiz({
                     className={[
                       'flex w-full items-center gap-[14px] rounded-[12px] border px-[17px] py-[15px] text-left transition-all duration-200 max-md:gap-3 max-md:px-[14px]',
                       FOCUS_RING,
-                      !frame ? 'border-les-card-line bg-les-card' : '',
+                      frame ?? 'border-les-card-line bg-les-card',
                       reviewing || advancing
                         ? 'cursor-default'
-                        : 'press hover:border-les-line',
+                        : frame
+                          ? 'press'
+                          : 'press hover:border-les-line',
                     ].join(' ')}
-                    style={frame}
                   >
                     <span
                       aria-hidden

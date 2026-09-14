@@ -7,8 +7,7 @@ import {
 } from './planCanon';
 
 /**
- * Turns "I want to do Job in 30 days" into the day-by-day readings a
- * `BiblePlan` document stores.
+ * Plan suggestions for the dashboard: "you last read Job, here is a Job plan".
  *
  * Chapter granularity is the floor: the repo has no verse counts and no
  * pericope data (see lib/local-data.ts - verse counts are only knowable by
@@ -23,132 +22,9 @@ export const PACE_CHAPTERS_PER_DAY: Record<Pace, number> = {
   stevig: 4,
 };
 
-export const PACE_LABELS: Record<Pace, string> = {
-  rustig: 'Rustig - 1 hoofdstuk per dag',
-  gestaag: 'Gestaag - 2 hoofdstukken per dag',
-  stevig: 'Stevig - 4 hoofdstukken per dag',
-};
-
-export function isPace(value: unknown): value is Pace {
-  return value === 'rustig' || value === 'gestaag' || value === 'stevig';
-}
-
-export type GeneratedReading = {
-  day: number;
-  book: string;
-  chapter: number;
-  title?: string;
-};
-
-export type GenerateResult = {
-  readings: GeneratedReading[];
-  /** Actual number of days used, which can be fewer than requested. */
-  duration: number;
-  totalChapters: number;
-  category: PlanCategory;
-  /** Human-readable notes for the UI: unknown books, clamped duration. */
-  warnings: string[];
-};
-
-/** Every chapter of every requested book, in canonical order. */
-function expandChapters(books: PlanBook[]): { book: PlanBook; chapter: number }[] {
-  const out: { book: PlanBook; chapter: number }[] = [];
-  for (const book of books) {
-    for (let chapter = 1; chapter <= book.chapters; chapter++) {
-      out.push({ book, chapter });
-    }
-  }
-  return out;
-}
-
-/** "Job 1–3", or "Job 1" for a single chapter, or "Job 42 · Psalmen 1". */
-function dayTitle(entries: { book: PlanBook; chapter: number }[]): string {
-  const parts: string[] = [];
-  let index = 0;
-  while (index < entries.length) {
-    const book = entries[index].book;
-    let end = index;
-    while (end + 1 < entries.length && entries[end + 1].book === book) end++;
-    const first = entries[index].chapter;
-    const last = entries[end].chapter;
-    parts.push(first === last ? `${book.nl} ${first}` : `${book.nl} ${first}–${last}`);
-    index = end + 1;
-  }
-  return parts.join(' · ');
-}
-
 /** Days needed to cover `totalChapters` at the given pace. */
 export function recommendedDuration(totalChapters: number, pace: Pace): number {
   return Math.max(1, Math.ceil(totalChapters / PACE_CHAPTERS_PER_DAY[pace]));
-}
-
-/**
- * Spreads the chapters of `bookNames` across `durationDays` as evenly as
- * possible; the remainder lands on the earliest days so the plan front-loads
- * rather than ending on a heavy one.
- *
- * Asking for more days than there are chapters is not an error - the plan is
- * simply as long as it can be, and the caller is told so.
- */
-export function generateReadings(options: {
-  bookNames: string[];
-  durationDays: number;
-}): GenerateResult {
-  const warnings: string[] = [];
-  const books: PlanBook[] = [];
-
-  for (const name of options.bookNames) {
-    const book = resolvePlanBook(name);
-    if (!book || book.chapters === 0) {
-      warnings.push(`Boek niet herkend en overgeslagen: ${name}`);
-      continue;
-    }
-    if (!books.includes(book)) books.push(book);
-  }
-
-  if (books.length === 0) {
-    return { readings: [], duration: 0, totalChapters: 0, category: 'overig', warnings };
-  }
-
-  const chapters = expandChapters(books);
-  const totalChapters = chapters.length;
-
-  let duration = Math.max(1, Math.floor(options.durationDays));
-  if (duration > totalChapters) {
-    warnings.push(
-      `Deze selectie telt ${totalChapters} hoofdstukken, dus het plan duurt ${totalChapters} dagen in plaats van ${duration}.`,
-    );
-    duration = totalChapters;
-  }
-
-  const base = Math.floor(totalChapters / duration);
-  const remainder = totalChapters % duration;
-
-  const readings: GeneratedReading[] = [];
-  let cursor = 0;
-  for (let day = 1; day <= duration; day++) {
-    const take = base + (day <= remainder ? 1 : 0);
-    const entries = chapters.slice(cursor, cursor + take);
-    cursor += take;
-
-    const title = dayTitle(entries);
-    entries.forEach((entry, indexInDay) => {
-      readings.push({
-        day,
-        book: entry.book.nl,
-        chapter: entry.chapter,
-        // Only the first entry of a day carries the label, so the day card has
-        // exactly one heading no matter how many chapters it holds.
-        ...(indexInDay === 0 ? { title } : {}),
-      });
-    });
-  }
-
-  // A mixed-testament selection has no single honest category.
-  const categories = new Set(books.map((b) => b.category));
-  const category: PlanCategory = categories.size === 1 ? books[0].category : 'overig';
-
-  return { readings, duration, totalChapters, category, warnings };
 }
 
 // ── Suggestions ────────────────────────────────────────────────────────────
