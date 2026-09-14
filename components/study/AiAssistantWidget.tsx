@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Send, X } from 'lucide-react';
 import AiAssistantIcon from '../ui/AiAssistantIcon';
 
@@ -21,6 +21,19 @@ export default function AiAssistantWidget({ onAsk, className = '' }: AiAssistant
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Click/tap anywhere outside the popup+launcher closes it, same as Escape.
+  useEffect(() => {
+    if (!open) return;
+    const handlePointerDown = (e: PointerEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('pointerdown', handlePointerDown);
+    return () => document.removeEventListener('pointerdown', handlePointerDown);
+  }, [open]);
 
   const submit = () => {
     const trimmed = input.trim();
@@ -39,7 +52,7 @@ export default function AiAssistantWidget({ onAsk, className = '' }: AiAssistant
   };
 
   return (
-    <>
+    <div ref={containerRef} className="contents">
       {/* Question popup */}
       <div
         className={[
@@ -132,6 +145,6 @@ export default function AiAssistantWidget({ onAsk, className = '' }: AiAssistant
           <AiAssistantIcon size={26} strokeWidth={1.9} />
         )}
       </button>
-    </>
+    </div>
   );
 }
