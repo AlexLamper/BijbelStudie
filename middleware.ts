@@ -8,7 +8,7 @@ export const config = {
     // `og` and the crawler-facing files are excluded so a social crawler or
     // Googlebot never pays for a getToken() round-trip just to fetch an image
     // or robots.txt.
-    "/((?!api|og|_next/static|_next/image|assets|favicon.ico|icon.svg|robots.txt|sitemap.xml|sitemap|sw.js|site.webmanifest|data).*)",
+    "/((?!api|og|_next/static|_next/image|assets|favicon.ico|icon.svg|robots.txt|sitemap.xml|sitemap|sw.js|site.webmanifest|data|images/appstore-badge.png).*)",
   ],
 };
 

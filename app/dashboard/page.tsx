@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { ArrowRight, BookOpen, ChartNoAxesColumn } from "lucide-react"
 import { CHAPTER_COUNTS } from "../../lib/data/bible-chapter-counts"
@@ -115,61 +115,7 @@ function useResumeStudy() {
   }
 }
 
-/**
- * Whether a second row of studies fits under "Aanbevolen voor jou" without
- * making the page scroll - true only on a tall viewport (a 27" at 1440, a
- * portrait monitor), never on a laptop, where the work column already reaches
- * the foot of the screen.
- *
- * Measured, not a `min-height` media query: the verse card grows with the
- * verse and a billing notice can sit above it, so a fixed breakpoint would
- * either leave the gap or push the page into a scroll. The extra row is the
- * same heading + grid as the recommended one, so its height is theirs - read
- * off the DOM, no guess. The recommended grid's bottom does not move when the
- * row appears, so the answer is stable and there is no flip-flop.
- *
- * Starts false, so the server HTML and a laptop never paint the row at all.
- * Below md the page scrolls anyway and the row never shows.
- */
-function useSpareRow() {
-  const columnRef = useRef<HTMLDivElement>(null)
-  const gridRef = useRef<HTMLDivElement>(null)
-  const [show, setShow] = useState(false)
-
-  useEffect(() => {
-    const column = columnRef.current
-    const grid = gridRef.current
-    // column -> page root -> AppShell's padded scrolling body
-    const scroller = column?.parentElement?.parentElement
-    const heading = grid?.previousElementSibling as HTMLElement | null | undefined
-    if (!column || !grid || !scroller || !heading) return
-
-    const wide = window.matchMedia("(min-width: 768px)")
-    const measure = () => {
-      if (!wide.matches) return setShow(false)
-      const sc = getComputedStyle(scroller)
-      const available = scroller.clientHeight - parseFloat(sc.paddingTop) - parseFloat(sc.paddingBottom)
-      const gap = parseFloat(getComputedStyle(column).rowGap) || 0
-      const used = grid.getBoundingClientRect().bottom - column.getBoundingClientRect().top
-      const need = gap + heading.offsetHeight + gap + grid.offsetHeight
-      setShow(available - used >= need)
-    }
-
-    measure()
-    const ro = new ResizeObserver(measure)
-    ro.observe(scroller)
-    ro.observe(column)
-    wide.addEventListener("change", measure)
-    return () => {
-      ro.disconnect()
-      wide.removeEventListener("change", measure)
-    }
-  }, [])
-
-  return { columnRef, gridRef, show }
-}
-
-/** The recommended-row cards; the spare row renders the very same card. */
+/** The recommended-row cards; "Meer om te ontdekken" renders the very same card. */
 function StudyCards({ studies }: { studies: typeof curatedStudies }) {
   return (
     <>
@@ -208,7 +154,6 @@ const STUDY_GRID =
 
 export default function DashboardPage() {
   const d = useDashboardData()
-  const spare = useSpareRow()
   const tree = useTreeSummary()
   const { resume, loading: resumeLoading } = useResumeStudy()
   // Hold the card until both sources have answered, so it never flips from the
@@ -234,7 +179,7 @@ export default function DashboardPage() {
 
   // Four: one full row of four on a wide screen, a clean 2 x 2 below it.
   const recommended = curatedStudies.slice(0, 4)
-  // The tall-screen spare row: the next curated studies, from the same static
+  // "Meer om te ontdekken": the next curated studies, from the same static
   // list (no request), never one already above and never the study the reader
   // is in the middle of. There is no popularity signal to rank by, so the
   // title does not claim one.
@@ -247,7 +192,10 @@ export default function DashboardPage() {
     <AppShell title="Dashboard">
       <div className="flex min-h-full gap-5 max-md:flex-col">
         {/* ── The work ─────────────────────────────────────────────── */}
-        <div ref={spare.columnRef} className="flex min-w-0 flex-1 flex-col gap-[18px] max-md:flex-none">
+        {/* Below md the column is `display: contents`, so its children join the
+            stacked page directly and "Meer om te ontdekken" can move under
+            the rail with `order-last`. */}
+        <div className="flex min-w-0 flex-1 flex-col gap-[18px] max-md:contents">
           {/* A flex gap is not created for a `display:none` child, so on the
               usual screen - where there is no billing notice - the verse still
               starts flush with the rail beside it. */}
@@ -344,19 +292,19 @@ export default function DashboardPage() {
               fixed chrome. At xl (1280) that leaves ~690 px, ~160 px a card at
               four across, still room for a two-line title and the meta line;
               under xl four would crush them, so it stays at two. */}
-          <div ref={spare.gridRef} className={STUDY_GRID}>
+          <div className={STUDY_GRID}>
             <StudyCards studies={recommended} />
           </div>
 
-          {/* Only when the screen has room left for it (see useSpareRow);
-              unrendered otherwise, so it adds no flex gap on a laptop. */}
-          {spare.show && moreStudies.length > 0 && (
-            <>
+          {/* Always shown. From md up it follows the recommended row in the
+              work column; below md it sits at the very bottom, under the rail. */}
+          {moreStudies.length > 0 && (
+            <section className="flex flex-col gap-[18px] max-md:order-last">
               <SectionHeading title="Meer om te ontdekken" />
               <div className={STUDY_GRID}>
                 <StudyCards studies={moreStudies} />
               </div>
-            </>
+            </section>
           )}
         </div>
 

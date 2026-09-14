@@ -24,6 +24,8 @@ import {
   SEG_TRACK,
   TABLE_HEAD,
   WARN,
+  isRecentlyActive,
+  relativeTime,
   tint,
 } from "../../../components/admin/adminSurface"
 
@@ -48,7 +50,7 @@ interface AdminUser {
   needsReconcile: boolean
   streak: number
   createdAt: string
-  lastStreakDate?: string
+  lastStreakDate?: string | null
   hasStripe: boolean
   onboardingCompleted: boolean
   noteCount: number
@@ -308,8 +310,11 @@ export default function AdminUsersPage() {
                           <StatusFlags user={u} />
                         </div>
                         <p className="mt-2 text-[11.5px] text-ink-muted tabular-nums">
-                          {`${u.noteCount} notities · ${u.streak} reeks · ${formatDate(u.createdAt)}`}
+                          {`${u.noteCount} notities · ${u.streak} dagen reeks · lid sinds ${formatDate(u.createdAt)}`}
                         </p>
+                        <div className="mt-1">
+                          <LastActive iso={u.lastStreakDate} />
+                        </div>
                       </div>
                       <div className="flex-none">{actions(u)}</div>
                     </li>
@@ -318,14 +323,15 @@ export default function AdminUsersPage() {
 
                 {/* -- md and up: the table --------------------------------- */}
                 <div className="hidden overflow-x-auto md:block">
-                  <table className="w-full">
+                  <table className="w-full min-w-[760px]">
                     <thead>
                       <tr className={`border-t ${ROW_LINE} ${TABLE_HEAD}`}>
                         <th scope="col" className="px-5 py-[10px] font-semibold">Gebruiker</th>
                         <th scope="col" className="px-3 py-[10px] font-semibold">Status</th>
                         <th scope="col" className="px-3 py-[10px] font-semibold">Notities</th>
                         <th scope="col" className="px-3 py-[10px] font-semibold">Reeks</th>
-                        <th scope="col" className="hidden px-3 py-[10px] font-semibold lg:table-cell">Aangemeld</th>
+                        <th scope="col" className="px-3 py-[10px] font-semibold">Lid sinds</th>
+                        <th scope="col" className="px-3 py-[10px] font-semibold">Laatst actief</th>
                         <th scope="col" className="w-px px-5 py-[10px]">
                           <span className="sr-only">Acties</span>
                         </th>
@@ -351,7 +357,10 @@ export default function AdminUsersPage() {
                           </td>
                           <td className="px-3 py-3 text-[12.5px] tabular-nums text-ink-body">{u.noteCount}</td>
                           <td className="px-3 py-3 text-[12.5px] tabular-nums text-ink-body">{u.streak}</td>
-                          <td className="hidden whitespace-nowrap px-3 py-3 text-[12.5px] tabular-nums text-ink-muted lg:table-cell">{formatDate(u.createdAt)}</td>
+                          <td className="whitespace-nowrap px-3 py-3 text-[12.5px] tabular-nums text-ink-muted">{formatDate(u.createdAt)}</td>
+                          <td className="whitespace-nowrap px-3 py-3">
+                            <LastActive iso={u.lastStreakDate} />
+                          </td>
                           <td className="px-5 py-3 text-right">{actions(u)}</td>
                         </tr>
                       ))}
@@ -398,6 +407,22 @@ function Initial({ user }: { user: AdminUser }) {
       className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-line-soft text-[12px] font-semibold text-ink-muted"
     >
       {(user.name || user.email).slice(0, 1).toUpperCase()}
+    </span>
+  )
+}
+
+/** Same dot and wording as "Laatst actief" in the users card on /beheer. */
+function LastActive({ iso }: { iso?: string | null }) {
+  return (
+    <span className="inline-flex items-center gap-[6px]">
+      <span
+        className="h-[7px] w-[7px] flex-none rounded-full"
+        style={{ backgroundColor: isRecentlyActive(iso) ? "var(--success-fill)" : "var(--line-strong)" }}
+        aria-hidden
+      />
+      <span className="truncate text-[12.5px] text-ink-muted">
+        {iso ? relativeTime(iso) : "onbekend"}
+      </span>
     </span>
   )
 }

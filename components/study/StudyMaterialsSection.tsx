@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { MessageSquare } from 'lucide-react';
+import AiAssistantIcon from '../ui/AiAssistantIcon';
 import { useSession } from 'next-auth/react';
 import TabComponent from './TabComponent';
 import { FadeBottom } from '../kit/primitives';
@@ -60,7 +61,7 @@ export default function StudyMaterialsSection({
 
   /**
    * The five tabs, in the design's order and with its two marks: a PRO label on
-   * Grondtekst (not for Pro readers), and a filled star on the AI assistant. Only Commentaar carries
+   * Grondtekst (not for Pro readers), and an "AI" speech bubble on the AI assistant. Only Commentaar carries
    * an icon - the rest are words, so the row fits the 446 px pane without
    * wrapping (design_handoff_web/PAGES.md §3).
    */
@@ -94,12 +95,9 @@ export default function StudyMaterialsSection({
             >
               {icon && <MessageSquare size={15} strokeWidth={1.8} className="flex-shrink-0" />}
               {star && (
-                // A filled four-point star in teal-dark: the one glyph that
-                // says "this answer is generated", and the same mark the FAB
-                // in the corner wears.
-                <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden className="flex-shrink-0 fill-teal-dark">
-                  <path d="M12 3.5l1.9 5.1 5.1 1.9-5.1 1.9L12 17.5l-1.9-5.1L5 10.5l5.1-1.9z" />
-                </svg>
+                // The "AI" speech bubble: says "ask the assistant here", and is
+                // the same mark the FAB in the corner wears.
+                <AiAssistantIcon size={16} strokeWidth={1.8} className="flex-shrink-0" />
               )}
               <span>{label}</span>
               {isPro && (

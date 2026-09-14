@@ -82,6 +82,15 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        // Loaded cross-origin by the external slideshow generator (canvas
+        // needs CORS to export an image that contains it).
+        source: "/images/appstore-badge.png",
+        headers: [
+          { key: "Access-Control-Allow-Origin", value: "*" },
+          { key: "Cache-Control", value: "public, max-age=86400" },
+        ],
+      },
+      {
         source: "/(.*)",
         headers: [
           // HSTS: without it the first request to http:// still costs a

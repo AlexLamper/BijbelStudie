@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { BarChart3, CreditCard, MessageSquare, RefreshCw, Search, Settings, Users } from "lucide-react"
 import BillingHealthCard, { type BillingStats } from "../../components/admin/BillingHealthCard"
-import { ADMIN_BUTTON, ADMIN_FIELD, ADMIN_PRIMARY } from "../../components/admin/adminSurface"
+import { ADMIN_BUTTON, ADMIN_FIELD, ADMIN_PRIMARY, isRecentlyActive, relativeTime } from "../../components/admin/adminSurface"
 import OnboardingPreviewButton from "../../components/admin/OnboardingPreviewButton"
 import AppShell from "../../components/shell/AppShell"
 import { Card, Skeleton, StatCard } from "../../components/kit/primitives"
@@ -79,24 +79,6 @@ function formatDate(d: string): string {
 
 function monthYear(d: string): string {
   return new Date(d).toLocaleDateString("nl-NL", { month: "short", year: "numeric" })
-}
-
-function relativeTime(iso: string): string {
-  const diff = Date.now() - new Date(iso).getTime()
-  const m = Math.floor(diff / 60000)
-  if (m < 1) return "nu"
-  if (m < 60) return `${m} min geleden`
-  const h = Math.floor(m / 60)
-  if (h < 24) return `${h} u geleden`
-  const d = Math.floor(h / 24)
-  if (d < 30) return `${d} dag${d === 1 ? "" : "en"} geleden`
-  return new Date(iso).toLocaleDateString("nl-NL", { day: "numeric", month: "short", year: "numeric" })
-}
-
-/** Active "now" is anything inside the last day - the green dot in the table. */
-function isRecentlyActive(iso: string | null | undefined): boolean {
-  if (!iso) return false
-  return Date.now() - new Date(iso).getTime() < 24 * 60 * 60 * 1000
 }
 
 interface FetchResult {

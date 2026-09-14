@@ -47,6 +47,16 @@ export function isAlwaysFreeCommentary(commentaryId: string): boolean {
   return commentaryId.toLowerCase().startsWith('kingcomments');
 }
 
+/**
+ * Whether a commentary sits behind the Pro gate. Default-deny: every source is
+ * Pro (Matthew Henry, Dachsel, Meyer, Calvijn, and any source added to the
+ * manifest later) unless it is explicitly always-free. The one place this
+ * decision is made; `gateCommentary` and any client label should use it.
+ */
+export function isProCommentary(commentaryId: string): boolean {
+  return !isAlwaysFreeCommentary(commentaryId);
+}
+
 export type Gated<T> = {
   items: T[];
   /** True when something was withheld, which is what the client renders a paywall over. */
@@ -71,7 +81,7 @@ export function gateCommentary<T>(
   withText: (item: T, text: string) => T,
   options: { commentaryId: string; isPro: boolean },
 ): Gated<T> {
-  if (options.isPro || isAlwaysFreeCommentary(options.commentaryId)) {
+  if (options.isPro || !isProCommentary(options.commentaryId)) {
     return { items, locked: false };
   }
 

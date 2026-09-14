@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { AlertCircle, ExternalLink, Languages, Info } from 'lucide-react';
+import { AlertCircle, ExternalLink } from 'lucide-react';
 import { SkeletonBlock } from '../ui/skeletons';
 import { useSession } from 'next-auth/react';
 import { bookNameMap } from '../../lib/book-mapping';
@@ -97,22 +97,22 @@ function WordCard({ word, isHebrew }: WordCardProps) {
 
   return (
     <div
-      className="flex flex-col items-center text-center min-w-[64px] px-2 py-1.5 rounded-md hover:bg-teal-50 dark:hover:bg-teal-400/10 transition-colors"
+      className="flex flex-col items-center text-center min-w-[64px] px-2 py-1.5 rounded-lg hover:bg-line-soft dark:hover:bg-secondary transition-colors"
       dir="ltr"
     >
       <div
-        className="text-2xl leading-snug text-gray-900 dark:text-foreground font-medium"
+        className="text-2xl leading-snug text-ink dark:text-foreground font-medium"
         dir={isHebrew ? 'rtl' : 'ltr'}
         lang={isHebrew ? 'he' : 'el'}
         style={{ fontFamily: isHebrew ? HEBREW_STACK : GREEK_STACK }}
       >
         {word.h}
       </div>
-      <div className="text-[10.5px] italic text-gray-500 dark:text-neutral-400 mt-0.5 max-w-[140px] truncate" title={word.t}>
+      <div className="text-[11px] italic text-ink-muted dark:text-muted-foreground mt-0.5 max-w-[140px] truncate" title={word.t}>
         {word.t || ' '}
       </div>
       <div
-        className="text-[11px] text-gray-700 dark:text-neutral-300 leading-tight mt-0.5 max-w-[140px] line-clamp-2"
+        className="text-[12px] text-ink-body dark:text-foreground leading-tight mt-0.5 max-w-[140px] line-clamp-2"
         title={gloss}
       >
         {gloss}
@@ -122,14 +122,15 @@ function WordCard({ word, isHebrew }: WordCardProps) {
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-1 text-[10px] tabular-nums tracking-wide px-1.5 py-0.5 rounded font-semibold text-teal-700 dark:text-teal-400 bg-teal-50 dark:bg-teal-400/10 hover:bg-teal-100 dark:hover:bg-teal-400/20 transition-colors inline-flex items-center gap-0.5"
+          className="mt-1 text-[10.5px] tabular-nums tracking-wide px-1.5 py-0.5 rounded font-semibold hover:underline underline-offset-2 inline-flex items-center gap-0.5"
+          style={{ color: 'var(--les-mark, #0D9488)', backgroundColor: 'var(--teal-wash-2)' }}
           title="Bekijk in Strong's lexicon (biblehub.com)"
         >
           {displayStrong(word.s)}
           <ExternalLink size={8} className="opacity-60" />
         </a>
       ) : (
-        <span className="mt-1 text-[10px] text-gray-400 dark:text-muted-foreground">-</span>
+        <span className="mt-1 text-[10.5px] text-ink-faint dark:text-muted-foreground">-</span>
       )}
     </div>
   );
@@ -146,15 +147,23 @@ function VerseRow({ verseNum, words, isHebrew, highlighted }: VerseRowProps) {
   return (
     <div
       className={[
-        'border-b last:border-b-0 border-gray-100 dark:border-border py-3 px-1',
-        highlighted ? 'bg-amber-50/60 dark:bg-amber-950/20 -mx-2 px-3 rounded-md' : '',
+        'border-b last:border-b-0 border-line dark:border-border py-3',
+        highlighted ? '-mx-3 px-3 rounded-md' : 'px-1',
       ].join(' ')}
+      style={
+        highlighted
+          ? { backgroundColor: 'var(--teal-wash-2)', boxShadow: 'inset 3px 0 0 0 #0D9488' }
+          : undefined
+      }
     >
-      <div className="flex items-center gap-2 mb-2">
-        <span className="inline-flex items-center justify-center min-w-[28px] h-6 px-1.5 rounded-full text-[10.5px] font-bold tabular-nums bg-teal-100 text-teal-800 dark:bg-teal-400/15 dark:text-teal-400">
+      <div className="flex items-baseline gap-2 mb-2">
+        <span
+          className="min-w-[20px] text-[13px] font-bold tabular-nums"
+          style={{ color: 'var(--les-mark, #0D9488)' }}
+        >
           {verseNum}
         </span>
-        <span className="text-[10.5px] uppercase tracking-wider text-gray-400 dark:text-neutral-500">
+        <span className="text-[11px] uppercase tracking-[1.2px] text-ink-faint dark:text-muted-foreground">
           {words.length} {words.length === 1 ? 'woord' : 'woorden'}
         </span>
       </div>
@@ -242,46 +251,42 @@ export default function OriginalText({ book, chapter, highlightVerses, embedded 
   }, [data]);
 
   return (
-    <div className={embedded ? '' : 'h-full overflow-y-auto px-4 py-4 pb-20'}>
-      {/* Intro panel. Embedded: a plain heading, no tinted card, so it matches
-          the other step-3 panels instead of announcing itself. */}
+    <div className={embedded ? '' : 'h-full flex flex-col min-w-0'}>
+      {/* Standalone (/lezen tab): the same header bar as the commentary tab -
+          hairline rule, uppercase muted label - instead of a tinted intro card. */}
+      {!embedded && (
+        <div className="flex flex-none items-center gap-[10px] border-b border-line-soft px-5 py-[11px] dark:border-border max-md:px-4 max-md:py-2">
+          <span className="flex-1 text-[12px] font-semibold uppercase tracking-[1.2px] text-ink-muted dark:text-muted-foreground">
+            Grondtekst - {langLabel}
+          </span>
+          <span className="flex-none rounded-md border border-line px-2 py-0.5 text-[11px] font-medium text-ink-muted dark:border-border dark:text-muted-foreground">
+            {testamentLabel}
+          </span>
+        </div>
+      )}
+
+      <div className={embedded ? '' : 'flex-1 min-h-0 overflow-y-auto px-5 pb-28 pt-[18px] max-md:px-4'}>
+      {/* Intro. Embedded: a plain heading so it matches the other step-3 panels. */}
       {embedded ? (
         <div className="mb-3">
           <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="text-[13px] font-semibold text-foreground">
+            <h3 className="text-[13px] font-semibold text-ink dark:text-foreground">
               Grondtekst - {langLabel}
             </h3>
-            <span className="text-[10px] uppercase tracking-wider font-semibold px-1.5 py-0.5 rounded bg-gray-100 dark:bg-secondary text-gray-500 dark:text-muted-foreground">
+            <span className="rounded-md border border-line px-1.5 py-0.5 text-[10.5px] font-medium text-ink-muted dark:border-border dark:text-muted-foreground">
               {testamentLabel}
             </span>
           </div>
-          <p className="text-[11px] text-gray-500 dark:text-muted-foreground mt-1 leading-relaxed">
+          <p className="text-[12px] text-ink-muted dark:text-muted-foreground mt-1 leading-relaxed">
             De originele woorden van {book} {chapter} in het {langLabel}, met transliteratie,
             betekenis en Strong-nummer.
           </p>
         </div>
       ) : (
-        <div className="mb-4 rounded-lg border border-teal-200/70 dark:border-teal-400/20 bg-gradient-to-br from-teal-50/70 to-white dark:from-teal-400/10 dark:to-transparent p-3">
-          <div className="flex items-start gap-2.5">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-teal-100 dark:bg-teal-400/15 flex items-center justify-center">
-              <Languages size={16} className="text-teal-700 dark:text-teal-400" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-foreground">
-                  Grondtekst - {langLabel}
-                </h3>
-                <span className="text-[10px] uppercase tracking-wider font-semibold px-1.5 py-0.5 rounded bg-teal-100 dark:bg-teal-400/15 text-teal-800 dark:text-teal-400">
-                  {testamentLabel}
-                </span>
-              </div>
-              <p className="text-xs text-gray-600 dark:text-neutral-400 mt-1 leading-relaxed">
-                De originele woorden van {book} {chapter} in het {langLabel}, met transliteratie, betekenis
-                en Strong-nummer. Klik op een Strong-nummer voor uitgebreide lexicale informatie.
-              </p>
-            </div>
-          </div>
-        </div>
+        <p className="mb-2 text-[13px] leading-relaxed text-ink-muted dark:text-muted-foreground">
+          De originele woorden van {book} {chapter} in het {langLabel}, met transliteratie, betekenis
+          en Strong-nummer. Klik op een Strong-nummer voor uitgebreide lexicale informatie.
+        </p>
       )}
 
       {/* Loading */}
@@ -301,9 +306,9 @@ export default function OriginalText({ book, chapter, highlightVerses, embedded 
 
       {/* Error */}
       {!loading && error && (
-        <div className="flex items-start gap-2.5 p-4 rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-950/20">
-          <AlertCircle size={18} className="text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
-          <div className="text-sm text-amber-800 dark:text-amber-200">{error}</div>
+        <div className="flex items-start gap-2.5 p-4 rounded-lg border border-line bg-[var(--surface-sunken)] dark:border-border">
+          <AlertCircle size={16} className="text-ink-muted dark:text-muted-foreground flex-shrink-0 mt-0.5" />
+          <div className="text-[13px] leading-relaxed text-ink-body dark:text-foreground">{error}</div>
         </div>
       )}
 
@@ -345,21 +350,20 @@ export default function OriginalText({ book, chapter, highlightVerses, embedded 
             )}
 
             {isSubscribed && (
-              <div className="mt-8 pt-4 border-t border-gray-200 dark:border-border text-[11px] text-gray-500 dark:text-neutral-400 leading-relaxed flex items-start gap-2">
-                <Info size={12} className="flex-shrink-0 mt-0.5" />
+              <div className="mt-8 pt-4 border-t border-line dark:border-border text-[11px] text-ink-muted dark:text-muted-foreground leading-relaxed">
                 <p>
                   Brontekst: <a
                     href="https://github.com/STEPBible/STEPBible-Data"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="underline hover:text-teal-700 dark:hover:text-teal-300"
+                    className="underline underline-offset-2 hover:text-ink dark:hover:text-foreground"
                   >STEPBible</a> - Translators Amalgamated {isHebrew ? 'Hebrew OT (TAHOT)' : 'Greek NT (TAGNT)'} ·
                   Tyndale House Cambridge · <span className="font-medium">CC BY 4.0</span>.
                   Lexicon-links via <a
                     href="https://biblehub.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="underline hover:text-teal-700 dark:hover:text-teal-300"
+                    className="underline underline-offset-2 hover:text-ink dark:hover:text-foreground"
                   >biblehub.com</a>.
                 </p>
               </div>
@@ -367,6 +371,7 @@ export default function OriginalText({ book, chapter, highlightVerses, embedded 
           </div>
         );
       })()}
+      </div>
     </div>
   );
 }

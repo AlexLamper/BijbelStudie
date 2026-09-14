@@ -2,6 +2,7 @@
 
 import React, { useRef, useState } from 'react';
 import { Send, X } from 'lucide-react';
+import AiAssistantIcon from '../ui/AiAssistantIcon';
 
 interface AiAssistantWidgetProps {
   // Called with the typed question; the parent switches to the AI tab and
@@ -111,6 +112,7 @@ export default function AiAssistantWidget({ onAsk, className = '' }: AiAssistant
           });
         }}
         aria-label={open ? 'AI-assistent sluiten' : 'AI-assistent openen'}
+        title={open ? 'AI-assistent sluiten' : 'Vraag het de AI-assistent'}
         aria-expanded={open}
         className={[
           // 52 px in the bottom-right corner of the study pane, with the design's
@@ -125,11 +127,9 @@ export default function AiAssistantWidget({ onAsk, className = '' }: AiAssistant
         {open ? (
           <X size={22} />
         ) : (
-          // The same filled four-point star the AI tab wears, so the two read
-          // as one feature.
-          <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden className="fill-white">
-            <path d="M12 3.5l1.9 5.1 5.1 1.9-5.1 1.9L12 17.5l-1.9-5.1L5 10.5l5.1-1.9z" />
-          </svg>
+          // The same "AI" speech bubble the AI tab wears, so the two read as
+          // one feature.
+          <AiAssistantIcon size={26} strokeWidth={1.9} />
         )}
       </button>
     </>

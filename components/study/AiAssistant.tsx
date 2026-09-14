@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { AlertCircle, Loader2, Send, Sparkles } from 'lucide-react';
+import { AlertCircle, Loader2, Send } from 'lucide-react';
+import AiAssistantIcon from '../ui/AiAssistantIcon';
 import { SkeletonBlock } from '../ui/skeletons';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -409,7 +410,7 @@ export default function AiAssistant({
         <div className="mb-4 rounded-lg border border-teal-200/70 dark:border-teal-400/20 bg-gradient-to-br from-teal-50/70 to-white dark:from-teal-400/10 dark:to-transparent p-3">
           <div className="flex items-start gap-2.5">
             <div className="flex-shrink-0 w-8 h-8 rounded-full bg-teal-100 dark:bg-teal-400/15 flex items-center justify-center">
-              <Sparkles size={16} className="text-teal-700 dark:text-teal-400" />
+              <AiAssistantIcon size={18} className="text-teal-700 dark:text-teal-400" />
             </div>
             <div className="min-w-0 flex-1">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-foreground">

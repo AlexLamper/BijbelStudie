@@ -88,3 +88,25 @@ export const SERIES_VIOLET = "var(--ad-violet)"
 
 /** `color` at the given alpha, for a tinted ground behind that same hue. */
 export const tint = (color: string, pct: number) => `color-mix(in srgb, ${color} ${pct}%, transparent)`
+
+/**
+ * "Laatst actief" wording, shared by the users card on /beheer and the table on
+ * /beheer/gebruikers so both read the same: minutes, hours, days, then a date.
+ */
+export function relativeTime(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime()
+  const m = Math.floor(diff / 60000)
+  if (m < 1) return "nu"
+  if (m < 60) return `${m} min geleden`
+  const h = Math.floor(m / 60)
+  if (h < 24) return `${h} u geleden`
+  const d = Math.floor(h / 24)
+  if (d < 30) return `${d} dag${d === 1 ? "" : "en"} geleden`
+  return new Date(iso).toLocaleDateString("nl-NL", { day: "numeric", month: "short", year: "numeric" })
+}
+
+/** Active "now" is anything inside the last day - the green dot next to "Laatst actief". */
+export function isRecentlyActive(iso: string | null | undefined): boolean {
+  if (!iso) return false
+  return Date.now() - new Date(iso).getTime() < 24 * 60 * 60 * 1000
+}

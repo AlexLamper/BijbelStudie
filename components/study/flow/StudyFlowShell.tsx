@@ -14,7 +14,6 @@ import {
   Menu,
   Minimize2,
   Settings2,
-  Sparkles,
   Volume2,
   VolumeX,
   X,
@@ -30,6 +29,7 @@ import StepQuiz from './StepQuiz';
 import LessonCompleteCard, { type CompletionSummary } from './LessonCompleteCard';
 import type { SerialisedPrompt } from '../../../lib/feedbackPrompts';
 import { useLevensboom } from '../../../hooks/useLevensboom';
+import AiAssistantIcon from '../../ui/AiAssistantIcon';
 import AiDock from './AiDock';
 import StudyExitGuard from './StudyExitGuard';
 import StudySettingsMenu from './StudySettingsMenu';
@@ -926,7 +926,7 @@ export default function StudyFlowShell({
                 aiOpen ? 'ring-2 ring-teal/40' : '',
               ].join(' ')}
             >
-              <Sparkles size={14} className="flex-none" />
+              <AiAssistantIcon size={16} strokeWidth={2} className="flex-none" />
               <span className="hidden sm:inline">AI</span>
             </button>
           </div>
