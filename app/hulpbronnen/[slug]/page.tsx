@@ -7,6 +7,7 @@ import { authOptions } from "../../../lib/authOptions";
 import { isAdminEmail } from "../../../lib/adminEmails";
 import connectMongoDB from "../../../lib/mongodb";
 import User from "../../../models/User";
+import { resolveIsPro } from "../../../lib/mobilePremium";
 import { LIBRARY, getLibraryItem, getCategoryMeta } from "../library";
 import Reader from "./Reader";
 import Breadcrumbs from "../Breadcrumbs";
@@ -93,9 +94,11 @@ export default async function LibraryReaderPage({ params }: PageProps) {
       } else {
         await connectMongoDB();
         const dbUser = await User.findOne({ email: session.user.email })
-          .select("subscribed isAdmin")
-          .lean<{ subscribed?: boolean; isAdmin?: boolean }>();
-        hasAccess = !!(dbUser?.subscribed || dbUser?.isAdmin);
+          .select("subscribed storePremium isAdmin")
+          .lean<{ subscribed?: boolean; storePremium?: boolean; isAdmin?: boolean }>();
+        // Stripe, App Store / RevenueCat or admin: the same resolution as the
+        // session. Admin-by-email was already let through above.
+        hasAccess = !!dbUser && resolveIsPro(dbUser);
       }
     }
   }

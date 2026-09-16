@@ -256,7 +256,59 @@ export async function updateEnrollmentSettings(
   return StudyEnrollment.findById(current._id).lean<EnrollmentDoc>();
 }
 
-/** Moves the resume cursor. Called on every step transition. */
+export interface CursorAfterLessonInput {
+  /** The enrollment's cursor before this lesson was finished. */
+  current: number | null | undefined;
+  /** Lesson days with a StudyProgress row. May contain nulls and strays. */
+  completedDays: readonly (number | null | undefined)[];
+  /** Every lesson day of the study, in any order. */
+  lessons: readonly number[];
+  /** The lesson that was just finished. Counts as completed. */
+  finishedDay: number;
+}
+
+/**
+ * Where the resume cursor goes after a lesson is finished, or null when every
+ * lesson is done.
+ *
+ * The cursor never moves backward for a lesson someone re-opens from the lesson
+ * list: finishing lesson 3 while the cursor is at 10 leaves it at 10. It lands
+ * on the first unfinished lesson at or after max(cursor, finished lesson), so
+ * finishing the current lesson skips days that were already done. Only when
+ * nothing after that point is left does it fall back to the earliest gap,
+ * because that gap is then the only work remaining.
+ */
+export function cursorAfterLesson({
+  current,
+  completedDays,
+  lessons,
+  finishedDay,
+}: CursorAfterLessonInput): number | null {
+  const days = [...new Set(lessons)].sort((a, b) => a - b);
+  const done = new Set<number>(
+    completedDays.filter((day): day is number => typeof day === 'number'),
+  );
+  done.add(finishedDay);
+
+  const start =
+    typeof current === 'number' && Number.isFinite(current)
+      ? Math.max(current, finishedDay)
+      : finishedDay;
+
+  const ahead = days.find((day) => day >= start && !done.has(day));
+  if (ahead !== undefined) return ahead;
+  return days.find((day) => !done.has(day)) ?? null;
+}
+
+/**
+ * Moves the resume cursor. Called on every step transition.
+ *
+ * Only moves forward: a step change in a lesson before the cursor (someone
+ * re-reading lesson 3 while at lesson 10) must not drag the resume point back.
+ * That condition lives in the update filter so two concurrent requests cannot
+ * race past it. Activity is still recorded either way - reading an old lesson
+ * is studying, and the reminder cron should see it.
+ */
 export async function moveCursor(
   userId: string,
   studyId: string,
@@ -264,10 +316,18 @@ export async function moveCursor(
   step: CursorStep,
 ): Promise<void> {
   await connectMongoDB();
-  await StudyEnrollment.updateOne(
-    { userId, studyId },
-    { $set: { currentLessonDay: lessonDay, currentStep: step, lastActivityAt: new Date() } },
+  const now = new Date();
+  const advanced = await StudyEnrollment.updateOne(
+    {
+      userId,
+      studyId,
+      $or: [{ currentLessonDay: { $lte: lessonDay } }, { currentLessonDay: null }],
+    },
+    { $set: { currentLessonDay: lessonDay, currentStep: step, lastActivityAt: now } },
   );
+  if (advanced.matchedCount === 0) {
+    await StudyEnrollment.updateOne({ userId, studyId }, { $set: { lastActivityAt: now } });
+  }
 }
 
 /**
@@ -275,12 +335,13 @@ export async function moveCursor(
  *
  * Counts StudyProgress rather than incrementing a counter: the ledger is the
  * truth, and an increment that runs twice on a retry would quietly claim a
- * lesson that was never done.
+ * lesson that was never done. The cursor position comes from
+ * `cursorAfterLesson`, so finishing an older lesson never moves it back.
  */
 export async function syncEnrollmentAfterLesson(
   userId: string,
   studyId: string,
-  nextDay: number | null,
+  finishedDay: number,
 ): Promise<EnrollmentDoc | null> {
   await connectMongoDB();
 
@@ -310,7 +371,15 @@ export async function syncEnrollmentAfterLesson(
     // A finished study must stop nudging, and must leave the partial index.
     set.nextReminderAt = null;
   } else {
-    if (nextDay != null) {
+    const nextDay = cursorAfterLesson({
+      current: current.currentLessonDay,
+      completedDays,
+      lessons: study.lessons.map((lesson) => lesson.day),
+      finishedDay,
+    });
+    // Unchanged cursor keeps its step: finishing an old lesson must not reset
+    // where the reader was inside the lesson they are actually on.
+    if (nextDay != null && nextDay !== current.currentLessonDay) {
       set.currentLessonDay = nextDay;
       set.currentStep = 'intro';
     }

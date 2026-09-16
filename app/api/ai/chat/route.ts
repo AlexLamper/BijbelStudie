@@ -5,6 +5,7 @@ import connectMongoDB from "../../../../lib/mongodb";
 import User from "../../../../models/User";
 import AiUsage from "../../../../models/AiUsage";
 import { isAdminEmail } from "../../../../lib/adminEmails";
+import { resolveIsPro } from "../../../../lib/mobilePremium";
 import { getChapter } from "../../../../lib/local-data";
 import { buildSystemInstruction, formatChapterText } from "../../../../lib/aiPrompt";
 import {
@@ -116,14 +117,16 @@ export async function POST(req: NextRequest) {
     const user = await User.findOne({ email: session.user.email }).lean<{
       _id: unknown;
       subscribed?: boolean;
+      storePremium?: boolean;
       isAdmin?: boolean;
     }>();
     if (!user) {
       return NextResponse.json({ error: "Gebruiker niet gevonden" }, { status: 404 });
     }
 
-    // Server-side premium check (mirrors authOptions session callback).
-    const unlimited = !!user.subscribed || !!user.isAdmin || isAdminEmail(session.user.email);
+    // Server-side premium check through the same helper as the session, so an
+    // App Store / RevenueCat subscriber (storePremium) is not capped as free.
+    const unlimited = resolveIsPro(user, isAdminEmail(session.user.email));
     const cap = unlimited ? PREMIUM_DAILY_CAP : FREE_DAILY_CAP;
 
     // ── Atomic quota increment (before the Gemini call) ─────────────
@@ -335,13 +338,14 @@ export async function GET() {
     const user = await User.findOne({ email: session.user.email }).lean<{
       _id: unknown;
       subscribed?: boolean;
+      storePremium?: boolean;
       isAdmin?: boolean;
     }>();
     if (!user) {
       return NextResponse.json({ error: "Gebruiker niet gevonden" }, { status: 404 });
     }
 
-    const unlimited = !!user.subscribed || !!user.isAdmin || isAdminEmail(session.user.email);
+    const unlimited = resolveIsPro(user, isAdminEmail(session.user.email));
     const cap = unlimited ? PREMIUM_DAILY_CAP : FREE_DAILY_CAP;
 
     let used = 0;

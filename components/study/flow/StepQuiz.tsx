@@ -125,8 +125,12 @@ export default function StepQuiz({
   const sendQuizSignal = useCallback(
     async (questionId: string, clear: boolean, reasonTag: string | null, answeredCorrectly: boolean | null) => {
       setSignalSending(questionId);
+      // Only a stored answer counts as sent. A refused or failed request leaves
+      // the Ja/Nee question in place so the reader can simply tap again - no
+      // error text, because a lost one-tap signal is not worth interrupting for.
+      let delivered = false;
       try {
-        await fetch('/api/feedback', {
+        const res = await fetch('/api/feedback', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -138,9 +142,12 @@ export default function StepQuiz({
             clear,
             reasonTag: reasonTag ?? undefined,
           }),
-        }).catch(() => {});
+        });
+        delivered = res.ok;
+      } catch {
+        delivered = false;
       } finally {
-        setSignalSent((prev) => ({ ...prev, [questionId]: true }));
+        if (delivered) setSignalSent((prev) => ({ ...prev, [questionId]: true }));
         setSignalOpenReasonFor(null);
         setSignalSending(null);
       }

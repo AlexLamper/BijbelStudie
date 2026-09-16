@@ -67,12 +67,11 @@ export async function GET(req: Request) {
 
     await connectMongoDB();
     const user = await User.findById(auth.id)
-      .select('name streak freezeCount subscribed lastReadChapter xp')
+      .select('name streak freezeCount lastReadChapter xp')
       .lean<{
         name?: string;
         streak?: number;
         freezeCount?: number;
-        subscribed?: boolean;
         xp?: number;
         lastReadChapter?: { book?: string; chapter?: number } | null;
       } | null>();
@@ -102,8 +101,10 @@ export async function GET(req: Request) {
       volgendHoofdstuk: nextChapter,
       reeks: user.streak && user.streak > 0 ? user.streak : undefined,
       // Freezes are Pro-only, so a free account is told it has none rather
-      // than being promised protection it cannot spend.
-      vriesdagen: user.subscribed ? (user.freezeCount ?? 0) : 0,
+      // than being promised protection it cannot spend. `auth.isPro` is the
+      // resolved entitlement (Stripe, App Store / RevenueCat, admin); the
+      // `subscribed` flag alone told App Store subscribers they had none.
+      vriesdagen: auth.isPro ? (user.freezeCount ?? 0) : 0,
       vers: dayText?.text ?? undefined,
       versverwijzing: dayText?.reference ?? undefined,
       niveau: levelForXp(user.xp ?? 0),

@@ -5,6 +5,8 @@ import connectMongoDB from "../../../lib/mongodb"
 import User from "../../../models/User"
 import { grantXp } from "../../../lib/gamification"
 import { advanceStreak, startOfDay } from "../../../lib/streak"
+import { isAdminEmail } from "../../../lib/adminEmails"
+import { resolveIsPro } from "../../../lib/mobilePremium"
 
 export async function GET() {
   const session = await getServerSession(authOptions)
@@ -35,6 +37,9 @@ export async function POST(request: Request) {
   // aid, but as a production route it let any signed-in user inflate their own
   // streak - and now their badges and XP with it - from the browser console.
   const url = new URL(request.url)
+  // Pro through any channel (Stripe, App Store / RevenueCat, admin) - the same
+  // resolution as the session and /api/v1/streak. `subscribed` alone is Stripe.
+  const isPro = resolveIsPro(user, isAdminEmail(session.user.email))
   const test = url.searchParams.get("test") === "true" && process.env.NODE_ENV !== "production"
 
   // The rules themselves live in lib/streak.ts, shared with /api/v1/streak so
@@ -55,7 +60,7 @@ export async function POST(request: Request) {
           freezeCount: user.freezeCount,
           lastStreakDate: user.lastStreakDate,
         },
-        { isPro: Boolean(user.subscribed) },
+        { isPro },
       )
 
   const newBadges = [...(user.badges ?? [])]
@@ -86,7 +91,7 @@ export async function POST(request: Request) {
   // only ever grant one badge per call - a user crossing two thresholds
   // together silently lost the lower one.
   const xp = move.advanced
-    ? await grantXp(String(user._id), "streak_day", { isPro: Boolean(user.subscribed) })
+    ? await grantXp(String(user._id), "streak_day", { isPro })
     : null
 
   return NextResponse.json(

@@ -51,6 +51,15 @@ interface LessonStateDoc {
   completedAt: Date | null;
 }
 
+/**
+ * True for the Flutter app, which authenticates with `Authorization: Bearer`
+ * (see lib/apiAuth resolveUser); the website sends its cookie session instead.
+ */
+function isBearerRequest(req: Request): boolean {
+  const header = req.headers.get('authorization') ?? '';
+  return header.toLowerCase().startsWith('bearer ') && header.slice(7).trim().length > 0;
+}
+
 function serialise(studyId: string, lessonDay: number, doc: LessonStateDoc | null) {
   return {
     studyId,
@@ -299,8 +308,13 @@ export async function PATCH(req: Request) {
        *
        * It never throws outward: a question is the most optional thing on this
        * screen, and the reader keeps what they earned regardless.
+       *
+       * Website only. The app never renders `feedbackPrompt`, and `nextPrompt`
+       * records the prompt as shown - asking on its behalf would burn the
+       * reader's cooldown and budget on a question nobody saw.
        */
-      const askable = completion.recorded && !completion.studyCompleted;
+      const askable =
+        completion.recorded && !completion.studyCompleted && !isBearerRequest(req);
       if (askable && (lessonDay === 2 || lessonDay === 7)) {
         try {
           feedbackPrompt = await nextPrompt({
@@ -318,7 +332,7 @@ export async function PATCH(req: Request) {
       // lesson - whereas a throw here would hand the reader an error for a
       // lesson that is already recorded and already marked complete.
       try {
-        await syncEnrollmentAfterLesson(auth.id, studyId, nextLessonDay(study, lessonDay));
+        await syncEnrollmentAfterLesson(auth.id, studyId, lessonDay);
       } catch (error) {
         console.error('[study-lesson-state] enrollment sync failed:', error);
       }
