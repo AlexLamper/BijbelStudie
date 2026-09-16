@@ -8,8 +8,8 @@
  * with a key that never reaches the browser. The gate still runs in our own
  * API routes on whatever comes back.
  *
- * KingComments is not in this list: it stays in this repo under its own licence
- * and is free for every reader.
+ * KingComments is not in this list: it is free for every reader under its own
+ * licence, synced from bijbelapi-data into ./private at build and read locally.
  *
  * Server-only. Env:
  *   BIJBELAPI_KEY   x-api-key sent to BijbelAPI (internal key, no rate limits)
