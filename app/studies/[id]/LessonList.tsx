@@ -13,6 +13,11 @@ export interface LessonRow {
   verseRange: string | null;
   focus: string;
   minutes: number;
+  /**
+   * The single-chapter study that opens exactly this lesson without an
+   * enrollment, or null (theme studies, partial passages).
+   */
+  chapterHref: string | null;
 }
 
 /**
@@ -31,9 +36,11 @@ export interface LessonRow {
  * worth a click, and the design's action word on the right opens the lesson
  * directly, so neither affordance was lost.
  *
- * A lesson is only openable once you are enrolled. Before that every row leads
- * to the same place as the start button, because opening a lesson without an
- * enrollment redirects straight back here - a dead end that looks like a bug.
+ * Enrolled (or a guest), a row opens the lesson in the study. Not enrolled, a
+ * row of a book study opens the same lesson as a single-chapter study
+ * (/studie/hoofdstuk/...), which needs no enrollment and still counts toward
+ * this study. Only rows without such a route (theme studies) stay locked,
+ * because the lesson page itself sends a reader who is not enrolled back here.
  */
 export default function LessonList({
   studyId,
@@ -56,7 +63,7 @@ export default function LessonList({
   guest?: boolean;
 }) {
   const router = useRouter();
-  const canOpen = enrolled || guest;
+  const inStudy = enrolled || guest;
   const [expanded, setExpanded] = useState<number | null>(currentDay);
   const [tab, setTab] = useState<'lessen' | 'over'>('lessen');
 
@@ -117,6 +124,10 @@ export default function LessonList({
               const isOpen = expanded === lesson.day;
               const reference = `${lesson.book} ${lesson.chapter}${lesson.verseRange ? `:${lesson.verseRange}` : ''}`;
               const action = isDone ? 'Herhalen' : isCurrent ? 'Verder' : 'Openen';
+              const href = inStudy
+                ? `/studie/${studyId}/${lesson.day}`
+                : lesson.chapterHref;
+              const canOpen = href !== null;
 
               return (
                 <li key={lesson.day} className="relative list-none border-t border-line-soft">
@@ -160,11 +171,12 @@ export default function LessonList({
                       </span>
                     </button>
 
-                    {canOpen ? (
+                    {href !== null ? (
                       <button
                         type="button"
-                        onClick={() => router.push(`/studie/${studyId}/${lesson.day}`)}
-                        data-track="study_lesson_open"
+                        onClick={() => router.push(href)}
+                        data-track={inStudy ? 'study_lesson_open' : 'chapter_study_lesson_row'}
+                        title={inStudy ? undefined : 'Bestudeer dit hoofdstuk los, zonder de studie te starten'}
                         className={[
                           'flex-none text-[12.5px] font-semibold outline-none transition-colors',
                           isDone || isCurrent ? 'text-teal hover:text-teal-dark dark:text-teal-400 dark:hover:text-teal-300' : 'text-ink-faint hover:text-ink-body',

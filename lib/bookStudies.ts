@@ -1,4 +1,4 @@
-import { BIBLE_BOOKS, readerBookName, type BibleBook } from './content/bibleBooks';
+import { BIBLE_BOOKS, getBibleBook, readerBookName, type BibleBook } from './content/bibleBooks';
 import { curatedStudies, type CuratedStudy, type Lesson } from './data/curated-studies';
 import { studyPhotoFor } from './studyPhotos';
 import { normaliseDashes } from './textFormat';
@@ -164,8 +164,27 @@ const BY_ID = new Map(ALL_STUDIES.map((study) => [study.id, study]));
  * enrollment in Genesis behaves exactly like an enrollment in Daniël.
  */
 export function findAnyStudy(studyId: string): CuratedStudy | null {
-  return BY_ID.get(studyId) ?? null;
+  const listed = BY_ID.get(studyId);
+  if (listed) return listed;
+  // A generated study whose book has an authored replacement (boek-daniel) is
+  // not in the catalogue, but it stays resolvable: a single-chapter study can
+  // land on it when the authored lesson does not cover that whole chapter, and
+  // its progress rows must keep resolving afterwards.
+  if (isBookStudyId(studyId)) {
+    const book = getBibleBook(studyId.slice(BOOK_STUDY_PREFIX.length));
+    if (book) {
+      let study = GENERATED_OFF_CATALOGUE.get(book.slug);
+      if (!study) {
+        study = generateBookStudy(book);
+        GENERATED_OFF_CATALOGUE.set(book.slug, study);
+      }
+      return study;
+    }
+  }
+  return null;
 }
+
+const GENERATED_OFF_CATALOGUE = new Map<string, CuratedStudy>();
 
 /**
  * How the catalogue groups a study.

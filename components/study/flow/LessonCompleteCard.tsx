@@ -8,6 +8,7 @@ import { badgeDescription, badgeLabel } from '../../../lib/badgeCatalog';
 import LessonTreeMoment from '../../levensboom/LessonTreeMoment';
 import { INK, INK_FAINT, INK_MUTED, SURFACE } from './lesson-layout';
 import PromptCard from '../../feedback/PromptCard';
+import LessonThumbs from '../../feedback/LessonThumbs';
 import type { SerialisedPrompt } from '../../../lib/feedbackPrompts';
 
 /**
@@ -37,6 +38,21 @@ export interface CompletionSummary {
   studyCompleted: boolean;
   noteId: string | null;
   nextLessonDay: number | null;
+}
+
+/** A single-chapter study's end screen. See ChapterCompletion. */
+export interface ChapterCompletionInfo {
+  bookName: string;
+  chapter: number;
+  /** Chapters in the book; 1 means this chapter IS the whole book study. */
+  bookChapters: number;
+  /** The next chapter across book boundaries; null after Openbaring 22. */
+  next: { href: string; label: string } | null;
+  /** `/studies/<id>` of the book study. */
+  followStudyHref: string;
+  enrolled: boolean;
+  /** Back to the reader at this chapter. */
+  exitHref: string;
 }
 
 export interface NextLessonPreview {
@@ -269,6 +285,7 @@ export default function LessonCompleteCard({
   guest = false,
   lessonHref,
   feedbackPrompt,
+  chapter,
 }: {
   studyId: string;
   studyTitle: string;
@@ -297,8 +314,29 @@ export default function LessonCompleteCard({
    * fraction of completions - see lib/feedbackEligibility.ts.
    */
   feedbackPrompt?: SerialisedPrompt | null;
+  /** Set for a single-chapter study ("Losse studie"): its own end screen. */
+  chapter?: ChapterCompletionInfo;
 }) {
   const reduceMotion = useReducedMotion();
+
+  if (chapter) {
+    return (
+      <ChapterCompletion
+        studyId={studyId}
+        lessonDay={lessonDay}
+        chapter={chapter}
+        summary={summary}
+        passageReference={passageReference}
+        minutes={minutes}
+        quizScore={quizScore}
+        quizTotal={quizTotal}
+        guest={guest}
+        lessonHref={lessonHref ?? `/studie/${studyId}/${lessonDay}`}
+        onContinue={onContinue}
+        reduceMotion={!!reduceMotion}
+      />
+    );
+  }
 
   if (guest) {
     return (
@@ -605,6 +643,10 @@ function SignedInCompletion({
           </div>
         )}
 
+        <div className="mt-4 flex justify-center">
+          <LessonThumbs studyId={studyId} lessonDay={lessonDay} />
+        </div>
+
         {/* The one short question, when there is one. Below the reward and the
             "Hierna" card, above the CTA row, so "Verder met les N" stays the
             dominant element - the reader must always be able to leave without
@@ -655,6 +697,182 @@ function SignedInCompletion({
           >
             {studyDone ? 'Naar dashboard' : 'Overzicht'}
           </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The end of a single-chapter study.
+ *
+ * Not the study card: there is no "les 4 van 12" to report and no "verder met
+ * les 5" to offer, because the reader picked one chapter. What they want to
+ * know is that it counted, and where to go next - the following chapter first,
+ * then the whole book as a study, then back to where they were reading.
+ *
+ * A book of one chapter (Obadja, Filémon, Judas, 2 en 3 Johannes) says so
+ * honestly: this chapter was the whole book study, so there is nothing left to
+ * follow. A guest gets the same save ask as at the end of any lesson.
+ */
+function ChapterCompletion({
+  studyId,
+  lessonDay,
+  chapter,
+  summary,
+  passageReference,
+  minutes,
+  quizScore,
+  quizTotal,
+  guest,
+  lessonHref,
+  onContinue,
+  reduceMotion,
+}: {
+  studyId: string;
+  lessonDay: number;
+  chapter: ChapterCompletionInfo;
+  summary: CompletionSummary;
+  passageReference: string;
+  minutes: number;
+  quizScore: number | null;
+  quizTotal: number | null;
+  guest: boolean;
+  lessonHref: string;
+  onContinue: () => void;
+  reduceMotion: boolean;
+}) {
+  const xp = useCountUp(summary.xpAwarded, !reduceMotion && !guest);
+  const hasQuiz = quizScore !== null && quizTotal !== null && quizTotal > 0;
+  const wholeBook = chapter.bookChapters === 1;
+  const saveNext = encodeURIComponent(lessonHref);
+
+  return (
+    <div className={`h-full overflow-y-auto flex flex-col justify-center ${AMBER_SCOPE}`}>
+      <div className="mx-auto w-full max-w-[470px] px-5 py-6">
+        <header className="text-center">
+          {!guest && (
+            <LessonTreeMoment
+              xpAwarded={summary.xpAwarded}
+              levelledUp={summary.levelledUp}
+              fallback={null}
+            />
+          )}
+          <p className="mt-4 text-[11px] font-bold uppercase tracking-[1.1px] text-les-accent">
+            Hoofdstuk bestudeerd
+          </p>
+          <h1 className={`mt-1 text-[26px] font-bold leading-tight tracking-[-0.4px] text-balance ${INK}`}>
+            {chapter.bookName} {chapter.chapter}
+          </h1>
+          <p className={`mt-1.5 text-[13px] ${INK_MUTED}`}>
+            {wholeBook
+              ? `${chapter.bookName} heeft één hoofdstuk, dus hiermee heb je het hele boek bestudeerd.`
+              : `Losse studie · telt mee voor de studie ${chapter.bookName}`}
+          </p>
+
+          {!guest && (summary.levelledUp || summary.newBadges.length > 0) && (
+            <div className="mt-3.5 flex flex-wrap items-center justify-center gap-2">
+              {summary.levelledUp && <RewardChip icon={Trophy} label="Nieuw level" detail="bereikt" />}
+              {summary.newBadges.map((badge) => (
+                <RewardChip
+                  key={badge}
+                  icon={Award}
+                  label={badgeLabel(badge)}
+                  detail={badgeDescription(badge)}
+                />
+              ))}
+            </div>
+          )}
+        </header>
+
+        {guest ? (
+          <section aria-labelledby="bewaar-hoofdstuk" className={`${SURFACE} mt-6 px-5 py-5 sm:px-6`}>
+            <h2 id="bewaar-hoofdstuk" className={`text-[15px] font-bold ${INK}`}>
+              Bewaar je voortgang
+            </h2>
+            <p className={`mt-1.5 text-[13.5px] leading-relaxed ${INK_MUTED}`}>
+              Je hebt dit hoofdstuk zonder account bestudeerd, dus er is nog niets bewaard. Met een
+              gratis account telt het mee en blijft je reflectie staan.
+            </p>
+            <div className="mt-4 flex flex-col sm:flex-row gap-2">
+              <Link
+                href={`/registreren?next=${saveNext}`}
+                data-track="guest_save_register"
+                className={`press inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-btn bg-teal text-[14px] font-semibold text-white no-underline transition-opacity hover:opacity-90 ${FOCUS_RING}`}
+              >
+                Gratis account maken <ArrowRight size={15} />
+              </Link>
+              <Link
+                href={`/inloggen?next=${saveNext}`}
+                data-track="guest_save_signin"
+                className={`press inline-flex h-11 items-center justify-center rounded-btn border border-les-card-line px-4 text-[14px] font-medium ${INK} no-underline hover:bg-les-card ${FOCUS_RING}`}
+              >
+                Inloggen
+              </Link>
+            </div>
+          </section>
+        ) : (
+          <div className="mt-6 grid grid-cols-3 gap-[11px]">
+            <Stat
+              value={summary.xpAwarded > 0 ? `+${xp}` : '0'}
+              label="XP verdiend"
+              accentInk="var(--les-accent)"
+            />
+            {hasQuiz ? (
+              <Stat value={`${quizScore}/${quizTotal}`} label={scoreLabel(quizScore, quizTotal)} />
+            ) : (
+              <Stat value={passageReference} label="Gelezen" />
+            )}
+            <Stat value={`${minutes} min`} label="Leestijd" />
+          </div>
+        )}
+
+        {!guest && (
+          <div className="mt-4 flex justify-center">
+            <LessonThumbs studyId={studyId} lessonDay={lessonDay} />
+          </div>
+        )}
+
+        {!guest && summary.noteId && (
+          <Link
+            href="/notities"
+            className={`mt-4 flex items-center gap-2 rounded-md text-[12.5px] no-underline ${INK_MUTED} transition-colors hover:text-les-ink ${FOCUS_RING}`}
+          >
+            <NotebookPen size={14} className="flex-none text-les-accent" />
+            Je reflectie is bewaard als notitie
+            <ArrowRight size={13} className="flex-none" />
+          </Link>
+        )}
+
+        <div className="mt-4 flex flex-col gap-2">
+          {chapter.next && (
+            <button
+              type="button"
+              onClick={onContinue}
+              className={`press inline-flex h-11 w-full items-center justify-center gap-2 rounded-btn bg-teal text-[14px] font-semibold text-white transition-opacity hover:opacity-90 ${FOCUS_RING}`}
+            >
+              Volgend hoofdstuk bestuderen <ArrowRight size={15} />
+            </button>
+          )}
+          <div className="flex flex-col sm:flex-row gap-2">
+            {!wholeBook && (
+              <Link
+                href={chapter.followStudyHref}
+                className={`press inline-flex h-11 flex-1 items-center justify-center rounded-btn border border-les-card-line px-4 text-[14px] font-medium ${INK} no-underline hover:bg-les-card ${FOCUS_RING}`}
+              >
+                {chapter.enrolled ? `Naar de studie ${chapter.bookName}` : `Heel ${chapter.bookName} als studie volgen`}
+              </Link>
+            )}
+            <Link
+              href={chapter.exitHref}
+              className={`press inline-flex h-11 flex-1 items-center justify-center rounded-btn border border-les-card-line px-4 text-[14px] font-medium ${INK} no-underline hover:bg-les-card ${FOCUS_RING}`}
+            >
+              Terug naar lezen
+            </Link>
+          </div>
+          {chapter.next && (
+            <p className={`text-center text-[12px] ${INK_FAINT}`}>Hierna: {chapter.next.label}</p>
+          )}
         </div>
       </div>
     </div>

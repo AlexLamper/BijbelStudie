@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { ChevronLeft, ChevronRight, NotebookPen, Volume2 } from 'lucide-react';
+import Link from 'next/link';
+import { ChevronLeft, ChevronRight, GraduationCap, NotebookPen, Volume2 } from 'lucide-react';
 import ChapterViewer from './ChapterViewer';
 import BibleSelector from './BibleSelector';
 import EmptyState from './EmptyState';
@@ -11,6 +12,7 @@ import { ReadingPreferencesMenu } from './ReadingPreferencesMenu';
 import { ReadingPreferences } from '../../hooks/useReadingPreferences';
 import { useVerseAnnotations } from '../../hooks/useVerseAnnotations';
 import { FadeBottom } from '../kit/primitives';
+import { chapterStudyHref } from '../../lib/chapterStudyRef';
 
 interface BibleViewerSectionProps {
   selectedBook: string;
@@ -92,6 +94,18 @@ export default function BibleViewerSection({
    */
   const [chapterText, setChapterText] = useState('');
 
+  /**
+   * "Bestudeer dit hoofdstuk": the open chapter as a single-chapter study
+   * (lib/chapterStudy.ts). Null for a book name outside the canon - an English
+   * or German translation's own spelling, say - and then no entry point shows.
+   * The translation rides along; the study page only accepts a real one.
+   */
+  const studyHref = useMemo(() => {
+    const base = selectedBook && selectedChapter ? chapterStudyHref(selectedBook, selectedChapter) : null;
+    if (!base) return null;
+    return selectedVersion ? `${base}?vertaling=${encodeURIComponent(selectedVersion)}` : base;
+  }, [selectedBook, selectedChapter, selectedVersion]);
+
   return (
     <SpokenTextScope>
       <section className="flex h-full min-w-0 flex-col bg-surface">
@@ -153,6 +167,18 @@ export default function BibleViewerSection({
           {/* The spacer; below md, the line break between the two rows. */}
           <div className="flex-1 max-md:order-4 max-md:h-2 max-md:basis-full" />
 
+          {studyHref && (
+            <Link
+              href={studyHref}
+              data-track="chapter_study_reader_toolbar"
+              title="Bestudeer dit hoofdstuk"
+              aria-label="Bestudeer dit hoofdstuk"
+              className="flex h-8 w-8 flex-none items-center justify-center rounded-lg text-teal no-underline transition-colors hover:bg-line-soft dark:text-teal-400 max-md:order-3 max-md:h-10 max-md:w-10"
+            >
+              <GraduationCap size={17} strokeWidth={1.9} />
+            </Link>
+          )}
+
           {/* An icon button, never a labelled one: the toolbar is already five
               controls wide and the glyph says it. */}
           <SpeakButton
@@ -201,6 +227,7 @@ export default function BibleViewerSection({
                 annotations={annotations}
                 onAnnotationsChanged={reloadAnnotations}
                 onChapterText={setChapterText}
+                studyHref={studyHref}
               />
             ) : (
               <EmptyState

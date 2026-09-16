@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { chapterStudyPath } from "../../../lib/chapterStudyRef";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, BookOpen } from "lucide-react";
 import { buildMetadata } from "../../../lib/pageMetadata";
@@ -240,6 +241,17 @@ export default async function BijbelboekPage({ params }: PageProps) {
               {book.name} bestuderen
             </Link>
           </div>
+          {/* A third intent: one chapter, today, without starting a study. */}
+          <p className="mt-3 text-[13px] text-ink-muted">
+            <Link
+              href={chapterStudyPath(book.slug, 1)}
+              data-track="chapter_study_book_page"
+              rel="nofollow"
+              className="font-semibold text-teal-dark no-underline hover:underline dark:text-teal-400"
+            >
+              Of bestudeer alleen {book.name} 1
+            </Link>
+          </p>
         </section>
 
         {/* Prev/next keeps the 66 detail pages linked in a chain, so a crawler

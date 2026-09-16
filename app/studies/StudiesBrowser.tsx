@@ -7,6 +7,7 @@ import type { CuratedStudy } from '../../lib/data/curated-studies'
 import { CATALOGUE_ENTRIES } from '../../lib/bookStudies'
 import { Card, Chip } from '../../components/kit/primitives'
 import StudyArtwork from './StudyArtwork'
+import ChapterStudyPicker from '../../components/study/ChapterStudyPicker'
 
 const COMPLETED_KEY = 'bijbelstudie_completed_studies'
 
@@ -326,6 +327,8 @@ export default function StudiesBrowser() {
               ⌘K
             </span>
           </div>
+          {/* One chapter, without starting a whole study. */}
+          <ChapterStudyPicker />
           <div className="flex flex-none flex-wrap gap-[9px]">
             {TYPE_PILLS.map(item => (
               <Chip

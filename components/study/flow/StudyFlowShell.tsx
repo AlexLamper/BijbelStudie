@@ -8,6 +8,8 @@ import {
   ArrowLeft,
   ArrowRight,
   Check,
+  ChevronLeft,
+  ChevronRight,
   ListChecks,
   Lock,
   Maximize2,
@@ -45,6 +47,8 @@ import {
   type StepKey,
 } from '../../../lib/studyFlow';
 import { guestLessonKey, readGuestLesson, writeGuestLesson } from '../../../lib/guestLessons';
+import type { ChapterStudyContext } from '../../../lib/chapterStudy';
+import { track } from '../../../lib/analytics';
 
 /**
  * The brand, in the roles design_handoff_web/TOKENS-LES.md gives it.
@@ -145,6 +149,18 @@ export interface LessonPayload {
   outline: { day: number; title: string; reference: string; completed: boolean }[];
 }
 
+/**
+ * A single-chapter study (/studie/hoofdstuk/...): the same lesson, opened
+ * without an enrollment. See lib/chapterStudy.ts.
+ */
+export interface ChapterModePayload {
+  context: ChapterStudyContext;
+  /** Whether the reader follows the book study this chapter belongs to. */
+  enrolled: boolean;
+  /** Where the close button goes: the reader at this chapter, or `?van=`. */
+  exitHref: string;
+}
+
 export interface LessonStatePayload {
   stepsCompleted: string[];
   currentStep: string;
@@ -188,12 +204,19 @@ export default function StudyFlowShell({
   initialState,
   initialStep,
   guest = false,
+  chapterMode,
 }: {
   lesson: LessonPayload;
   initialState: LessonStatePayload;
   initialStep: StepKey;
   /** No session: state stays in the browser, nothing account-bound is sent. */
   guest?: boolean;
+  /**
+   * "Losse studie": header names the chapter, navigation is previous/next
+   * chapter, the way out is the reader, and every write carries
+   * `entry: 'chapter'` so no resume cursor moves.
+   */
+  chapterMode?: ChapterModePayload;
 }) {
   const router = useRouter();
   const { preferences, updatePreferences } = useReadingPreferences();
@@ -283,6 +306,7 @@ export default function StudyFlowShell({
   }`;
 
   const guestKey = guestLessonKey(lesson.study.id, lesson.lesson.day);
+  const isChapterMode = !!chapterMode;
 
   /**
    * One writer for every lesson-state change the flow makes.
@@ -304,13 +328,14 @@ export default function StudyFlowShell({
         body: JSON.stringify({
           studyId: lesson.study.id,
           lessonDay: lesson.lesson.day,
+          ...(isChapterMode ? { entry: 'chapter' } : {}),
           ...body,
         }),
       });
       if (!res.ok) return null;
       return res.json();
     },
-    [guest, guestKey, lesson.study.id, lesson.lesson.day],
+    [guest, guestKey, lesson.study.id, lesson.lesson.day, isChapterMode],
   );
 
   // A guest's resume point. The server rendered this lesson from nothing, so
@@ -559,7 +584,10 @@ export default function StudyFlowShell({
       nextLessonDay: completion?.nextLessonDay ?? lesson.nextLessonDay,
     });
     setFeedbackPrompt((data?.feedbackPrompt as SerialisedPrompt | undefined) ?? null);
-  }, [steps, step, patch, guest, lesson.nextLessonDay, swipeSound, reduceMotion, applyXp]);
+    if (isChapterMode) {
+      track('chapter_study_completed', { logged_in: guest ? 'no' : 'yes', platform: 'web' });
+    }
+  }, [steps, step, patch, guest, lesson.nextLessonDay, swipeSound, reduceMotion, applyXp, isChapterMode]);
 
   const onPrevious = useCallback(() => {
     const previous = goBack(steps, step);
@@ -750,7 +778,29 @@ export default function StudyFlowShell({
         nextLesson={
           next ? { day: next.day, title: next.title, reference: next.reference } : null
         }
+        chapter={
+          chapterMode
+            ? {
+                bookName: chapterMode.context.ref.bookName,
+                chapter: chapterMode.context.ref.chapter,
+                bookChapters: chapterMode.context.ref.chapters,
+                next: chapterMode.context.next
+                  ? {
+                      href: chapterMode.context.next.href,
+                      label: `${chapterMode.context.next.bookName} ${chapterMode.context.next.chapter}`,
+                    }
+                  : null,
+                followStudyHref: chapterMode.context.followStudy.href,
+                enrolled: chapterMode.enrolled,
+                exitHref: chapterMode.exitHref,
+              }
+            : undefined
+        }
         onContinue={() => {
+          if (chapterMode) {
+            if (chapterMode.context.next) router.push(chapterMode.context.next.href);
+            return;
+          }
           if (summary.nextLessonDay != null) {
             router.push(`/studie/${lesson.study.id}/${summary.nextLessonDay}`);
           }
@@ -824,9 +874,9 @@ export default function StudyFlowShell({
             <Menu size={19} />
           </button>
           <Link
-            href={`/studies/${lesson.study.id}`}
-            aria-label="Terug naar de studie"
-            title="Terug naar de studie"
+            href={chapterMode ? chapterMode.exitHref : `/studies/${lesson.study.id}`}
+            aria-label={chapterMode ? 'Terug naar lezen' : 'Terug naar de studie'}
+            title={chapterMode ? 'Terug naar lezen' : 'Terug naar de studie'}
             className={`max-md:hidden h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-les-card ${INK_FAINT} hover:text-les-ink no-underline flex-none ${FOCUS_RING}`}
           >
             <X size={17} />
@@ -835,29 +885,33 @@ export default function StudyFlowShell({
 
           {/* Lesson navigator. What lessons there are and which are done was
               previously only visible on the detail page, one navigation away. */}
-          <div className="min-w-0 flex-none max-w-[56%] max-md:flex-1 max-md:max-w-none">
-            <button
-              type="button"
-              onClick={() => {
-                setSettingsOpen(false);
-                setOutlineOpen((open) => !open);
-              }}
-              aria-expanded={outlineOpen}
-              className={`w-full min-w-0 flex flex-col items-center rounded-md px-2 py-1 hover:bg-les-card transition-colors ${FOCUS_RING}`}
-            >
-              <span className="flex items-center gap-1.5 max-w-full">
-                <span className={`truncate text-[13.5px] font-bold ${INK}`}>
-                  {lesson.lesson.title}
+          {chapterMode ? (
+            <ChapterHeaderNav chapterMode={chapterMode} position={position} stepsTotal={steps.length} />
+          ) : (
+            <div className="min-w-0 flex-none max-w-[56%] max-md:flex-1 max-md:max-w-none">
+              <button
+                type="button"
+                onClick={() => {
+                  setSettingsOpen(false);
+                  setOutlineOpen((open) => !open);
+                }}
+                aria-expanded={outlineOpen}
+                className={`w-full min-w-0 flex flex-col items-center rounded-md px-2 py-1 hover:bg-les-card transition-colors ${FOCUS_RING}`}
+              >
+                <span className="flex items-center gap-1.5 max-w-full">
+                  <span className={`truncate text-[13.5px] font-bold ${INK}`}>
+                    {lesson.lesson.title}
+                  </span>
+                  <ListChecks size={13} className={`flex-none ${INK_FAINT}`} />
                 </span>
-                <ListChecks size={13} className={`flex-none ${INK_FAINT}`} />
-              </span>
-              <span className={`text-[11.5px] ${INK_FAINT}`}>
-                Les {lesson.lesson.day} van {lesson.study.lessonsTotal} &middot; stap {position} van{' '}
-                {steps.length}
-              </span>
-            </button>
+                <span className={`text-[11.5px] ${INK_FAINT}`}>
+                  Les {lesson.lesson.day} van {lesson.study.lessonsTotal} &middot; stap {position} van{' '}
+                  {steps.length}
+                </span>
+              </button>
 
-          </div>
+            </div>
+          )}
 
           <div className="flex-1 flex items-center justify-end gap-1.5 max-md:flex-none max-md:gap-1">
             {/* Nothing but the lesson on the glass. Hidden below sm: phone
@@ -965,7 +1019,8 @@ export default function StudyFlowShell({
         <LessonNavSheet
           open={navOpen}
           onClose={closeNav}
-          studyHref={`/studies/${lesson.study.id}`}
+          studyHref={chapterMode ? chapterMode.exitHref : `/studies/${lesson.study.id}`}
+          backLabel={chapterMode ? 'Terug naar lezen' : undefined}
         />
 
         {/* The lesson navigator, hung off the header rather than off its trigger.
@@ -1079,7 +1134,9 @@ export default function StudyFlowShell({
           className={`hidden w-[212px] flex-none flex-col border-r py-4 lg:flex ${RULE}`}
         >
           <div className="px-[14px]">
-            <p className={`text-[10px] font-semibold uppercase tracking-[1.2px] ${INK_FAINT}`}>Deze les</p>
+            <p className={`text-[10px] font-semibold uppercase tracking-[1.2px] ${INK_FAINT}`}>
+              {chapterMode ? 'Losse studie' : 'Deze les'}
+            </p>
             {/* Not a heading element: the one h1 on this screen belongs to the
                 step being read, and an h2 before it would invert the order. */}
             <p className={`mt-[7px] text-[14.5px] font-bold leading-[1.35] ${INK}`}>
@@ -1109,7 +1166,9 @@ export default function StudyFlowShell({
               </dd>
             </div>
             <div className="flex justify-between gap-2 py-1">
-              <dt className={INK_FAINT}>Van de studie</dt>
+              <dt className={INK_FAINT}>
+                {chapterMode ? `Van ${chapterMode.context.ref.bookName}` : 'Van de studie'}
+              </dt>
               <dd className={`font-semibold tabular-nums ${INK_MUTED}`}>
                 {lessonsDone}/{lesson.study.lessonsTotal}
               </dd>
@@ -1324,4 +1383,60 @@ function startsInSidewaysRegion(target: Element | null, boundary: Element): bool
     node = node.parentElement;
   }
   return false;
+}
+
+/**
+ * The header's middle track in chapter mode: "<Boek> <n> · Losse studie" with
+ * the previous and next chapter either side. Replaces the lesson navigator,
+ * because a chapter picked out of a book has no outline to walk: its
+ * neighbours are the chapters around it, across book boundaries.
+ */
+function ChapterHeaderNav({
+  chapterMode,
+  position,
+  stepsTotal,
+}: {
+  chapterMode: ChapterModePayload;
+  position: number;
+  stepsTotal: number;
+}) {
+  const { ref, previous, next } = chapterMode.context;
+  const arrow = `h-8 w-8 flex-none inline-flex items-center justify-center rounded-md no-underline transition-colors ${INK_FAINT} hover:bg-les-card hover:text-les-ink max-md:h-10 max-md:w-10 ${FOCUS_RING}`;
+  const spacer = <span className="h-8 w-8 flex-none max-md:h-10 max-md:w-10" aria-hidden />;
+  return (
+    <div className="min-w-0 flex-none max-w-[56%] max-md:flex-1 max-md:max-w-none flex items-center gap-1">
+      {previous ? (
+        <Link
+          href={previous.href}
+          aria-label={`Vorig hoofdstuk: ${previous.bookName} ${previous.chapter}`}
+          title={`${previous.bookName} ${previous.chapter}`}
+          className={arrow}
+        >
+          <ChevronLeft size={16} />
+        </Link>
+      ) : (
+        spacer
+      )}
+      <div className="min-w-0 flex-1 flex flex-col items-center px-1 py-1">
+        <span className={`max-w-full truncate text-[13.5px] font-bold ${INK}`}>
+          {ref.bookName} {ref.chapter} &middot; Losse studie
+        </span>
+        <span className={`text-[11.5px] ${INK_FAINT}`}>
+          stap {position} van {stepsTotal}
+        </span>
+      </div>
+      {next ? (
+        <Link
+          href={next.href}
+          aria-label={`Volgend hoofdstuk: ${next.bookName} ${next.chapter}`}
+          title={`${next.bookName} ${next.chapter}`}
+          className={arrow}
+        >
+          <ChevronRight size={16} />
+        </Link>
+      ) : (
+        spacer
+      )}
+    </div>
+  );
 }

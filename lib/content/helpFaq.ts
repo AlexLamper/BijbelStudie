@@ -60,6 +60,10 @@ export const HELP_TOPICS: HelpTopic[] = [
         q: "Kan ik naar de gesproken tekst luisteren?",
         a: "Ja, met de voorleesfunctie laat je een hoofdstuk hardop voorlezen terwijl je meeleest.",
       },
+      {
+        q: "Kan ik een los hoofdstuk bestuderen zonder een hele studie te volgen?",
+        a: "Ja. Kies in de lezer 'Bestudeer dit hoofdstuk', of kies op de pagina Studies een boek en een hoofdstuk. Je doorloopt dan dezelfde stappen als in een studie: lezen, verdieping, reflectie en toetsing. Je hoeft daarvoor geen studie te starten, en het hoofdstuk telt wel mee voor de studie van dat boek, mocht je die later volgen. Losse studies zijn gratis; alleen de Pro-commentaren en de extra AI-vragen horen bij Pro.",
+      },
     ],
   },
   {

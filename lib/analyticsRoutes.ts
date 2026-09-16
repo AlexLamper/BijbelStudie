@@ -24,6 +24,7 @@ export const ROUTE_KEYS = [
   'studies',
   'studies_detail',
   'studie_flow',
+  'studie_hoofdstuk',
   'notities',
   'groepen',
   'groepen_detail',
@@ -60,6 +61,7 @@ export const ROUTE_LABELS: Record<RouteKey, string> = {
   studies: 'Studies (overzicht)',
   studies_detail: 'Studie (detail)',
   studie_flow: 'Studieflow (les)',
+  studie_hoofdstuk: 'Losse studie (hoofdstuk)',
   notities: 'Notities',
   groepen: 'Groepen',
   groepen_detail: 'Groep (detail)',
@@ -116,6 +118,8 @@ const EXACT: Record<string, RouteKey> = {
 /** Longest prefix wins, so `/studies/x` cannot be read as `/studie`. */
 const PREFIXES: [string, RouteKey][] = [
   ['/studies/', 'studies_detail'],
+  // Before '/studie/': the first match wins, so the more specific prefix leads.
+  ['/studie/hoofdstuk/', 'studie_hoofdstuk'],
   ['/studie/', 'studie_flow'],
   ['/groepen/', 'groepen_detail'],
   ['/hulpbronnen/', 'hulpbronnen_detail'],
@@ -190,6 +194,13 @@ export const CLICK_TARGETS = [
   'study_step_previous',
   'study_lesson_complete',
   'study_quiz_submit',
+  // Studying a single chapter ("Bestudeer dit hoofdstuk"), by entry point.
+  'chapter_study_reader_toolbar',
+  'chapter_study_reader_end',
+  'chapter_study_lesson_row',
+  'chapter_study_picker_open',
+  'chapter_study_picker_choose',
+  'chapter_study_book_page',
   // Reading
   'reading_note_create',
   'reading_speak',

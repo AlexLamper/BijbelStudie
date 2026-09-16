@@ -19,6 +19,7 @@ import { studyPhotoFor } from '../../../lib/studyPhotos';
 import StudyArtwork from '../StudyArtwork';
 import StudySetupProvider, { StudyActionBar, StudySettingsButton } from './StudyOnboardingForm';
 import LessonList from './LessonList';
+import { chapterStudyPath, findBook, resolveChapterStudy } from '../../../lib/chapterStudy';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -330,6 +331,7 @@ export default async function StudyDetailPage({ params }: PageProps) {
                   verseRange: lesson.verseRange ?? null,
                   focus: lesson.focus,
                   minutes: lesson.estimatedMinutes ?? 12,
+                  chapterHref: chapterHrefFor(study.id, lesson),
                 }))}
                 completedDays={completedDays}
                 currentDay={enrolled ? resumeDay : null}
@@ -406,4 +408,18 @@ function AboutRow({ label, value, last = false }: { label: string; value: string
       <span className="min-w-0 truncate text-right text-[13px] font-medium text-ink">{value}</span>
     </div>
   );
+}
+
+/**
+ * The single-chapter study for a lesson row, when that route opens exactly this
+ * lesson (a book study's whole-chapter lesson). Null for a theme study or a
+ * partial passage: sending those rows to the chapter route would open a
+ * different lesson than the one listed.
+ */
+function chapterHrefFor(studyId: string, lesson: { day: number; book: string; chapter: number }): string | null {
+  const book = findBook(lesson.book);
+  if (!book) return null;
+  const target = resolveChapterStudy(book.slug, lesson.chapter);
+  if (!target || target.studyId !== studyId || target.lessonDay !== lesson.day) return null;
+  return chapterStudyPath(book.slug, lesson.chapter);
 }

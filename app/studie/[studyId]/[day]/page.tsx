@@ -11,13 +11,16 @@ import { getVersions } from '../../../../lib/local-data';
 import {
   findLesson,
   isStepKey,
-  nextLessonDay,
   resolveCommentaryId,
-  resolvePassage,
-  resolveReflectionQuestion,
   resolveSteps,
   type StepKey,
 } from '../../../../lib/studyFlow';
+import {
+  buildLessonPayload,
+  buildLessonState,
+  EMPTY_LESSON_STATE,
+  type StoredLessonState,
+} from '../../../../lib/lessonPayload';
 import { findStudy, getEnrollment } from '../../../../lib/studyEnrollmentService';
 import StudyFlowShell, {
   type LessonPayload,
@@ -90,9 +93,7 @@ export default async function StudyLessonPage({ params, searchParams }: PageProp
     () => [] as { id: string; name: string; language: string }[],
   );
 
-  const content = getLessonContent(studyId, lessonDay);
-  const steps = resolveSteps(lesson, content);
-  const passage = resolvePassage(lesson, content);
+  const steps = resolveSteps(lesson, getLessonContent(studyId, lessonDay));
 
   // Which lessons are already done, for the navigator in the flow header. The
   // reader could previously only see that list by leaving the lesson.
@@ -102,15 +103,7 @@ export default async function StudyLessonPage({ params, searchParams }: PageProp
     ),
   );
 
-  const state = await StudyLessonState.findOne({ userId, studyId, lessonDay }).lean<{
-    stepsCompleted?: string[];
-    currentStep?: string;
-    viewTranslation?: string | null;
-    depthPanel?: string | null;
-    reflection?: { text?: string; updatedAt?: Date | null; noteId?: unknown };
-    quiz?: { score?: number | null; total?: number | null; attempts?: number };
-    completedAt?: Date | null;
-  }>();
+  const state = await StudyLessonState.findOne({ userId, studyId, lessonDay }).lean<StoredLessonState>();
 
   // The URL wins when it names a real step, so a shared or refreshed link lands
   // where it says; otherwise resume where the reader left off.
@@ -121,65 +114,19 @@ export default async function StudyLessonPage({ params, searchParams }: PageProp
       : null;
   const initialStep: StepKey = fromUrl ?? fromState ?? steps[0];
 
-  const payload: LessonPayload = {
-    study: { id: study.id, title: study.title, lessonsTotal: study.lessons.length },
-    lesson: {
-      day: lesson.day,
-      title: lesson.title,
-      estimatedMinutes: lesson.estimatedMinutes ?? 12,
-    },
-    steps,
-    passage,
+  const payload: LessonPayload = buildLessonPayload({
+    study,
+    lesson,
     translation: enrollment.translation ?? study.startVersion,
-    translations: versions.map((version) => ({
-      id: version.id,
-      name: version.name,
-      language: version.language,
-    })),
+    translations: versions,
     commentaryId: resolveCommentaryId({
       enrollmentCommentary: enrollment.commentary,
       userPreference: user.preferences?.commentary ?? null,
     }),
-    content: {
-      intro: content?.intro ?? null,
-      readingCue: content?.word?.readingCue ?? null,
-      depth: content?.depth ?? null,
-      reflection: {
-        question: resolveReflectionQuestion(lesson, content),
-        prompts: content?.reflection?.prompts ?? [],
-        placeholder: content?.reflection?.placeholder ?? null,
-      },
-      quiz: {
-        enabled: content?.quiz?.enabled !== false,
-        questionCount: content?.quiz?.questionCount ?? 5,
-      },
-    },
-    nextLessonDay: nextLessonDay(study, lessonDay),
-    outline: study.lessons.map((entry) => ({
-      day: entry.day,
-      title: entry.title,
-      reference: `${entry.book} ${entry.chapter}${entry.verseRange ? `:${entry.verseRange}` : ''}`,
-      completed: completedDays.has(entry.day),
-    })),
-  };
+    completedDays,
+  });
 
-  const initialState: LessonStatePayload = {
-    stepsCompleted: state?.stepsCompleted ?? [],
-    currentStep: state?.currentStep ?? steps[0],
-    viewTranslation: state?.viewTranslation ?? null,
-    depthPanel: state?.depthPanel ?? null,
-    reflection: {
-      text: state?.reflection?.text ?? '',
-      updatedAt: state?.reflection?.updatedAt ? state.reflection.updatedAt.toISOString() : null,
-      noteId: state?.reflection?.noteId ? String(state.reflection.noteId) : null,
-    },
-    quiz: {
-      score: state?.quiz?.score ?? null,
-      total: state?.quiz?.total ?? null,
-      attempts: state?.quiz?.attempts ?? 0,
-    },
-    completedAt: state?.completedAt ? state.completedAt.toISOString() : null,
-  };
+  const initialState: LessonStatePayload = buildLessonState(state, steps[0]);
 
   return (
     <StudyFlowShell lesson={payload} initialState={initialState} initialStep={initialStep} />
@@ -216,60 +163,20 @@ async function GuestLesson({
       ? vertaling
       : study.startVersion;
 
-  const content = getLessonContent(study.id, lesson.day);
-  const steps = resolveSteps(lesson, content);
-  const passage = resolvePassage(lesson, content);
+  const steps = resolveSteps(lesson, getLessonContent(study.id, lesson.day));
   const initialStep: StepKey =
     isStepKey(stap) && steps.includes(stap) ? (stap as StepKey) : steps[0];
 
-  const payload: LessonPayload = {
-    study: { id: study.id, title: study.title, lessonsTotal: study.lessons.length },
-    lesson: {
-      day: lesson.day,
-      title: lesson.title,
-      estimatedMinutes: lesson.estimatedMinutes ?? 12,
-    },
-    steps,
-    passage,
+  const payload: LessonPayload = buildLessonPayload({
+    study,
+    lesson,
     translation,
-    translations: versions.map((version) => ({
-      id: version.id,
-      name: version.name,
-      language: version.language,
-    })),
+    translations: versions,
     commentaryId: resolveCommentaryId({ enrollmentCommentary: null, userPreference: null }),
-    content: {
-      intro: content?.intro ?? null,
-      readingCue: content?.word?.readingCue ?? null,
-      depth: content?.depth ?? null,
-      reflection: {
-        question: resolveReflectionQuestion(lesson, content),
-        prompts: content?.reflection?.prompts ?? [],
-        placeholder: content?.reflection?.placeholder ?? null,
-      },
-      quiz: {
-        enabled: content?.quiz?.enabled !== false,
-        questionCount: content?.quiz?.questionCount ?? 5,
-      },
-    },
-    nextLessonDay: nextLessonDay(study, lesson.day),
-    outline: study.lessons.map((entry) => ({
-      day: entry.day,
-      title: entry.title,
-      reference: `${entry.book} ${entry.chapter}${entry.verseRange ? `:${entry.verseRange}` : ''}`,
-      completed: false,
-    })),
-  };
+    completedDays: new Set<number>(),
+  });
 
-  const initialState: LessonStatePayload = {
-    stepsCompleted: [],
-    currentStep: initialStep,
-    viewTranslation: null,
-    depthPanel: null,
-    reflection: { text: '', updatedAt: null, noteId: null },
-    quiz: { score: null, total: null, attempts: 0 },
-    completedAt: null,
-  };
+  const initialState: LessonStatePayload = { ...EMPTY_LESSON_STATE, currentStep: initialStep };
 
   return (
     <StudyFlowShell lesson={payload} initialState={initialState} initialStep={initialStep} guest />
