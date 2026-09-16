@@ -49,7 +49,7 @@ export function isAlwaysFreeCommentary(commentaryId: string): boolean {
 
 /**
  * Whether a commentary sits behind the Pro gate. Default-deny: every source is
- * Pro (Matthew Henry, Dachsel, Meyer, Calvijn, and any source added to the
+ * Pro (Matthew Henry, Dachsel, Calvijn, and any source added to the
  * manifest later) unless it is explicitly always-free. The one place this
  * decision is made; `gateCommentary` and any client label should use it.
  */

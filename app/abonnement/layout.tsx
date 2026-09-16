@@ -10,8 +10,6 @@ import { JsonLd } from "../../components/seo/JsonLd";
 import { PLANS } from "../../lib/pricing";
 import { absoluteUrl, BASE_URL, ORG_ID } from "../../lib/seo/constants";
 import { graph, webPageNode, breadcrumbNode } from "../../lib/seo/structuredData";
-import SceneShell from "../../components/scene/SceneShell";
-import { SCENE_TREE, sceneSvg } from "../../components/scene/scene-svg";
 
 export async function generateMetadata(): Promise<Metadata> {
   const cookieStore = await cookies();
@@ -36,7 +34,7 @@ function pricingGraph() {
       path: "/abonnement",
       name: "Prijzen en abonnement",
       description:
-        "BijbelStudie is gratis te gebruiken, inclusief KingComments. Pro ontgrendelt Matthew Henry, Calvijn, Dachsel en Meyer, 200 AI-vragen per dag en de grondtekst.",
+        "BijbelStudie is gratis te gebruiken, inclusief KingComments. Pro ontgrendelt Matthew Henry, Calvijn en Dachsel, 200 AI-vragen per dag en de grondtekst.",
       breadcrumbId: `${url}#breadcrumb`,
     }),
     breadcrumbNode(CRUMBS, url),
@@ -45,7 +43,7 @@ function pricingGraph() {
       "@id": `${url}#product`,
       name: "BijbelStudie Pro",
       description:
-        "De commentaren van Matthew Henry, Calvijn, Dachsel en Meyer, 200 AI-vragen per dag en de volledige Hebreeuwse en Griekse grondtekst, boven op alles wat gratis blijft - inclusief KingComments.",
+        "De commentaren van Matthew Henry, Calvijn en Dachsel, 200 AI-vragen per dag en de volledige Hebreeuwse en Griekse grondtekst, boven op alles wat gratis blijft - inclusief KingComments.",
       brand: { "@id": ORG_ID },
       url,
       offers: [
@@ -82,25 +80,21 @@ function pricingGraph() {
 }
 
 /**
- * Providers, the pricing graph, and the scene - no chrome of its own.
+ * Providers and the pricing graph only - no chrome.
  *
- * The shell lives here rather than in the page because the page is a client
- * component and `scene-svg.ts` pulls in the tree generator, which has no
- * business in a browser bundle: rendered here on the server, the landscape is
- * in the HTML of the first paint and is what crawlers get. `backdrop` therefore
- * stays "static" - this route is reachable signed OUT (the page sends a visitor
- * with no account into /registreren and resumes the chosen plan afterwards), so
- * the reader-tree backdrop, which needs a guaranteed session, is not an option.
+ * The page now sits in the shared app shell (components/shell/AppShell.tsx),
+ * the same sidebar-and-top-bar frame as /dashboard, /notities, /profiel and
+ * every other converted route, rather than the immersive scene backdrop this
+ * page used to draw for itself. A layout in the App Router can only ADD
+ * chrome, never replace what a parent rendered, so AppShell is drawn by
+ * `page.tsx` itself - the same shape as app/notities/layout.tsx and
+ * app/dashboard/layout.tsx.
  *
- * The navbar and the rail both read the session and `components/layout/header`
- * pushes an unauthenticated visitor to the sign-in page, which would hijack a
- * pricing page mid-decision. They are shown only when the server already has a
- * session, which `SessionProvider` then seeds so the client never sees a
- * moment of "unauthenticated".
- *
- * The old `h-screen overflow-hidden` wrapper is gone: the depth engine in
- * components/scene/useSceneDepth.ts measures `window.scrollY`, so the DOCUMENT
- * has to be what scrolls.
+ * This route is reachable signed OUT (a visitor arriving from search or a
+ * paywall with no account yet) as well as signed in. AppShell already
+ * supports that: TopBar renders "Inloggen" in place of the account controls
+ * and Sidebar renders the guest footer instead of the account row - the same
+ * as /lezen, which is deliberately open to a visitor without an account.
  */
 export default async function SubscribeLayout({
   children,
@@ -113,25 +107,12 @@ export default async function SubscribeLayout({
   // any client-side check on those fields read undefined on this route, and a
   // Pro user rendered as not-Pro.
   const session = await getServerSession(authOptions);
-  const signedIn = Boolean(session?.user);
 
   return (
     <>
       <JsonLd data={pricingGraph()} />
       <SessionProvider session={session}>
-        {/* `gateId` names the hero: the still SVG upgrades to the live canvas
-            only while that screen is on view, and the loop stops past it. The
-            "Je bent al Pro" branch has no such element, and SceneBackdrop
-            leaves the SVG alone when the gate is not on the page. */}
-        <SceneShell
-          svg={sceneSvg()}
-          {...SCENE_TREE}
-          gateId="abonnement-hero"
-          header={signedIn}
-          rail={signedIn}
-        >
-          {children}
-        </SceneShell>
+        {children}
       </SessionProvider>
     </>
   );

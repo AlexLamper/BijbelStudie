@@ -5,8 +5,6 @@ import { useRouter } from "next/navigation"
 import { PLANS, perWeek } from "../../lib/pricing"
 import { track, trackNow } from "../../lib/analytics"
 
-const TEAL = "#0D9488"
-
 /** Which gated surface this prompt is standing in for. */
 export type PaywallSurface = "commentary" | "ai_limit" | "original_text" | "plan_limit"
 
@@ -25,6 +23,11 @@ const SOURCE_FOR: Record<PaywallSurface, string> = {
  * the price, framed per week, so the ask is answered in place rather than one
  * navigation away; and it records which surface produced the impression and the
  * click, which is how the contextual paywalls get ranked against each other.
+ *
+ * Same card as everywhere else in kit/primitives.tsx - `rounded-card
+ * border-line bg-surface`, no gradient - and `bg-teal` for the CTA, the same
+ * fill /dashboard's own primary button and MembershipPanel's "Upgrade naar
+ * Pro" button use.
  */
 export function UpgradePrompt({
   surface,
@@ -56,35 +59,34 @@ export function UpgradePrompt({
 
   return (
     <div
-      className={`max-w-[340px] mx-auto rounded-xl border border-line bg-gradient-to-br from-gray-50 to-white dark:from-card dark:to-background text-center shadow-sm ${
+      className={`mx-auto max-w-[340px] rounded-card border border-line bg-surface text-center ${
         compact ? "p-4" : "p-5"
       }`}
     >
-      <h3 className="font-semibold text-sm text-ink mb-1.5">
+      <h3 className="mb-1.5 text-sm font-semibold text-ink">
         {title}
       </h3>
 
-      <p className="text-xs text-muted-foreground max-w-[260px] mx-auto leading-relaxed mb-3">
+      <p className="mx-auto mb-3 max-w-[260px] text-xs leading-relaxed text-ink-muted">
         {body}
       </p>
 
       {/* The price, answered here. The billed amount stays attached to the
           per-week figure wherever that figure appears. */}
-      <p className="text-xs text-ink-muted mb-3.5">
+      <p className="mb-3.5 text-xs text-ink-muted">
         Vanaf{" "}
         <span className="font-bold text-ink tabular-nums">
           {perWeek(PLANS.annual)}
         </span>{" "}
         per week
-        <span className="block text-[11px] text-ink-faint mt-0.5">
+        <span className="mt-0.5 block text-[11px] text-ink-faint">
           {PLANS.annual.billedLabel}
         </span>
       </p>
 
       <button
         onClick={handleClick}
-        className="px-5 h-9 max-md:h-10 rounded-md text-sm font-semibold text-white transition-opacity hover:opacity-90"
-        style={{ backgroundColor: TEAL }}
+        className="h-9 max-md:h-10 rounded-btn bg-teal px-5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
       >
         {cta}
       </button>

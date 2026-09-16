@@ -135,10 +135,13 @@ function RegisterPageInner() {
   }
 
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: SCENE_BG }}>
+    // `h-screen overflow-hidden`, not `min-h-screen` - see app/inloggen/page.tsx.
+    // The form column carries its own `overflow-y-auto` as a safety net for a
+    // very short viewport.
+    <div className="flex h-screen overflow-hidden" style={{ backgroundColor: SCENE_BG }}>
       {/* Left: the form. Nothing is drawn in front of it and nothing it shows
           waits on anything else - the same discipline as /inloggen. */}
-      <div className="relative flex flex-1 flex-col justify-center px-6 py-12 sm:px-10 md:px-16 xl:px-24">
+      <div className="relative flex flex-1 flex-col justify-center overflow-y-auto px-6 py-6 sm:px-10 sm:py-8 md:px-16 xl:px-24">
         <Link
           href="/"
           className="absolute left-6 top-6 inline-flex items-center gap-1.5 rounded text-sm text-white/70 no-underline outline-none transition-colors hover:text-white focus-visible:ring-2 focus-visible:ring-white"
@@ -147,7 +150,7 @@ function RegisterPageInner() {
           Terug
         </Link>
 
-        <div className="mx-auto w-full max-w-sm space-y-7">
+        <div className="mx-auto w-full max-w-sm space-y-5">
           {/* Logo */}
           <div className="flex items-center gap-2.5">
             <BrandMark />

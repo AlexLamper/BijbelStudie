@@ -5,8 +5,6 @@ import SessionProvider from "../../components/providers/SessionProvider";
 import { cookies } from "next/headers";
 import { cookieName, fallbackLng } from "../i18n/settings";
 import { generatePageMetadata } from "../../lib/pageMetadata";
-import SceneShell from "../../components/scene/SceneShell";
-import { SCENE_TREE, sceneSvg } from "../../components/scene/scene-svg";
 
 export async function generateMetadata(): Promise<Metadata> {
   const cookieStore = await cookies();
@@ -15,23 +13,18 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Providers and the scene - no chrome of its own.
+ * Providers only - no chrome.
  *
- * This is a checkout return: someone is standing in the middle of a
- * transaction, so the page has to be fast and unambiguous. The backdrop is
- * therefore the server-rendered SVG with NO `gateId`, which means no canvas
- * ever mounts here - the picture is in the first paint and nothing competes
- * with the verification request for the main thread. The shell lives in the
- * layout because `scene-svg.ts` renders on the server and the page is a client
- * component.
+ * The checkout return now sits in the shared app shell
+ * (components/shell/AppShell.tsx), the same sidebar-and-top-bar frame as
+ * /abonnement, where the checkout started. A layout in the App Router can only
+ * ADD chrome, never replace what a parent rendered, so AppShell is drawn by
+ * `page.tsx` itself - the same shape as app/abonnement/layout.tsx.
  *
- * The navbar and the rail read the session, and `components/layout/header`
- * pushes an unauthenticated visitor straight to the sign-in page - which would
- * be a terrible thing to do to someone who has just paid. They appear only when
- * the server already has a session, which `SessionProvider` then seeds.
- *
- * No wrapper with its own scrollbar: the depth engine in
- * components/scene/useSceneDepth.ts measures `window.scrollY`.
+ * The shell is safe signed OUT: TopBar renders "Inloggen" in place of the
+ * account controls and Sidebar renders the guest footer, and neither of them
+ * redirects - so, unlike the old scene navbar, it can be drawn for everyone
+ * without ever bouncing someone who has just paid to the sign-in page.
  */
 export default async function SuccessLayout({
   children,
@@ -44,13 +37,10 @@ export default async function SuccessLayout({
   // any client-side check on those fields read undefined on this route, and a
   // Pro user rendered as not-Pro.
   const session = await getServerSession(authOptions);
-  const signedIn = Boolean(session?.user);
 
   return (
     <SessionProvider session={session}>
-      <SceneShell svg={sceneSvg()} {...SCENE_TREE} header={signedIn} rail={signedIn}>
-        {children}
-      </SceneShell>
+      {children}
     </SessionProvider>
   );
 }

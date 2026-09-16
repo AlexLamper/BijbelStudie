@@ -1,7 +1,6 @@
 "use client"
 
 import { ArrowRight, CheckCircle, Loader2 } from "lucide-react"
-import Link from "next/link"
 import { ProBadge } from "../../components/ui/ProBadge"
 import { useSession } from "next-auth/react"
 import { useState, useEffect, useCallback, Suspense } from "react"
@@ -20,12 +19,8 @@ import {
   type BillingInterval,
 } from "../../lib/pricing"
 import { track, trackNow } from "../../lib/analytics"
-import { Panel, SceneSkeleton, SectionHeading } from "../../components/scene/pieces"
-import { PLATE, TEAL, TEAL_DEEP, TEAL_ON_DARK } from "../../components/scene/tokens"
-
-/** #0D9488 is 3.7:1 on white - fine as a fill, short of AA as type. #0F766E
- *  (teal-700) is the type colour on the light plate, teal-400 on the dark one. */
-const TEAL_TEXT = "text-teal-700 dark:text-teal-400"
+import AppShell from "../../components/shell/AppShell"
+import { Card, SectionHeading, Skeleton } from "../../components/kit/primitives"
 
 /**
  * The reasons apply to the product, not to a billing interval. The page used to
@@ -39,14 +34,15 @@ const REASSURANCE = [
 ]
 
 /**
- * A plan, as a lit object on the landscape.
+ * A plan, as one of the two cards in the shell's content column.
  *
- * The card keeps every colour it had, because it keeps the white ground it was
- * drawn for: the price, the billed label, the saving line and the amber
- * comparison badge all measure exactly what they measured before, and a figure
- * a subscriber may want to check is the last thing that should be sitting on a
- * photograph. PLATE is the shell's surface for precisely this - see
- * components/scene/README.md.
+ * Same shape as every other card in the app - `rounded-card border border-line
+ * bg-surface`, the kit/primitives.tsx `Card` surface - with `teal-dark`
+ * (#0F766E) rather than `teal` (#0D9488) wherever the fill carries white type,
+ * because white on #0D9488 measures 3.74:1 and fails; on #0F766E it is 5.5:1.
+ * Both are literal entries in tailwind.config.ts (`teal.DEFAULT` /
+ * `teal.dark`), not theme tokens, so the brand colour never drifts with the
+ * reader's light/dark setting.
  *
  * Nothing about how a price is phrased moved. Every amount is derived in
  * lib/pricing.ts, where the EU Omnibus and Dutch price-indication rules are
@@ -69,19 +65,14 @@ function PlanCard({
 
   return (
     <div
-      className={`relative flex flex-col p-6 ${PLATE} dark:bg-surface dark:ring-white/10`}
-      // `outline` rather than a ring, so the plate keeps its own hairline and
-      // its shadow; a negative offset keeps the frame inside the rounded edge.
-      style={recommended ? { outline: `2px solid ${TEAL}`, outlineOffset: -2 } : undefined}
+      className={`relative flex flex-col rounded-card border bg-surface p-6 ${
+        recommended ? "border-teal-dark" : "border-line"
+      }`}
+      style={recommended ? { borderWidth: 2 } : undefined}
     >
       {recommended && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-          {/* Same words as before. Only the fill moved, from #0D9488 to
-              #0F766E: white on the former measures 3.74:1 and fails. */}
-          <span
-            className="whitespace-nowrap rounded-full px-3 py-1 text-xs font-bold text-white"
-            style={{ backgroundColor: TEAL_DEEP }}
-          >
+          <span className="whitespace-nowrap rounded-full bg-teal-dark px-3 py-1 text-xs font-bold text-white">
             Beste waarde
           </span>
         </div>
@@ -99,9 +90,7 @@ function PlanCard({
               is €29,89, or 2,99 months, and rounding that up would be a claim
               the prices do not support. */}
           {isAnnual && (
-            <span
-              className="whitespace-nowrap rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-800 dark:bg-amber-500/15 dark:text-amber-300"
-            >
+            <span className="whitespace-nowrap rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-800 dark:bg-amber-500/15 dark:text-amber-300">
               {annualDiscountPercent()}% goedkoper
             </span>
           )}
@@ -118,7 +107,7 @@ function PlanCard({
 
         {isAnnual ? (
           <>
-            <p className={`mt-1.5 text-xs font-semibold ${TEAL_TEXT}`}>
+            <p className="mt-1.5 text-xs font-semibold text-teal-dark dark:text-teal-400">
               Je bespaart {annualSaving()} per jaar
             </p>
             <p className="mt-0.5 text-xs text-ink-muted">
@@ -143,7 +132,7 @@ function PlanCard({
             {/* Both plans contain the same product, so both get the same ticks.
                 The annual card used to render these grey, which read as
                 "not included". */}
-            <CheckCircle size={14} aria-hidden className={TEAL_TEXT} style={{ flexShrink: 0, marginTop: 3 }} />
+            <CheckCircle size={14} aria-hidden className="mt-[3px] flex-shrink-0 text-teal-dark dark:text-teal-400" />
             {f}
           </li>
         ))}
@@ -152,10 +141,11 @@ function PlanCard({
       <button
         onClick={() => onSelect(interval)}
         disabled={busy}
-        className={`press flex w-full min-h-11 items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[#0F766E] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-surface disabled:opacity-60 ${
-          recommended ? "" : "border border-line-strong bg-surface text-ink-body"
+        className={`press flex h-12 w-full items-center justify-center gap-2 rounded-btn text-sm font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[#0F766E] focus-visible:ring-offset-2 disabled:opacity-60 ${
+          recommended
+            ? "bg-teal-dark text-white hover:opacity-90"
+            : "border border-line bg-surface text-ink-body hover:border-line-strong"
         }`}
-        style={recommended ? { backgroundColor: TEAL_DEEP, color: "#fff" } : undefined}
       >
         {busy ? (
           <Loader2 size={16} aria-hidden className="animate-spin" />
@@ -171,17 +161,19 @@ function PlanCard({
 }
 
 /** The waiting state, in the shape of what is coming. Text never waits on the
- *  scene - only on its own data. */
+ *  data - only the plan cards, whose prices come from the same fetch, get a
+ *  placeholder. */
 function PricingSkeleton() {
   return (
-    <div role="status" aria-label="Abonnement laden" className="pb-20 pt-24">
-      <div className="max-w-[46rem] space-y-3">
-        <SceneSkeleton className="h-12 w-[24rem] max-w-full" />
-        <SceneSkeleton className="h-4 w-[20rem] max-w-full" />
+    <div role="status" aria-label="Abonnement laden" className="max-w-[64rem]">
+      <div className="max-w-[38rem] space-y-3">
+        <Skeleton className="h-4 w-28" />
+        <Skeleton className="h-9 w-full max-w-[28rem]" />
+        <Skeleton className="h-4 w-full max-w-[22rem]" />
       </div>
-      <div className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-2">
-        <SceneSkeleton className="h-80 rounded-3xl" />
-        <SceneSkeleton className="h-80 rounded-3xl" />
+      <div className="mt-8 grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2">
+        <Skeleton className="h-80 rounded-card" />
+        <Skeleton className="h-80 rounded-card" />
       </div>
     </div>
   )
@@ -324,146 +316,103 @@ function SubscribePageInner() {
     return (
       <section
         aria-labelledby="abonnement-pro-titel"
-        className="flex min-h-[calc(100vh-3.5rem)] flex-col justify-center pb-24"
+        className="flex min-h-[50vh] flex-col items-center justify-center text-center"
       >
-        <div className="scene-sky max-w-[40rem]">
-          {/* The mark belongs NEXT to the words it confirms, not floating on
-              its own line above them: one row, the heading on the left, the
-              check on the right edge of the measure, both on the same centre
-              line. `min-w-0` lets the heading wrap at 375px instead of pushing
-              the mark off the row, and the mark never shrinks. */}
-          <div className="flex items-center justify-between gap-4 sm:gap-6">
-            <h1
-              id="abonnement-pro-titel"
-              className="min-w-0 text-4xl font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl"
-            >
-              Je bent al Pro
-            </h1>
-            <CheckCircle
-              className="h-9 w-9 flex-shrink-0 sm:h-11 sm:w-11"
-              aria-hidden
-              style={{ color: TEAL_ON_DARK }}
-            />
+        <Card className="max-w-[26rem] p-8">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-teal-faint">
+            <CheckCircle className="h-6 w-6 text-teal-dark dark:text-teal-400" aria-hidden />
           </div>
-          <p className="mt-4 max-w-[32rem] text-base leading-relaxed text-white/85">
+          <h1 id="abonnement-pro-titel" className="mt-4 text-2xl font-bold tracking-tight text-ink">
+            Je bent al Pro
+          </h1>
+          <p className="mt-2 text-sm leading-relaxed text-ink-muted">
             Bedankt voor je steun. Je hebt volledige toegang tot alle functies.
           </p>
           <button
             onClick={() => router.push("/dashboard")}
-            className="press mt-8 inline-flex items-center justify-center gap-3 rounded-full bg-white px-7 py-4 text-base font-semibold text-gray-900 shadow-xl shadow-black/30 outline-none transition-colors hover:bg-white/90 focus-visible:ring-2 focus-visible:ring-[#0D9488]"
+            className="press mt-6 inline-flex h-11 w-full items-center justify-center gap-2 rounded-btn bg-teal text-sm font-semibold text-white outline-none transition-colors hover:bg-teal-dark focus-visible:ring-2 focus-visible:ring-[#0D9488] focus-visible:ring-offset-2"
           >
-            Terug naar dashboard <ArrowRight size={18} aria-hidden />
+            Terug naar dashboard <ArrowRight size={16} aria-hidden />
           </button>
-        </div>
+        </Card>
       </section>
     )
   }
 
   return (
-    <>
-      {/* This route is crawlable and is reached signed OUT from search, and the
-          shell only draws its navbar and rail for a session (the navbar pushes
-          an unauthenticated visitor to the sign-in page). Without this the
-          pricing page would be a dead end for exactly the visitor it is written
-          for. `SessionProvider` is seeded on the server, so a signed-in reader
-          never sees this flash in. */}
-      {status !== "authenticated" && (
-        <div className="pt-5">
-          <Link
-            href="/"
-            className="max-md:inline-flex max-md:min-h-10 max-md:items-center rounded-md text-sm font-bold tracking-tight text-white no-underline outline-none transition-colors hover:text-white/80 focus-visible:ring-2 focus-visible:ring-white"
-          >
-            BijbelStudie
-          </Link>
-        </div>
-      )}
-
-      {/* -- Layer 1: the sky ------------------------------------------
-          `id` is the shell's canvas gate: the still SVG upgrades to the live
-          tree only while this screen is on view. */}
-      <section
-        id="abonnement-hero"
-        aria-labelledby="abonnement-titel"
-        className="flex min-h-[calc(100vh-3.5rem)] flex-col justify-end pb-28 pt-8"
-      >
-        <div className="scene-sky max-w-[46rem]">
-          <ProBadge size="md" label="BijbelStudie Pro" />
-          <h1
-            id="abonnement-titel"
-            className="mt-5 text-4xl font-semibold leading-[1.05] tracking-tight text-white drop-shadow-sm break-words max-[380px]:text-[2rem] sm:text-5xl xl:text-6xl"
-          >
-            Alles wat je nodig hebt<br />voor serieuze bijbelstudie.
-          </h1>
-          <p className="mt-5 max-w-[34rem] text-base leading-relaxed text-white/85 sm:text-lg">
-            Onbeperkte toegang tot commentaren, de grondtekst, notities en de AI-assistent.
-          </p>
-        </div>
+    <div className="max-w-[64rem]">
+      <section aria-labelledby="abonnement-titel" className="max-w-[38rem]">
+        <ProBadge size="md" label="BijbelStudie Pro" />
+        <h1 id="abonnement-titel" className="mt-4 text-3xl font-bold tracking-tight text-ink sm:text-4xl">
+          Alles wat je nodig hebt voor serieuze bijbelstudie.
+        </h1>
+        <p className="mt-3 text-base leading-relaxed text-ink-muted">
+          Onbeperkte toegang tot commentaren, de grondtekst, notities en de AI-assistent.
+        </p>
       </section>
 
-      {/* -- Layer 2: the horizon --------------------------------------
-          Annual first, in the DOM as well as visually, so it also leads on
+      {/* Annual first, in the DOM as well as visually, so it also leads on
           mobile. */}
-      <div className="scene-horizon -mt-16">
-        <div className="grid grid-cols-1 gap-4 max-md:gap-6 md:grid-cols-2">
-          <PlanCard
-            interval="annual"
-            recommended={RECOMMENDED === "annual"}
-            loading={loading}
-            onSelect={handleSelect}
-          />
-          <PlanCard
-            interval="monthly"
-            recommended={RECOMMENDED === "monthly"}
-            loading={loading}
-            onSelect={handleSelect}
-          />
-        </div>
+      <div className="mt-8 grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2">
+        <PlanCard
+          interval="annual"
+          recommended={RECOMMENDED === "annual"}
+          loading={loading}
+          onSelect={handleSelect}
+        />
+        <PlanCard
+          interval="monthly"
+          recommended={RECOMMENDED === "monthly"}
+          loading={loading}
+          onSelect={handleSelect}
+        />
       </div>
 
-      {/* -- Layer 3: the desk ----------------------------------------- */}
-      <div className="pb-20 pt-16">
+      <div className="mt-14">
         {/* A neutral label for the three items that were already here. It says
             nothing about price, saving or discount on purpose: every claim on
             this page is fixed by the EU Omnibus rules and none of them moved. */}
-        <SectionHeading id="abonnement-zeker" title="Goed om te weten" rule />
-        <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-3">
+        <SectionHeading title="Goed om te weten" />
+        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
           {REASSURANCE.map(({ title, body }) => (
-            <Panel key={title} className="p-4">
-              <p className="text-sm font-semibold text-white">{title}</p>
-              <p className="mt-1 text-xs leading-relaxed text-white/75">{body}</p>
-            </Panel>
+            <Card key={title} className="p-4">
+              <p className="text-sm font-semibold text-ink">{title}</p>
+              <p className="mt-1 text-xs leading-relaxed text-ink-muted">{body}</p>
+            </Card>
           ))}
         </div>
 
-        <p className="mt-10 text-xs font-medium text-white/75">
+        <p className="mt-10 text-xs font-medium text-ink-muted">
           Veilige betaling via Stripe &nbsp;·&nbsp; Altijd opzegbaar &nbsp;·&nbsp; Geen verborgen kosten
         </p>
         {/* Pre-contract information. A subscriber is entitled to see the renewal
             terms, how to stop, and the withdrawal right before paying, not only
             in the terms page afterwards. */}
-        <p className="mt-3 max-w-[46rem] text-xs leading-relaxed text-white/70">
+        <p className="mt-3 max-w-[46rem] text-xs leading-relaxed text-ink-faint">
           Prijzen inclusief btw. Je abonnement verlengt automatisch en is daarna maandelijks opzegbaar
           via Instellingen &rsaquo; Abonnement, zonder opgaaf van reden. Je hebt 14 dagen
           herroepingsrecht; zie de{" "}
           <a
             href="/algemene-voorwaarden"
-            className="rounded-sm font-semibold text-white underline underline-offset-4 outline-none focus-visible:ring-2 focus-visible:ring-white"
+            className="rounded-sm font-semibold text-teal-dark underline underline-offset-4 outline-none dark:text-teal-400 focus-visible:ring-2 focus-visible:ring-[#0D9488]"
           >
             algemene voorwaarden
           </a>
           .
         </p>
       </div>
-    </>
+    </div>
   )
 }
 
 export default function SubscribePage() {
-  // useSearchParams needs a Suspense boundary to keep the route from opting the
-  // whole page into client-side rendering.
   return (
-    <Suspense fallback={<PricingSkeleton />}>
-      <SubscribePageInner />
-    </Suspense>
+    <AppShell title="Abonnement" ownHeading>
+      {/* useSearchParams needs a Suspense boundary to keep the route from
+          opting the whole page into client-side rendering. */}
+      <Suspense fallback={<PricingSkeleton />}>
+        <SubscribePageInner />
+      </Suspense>
+    </AppShell>
   )
 }

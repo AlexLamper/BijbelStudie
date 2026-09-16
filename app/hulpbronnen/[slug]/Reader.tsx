@@ -3,16 +3,15 @@
 import { useState } from "react";
 import { ExternalLink, Maximize2, Minimize2 } from "lucide-react";
 import type { LibraryItem } from "../library";
-import { CTA_BRAND, EYEBROW, SCENE_BG, TEAL_DEEP, TILE } from "../../../components/scene/tokens";
+import { BTN_PRIMARY, EYEBROW, TEXT_LINK } from "../tokens";
 
 /**
- * The in-app reader, as a lit window on the scene.
+ * The in-app reader, as a framed pane in the shell's content column.
  *
- * The frame is the page's own dark surface; the pane inside it is opaque
- * because it holds a whole external page and nothing about that is ours to
- * tint. That is the only opaque thing on this route, and it is a framed object
- * rather than the page's floor - which is why /hulpbronnen keeps a landscape
- * instead of taking `backdrop="none"` (see app/hulpbronnen/layout.tsx).
+ * The pane is opaque white in both themes on purpose: it holds a whole external
+ * page, and nothing about that is ours to tint. Full screen lifts the pane over
+ * the shell onto the shell's own ground (`bg-line-soft`, `bg-background` in
+ * dark), the same ground AppShell paints behind every card.
  *
  * `canEmbed: false` is a licensing fact, not a rendering hint: those sources -
  * DBNL among them - are read at the source, in a normal outbound link, and are
@@ -28,15 +27,18 @@ export default function Reader({ item }: { item: LibraryItem }) {
 
   return (
     <div
-      className={fullscreen ? "fixed inset-0 z-50 flex flex-col p-4" : "space-y-3"}
-      style={fullscreen ? { backgroundColor: SCENE_BG } : undefined}
+      className={
+        fullscreen
+          ? "fixed inset-0 z-50 flex flex-col gap-3 bg-line-soft p-4 dark:bg-background"
+          : "space-y-3"
+      }
     >
       <div className="flex items-center justify-between gap-3">
         <p className={`m-0 ${EYEBROW}`}>In-app lezer</p>
         <button
           type="button"
           onClick={() => setFullscreen(f => !f)}
-          className="inline-flex items-center gap-1.5 rounded text-xs font-semibold text-white/75 outline-none transition-colors hover:text-white focus-visible:ring-2 focus-visible:ring-white"
+          className="inline-flex h-9 items-center gap-1.5 rounded-btn px-2.5 text-[13px] font-semibold text-ink-body outline-none transition-colors hover:bg-line-soft focus-visible:ring-2 focus-visible:ring-[#0D9488] dark:hover:bg-surface"
         >
           {fullscreen ? (
             <>
@@ -51,13 +53,10 @@ export default function Reader({ item }: { item: LibraryItem }) {
         </button>
       </div>
 
-      {/* The frame is written out rather than built from TILE: TILE's ground is
-          `bg-black/40`, and two background utilities on one element are settled
-          by Tailwind's own output order, not by the order they are written in.
-          The pane is opaque white on purpose - it holds a whole external page. */}
+      {/* The pane is opaque white on purpose - it holds a whole external page. */}
       <div
         className={[
-          "relative overflow-hidden rounded-2xl border border-white/20 bg-white shadow-2xl shadow-black/40",
+          "relative overflow-hidden rounded-card border border-line bg-white",
           fullscreen ? "min-h-0 flex-1" : "h-[75vh]",
         ].join(" ")}
       >
@@ -71,13 +70,13 @@ export default function Reader({ item }: { item: LibraryItem }) {
         />
       </div>
 
-      <p className="m-0 text-center text-[11px] leading-relaxed text-white/60">
+      <p className="m-0 text-center text-[12px] leading-relaxed text-ink-muted">
         Wordt de tekst niet geladen? Sommige bronnen blokkeren inbedding -{" "}
         <a
           href={item.sourceUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="rounded text-white/80 underline underline-offset-4 outline-none transition-colors hover:text-white focus-visible:ring-2 focus-visible:ring-white"
+          className={TEXT_LINK}
         >
           open op {item.source}
         </a>
@@ -89,19 +88,21 @@ export default function Reader({ item }: { item: LibraryItem }) {
 
 function NotEmbeddable({ item }: { item: LibraryItem }) {
   return (
-    <section aria-labelledby="hulpbron-bron" className={`max-w-[36rem] p-8 text-center ${TILE}`}>
-      <h2 id="hulpbron-bron" className="text-lg font-semibold text-white">
+    <section
+      aria-labelledby="hulpbron-bron"
+      className="max-w-[36rem] rounded-card border border-line bg-surface p-8 text-center"
+    >
+      <h2 id="hulpbron-bron" className="text-lg font-semibold text-ink">
         Lees dit werk bij {item.source}
       </h2>
-      <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-white/75">
+      <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-ink-muted">
         Deze bron staat inbedding in andere websites niet toe, maar het werk is daar volledig en gratis te lezen.
       </p>
       <a
         href={item.sourceUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className={`mt-6 ${CTA_BRAND}`}
-        style={{ backgroundColor: TEAL_DEEP }}
+        className={`mt-6 ${BTN_PRIMARY}`}
       >
         {/* Identifies where the link goes, not decoration. */}
         <ExternalLink className="h-4 w-4" aria-hidden />

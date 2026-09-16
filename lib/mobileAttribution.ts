@@ -29,7 +29,6 @@ const MOBILE_BIBLE_ATTRIBUTION: Record<string, string> = {
 const MOBILE_COMMENTARY_ATTRIBUTION: Record<string, string> = {
   matthew_henry_nl: 'Matthew Henry (1662–1714) - publiek domein',
   dachsel: 'Karl August Dachsel (1818–1893) - publiek domein',
-  meyer: 'Heinrich August Wilhelm Meyer (1800–1873) - publiek domein',
   calvijn_nl:
     'Johannes Calvijn (1509–1564) - vertaald uit de publiek-domein Engelse '
     + 'editie (Calvin Translation Society); vertaling in uitvoering',

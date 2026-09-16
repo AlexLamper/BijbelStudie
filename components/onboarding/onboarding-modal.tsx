@@ -265,6 +265,17 @@ interface OnboardingModalProps {
    * they left it. See components/admin/OnboardingPreviewButton.tsx.
    */
   preview?: boolean
+  /**
+   * Run for a visitor with no account - "Doorgaan als gast" on /inloggen or
+   * /registreren. See components/onboarding/guest-onboarding-wrapper.tsx.
+   *
+   * Shares `preview`'s shape (skip the preferences POST, skip `plant()`, since
+   * both are account-bound and there is no account to write onto) but is NOT
+   * `preview`: this is the visitor's own first run, not a reviewer's replay,
+   * so the theme they picked in step 4 stays picked instead of being put back,
+   * and the study-style answer still reorders their menu for this visit.
+   */
+  guest?: boolean
 }
 
 export function OnboardingModal({
@@ -272,6 +283,7 @@ export function OnboardingModal({
   onClose,
   onComplete,
   preview = false,
+  guest = false,
 }: OnboardingModalProps) {
   const [open, setOpen] = useState(initialIsOpen)
   const [step, setStep] = useState(1)
@@ -419,6 +431,16 @@ export function OnboardingModal({
         // Nothing is saved and nothing is planted. Hand the reviewer back the
         // theme they came in with, since the theme step changed it live.
         if (themeOnOpen.current) setTheme(themeOnOpen.current)
+        setOpen(false)
+        if (complete) onComplete()
+        else onClose()
+        return
+      }
+      if (guest) {
+        // No account to save onto: the preferences POST and plant() are both
+        // account-bound and would just 401. The theme is already live (set
+        // per click in step 4) and is left as the visitor chose it.
+        setStudyStyle(prefs.studyStyle)
         setOpen(false)
         if (complete) onComplete()
         else onClose()
@@ -824,15 +846,21 @@ export function OnboardingModal({
 
                   {step === TOTAL && (
                     <p className="mt-4 text-xs leading-relaxed text-gray-600 dark:text-muted-foreground">
-                      Lezen is gratis, in elke vertaling. Met{" "}
-                      <Link
-                        href="/abonnement"
-                        className={cn("font-semibold underline underline-offset-2", TEAL_INK)}
-                      >
-                        Pro
-                      </Link>{" "}
-                      lees je commentaren volledig, open je de grondtekst en stel je meer vragen aan de
-                      AI-assistent.
+                      {guest ? (
+                        "Dit is een voorproefje: je keuzes worden pas bewaard zodra je een gratis account maakt."
+                      ) : (
+                        <>
+                          Lezen is gratis, in elke vertaling. Met{" "}
+                          <Link
+                            href="/abonnement"
+                            className={cn("font-semibold underline underline-offset-2", TEAL_INK)}
+                          >
+                            Pro
+                          </Link>{" "}
+                          lees je commentaren volledig, open je de grondtekst en stel je meer vragen aan de
+                          AI-assistent.
+                        </>
+                      )}
                     </p>
                   )}
                 </div>

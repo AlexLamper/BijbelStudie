@@ -1,12 +1,23 @@
 'use client';
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { AlertCircle, Loader2, Send } from 'lucide-react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
+import { SessionContext } from 'next-auth/react';
+import * as DialogPrimitive from '@radix-ui/react-dialog';
+import { AlertCircle, Loader2, Send, X } from 'lucide-react';
 import AiAssistantIcon from '../ui/AiAssistantIcon';
 import { SkeletonBlock } from '../ui/skeletons';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import UpgradePrompt from "../pricing/UpgradePrompt";
+import {
+  Dialog,
+  DialogPortal,
+  DialogOverlay,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from '../ui/dialog';
 
 interface AiAssistantProps {
   book: string;
@@ -150,6 +161,14 @@ export default function AiAssistant({
   const [error, setError] = useState<string | null>(null);
   const [quota, setQuota] = useState<QuotaState | null>(null);
   const [quotaHit, setQuotaHit] = useState(false);
+  // Read directly from context, not `useSession`: this component is also
+  // mounted inside the /studie flow's AiDock, on routes with no
+  // SessionProvider, where the hook throws. Without a provider the status is
+  // simply unknown and the proactive guard below never fires - the 401 the
+  // API still returns for an anonymous call opens the same dialog.
+  const sessionCtx = useContext(SessionContext);
+  const isGuest = sessionCtx?.status === 'unauthenticated';
+  const [loginPromptOpen, setLoginPromptOpen] = useState(false);
   // True from the first streamed token until the answer ends. The skeleton is
   // for an empty panel; once words are arriving they are the better progress
   // indicator, and showing both would be a placeholder next to the real thing.
@@ -204,6 +223,14 @@ export default function AiAssistant({
       const trimmed = text.trim();
       if (!trimmed || loading) return;
 
+      // A guest gets the sign-in dialog straight away instead of a request
+      // that can only come back 401 - mirrors SpeakButton's guard for
+      // voorlezen. The question stays in the composer, untouched.
+      if (isGuest) {
+        setLoginPromptOpen(true);
+        return;
+      }
+
       setError(null);
       setLoading(true);
       setStreaming(false);
@@ -241,6 +268,11 @@ export default function AiAssistant({
               setQuota((q) => (q ? { ...q, used: data.used ?? q.used } : q));
               // Remove the optimistically added user message
               setMessages((prev) => prev.slice(0, -1));
+            } else if (res.status === 401) {
+              // The session lapsed between the guard above and this request
+              // landing - same dialog, not the raw "Niet geauthenticeerd".
+              undoSend();
+              setLoginPromptOpen(true);
             } else {
               setError(data?.error || 'Er ging iets mis. Probeer het opnieuw.');
               undoSend();
@@ -359,7 +391,7 @@ export default function AiAssistant({
         setStreaming(false);
       }
     },
-    [messages, loading, book, chapter, version],
+    [messages, loading, book, chapter, version, isGuest],
   );
 
   /**
@@ -406,22 +438,20 @@ export default function AiAssistant({
     <div className="h-full flex flex-col overflow-hidden">
       {/* Scrollable area: intro + messages */}
       <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto px-3 sm:px-4 pt-4 pb-2">
-        {/* Intro panel */}
-        <div className="mb-4 rounded-lg border border-teal-200/70 dark:border-teal-400/20 bg-gradient-to-br from-teal-50/70 to-white dark:from-teal-400/10 dark:to-transparent p-3">
-          <div className="flex items-start gap-2.5">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-teal-100 dark:bg-teal-400/15 flex items-center justify-center">
-              <AiAssistantIcon size={18} className="text-teal-700 dark:text-teal-400" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-foreground">
-                AI-assistent
-              </h3>
-              <p className="text-xs text-gray-600 dark:text-neutral-400 mt-1 leading-relaxed">
-                Stel vragen over {book ? `${book} ${chapter}` : 'de Bijbel'} of over de Bijbel in
-                het algemeen. Antwoorden kunnen fouten bevatten, toets alles aan de Schrift.
-              </p>
-            </div>
+        {/* Intro panel: a plain header rule, matching the flat section
+            headers used elsewhere in the study panel (e.g. the "book" bar in
+            HistoricalContext) rather than the gradient card + circular icon
+            badge this used to carry - the one part of the panel that still
+            looked like the pre-redesign app. */}
+        <div className="mb-4 pb-3 border-b border-line">
+          <div className="flex items-center gap-2">
+            <AiAssistantIcon size={16} strokeWidth={1.8} className="flex-shrink-0 text-teal" />
+            <h3 className="text-sm font-semibold text-ink">AI-assistent</h3>
           </div>
+          <p className="mt-1.5 text-xs text-ink-muted leading-relaxed">
+            Stel vragen over {book ? `${book} ${chapter}` : 'de Bijbel'} of over de Bijbel in
+            het algemeen. Antwoorden kunnen fouten bevatten, toets alles aan de Schrift.
+          </p>
         </div>
 
         {/* Not configured */}
@@ -445,7 +475,7 @@ export default function AiAssistant({
                 key={q}
                 onClick={() => sendMessage(q)}
                 disabled={loading}
-                className="text-left text-xs sm:text-sm px-3.5 py-2.5 rounded-lg border border-teal-200/80 dark:border-teal-400/20 text-gray-700 dark:text-neutral-300 hover:bg-teal-50 dark:hover:bg-teal-400/10 hover:border-teal-300 dark:hover:border-teal-400/40 transition-colors disabled:opacity-50"
+                className="text-left text-xs sm:text-sm px-3.5 py-2.5 rounded-lg border border-line bg-surface text-ink-body transition-colors hover:border-teal disabled:opacity-50 disabled:hover:border-line outline-none focus-visible:ring-2 focus-visible:ring-[#0D9488]/40"
               >
                 {q}
               </button>
@@ -521,7 +551,7 @@ export default function AiAssistant({
           ) : (
             <>
               {quota && !quota.unlimited && (
-                <div className="text-[11px] text-gray-500 dark:text-neutral-400 mb-1.5 px-1">
+                <div className="text-[11px] text-ink-faint mb-1.5 px-1">
                   {quota.used} van {quota.cap} vragen vandaag
                 </div>
               )}
@@ -538,7 +568,7 @@ export default function AiAssistant({
                   maxLength={MAX_MESSAGE_LENGTH}
                   placeholder="Stel een vraag over de Bijbel…"
                   disabled={loading}
-                  className="flex-1 resize-none rounded-lg border border-gray-200 dark:border-border bg-white dark:bg-card px-3 py-2 text-sm max-md:text-[16px] text-gray-900 dark:text-foreground placeholder:text-gray-400 dark:placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-[#0D9488]/40 focus:border-[#0D9488] disabled:opacity-60"
+                  className="flex-1 resize-none rounded-lg border border-line bg-surface px-3 py-2 text-sm max-md:text-[16px] text-ink placeholder:text-ink-faint focus:outline-none focus:ring-2 focus:ring-[#0D9488]/40 focus:border-[#0D9488] disabled:opacity-60"
                 />
                 <button
                   onClick={() => sendMessage(input)}
@@ -557,6 +587,94 @@ export default function AiAssistant({
           )}
         </div>
       )}
+
+      <AiLoginDialog open={loginPromptOpen} onClose={() => setLoginPromptOpen(false)} />
     </div>
+  );
+}
+
+/**
+ * What a guest sees on asking the AI-assistant a question.
+ *
+ * The chat and quota endpoints both refuse an anonymous caller with a plain
+ * 401, which used to reach the reader as the raw "Niet geauthenticeerd" text
+ * inside the amber error panel - a fault report for something that is not a
+ * fault. This says what is going on and offers the way in, mirroring
+ * SpeakButton's `SpeakLoginDialog` for the same situation on voorlezen.
+ *
+ * Built on the Radix dialog primitives directly rather than the generic
+ * `Modal` wrapper, for the lighter scrim and a z-index above the /studie
+ * flow's own overlays (the AiDock backdrop and panel sit at z-40/z-50).
+ */
+function AiLoginDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+  // The path to return to, read when the dialog opens so it includes the
+  // query (chapter, translation). app/inloggen passes it through safeRedirect.
+  const [next, setNext] = useState('/');
+  useEffect(() => {
+    if (open && typeof window !== 'undefined') {
+      setNext(window.location.pathname + window.location.search);
+    }
+  }, [open]);
+  const target = encodeURIComponent(next);
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
+      <DialogPortal>
+        <DialogOverlay className="z-[80] bg-slate-900/50 backdrop-blur-[2px]" />
+        <DialogPrimitive.Content
+          className="fixed left-1/2 top-1/2 z-[80] w-[calc(100%-2rem)] max-w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-line bg-surface p-6 shadow-xl focus:outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
+        >
+          <p className="text-[10.5px] font-semibold uppercase tracking-[1.1px] text-[#0D9488] dark:text-teal-400">
+            AI-assistent
+          </p>
+          <DialogTitle className="mt-2 text-lg font-semibold leading-snug text-ink">
+            Log in om de AI-assistent te gebruiken
+          </DialogTitle>
+          <DialogDescription className="mt-2 text-sm leading-relaxed text-ink-muted">
+            Vragen stellen aan de AI-assistent is alleen beschikbaar met een account. Met een
+            gratis account stel je meteen vragen over de Bijbel en dit hoofdstuk.
+          </DialogDescription>
+
+          <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <DialogClose asChild>
+              <button
+                type="button"
+                className="inline-flex h-10 items-center justify-center rounded-lg border border-line px-4 text-sm font-medium text-ink-body transition-colors hover:bg-line-soft focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0D9488] focus-visible:ring-offset-2"
+              >
+                Annuleren
+              </button>
+            </DialogClose>
+            <Link
+              href={`/inloggen?next=${target}`}
+              onClick={onClose}
+              data-track="ai_guest_signin"
+              className="inline-flex h-10 items-center justify-center rounded-lg px-5 text-sm font-semibold text-white no-underline transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0D9488] focus-visible:ring-offset-2"
+              style={{ backgroundColor: '#0D9488' }}
+            >
+              Inloggen
+            </Link>
+          </div>
+
+          <p className="mt-4 text-center text-[13px] text-ink-muted sm:text-right">
+            Nog geen account?{' '}
+            <Link
+              href={`/registreren?next=${target}`}
+              onClick={onClose}
+              data-track="ai_guest_register"
+              className="font-semibold underline-offset-4 hover:underline text-[#0D9488] dark:text-teal-400"
+            >
+              Gratis registreren
+            </Link>
+          </p>
+
+          <DialogClose
+            className="absolute right-4 top-4 rounded-md p-1 text-ink-faint transition-colors hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0D9488]"
+            aria-label="Sluiten"
+          >
+            <X className="h-4 w-4" />
+          </DialogClose>
+        </DialogPrimitive.Content>
+      </DialogPortal>
+    </Dialog>
   );
 }

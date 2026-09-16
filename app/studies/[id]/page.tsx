@@ -214,7 +214,7 @@ export default async function StudyDetailPage({ params }: PageProps) {
       lessonsTotal={lessonsTotal}
       lessonsCompleted={lessonsDone}
     >
-      <AppShell title={study.title} active="/studies">
+      <AppShell title={study.title} active="/studies" ownHeading>
         <div className="flex min-h-full flex-col gap-4">
           {/* Back to the catalogue. A real link rather than history.back():
               plenty of visitors land here straight from search or a shared

@@ -57,7 +57,16 @@ export function FAQItem({
           overflow: "hidden",
         }}
       >
-        <p className="min-h-0 pb-5 text-sm leading-relaxed" style={{ color: mutedColor }}>{a}</p>
+        {/* The padding has to live on a wrapper nested *inside* the grid item,
+            not on the grid item itself. A "0fr" row still has to size around
+            its item's full border box, padding included - `min-h-0` zeroes out
+            the item's own content height, but `pb-5` on that same element was
+            still 20px the row could never shrink below, which is exactly the
+            gap a closed question showed. Pushing the padding one level down,
+            past this wrapper's own `min-h-0`, lets the row collapse to 0. */}
+        <div className="min-h-0 overflow-hidden">
+          <p className="pb-5 text-sm leading-relaxed" style={{ color: mutedColor }}>{a}</p>
+        </div>
       </div>
     </div>
   )

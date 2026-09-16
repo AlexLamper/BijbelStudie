@@ -33,32 +33,32 @@ export function Footer() {
 
           {/* Brand column */}
           <div className="space-y-4">
-            {/* The full-colour mark, lifted off the ground by a halo instead of
-                being swapped for an inverted asset.
+            {/* `/images/logo.svg` is a #262626 tile (near-black) with a
+                #F9F9F9 cross - drawn for a light page, where it reads fine.
+                On this #1F2937 footer the tile sits within a hair of the
+                background (contrast ~1.1:1) and all but disappears, leaving
+                a faint cross floating with no visible tile around it - not
+                legible, not professional.
 
-                What was here was `Logo-text-dark-mode.svg`: the inverted
-                lockup (light tile, dark cross, light lettering) drawn for this
-                #1F2937 ground, because the real mark is a #262626 tile that
-                sits at almost the same value as the footer and disappears into
-                it. The mark is now the real one and the halo does that job.
+                Rather than shipping a second logo asset to keep in sync with
+                the real one, `invert(1)` flips it at render time: the tile
+                becomes a light ~#D9D9D9 (9.5:1 on this background) and the
+                cross becomes near-black - the same "light tile, dark cross"
+                treatment this footer used to use as a dedicated dark-mode
+                svg, without a second file to maintain. Scoped to this one
+                <Image>, so the mark is unaffected everywhere else it renders
+                (navbar, header, sidebar - all on light grounds).
 
-                The light-mode lockup is deliberately NOT used here. Its
-                lettering is one #262626 path, which is 1.09:1 on #1F2937 -
-                invisible - and a halo scaled to the 26px mark cannot fix 92px
-                of dark type beside it. So the lockup is split the way the
-                header already splits it: the icon as artwork, the wordmark as
-                white text. Same link, same 26px height. */}
+                The wordmark is not part of that asset - it is plain text
+                here, so it just stays white, same as the header splits it. */}
             <Link href="/" className="inline-flex items-center gap-2" aria-label="BijbelStudie">
-              {/* No halo behind the mark (removed at the owner's request: the
-                  tile is a rounded square with one rounder corner, and a
-                  circular glow read as a mismatch). No `rounded-*` either -
-                  the tile carries its own corner radius. */}
               <Image
                 src="/images/logo.svg"
                 alt="BijbelStudie"
                 width={26}
                 height={26}
                 className="h-[26px] w-[26px]"
+                style={{ filter: "invert(1)" }}
               />
               <span className="text-base font-bold tracking-tight text-white">
                 Bijbel<span style={{ color: "#0D9488" }}>Studie</span>
@@ -76,9 +76,15 @@ export function Footer() {
             </h3>
             <ul className="space-y-3">
               {[
-                { href: "/#about",    label: "Over ons" },
-                { href: "/#features", label: "Functies" },
-                { href: "/#pricing",  label: "Prijzen" },
+                // These three used to point at "/#about", "/#features" and
+                // "/#pricing" - anchors that never existed on the landing
+                // page (its real section ids are "in-actie", "prijzen" and
+                // "faq"; there is no "about" section at all), so they were
+                // dead links that just landed on "/". "Over ons" is dropped
+                // rather than repointed - there is no about-us content
+                // anywhere on the site to send it to.
+                { href: "/#in-actie", label: "Functies" },
+                { href: "/#prijzen",  label: "Prijzen" },
                 { href: "/#faq",      label: "FAQ" },
                 { href: "/studies",   label: "Begeleide studies" },
                 // The single internal link into the reference cluster. A sitemap

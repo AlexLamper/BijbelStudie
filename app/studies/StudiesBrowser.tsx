@@ -295,10 +295,17 @@ export default function StudiesBrowser() {
               </div>
             </div>
           ))}
+          {/* Lives inside the sticky nav, not after it: this rail is pinned in
+              place for most of the page's scroll (the aside stretches to the
+              height of the card grid beside it), so a sibling paragraph placed
+              after </nav> would scroll into and stay trapped behind the pinned
+              rail - a positioned element always paints over static content -
+              instead of merely passing by it. As the rail's own last row it
+              scrolls and stays visible together with the filters. */}
+          <p className="hidden text-[12px] leading-relaxed text-ink-faint md:block">
+            {startedCount} {startedCount === 1 ? 'studie' : 'studies'} begonnen, {completedCount} afgerond van de {ENTRIES.length}.
+          </p>
         </nav>
-        <p className="mt-6 hidden text-[12px] leading-relaxed text-ink-faint md:block">
-          {startedCount} {startedCount === 1 ? 'studie' : 'studies'} begonnen, {completedCount} afgerond van de {ENTRIES.length}.
-        </p>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col gap-[18px]">

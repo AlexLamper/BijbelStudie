@@ -1,10 +1,12 @@
 import { Metadata } from "next";
 import { cookies } from "next/headers";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../../lib/authOptions";
+import SessionProvider from "../../components/providers/SessionProvider";
 import { cookieName, fallbackLng } from "../i18n/settings";
 import { generatePageMetadata } from "../../lib/pageMetadata";
+import AppShell from "../../components/shell/AppShell";
 import CanceledClient from "./CanceledClient";
-import SceneShell from "../../components/scene/SceneShell";
-import { SCENE_TREE, sceneSvg } from "../../components/scene/scene-svg";
 
 export async function generateMetadata(): Promise<Metadata> {
   const cookieStore = await cookies();
@@ -22,14 +24,19 @@ export default async function CanceledPage({
   // annual in the funnel.
   const { interval } = await searchParams;
 
-  // The scene, rendered to an SVG on the server so it is in the first paint.
-  // No `gateId`, so no canvas ever mounts: this is a checkout return and the
-  // only thing that matters is how quickly the visitor can read that nothing
-  // was charged. No navbar and no rail either - this route sits under the root
-  // layout, which mounts no SessionProvider, and both of them read the session.
+  // The shared app shell, the same frame as /abonnement where the checkout
+  // started. Its sidebar and top bar read the session, and this route sits
+  // under the root layout, which mounts no SessionProvider - so the provider is
+  // mounted here, seeded from the server. `authOptions` is required: without it
+  // NextAuth skips the `session` callback that attaches isAdmin/isSubscribed.
+  // The shell is safe signed out (an "Inloggen" button, no redirect).
+  const session = await getServerSession(authOptions);
+
   return (
-    <SceneShell svg={sceneSvg()} {...SCENE_TREE}>
-      <CanceledClient interval={interval === "annual" ? "annual" : "monthly"} />
-    </SceneShell>
+    <SessionProvider session={session}>
+      <AppShell title="Abonnement">
+        <CanceledClient interval={interval === "annual" ? "annual" : "monthly"} />
+      </AppShell>
+    </SessionProvider>
   );
 }

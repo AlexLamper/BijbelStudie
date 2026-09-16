@@ -29,7 +29,8 @@ import { MobileMenuButton } from "./MobileNav";
  *   instead of showing an invented count. The design's orange dot is therefore
  *   not drawn: a dot that is always on is a worse lie than no dot.
  */
-export default function TopBar({ title }: { title: string }) {
+export default function TopBar({ title, ownHeading = false }: { title: string; ownHeading?: boolean }) {
+  const Title = ownHeading ? "p" : "h1";
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const [bellOpen, setBellOpen] = useState(false);
@@ -67,7 +68,7 @@ export default function TopBar({ title }: { title: string }) {
       <MobileMenuButton className="text-ink-body" />
 
       {/* 1. Title */}
-      <h1 className="flex-none text-[18px] font-bold tracking-[-0.2px] text-ink max-md:min-w-0 max-md:flex-initial max-md:truncate max-md:text-[17px]">{title}</h1>
+      <Title className="flex-none text-[18px] font-bold tracking-[-0.2px] text-ink max-md:min-w-0 max-md:flex-initial max-md:truncate max-md:text-[17px]">{title}</Title>
 
       {/* 2. Spacer */}
       <div className="flex-1" />

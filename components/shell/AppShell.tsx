@@ -19,12 +19,15 @@ export default function AppShell({
   title,
   active,
   padded = true,
+  ownHeading = false,
   children,
 }: {
   title: string;
   /** Forces a sidebar row active; by default the row is derived from the URL. */
   active?: string;
   padded?: boolean;
+  /** The page renders its own <h1>, so the top-bar title must not be one too. */
+  ownHeading?: boolean;
   children: React.ReactNode;
 }) {
   return (
@@ -43,7 +46,7 @@ export default function AppShell({
     <div className="flex h-screen w-full min-w-0 bg-line-soft dark:bg-background max-md:h-[100dvh] max-md:[--mobile-tabbar-h:calc(56px+env(safe-area-inset-bottom))]">
       <Sidebar active={active} />
       <main className="flex min-w-0 flex-1 flex-col">
-        <TopBar title={title} />
+        <TopBar title={title} ownHeading={ownHeading} />
         {padded ? (
           <div className="flex-1 overflow-auto px-[28px] py-[26px] max-md:px-4 max-md:py-5">{children}</div>
         ) : (

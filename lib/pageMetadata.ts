@@ -122,7 +122,7 @@ const pageConfigs: Record<string, PageMetadataConfig> = {
     // Keep any price in this snippet identical to what Stripe actually charges
     // (lib/pricing.ts). A derived per-week/per-month figure without its billing
     // period is exactly what the EU Omnibus price-indication rules forbid.
-    description: 'Gratis met KingComments. Pro: Matthew Henry, Calvijn, Dachsel en Meyer, 200 AI-vragen per dag en de grondtekst voor €9,99 per maand of €89,99 per jaar.',
+    description: 'Gratis met KingComments. Pro: Matthew Henry, Calvijn en Dachsel, 200 AI-vragen per dag en de grondtekst voor €9,99 per maand of €89,99 per jaar.',
     path: '/abonnement',
     type: 'website'
   },
@@ -243,6 +243,20 @@ const pageConfigs: Record<string, PageMetadataConfig> = {
     path: '/bijbelboeken',
     type: 'website',
     ogEyebrow: 'Naslag',
+  },
+
+  /* ─── Standalone utility pages ──────────────────────────────── */
+
+  appDownload: {
+    title: 'Download de app',
+    description: 'Download de BijbelStudie-app voor iOS. Bijbelstudie, commentaren en de grondtekst in je zak.',
+    path: '/app',
+    type: 'website',
+    // A bio-link landing page for TikTok/Instagram, not a search-facing page -
+    // its only two lines of content would read as thin to Google, and it has
+    // nothing a searcher would query for that /studies or "/" don't already
+    // rank on. Keep it out of the index and out of app/sitemap.ts.
+    indexable: false,
   },
 };
 
