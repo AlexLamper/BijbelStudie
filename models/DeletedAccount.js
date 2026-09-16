@@ -11,11 +11,13 @@ import mongoose from "mongoose";
  * lib/accountArchive.ts first and refuse to delete when archiving fails.
  *
  * Restore with `node scripts/recover-account.mjs`. Rows are kept for 90 days
- * (the retention the privacy policy promises) and removed by
- * `node scripts/purge-deleted-accounts.mjs`, which is read-only unless
- * --write. There is deliberately no TTL index: MongoDB would drop these
- * copies unattended, and an archive row is the only thing standing between a
- * wrong deletion and permanent data loss.
+ * (the retention /privacybeleid and /account-verwijderen promise) and removed
+ * daily by the Vercel Cron route app/api/internal/data-retention
+ * (lib/dataRetention.ts); `node scripts/purge-deleted-accounts.mjs` does the
+ * same by hand. There is deliberately no TTL index: MongoDB would drop these
+ * copies with no log of what went and no way to spare admin copies, and an
+ * archive row is the only thing standing between a wrong deletion and
+ * permanent data loss.
  */
 const DeletedAccountSchema = new mongoose.Schema(
   {

@@ -8,8 +8,8 @@ import { PublicFrame } from "../../components/content/PublicFrame";
  * safety form. Play requires it to be reachable without the app and without
  * signing in, to name the app, to give the steps, and to say what is deleted
  * and what is kept for how long. Keep the lists in step with
- * lib/accountPurge.ts (what is removed) and models/DeletedAccount.js (the
- * 90-day archive).
+ * lib/accountPurge.ts (what is removed), lib/dataRetention.ts (the 90-day
+ * archive purge and feedback anonymisation) and /privacybeleid.
  */
 export const metadata: Metadata = generatePageMetadata("accountDeletion");
 
@@ -28,27 +28,27 @@ const DELETED = [
   "Notities, markeringen en bladwijzers",
   "Leesgeschiedenis, voortgang, reeksen en je Levensboom",
   "Voortgang in studies en leesplannen",
-  "Gegevens over je gebruik van de AI-assistent",
+  "Het aantal vragen dat je aan de AI-assistent stelde (gesprekken bewaren we niet bij je account)",
   "Berichten in groepen; je lidmaatschap van groepen en leesplannen vervalt",
   "Alle inlogsessies, op elk apparaat",
 ];
 
 const KEPT = [
   {
-    title: "Beveiligingskopie: maximaal 90 dagen",
-    body: "Voordat we iets verwijderen maken we een kopie, zodat een onterechte verwijdering hersteld kan worden. Die kopie is niet in gebruik en wordt binnen 90 dagen definitief gewist.",
+    title: "Beveiligingskopie: 90 dagen",
+    body: "Voordat we iets verwijderen maken we een kopie, zodat een onterechte verwijdering hersteld kan worden. Die kopie is niet in gebruik en wordt na 90 dagen automatisch en definitief gewist.",
   },
   {
-    title: "Feedback en app-statistieken: anoniem",
-    body: "Feedback die je hebt gegeven en gebruiksstatistieken blijven bestaan, maar zonder je naam, e-mailadres of account. Ze zijn daarna niet meer tot jou te herleiden.",
+    title: "Feedback en app-statistieken: zonder je gegevens",
+    body: "Feedback die je hebt gegeven en gebruiksstatistieken blijven bestaan, maar zonder je account, naam, e-mailadres of browser- en apptype. Bij meldingen over AI-antwoorden wissen we ook je vraag en toelichting; alleen de reden en het AI-antwoord blijven. Wat je zelf in gewone feedback schreef blijft staan: wil je dat ook kwijt, mail ons dan. Gebruiksstatistieken worden na 400 dagen automatisch gewist.",
   },
   {
     title: "Groepen van anderen",
     body: "Groepen en leesplannen blijven bestaan voor de andere deelnemers. Jij wordt eruit verwijderd.",
   },
   {
-    title: "Betaalgegevens bij de winkel",
-    body: "Aankopen via de App Store, Google Play of de website worden verwerkt door Apple, Google en Stripe. Zij bewaren hun eigen administratie volgens hun wettelijke bewaartermijnen.",
+    title: "Betaalgegevens",
+    body: "Aankopen in de app verwerken Apple en Google, samen met RevenueCat; betalingen via de website verwerkt Stripe. Die administratie blijft bewaard volgens de wettelijke bewaartermijnen, voor betalingen via de website 7 jaar (fiscale bewaarplicht).",
   },
 ];
 

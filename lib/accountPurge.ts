@@ -17,6 +17,7 @@ import RefreshToken from '../models/RefreshToken';
 import FeedbackState from '../models/FeedbackState';
 import Feedback from '../models/Feedback';
 import AnalyticsEvent from '../models/AnalyticsEvent';
+import { AI_REPORT_FREE_TEXT_CLEAR, feedbackIdentityClear } from './dataRetention';
 
 /**
  * Removes one person's data. The single list behind both delete paths - the
@@ -49,13 +50,16 @@ export async function deleteAccountData(userId: mongoose.Types.ObjectId): Promis
     await FeedbackState.deleteMany({ userId }, opts);
 
     // Feedback answers and analytics events describe the product, not the
-    // person. Cut the link and keep the row - the same thing the feedback
-    // retention job does with `anonymisedAt`.
+    // person. Cut the link and keep the row - the same fields the 2-year
+    // feedback retention job clears (lib/dataRetention.ts). AI-answer reports
+    // first: their question and comment are the reader's own free text, and the
+    // second update nulls the userId this one is filtered on.
     await Feedback.updateMany(
-      { userId },
-      { $set: { userId: null, name: '', email: '', anonymisedAt: new Date() } },
+      { userId, touchpoint: 'ai_report' },
+      { $set: AI_REPORT_FREE_TEXT_CLEAR },
       opts,
     );
+    await Feedback.updateMany({ userId }, { $set: feedbackIdentityClear(new Date()) }, opts);
     await AnalyticsEvent.updateMany({ userId }, { $set: { userId: null } }, opts);
 
     // Leave every group and plan rather than deleting them: they belong to

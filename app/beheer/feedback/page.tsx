@@ -30,6 +30,7 @@ interface FeedbackRow {
   status: string
   touchpoint: string
   answers: { key: string; value: string }[]
+  aiReport?: { reason: string; comment: string; question: string; answer: string; surface: string; model: string | null } | null
   context: Record<string, unknown> | null
   createdAt: string
 }
@@ -74,6 +75,7 @@ const TOUCHPOINT_LABELS: Record<string, string> = {
   subscription_cancel: "Opzegging",
   dormant_return: "Terugkeer",
   pmf_survey: "PMF-onderzoek",
+  ai_report: "AI-antwoord gemeld",
 }
 
 function formatDate(iso: string): string {
@@ -305,6 +307,21 @@ export default function AdminFeedbackPage() {
                       )}
                     </div>
                     <p className="whitespace-pre-wrap break-words text-[13.5px] leading-[1.6] text-ink">{row.message}</p>
+                    {row.aiReport && (
+                      <details className="mt-2 rounded-md border border-line bg-sunken px-3 py-2 text-[12.5px] leading-[1.55] text-ink-muted">
+                        <summary className="cursor-pointer font-semibold text-ink">Vraag en gemeld antwoord</summary>
+                        {row.aiReport.question && (
+                          <p className="mt-2 whitespace-pre-wrap break-words">
+                            <span className="font-semibold text-ink">Vraag: </span>
+                            {row.aiReport.question}
+                          </p>
+                        )}
+                        <p className="mt-2 whitespace-pre-wrap break-words">
+                          <span className="font-semibold text-ink">Antwoord: </span>
+                          {row.aiReport.answer}
+                        </p>
+                      </details>
+                    )}
                     {row.answers.length > 0 && (
                       <div className="mt-2 flex flex-wrap gap-1.5">
                         {row.answers.map((a, i) => (

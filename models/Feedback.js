@@ -55,6 +55,8 @@ const FeedbackSchema = new mongoose.Schema(
         "subscription_cancel",
         "dormant_return",
         "pmf_survey",
+        // A reader flagging an AI-assistant answer (`lib/aiReport.ts`).
+        "ai_report",
       ],
       default: "unprompted",
       index: true,
@@ -98,6 +100,25 @@ const FeedbackSchema = new mongoose.Schema(
       streakBucket: { type: String, default: null },
       tenureBucket: { type: String, default: null },
       lessonsBucket: { type: String, default: null },
+    },
+
+    // Only on `touchpoint: "ai_report"`: the flagged answer itself, so the
+    // report can be judged (and the prompt or filter fixed) without having to
+    // reproduce a model reply that may never come out the same way twice.
+    // Left undefined on every other document.
+    aiReport: {
+      type: new mongoose.Schema(
+        {
+          reason: { type: String, enum: ["onjuist", "aanstootgevend", "schadelijk", "anders"], required: true },
+          comment: { type: String, default: "", maxlength: 1000 },
+          question: { type: String, default: "", maxlength: 2000 },
+          answer: { type: String, required: true, maxlength: 4000 },
+          surface: { type: String, default: "onbekend" },
+          model: { type: String, default: null },
+        },
+        { _id: false },
+      ),
+      default: undefined,
     },
 
     // Triage, assigned by a human in the read-out. Never inferred, because a

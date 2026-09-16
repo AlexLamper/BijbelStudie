@@ -202,7 +202,7 @@ const pageConfigs: Record<string, PageMetadataConfig> = {
   },
   privacyPolicy: {
     title: 'Privacybeleid',
-    description: 'Het privacybeleid van BijbelStudie: welke gegevens we verwerken, waarom, en welke rechten je hebt.',
+    description: 'Het privacybeleid van de BijbelStudie-website en -app: welke gegevens we verwerken, waarom, met wie we ze delen, hoe lang we ze bewaren en welke rechten je hebt.',
     path: '/privacybeleid',
     type: 'website'
   },

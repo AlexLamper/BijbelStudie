@@ -1,6 +1,11 @@
 # Privacybeleid - concept voor juridische review
 
-**Status: NIET PUBLICEREN zonder review.** Dit is een concept dat de feitelijke
+**Achterhaald (2026-09-16):** de live pagina `app/privacybeleid/page.tsx` is
+herschreven op basis van de code en is nu leidend; bewaartermijnen worden
+afgedwongen door `lib/dataRetention.ts` (dagelijkse cron). Dit concept blijft
+alleen staan als achtergrond voor de juridische review.
+
+**Oorspronkelijke status: NIET PUBLICEREN zonder review.** Dit is een concept dat de feitelijke
 gegevensstromen van de app beschrijft, zodat een jurist het kan omzetten in een
 definitief beleid. De live pagina (`app/privacybeleid/page.tsx`) is nog de oude,
 algemene tekst en is met opzet niet aangepast.

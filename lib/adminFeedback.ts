@@ -21,6 +21,7 @@ const TOUCHPOINTS = [
   "subscription_cancel",
   "dormant_return",
   "pmf_survey",
+  "ai_report",
 ] as const;
 
 export type AdminFeedbackFilters = {
@@ -50,6 +51,14 @@ export type AdminFeedbackPayload = {
           touchpoint: string;
           answers: { key: string; value: string }[];
           context: Record<string, unknown> | null;
+          aiReport: {
+            reason: string;
+            comment: string;
+            question: string;
+            answer: string;
+            surface: string;
+            model: string | null;
+          } | null;
           createdAt: string;
         }>;
         total: number;
@@ -106,6 +115,16 @@ export async function adminFeedbackPayload(filters: AdminFeedbackFilters): Promi
           ? d.answers.map((a: { key?: string; value?: string }) => ({ key: a.key || "", value: a.value || "" }))
           : [],
         context: d.context ?? null,
+        aiReport: d.aiReport
+          ? {
+              reason: d.aiReport.reason || "anders",
+              comment: d.aiReport.comment || "",
+              question: d.aiReport.question || "",
+              answer: d.aiReport.answer || "",
+              surface: d.aiReport.surface || "onbekend",
+              model: d.aiReport.model ?? null,
+            }
+          : null,
         createdAt: d.createdAt ? new Date(d.createdAt).toISOString() : "",
       })),
       total,

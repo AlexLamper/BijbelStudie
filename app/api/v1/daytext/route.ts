@@ -1,4 +1,5 @@
 import { corsPreflight, errorV1, handleV1Error, jsonV1 } from '../../../../lib/apiV1';
+import { dayTextCacheControl } from '../../../../lib/httpCache';
 import { dayTextInVersion, fetchDayText } from '../../../../lib/mobileDayText';
 
 export async function OPTIONS() {
@@ -26,7 +27,9 @@ export async function GET(req: Request) {
 
     return jsonV1(payload, {
       // The query string is part of the cache key, so translations do not bleed.
-      headers: { 'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400' },
+      // Expires at Amsterdam midnight at the latest, so no cache serves
+      // yesterday's verse into the new day.
+      headers: { 'Cache-Control': dayTextCacheControl() },
     });
   } catch (error) {
     return handleV1Error(error);

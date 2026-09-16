@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server"
 import { CANONICAL_NL } from "../../../../lib/book-mapping"
-import { DAY_TEXT_CACHE_CONTROL } from "../../../../lib/httpCache"
-import { dayTextInVersion, recordDayText } from "../../../../lib/mobileDayText"
+import { dayTextReference } from "../../../../lib/dailyVerseTranslation"
+import { dayTextCacheControl } from "../../../../lib/httpCache"
+import { dayTextInVersion, fetchUpstreamDayText, recordDayText } from "../../../../lib/mobileDayText"
 
 /**
  * GET /api/bible/daytext[?version=<translation id>]
@@ -17,26 +18,20 @@ export async function GET(request: Request) {
   try {
     const requested = new URL(request.url).searchParams.get("version")
 
-    const res = await fetch("https://bijbelapi.com/api/daytext?version=sv", {
-      next: { revalidate: 86400 }, // cache 24 hours - one verse per day
-    })
+    // Same per-day upstream request (and Data Cache entry) as `/api/v1/daytext`.
+    const upstream = await fetchUpstreamDayText()
 
-    if (!res.ok) {
+    if (!upstream) {
       return NextResponse.json({ error: "Externe API niet bereikbaar" }, { status: 502 })
     }
 
-    const data = await res.json()
-
     // BijbelAPI returns English book names ("Ecclesiastes"); the app is Dutch-only,
     // and the Statenvertaling data is keyed on the canonical Dutch names.
-    const book = CANONICAL_NL[data.book] ?? data.book
+    const book = CANONICAL_NL[upstream.book] ?? upstream.book
     const base = {
-      text:      data.text,
-      reference: `${book} ${data.chapter}:${data.verse}`,
-      version:   "Statenvertaling",
+      ...upstream,
       book,
-      chapter:   Number(data.chapter),
-      verse:     Number(data.verse),
+      reference: dayTextReference(book, upstream.chapter, upstream.verse, upstream.verseEnd),
     }
 
     // Files the day in the shared archive that backs "Voorgaande dagen". Best
@@ -48,7 +43,7 @@ export async function GET(request: Request) {
       await dayTextInVersion(base, requested),
       // Everyone asking for the same translation gets the same verse today, so
       // one shared copy per translation serves them all.
-      { headers: { "Cache-Control": DAY_TEXT_CACHE_CONTROL } },
+      { headers: { "Cache-Control": dayTextCacheControl() } },
     )
   } catch {
     return NextResponse.json({ error: "Verbindingsfout" }, { status: 500 })

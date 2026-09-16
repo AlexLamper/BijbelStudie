@@ -27,6 +27,28 @@
 export const PUBLIC_CONTENT_CACHE_CONTROL =
   'public, max-age=3600, s-maxage=604800, stale-while-revalidate=86400';
 
-/** One verse per day upstream, so the shared copy expires hourly. */
-export const DAY_TEXT_CACHE_CONTROL =
-  'public, max-age=600, s-maxage=3600, stale-while-revalidate=86400';
+/** Seconds left in the current Europe/Amsterdam calendar day (at least 1). */
+export function secondsUntilAmsterdamMidnight(now = new Date()): number {
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/Amsterdam',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(now);
+  const part = (type: string) => Number(parts.find((p) => p.type === type)?.value ?? 0);
+  const elapsed = part('hour') * 3600 + part('minute') * 60 + part('second');
+  return Math.max(1, 86_400 - elapsed);
+}
+
+/**
+ * The verse of the day changes at Amsterdam midnight, so every cache lifetime
+ * - browser, CDN, and the stale-while-revalidate window after it - is capped
+ * at the time left in the day. Hourly shared copies as before during the day;
+ * no cache can hand out yesterday's verse after 00:00.
+ */
+export function dayTextCacheControl(now = new Date()): string {
+  const left = secondsUntilAmsterdamMidnight(now);
+  const sMaxAge = Math.min(3600, left);
+  return `public, max-age=${Math.min(600, left)}, s-maxage=${sMaxAge}, stale-while-revalidate=${left - sMaxAge}`;
+}
