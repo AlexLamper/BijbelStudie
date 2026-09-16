@@ -5,6 +5,8 @@ import connectMongoDB from "../../../lib/mongodb"
 import User from "../../../models/User"
 import Feedback from "../../../models/Feedback"
 import { clientIp, consume } from "../../../lib/rateLimit"
+import { signalRateKey } from "../../../lib/feedbackSignal"
+import { toRouteKey } from "../../../lib/analyticsRoutes"
 
 const ALLOWED_CATEGORIES = new Set(["bug", "feature", "praise", "other"])
 
@@ -48,6 +50,14 @@ const REASON_LABELS: Record<string, string> = {
 const PER_IP = { scope: "feedback:ip", limit: 5, windowMs: 60 * 60 * 1000 }
 /** 20 per account per day, so a signed-in enthusiast is never the problem. */
 const PER_USER = { scope: "feedback:user", limit: 20, windowMs: 24 * 60 * 60 * 1000 }
+/**
+ * The one-tap quiz signal has its own bucket. `StepQuiz` sends one request per
+ * question, so sharing the form's 5-per-IP budget meant a single quiz review
+ * exhausted it - further taps were refused and the reader's feedback form from
+ * that address was blocked for the rest of the hour. Keyed per account when
+ * signed in, per IP otherwise, and never charged against the form's budgets.
+ */
+const PER_QUIZ_SIGNAL = { scope: "feedback:quiz-signal", limit: 60, windowMs: 60 * 60 * 1000 }
 
 const MAX_BODY_BYTES = 16 * 1024
 const MAX_MESSAGE_LENGTH = 4000
@@ -75,20 +85,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Bericht is te lang" }, { status: 413 })
   }
 
-  if (consume(PER_IP, clientIp(request)).limited) {
-    return NextResponse.json(
-      { error: "Je hebt net al feedback gestuurd. Probeer het later opnieuw." },
-      { status: 429 },
-    )
-  }
-
   let body: Record<string, unknown>
   try {
     const raw = await request.text()
     if (raw.length > MAX_BODY_BYTES) {
       return NextResponse.json({ error: "Bericht is te lang" }, { status: 413 })
     }
-    body = JSON.parse(raw)
+    const parsed: unknown = JSON.parse(raw)
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return NextResponse.json({ error: "Ongeldige JSON" }, { status: 400 })
+    }
+    body = parsed as Record<string, unknown>
   } catch {
     return NextResponse.json({ error: "Ongeldige JSON" }, { status: 400 })
   }
@@ -102,6 +109,16 @@ export async function POST(request: Request) {
 
   const touchpointRaw = typeof body.touchpoint === "string" ? body.touchpoint : null
   const isQuizSignal = touchpointRaw === QUIZ_TOUCHPOINT
+  const ip = clientIp(request)
+
+  // The form's per-IP budget is charged only for a form submission, and before
+  // any database work.
+  if (!isQuizSignal && consume(PER_IP, ip).limited) {
+    return NextResponse.json(
+      { error: "Je hebt net al feedback gestuurd. Probeer het later opnieuw." },
+      { status: 429 },
+    )
+  }
 
   await connectMongoDB()
 
@@ -120,7 +137,7 @@ export async function POST(request: Request) {
         // Identity from the database, never from the body.
         name = u.name || ""
         email = u.email || ""
-        if (consume(PER_USER, String(u._id)).limited) {
+        if (!isQuizSignal && consume(PER_USER, String(u._id)).limited) {
           return NextResponse.json(
             { error: "Je hebt vandaag al veel feedback gestuurd. Bedankt - morgen weer." },
             { status: 429 },
@@ -137,6 +154,13 @@ export async function POST(request: Request) {
   // to a specific answer the reader just gave - it requires a signed-in
   // caller. There is no anonymous path for a prompted response.
   if (isQuizSignal) {
+    const quizKey = signalRateKey(userId ? String(userId) : null, ip)
+    if (consume(PER_QUIZ_SIGNAL, quizKey).limited) {
+      return NextResponse.json(
+        { error: "Te veel reacties achter elkaar. Probeer het later opnieuw." },
+        { status: 429 },
+      )
+    }
     if (!userId) {
       return NextResponse.json({ error: "Niet ingelogd" }, { status: 401 })
     }
@@ -208,6 +232,15 @@ export async function POST(request: Request) {
       ? Math.round(body.rating)
       : undefined
   const page = typeof body.page === "string" ? body.page.slice(0, 200) : ""
+  const subject = stripControlChars(typeof body.subject === "string" ? body.subject.trim() : "").slice(0, 120)
+  // `context.platform` is enum-validated; the route key is folded from a path
+  // (`lib/analyticsRoutes.ts`), never stored raw.
+  const rawContext =
+    body.context && typeof body.context === "object" && !Array.isArray(body.context)
+      ? (body.context as Record<string, unknown>)
+      : {}
+  const platform = rawContext.platform === "ios" || rawContext.platform === "android" ? rawContext.platform : "web"
+  const routeKey = toRouteKey(typeof rawContext.path === "string" ? rawContext.path : page)
 
   // Only when there is no account behind the submission does a self-reported
   // reply address get stored, and then under names that say what it is.
@@ -227,10 +260,12 @@ export async function POST(request: Request) {
     contactEmail,
     category,
     rating,
+    subject,
     message,
     page,
     userAgent,
     touchpoint: "unprompted",
+    context: { platform, routeKey },
   })
 
   return NextResponse.json({ ok: true })

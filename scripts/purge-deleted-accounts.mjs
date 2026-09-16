@@ -12,8 +12,11 @@
  * deliberately: it prints what it would remove, and only removes it when the
  * owner passes --write.
  *
- * Retention default is 90 days, the upper end of what the privacy policy
- * promises. Rows younger than --days are never touched, and neither is a row
+ * The same purge now runs daily and unattended through the Vercel Cron route
+ * app/api/internal/data-retention (lib/dataRetention.ts - keep the rules in
+ * step). This script stays for inspecting the archive and for a manual run.
+ *
+ * Retention default is 90 days, what the privacy policy promises. Rows younger than --days are never touched, and neither is a row
  * whose archived user is an admin account (`isAdmin` or ADMIN_EMAILS) unless
  * --include-admins is given - those are the copies that matter most.
  *

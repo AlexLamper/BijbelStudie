@@ -34,16 +34,18 @@ export function bannerGradient(key: string | number | undefined | null): string 
 /* ── Card ─────────────────────────────────────────────────────────────────── */
 
 export function Card({
+  id,
   children,
   className = "",
   style,
 }: {
+  id?: string;
   children?: React.ReactNode;
   className?: string;
   style?: React.CSSProperties;
 }) {
   return (
-    <div className={`rounded-card border border-line bg-surface ${className}`} style={style}>
+    <div id={id} className={`rounded-card border border-line bg-surface ${className}`} style={style}>
       {children}
     </div>
   );

@@ -4,6 +4,8 @@ import connectMongoDB from "../../../../lib/mongodb"
 import User from "../../../../models/User"
 import { authOptions } from "../../../../lib/authOptions"
 import { grantXp } from "../../../../lib/gamification"
+import { isAdminEmail } from "../../../../lib/adminEmails"
+import { resolveIsPro } from "../../../../lib/mobilePremium"
 import { isSafeBookKey, isSafeChapter } from "../../../../lib/readingProgress"
 import { toCanonicalDutchBook } from "../../../../lib/readChaptersCanon"
 
@@ -105,7 +107,7 @@ export async function POST(request: NextRequest) {
     const xp =
       alreadyRead || body?.awardXp === false
         ? null
-        : await grantXp(String(user._id), "chapter_read", { isPro: Boolean(user.subscribed) })
+        : await grantXp(String(user._id), "chapter_read", { isPro: resolveIsPro(user, isAdminEmail(session.user.email)) })
 
     return NextResponse.json({
       message: "Last read chapter updated successfully",

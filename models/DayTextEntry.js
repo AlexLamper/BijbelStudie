@@ -18,6 +18,8 @@ const DayTextEntrySchema = new mongoose.Schema(
     book: { type: String, required: true },
     chapter: { type: Number, required: true },
     verse: { type: Number, required: true },
+    /** Last verse of a short passage (e.g. 4:6-7); absent for one verse. */
+    verseEnd: { type: Number },
     version: { type: String, default: "" },
   },
   { timestamps: true }

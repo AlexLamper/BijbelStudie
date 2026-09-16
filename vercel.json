@@ -3,6 +3,10 @@
     {
       "path": "/api/internal/reconcile-subscriptions",
       "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/internal/data-retention",
+      "schedule": "30 3 * * *"
     }
   ]
 }

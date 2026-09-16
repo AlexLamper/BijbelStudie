@@ -115,6 +115,11 @@ export const EVENTS = {
   annual_upsell_dismissed: {},
   billing_issue_shown: {},
   billing_issue_resolved_click: {},
+  /** A single-chapter study ("Losse studie") was finished. */
+  chapter_study_completed: {
+    logged_in: ["yes", "no"],
+    platform: PLATFORM,
+  },
 } as const;
 
 export type EventName = keyof typeof EVENTS;

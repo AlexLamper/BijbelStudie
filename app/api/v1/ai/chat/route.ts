@@ -256,7 +256,8 @@ export async function POST(req: Request) {
 
     if (cacheable) await writeCachedAnswer(cacheCtx, reply, model);
 
-    return jsonV1({ reply, used: newCount, cap: unlimited ? null : cap });
+    // `model` lets the app attach it to an AI-answer report (`/api/v1/feedback/ai-report`).
+    return jsonV1({ reply, used: newCount, cap: unlimited ? null : cap, model });
   } catch (error) {
     return handleV1Error(error);
   }

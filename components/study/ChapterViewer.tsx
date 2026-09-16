@@ -1,5 +1,6 @@
 ﻿import React, { useEffect, useState } from 'react';
-import { AlertCircle, Plus } from 'lucide-react';
+import Link from 'next/link';
+import { AlertCircle, ArrowRight, Plus } from 'lucide-react';
 import { SkeletonChapter } from '../ui/skeletons';
 import { CreateNoteModal } from './CreateNoteModal';
 import { ReadingPreferences } from '../../hooks/useReadingPreferences';
@@ -26,6 +27,8 @@ type Props = {
   onAnnotationsChanged?: () => void;
   /** Publishes the chapter as one string, for the toolbar's read-aloud button. */
   onChapterText?: (text: string) => void;
+  /** The single-chapter study for this chapter; a link under the last verse when set. */
+  studyHref?: string | null;
 };
 
 type VerseData = { [key: string]: string };
@@ -52,6 +55,7 @@ export default function ChapterViewer({
   annotations,
   onAnnotationsChanged,
   onChapterText,
+  studyHref,
 }: Props) {
   const [verses, setVerses] = useState<VerseData>({});
   const [loading, setLoading] = useState(false);
@@ -301,6 +305,20 @@ export default function ChapterViewer({
                 );
               })}
             </div>
+
+            {/* End of the chapter: the natural moment to go deeper into it. */}
+            {studyHref && (
+              <div className="mt-6 flex justify-center">
+                <Link
+                  href={studyHref}
+                  data-track="chapter_study_reader_end"
+                  className="inline-flex items-center gap-2 rounded-btn border border-line bg-surface px-4 py-2 text-[13.5px] font-semibold text-teal-dark no-underline transition-colors hover:bg-line-soft dark:text-teal-400"
+                >
+                  Bestudeer dit hoofdstuk
+                  <ArrowRight size={15} aria-hidden />
+                </Link>
+              </div>
+            )}
 
             {/* The licensing line. `getBibleAttribution` returns it verbatim
                 and nothing here may reword, truncate or wrap it - the NBG51

@@ -33,6 +33,8 @@ export const TOUCHPOINTS = [
   'subscription_cancel',
   'dormant_return',
   'pmf_survey',
+  'study_complete',
+  'paywall_dismiss',
 ] as const;
 
 export type Touchpoint = (typeof TOUCHPOINTS)[number];
@@ -81,7 +83,23 @@ export interface PromptDef {
    * micro-signals, which carry no dismissal cost and have their own limits.
    */
   budgeted: boolean;
+  /**
+   * The option keys are "1" to "5" and the chosen one is also stored as the
+   * document's `rating`, so the inbox's rating filter covers it.
+   */
+  ratingScale?: boolean;
 }
+
+/** Five faces for a 1 to 5 rating. The keys are the numbers. */
+const RATING_OPTIONS: PromptOption[] = [
+  { key: '1', label: '😞' },
+  { key: '2', label: '🙁' },
+  { key: '3', label: '😐' },
+  { key: '4', label: '🙂' },
+  { key: '5', label: '😄' },
+];
+
+const OPTIONAL_NOTE: PromptFollowUp = { key: 'toelichting', question: 'Wil je er iets over kwijt? (optioneel)' };
 
 /**
  * The five step labels, taken from the rail rather than retyped, so the
@@ -196,6 +214,77 @@ export const PROMPTS: Record<string, PromptDef> = {
     },
     maxLen: 600,
     segments: ['nieuw', 'actief', 'verdiepend'],
+    cooldownDays: 90,
+    lifetimeCap: 2,
+    platforms: ['web'],
+    budgeted: true,
+  },
+
+  /**
+   * S1 - a whole study finished. Asked on the next dashboard visit rather
+   * than on the reward screen itself, so the finish stays a finish. A rating
+   * first (one tap), then an optional line.
+   */
+  s1_study_rating: {
+    touchpoint: 'study_complete',
+    version: 1,
+    question: 'Je hebt een studie afgerond. Hoe vond je hem?',
+    input: 'choice',
+    options: RATING_OPTIONS,
+    followUp: Object.fromEntries(RATING_OPTIONS.map((option) => [option.key, OPTIONAL_NOTE])),
+    maxLen: 600,
+    segments: ['nieuw', 'actief', 'verdiepend', 'afhakend', 'slapend', 'opgezegd'],
+    cooldownDays: 60,
+    lifetimeCap: 3,
+    platforms: ['web'],
+    budgeted: true,
+    ratingScale: true,
+  },
+
+  /**
+   * W1 - closing an upgrade prompt with "Niet nu". Outside the budget for the
+   * same reason as P1: the reader is already saying no, and this only asks
+   * why. Once per reader, ever.
+   */
+  w1_paywall_reason: {
+    touchpoint: 'paywall_dismiss',
+    version: 1,
+    question: 'Wat houdt je tegen?',
+    input: 'choice',
+    options: [
+      { key: 'te_duur', label: 'Te duur' },
+      { key: 'onduidelijk', label: 'Weet niet wat ik krijg' },
+      { key: 'later', label: 'Later misschien' },
+      { key: 'gratis_genoeg', label: 'Gratis is genoeg' },
+    ],
+    maxLen: 0,
+    segments: ['nieuw', 'actief', 'verdiepend', 'afhakend', 'slapend', 'opgezegd'],
+    cooldownDays: 365,
+    lifetimeCap: 1,
+    platforms: ['web'],
+    budgeted: false,
+  },
+
+  /**
+   * D1 - an enrolled reader back after 14 or more quiet days. Asked on the
+   * dashboard, once, before they have had to explain themselves anywhere else.
+   */
+  d1_dormant_reason: {
+    touchpoint: 'dormant_return',
+    version: 1,
+    question: 'Welkom terug. Wat hield je tegen?',
+    input: 'choice',
+    options: [
+      { key: 'geen_tijd', label: 'Geen tijd' },
+      { key: 'vergeten', label: 'Vergeten' },
+      { key: 'te_zwaar', label: 'Te zwaar of te lang' },
+      { key: 'niet_gezocht', label: 'Niet wat ik zocht' },
+      { key: 'anders', label: 'Iets anders' },
+    ],
+    followUp: { anders: { key: 'toelichting', question: 'Wat was het?' } },
+    maxLen: 600,
+    // 14+ idle days resolves to one of these (lib/feedbackSegments.ts).
+    segments: ['afhakend', 'slapend', 'opgezegd'],
     cooldownDays: 90,
     lifetimeCap: 2,
     platforms: ['web'],

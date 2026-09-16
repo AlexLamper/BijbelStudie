@@ -11,9 +11,11 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "../../components/ui/dropdown-menu"
 import { EditNoteModal } from "../../components/study/EditNoteModal"
+import { ConfirmDialog } from "../../components/ui/ConfirmDialog"
 import AppShell from "../../components/shell/AppShell"
 import { Card, Skeleton } from "../../components/kit/primitives"
 import SavedStudies from "./SavedStudies"
+import { INTENT_EVENT } from "../../lib/commands/deepLink"
 
 interface Note {
   _id: string
@@ -70,8 +72,8 @@ const TABS: { value: string; label: string }[] = [
  *
  * The data layer is untouched: the same /api/notes query with the same
  * server-side book/tag/type filters, the same twenty per page, the same edit
- * modal and the same delete (same confirm wording, same DELETE, same local
- * removal). What changed is what those values render as, plus two things worth
+ * modal and the same delete (same DELETE, same local removal, confirmed in an
+ * in-app ConfirmDialog rather than window.confirm). What changed is what those values render as, plus two things worth
  * naming:
  *
  * - "Bladwijzers" is the design's third tab and the web has no verse-bookmark
@@ -98,6 +100,8 @@ export default function NotesPage() {
   const [totalPages, setTotalPages]     = useState(1)
   const [editingNote, setEditingNote]   = useState<Note | null>(null)
   const [showEditModal, setShowEditModal] = useState(false)
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
+  const [deleting, setDeleting]         = useState(false)
 
   const uniqueBooks = Array.from(new Set(notes.map(n => n.book))).sort()
   const uniqueTags  = Array.from(new Set(notes.flatMap(n => n.tags))).sort()
@@ -106,10 +110,17 @@ export default function NotesPage() {
 
   // Deep link from the study page: /notities?tab=bewaard. Read after mount
   // rather than through useSearchParams, which would need a Suspense boundary.
+  // Also on INTENT_EVENT: the command palette pushing ?tab=bewaard while the
+  // reader is already on /notities does not remount the page.
   useEffect(() => {
-    if (new URLSearchParams(window.location.search).get("tab") === "bewaard") {
-      setSelectedType(SAVED_TAB)
+    function applyTab() {
+      if (new URLSearchParams(window.location.search).get("tab") === "bewaard") {
+        setSelectedType(SAVED_TAB)
+      }
     }
+    applyTab()
+    window.addEventListener(INTENT_EVENT, applyTab)
+    return () => window.removeEventListener(INTENT_EVENT, applyTab)
   }, [])
 
   useEffect(() => {
@@ -174,13 +185,20 @@ export default function NotesPage() {
     return { byBook, noteCount, highlightCount }
   }, [notes])
 
-  const deleteNote = async (id: string) => {
-    if (!confirm("Weet u zeker dat u deze notitie wilt verwijderen?")) return
+  const confirmDelete = async () => {
+    const id = pendingDeleteId
+    if (!id) return
+    setDeleting(true)
     try {
-      await fetch(`/api/notes/${id}`, { method: "DELETE" })
-      setNotes(notes.filter(n => n._id !== id))
+      const res = await fetch(`/api/notes/${id}`, { method: "DELETE" })
+      if (!res.ok) throw new Error("delete failed")
+      setNotes(prev => prev.filter(n => n._id !== id))
+      setError(null)
     } catch {
       setError("Verwijderen mislukt.")
+    } finally {
+      setDeleting(false)
+      setPendingDeleteId(null)
     }
   }
 
@@ -344,7 +362,7 @@ export default function NotesPage() {
                           <DropdownMenuItem onClick={() => editNote(note)}>
                             <Edit className="mr-2 h-4 w-4" /> Bewerken
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => deleteNote(note._id)} className="text-destructive">
+                          <DropdownMenuItem onClick={() => setPendingDeleteId(note._id)} className="text-destructive">
                             <Trash2 className="mr-2 h-4 w-4" /> Verwijderen
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -539,6 +557,19 @@ export default function NotesPage() {
         onClose={() => { setShowEditModal(false); setEditingNote(null) }}
         note={editingNote}
         onSave={handleSaved}
+      />
+
+      <ConfirmDialog
+        open={pendingDeleteId !== null}
+        onCancel={() => setPendingDeleteId(null)}
+        onConfirm={confirmDelete}
+        title="Notitie verwijderen?"
+        description="Deze notitie wordt definitief verwijderd. Dit kan niet ongedaan worden gemaakt."
+        confirmLabel="Verwijderen"
+        pendingLabel="Verwijderen…"
+        cancelLabel="Annuleren"
+        pending={deleting}
+        destructive
       />
     </AppShell>
   )

@@ -22,6 +22,12 @@ import { promoteReflectionToNote, recordLessonCompletion } from '../../../../lib
 import { upsertLessonState } from '../../../../lib/lessonStateWrite';
 import { nextPrompt } from '../../../../lib/feedbackService';
 import type { SerialisedPrompt } from '../../../../lib/feedbackPrompts';
+import {
+  adjacentChapter,
+  chapterRefPayload,
+  findBook,
+  type ChapterRefPayload,
+} from '../../../../lib/chapterStudyRef';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,6 +55,15 @@ interface LessonStateDoc {
   };
   startedAt: Date;
   completedAt: Date | null;
+}
+
+/**
+ * True for the Flutter app, which authenticates with `Authorization: Bearer`
+ * (see lib/apiAuth resolveUser); the website sends its cookie session instead.
+ */
+function isBearerRequest(req: Request): boolean {
+  const header = req.headers.get('authorization') ?? '';
+  return header.toLowerCase().startsWith('bearer ') && header.slice(7).trim().length > 0;
 }
 
 function serialise(studyId: string, lessonDay: number, doc: LessonStateDoc | null) {
@@ -104,12 +119,40 @@ export async function GET(req: Request) {
 }
 
 /**
- * `{ studyId, lessonDay, currentStep?, completeStep?, reflectionText?, complete? }`
+ * The note tag a reflection written in a single-chapter study carries, so those
+ * notes can be found apart from the ones written inside a followed study.
+ */
+const CHAPTER_NOTE_TAG = 'hoofdstuk';
+
+/**
+ * The chapter after the one this lesson reads, for "Volgend hoofdstuk
+ * bestuderen". Null after Openbaring 22 or for a passage outside the canon.
+ */
+function nextChapterFor(book: string, chapter: number): ChapterRefPayload | null {
+  const found = findBook(book);
+  if (!found) return null;
+  const next = adjacentChapter(found.slug, chapter, 1);
+  return next ? chapterRefPayload(next) : null;
+}
+
+/**
+ * `{ studyId, lessonDay, currentStep?, completeStep?, reflectionText?, complete?, entry? }`
  *
  * One endpoint for every write the flow makes, because they all happen on the
  * same document and separating them would mean two round trips per step
  * transition. `complete: true` is the only branch that touches the XP ledger,
  * and it does so through lib/studyCompletion like every other caller.
+ *
+ * `entry: 'chapter'` marks a single-chapter study (/studie/hoofdstuk/...): the
+ * same lesson of the book study, opened WITHOUT an enrollment. The ledger and
+ * the lesson state are written exactly as for any lesson, so the chapter counts
+ * toward the book study and never pays twice. What changes: the resume cursor
+ * is never moved (there may be no enrollment, and studying Romeinen 8 on its
+ * own must not drag a followed study's "verder met les" there), nothing ever
+ * creates an enrollment, the promoted note is tagged `hoofdstuk`, the response
+ * carries `chapterNext`, and no feedback prompt is asked (its lesson 2/7 rule
+ * means nothing for a chapter picked out of a book). Absent `entry` is the old
+ * behaviour, byte for byte, so shipped clients are unaffected.
  */
 export async function PATCH(req: Request) {
   try {
@@ -118,6 +161,7 @@ export async function PATCH(req: Request) {
 
     const studyId = typeof body.studyId === 'string' ? body.studyId.trim() : '';
     const lessonDay = Number(body.lessonDay);
+    const chapterEntry = body.entry === 'chapter';
 
     if (!studyId || !Number.isInteger(lessonDay)) {
       return errorV1('MISSING_FIELDS', 400, 'studyId en lessonDay zijn verplicht');
@@ -265,7 +309,9 @@ export async function PATCH(req: Request) {
             chapter: passage.chapter,
             verseStart: passage.verseStart,
             verseEnd: passage.verseEnd,
-            tags: content?.reflection?.noteTags,
+            tags: chapterEntry
+              ? [...(content?.reflection?.noteTags ?? []), CHAPTER_NOTE_TAG]
+              : content?.reflection?.noteTags,
             existingNoteId: current.reflection.noteId ? String(current.reflection.noteId) : null,
           });
 
@@ -299,8 +345,16 @@ export async function PATCH(req: Request) {
        *
        * It never throws outward: a question is the most optional thing on this
        * screen, and the reader keeps what they earned regardless.
+       *
+       * Website only. The app never renders `feedbackPrompt`, and `nextPrompt`
+       * records the prompt as shown - asking on its behalf would burn the
+       * reader's cooldown and budget on a question nobody saw.
        */
-      const askable = completion.recorded && !completion.studyCompleted;
+      const askable =
+        completion.recorded &&
+        !completion.studyCompleted &&
+        !isBearerRequest(req) &&
+        !chapterEntry;
       if (askable && (lessonDay === 2 || lessonDay === 7)) {
         try {
           feedbackPrompt = await nextPrompt({
@@ -317,11 +371,17 @@ export async function PATCH(req: Request) {
       // ledger every time it runs, so a skipped sync is repaired by the next
       // lesson - whereas a throw here would hand the reader an error for a
       // lesson that is already recorded and already marked complete.
+      //
+      // Also in chapter mode: it only ever updates an EXISTING enrollment (the
+      // count, and a cursor that only moves forward) and creates none, so a
+      // chapter studied on its own is counted in the book study it belongs to.
       try {
-        await syncEnrollmentAfterLesson(auth.id, studyId, nextLessonDay(study, lessonDay));
+        await syncEnrollmentAfterLesson(auth.id, studyId, lessonDay);
       } catch (error) {
         console.error('[study-lesson-state] enrollment sync failed:', error);
       }
+    } else if (chapterEntry) {
+      // A single-chapter study never moves a resume cursor. See the header.
     } else if (set.currentStep !== undefined) {
       await moveCursor(auth.id, studyId, lessonDay, set.currentStep as never);
     } else if (set['reflection.text'] !== undefined) {
@@ -353,6 +413,9 @@ export async function PATCH(req: Request) {
             xp: completion.xp,
             noteId,
             nextLessonDay: nextLessonDay(study, lessonDay),
+            ...(chapterEntry
+              ? { chapterNext: nextChapterFor(lesson.book, lesson.chapter) }
+              : {}),
           }
         : null,
       feedbackPrompt,

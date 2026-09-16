@@ -138,6 +138,7 @@ export function Footer() {
               {[
                 { href: "/privacybeleid",   label: "Privacybeleid" },
                 { href: "/algemene-voorwaarden", label: "Servicevoorwaarden" },
+                { href: "/account-verwijderen", label: "Account verwijderen" },
               ].map(({ href, label }) => (
                 <li key={href}>
                   <Link href={href}

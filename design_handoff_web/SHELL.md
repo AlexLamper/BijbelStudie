@@ -41,7 +41,7 @@ Van links naar rechts, precies vijf onderdelen:
 
 1. **Titel** - alleen de paginanaam, Inter 700 · 18 px · ls −0.2. Geen subtitel, geen breadcrumb, geen datum.
 2. **Spacer** `flex-1`
-3. **Globaal zoekveld** - 260 px, hoogte 38, radius 10, `line-soft`, padding 0 12, gap 9: `Search` 17 px `ink-muted`, placeholder "Zoek vers, studie of notitie" Inter 400 · 13 px · `ink-faint` met `flex-1`, en helemaal rechts de toets-hint `⌘K`: Inter 600 · 10.5 px monospace · `ink-faint`, rand 1 px `line`, radius 5, padding 2 5, wit.
+3. **Globaal zoekveld** - 260 px, hoogte 38, radius 10, `line-soft`, padding 0 12, gap 9: `Search` 17 px `ink-muted`, placeholder "Zoek pagina, instelling of hulp" Inter 400 · 13 px · `ink-faint` met `flex-1`, en helemaal rechts de toets-hint `⌘K`: Inter 600 · 10.5 px monospace · `ink-faint`, rand 1 px `line`, radius 5, padding 2 5, wit. Het veld opent het commandopalet (`components/search/`): pagina's, instellingen, acties en hulp, volledig client-side. ⌘/Ctrl-K opent en sluit, "/" opent. Het zoekt bewust niet in bijbeltekst, commentaren of notities.
 4. **Meldingen** - 38 × 38, radius 10, `Bell` 19 px `ink-body`, met een stip van 7 px `warn` met 1.5 px witte rand op `right:9 top:9`.
 5. **Profiel** - wrapper `relative`; boomavatar 34 px (`overflow:hidden`, radius 50%) en **als sibling daarnaast, niet erin**, de streakbadge: wit, radius 9999, padding 2 8, schaduw `0 1px 5px rgba(17,24,39,.22)`, Inter 700 · 12 px · `teal-dark`, op `right:-9 bottom:-3`.
 

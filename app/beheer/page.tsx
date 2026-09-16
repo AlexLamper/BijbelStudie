@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { BarChart3, CreditCard, MessageSquare, RefreshCw, Search, Settings, Users } from "lucide-react"
 import BillingHealthCard, { type BillingStats } from "../../components/admin/BillingHealthCard"
+import NewFeedbackCard from "../../components/admin/NewFeedbackCard"
 import { ADMIN_BUTTON, ADMIN_FIELD, ADMIN_PRIMARY, isRecentlyActive, relativeTime } from "../../components/admin/adminSurface"
 import OnboardingPreviewButton from "../../components/admin/OnboardingPreviewButton"
 import AppShell from "../../components/shell/AppShell"
@@ -307,6 +308,8 @@ export default function AdminDashboardPage() {
           />
           <StatCard className="min-w-0" label="Actieve reeksen" value={formatNumber(stats?.users.activeStreak)} />
         </div>
+
+        <NewFeedbackCard />
 
         {/* ── The users table ───────────────────────────────────────── */}
         <Card className="flex-none overflow-hidden">

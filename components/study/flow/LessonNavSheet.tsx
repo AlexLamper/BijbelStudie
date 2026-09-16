@@ -28,10 +28,13 @@ export default function LessonNavSheet({
   open,
   onClose,
   studyHref,
+  backLabel = 'Terug naar de studie',
 }: {
   open: boolean;
   onClose: () => void;
   studyHref: string;
+  /** The first row's words; a single-chapter study goes back to the reader. */
+  backLabel?: string;
 }) {
   useEffect(() => {
     if (!open) return;
@@ -43,11 +46,19 @@ export default function LessonNavSheet({
   }, [open, onClose]);
 
   if (!open) return null;
-  return <SheetBody onClose={onClose} studyHref={studyHref} />;
+  return <SheetBody onClose={onClose} studyHref={studyHref} backLabel={backLabel} />;
 }
 
 /** Split out so the admin check only runs once the sheet is actually opened. */
-function SheetBody({ onClose, studyHref }: { onClose: () => void; studyHref: string }) {
+function SheetBody({
+  onClose,
+  studyHref,
+  backLabel,
+}: {
+  onClose: () => void;
+  studyHref: string;
+  backLabel: string;
+}) {
   const pathname = usePathname();
   const isAdmin = useIsAdmin();
 
@@ -80,7 +91,7 @@ function SheetBody({ onClose, studyHref }: { onClose: () => void; studyHref: str
         <div className="min-h-0 flex-1 overflow-y-auto px-2 py-3 pb-[max(12px,env(safe-area-inset-bottom))]">
           <Link href={studyHref} onClick={onClose} className={`${row} ${INK} hover:bg-les-card`}>
             <ArrowLeft size={18} className="flex-none text-les-accent" />
-            Terug naar de studie
+            {backLabel}
           </Link>
 
           {NAV_GROUPS.map((group) => {

@@ -15,8 +15,8 @@ import { useIsPro } from "../../hooks/useIsPro";
  * corner.
  *
  * The ring is the shared account frame (./AccountAvatar): a thin teal ring
- * with a white gap for Pro, a hairline for a free account, both read from
- * `useIsPro`. It used to be a gold ring drawn for everyone, which read as a Pro
+ * with a white gap for Pro (gold when the studio ring is `goud`), a hairline
+ * for a free account. It used to be a gold ring drawn for everyone, which read as a Pro
  * mark on free accounts. The PRO pill itself is not drawn here - on these cards
  * the corner belongs to the level marker. The caption and the link belong to
  * the card the disc sits in.

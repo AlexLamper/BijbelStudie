@@ -57,6 +57,7 @@ export default function LevensboomSection() {
     <>
       <div className="divide-y divide-line-soft">
         <Row
+          id="instelling-boom-tonen"
           label="Boom tonen"
           hint="Je XP, niveau en badges lopen door als je hem verbergt"
           checked={!prefs?.disabled}
@@ -64,6 +65,7 @@ export default function LevensboomSection() {
           onChange={(value) => void setPrefs({ disabled: !value })}
         />
         <Row
+          id="instelling-minder-beweging"
           label="Minder beweging"
           hint="Geen wiegen, deeltjes of groei-animatie"
           checked={Boolean(prefs?.reducedMotion)}
@@ -71,6 +73,7 @@ export default function LevensboomSection() {
           onChange={(value) => void setPrefs({ reducedMotion: value })}
         />
         <Row
+          id="instelling-openbaar-profiel"
           label="Openbaar profiel"
           hint="Een pagina met je boom, je voornaam, je niveau en je badges. Nooit je e-mail, reeks of leesgeschiedenis."
           checked={Boolean(prefs?.publicProfile)}
@@ -117,12 +120,15 @@ export default function LevensboomSection() {
 }
 
 function Row({
+  id,
   label,
   hint,
   checked,
   disabled,
   onChange,
 }: {
+  /** An `instelling-*` anchor for deep links from the command palette. */
+  id?: string;
   label: string;
   hint: string;
   checked: boolean;
@@ -130,7 +136,7 @@ function Row({
   onChange: (value: boolean) => void;
 }) {
   return (
-    <div className={ROW}>
+    <div id={id} className={`${ROW} scroll-mt-6`}>
       <div className="min-w-0 sm:max-w-[26rem]">
         <p className="text-[14.5px] text-ink">{label}</p>
         <p className="mt-[3px] text-[12px] leading-relaxed text-ink-faint">{hint}</p>

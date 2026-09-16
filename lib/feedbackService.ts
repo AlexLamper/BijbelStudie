@@ -20,6 +20,7 @@ import { tenureBucket } from './analyticsSchema';
 import {
   choosePrompt,
   findPromptState,
+  sampleRateFromEnv,
   shownUpdate,
   type FeedbackStateLike,
 } from './feedbackEligibility';
@@ -152,6 +153,7 @@ export async function nextPrompt({
     now,
     platform,
     userId,
+    sampleRate: sampleRateFromEnv(process.env.FEEDBACK_SAMPLE_RATE),
   });
   if (!promptId) return null;
 
@@ -247,9 +249,15 @@ export async function submitResponse({
   const segment = resolveSegment(reader, now);
   const buckets = buildContextBuckets(reader, now);
 
+  // A rating prompt also fills the top-level `rating`, so the inbox can filter
+  // on it next to the ratings from the /feedback form.
+  const chosen = validated.find((entry) => entry.key === 'keuze')?.value;
+  const rating = def.ratingScale && chosen && /^[1-5]$/.test(chosen) ? Number(chosen) : undefined;
+
   await Feedback.create({
     userId,
     category: 'other',
+    ...(rating ? { rating } : {}),
     // The answer lives in `answers`; `message` carries the free text as well so
     // the existing inbox and the admin list keep working unchanged.
     message: validated.map((entry) => entry.value).join(' | ').slice(0, 2000),

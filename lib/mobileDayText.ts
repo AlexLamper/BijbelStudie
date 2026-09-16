@@ -9,20 +9,16 @@
 import { unstable_cache } from 'next/cache';
 import {
   DAYTEXT_DEFAULT_VERSION,
+  dayTextReference,
+  parseUpstreamDayText,
+  passageFromChapter,
   resolveDayTextVersion,
-  verseFromChapter,
   withDayTextVersion,
+  type DayTextBase,
   type DayTextInVersion,
 } from './dailyVerseTranslation';
 
-export type DayText = {
-  text: string;
-  reference: string;
-  version: string;
-  book: string;
-  chapter: number;
-  verse: number;
-};
+export type DayText = DayTextBase;
 
 /**
  * The Amsterdam calendar day, `yyyy-mm-dd` - the archive's key.
@@ -56,7 +52,7 @@ export async function recordDayText(verse: DayText, date = dayKeyNL()): Promise<
     const entry: DayText = {
       ...verse,
       book,
-      reference: `${book} ${verse.chapter}:${verse.verse}`,
+      reference: dayTextReference(book, verse.chapter, verse.verse, verse.verseEnd),
     };
     const [{ default: connectMongoDB }, { default: DayTextEntry }] = await Promise.all([
       import('./mongodb'),
@@ -92,9 +88,10 @@ export async function readDayTextHistory(limit = 60): Promise<(DayText & { date:
 }
 
 /**
- * One verse's text in one translation, cached across instances.
+ * One verse's (or short passage's) text in one translation, cached across
+ * instances.
  *
- * A (translation, book, chapter, verse) text never changes, so the Data Cache
+ * A (translation, book, chapter, verse range) text never changes, so the Data Cache
  * entry is safe for a week; the args are part of the key, so translations can
  * never bleed into each other. This matters for CPU: NBG51 is a single-file
  * source, and a cold instance would otherwise re-parse the whole translation
@@ -102,7 +99,7 @@ export async function readDayTextHistory(limit = 60): Promise<(DayText & { date:
  * "not synced yet" must not stay missing for a week.
  */
 const cachedVerseText = unstable_cache(
-  async (versionId: string, book: string, chapter: number, verse: number): Promise<string> => {
+  async (versionId: string, book: string, chapter: number, verse: number, verseEnd?: number): Promise<string> => {
     const [{ getChapter }, { CANONICAL_NL }] = await Promise.all([
       import('./local-data'),
       import('./book-mapping'),
@@ -112,12 +109,12 @@ const cachedVerseText = unstable_cache(
     const names = Array.from(new Set([book, CANONICAL_NL[book]].filter(Boolean) as string[]));
     for (const name of names) {
       const data = await getChapter(versionId, name, chapter);
-      const text = verseFromChapter(data?.verses, verse);
+      const text = passageFromChapter(data?.verses, verse, verseEnd);
       if (text) return text;
     }
     throw new Error('DAYTEXT_VERSE_MISSING');
   },
-  ['daytext-verse-text-v1'],
+  ['daytext-verse-text-v2'],
   { revalidate: 604_800 },
 );
 
@@ -137,30 +134,34 @@ export async function dayTextInVersion(
     return withDayTextVersion(base, versionId, null);
   }
   try {
-    const text = await cachedVerseText(versionId, base.book, base.chapter, base.verse);
+    const text = await cachedVerseText(versionId, base.book, base.chapter, base.verse, base.verseEnd);
     return withDayTextVersion(base, versionId, text);
   } catch {
     return withDayTextVersion(base, versionId, null);
   }
 }
 
-export async function fetchDayText(): Promise<DayText | null> {
-  const res = await fetch('https://bijbelapi.com/api/daytext?version=sv', {
-    next: { revalidate: 86400 }, // one verse per day
-  });
+/**
+ * BijbelAPI's verse of the day for one Amsterdam calendar day.
+ *
+ * BijbelAPI picks from its curated pool by date; `seed=<yyyy-mm-dd>` makes
+ * both sides agree on which day it is (its server runs in UTC) and, because
+ * the date is part of the URL, gives every day its own Data Cache entry - the
+ * old date-less URL kept a verse for 24 h from whenever it was first fetched,
+ * well into the next day. English book names, as upstream sends them.
+ */
+export async function fetchUpstreamDayText(date = dayKeyNL()): Promise<DayText | null> {
+  const res = await fetch(
+    `https://bijbelapi.com/api/daytext?version=sv&seed=${encodeURIComponent(date)}`,
+    { next: { revalidate: 86400 } }, // one verse per day, and one URL per day
+  );
   if (!res.ok) return null;
+  return parseUpstreamDayText(await res.json());
+}
 
-  const data = await res.json();
-  if (!data?.text) return null;
-
-  const verse: DayText = {
-    text: data.text,
-    reference: `${data.book} ${data.chapter}:${data.verse}`,
-    version: 'Statenvertaling',
-    book: data.book,
-    chapter: Number(data.chapter),
-    verse: Number(data.verse),
-  };
+export async function fetchDayText(): Promise<DayText | null> {
+  const verse = await fetchUpstreamDayText();
+  if (!verse) return null;
 
   await recordDayText(verse);
   return verse;

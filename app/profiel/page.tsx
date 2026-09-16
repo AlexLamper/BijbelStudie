@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { useSession, getSession, signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Check, Loader2, LogOut, Pencil, X } from "lucide-react"
+import { Award, BookOpenCheck, Check, Flame, GraduationCap, Loader2, LogOut, Pencil, X, type LucideIcon } from "lucide-react"
 import { BadgesDialog, BadgeRings, BADGE_TOTAL } from "../../components/profile/badges"
 import ActivityFeed, { type ActivityFilter } from "../../components/profile/ActivityFeed"
 import AppShell from "../../components/shell/AppShell"
@@ -12,6 +12,7 @@ import Tabs from "../../components/kit/Tabs"
 import { Card, Pill, ProgressBar, Skeleton, StatCard } from "../../components/kit/primitives"
 import { useLevensboom } from "../../hooks/useLevensboom"
 import { useIsPro } from "../../hooks/useIsPro"
+import { INTENT_EVENT, PROFIEL_ACTIES, consumeIntent, readIntent } from "../../lib/commands/deepLink"
 import AccountAvatar from "../../components/kit/AccountAvatar"
 import TreeAvatar from "../../components/kit/TreeAvatar"
 import { FreeMembershipPanel, ProMembershipPanel, type BillingInfo } from "../../components/profile/MembershipPanel"
@@ -94,6 +95,25 @@ export default function ProfilePage() {
     }
     fetchUserData()
   }, [mounted, router])
+
+  // Deep links from the command palette: ?actie=naam|bio opens that editor,
+  // ?actie=badges the badges dialog. Waits for the profile, since the editors
+  // are drafted from it, then consumes the intent.
+  const profileReady = mounted && !loading && !!user
+  useEffect(() => {
+    if (!profileReady) return
+    function applyIntent() {
+      const actie = readIntent("actie", PROFIEL_ACTIES)
+      if (!actie) return
+      consumeIntent("actie")
+      if (actie === "naam") setEditing("name")
+      else if (actie === "bio") setEditing("bio")
+      else setBadgesOpen(true)
+    }
+    applyIntent()
+    window.addEventListener(INTENT_EVENT, applyIntent)
+    return () => window.removeEventListener(INTENT_EVENT, applyIntent)
+  }, [profileReady])
 
   // Plan and renewal date for the membership panel - read-only, real Pro only.
   useEffect(() => {
@@ -308,10 +328,10 @@ export default function ProfilePage() {
             </Card>
 
             <div className="grid flex-none grid-cols-2 gap-[13px] sm:grid-cols-4">
-              <StatCard label="Leesreeks" value={waiting ? "-" : streak} />
-              <StatCard label="Badges" value={waiting ? "-" : `${badgeCount}/${BADGE_TOTAL}`} />
-              <StatCard label="Lessen afgerond" value={levensboom ? levensboom.lessonsCompleted : "-"} />
-              <StatCard label="Studies afgerond" value={levensboom ? levensboom.studiesCompleted : "-"} />
+              <StatCard label="Leesreeks" value={waiting ? "-" : streak} icon={<StatIcon icon={Flame} />} />
+              <StatCard label="Badges" value={waiting ? "-" : `${badgeCount}/${BADGE_TOTAL}`} icon={<StatIcon icon={Award} />} />
+              <StatCard label="Lessen afgerond" value={levensboom ? levensboom.lessonsCompleted : "-"} icon={<StatIcon icon={BookOpenCheck} />} />
+              <StatCard label="Studies afgerond" value={levensboom ? levensboom.studiesCompleted : "-"} icon={<StatIcon icon={GraduationCap} />} />
             </div>
 
             <Card className="flex min-h-[320px] flex-1 flex-col overflow-hidden lg:min-h-0">
@@ -436,6 +456,18 @@ export default function ProfilePage() {
 
       <BadgesDialog open={badgesOpen} onClose={() => setBadgesOpen(false)} earned={earnedBadges} />
     </AppShell>
+  )
+}
+
+/** Small teal-tinted square that names the data type of a stat card. */
+function StatIcon({ icon: Icon }: { icon: LucideIcon }) {
+  return (
+    <span
+      aria-hidden="true"
+      className="-my-1 flex h-6 w-6 flex-none items-center justify-center rounded-[8px] bg-[#0D9488]/[0.08] text-[#0D9488] dark:bg-[#0D9488]/[0.18] dark:text-teal-300"
+    >
+      <Icon size={15} strokeWidth={1.9} />
+    </span>
   )
 }
 

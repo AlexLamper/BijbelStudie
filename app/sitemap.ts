@@ -33,6 +33,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/contact`,              lastModified: SITE_CONTENT_DATE, changeFrequency: "yearly",  priority: 0.4 },
     { url: `${BASE_URL}/privacybeleid`,        lastModified: SITE_CONTENT_DATE, changeFrequency: "yearly",  priority: 0.2 },
     { url: `${BASE_URL}/algemene-voorwaarden`, lastModified: SITE_CONTENT_DATE, changeFrequency: "yearly",  priority: 0.2 },
+    { url: `${BASE_URL}/account-verwijderen`,  lastModified: SITE_CONTENT_DATE, changeFrequency: "yearly",  priority: 0.2 },
   ];
 
   // The hub is already in staticRoutes above; only the sub-guides go here.

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
+import { GROEPEN_ACTIES, INTENT_EVENT, consumeIntent, readIntent } from "../../lib/commands/deepLink"
 import Link from "next/link"
 import { Plus, Search, Lock, Globe, RefreshCw, ChevronRight, UserPlus } from "lucide-react"
 import { GroupDialog } from "./_GroupDialog"
@@ -380,6 +381,35 @@ export default function GroepenPage() {
   }, [])
 
   useEffect(() => { loadGroups() }, [loadGroups])
+
+  // Deep links from the command palette: ?actie=aanmaken opens the create
+  // dialog, ?actie=code puts the cursor in the invite-code field. Consumed
+  // after use so a reload does not reopen the dialog.
+  useEffect(() => {
+    function applyIntent() {
+      const actie = readIntent("actie", GROEPEN_ACTIES)
+      if (!actie) return
+      consumeIntent("actie")
+      if (actie === "aanmaken") {
+        setShowCreate(true)
+        return
+      }
+      const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+      const tryFocus = (left: number) => {
+        const input = document.getElementById("groepen-code") as HTMLInputElement | null
+        if (!input) {
+          if (left > 0) window.setTimeout(() => tryFocus(left - 1), 100)
+          return
+        }
+        input.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" })
+        input.focus({ preventScroll: true })
+      }
+      tryFocus(20)
+    }
+    applyIntent()
+    window.addEventListener(INTENT_EVENT, applyIntent)
+    return () => window.removeEventListener(INTENT_EVENT, applyIntent)
+  }, [])
 
   const query    = search.trim()
   const filtered = (tab === "discover" ? publicGroups : myGroups).filter(g =>

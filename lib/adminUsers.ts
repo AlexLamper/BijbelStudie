@@ -5,7 +5,8 @@ import Note from "../models/Note";
 
 import type { AdminPayload } from "./adminStats";
 import { proRingGrant } from "./levensboom/proRing";
-import { archiveAccount, isProtectedAccount } from "./accountArchive";
+import { isProtectedAccount } from "./accountArchive";
+import { archiveAndDeleteAccount } from "./accountDeletion";
 import { normaliseEmail } from "./userLookup";
 
 /**
@@ -181,10 +182,12 @@ export async function deleteAdminUserPayload(
     };
   }
 
-  // Copy first; a failed copy aborts the delete (the error surfaces as a 500).
-  const archive = await archiveAccount(target._id, { route: "admin", actor: callerEmail });
-
-  await Promise.all([Note.deleteMany({ userId: target._id }), User.deleteOne({ _id: target._id })]);
+  // Copy first, then the same removal as the self-service deletes - all inside
+  // lib/accountDeletion.ts. A failed copy aborts the delete (surfaces as a 500).
+  const archive = await archiveAndDeleteAccount(
+    { _id: target._id, email: target.email, isAdmin: target.isAdmin },
+    { route: "admin", actor: callerEmail },
+  );
 
   return { status: 200, body: { ok: true, archiveId: archive.archiveId } };
 }

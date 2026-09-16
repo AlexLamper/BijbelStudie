@@ -10,6 +10,7 @@ import { SkeletonBlock } from '../ui/skeletons';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import UpgradePrompt from "../pricing/UpgradePrompt";
+import AiAnswerThumbs from '../feedback/AiAnswerThumbs';
 import {
   Dialog,
   DialogPortal,
@@ -493,12 +494,19 @@ export default function AiAssistant({
                 </div>
               </div>
             ) : (
-              <div key={i} className="content-in flex justify-start">
+              <div key={i} className="content-in flex flex-col items-start">
                 <div className="bg-gray-100 dark:bg-secondary text-gray-900 dark:text-foreground rounded-2xl rounded-bl-sm px-3.5 py-2.5 text-sm max-w-[92%] break-words">
                   <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                     {m.content}
                   </ReactMarkdown>
                 </div>
+                {/* Thumbs once the answer is complete, never under one still streaming. */}
+                {!(loading && i === messages.length - 1) && (
+                  <AiAnswerThumbs
+                    question={messages[i - 1]?.role === 'user' ? messages[i - 1].content : ''}
+                    answer={m.content}
+                  />
+                )}
               </div>
             ),
           )}

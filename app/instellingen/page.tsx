@@ -10,7 +10,11 @@ import { Switch } from "../../components/ui/switch"
 import { CLOUD_VOICES } from "../../lib/cloudVoices"
 import SubscriptionSection from "../../components/settings/SubscriptionSection"
 import LevensboomSection from "../../components/settings/LevensboomSection"
+import PasswordSection from "../../components/settings/PasswordSection"
+import DeleteAccountSection from "../../components/settings/DeleteAccountSection"
+import FeedbackPromptsSetting from "../../components/settings/FeedbackPromptsSetting"
 import AppShell from "../../components/shell/AppShell"
+import { INSTELLINGEN_SECTIES, INTENT_EVENT, consumeHash, readIntent, scrollToSetting, settingHash, writeParam } from "../../lib/commands/deepLink"
 import { Card, Skeleton } from "../../components/kit/primitives"
 import { APP_STORE_URL } from "../../lib/appStore"
 
@@ -144,6 +148,26 @@ export default function SettingsPage() {
 
   useEffect(() => setMounted(true), [])
 
+  // Deep links (command palette): ?sectie=<tab> picks the tab, #instelling-*
+  // scrolls to that control. Read on mount and again on INTENT_EVENT, because
+  // a push to /instellingen while already here does not remount the page.
+  useEffect(() => {
+    function applyIntent() {
+      const sectie = readIntent("sectie", INSTELLINGEN_SECTIES)
+      if (sectie) setSection(sectie)
+      const anchor = settingHash()
+      if (anchor) {
+        // Consumed once acted on: the mount read and the palette's event can
+        // both arrive for one navigation, and must not scroll and flash twice.
+        consumeHash()
+        void scrollToSetting(anchor)
+      }
+    }
+    applyIntent()
+    window.addEventListener(INTENT_EVENT, applyIntent)
+    return () => window.removeEventListener(INTENT_EVENT, applyIntent)
+  }, [])
+
   // The reminder lives on the server so the phone and the browser agree on it;
   // the notification itself is still scheduled locally by the app.
   useEffect(() => {
@@ -235,7 +259,10 @@ export default function SettingsPage() {
                 type="button"
                 role="tab"
                 aria-selected={active}
-                onClick={() => setSection(item.id)}
+                onClick={() => {
+                  setSection(item.id)
+                  writeParam("sectie", item.id)
+                }}
                 className={[
                   "flex h-9 items-center rounded-[9px] px-[14px] text-[13.5px] transition-colors max-md:flex-none max-md:whitespace-nowrap",
                   active ? "bg-teal font-semibold text-white" : "font-medium text-ink-muted hover:bg-line-soft hover:text-ink-body",
@@ -253,7 +280,7 @@ export default function SettingsPage() {
           <div className="flex min-w-0 flex-1 flex-col gap-[18px]">
             {section === "lezen" && (
               <SectionCard title="Weergave">
-                <Row label="Thema" hint="Volgt je systeem als je 'Systeem' kiest.">
+                <Row id="instelling-thema" label="Thema" hint="Volgt je systeem als je 'Systeem' kiest.">
                   {mounted && (
                     <div className={SEG_TRACK} role="group" aria-label="Thema">
                       {[
@@ -291,6 +318,7 @@ export default function SettingsPage() {
               <>
                 <SectionCard title="Bijbel & commentaren">
                   <Row
+                    id="instelling-vertaling"
                     label="Standaard bijbelvertaling"
                     hint="Wordt geopend als je een nieuw hoofdstuk start"
                   >
@@ -320,6 +348,7 @@ export default function SettingsPage() {
                   </Row>
 
                   <Row
+                    id="instelling-commentaar"
                     label="Standaard commentaar"
                     hint="Wordt geladen naast de tekst voor uitleg en context"
                     last
@@ -343,7 +372,7 @@ export default function SettingsPage() {
                 </SectionCard>
 
                 <SectionCard title="Leesweergave">
-                  <Row label="Tekstgrootte" hint={`Huidig: ${FONT_SIZE_LABELS[preferences.fontSize] || preferences.fontSize}`}>
+                  <Row id="instelling-tekstgrootte" label="Tekstgrootte" hint={`Huidig: ${FONT_SIZE_LABELS[preferences.fontSize] || preferences.fontSize}`}>
                     <div className={`gap-1 ${SEG_TRACK}`}>
                       <button
                         onClick={() => adjustFontSize(-1)}
@@ -365,7 +394,7 @@ export default function SettingsPage() {
                     </div>
                   </Row>
 
-                  <Row label="Regelafstand">
+                  <Row id="instelling-regelafstand" label="Regelafstand">
                     <SegmentedControl
                       label="Regelafstand"
                       value={preferences.lineHeight}
@@ -374,7 +403,7 @@ export default function SettingsPage() {
                     />
                   </Row>
 
-                  <Row label="Lettertype" hint="Schreef voor bijbeltekst, schreefloos voor de rest.">
+                  <Row id="instelling-lettertype" label="Lettertype" hint="Schreef voor bijbeltekst, schreefloos voor de rest.">
                     <SegmentedControl
                       label="Lettertype"
                       value={preferences.fontFamily}
@@ -387,7 +416,7 @@ export default function SettingsPage() {
                     />
                   </Row>
 
-                  <Row label="Letterafstand">
+                  <Row id="instelling-letterafstand" label="Letterafstand">
                     <SegmentedControl
                       label="Letterafstand"
                       value={preferences.letterSpacing}
@@ -396,7 +425,7 @@ export default function SettingsPage() {
                     />
                   </Row>
 
-                  <Row label="Versnummers tonen" last>
+                  <Row id="instelling-versnummers" label="Versnummers tonen" last>
                     <Switch
                       checked={preferences.showVerseNumbers}
                       onCheckedChange={(v) => updatePreferences({ showVerseNumbers: v })}
@@ -408,6 +437,7 @@ export default function SettingsPage() {
 
                 <SectionCard title="Voorlezen">
                   <Row
+                    id="instelling-stem"
                     label="Standaard stem"
                     hint="Wordt gebruikt zodra je op een voorlees-knop klikt"
                     last
@@ -441,6 +471,7 @@ export default function SettingsPage() {
             {section === "meldingen" && (
               <SectionCard title="Meldingen">
                 <Row
+                  id="instelling-herinneringen"
                   label="Herinneringen"
                   hint="Hooguit één per dag, op jouw moment."
                 >
@@ -453,6 +484,7 @@ export default function SettingsPage() {
                 </Row>
 
                 <Row
+                  id="instelling-herinneringstijd"
                   label="Studieherinnering"
                   labelFor="instellingen-tijdstip"
                   hint={reminderEnabled ? `Elke dag om ${reminderTime}` : "Zet de herinnering aan om een tijd te kiezen"}
@@ -482,20 +514,25 @@ export default function SettingsPage() {
               </SectionCard>
             )}
 
+            {section === "meldingen" && <FeedbackPromptsSetting />}
+
             {section === "account" && (
               <SectionCard title="Voortgang" subtitle="Je boom op je profiel, en wie hem mag zien">
                 <LevensboomSection />
               </SectionCard>
             )}
 
+            {section === "account" && <PasswordSection />}
+            {section === "account" && <DeleteAccountSection />}
+
             {section === "abonnement" && (
-              <SectionCard title="Abonnement" subtitle="Je plan, facturen en opzeggen">
+              <SectionCard id="instelling-abonnement" title="Abonnement" subtitle="Je plan, facturen en opzeggen">
                 <SubscriptionSection />
               </SectionCard>
             )}
 
             {section === "over" && (
-              <SectionCard title="Over BijbelStudie">
+              <SectionCard id="instelling-over" title="Over BijbelStudie">
                 <div className="divide-y divide-line-soft">
                   <AboutRow href="/privacybeleid" label="Privacybeleid" />
                   <AboutRow href="/algemene-voorwaarden" label="Algemene voorwaarden" />
@@ -551,7 +588,7 @@ export default function SettingsPage() {
               )}
             </Card>
 
-            <Card className="flex-none p-[18px]">
+            <Card id="instelling-standaard-herstellen" className="flex-none scroll-mt-6 p-[18px]">
               <div className="text-[14.5px] font-bold text-ink">Snel terugzetten</div>
               <p className="mt-[6px] text-[12.5px] leading-[1.6] text-ink-muted">
                 Zet de leesweergave terug naar de standaardinstellingen.
@@ -575,14 +612,16 @@ export default function SettingsPage() {
 
 /** One panel: a heading, an optional lead, then the rows. */
 function SectionCard({
-  title, subtitle, children,
+  id, title, subtitle, children,
 }: {
+  /** An `instelling-*` anchor for deep links from the command palette. */
+  id?: string
   title: string
   subtitle?: string
   children: React.ReactNode
 }) {
   return (
-    <Card className="flex-none px-[22px] py-5">
+    <Card id={id} className="flex-none scroll-mt-6 px-[22px] py-5">
       <h2 className="text-[16.5px] font-bold text-ink">{title}</h2>
       {subtitle && <p className="mt-1 text-[13px] leading-relaxed text-ink-muted">{subtitle}</p>}
       <div className="mt-1">{children}</div>
@@ -596,8 +635,10 @@ function SectionCard({
  * at the same right edge.
  */
 function Row({
-  label, labelFor, hint, last = false, children,
+  id, label, labelFor, hint, last = false, children,
 }: {
+  /** An `instelling-*` anchor for deep links from the command palette. */
+  id?: string
   label: string
   /** Set when the control is a single field, so the label actually labels it. */
   labelFor?: string
@@ -607,7 +648,8 @@ function Row({
 }) {
   return (
     <div
-      className={`flex flex-col gap-2.5 py-[14px] sm:flex-row sm:items-center sm:justify-between sm:gap-4 ${
+      id={id}
+      className={`flex scroll-mt-6 flex-col gap-2.5 py-[14px] sm:flex-row sm:items-center sm:justify-between sm:gap-4 ${
         last ? "" : "border-b border-line-soft"
       }`}
     >

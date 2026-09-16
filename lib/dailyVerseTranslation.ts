@@ -41,7 +41,45 @@ export type DayTextBase = {
   book: string;
   chapter: number;
   verse: number;
+  /**
+   * Last verse when the day's text is a short passage (e.g. Filippenzen
+   * 4:6-7); absent for a single verse. `verse` stays the first verse, so
+   * clients that ignore this field still open the right chapter.
+   */
+  verseEnd?: number;
 };
+
+/** `Book c:v`, or `Book c:v-w` for a passage. */
+export function dayTextReference(book: string, chapter: number, verse: number, verseEnd?: number): string {
+  const range = verseEnd !== undefined && verseEnd > verse ? `-${verseEnd}` : '';
+  return `${book} ${chapter}:${verse}${range}`;
+}
+
+/**
+ * BijbelAPI's `/api/daytext` payload as the card's base shape, or null when it
+ * carries no text. Book names stay as upstream sends them (English); callers
+ * normalise. `verse_end` is additive upstream, so a payload without it (or
+ * with it equal to `verse`) is a single verse.
+ */
+export function parseUpstreamDayText(data: unknown): DayTextBase | null {
+  if (!data || typeof data !== 'object') return null;
+  const d = data as Record<string, unknown>;
+  if (typeof d.text !== 'string' || !d.text.trim()) return null;
+  const book = typeof d.book === 'string' ? d.book : '';
+  const chapter = Number(d.chapter);
+  const verse = Number(d.verse);
+  const end = Number(d.verse_end);
+  const verseEnd = Number.isInteger(end) && end > verse ? end : undefined;
+  return {
+    text: d.text,
+    reference: dayTextReference(book, chapter, verse, verseEnd),
+    version: 'Statenvertaling',
+    book,
+    chapter,
+    verse,
+    ...(verseEnd !== undefined ? { verseEnd } : {}),
+  };
+}
 
 export type DayTextInVersion = DayTextBase & {
   /** The translation id the text is actually in, e.g. `nbg51`. */
@@ -83,6 +121,21 @@ export function verseFromChapter(verses: unknown, verse: number): string | null 
   if (typeof raw !== 'string') return null;
   const text = raw.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
   return text || null;
+}
+
+/**
+ * Verses `verse`..`verseEnd` joined by a space, or null when any of them is
+ * missing - half a passage is not the day's text.
+ */
+export function passageFromChapter(verses: unknown, verse: number, verseEnd?: number): string | null {
+  const last = verseEnd !== undefined && verseEnd > verse ? verseEnd : verse;
+  const parts: string[] = [];
+  for (let n = verse; n <= last; n++) {
+    const text = verseFromChapter(verses, n);
+    if (!text) return null;
+    parts.push(text);
+  }
+  return parts.join(' ');
 }
 
 /**

@@ -13,7 +13,7 @@
  * | lifetime cap per prompt| from the registry (1 or 2)  |
  * | monthly cap per user   | 1                            |
  * | annual cap per user    | 4                            |
- * | sampling               | 25% of eligible events       |
+ * | sampling               | FEEDBACK_SAMPLE_RATE, def. 1 |
  * | opt out                | permanent                    |
  *
  * Sampling is a deterministic bucket on the user and the prompt, never a random
@@ -26,7 +26,22 @@ import { PROMPTS, type PromptId, type Segment } from './feedbackPrompts';
 export const GLOBAL_COOLDOWN_DAYS = 14;
 export const MONTHLY_CAP = 1;
 export const ANNUAL_CAP = 4;
-export const DEFAULT_SAMPLE_RATE = 0.25;
+/**
+ * Everyone eligible is asked while the reader base is small. Lower it with the
+ * `FEEDBACK_SAMPLE_RATE` env var (0 to 1) once answers start to pile up.
+ */
+export const DEFAULT_SAMPLE_RATE = 1;
+
+/**
+ * `FEEDBACK_SAMPLE_RATE` read defensively: anything that is not a number in
+ * [0, 1] falls back to the default rather than silently switching prompts off.
+ */
+export function sampleRateFromEnv(raw: string | undefined | null): number {
+  if (raw === undefined || raw === null || raw.trim() === '') return DEFAULT_SAMPLE_RATE;
+  const value = Number(raw);
+  if (!Number.isFinite(value) || value < 0 || value > 1) return DEFAULT_SAMPLE_RATE;
+  return value;
+}
 
 const DAY_MS = 86_400_000;
 
