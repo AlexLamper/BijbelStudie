@@ -207,3 +207,99 @@ export function getBookNameFromNumber(number: number): string {
     }
     return BIBLE_BOOKS_ORDER[number - 1];
 }
+
+/* ─── Reader deep links ──────────────────────────────────────────
+ * Links into /lezen come from outside (BijbelQuiz, shared URLs, mail) and
+ * spell books however the sender does: "Hebreeën", "1 Korinthe",
+ * "1-korintiers", "Hebrews", "HEB". Each translation folder, on the other hand,
+ * has exactly one spelling ("2 Corinthiër", "Filémon", "Haggaï" in the
+ * Statenvertaling; English names in KJV). Matching the raw string made every
+ * link that did not use the exact folder name open Genesis 1 instead.
+ */
+
+/** OSIS-style codes (as in lib/bookCanon.ts), in BIBLE_BOOKS_ORDER order. */
+const OSIS_CODES = [
+  'GEN', 'EXOD', 'LEV', 'NUM', 'DEUT', 'JOSH', 'JUDG', 'RUTH', '1SAM', '2SAM',
+  '1KGS', '2KGS', '1CHR', '2CHR', 'EZRA', 'NEH', 'ESTH', 'JOB', 'PS', 'PROV',
+  'ECCL', 'SONG', 'ISA', 'JER', 'LAM', 'EZEK', 'DAN', 'HOS', 'JOEL', 'AMOS',
+  'OBAD', 'JONAH', 'MIC', 'NAH', 'HAB', 'ZEPH', 'HAG', 'ZECH', 'MAL',
+  'MATT', 'MARK', 'LUKE', 'JOHN', 'ACTS', 'ROM', '1COR', '2COR', 'GAL', 'EPH',
+  'PHIL', 'COL', '1THESS', '2THESS', '1TIM', '2TIM', 'TITUS', 'PHLM', 'HEB', 'JAS',
+  '1PET', '2PET', '1JOHN', '2JOHN', '3JOHN', 'JUDE', 'REV',
+];
+
+/** Spellings used elsewhere (NBV, NBG, BijbelQuiz) that no folder uses. */
+const EXTRA_SPELLINGS: Record<string, string> = {
+  'Rechters': 'Judges',
+  'Psalm': 'Psalms',
+  'Ester': 'Esther',
+  'Sefanja': 'Zephaniah',
+  'Matteüs': 'Matthew',
+  'Marcus': 'Mark',
+  'Lucas': 'Luke',
+  'Handelingen der Apostelen': 'Acts',
+  '1 Korintiërs': '1 Corinthians',
+  '2 Korintiërs': '2 Corinthians',
+  '1 Korinthiërs': '1 Corinthians',
+  '2 Korinthiërs': '2 Corinthians',
+  '2 Corinthiërs': '2 Corinthians',
+  '1 Tessalonicenzen': '1 Thessalonians',
+  '2 Tessalonicenzen': '2 Thessalonians',
+  '1 Timoteüs': '1 Timothy',
+  '2 Timoteüs': '2 Timothy',
+  'Hebreeen': 'Hebrews',
+  'Openbaringen': 'Revelation',
+  'Song of Songs': 'Song of Solomon',
+};
+
+/** Lowercase, no diacritics, no spaces/dots/dashes/underscores/plus signs. */
+function foldBookName(name: string): string {
+  return name
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[\s._+-]/g, '');
+}
+
+let foldedToEnglish: Map<string, string> | null = null;
+
+function getFoldedMap(): Map<string, string> {
+  if (foldedToEnglish) return foldedToEnglish;
+  const map = new Map<string, string>();
+  const add = (name: string, english: string) => {
+    const key = foldBookName(name);
+    if (key && !map.has(key)) map.set(key, english);
+  };
+  BIBLE_BOOKS_ORDER.forEach((english, i) => {
+    add(english, english);
+    add(OSIS_CODES[i], english);
+  });
+  Object.entries(CANONICAL_NL).forEach(([english, dutch]) => add(dutch, english));
+  Object.entries(bookNameMap).forEach(([name, english]) => add(name, english));
+  Object.entries(EXTRA_SPELLINGS).forEach(([name, english]) => add(name, english));
+  foldedToEnglish = map;
+  return map;
+}
+
+/**
+ * The canonical English name (a BIBLE_BOOKS_ORDER entry, or a deuterocanonical
+ * name) for any spelling of a book, or null when unrecognised.
+ */
+export function canonicalBookName(name: string | null | undefined): string | null {
+  if (!name) return null;
+  const trimmed = name.trim();
+  if (bookNameMap[trimmed]) return bookNameMap[trimmed];
+  return getFoldedMap().get(foldBookName(trimmed)) ?? null;
+}
+
+/**
+ * The entry of `bookList` (one translation's own folder names) that `name`
+ * refers to, whatever spelling `name` uses. Null when nothing matches.
+ */
+export function resolveBookInList(name: string | null | undefined, bookList: readonly string[]): string | null {
+  if (!name) return null;
+  if (bookList.includes(name)) return name;
+  const target = canonicalBookName(name);
+  if (!target) return null;
+  return bookList.find(book => canonicalBookName(book) === target) ?? null;
+}

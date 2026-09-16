@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { bookNameMap, normalizeBookName, BIBLE_BOOKS_ORDER } from '../lib/book-mapping';
+import { bookNameMap, normalizeBookName, BIBLE_BOOKS_ORDER, resolveBookInList } from '../lib/book-mapping';
 import { rememberReaderVersion } from '../lib/dailyVerseStore';
 
 /* ─── Static data - never changes ───────────────────────────── */
@@ -161,22 +161,34 @@ export function useBibleData(lng: string, options: UseBibleDataOptions = {}): Us
     let cancelled = false;
 
     async function init() {
-      // Case A: URL params override everything - skip network calls
-      if (initialBook && initialChapter && initialVersion) {
-        const versionExists = VERSIONS.some(v => v.id === initialVersion);
-        if (versionExists) {
-          setSelectedVersion(initialVersion);
-          setSelectedBook(initialBook);
-          setSelectedChapter(initialChapter);
+      // A deep link (?book=&chapter=[&version=]) names a passage. The book may
+      // be spelled any way (Dutch with or without diacritics, English, a slug,
+      // an OSIS code) and is resolved against the chosen translation's own
+      // folder names. `chapter` defaults to 1 and `version` is optional: links
+      // from BijbelQuiz used to carry only book + chapter, and requiring all
+      // three silently opened the last-read chapter or Genesis 1 instead.
+      const linkChapter =
+        initialChapter && Number.isFinite(initialChapter) && initialChapter > 0
+          ? Math.floor(initialChapter)
+          : 1;
+      const linkVersion =
+        initialVersion && VERSIONS.some(v => v.id === initialVersion) ? initialVersion : null;
+
+      // Case A: URL names both passage and version - skip last-read/preferences
+      if (initialBook && linkVersion) {
+        const index = await getBooksIndex();
+        if (cancelled) return;
+        const bookList = index ? resolveBooksFromIndex(index, linkVersion) : [];
+        const book = resolveBookInList(initialBook, bookList);
+        if (book) {
+          setSelectedVersion(linkVersion);
+          setSelectedBook(book);
+          setSelectedChapter(linkChapter);
           setLastReadLoaded(true);
-          // Still need books + chapters for the selector UI
-          const [index, chaps] = await Promise.all([
-            getBooksIndex(),
-            fetchChaptersDirect(initialVersion, initialBook),
-          ]);
+          setBooks(bookList);
+          const chaps = await fetchChaptersDirect(linkVersion, book);
           if (cancelled) return;
-          if (index) setBooks(resolveBooksFromIndex(index, initialVersion));
-          applyChapters(chaps, initialChapter);
+          applyChapters(chaps, linkChapter);
           setLoadingBooks(false);
           return;
         }
@@ -235,13 +247,20 @@ export function useBibleData(lng: string, options: UseBibleDataOptions = {}): Us
       setBooks(bookList);
       setLoadingBooks(false);
 
-      // Determine book to open
+      // Determine book to open: a deep-linked passage wins over last-read, in
+      // whichever translation the reader already uses.
       let book = restoredBook;
-      if (!book || !bookList.includes(book)) {
+      const linkedBook = initialBook ? resolveBookInList(initialBook, bookList) : null;
+      if (linkedBook) {
+        book = linkedBook;
+        restoredChapter = linkChapter;
+      } else if (!book || !bookList.includes(book)) {
         book = bookList.includes('Genesis') ? 'Genesis' : (bookList[0] ?? '');
         restoredChapter = 1;
       }
 
+      // Chapter with the book, so the reader does not load chapter 1 first.
+      setSelectedChapter(restoredChapter);
       setSelectedBook(book);
       setLastReadLoaded(true);
 
