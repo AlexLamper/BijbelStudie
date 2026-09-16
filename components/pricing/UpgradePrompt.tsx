@@ -1,9 +1,11 @@
 "use client"
 
-import { useEffect, useRef } from "react"
-import { useRouter } from "next/navigation"
+import { useEffect, useRef, useState } from "react"
+import { usePathname, useRouter } from "next/navigation"
 import { PLANS, perWeek } from "../../lib/pricing"
 import { track, trackNow } from "../../lib/analytics"
+import type { SerialisedPrompt } from "../../lib/feedbackPrompts"
+import PromptCard from "../feedback/PromptCard"
 
 /** Which gated surface this prompt is standing in for. */
 export type PaywallSurface = "commentary" | "ai_limit" | "original_text" | "plan_limit"
@@ -43,7 +45,12 @@ export function UpgradePrompt({
   compact?: boolean
 }) {
   const router = useRouter()
+  const pathname = usePathname()
   const reported = useRef(false)
+  const [declined, setDeclined] = useState(false)
+  const [whyPrompt, setWhyPrompt] = useState<SerialisedPrompt | null>(null)
+  // Never inside the immersive /studie flow: a question there interrupts reading.
+  const canAskWhy = !pathname?.startsWith("/studie")
 
   // One impression per mount, not per render.
   useEffect(() => {
@@ -51,6 +58,22 @@ export function UpgradePrompt({
     reported.current = true
     track("paywall_hit", { surface })
   }, [surface])
+
+  /**
+   * "Niet nu": asks "Wat houdt je tegen?" once per reader, ever (the
+   * w1_paywall_reason budget in lib/feedbackPrompts.ts). The server decides;
+   * a guest or an already-asked reader simply gets nothing back.
+   */
+  const handleDecline = () => {
+    setDeclined(true)
+    const params = new URLSearchParams({ touchpoint: "paywall_dismiss", path: pathname || "" })
+    void fetch(`/api/feedback/next?${params.toString()}`, { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.prompt) setWhyPrompt(data.prompt as SerialisedPrompt)
+      })
+      .catch(() => {})
+  }
 
   const handleClick = () => {
     trackNow("paywall_cta_clicked", { surface })
@@ -90,6 +113,22 @@ export function UpgradePrompt({
       >
         {cta}
       </button>
+
+      {canAskWhy && !declined && (
+        <button
+          type="button"
+          onClick={handleDecline}
+          className="mt-2 block w-full text-[12px] font-semibold text-ink-muted hover:underline"
+        >
+          Niet nu
+        </button>
+      )}
+
+      {whyPrompt && (
+        <div className="text-left">
+          <PromptCard prompt={whyPrompt} tone="light" context={{ path: pathname }} />
+        </div>
+      )}
     </div>
   )
 }

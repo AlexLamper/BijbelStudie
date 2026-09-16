@@ -31,12 +31,17 @@ const FeedbackSchema = new mongoose.Schema(
       index: true,
     },
     rating: { type: Number, min: 1, max: 5 },
+    // Optional one-line summary from the /feedback form. Older documents carry
+    // it (if at all) as the first line of `message`.
+    subject: { type: String, default: "", maxlength: 120 },
     message: { type: String, required: true, maxlength: 4000 },
     page: { type: String, default: "" },
     userAgent: { type: String, default: "" },
+    // `planned` and `shipped` are the two states a reader sees as progress in
+    // "Mijn feedback" (Gepland / Opgelost).
     status: {
       type: String,
-      enum: ["new", "reviewed", "resolved", "archived"],
+      enum: ["new", "reviewed", "planned", "shipped", "resolved", "archived"],
       default: "new",
       index: true,
     },
@@ -57,6 +62,13 @@ const FeedbackSchema = new mongoose.Schema(
         "pmf_survey",
         // A reader flagging an AI-assistant answer (`lib/aiReport.ts`).
         "ai_report",
+        // Dashboard prompt on the visit after a study was finished.
+        "study_complete",
+        // "Wat houdt je tegen?" under an upgrade prompt.
+        "paywall_dismiss",
+        // One-tap thumbs (lib/feedbackSignal.ts).
+        "ai_answer",
+        "lesson_quality",
       ],
       default: "unprompted",
       index: true,
@@ -131,6 +143,33 @@ const FeedbackSchema = new mongoose.Schema(
       default: null,
     },
 
+    // Closing the loop (lib/feedbackReply.ts). An internal note is never shown
+    // to the reader; a reply is, in "Mijn feedback" and by email when a sender
+    // is configured. `lastReplyAt` against `userSeenReplyAt` is what makes a
+    // reply "unseen" without scanning the array.
+    adminNote: { type: String, default: "", maxlength: 2000 },
+    replies: {
+      type: [
+        new mongoose.Schema(
+          {
+            at: { type: Date, required: true },
+            body: { type: String, required: true, maxlength: 4000 },
+            channel: { type: String, enum: ["email", "in_app"], default: "in_app" },
+            emailStatus: {
+              type: String,
+              enum: ["sent", "skipped", "failed", "no_recipient", null],
+              default: null,
+            },
+            emailId: { type: String, default: null },
+          },
+          { _id: false },
+        ),
+      ],
+      default: undefined,
+    },
+    lastReplyAt: { type: Date, default: null },
+    userSeenReplyAt: { type: Date, default: null },
+
     // Set by the retention job once `userId`, `name` and `email` have been
     // cleared. The answer itself is kept - it is about the product, not the
     // person.
@@ -146,5 +185,7 @@ FeedbackSchema.index({ touchpoint: 1, createdAt: -1 })
 FeedbackSchema.index({ "context.studyId": 1, "context.lessonDay": 1 })
 FeedbackSchema.index({ "context.quizQuestionId": 1 })
 FeedbackSchema.index({ promptId: 1, createdAt: -1 })
+// "Mijn feedback" and the dashboard's unseen-reply check.
+FeedbackSchema.index({ userId: 1, createdAt: -1 })
 
 export default mongoose.models.Feedback || mongoose.model("Feedback", FeedbackSchema)

@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "../../../../../lib/adminGuard";
-import { adminFeedbackUpdateStatus } from "../../../../../lib/adminFeedback";
+import { adminFeedbackUpdate } from "../../../../../lib/adminFeedback";
 
 interface RouteContext {
   params: Promise<{ id: string }>;
 }
 
-/** Sets `status` on one submission - the only triage this phase needs. */
+/**
+ * Triage on one submission: any of `status`, `adminNote`, `themes`,
+ * `sentiment`. Only the fields sent are written.
+ */
 export async function PATCH(req: Request, { params }: RouteContext) {
   const guard = await requireAdmin();
   if (!guard.ok) return guard.response;
@@ -19,11 +22,10 @@ export async function PATCH(req: Request, { params }: RouteContext) {
   } catch {
     return NextResponse.json({ error: "Ongeldige JSON" }, { status: 400 });
   }
-
-  if (typeof body.status !== "string") {
-    return NextResponse.json({ error: "status is verplicht" }, { status: 400 });
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return NextResponse.json({ error: "Ongeldige JSON" }, { status: 400 });
   }
 
-  const result = await adminFeedbackUpdateStatus(id, body.status);
+  const result = await adminFeedbackUpdate(id, body);
   return NextResponse.json(result.body, { status: result.status });
 }

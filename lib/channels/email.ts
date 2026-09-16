@@ -40,6 +40,13 @@ export type EmailMessage = {
    * reset is nonsense, and RFC 8058 does not ask for it.
    */
   unsubscribeUrl?: string;
+  /**
+   * Where a reply goes. Unset for everything sent from the no-reply sender;
+   * set for mail a person is meant to answer, such as a reply to feedback.
+   */
+  replyTo?: EmailAddress;
+  /** Overrides the default sender for this one message (`EMAIL_FROM`). */
+  from?: string;
 };
 
 export type SendResult =
@@ -56,6 +63,16 @@ export const SITE_ORIGIN = 'https://www.bijbelstudie.io';
  * the streams is in NOTIFICATIONS_PLAN.md, open decision O1.
  */
 const DEFAULT_FROM = 'BijbelStudie <geenantwoord@mail.bijbelstudie.io>';
+
+/** No CR or LF: a header value must stay one header. */
+function isSafeHeaderValue(value: string): boolean {
+  return !value.includes(String.fromCharCode(13)) && !value.includes(String.fromCharCode(10));
+}
+
+function senderFor(message: EmailMessage): string {
+  const own = message.from?.trim();
+  return own && isSafeHeaderValue(own) ? own : from();
+}
 
 function from(): string {
   return process.env.EMAIL_FROM?.trim() || DEFAULT_FROM;
@@ -91,11 +108,12 @@ async function deliver(message: EmailMessage, apiKey: string): Promise<SendResul
         'content-type': 'application/json',
       },
       body: JSON.stringify({
-        from: from(),
+        from: senderFor(message),
         to: [message.to],
         subject: message.subject,
         html: message.html,
         text: message.text,
+        ...(isSendableAddress(message.replyTo) ? { reply_to: [message.replyTo] } : {}),
         ...(Object.keys(headers).length > 0 ? { headers } : {}),
       }),
     });

@@ -59,7 +59,13 @@ export async function deleteAccountData(userId: mongoose.Types.ObjectId): Promis
       { $set: AI_REPORT_FREE_TEXT_CLEAR },
       opts,
     );
-    await Feedback.updateMany({ userId }, { $set: feedbackIdentityClear(new Date()) }, opts);
+    // Replies to this person go too (lib/feedbackReply.ts): a reply may address
+    // them by name, and its Resend message id leads back to their address.
+    await Feedback.updateMany(
+      { userId },
+      { $set: feedbackIdentityClear(new Date()), $unset: { replies: '', userSeenReplyAt: '' } },
+      opts,
+    );
     await AnalyticsEvent.updateMany({ userId }, { $set: { userId: null } }, opts);
 
     // Leave every group and plan rather than deleting them: they belong to

@@ -473,6 +473,16 @@ export const SETTING_COMMANDS: CommandItem[] = [
     target: { type: "link", href: setting("meldingen", "herinneringstijd") },
   },
   {
+    id: "instelling-feedback-vragen",
+    group: "instelling",
+    title: "Korte vragen over BijbelStudie",
+    subtitle: "Instellingen · Meldingen",
+    keywords: ["feedback", "vragen", "enquete", "vragenlijst", "niet meer vragen", "uitzetten", "privacy"],
+    icon: "bell",
+    visibility: "ingelogd",
+    target: { type: "link", href: setting("meldingen", "feedback-vragen") },
+  },
+  {
     id: "instelling-boom-tonen",
     group: "instelling",
     title: "Boom tonen",

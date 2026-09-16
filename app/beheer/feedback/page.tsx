@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useCallback, useEffect, useState } from "react"
 import { ChevronLeft, RefreshCw } from "lucide-react"
 import AppShell from "../../../components/shell/AppShell"
+import FeedbackTriagePanel, { type TriageItem } from "../../../components/admin/FeedbackTriagePanel"
 import { Card, Skeleton } from "../../../components/kit/primitives"
 import {
   ADMIN_BUTTON,
@@ -33,6 +34,13 @@ interface FeedbackRow {
   aiReport?: { reason: string; comment: string; question: string; answer: string; surface: string; model: string | null } | null
   context: Record<string, unknown> | null
   createdAt: string
+  subject?: string
+  segment?: string | null
+  adminNote: string
+  themes: string[]
+  sentiment: string | null
+  replies: TriageItem["replies"]
+  lastReplyAt: string | null
 }
 
 /** One study/lesson row of view 2: where the prompted answers came from. */
@@ -48,12 +56,21 @@ interface LessonRow {
 interface FeedbackResponse {
   feedback: FeedbackRow[]
   total: number
-  counts: { status: Record<string, number>; category: Record<string, number>; touchpoint: Record<string, number> }
+  nextCursor?: string | null
+  counts: {
+    status: Record<string, number>
+    category: Record<string, number>
+    touchpoint: Record<string, number>
+    platform?: Record<string, number>
+    unanswered?: number
+  }
 }
 
 const STATUS_LABELS: Record<string, string> = {
   new: "Nieuw",
   reviewed: "Bekeken",
+  planned: "Gepland",
+  shipped: "Opgelost",
   resolved: "Afgehandeld",
   archived: "Gearchiveerd",
 }
@@ -76,6 +93,33 @@ const TOUCHPOINT_LABELS: Record<string, string> = {
   dormant_return: "Terugkeer",
   pmf_survey: "PMF-onderzoek",
   ai_report: "AI-antwoord gemeld",
+  study_complete: "Studie afgerond",
+  paywall_dismiss: "Upgrade weggeklikt",
+  ai_answer: "Duim AI-antwoord",
+  lesson_quality: "Duim les",
+}
+
+const PLATFORM_LABELS: Record<string, string> = {
+  web: "Web",
+  ios: "iOS",
+  android: "Android",
+  onbekend: "Onbekend",
+}
+
+/**
+ * "web · 1.4.2 · actief · lezen · Pro": everything known about where an item
+ * came from, on one line, skipping what is unknown.
+ */
+function contextLine(row: FeedbackRow): string {
+  const ctx = (row.context ?? {}) as Record<string, unknown>
+  const parts = [
+    typeof ctx.platform === "string" ? PLATFORM_LABELS[ctx.platform] ?? ctx.platform : null,
+    typeof ctx.appVersion === "string" ? ctx.appVersion : null,
+    row.segment ?? null,
+    typeof ctx.routeKey === "string" && ctx.routeKey !== "other" ? ctx.routeKey : null,
+    ctx.isPro === true ? "Pro" : ctx.isPro === false ? "Gratis" : null,
+  ]
+  return parts.filter(Boolean).join(" · ")
 }
 
 function formatDate(iso: string): string {
@@ -100,6 +144,18 @@ export default function AdminFeedbackPage() {
   const [statusFilter, setStatusFilter] = useState("")
   const [categoryFilter, setCategoryFilter] = useState("")
   const [touchpointFilter, setTouchpointFilter] = useState("")
+  const [platformFilter, setPlatformFilter] = useState("")
+  const [ratingFilter, setRatingFilter] = useState("")
+  const [unansweredOnly, setUnansweredOnly] = useState(false)
+  const [searchInput, setSearchInput] = useState("")
+  const [search, setSearch] = useState("")
+  const [nextCursor, setNextCursor] = useState<string | null>(null)
+  const [loadingMore, setLoadingMore] = useState(false)
+  /** `?id=` deep link: that one item, highlighted and opened. */
+  const [focusId, setFocusId] = useState<string | null>(null)
+  const [openId, setOpenId] = useState<string | null>(null)
+  /** URL params are read once on mount before the first load. */
+  const [ready, setReady] = useState(false)
   const [pendingId, setPendingId] = useState<string | null>(null)
   /**
    * View 2: the same answers grouped per lesson. The list says what people
@@ -109,14 +165,51 @@ export default function AdminFeedbackPage() {
    */
   const [lessonRows, setLessonRows] = useState<LessonRow[]>([])
 
+  // Read from window rather than useSearchParams, which would need a Suspense
+  // boundary around the whole page.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const status = params.get("status")
+    if (status && STATUS_LABELS[status]) setStatusFilter(status)
+    const id = params.get("id")
+    if (id && /^[a-f0-9]{24}$/i.test(id)) {
+      setFocusId(id)
+      setOpenId(id)
+    }
+    setReady(true)
+  }, [])
+
+  // Search waits for a pause in typing.
+  useEffect(() => {
+    const t = setTimeout(() => setSearch(searchInput.trim()), 350)
+    return () => clearTimeout(t)
+  }, [searchInput])
+
+  const buildParams = useCallback(
+    (cursor?: string | null) => {
+      const params = new URLSearchParams()
+      if (focusId) {
+        params.set("id", focusId)
+        return params
+      }
+      if (statusFilter) params.set("status", statusFilter)
+      if (categoryFilter) params.set("category", categoryFilter)
+      if (touchpointFilter) params.set("touchpoint", touchpointFilter)
+      if (platformFilter) params.set("platform", platformFilter)
+      if (ratingFilter) params.set("rating", ratingFilter)
+      if (unansweredOnly) params.set("unanswered", "1")
+      if (search) params.set("q", search)
+      if (cursor) params.set("cursor", cursor)
+      return params
+    },
+    [focusId, statusFilter, categoryFilter, touchpointFilter, platformFilter, ratingFilter, unansweredOnly, search],
+  )
+
   const load = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
-      const params = new URLSearchParams()
-      if (statusFilter) params.set("status", statusFilter)
-      if (categoryFilter) params.set("category", categoryFilter)
-      if (touchpointFilter) params.set("touchpoint", touchpointFilter)
+      const params = buildParams()
       const res = await fetch(`/api/admin/feedback?${params.toString()}`, { cache: "no-store", credentials: "include" })
       const data = await res.json().catch(() => null)
       if (!res.ok) {
@@ -126,16 +219,37 @@ export default function AdminFeedbackPage() {
       setRows(data.feedback ?? [])
       setTotal(data.total ?? 0)
       setCounts(data.counts ?? null)
+      setNextCursor(data.nextCursor ?? null)
     } catch {
       setError("Kon feedback niet laden: server niet bereikbaar")
     } finally {
       setLoading(false)
     }
-  }, [statusFilter, categoryFilter, touchpointFilter])
+  }, [buildParams])
+
+  const loadMore = useCallback(async () => {
+    if (!nextCursor) return
+    setLoadingMore(true)
+    try {
+      const params = buildParams(nextCursor)
+      const res = await fetch(`/api/admin/feedback?${params.toString()}`, { cache: "no-store", credentials: "include" })
+      const data = await res.json().catch(() => null)
+      if (!res.ok) return
+      setRows((prev) => [...prev, ...((data.feedback ?? []) as FeedbackRow[])])
+      setNextCursor(data.nextCursor ?? null)
+    } finally {
+      setLoadingMore(false)
+    }
+  }, [buildParams, nextCursor])
 
   useEffect(() => {
+    if (!ready) return
     void load()
-  }, [load])
+  }, [load, ready])
+
+  const patchRow = useCallback((id: string, patch: Partial<FeedbackRow>) => {
+    setRows((prev) => prev.map((r) => (r._id === id ? { ...r, ...patch } : r)))
+  }, [])
 
   useEffect(() => {
     fetch("/api/admin/feedback/by-lesson", { cache: "no-store", credentials: "include" })
@@ -223,7 +337,70 @@ export default function AdminFeedbackPage() {
               </option>
             ))}
           </select>
+          <select
+            value={platformFilter}
+            onChange={(e) => setPlatformFilter(e.target.value)}
+            aria-label="Filter op platform"
+            className={`w-full cursor-pointer sm:w-auto ${ADMIN_FIELD}`}
+          >
+            <option value="">Alle platforms</option>
+            {Object.entries(PLATFORM_LABELS).map(([value, label]) => {
+              const n = counts?.platform?.[value]
+              return (
+                <option key={value} value={value}>
+                  {label} {n ? `(${n})` : ""}
+                </option>
+              )
+            })}
+          </select>
+          <select
+            value={ratingFilter}
+            onChange={(e) => setRatingFilter(e.target.value)}
+            aria-label="Filter op beoordeling"
+            className={`w-full cursor-pointer sm:w-auto ${ADMIN_FIELD}`}
+          >
+            <option value="">Elke beoordeling</option>
+            {[5, 4, 3, 2, 1].map((n) => (
+              <option key={n} value={String(n)}>
+                {n} / 5
+              </option>
+            ))}
+          </select>
+          <label className="flex cursor-pointer items-center gap-2 text-[12.5px] font-medium text-ink-body">
+            <input
+              type="checkbox"
+              checked={unansweredOnly}
+              onChange={(e) => setUnansweredOnly(e.target.checked)}
+              className="h-4 w-4 accent-[#0D9488]"
+            />
+            Onbeantwoord {counts?.unanswered ? `(${counts.unanswered})` : ""}
+          </label>
+          <input
+            type="search"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            maxLength={80}
+            placeholder="Zoek in tekst, naam of e-mail"
+            aria-label="Zoeken in feedback"
+            className={`w-full sm:w-64 ${ADMIN_FIELD}`}
+          />
         </Card>
+
+        {focusId && (
+          <Card className="flex flex-none flex-wrap items-center gap-3 p-3">
+            <p className="min-w-0 flex-1 text-[12.5px] text-ink-muted">Je bekijkt één melding via een directe link.</p>
+            <button
+              type="button"
+              onClick={() => {
+                setFocusId(null)
+                window.history.replaceState(null, "", "/beheer/feedback")
+              }}
+              className={ADMIN_BUTTON}
+            >
+              Alle feedback tonen
+            </button>
+          </Card>
+        )}
 
         {lessonRows.length > 0 && (
           <Card className="flex-none overflow-hidden">
@@ -292,7 +469,10 @@ export default function AdminFeedbackPage() {
         ) : (
           <div className="flex flex-col gap-3">
             {rows.map((row) => (
-              <Card key={row._id} className="flex-none p-4 sm:p-[17px]">
+              <Card
+                key={row._id}
+                className={`flex-none p-4 sm:p-[17px] ${focusId === row._id ? "ring-2 ring-[#0D9488]" : ""}`}
+              >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                   <div className="min-w-0 flex-1">
                     <div className="mb-[6px] flex flex-wrap items-center gap-2">
@@ -305,7 +485,13 @@ export default function AdminFeedbackPage() {
                       {row.rating != null && (
                         <span className="text-[11.5px] text-ink-faint tabular-nums">{row.rating} / 5</span>
                       )}
+                      {row.replies?.length > 0 && (
+                        <span className="rounded-full bg-teal-faint px-[7px] py-[2px] text-[11px] font-semibold text-teal dark:text-teal-400">
+                          Beantwoord
+                        </span>
+                      )}
                     </div>
+                    {row.subject && <p className="mb-1 break-words text-[14px] font-semibold text-ink">{row.subject}</p>}
                     <p className="whitespace-pre-wrap break-words text-[13.5px] leading-[1.6] text-ink">{row.message}</p>
                     {row.aiReport && (
                       <details className="mt-2 rounded-md border border-line bg-sunken px-3 py-2 text-[12.5px] leading-[1.55] text-ink-muted">
@@ -337,6 +523,32 @@ export default function AdminFeedbackPage() {
                       {row.email || row.contactEmail ? ` (${row.email || row.contactEmail})` : ""}
                       {row.page ? ` · ${row.page}` : ""}
                     </p>
+                    {contextLine(row) && (
+                      <p className="mt-0.5 break-words text-[11.5px] text-ink-faint">{contextLine(row)}</p>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setOpenId((prev) => (prev === row._id ? null : row._id))}
+                      aria-expanded={openId === row._id}
+                      className="mt-2 text-[12.5px] font-semibold text-teal hover:underline dark:text-teal-400"
+                    >
+                      {openId === row._id ? "Sluiten" : row.replies?.length ? "Antwoorden en notities" : "Beantwoorden en triëren"}
+                    </button>
+                    {openId === row._id && (
+                      <FeedbackTriagePanel
+                        item={{
+                          _id: row._id,
+                          status: row.status,
+                          adminNote: row.adminNote ?? "",
+                          themes: row.themes ?? [],
+                          sentiment: row.sentiment ?? null,
+                          replies: row.replies ?? [],
+                          email: row.email,
+                          contactEmail: row.contactEmail,
+                        }}
+                        onChange={(patch) => patchRow(row._id, patch)}
+                      />
+                    )}
                   </div>
                   <select
                     value={row.status}
@@ -354,6 +566,16 @@ export default function AdminFeedbackPage() {
                 </div>
               </Card>
             ))}
+            {nextCursor && !focusId && (
+              <button
+                type="button"
+                onClick={() => void loadMore()}
+                disabled={loadingMore}
+                className={`self-center ${ADMIN_BUTTON}`}
+              >
+                {loadingMore ? "Laden..." : "Meer laden"}
+              </button>
+            )}
           </div>
         )}
       </div>

@@ -5,6 +5,8 @@ import connectMongoDB from "../../../lib/mongodb"
 import User from "../../../models/User"
 import Feedback from "../../../models/Feedback"
 import { clientIp, consume } from "../../../lib/rateLimit"
+import { signalRateKey } from "../../../lib/feedbackSignal"
+import { toRouteKey } from "../../../lib/analyticsRoutes"
 
 const ALLOWED_CATEGORIES = new Set(["bug", "feature", "praise", "other"])
 
@@ -152,7 +154,7 @@ export async function POST(request: Request) {
   // to a specific answer the reader just gave - it requires a signed-in
   // caller. There is no anonymous path for a prompted response.
   if (isQuizSignal) {
-    const quizKey = userId ? `user:${String(userId)}` : `ip:${ip}`
+    const quizKey = signalRateKey(userId ? String(userId) : null, ip)
     if (consume(PER_QUIZ_SIGNAL, quizKey).limited) {
       return NextResponse.json(
         { error: "Te veel reacties achter elkaar. Probeer het later opnieuw." },
@@ -230,6 +232,15 @@ export async function POST(request: Request) {
       ? Math.round(body.rating)
       : undefined
   const page = typeof body.page === "string" ? body.page.slice(0, 200) : ""
+  const subject = stripControlChars(typeof body.subject === "string" ? body.subject.trim() : "").slice(0, 120)
+  // `context.platform` is enum-validated; the route key is folded from a path
+  // (`lib/analyticsRoutes.ts`), never stored raw.
+  const rawContext =
+    body.context && typeof body.context === "object" && !Array.isArray(body.context)
+      ? (body.context as Record<string, unknown>)
+      : {}
+  const platform = rawContext.platform === "ios" || rawContext.platform === "android" ? rawContext.platform : "web"
+  const routeKey = toRouteKey(typeof rawContext.path === "string" ? rawContext.path : page)
 
   // Only when there is no account behind the submission does a self-reported
   // reply address get stored, and then under names that say what it is.
@@ -249,10 +260,12 @@ export async function POST(request: Request) {
     contactEmail,
     category,
     rating,
+    subject,
     message,
     page,
     userAgent,
     touchpoint: "unprompted",
+    context: { platform, routeKey },
   })
 
   return NextResponse.json({ ok: true })

@@ -4,6 +4,7 @@ import { authOptions } from "../../../../lib/authOptions"
 import connectMongoDB from "../../../../lib/mongodb"
 import User from "../../../../models/User"
 import AnalyticsEvent from "../../../../models/AnalyticsEvent"
+import Feedback from "../../../../models/Feedback"
 import stripe from "../../../../lib/stripe"
 import { tenureBucket } from "../../../../lib/analyticsSchema"
 import { periodEndOf } from "../../../../lib/subscriptionSync"
@@ -34,6 +35,16 @@ type Reason = (typeof REASONS)[number]
 
 const MAX_FEEDBACK_CHARS = 1000
 
+/** Dutch labels for the inbox, where the reason is the whole message when no text was given. */
+const REASON_LABELS: Record<Reason, string> = {
+  too_expensive: "Te duur",
+  not_using: "Gebruik het niet genoeg",
+  missing_features: "Mis functies",
+  technical_problems: "Technische problemen",
+  temporary_break: "Tijdelijke pauze",
+  other: "Anders",
+}
+
 function isReason(value: unknown): value is Reason {
   return typeof value === "string" && (REASONS as readonly string[]).includes(value)
 }
@@ -55,9 +66,11 @@ export async function POST(req: NextRequest) {
     // whole user document. One corrupt unrelated field would otherwise make
     // cancelling impossible, which is exactly what the law here forbids.
     const user = await User.findOne({ email: session.user.email })
-      .select("subscribed stripeSubscriptionId subscriptionStartedAt createdAt")
+      .select("name email subscribed stripeSubscriptionId subscriptionStartedAt createdAt")
       .lean<{
         _id: unknown
+        name?: string
+        email?: string
         subscribed?: boolean
         stripeSubscriptionId?: string | null
         subscriptionStartedAt?: Date | null
@@ -107,6 +120,23 @@ export async function POST(req: NextRequest) {
       name: "subscription_canceled",
       userId: user._id,
       props: { reason: cancelReason ?? "unspecified", tenure: tenureBucket(tenureDays) },
+    }).catch(() => {})
+
+    // The same answer in the feedback inbox (/beheer/feedback), so a cancel
+    // reason can be read and answered next to everything else. The User fields
+    // above stay: billing tooling reads them. Best effort - a failed write here
+    // must never make the cancellation itself fail.
+    const cancelText = typeof feedback === "string" ? feedback.trim().slice(0, MAX_FEEDBACK_CHARS) : ""
+    await Feedback.create({
+      userId: user._id,
+      name: user.name ?? "",
+      email: user.email ?? session.user.email,
+      category: "other",
+      message: cancelText || `Opgezegd: ${cancelReason ? REASON_LABELS[cancelReason] : "geen reden opgegeven"}`,
+      touchpoint: "subscription_cancel",
+      answers: [{ key: "reden", value: cancelReason ?? "unspecified" }],
+      segment: "opgezegd",
+      context: { platform: "web", isPro: true, tenureBucket: tenureBucket(tenureDays) },
     }).catch(() => {})
 
     return NextResponse.json({

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 import { Star, Loader2, CheckCircle2, AlertCircle, Check } from "lucide-react"
 import AppShell from "../../components/shell/AppShell"
 import { Card } from "../../components/kit/primitives"
+import MyFeedbackList from "../../components/feedback/MyFeedbackList"
 
 type Category = "bug" | "feature" | "praise" | "other"
 
@@ -34,8 +35,8 @@ const REASONS = [
     body: "De meest genoemde punten gaan als eerste op de lijst.",
   },
   {
-    title: "Je hoort wat ermee gebeurt",
-    body: "Je krijgt bericht zodra er iets mee is gedaan.",
+    title: "Je ziet wat ermee gebeurt",
+    body: "Je ziet in Mijn feedback wat ermee gebeurt: bekeken, gepland of opgelost. Komt er een antwoord, dan staat dat daar ook.",
   },
 ]
 
@@ -52,13 +53,13 @@ type Status = "idle" | "sending" | "success" | "error"
  * {category, rating, message, page, website}, the same honeypot, the same
  * four-second reset after a success and the same minimum of four characters.
  *
- * TWO FIELDS THE DESIGN ADDS have no column of their own in that body, so they
- * are composed into `message` rather than sent as new fields - the endpoint is
- * untouched:
- *   - "Onderwerp" becomes the message's first line.
- *   - The tick box appends the browser's user-agent string, and only when the
- *     reader has ticked it. The design says "app-versie en apparaat"; on the web
- *     there is no app version, so the label says what is actually sent.
+ * "Onderwerp" is its own field (`subject` on the document). The tick box
+ * appends the browser's user-agent string to the message, and only when the
+ * reader has ticked it. `context` carries `platform: "web"` and the path, which
+ * the route folds to a route key.
+ *
+ * Two tabs: the form, and "Mijn feedback" (`?tab=mijn`), where a reader follows
+ * what happened to what they sent and reads any answer.
  */
 export default function FeedbackPage() {
   const pathname = usePathname()
@@ -74,6 +75,18 @@ export default function FeedbackPage() {
   // every input it finds. The server answers 200 and writes nothing when
   // this arrives filled - see app/api/feedback/route.ts.
   const [website, setWebsite] = useState("")
+  const [tab, setTab] = useState<"nieuw" | "mijn">("nieuw")
+
+  // `?tab=mijn` (the reply email and the dashboard card link here). Read from
+  // window: useSearchParams would need a Suspense boundary around the page.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("tab") === "mijn") setTab("mijn")
+  }, [])
+
+  function switchTab(next: "nieuw" | "mijn") {
+    setTab(next)
+    window.history.replaceState(null, "", next === "mijn" ? "/feedback?tab=mijn" : "/feedback")
+  }
 
   useEffect(() => {
     if (status !== "success") return
@@ -98,7 +111,6 @@ export default function FeedbackPage() {
     setErrorMsg(null)
 
     const body = [
-      subject.trim(),
       message.trim(),
       sendDevice && typeof navigator !== "undefined" ? `- ${navigator.userAgent}` : "",
     ]
@@ -112,8 +124,10 @@ export default function FeedbackPage() {
         body: JSON.stringify({
           category,
           rating: rating || undefined,
+          subject: subject.trim(),
           message: body,
           page: pathname || "",
+          context: { platform: "web", path: pathname || "/feedback" },
           website,
         }),
       })
@@ -132,8 +146,35 @@ export default function FeedbackPage() {
 
   return (
     <AppShell title="Feedback">
-      <div className="flex min-h-full gap-5">
-        {/* ── The form ─────────────────────────────────────────────── */}
+      {/* Tabs: the form, and what became of earlier feedback. */}
+      <div role="tablist" aria-label="Feedback" className="mb-4 inline-flex max-w-full rounded-[10px] border border-line bg-surface p-[3px]">
+        {([
+          { id: "nieuw", label: "Nieuw bericht" },
+          { id: "mijn", label: "Mijn feedback" },
+        ] as const).map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            role="tab"
+            aria-selected={tab === t.id}
+            onClick={() => switchTab(t.id)}
+            className={`h-8 rounded-[8px] px-3.5 text-[13px] font-semibold transition-colors ${
+              tab === t.id ? "bg-teal text-white" : "text-ink-muted hover:bg-line-soft hover:text-ink-body"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Below lg the rail stacks under the form instead of squeezing it. */}
+      <div className="flex min-h-full gap-5 max-lg:flex-col">
+        {tab === "mijn" ? (
+          <div className="min-w-0 flex-1">
+            <MyFeedbackList />
+          </div>
+        ) : (
+        /* ── The form ─────────────────────────────────────────────── */
         <form onSubmit={handleSubmit} className="min-w-0 flex-1">
           {/* Honeypot: off-screen rather than display:none, which some bots
               skip, and aria-hidden + tabIndex so it is invisible to assistive
@@ -156,7 +197,7 @@ export default function FeedbackPage() {
             </p>
 
             {/* Rating */}
-            <div className="mt-[18px] flex items-center gap-[18px] rounded-[12px] border border-line bg-sunken px-[18px] py-[15px]">
+            <div className="mt-[18px] flex flex-wrap items-center gap-x-[18px] gap-y-3 rounded-[12px] border border-line bg-sunken px-[18px] py-[15px]">
               <div className="min-w-0 flex-1">
                 <p className="text-[14.5px] font-semibold text-ink">Hoe beoordeel je BijbelStudie?</p>
                 <p className="mt-[3px] text-[12px] text-ink-faint">Optioneel - één tik</p>
@@ -192,7 +233,7 @@ export default function FeedbackPage() {
 
             {/* Kind */}
             <FieldLabel className="mt-5">Soort</FieldLabel>
-            <div className="mt-[9px] flex gap-[10px]">
+            <div className="mt-[9px] grid grid-cols-2 gap-[10px] sm:grid-cols-4">
               {CATEGORIES.map((c) => {
                 const active = category === c.value
                 return (
@@ -202,7 +243,7 @@ export default function FeedbackPage() {
                     aria-pressed={active}
                     onClick={() => setCategory(c.value)}
                     className={[
-                      "flex-1 rounded-[11px] p-[13px] text-center text-[13.5px] font-semibold transition-colors",
+                      "rounded-[11px] p-[13px] text-center text-[13.5px] font-semibold transition-colors",
                       active
                         ? "border-2 border-teal bg-[var(--teal-wash-2)] text-teal dark:text-teal-400"
                         : "border border-line bg-surface text-ink-body hover:border-line-strong",
@@ -273,14 +314,18 @@ export default function FeedbackPage() {
                 <div>
                   <p className="text-[13.5px] font-semibold text-ink">Dank je wel!</p>
                   <p className="mt-0.5 text-[12px] text-ink-muted">
-                    Je feedback is verzonden. We nemen elke reactie serieus mee.
+                    Je feedback is verzonden. Je ziet in{" "}
+                    <button type="button" onClick={() => switchTab("mijn")} className="font-semibold text-teal underline-offset-2 hover:underline dark:text-teal-400">
+                      Mijn feedback
+                    </button>{" "}
+                    wat ermee gebeurt.
                   </p>
                 </div>
               </div>
             )}
 
             {/* Send */}
-            <div className="mt-[18px] flex items-center gap-3">
+            <div className="mt-[18px] flex flex-wrap items-center gap-3">
               <button
                 type="submit"
                 disabled={status === "sending" || message.trim().length < 4}
@@ -296,15 +341,17 @@ export default function FeedbackPage() {
                   the reader's own address back at them, which tells them nothing
                   they did not already know - and `app/feedback/layout.tsx` gates
                   guests, so there is always an account address behind a
-                  submission anyway. What is worth knowing is which sender the
-                  answer arrives from; hence the address, not the session. */}
-              <p className="text-[12.5px] text-ink-faint">Je krijgt antwoord van info@bijbelstudie.io</p>
+                  submission anyway. What is worth knowing is where an answer
+                  shows up: always in Mijn feedback, by mail only when the
+                  owner has configured a reply sender. */}
+              <p className="text-[12.5px] text-ink-faint">Een antwoord verschijnt in Mijn feedback</p>
             </div>
           </Card>
         </form>
+        )}
 
         {/* ── The rail ─────────────────────────────────────────────── */}
-        <aside className="flex w-[350px] flex-none flex-col gap-[18px]">
+        <aside className="flex w-[350px] flex-none flex-col gap-[18px] max-lg:w-full">
           <Card className="flex-none p-[18px]">
             <h2 className="text-[15px] font-bold text-ink">Waarom feedback geven?</h2>
             <p className="mt-[6px] text-[12.5px] leading-[1.6] text-ink-muted">

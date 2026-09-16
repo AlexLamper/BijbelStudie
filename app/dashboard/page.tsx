@@ -14,6 +14,7 @@ import {
 } from "../../hooks/useDashboardData"
 import BillingNotices from "../../components/pricing/BillingNotices"
 import DailyVerseCard from "../../components/dashboard/DailyVerseCard"
+import DashboardFeedbackSlot from "../../components/feedback/DashboardFeedbackSlot"
 import { useTreeSummary } from "../../components/dashboard/ProgressTree"
 import AppShell from "../../components/shell/AppShell"
 import StudyArtwork from "../studies/StudyArtwork"
@@ -204,6 +205,10 @@ export default function DashboardPage() {
           </div>
 
           <DailyVerseCard verse={d.verse} loading={d.verseLoading} />
+
+          {/* At most one feedback card: an unseen answer, a finished-study
+              rating or a welcome-back question. Usually nothing. */}
+          <DashboardFeedbackSlot />
 
           {/* Verder waar je was.
               One row: the text block at `flex-1` (eyebrow, title, a slim bar
