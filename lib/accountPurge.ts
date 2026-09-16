@@ -17,7 +17,7 @@ import RefreshToken from '../models/RefreshToken';
 import FeedbackState from '../models/FeedbackState';
 import Feedback from '../models/Feedback';
 import AnalyticsEvent from '../models/AnalyticsEvent';
-import { AI_REPORT_FREE_TEXT_CLEAR, feedbackIdentityClear } from './dataRetention';
+import { AI_REPORT_FREE_TEXT_CLEAR, FEEDBACK_REPLY_UNSET, feedbackIdentityClear } from './dataRetention';
 
 /**
  * Removes one person's data. The single list behind both delete paths - the
@@ -63,7 +63,7 @@ export async function deleteAccountData(userId: mongoose.Types.ObjectId): Promis
     // them by name, and its Resend message id leads back to their address.
     await Feedback.updateMany(
       { userId },
-      { $set: feedbackIdentityClear(new Date()), $unset: { replies: '', userSeenReplyAt: '' } },
+      { $set: feedbackIdentityClear(new Date()), $unset: FEEDBACK_REPLY_UNSET },
       opts,
     );
     await AnalyticsEvent.updateMany({ userId }, { $set: { userId: null } }, opts);

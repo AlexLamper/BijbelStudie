@@ -123,6 +123,13 @@ export const AI_REPORT_FREE_TEXT_CLEAR = {
   'aiReport.question': '',
 } as const;
 
+/**
+ * `$unset` for replies sent to the person (lib/feedbackReply.ts): a reply can
+ * address them by name and its Resend id leads back to their address. Shared by
+ * account deletion and the 2-year job.
+ */
+export const FEEDBACK_REPLY_UNSET = { replies: '', lastReplyAt: '', userSeenReplyAt: '' } as const;
+
 export type FeedbackAnonymiseResult = { cutoff: string; aiReportsCleared: number; anonymised: number };
 
 /**
@@ -142,7 +149,10 @@ export async function anonymiseExpiredFeedback({
     { ...expired, touchpoint: 'ai_report' },
     { $set: AI_REPORT_FREE_TEXT_CLEAR },
   );
-  const result = await Feedback.updateMany(expired, { $set: feedbackIdentityClear(now) });
+  const result = await Feedback.updateMany(expired, {
+    $set: feedbackIdentityClear(now),
+    $unset: FEEDBACK_REPLY_UNSET,
+  });
   return {
     cutoff: cutoff.toISOString(),
     aiReportsCleared: reports.modifiedCount ?? 0,
