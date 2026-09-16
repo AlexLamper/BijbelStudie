@@ -62,7 +62,7 @@ export const SITE_ORIGIN = 'https://www.bijbelstudie.io';
  * problem cannot take password reset down with it - the argument for splitting
  * the streams is in NOTIFICATIONS_PLAN.md, open decision O1.
  */
-const DEFAULT_FROM = 'BijbelStudie <geenantwoord@mail.bijbelstudie.io>';
+const DEFAULT_FROM = 'BijbelStudie <noreply@mail.bijbelstudie.io>';
 
 /** No CR or LF: a header value must stay one header. */
 function isSafeHeaderValue(value: string): boolean {
