@@ -264,8 +264,8 @@ export default function PrivacyPolicyPage() {
       <Card>
         <CardTitle>1. Wie wij zijn</CardTitle>
         <p className={`${bodyClass} mt-1`}>
-          BijbelStudie is een eenmanszaak van Adriaan Pieter Lamper, gevestigd in Middelharnis (KvK-nummer 92873324). Wij
-          zijn verantwoordelijk voor de verwerking van je persoonsgegevens zoals in dit beleid beschreven. De
+          BijbelStudie (KvK-nummer 92873324) is verantwoordelijk voor de verwerking van je persoonsgegevens zoals in dit
+          beleid beschreven. De
           website en de app delen één account, dus dit beleid geldt voor allebei. Vragen over privacy stuur je naar{" "}
           <Mail />.
         </p>
