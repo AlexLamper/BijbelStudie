@@ -109,7 +109,7 @@ const RECIPIENTS: Recipient[] = [
     name: "MongoDB Inc. (MongoDB Atlas)",
     role: "Database",
     data: "Alles wat we volgens dit beleid opslaan",
-    location: "Verenigde Staten",
+    location: "Frankfurt, Duitsland (EU)",
   },
   {
     name: "Google (Gemini API)",
@@ -264,7 +264,8 @@ export default function PrivacyPolicyPage() {
       <Card>
         <CardTitle>1. Wie wij zijn</CardTitle>
         <p className={`${bodyClass} mt-1`}>
-          BijbelStudie is verantwoordelijk voor de verwerking van je persoonsgegevens zoals in dit beleid beschreven. De
+          BijbelStudie is een eenmanszaak van Adriaan Pieter Lamper, gevestigd in Middelharnis (KvK-nummer 92873324). Wij
+          zijn verantwoordelijk voor de verwerking van je persoonsgegevens zoals in dit beleid beschreven. De
           website en de app delen één account, dus dit beleid geldt voor allebei. Vragen over privacy stuur je naar{" "}
           <Mail />.
         </p>
@@ -309,9 +310,8 @@ export default function PrivacyPolicyPage() {
             API van Google. Je naam, e-mailadres en account-ID sturen we niet mee.
           </li>
           <li>
-            We gebruiken de betaalde Gemini API. Volgens de voorwaarden van Google gebruikt Google die gegevens dan niet
-            om zijn producten of AI-modellen te verbeteren. Google bewaart ze wel een beperkte tijd om misbruik op te
-            sporen en aan wettelijke verplichtingen te voldoen.
+            Google verwerkt die gegevens volgens de voorwaarden van de Gemini API en bewaart ze een beperkte tijd om
+            misbruik op te sporen en aan wettelijke verplichtingen te voldoen.
           </li>
           <li>Zet geen persoonlijke gegevens van jezelf of anderen in je vraag.</li>
           <li>
