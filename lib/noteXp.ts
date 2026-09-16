@@ -23,6 +23,13 @@ import { grantXp, type GrantResult } from './gamification';
 export const NOTE_XP_MIN_LENGTH = 15;
 export const NOTE_XP_DAILY_CAP = 3;
 
+// isPro must come from resolveIsPro (Stripe, store and admin), never `subscribed` alone.
+export const FREE_NOTE_LIMIT = 7;
+
+export function canCreateAnotherNote(existingNoteCount: number, isPro: boolean): boolean {
+  return isPro || existingNoteCount < FREE_NOTE_LIMIT;
+}
+
 function startOfDay(date: Date): Date {
   const d = new Date(date);
   d.setHours(0, 0, 0, 0);

@@ -6,9 +6,9 @@ import { HELP_TOPICS, ALL_HELP_FAQS } from "../../lib/content/helpFaq";
 import { JsonLd } from "../../components/seo/JsonLd";
 import { absoluteUrl } from "../../lib/seo/constants";
 import { graph, webPageNode, breadcrumbNode, faqNode } from "../../lib/seo/structuredData";
-import SceneShell from "../../components/scene/SceneShell";
-import { SCENE_TREE, sceneSvg } from "../../components/scene/scene-svg";
-import { EYEBROW, TEAL_ON_DARK, TILE } from "../../components/scene/tokens";
+import SessionProvider from "../../components/providers/SessionProvider";
+import AppShell from "../../components/shell/AppShell";
+import { Card, SectionHeading } from "../../components/kit/primitives";
 
 /**
  * /help had no metadata, so it inherited the root layout's canonical of "/"
@@ -16,19 +16,32 @@ import { EYEBROW, TEAL_ON_DARK, TILE } from "../../components/scene/tokens";
  * canonical and is a server component, so the full FAQ text is in the served
  * HTML rather than behind an accordion that only mounts on click.
  *
- * It is also a scene page now, and deliberately the quietest one: the reader
- * came here for an answer, so the landscape is the still server-rendered SVG
- * (`backdrop` defaults to "static", and with no `gateId` no canvas ever mounts)
- * and the answers are set straight on it as type with hairlines between them.
- * No panel around the prose - six stacked panels would have buried the picture
- * without making a single sentence easier to read.
+ * It sits in the shared app shell (components/shell/AppShell.tsx), the same
+ * frame as /abonnement, /studies and /lezen, which are open to a visitor
+ * without an account in the same way. The top bar's title is the page's only
+ * <h1>, so it carries the full "Help en veelgestelde vragen" - the same text as
+ * the <title> and the FAQPage name - and every heading in the body is an <h2>.
+ *
+ * Still `force-static`: the answers never depend on who is reading. That is
+ * also why the SessionProvider below is handed no session - a static render
+ * cannot read the cookie, so the shell's sidebar and top bar fetch the session
+ * on the client and show the account (or "Inloggen") once it is known. The
+ * FAQ text itself never waits on that.
  */
 export const metadata: Metadata = generatePageMetadata("help");
 export const dynamic = "force-static";
 
+const PAGE_TITLE = "Help en veelgestelde vragen";
+
 const CRUMBS = [
   { name: "Home", path: "/" },
   { name: "Help", path: "/help" },
+];
+
+const MORE_LINKS = [
+  { href: "/studies", label: "Begeleide studies", description: "Kant-en-klare studies om mee te beginnen." },
+  { href: "/abonnement", label: "Prijzen", description: "Wat gratis blijft en wat Pro toevoegt." },
+  { href: "/contact", label: "Contact", description: "Staat je vraag er niet bij? Laat het weten." },
 ];
 
 export default function HelpPage() {
@@ -37,7 +50,7 @@ export default function HelpPage() {
   const pageGraph = graph(
     webPageNode({
       path: "/help",
-      name: "Help en veelgestelde vragen",
+      name: PAGE_TITLE,
       description:
         "Antwoorden op de meestgestelde vragen over BijbelStudie: accounts, vertalingen, begeleide studies, de AI-assistent, Pro en privacy.",
       type: "FAQPage",
@@ -48,122 +61,117 @@ export default function HelpPage() {
   );
 
   return (
-    <SceneShell svg={sceneSvg()} {...SCENE_TREE}>
+    <SessionProvider>
       <JsonLd data={pageGraph} />
+      <AppShell title={PAGE_TITLE}>
+        <div className="max-w-[46rem] pb-10">
+          {/* The visible trail has to exist for the BreadcrumbList markup to be
+              eligible - Google drops structured data that describes navigation
+              a visitor cannot see. */}
+          <nav aria-label="Kruimelpad">
+            <ol className="flex flex-wrap items-center gap-1.5 text-xs text-ink-faint">
+              {CRUMBS.map((crumb, i) => {
+                const isLast = i === CRUMBS.length - 1;
+                return (
+                  <li key={crumb.path} className="flex items-center gap-1.5">
+                    {i > 0 && <ChevronRight className="h-3 w-3 shrink-0" aria-hidden />}
+                    {isLast ? (
+                      <span aria-current="page" className="font-medium text-ink-body">{crumb.name}</span>
+                    ) : (
+                      <Link
+                        href={crumb.path}
+                        className="rounded text-ink-muted no-underline underline-offset-4 outline-none transition-colors hover:text-teal hover:underline focus-visible:ring-2 focus-visible:ring-[#0D9488] dark:hover:text-teal-400"
+                      >
+                        {crumb.name}
+                      </Link>
+                    )}
+                  </li>
+                );
+              })}
+            </ol>
+          </nav>
 
-      {/* The visible trail has to exist for the BreadcrumbList markup to be
-          eligible - Google drops structured data that describes navigation a
-          visitor cannot see. */}
-      <nav aria-label="Kruimelpad" className="pt-5">
-        <ol className="flex flex-wrap items-center gap-1.5 text-xs text-white/60">
-          {CRUMBS.map((crumb, i) => {
-            const isLast = i === CRUMBS.length - 1;
-            return (
-              <li key={crumb.path} className="flex items-center gap-1.5">
-                {i > 0 && <ChevronRight className="h-3 w-3 shrink-0" aria-hidden />}
-                {isLast ? (
-                  <span aria-current="page" className="font-medium text-white/90">{crumb.name}</span>
-                ) : (
-                  <Link
-                    href={crumb.path}
-                    className="rounded text-white/70 no-underline underline-offset-4 outline-none transition-colors hover:text-white hover:underline focus-visible:ring-2 focus-visible:ring-white"
-                  >
-                    {crumb.name}
-                  </Link>
-                )}
-              </li>
-            );
-          })}
-        </ol>
-      </nav>
+          {/* -- Intro ----------------------------------------------------- */}
+          <div className="mt-5">
+            <p className="text-xs font-semibold uppercase tracking-widest text-teal-dark dark:text-teal-400">
+              Helpcentrum
+            </p>
+            <p className="mt-2 text-base leading-relaxed text-ink-body">
+              Antwoord op {ALL_HELP_FAQS.length} vragen over accounts, vertalingen, begeleide
+              studies, de AI-assistent, Pro en privacy. Staat je vraag er niet bij? Neem gerust{" "}
+              <Link
+                href="/contact"
+                className="rounded-sm font-semibold text-teal-dark underline underline-offset-4 outline-none hover:text-teal dark:text-teal-400 focus-visible:ring-2 focus-visible:ring-[#0D9488]"
+              >
+                contact
+              </Link>{" "}
+              op.
+            </p>
+          </div>
 
-      {/* -- The sky ---------------------------------------------------- */}
-      <header className="pb-10 pt-8">
-        <div className="scene-sky max-w-[46rem]">
-          <p className={EYEBROW} style={{ color: TEAL_ON_DARK }}>Helpcentrum</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-white sm:text-4xl lg:text-5xl">
-            Help en veelgestelde vragen
-          </h1>
-          <p className="mt-4 text-base leading-relaxed text-white/80">
-            Antwoord op {ALL_HELP_FAQS.length} vragen over accounts, vertalingen, begeleide
-            studies, de AI-assistent, Pro en privacy. Staat je vraag er niet bij? Neem gerust{" "}
-            <Link
-              href="/contact"
-              className="rounded font-semibold text-white underline underline-offset-4 outline-none transition-colors hover:text-white/80 focus-visible:ring-2 focus-visible:ring-white"
-            >
-              contact
-            </Link>{" "}
-            op.
-          </p>
-        </div>
-      </header>
+          {/* -- Topics: the way into the answers -------------------------- */}
+          <Card className="mt-6 p-4 sm:p-5">
+            <nav aria-label="Onderwerpen">
+              <p className="text-xs font-semibold uppercase tracking-widest text-ink-muted">Onderwerpen</p>
+              <ul className="mt-3 flex flex-wrap gap-2">
+                {HELP_TOPICS.map(topic => (
+                  <li key={topic.id}>
+                    {/* A plain fragment link, not next/link: the browser scrolls
+                        the shell's own scroll container to the section. */}
+                    <a
+                      href={`#${topic.id}`}
+                      className="inline-flex items-center rounded-full border border-line bg-surface px-[15px] py-2 text-[13px] font-medium text-ink-body no-underline outline-none transition-colors hover:border-line-strong focus-visible:ring-2 focus-visible:ring-[#0D9488]"
+                    >
+                      {topic.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </Card>
 
-      {/* -- The horizon: the way into the answers ---------------------- */}
-      <div className="scene-horizon">
-        <nav aria-label="Onderwerpen" className={`p-4 shadow-lg shadow-black/20 sm:p-5 ${TILE}`}>
-          <p className={EYEBROW}>Onderwerpen</p>
-          <ul className="mt-3 flex flex-wrap gap-2">
-            {HELP_TOPICS.map(topic => (
-              <li key={topic.id}>
-                <a
-                  href={`#${topic.id}`}
-                  className="inline-flex rounded-lg border border-white/20 bg-black/30 px-3 py-1.5 text-sm font-semibold text-white no-underline outline-none transition-colors hover:bg-black/50 focus-visible:ring-2 focus-visible:ring-white"
-                >
-                  {topic.title}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </div>
+          {/* -- The answers ----------------------------------------------- */}
+          {HELP_TOPICS.map(topic => (
+            <section key={topic.id} id={topic.id} className="mt-10 scroll-mt-6">
+              <SectionHeading title={topic.title} />
+              <Card className="mt-3 px-4 sm:px-[22px]">
+                <dl>
+                  {topic.faqs.map((faq, i) => (
+                    <div key={faq.q} className={`py-4 ${i === 0 ? "" : "border-t border-line-soft"}`}>
+                      <dt className="text-[14.5px] font-semibold text-ink">{faq.q}</dt>
+                      <dd className="mt-1.5 text-[13.5px] leading-[1.7] text-ink-body">{faq.a}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </Card>
+            </section>
+          ))}
 
-      {/* -- The desk: the answers themselves --------------------------- */}
-      <div className="max-w-[46rem] pb-24 pt-14">
-        {HELP_TOPICS.map(topic => (
-          <section key={topic.id} id={topic.id} className="scroll-mt-24 pt-10 first:pt-0">
-            <h2 className="border-b border-white/15 pb-2.5 text-lg font-semibold tracking-tight text-white">
-              {topic.title}
-            </h2>
-            <dl>
-              {topic.faqs.map(faq => (
-                <div key={faq.q} className="border-b border-white/10 py-5">
-                  <dt className="text-base font-semibold text-white">{faq.q}</dt>
-                  <dd className="mt-1.5 text-sm leading-relaxed text-white/75">{faq.a}</dd>
-                </div>
-              ))}
-            </dl>
+          {/* Verder lezen - records, so rows rather than a grid of cards. */}
+          <section className="mt-10">
+            <SectionHeading title="Meer lezen" />
+            <Card className="mt-3 overflow-hidden">
+              <ul>
+                {MORE_LINKS.map((link, i) => (
+                  <li key={link.href} className={i === 0 ? "" : "border-t border-line-soft"}>
+                    <Link
+                      href={link.href}
+                      className="group flex items-center justify-between gap-4 px-4 py-3.5 no-underline outline-none transition-colors hover:bg-line-soft focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#0D9488] sm:px-[22px]"
+                    >
+                      <span className="min-w-0">
+                        <span className="block text-sm font-semibold text-ink">{link.label}</span>
+                        <span className="mt-0.5 block text-[13px] text-ink-muted">{link.description}</span>
+                      </span>
+                      {/* Identifies the row as a link onward. */}
+                      <ChevronRight className="h-4 w-4 shrink-0 text-ink-faint" aria-hidden />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </Card>
           </section>
-        ))}
-
-        {/* Verder lezen - records, so rows rather than a grid of cards. */}
-        <section className="pt-14">
-          <h2 className="border-b border-white/15 pb-2.5 text-lg font-semibold tracking-tight text-white">
-            Meer lezen
-          </h2>
-          <ul>
-            {[
-              { href: "/studies", label: "Begeleide studies", description: "Kant-en-klare studies om mee te beginnen." },
-              { href: "/abonnement", label: "Prijzen", description: "Wat gratis blijft en wat Pro toevoegt." },
-              { href: "/contact", label: "Contact", description: "Staat je vraag er niet bij? Laat het weten." },
-            ].map(link => (
-              <li key={link.href} className="border-b border-white/10">
-                <Link
-                  href={link.href}
-                  className="group flex items-center justify-between gap-4 py-4 no-underline outline-none focus-visible:ring-2 focus-visible:ring-white"
-                >
-                  <span className="min-w-0">
-                    <span className="block text-sm font-semibold text-white group-hover:underline">
-                      {link.label}
-                    </span>
-                    <span className="mt-0.5 block text-sm text-white/65">{link.description}</span>
-                  </span>
-                  <ChevronRight className="h-4 w-4 shrink-0 text-white/50" aria-hidden />
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      </div>
-    </SceneShell>
+        </div>
+      </AppShell>
+    </SessionProvider>
   );
 }

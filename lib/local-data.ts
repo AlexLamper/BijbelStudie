@@ -331,7 +331,7 @@ export async function getBooks(version: string) {
             return [];
         }
         
-        // Check for array of books (NBG51, Meyer)
+        // Check for array of books (e.g. NBG51)
         if (data.books && Array.isArray(data.books)) {
             books = data.books.map((b: { name?: string; bnumber?: number }) => {
                 if (b.name) return b.name;

@@ -2,17 +2,20 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
-import { ArrowLeft, ChevronRight, ExternalLink, ShieldCheck, Lock } from "lucide-react";
+import { ArrowLeft, ExternalLink, ShieldCheck, Lock } from "lucide-react";
 import { authOptions } from "../../../lib/authOptions";
 import { isAdminEmail } from "../../../lib/adminEmails";
 import connectMongoDB from "../../../lib/mongodb";
 import User from "../../../models/User";
 import { LIBRARY, getLibraryItem, getCategoryMeta } from "../library";
 import Reader from "./Reader";
+import Breadcrumbs from "../Breadcrumbs";
+import { BTN_PRIMARY, BTN_SECONDARY, EYEBROW, TEXT_LINK } from "../tokens";
 import { buildMetadata } from "../../../lib/pageMetadata";
 import { JsonLd } from "../../../components/seo/JsonLd";
 import { ProBadge } from "../../../components/ui/ProBadge";
-import { CTA_BRAND, EYEBROW, TEAL_DEEP, TEAL_ON_DARK, TILE } from "../../../components/scene/tokens";
+import AppShell from "../../../components/shell/AppShell";
+import { Card } from "../../../components/kit/primitives";
 import { absoluteUrl } from "../../../lib/seo/constants";
 import {
   graph,
@@ -63,15 +66,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 /**
- * A work's own page, in the same window as the list.
+ * A work's own page, in the same shell as the list.
  *
- * The shell, the navbar, the rail and the gutter all come from
- * app/hulpbronnen/layout.tsx - this file draws only its own layers, on the
- * landscape, in the scene's literal whites. There is no `max-w-*` and no
- * `mx-auto` any more: the shell's gutter is the page's width, and a second
- * measure inside it left the content floating in a band of its own beside the
- * rail. The one place a reading measure still applies is the description and
- * the rights notice, which are prose.
+ * Still a server component: the metadata, the Book graph, the trail and the
+ * work's description are in the HTML a crawler receives, and the Pro check runs
+ * here before anything is sent. Only the reader itself (./Reader.tsx) needs the
+ * client, for its full-screen toggle.
+ *
+ * The top bar carries the section name, "Hulpbronnen", the same title the list
+ * uses, so moving between the two does not change the frame; the page's own
+ * `h1` is the work's title. There is no `max-w-*` on the page as a whole - the
+ * shell's gutter is its width - and a reading measure applies only to the
+ * prose: the description and the rights notice.
  */
 export default async function LibraryReaderPage({ params }: PageProps) {
   const { slug } = await params;
@@ -122,145 +128,111 @@ export default async function LibraryReaderPage({ params }: PageProps) {
   );
 
   return (
-    <>
+    <AppShell title="Hulpbronnen" ownHeading>
       <JsonLd data={pageGraph} />
 
-      {/* The visible trail has to exist for the BreadcrumbList markup to be
-          eligible - Google drops structured data describing navigation a
-          visitor cannot see. */}
-      <nav aria-label="Kruimelpad" className="pt-5">
-        <ol className="m-0 flex list-none flex-wrap items-center gap-1.5 p-0 text-xs text-white/60">
-          {crumbs.map((crumb, i) => {
-            const isLast = i === crumbs.length - 1;
-            return (
-              <li key={crumb.path} className="flex list-none items-center gap-1.5">
-                {i > 0 && <ChevronRight className="h-3 w-3 shrink-0" aria-hidden />}
-                {isLast ? (
-                  <span aria-current="page" className="min-w-0 truncate font-medium text-white/90">
-                    {crumb.name}
-                  </span>
-                ) : (
-                  <Link
-                    href={crumb.path}
-                    className="rounded text-white/70 no-underline underline-offset-4 outline-none transition-colors hover:text-white hover:underline focus-visible:ring-2 focus-visible:ring-white"
-                  >
-                    {crumb.name}
-                  </Link>
-                )}
-              </li>
-            );
-          })}
-        </ol>
-      </nav>
+      <Breadcrumbs crumbs={crumbs} />
 
-      {/* -- The sky: what this work is --------------------------------- */}
-      <header className="pb-8 pt-6">
-        <div className="scene-sky max-w-[46rem]">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1.5">
-              {/* The category's own colour identifies it; it is never the fill
-                  under the label, where half the five would fail contrast. */}
-              <span
-                aria-hidden
-                className="inline-block h-2 w-2 shrink-0 rounded-full ring-1 ring-black/30"
-                style={{ backgroundColor: cat.color }}
-              />
-              <span className={EYEBROW}>{cat.label}</span>
-            </span>
-            {item.isPro && <ProBadge />}
-          </div>
+      {/* -- What this work is ------------------------------------------ */}
+      <header className="mt-5 max-w-[46rem]">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center gap-1.5">
+            {/* The category's own colour identifies it; it is never the fill
+                under the label, where half the five would fail contrast. */}
+            <span
+              aria-hidden
+              className="inline-block h-2 w-2 shrink-0 rounded-full"
+              style={{ backgroundColor: cat.color }}
+            />
+            <span className={EYEBROW}>{cat.label}</span>
+          </span>
+          {item.isPro && <ProBadge />}
+        </div>
 
-          <h1 className="mt-3 text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl">
-            {item.title}
-          </h1>
-          {(item.author || item.year) && (
-            <p className="mt-2 text-sm text-white/60">
-              {[item.author, item.year].filter(Boolean).join(" · ")}
-            </p>
-          )}
-          <p className="mt-4 text-base leading-relaxed text-white/80">
-            {item.description}
+        <h1 className="mt-3 text-3xl font-bold leading-tight tracking-tight text-ink sm:text-4xl">
+          {item.title}
+        </h1>
+        {(item.author || item.year) && (
+          <p className="mt-2 text-sm text-ink-faint">
+            {[item.author, item.year].filter(Boolean).join(" · ")}
           </p>
+        )}
+        <p className="mt-4 text-base leading-relaxed text-ink-body">
+          {item.description}
+        </p>
 
-          {/* The outbound link is the point of this page: several sources -
-              DBNL among them - are read at the source and never inside an
-              embed. `target="_blank" rel="noopener noreferrer"` keeps it a
-              normal outbound link. */}
-          <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-3">
+        {/* The outbound link is the point of this page: several sources -
+            DBNL among them - are read at the source and never inside an
+            embed. `target="_blank" rel="noopener noreferrer"` keeps it a
+            normal outbound link. */}
+        <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-3">
+          <a
+            href={item.sourceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={BTN_PRIMARY}
+          >
+            {/* Identifies where the link goes, not decoration. */}
+            <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+            Openen op {item.source}
+          </a>
+          <span className="min-w-0 break-words text-xs text-ink-muted">
+            Bron:{" "}
             <a
               href={item.sourceUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className={CTA_BRAND}
-              style={{ backgroundColor: TEAL_DEEP }}
+              className={TEXT_LINK}
             >
-              {/* Identifies where the link goes, not decoration. */}
-              <ExternalLink className="h-3.5 w-3.5" aria-hidden />
-              Openen op {item.source}
+              {item.sourceUrl.replace(/^https?:\/\//, "")}
             </a>
-            <span className="min-w-0 text-xs text-white/60">
-              Bron:{" "}
-              <a
-                href={item.sourceUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded text-white/80 underline underline-offset-4 outline-none transition-colors hover:text-white focus-visible:ring-2 focus-visible:ring-white"
-              >
-                {item.sourceUrl.replace(/^https?:\/\//, "")}
-              </a>
-            </span>
-          </div>
+          </span>
         </div>
       </header>
 
-      {/* -- The horizon: the rights notice ----------------------------- */}
-      <div className="scene-horizon">
-        {/* `rightsNote` is the licence talking. Never edited, never summarised
-            - the per-source strings live in library.ts. */}
-        <div className={`flex max-w-[52rem] items-start gap-3 p-4 shadow-lg shadow-black/20 ${TILE}`}>
-          {/* Identifies what the notice is about, not decoration. */}
-          <ShieldCheck aria-hidden className="mt-0.5 h-4 w-4 shrink-0" style={{ color: TEAL_ON_DARK }} />
-          <p className="m-0 text-xs leading-relaxed text-white/80">
-            <strong className="font-semibold text-white">Auteursrecht:</strong> {item.rightsNote}
-          </p>
-        </div>
-      </div>
+      {/* -- The rights notice ------------------------------------------ */}
+      {/* `rightsNote` is the licence talking. Never edited, never summarised
+          - the per-source strings live in library.ts. */}
+      <Card className="mt-8 flex max-w-[52rem] items-start gap-3 p-4">
+        {/* Identifies what the notice is about, not decoration. */}
+        <ShieldCheck aria-hidden className="mt-0.5 h-4 w-4 shrink-0 text-teal-dark dark:text-teal-400" />
+        <p className="m-0 text-[13px] leading-relaxed text-ink-body">
+          <strong className="font-semibold text-ink">Auteursrecht:</strong> {item.rightsNote}
+        </p>
+      </Card>
 
-      {/* -- The desk: the work itself, or the gate in front of it ------ */}
-      <div className="pb-24 pt-12">
+      {/* -- The work itself, or the gate in front of it ----------------- */}
+      <div className="mt-8">
         {hasAccess ? <Reader item={item} /> : <Paywall />}
 
-        <Link
-          href="/hulpbronnen"
-          className="mt-10 inline-flex items-center gap-2 rounded-lg border border-white/25 px-4 py-2.5 text-sm font-semibold text-white no-underline outline-none transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white"
-        >
+        <Link href="/hulpbronnen" className={`mt-10 ${BTN_SECONDARY}`}>
           {/* Identifies the direction of travel, not decoration. */}
           <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
           Terug naar bibliotheek
         </Link>
       </div>
-    </>
+    </AppShell>
   );
 }
 
 function Paywall() {
   return (
-    <section aria-labelledby="hulpbron-pro" className={`max-w-[36rem] p-8 text-center ${TILE}`}>
-      <div
-        className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full"
-        style={{ backgroundColor: "rgba(217,119,6,0.18)" }}
-      >
+    <section
+      aria-labelledby="hulpbron-pro"
+      className="max-w-[36rem] rounded-card border border-line bg-surface p-8 text-center"
+    >
+      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-500/15">
         {/* Identifies the state - this work is gated - not decoration. */}
-        <Lock className="h-5 w-5" style={{ color: "#FBBF24" }} aria-hidden />
+        <Lock className="h-5 w-5 text-amber-700 dark:text-amber-300" aria-hidden />
       </div>
-      <h2 id="hulpbron-pro" className="text-lg font-semibold text-white">
+      <h2 id="hulpbron-pro" className="text-lg font-semibold text-ink">
         Dit werk is onderdeel van Pro
       </h2>
-      <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-white/75">
+      <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-ink-muted">
         Upgrade naar Pro om alle uitgebreide werken in de bibliotheek direct in de app te lezen,
         inclusief dogmatische standaardwerken en theologische prekenbundels.
       </p>
-      <Link href="/abonnement" className={`mt-6 ${CTA_BRAND}`} style={{ backgroundColor: TEAL_DEEP }}>
+      <Link href="/abonnement" className={`mt-6 ${BTN_PRIMARY}`}>
         Upgrade naar Pro
       </Link>
     </section>

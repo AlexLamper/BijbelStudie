@@ -13,12 +13,9 @@ import { ALL_STUDIES } from "../../lib/bookStudies"
 import { PLANS, euro } from "../../lib/pricing"
 import LandingTree from "./LandingTree"
 import HeroLevensboom from "./HeroLevensboom"
-import LevensboomGroeiDemo from "./LevensboomGroeiDemo"
 import StudyFlowDemo, { type DemoLesson } from "./StudyFlowDemo"
 import CountUp from "./CountUp"
 import { renderTreeSvg } from "../../lib/levensboom/svg"
-import { STAGES } from "../../lib/levensboom/stages"
-import { CATALOG } from "../../lib/levensboom/catalog"
 import { LP_THEME_VARS } from "./studyLandingShared"
 
 /* ─── Design tokens ──────────────────────────────────────────── */
@@ -182,7 +179,6 @@ function Navbar() {
             sitemap, maar horen niet in de hoofdnavigatie van de app. */}
         <nav className="hidden md:flex items-center justify-center gap-1">
           {[
-            { href: "#levensboom",    label: "Voortgang" },
             { href: "#prijzen",       label: "Prijzen" },
             { href: "#faq",           label: "FAQ" },
           ].map(({ href, label }) => (
@@ -222,7 +218,6 @@ function Navbar() {
               style={{ borderColor: T.border, backgroundColor: T.page }}
             >
               {[
-                { href: "#levensboom", label: "Voortgang" },
                 { href: "#prijzen",    label: "Prijzen" },
                 { href: "#faq",        label: "FAQ" },
                 { href: "/inloggen",   label: "Inloggen" },
@@ -555,7 +550,6 @@ const COMMENTARIES = [
   { name: "Matthew Henry",       author: "1662-1714",     note: "Het bekendste commentaar op de hele Bijbel, in Nederlandse vertaling",     free: false },
   { name: "Johannes Calvijn",    author: "1509-1564",     note: "Het commentaar van de reformator op de meeste bijbelboeken, in Nederlandse vertaling", free: false },
   { name: "Karl August Dachsel", author: "1818-1893",     note: "Uitvoerig vers-voor-vers commentaar met veel aandacht voor de grondtekst", free: false },
-  { name: "Heinrich Meyer",      author: "1800-1873",     note: "Kritisch-exegetisch commentaar op het Nieuwe Testament",                   free: false },
 ]
 
 /**
@@ -618,7 +612,7 @@ function BibleLibrary() {
         <SectionHeader
           label="Bibliotheek"
           title="Vertalingen en commentaren op één plek"
-          subtitle="Vier Nederlandse vertalingen naast elkaar, en bij elk vers de uitleg van vijf commentaren."
+          subtitle="Vier Nederlandse vertalingen naast elkaar, en bij elk vers de uitleg van vier commentaren."
         />
 
         <FadeUp className="mx-auto max-w-4xl">
@@ -634,7 +628,7 @@ function BibleLibrary() {
             <LibraryGroup
               label="Commentaren"
               items={COMMENTARIES.map(({ name, author, note }) => ({ name, meta: author, note }))}
-              footnote="KingComments is voor iedereen gratis en volledig te lezen; de overige vier horen bij Pro."
+              footnote="KingComments is voor iedereen gratis en volledig te lezen; de overige drie horen bij Pro."
             />
           </div>
 
@@ -773,7 +767,7 @@ function Pricing() {
     "Alles in het gratis plan",
     "200 AI-vragen per dag, i.p.v. 5",
     "Matthew Henry commentaar (NL)",
-    "Calvijn, Dachsel en Meyer",
+    "Calvijn en Dachsel",
     "Grondtekst: Hebreeuws en Grieks",
     "Prioriteitsondersteuning",
   ]
@@ -938,11 +932,14 @@ function CTA() {
               style={{ background: "radial-gradient(ellipse 65% 85% at 50% 0%, rgba(13,148,136,0.10), transparent 70%)" }} />
 
             <div className="relative mx-auto max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase"
-                style={{ backgroundColor: T.tealLight, color: T.tealDeep, letterSpacing: "0.14em" }}>
-                <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: T.teal }} />
+              {/* Plain eyebrow, matching every other section label on the page
+                  (SectionHeader, LibraryGroup) - no pill background, no dot.
+                  The rounded chip-with-bullet-dot treatment this replaced was
+                  the only badge like it on the page and read as a marketing
+                  gimmick rather than as this site's own design language. */}
+              <p className="text-[0.6875rem] font-bold uppercase" style={{ color: T.tealText, letterSpacing: "0.16em" }}>
                 Begin vandaag nog
-              </div>
+              </p>
 
               <h2
                 className="mt-6 font-extrabold text-balance"
@@ -962,7 +959,7 @@ function CTA() {
                   Gratis beginnen
                   <ArrowRight className="h-4 w-4" />
                 </Link>
-                <Link href="#levensboom"
+                <Link href="#faq"
                   className="press inline-flex items-center justify-center gap-2 rounded-xl border bg-surface px-8 py-3.5 font-semibold transition-colors hover:bg-sunken"
                   style={{ borderColor: T.border, color: T.text }}>
                   Meer informatie
@@ -981,78 +978,6 @@ function CTA() {
 }
 
 
-/* ─── Levensboom ─────────────────────────────────────────────── */
-/**
- * The avatar as a section - "voortgang" to the reader, never "levensboom".
- * Left, one tree walking through every level from kiem to eeuwenoude boom on
- * its own (or under the visitor's thumb on the slider); right, the five stages
- * with what each one brings. Every picture is the product's own generator,
- * rendered to SVG at build time and swapped for the live canvas on screen - so
- * the page keeps its static HTML and the trees still move. A gallery of three
- * grown trees used to close the section; the growth demo already makes the
- * point, and a second row of pictures only made the section run on.
- */
-function LevensboomSection() {
-  const levelItems = CATALOG.filter(item => item.unlock.kind === "level")
-  return (
-    <section id="levensboom" className={`${SECTION_Y} scroll-mt-16`} style={{ backgroundColor: T.page, ...EDGE }}>
-      <div className={SHELL}>
-        <SectionHeader
-          label="Jouw voortgang"
-          title="Elk niveau een nieuwe boom"
-          subtitle="Iedere lezer plant een boom. Hij begint als kiem en groeit met elke les, elk hoofdstuk en elke aantekening - op de website en in de app dezelfde boom. Schuif door de niveaus en zie hem groeien."
-        />
-
-        <FadeUp>
-          <div className="grid gap-10 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,0.7fr)] lg:items-start">
-            <LevensboomGroeiDemo
-              seed={LANDING_SEED}
-              initialSvg={renderTreeSvg({ seed: LANDING_SEED, level: 6, frac: 0.6, species: "eik", scene: "waterbeken", framing: "scene", width: 720, height: 450, rootAttributes: 'aria-hidden="true"' })}
-            />
-
-            <ol className="relative space-y-2">
-              {STAGES.map((stage, index) => {
-                const next = STAGES[index + 1]
-                const to = next ? next.from - 1 : null
-                const range = to === null ? `niveau ${stage.from}+` : stage.from === to ? `niveau ${stage.from}` : `niveau ${stage.from}–${to}`
-                const inBand = (at: number) => at >= stage.from && (to === null || at <= to)
-                const brings = [
-                  ...(inBand(8) ? ["de eerste vrucht van de Geest"] : []),
-                  ...(inBand(16) ? ["een tweede stam"] : []),
-                  ...levelItems.filter(item => inBand((item.unlock as { level: number }).level)).map(item => item.name.toLowerCase()),
-                ]
-                const sample = to === null ? stage.from + 2 : Math.round((stage.from + to) / 2)
-                return (
-                  <li key={stage.id} className="lp-card dark:bg-surface dark:border-line dark:hover:border-line-strong flex items-center gap-4 rounded-2xl p-3">
-                    <LandingTree
-                      svg={renderTreeSvg({ seed: LANDING_SEED, level: sample, frac: 0.6, species: "eik", framing: "portrait", width: 120, height: 120, rootAttributes: 'aria-hidden="true"' })}
-                      seed={LANDING_SEED}
-                      level={sample}
-                      species="eik"
-                      framing="portrait"
-                      className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-full ring-1 ring-black/5 dark:ring-white/10"
-                    />
-                    <div className="min-w-0">
-                      <div className="flex items-baseline justify-between gap-3">
-                        <p className="text-sm font-bold" style={{ color: T.text }}>{stage.name}</p>
-                        <p className="flex-shrink-0 text-[11px] tabular-nums" style={{ color: T.muted }}>{range}</p>
-                      </div>
-                      <p className="mt-0.5 text-xs leading-relaxed" style={{ color: T.muted }}>
-                        {stage.blurb}
-                        {brings.length > 0 ? ` Brengt ${brings.join(", ")}.` : ""}
-                      </p>
-                    </div>
-                  </li>
-                )
-              })}
-            </ol>
-          </div>
-        </FadeUp>
-      </div>
-    </section>
-  )
-}
-
 /* ─── Page ───────────────────────────────────────────────────── */
 export default function LandingPage() {
   return (
@@ -1067,7 +992,6 @@ export default function LandingPage() {
       <main>
         <Hero />
         <StudyFlowSection />
-        <LevensboomSection />
         <StudyDiscovery />
         <BibleLibrary />
         <Pricing />

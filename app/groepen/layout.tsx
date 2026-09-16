@@ -12,17 +12,17 @@ export const metadata: Metadata = {
 /**
  * Providers only - no chrome.
  *
- * /groepen now sits in the shared immersive shell
- * (components/scene/SceneShell.tsx), which draws its own navbar and its own
- * rail. A layout in the App Router can only ADD chrome, never replace what a
- * parent rendered, so the `Header` and the `AppSidebar` had to leave this file;
- * the pages render `<SceneShell header rail>` themselves.
+ * /groepen and /groepen/[id] sit in the shared app shell
+ * (components/shell/AppShell.tsx), the same sidebar-and-top-bar frame as
+ * /dashboard, /notities and /abonnement, rather than the immersive scene
+ * backdrop they used to draw. A layout in the App Router can only ADD chrome,
+ * never replace what a parent rendered, so AppShell is drawn by each page
+ * itself (it takes the page's title) - the same shape as
+ * app/notities/layout.tsx and app/dashboard/layout.tsx.
  *
- * Just as load-bearing: the wrapper this used to have was an `h-screen
- * overflow-hidden` box with the page scrolling inside it, and the scene's depth
- * engine measures `window.scrollY`. Inside such a box the landscape never
- * moves. The DOCUMENT has to scroll, which is why this is providers only - the
- * same shape as app/dashboard/layout.tsx and app/notities/layout.tsx.
+ * The signed-out branch below needs no change for that: GuestGateScene already
+ * renders the GuestGate card inside the same AppShell, whose top bar shows
+ * "Inloggen" in place of the account controls.
  *
  * `authOptions` is passed on purpose, not left off. Without it NextAuth returns
  * only the default session ({name, email, image}) and skips the `session`

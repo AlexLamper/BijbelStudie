@@ -5,6 +5,7 @@ import { ThemeProvider } from "../components/providers/theme-provider";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../lib/authOptions";
 import { OnboardingWrapper } from "../components/onboarding/onboarding-wrapper";
+import { GuestOnboardingWrapper } from "../components/onboarding/guest-onboarding-wrapper";
 import { GuidedTourLauncher } from "../components/onboarding/guided-tour";
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Suspense } from "react";
@@ -236,7 +237,7 @@ export default async function RootLayout({
                 <div id="main-content" className="min-h-screen mx-auto w-full">
                   {children}
                 </div>
-                {session?.user && (
+                {session?.user ? (
                   <>
                     {/* Everything the reader did as a guest, replayed onto the
                         account they just made. Renders nothing and fetches
@@ -250,6 +251,12 @@ export default async function RootLayout({
                         the modal blocks interaction until dismissed. */}
                     <GuidedTourLauncher canShow={!!session.user.onboardingCompleted} tourCompleted={!!session.user.tourCompleted} isSubscribed={!!session.user.isSubscribed} />
                   </>
+                ) : (
+                  // The same first-run tour, for a visitor who chose "Doorgaan
+                  // als gast" instead of an account - see
+                  // components/onboarding/guest-onboarding-wrapper.tsx. Idle on
+                  // every other signed-out page load.
+                  <GuestOnboardingWrapper />
                 )}
               </LevensboomProvider>
             </PrefetchProvider>

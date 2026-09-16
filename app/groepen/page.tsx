@@ -4,11 +4,8 @@ import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { Plus, Search, Lock, Globe, RefreshCw, ChevronRight, UserPlus } from "lucide-react"
 import { GroupDialog } from "./_GroupDialog"
-import SceneShell from "../../components/scene/SceneShell"
-import { SectionHeading } from "../../components/scene/pieces"
-import {
-  CTA_PRIMARY, EYEBROW, TEAL, TEAL_DEEP, TEAL_ON_DARK, TILE,
-} from "../../components/scene/tokens"
+import AppShell from "../../components/shell/AppShell"
+import { Card, SectionHeading, Skeleton } from "../../components/kit/primitives"
 
 interface Member { _id: string; name: string; image?: string }
 interface Group {
@@ -22,67 +19,80 @@ interface Group {
 }
 
 /**
- * Inside the modals the surface is still the themed dialog, so the brand fill
- * there stays what it always was. Everything ON the landscape uses the scene's
- * own values from components/scene/tokens.ts instead.
+ * #0D9488 is 3.7:1 on white - fine as a fill or a border, short of AA as small
+ * type and as a ground for white type. Type in the brand colour is teal-dark
+ * (#0F766E) on the light surface and teal-400 on the dark one; a filled button
+ * that carries white type is teal-dark as well (5.5:1).
  */
-const IC = TEAL                       // fills that carry no type
-// #0D9488 is 3.7:1 on white, short of AA for small text: teal-dark (= TEAL_DEEP)
-// on the white card, teal-400 on the dark one.
 const TEAL_TEXT = "text-teal-dark dark:text-teal-400"
-const BG_TEAL = "rgba(13,148,136,0.08)"
 
-/** A control on the landscape: quiet glass, white type, a real focus ring. */
-const SCENE_FIELD =
-  "w-full rounded-lg border border-white/20 bg-black/30 px-3 py-2 text-sm text-white outline-none max-md:min-h-11 max-md:text-base transition-colors placeholder:text-white/50 hover:bg-black/40 focus-visible:ring-2 focus-visible:ring-white"
+/** The one filled button shape on this page. */
+const BTN_PRIMARY =
+  "press inline-flex items-center justify-center gap-2 rounded-btn bg-teal-dark text-[13.5px] font-semibold text-white outline-none transition-colors hover:bg-[#115E59] focus-visible:ring-2 focus-visible:ring-[#0D9488] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-surface disabled:cursor-not-allowed disabled:opacity-50"
 
-/* ── One group, as a line in the ledger ─────────────────────────── */
+/** The quiet button next to it: a hairline, no fill. */
+const BTN_SECONDARY =
+  "press inline-flex items-center justify-center gap-1.5 rounded-btn border border-line bg-surface text-[13.5px] font-semibold text-ink-body no-underline outline-none transition-colors hover:bg-line-soft focus-visible:ring-2 focus-visible:ring-[#0D9488]"
+
+/** A text field on the page (not inside the dialog). */
+const FIELD =
+  "h-10 w-full rounded-btn border border-line bg-surface px-3 text-[13.5px] text-ink outline-none transition-colors placeholder:text-ink-faint focus-visible:border-teal max-md:h-11 max-md:text-base"
+
+/** A text field inside the dialogs. */
+const DIALOG_FIELD =
+  "w-full rounded-btn border border-line bg-surface px-3 py-2.5 text-sm text-ink outline-none transition-colors placeholder:text-ink-faint focus-visible:border-teal max-md:text-base"
+
+/** The small uppercase label the rail cards on /notities use. */
+const EYEBROW = "text-[10.5px] font-semibold uppercase tracking-[1.1px] text-ink-faint"
+
+/* ── One group, as a row in the list ────────────────────────────── */
 /**
- * A group used to be a card in a four-up grid. On the landscape a grid of
- * boxes is a box inside a box, and it read as somebody else's content; the
- * README calls this out for exactly this shape of list. The group is a record,
- * so it is set as one: the name and what it is on the left, who is in it and
- * the one action on the right, a hairline between them.
+ * The group is a record, so it is set as one: the name and what it is on the
+ * left, who is in it and the one action on the right, a hairline between rows -
+ * the same row shape as ListRow in components/kit/primitives.tsx.
  */
-function GroupRow({ group, isMember, onJoin }: {
+function GroupRow({ group, isMember, onJoin, first }: {
   group: Group
   isMember: boolean
   onJoin: (group: Group) => void
+  first: boolean
 }) {
   return (
-    <li className="border-b border-white/10 py-5 sm:grid sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-6">
+    <li className={`px-[18px] py-4 max-md:px-4 sm:grid sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-6 ${
+      first ? "" : "border-t border-line-soft"
+    }`}>
       <div className="min-w-0">
         <div className="flex items-center gap-2">
           {/* Identifies who can see the group - a data type, not decoration. */}
           {group.isPublic
-            ? <Globe size={12} className="shrink-0 text-white/60" aria-hidden />
-            : <Lock size={12} className="shrink-0 text-white/60" aria-hidden />}
-          <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-white/60">
+            ? <Globe size={12} className="shrink-0 text-ink-faint" aria-hidden />
+            : <Lock size={12} className="shrink-0 text-ink-faint" aria-hidden />}
+          <span className={EYEBROW}>
             {group.isPublic ? "Openbaar" : "Privé"}
           </span>
           {isMember && (
-            <span className="text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: TEAL_ON_DARK }}>
+            <span className={`text-[10.5px] font-semibold uppercase tracking-[1.1px] ${TEAL_TEXT}`}>
               · Lid
             </span>
           )}
         </div>
 
-        <h3 className="mt-1 truncate text-base font-semibold text-white">{group.name}</h3>
+        <h3 className="mt-1 truncate text-[14.5px] font-semibold text-ink">{group.name}</h3>
         {group.description && (
-          <p className="mt-0.5 line-clamp-2 break-words text-sm leading-relaxed text-white/70">{group.description}</p>
+          <p className="mt-0.5 line-clamp-2 break-words text-[13px] leading-relaxed text-ink-muted">{group.description}</p>
         )}
 
         <div className="mt-2 flex items-center gap-2">
           <div className="flex -space-x-1.5" aria-hidden>
             {group.members.slice(0, 4).map((m, i) => (
               <span key={i}
-                className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-2 border-black/40 text-[10px] font-bold text-white"
-                style={{ backgroundColor: TEAL_DEEP, zIndex: 4 - i }}>
+                className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-2 border-surface bg-teal-dark text-[10px] font-bold text-white"
+                style={{ zIndex: 4 - i }}>
                 {m.userId?.name?.[0]?.toUpperCase() ?? "?"}
               </span>
             ))}
           </div>
-          <span className="text-xs text-white/60">
+          <span className="text-[12px] text-ink-faint">
             {group.members.length} {group.members.length === 1 ? "lid" : "leden"}
           </span>
         </div>
@@ -90,15 +100,12 @@ function GroupRow({ group, isMember, onJoin }: {
 
       <div className="mt-3 flex-shrink-0 sm:mt-0">
         {isMember ? (
-          <Link href={`/groepen/${group._id}`}
-            className="inline-flex items-center gap-1 rounded-md text-sm font-semibold text-white no-underline max-md:min-h-10 underline-offset-4 outline-none transition-colors hover:underline focus-visible:ring-2 focus-visible:ring-white">
+          <Link href={`/groepen/${group._id}`} className={`${BTN_SECONDARY} h-9 px-3.5 max-md:h-10`}>
             Bekijken <ChevronRight size={14} aria-hidden />
           </Link>
         ) : (
-          <button onClick={() => onJoin(group)}
-            className="press inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold text-white outline-none max-md:min-h-10 max-md:px-4 max-md:text-sm transition-colors hover:bg-[#115E59] focus-visible:ring-2 focus-visible:ring-white"
-            style={{ backgroundColor: TEAL_DEEP }}>
-            <UserPlus size={12} aria-hidden /> Deelnemen
+          <button onClick={() => onJoin(group)} className={`${BTN_PRIMARY} h-9 px-3.5 max-md:h-10 max-md:px-4`}>
+            <UserPlus size={14} aria-hidden /> Deelnemen
           </button>
         )}
       </div>
@@ -145,16 +152,15 @@ function JoinModal({ group, onClose, onJoined }: {
         {!group.isPublic && (
           <input
             value={code} onChange={e => setCode(e.target.value.toUpperCase())}
+            aria-label="Uitnodigingscode"
             placeholder="Bijv. ABC123"
             maxLength={6}
-            className="w-full px-3 py-2.5 border border-border rounded-lg text-sm max-md:text-base font-mono tracking-widest text-center bg-background text-foreground focus:outline-none focus:ring-2 mb-3"
-            style={{ "--tw-ring-color": IC } as React.CSSProperties}
+            className={`${DIALOG_FIELD} mb-3 text-center font-mono tracking-widest`}
           />
         )}
-        {error && <p className="text-sm text-destructive mb-3">{error}</p>}
+        {error && <p className="mb-3 text-sm text-danger">{error}</p>}
         <button onClick={handleJoin} disabled={loading || (!group.isPublic && code.length < 6)}
-          className="press w-full py-2.5 max-md:min-h-11 rounded-lg text-sm font-semibold text-white transition-colors disabled:opacity-50"
-          style={{ backgroundColor: TEAL_DEEP }}>
+          className={`${BTN_PRIMARY} h-11 w-full`}>
           {loading ? "Bezig..." : "Deelnemen"}
         </button>
       </div>
@@ -190,6 +196,11 @@ function CreateModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
     } finally { setLoading(false) }
   }
 
+  const visibilityOption = (active: boolean) =>
+    `press flex flex-col gap-1 rounded-btn p-3 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[#0D9488] ${
+      active ? "border-2 border-teal bg-teal-faint" : "border border-line bg-surface hover:border-line-strong"
+    }`
+
   return (
     <GroupDialog
       open
@@ -200,20 +211,18 @@ function CreateModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
       <div>
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">Naam *</label>
-            <input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
+            <label htmlFor="groep-naam" className={`mb-1.5 block ${EYEBROW}`}>Naam *</label>
+            <input id="groep-naam" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
               placeholder="Bijv. Zondagsgroep Amsterdam"
-              className="w-full px-3 py-2.5 border border-border rounded-lg text-sm max-md:text-base bg-background text-foreground focus:outline-none focus:ring-2"
-              style={{ "--tw-ring-color": IC } as React.CSSProperties}
+              className={DIALOG_FIELD}
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">Beschrijving</label>
-            <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
+            <label htmlFor="groep-beschrijving" className={`mb-1.5 block ${EYEBROW}`}>Beschrijving</label>
+            <textarea id="groep-beschrijving" value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
               placeholder="Vertel iets over de groep..."
               rows={3}
-              className="w-full px-3 py-2.5 border border-border rounded-lg text-sm max-md:text-base bg-background text-foreground focus:outline-none focus:ring-2 resize-none"
-              style={{ "--tw-ring-color": IC } as React.CSSProperties}
+              className={`${DIALOG_FIELD} resize-none`}
             />
           </div>
           <div className="grid grid-cols-2 gap-3 max-[380px]:grid-cols-1">
@@ -221,12 +230,12 @@ function CreateModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
               type="button"
               aria-pressed={form.isPublic}
               onClick={() => setForm(p => ({ ...p, isPublic: true }))}
-              className="press flex flex-col gap-1 p-3 rounded-xl border text-left transition-colors"
-              style={{ borderColor: form.isPublic ? IC : undefined, backgroundColor: form.isPublic ? BG_TEAL : undefined }}>
-              <span className={`flex items-center gap-2 text-sm font-semibold whitespace-nowrap ${form.isPublic ? TEAL_TEXT : ""}`}>
-                <Globe size={14} className="shrink-0" /> Openbaar
+              className={visibilityOption(form.isPublic)}>
+              {/* Identifies the visibility - a data type, not decoration. */}
+              <span className={`flex items-center gap-2 whitespace-nowrap text-sm font-semibold ${form.isPublic ? TEAL_TEXT : "text-ink"}`}>
+                <Globe size={14} className="shrink-0" aria-hidden /> Openbaar
               </span>
-              <span className="text-xs leading-snug text-muted-foreground">
+              <span className="text-xs leading-snug text-ink-muted">
                 Iedereen kan de groep vinden en meedoen
               </span>
             </button>
@@ -234,22 +243,21 @@ function CreateModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
               type="button"
               aria-pressed={!form.isPublic}
               onClick={() => setForm(p => ({ ...p, isPublic: false }))}
-              className="press flex flex-col gap-1 p-3 rounded-xl border text-left transition-colors"
-              style={{ borderColor: !form.isPublic ? IC : undefined, backgroundColor: !form.isPublic ? BG_TEAL : undefined }}>
-              <span className={`flex items-center gap-2 text-sm font-semibold whitespace-nowrap ${!form.isPublic ? TEAL_TEXT : ""}`}>
-                <Lock size={14} className="shrink-0" /> Privé
+              className={visibilityOption(!form.isPublic)}>
+              <span className={`flex items-center gap-2 whitespace-nowrap text-sm font-semibold ${!form.isPublic ? TEAL_TEXT : "text-ink"}`}>
+                <Lock size={14} className="shrink-0" aria-hidden /> Privé
               </span>
-              <span className="text-xs leading-snug text-muted-foreground">
+              <span className="text-xs leading-snug text-ink-muted">
                 Alleen met uitnodigingscode
               </span>
             </button>
           </div>
         </div>
 
-        {error && <p className="text-sm text-destructive mt-3">{error}</p>}
+        {error && <p className="mt-3 text-sm text-danger">{error}</p>}
         {needsPro && (
-          <div className="mt-3 rounded-xl border border-border p-3" style={{ backgroundColor: BG_TEAL }}>
-            <p className="text-sm text-foreground">
+          <div className="mt-3 rounded-btn border border-line bg-teal-faint p-3">
+            <p className="text-sm text-ink">
               Een eigen groep aanmaken hoort bij Pro. Deelnemen aan bestaande groepen is gratis.
             </p>
             <Link href="/abonnement"
@@ -259,14 +267,11 @@ function CreateModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
           </div>
         )}
 
-        <div className="flex gap-3 mt-5">
-          <button onClick={onClose}
-            className="press flex-1 py-2.5 max-md:min-h-11 rounded-xl border border-border text-sm font-semibold text-foreground hover:bg-muted transition-colors">
+        <div className="mt-5 flex gap-3">
+          <button onClick={onClose} className={`${BTN_SECONDARY} h-11 flex-1`}>
             Annuleren
           </button>
-          <button onClick={handleCreate} disabled={loading}
-            className="press flex-1 py-2.5 max-md:min-h-11 rounded-xl text-sm font-semibold text-white disabled:opacity-50 transition-colors"
-            style={{ backgroundColor: TEAL_DEEP }}>
+          <button onClick={handleCreate} disabled={loading} className={`${BTN_PRIMARY} h-11 flex-1`}>
             {loading ? "Aanmaken..." : "Aanmaken"}
           </button>
         </div>
@@ -306,33 +311,35 @@ function InviteJoinBar({ onJoined }: { onJoined: () => void }) {
       <div className="mt-2 flex gap-2">
         <input id="groepen-code" value={code} onChange={e => setCode(e.target.value.toUpperCase())}
           placeholder="ABC123" maxLength={6}
-          className={`${SCENE_FIELD} font-mono tracking-widest`}
+          className={`${FIELD} font-mono tracking-widest`}
           onKeyDown={e => e.key === "Enter" && handleJoin()}
         />
         <button onClick={handleJoin} disabled={loading || code.length < 6}
-          className="press flex-shrink-0 rounded-lg px-4 py-2 text-sm font-semibold text-white outline-none max-md:min-h-11 transition-colors hover:bg-[#115E59] focus-visible:ring-2 focus-visible:ring-white disabled:cursor-not-allowed disabled:opacity-50"
-          style={{ backgroundColor: TEAL_DEEP }}>
+          className={`${BTN_PRIMARY} h-10 flex-shrink-0 px-4 max-md:h-11`}>
           {loading ? "..." : "Deelnemen"}
         </button>
       </div>
-      {error && <p className="mt-2 text-xs text-red-300">{error}</p>}
-      {success && <p className="mt-2 text-xs font-medium" style={{ color: TEAL_ON_DARK }}>Succesvol lid geworden!</p>}
+      {error && <p className="mt-2 text-[12px] text-danger">{error}</p>}
+      {success && <p className={`mt-2 text-[12px] font-medium ${TEAL_TEXT}`}>Succesvol lid geworden!</p>}
     </div>
   )
 }
 
 /* ── Page ─────────────────────────────────────────────────────── */
 /**
- * Groepen, in the shared immersive shell.
+ * Groepen, in the shared app shell (components/shell/AppShell.tsx) - the same
+ * sidebar-and-top-bar frame as /dashboard, /notities and /abonnement, rather
+ * than the immersive landscape this page used to draw.
  *
- * Three layers, the shape the dashboard uses:
- *   1. the sky      - a short one. Someone here came to find or join a group,
- *                     not to look at a landscape.
- *   2. the horizon  - the two ways in: an uitnodigingscode and the search box
- *                     with the twee tabbladen. There is no honest row of
- *                     figures for this page, and that toolbar IS what a reader
- *                     reaches for first.
- *   3. the desk     - the groups, bare on the landscape as a ledger.
+ * Three blocks, top to bottom:
+ *   1. the intro   - what a group is, and the one Pro action (aanmaken).
+ *   2. the toolbar - the two ways in: an uitnodigingscode and the search box
+ *                    with the twee tabbladen. That is what a reader reaches for
+ *                    first.
+ *   3. the list    - the groups, as rows in one card.
+ *
+ * A signed-out visitor never reaches this component: app/groepen/layout.tsx
+ * answers them with the GuestGate in the same shell.
  *
  * Nothing about the data changed: the same GET /api/groepen, the same
  * join / join-by-code / create endpoints with the same bodies, the same
@@ -400,49 +407,48 @@ export default function GroepenPage() {
         }
 
   return (
-    <SceneShell backdrop="reader" header rail>
-      {/* -- The sky ---------------------------------------------------- */}
-      <section aria-labelledby="groepen-titel" className="pb-10 pt-6">
-        <div className="scene-sky flex flex-wrap items-end justify-between gap-x-8 gap-y-6">
+    <AppShell title="Groepen">
+      <div className="max-w-[64rem]">
+        {/* -- The intro --------------------------------------------------- */}
+        {/* The top bar already carries the page's h1, so the intro starts at h2. */}
+        <section aria-labelledby="groepen-titel" className="flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
           <div className="min-w-0 max-w-[40rem]">
-            {/* One of the two accents on this screen; the other is the "Lid"
-                marker in the ledger. */}
-            <p className={EYEBROW} style={{ color: TEAL_ON_DARK }}>Groepen</p>
-            <h1 id="groepen-titel" className="mt-2 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+            <p className={`text-[10.5px] font-semibold uppercase tracking-[1.1px] ${TEAL_TEXT}`}>Groepen</p>
+            <h2 id="groepen-titel" className="mt-2 text-[24px] font-bold leading-tight tracking-[-0.4px] text-ink">
               Samen lezen
-            </h1>
-            <p className="mt-3 text-sm leading-relaxed text-white/80">
+            </h2>
+            <p className="mt-2 text-[14px] leading-relaxed text-ink-muted">
               Een kleine groep leest hetzelfde gedeelte en praat er samen over door. Deelnemen is gratis.
             </p>
           </div>
-          <button onClick={() => setShowCreate(true)} className={CTA_PRIMARY}>
+          <button onClick={() => setShowCreate(true)} className={`${BTN_PRIMARY} h-11 px-[18px]`}>
             <Plus size={16} aria-hidden /> Groep aanmaken
           </button>
-        </div>
-      </section>
+        </section>
 
-      {/* -- The horizon: the two ways in ------------------------------- */}
-      <div className="scene-horizon">
-        <div className={`grid gap-4 p-4 shadow-lg shadow-black/20 md:grid-cols-2 sm:gap-6 sm:p-5 ${TILE}`}>
+        {/* -- The toolbar: the two ways in -------------------------------- */}
+        <Card className="mt-6 grid gap-5 p-[18px] md:grid-cols-2 md:gap-6 max-md:p-4">
           <InviteJoinBar onJoined={loadGroups} />
 
           <div className="min-w-0">
             <label htmlFor="groepen-zoeken" className={EYEBROW}>Zoeken</label>
             <div className="mt-2 flex flex-wrap items-center gap-2">
-              <div className="relative min-w-0 flex-1">
+              <div className="search-field flex h-10 min-w-0 flex-1 items-center gap-2 rounded-btn border border-line bg-surface px-3 max-md:h-11">
                 {/* Identifies the field, not decoration. */}
-                <Search size={15} aria-hidden className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/50" />
+                <Search size={15} aria-hidden className="flex-none text-ink-muted" />
                 <input id="groepen-zoeken" type="search" value={search} onChange={e => setSearch(e.target.value)}
                   placeholder="Zoek groepen..."
-                  className={`${SCENE_FIELD} pl-9`}
+                  className="min-w-0 flex-1 border-0 bg-transparent text-[13.5px] text-ink outline-none placeholder:text-ink-faint max-md:text-base"
                 />
               </div>
 
-              <div className="flex flex-shrink-0 gap-1 rounded-lg border border-white/20 bg-black/30 p-1 max-md:w-full">
+              <div className="flex flex-shrink-0 gap-1 rounded-btn border border-line bg-sunken p-1 max-md:w-full">
                 {(["discover", "mine"] as const).map(t => (
                   <button key={t} onClick={() => setTab(t)} aria-pressed={tab === t}
-                    className={`rounded-md px-3 py-1.5 text-xs font-semibold outline-none max-md:min-h-9 max-md:flex-1 max-md:text-sm transition-colors focus-visible:ring-2 focus-visible:ring-white ${
-                      tab === t ? "bg-white text-gray-900" : "text-white/70 hover:text-white"
+                    className={`rounded-[7px] px-3 py-1.5 text-[12.5px] font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[#0D9488] max-md:min-h-9 max-md:flex-1 max-md:text-sm ${
+                      tab === t
+                        ? "bg-surface text-ink shadow-[0_1px_2px_rgba(17,24,39,.08)]"
+                        : "text-ink-muted hover:text-ink-body"
                     }`}>
                     {t === "discover" ? "Ontdekken" : `Mijn groepen (${myGroups.length})`}
                   </button>
@@ -450,95 +456,98 @@ export default function GroepenPage() {
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </Card>
 
-      {/* -- The desk: the ledger --------------------------------------- */}
-      <div className="pb-24 pt-12">
-        <SectionHeading
-          id="groepen-lijst"
-          rule
-          title={tab === "discover" ? "Openbare groepen" : "Mijn groepen"}
-          action={
-            !loading && !loadFailed && filtered.length > 0 ? (
-              <span className="text-xs tabular-nums text-white/60">
-                {filtered.length} {filtered.length === 1 ? "groep" : "groepen"}
-              </span>
-            ) : undefined
-          }
-        />
+        {/* -- The list ---------------------------------------------------- */}
+        <div className="mt-8">
+          <SectionHeading
+            title={tab === "discover" ? "Openbare groepen" : "Mijn groepen"}
+            meta={
+              !loading && !loadFailed && filtered.length > 0 ? (
+                <span className="tabular-nums">
+                  {filtered.length} {filtered.length === 1 ? "groep" : "groepen"}
+                </span>
+              ) : undefined
+            }
+          />
 
-        {loading ? (
-          <ul aria-label="Groepen laden" className="mt-1">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <li key={i} className="border-b border-white/10 py-5">
-                <div className="skeleton-pulse h-3 w-20 rounded bg-white/15" />
-                <div className="skeleton-pulse mt-2 h-4 w-56 max-w-full rounded bg-white/20" />
-                <div className="skeleton-pulse mt-2 h-3 w-72 max-w-full rounded bg-white/10" />
-              </li>
-            ))}
-          </ul>
-        ) : loadFailed ? (
-          <div className="content-in max-w-xl py-12">
-            <h3 className="text-base font-semibold text-white">Groepen konden niet worden geladen</h3>
-            <p className="mt-1.5 text-sm leading-relaxed text-white/70">
-              Er ging iets mis bij het ophalen van de groepen. Dit betekent niet dat er geen
-              groepen zijn - probeer het opnieuw.
-            </p>
-            <button onClick={loadGroups}
-              className="press mt-5 inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm max-md:min-h-11 font-semibold text-white outline-none transition-colors hover:bg-[#115E59] focus-visible:ring-2 focus-visible:ring-white"
-              style={{ backgroundColor: TEAL_DEEP }}>
-              <RefreshCw size={15} aria-hidden /> Opnieuw proberen
-            </button>
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="content-in max-w-2xl py-12">
-            <h3 className="text-base font-semibold text-white">{empty.title}</h3>
-            <p className="mt-1.5 text-sm leading-relaxed text-white/70">{empty.body}</p>
-
-            {/* The explainer and the aanmaak-CTA are onboarding, not search results:
-                showing them under "geen treffers voor <zoekterm>" buries the one
-                thing that helps there, namely zoeken op iets anders. */}
-            {!query && (
-              <>
-                <div className="mt-8 border-t border-white/15 pt-6">
-                  <h4 className="text-sm font-semibold text-white">Wat is een bijbelstudiegroep?</h4>
-                  <p className="mt-2 text-sm leading-relaxed text-white/70">
-                    Een kleine groep die hetzelfde bijbelgedeelte leest en er samen over doorpraat.
-                    De groepsleider zet een wekelijkse opdracht klaar, iedereen leest die en deelt
-                    wat opvalt.
-                  </p>
-                  <dl className="mt-5 grid gap-4 sm:grid-cols-3">
-                    {[
-                      { title: "Wekelijkse opdracht", body: "Een hoofdstuk of gedeelte voor de hele groep" },
-                      { title: "Bespreking",          body: "Stel vragen en reageer op elkaar" },
-                      { title: "Gedeelde notities",   body: "Deel wat u ontdekt met de groep" },
-                    ].map(({ title, body }) => (
-                      <div key={title} className="min-w-0">
-                        <dt className="text-sm font-semibold text-white">{title}</dt>
-                        <dd className="mt-0.5 text-xs leading-snug text-white/60">{body}</dd>
-                      </div>
-                    ))}
-                  </dl>
-                </div>
-                <button onClick={() => setShowCreate(true)}
-                  className="press mt-6 inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm max-md:min-h-11 font-semibold text-white outline-none transition-colors hover:bg-[#115E59] focus-visible:ring-2 focus-visible:ring-white"
-                  style={{ backgroundColor: TEAL_DEEP }}>
-                  <Plus size={15} aria-hidden /> Groep aanmaken
+          {loading ? (
+            <Card className="mt-3 overflow-hidden">
+              <ul role="status" aria-label="Groepen laden">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <li key={i} className={`space-y-2 px-[18px] py-4 max-md:px-4 ${i === 0 ? "" : "border-t border-line-soft"}`}>
+                    <Skeleton className="h-3 w-20" />
+                    <Skeleton className="h-4 w-56 max-w-full" />
+                    <Skeleton className="h-3 w-72 max-w-full" />
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          ) : loadFailed ? (
+            <Card className="content-in mt-3 p-[22px] max-md:p-4">
+              <div className="max-w-xl">
+                <h3 className="text-[15.5px] font-bold text-ink">Groepen konden niet worden geladen</h3>
+                <p className="mt-2 text-[13.5px] leading-relaxed text-ink-muted">
+                  Er ging iets mis bij het ophalen van de groepen. Dit betekent niet dat er geen
+                  groepen zijn - probeer het opnieuw.
+                </p>
+                <button onClick={loadGroups} className={`${BTN_PRIMARY} mt-5 h-11 px-5`}>
+                  <RefreshCw size={15} aria-hidden /> Opnieuw proberen
                 </button>
-              </>
-            )}
-          </div>
-        ) : (
-          <ul className="stagger-in mt-1">
-            {filtered.map(group => (
-              <GroupRow key={group._id} group={group}
-                isMember={myGroupIds.has(group._id)}
-                onJoin={setJoinTarget}
-              />
-            ))}
-          </ul>
-        )}
+              </div>
+            </Card>
+          ) : filtered.length === 0 ? (
+            <Card className="content-in mt-3 p-[22px] max-md:p-4">
+              <div className="max-w-2xl">
+                <h3 className="text-[15.5px] font-bold text-ink">{empty.title}</h3>
+                <p className="mt-2 text-[13.5px] leading-relaxed text-ink-muted">{empty.body}</p>
+
+                {/* The explainer and the aanmaak-CTA are onboarding, not search results:
+                    showing them under "geen treffers voor <zoekterm>" buries the one
+                    thing that helps there, namely zoeken op iets anders. */}
+                {!query && (
+                  <>
+                    <div className="mt-6 border-t border-line pt-5">
+                      <h4 className="text-[14px] font-semibold text-ink">Wat is een bijbelstudiegroep?</h4>
+                      <p className="mt-2 text-[13.5px] leading-relaxed text-ink-muted">
+                        Een kleine groep die hetzelfde bijbelgedeelte leest en er samen over doorpraat.
+                        De groepsleider zet een wekelijkse opdracht klaar, iedereen leest die en deelt
+                        wat opvalt.
+                      </p>
+                      <dl className="mt-4 grid gap-3 sm:grid-cols-3">
+                        {[
+                          { title: "Wekelijkse opdracht", body: "Een hoofdstuk of gedeelte voor de hele groep" },
+                          { title: "Bespreking",          body: "Stel vragen en reageer op elkaar" },
+                          { title: "Gedeelde notities",   body: "Deel wat u ontdekt met de groep" },
+                        ].map(({ title, body }) => (
+                          <div key={title} className="min-w-0 rounded-btn border border-line bg-sunken px-3.5 py-3">
+                            <dt className="text-[13.5px] font-semibold text-ink">{title}</dt>
+                            <dd className="mt-0.5 text-[12px] leading-snug text-ink-muted">{body}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                    </div>
+                    <button onClick={() => setShowCreate(true)} className={`${BTN_PRIMARY} mt-6 h-11 px-5`}>
+                      <Plus size={15} aria-hidden /> Groep aanmaken
+                    </button>
+                  </>
+                )}
+              </div>
+            </Card>
+          ) : (
+            <Card className="mt-3 overflow-hidden">
+              <ul className="stagger-in">
+                {filtered.map((group, i) => (
+                  <GroupRow key={group._id} group={group}
+                    isMember={myGroupIds.has(group._id)}
+                    onJoin={setJoinTarget}
+                    first={i === 0}
+                  />
+                ))}
+              </ul>
+            </Card>
+          )}
+        </div>
       </div>
 
       {/* Modals */}
@@ -550,6 +559,6 @@ export default function GroepenPage() {
         <CreateModal onClose={() => setShowCreate(false)}
           onCreated={() => { setShowCreate(false); loadGroups() }} />
       )}
-    </SceneShell>
+    </AppShell>
   )
 }

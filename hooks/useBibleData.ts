@@ -20,9 +20,9 @@ const VERSIONS = [
   { id: 'coverdale', name: 'Coverdale Bible (1535)',     language: 'en' },
 ] as const;
 
-// Flat-file translations: stored as a single JSON, no per-book directory.
-// Chapters must be fetched via API instead of /data/bibles/{version}/{book}/chapters.json
-const FLAT_FILE_VERSIONS = new Set<string>(['nbg51']);
+// Licensed translations live in ./private, not /public/data, so their chapter
+// lists come from the API instead of /data/bibles/{version}/{book}/chapters.json.
+const API_CHAPTER_VERSIONS = new Set<string>(['nbg51', 'net']);
 
 // Flat-file translations that store book names in English internally (need Dutch→English mapping)
 const ENGLISH_INTERNAL_VERSIONS = new Set<string>();
@@ -77,7 +77,7 @@ async function fetchChaptersDirect(version: string, bookName: string): Promise<n
   try {
     let sorted: number[] = [];
 
-    if (FLAT_FILE_VERSIONS.has(version)) {
+    if (API_CHAPTER_VERSIONS.has(version)) {
       // basisbijbel stores books with English names internally; translate Dutch display name back.
       // Other flat-file translations (heilige_schrift_1917, canisiusbijbel) use Dutch names natively.
       const bookParam = ENGLISH_INTERNAL_VERSIONS.has(version)

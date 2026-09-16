@@ -4,7 +4,7 @@ import { authOptions } from "../../../lib/authOptions";
 import connectMongoDB from "../../../lib/mongodb";
 import Note from "../../../models/Note";
 import User from "../../../models/User";
-import { grantNoteXp } from "../../../lib/noteXp";
+import { grantNoteXp, canCreateAnotherNote } from "../../../lib/noteXp";
 import { resolveIsPro } from "../../../lib/mobilePremium";
 import { isAdminEmail } from "../../../lib/adminEmails";
 import { randomUUID } from "crypto";
@@ -94,11 +94,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Check note limit for free users
     const isPro = resolveIsPro(user, isAdminEmail(session.user.email));
     if (!isPro) {
       const noteCount = await Note.countDocuments({ userId: user._id });
-      if (noteCount >= 7) {
+      if (!canCreateAnotherNote(noteCount, isPro)) {
         return NextResponse.json(
           { error: "Je hebt het gratis limiet van 7 notities bereikt. Upgrade naar Pro voor onbeperkte notities.", code: "NOTE_LIMIT_REACHED" },
           { status: 403 }

@@ -52,7 +52,7 @@ export const GUIDE_FREE: Guide = {
       id: "gratis-commentaren",
       heading: "Gratis bijbelcommentaren",
       body: [
-        "Een commentaar vertelt je wat je zelf niet kon weten: historische achtergrond, parallellen, en hoe anderen het gedeelte door de eeuwen heen hebben uitgelegd. De eerste drie hieronder zijn publiek domein; KingComments is hedendaags en door de auteur vrij beschikbaar gesteld.",
+        "Een commentaar vertelt je wat je zelf niet kon weten: historische achtergrond, parallellen, en hoe anderen het gedeelte door de eeuwen heen hebben uitgelegd. De eerste twee hieronder zijn publiek domein; KingComments is hedendaags en door de auteur vrij beschikbaar gesteld.",
       ],
       list: [
         {
@@ -62,10 +62,6 @@ export const GUIDE_FREE: Guide = {
         {
           title: "Karl August Dachsel (1818-1893)",
           text: "Een uitgebreid Duits commentaar in Nederlandse vertaling, vers voor vers en met veel aandacht voor de grondtekst.",
-        },
-        {
-          title: "Heinrich Meyer (1800-1873)",
-          text: "Kritisch-exegetisch commentaar op het Nieuwe Testament, technischer van aard en nuttig als je wilt weten wat de grammatica van een vers toelaat.",
         },
         {
           title: "KingComments",
@@ -161,7 +157,7 @@ export const GUIDE_FREE: Guide = {
     },
     {
       q: "Zijn gratis bijbelcommentaren betrouwbaar?",
-      a: "Ze zijn gratis omdat het auteursrecht is vervallen of omdat de auteur ze zelf vrijgeeft, niet omdat ze van mindere kwaliteit zijn. Matthew Henry, Dachsel en Meyer worden nog altijd geraadpleegd, en KingComments is een hedendaags commentaar dat de auteur vrij beschikbaar stelt. Wel zijn het commentaren van hun eigen tijd: ze kennen archeologische en tekstkritische vondsten van na hun overlijden niet. Lees ze als een goed geïnformeerde gesprekspartner, niet als het laatste woord.",
+      a: "Ze zijn gratis omdat het auteursrecht is vervallen of omdat de auteur ze zelf vrijgeeft, niet omdat ze van mindere kwaliteit zijn. Matthew Henry en Dachsel worden nog altijd geraadpleegd, en KingComments is een hedendaags commentaar dat de auteur vrij beschikbaar stelt. Wel zijn het commentaren van hun eigen tijd: ze kennen archeologische en tekstkritische vondsten van na hun overlijden niet. Lees ze als een goed geïnformeerde gesprekspartner, niet als het laatste woord.",
     },
     {
       q: "Heb ik een account nodig om gratis te beginnen?",

@@ -8,11 +8,11 @@ import { useSession } from "next-auth/react"
 import { useTranslation } from "../i18n/client"
 import { trackNow } from "../../lib/analytics"
 import { useLevensboom } from "../../hooks/useLevensboom"
-import { Panel, SceneSkeleton } from "../../components/scene/pieces"
-import { CTA_PRIMARY, EYEBROW, TEAL_ON_DARK } from "../../components/scene/tokens"
+import AppShell from "../../components/shell/AppShell"
+import { Card, Skeleton } from "../../components/kit/primitives"
 
 /**
- * The checkout return, on the scene.
+ * The checkout return, in the app shell.
  *
  * Restyled, not rebuilt: the same single POST to /api/verify-subscription per
  * session id, the same `update()` of the session, the same Levensboom refresh
@@ -21,8 +21,9 @@ import { CTA_PRIMARY, EYEBROW, TEAL_ON_DARK } from "../../components/scene/token
  * fails, and the same two destinations afterwards.
  *
  * Someone is standing in the middle of a transaction here, so everything that
- * answers "did my payment go through" fits on the first screen and nothing on
- * the page waits for the landscape - the layout mounts no canvas at all.
+ * answers "did my payment go through" sits in one card on the first screen.
+ * The top bar carries the page's only <h1> ("Abonnement", the route the
+ * checkout started from), so the card's heading is an <h2>.
  */
 export default function SuccessPage() {
   const { t } = useTranslation("success")
@@ -88,89 +89,86 @@ export default function SuccessPage() {
   }, [sessionId, router, update])
 
   return (
-    <section
-      aria-labelledby="succes-titel"
-      className="flex min-h-[calc(100vh-3.5rem)] flex-col justify-center py-16"
-    >
-      <div className="mx-auto w-full max-w-[46rem]">
-        {status === "loading" ? (
-          <div role="status" aria-label={t("verifying")} className="space-y-4">
-            <SceneSkeleton className="h-4 w-32" />
-            <SceneSkeleton className="h-12 w-[22rem] max-w-full" />
-            <SceneSkeleton className="h-4 w-[26rem] max-w-full" />
-            <SceneSkeleton className="mt-6 h-48 w-full rounded-2xl" />
-          </div>
-        ) : (
-          <>
-            {/* The answer to "did it work", set straight into the landscape. */}
-            <div className="scene-sky">
-              <p className={EYEBROW} style={{ color: TEAL_ON_DARK }}>
-                <CheckCircle size={13} aria-hidden className="mr-1.5 inline-block align-[-2px]" />
-                {t("status")}
-              </p>
-              <h1
-                id="succes-titel"
-                className="mt-3 text-4xl font-semibold leading-[1.05] tracking-tight text-white drop-shadow-sm sm:text-5xl"
-              >
-                {t("title")}
-              </h1>
-              <p className="mt-4 max-w-[34rem] text-base leading-relaxed text-white/85 sm:text-lg">
-                {t("subtitle")}
-              </p>
+    <AppShell title="Abonnement">
+      <div className="flex min-h-full flex-col items-center justify-center">
+        <div className="w-full max-w-[38rem]">
+          {status === "loading" ? (
+            // The waiting state, in the shape of the card that is coming.
+            <div role="status" aria-label={t("verifying")}>
+              <Skeleton className="h-[26rem] w-full rounded-card" />
             </div>
-
-            {/* What the subscription now is, in three lines. */}
-            <Panel className="mt-10 p-5 sm:p-6" labelledBy="succes-wat">
-              <h2 id="succes-wat" className="sr-only">{t("status")}</h2>
-              <p className="text-sm leading-relaxed text-white/85">{t("message")}</p>
-
-              <dl className="mt-5 divide-y divide-white/10 border-t border-white/10">
-                <div className="py-3">
-                  <dt className="text-sm font-semibold text-white">{t("features.full_access")}</dt>
-                  <dd className="mt-1 text-xs leading-relaxed text-white/75">{t("features.full_access_desc")}</dd>
-                </div>
-                <div className="py-3">
-                  <dt className="text-sm font-semibold text-white">{t("features.advanced")}</dt>
-                  <dd className="mt-1 text-xs leading-relaxed text-white/75">{t("features.advanced_desc")}</dd>
-                </div>
-                <div className="py-3">
-                  <dt className="text-sm font-semibold text-white">
-                    {t(billingInterval === "annual" ? "features.billing_annual" : "features.billing_monthly")}
-                  </dt>
-                  <dd className="mt-1 text-xs leading-relaxed text-white/75">
-                    {t(
-                      billingInterval === "annual"
-                        ? "features.billing_annual_desc"
-                        : "features.billing_monthly_desc"
-                    )}
-                  </dd>
-                </div>
-              </dl>
-
-              {sessionId && (
-                <p className="mt-4 text-[11px] tabular-nums text-white/55">
-                  {t("reference")} {sessionId.substring(0, 16)}...
+          ) : (
+            <section aria-labelledby="succes-titel">
+              <Card className="p-6 sm:p-8">
+                {/* The answer to "did it work", first and in the brand colour.
+                    The tick identifies the line as a status. teal-dark, not
+                    teal: #0D9488 on the faint wash is too light for 12 px type. */}
+                <p className="inline-flex items-center gap-1.5 rounded-full bg-teal-faint px-3 py-1 text-xs font-semibold text-teal-dark dark:text-teal-400">
+                  <CheckCircle size={14} aria-hidden className="flex-shrink-0" />
+                  {t("status")}
                 </p>
-              )}
-            </Panel>
+                <h2
+                  id="succes-titel"
+                  className="mt-4 text-2xl font-bold tracking-tight text-ink sm:text-3xl"
+                >
+                  {t("title")}
+                </h2>
+                <p className="mt-2 text-base leading-relaxed text-ink-body">{t("subtitle")}</p>
+                <p className="mt-4 text-sm leading-relaxed text-ink-muted">{t("message")}</p>
 
-            {/* Actions. Dutch routes: /study only resolved via a 308 and
-                /courses resolved to nothing at all - a 404 on the page a
-                customer lands on immediately after paying. */}
-            <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
-              <Link href={`/studie`} className={CTA_PRIMARY}>
-                {t("cta_study")}
-              </Link>
-              <Link
-                href={`/studies`}
-                className="rounded-md text-sm font-semibold text-white/85 no-underline underline-offset-4 outline-none transition-colors hover:text-white hover:underline focus-visible:ring-2 focus-visible:ring-white"
-              >
-                {t("cta_courses")}
-              </Link>
-            </div>
-          </>
-        )}
+                {/* What the subscription now is, in three lines. */}
+                <dl className="mt-6 divide-y divide-line-soft border-y border-line-soft">
+                  <div className="py-3">
+                    <dt className="text-sm font-semibold text-ink">{t("features.full_access")}</dt>
+                    <dd className="mt-1 text-xs leading-relaxed text-ink-muted">{t("features.full_access_desc")}</dd>
+                  </div>
+                  <div className="py-3">
+                    <dt className="text-sm font-semibold text-ink">{t("features.advanced")}</dt>
+                    <dd className="mt-1 text-xs leading-relaxed text-ink-muted">{t("features.advanced_desc")}</dd>
+                  </div>
+                  <div className="py-3">
+                    <dt className="text-sm font-semibold text-ink">
+                      {t(billingInterval === "annual" ? "features.billing_annual" : "features.billing_monthly")}
+                    </dt>
+                    <dd className="mt-1 text-xs leading-relaxed text-ink-muted">
+                      {t(
+                        billingInterval === "annual"
+                          ? "features.billing_annual_desc"
+                          : "features.billing_monthly_desc"
+                      )}
+                    </dd>
+                  </div>
+                </dl>
+
+                {sessionId && (
+                  <p className="mt-3 text-[11px] tabular-nums text-ink-faint">
+                    {t("reference")} {sessionId.substring(0, 16)}...
+                  </p>
+                )}
+
+                {/* Actions. Dutch routes: /study only resolved via a 308 and
+                    /courses resolved to nothing at all - a 404 on the page a
+                    customer lands on immediately after paying. White type
+                    sits on teal-dark (#0F766E, 5.5:1), not teal (3.74:1). */}
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                  <Link
+                    href={`/studie`}
+                    className="press inline-flex h-11 items-center justify-center rounded-btn bg-teal-dark px-5 text-sm font-semibold text-white no-underline outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#0F766E] focus-visible:ring-offset-2"
+                  >
+                    {t("cta_study")}
+                  </Link>
+                  <Link
+                    href={`/studies`}
+                    className="press inline-flex h-11 items-center justify-center rounded-btn border border-line bg-surface px-5 text-sm font-semibold text-ink-body no-underline outline-none transition-colors hover:border-line-strong focus-visible:ring-2 focus-visible:ring-[#0D9488] focus-visible:ring-offset-2"
+                  >
+                    {t("cta_courses")}
+                  </Link>
+                </div>
+              </Card>
+            </section>
+          )}
+        </div>
       </div>
-    </section>
+    </AppShell>
   )
 }

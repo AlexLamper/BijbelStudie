@@ -45,16 +45,10 @@ export const MOBILE_ALLOWED_BIBLES: ReadonlySet<string> = new Set([
 
 /**
  * Commentary ids as they appear in `public/data/manifest.json`.
- *
- * `meyer` is public domain (Heinrich Meyer, d. 1898) and `public/data/
- * commentaries/meyer.json` exists on disk, but it is NOT registered in
- * manifest.json, so it will not surface in /api/v1/commentaries until it is.
- * It is allowlisted here so that registering it is the only step needed.
  */
 export const MOBILE_ALLOWED_COMMENTARIES: ReadonlySet<string> = new Set([
   'matthew_henry_nl', // Matthew Henry, d. 1714 - public domain
   'dachsel', // Karl August Dachsel, d. 1893 - public domain
-  'meyer', // Heinrich Meyer, d. 1898 - public domain
   // John Calvin, d. 1564. Dutch text is translated from the public-domain
   // English Calvin Translation Society edition (public domain, John King et
   // al., 1840s-50s) - our own translation of a public-domain work, no

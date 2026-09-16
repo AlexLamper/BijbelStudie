@@ -7,25 +7,23 @@ import { annualSaving, effectivePerMonth, PLANS } from "../../lib/pricing"
 import { track, trackNow } from "../../lib/analytics"
 
 /**
- * Colours for the scene. These notices render on the dashboard, which is one
- * fixed full-bleed landscape - so the old pale tints (a 50%-opaque #FEE2E2 with
- * #111827 type) sat on a photograph and stopped being readable at the top of a
- * noon sky. Every value below is a literal white or a literal dark ground, and
- * every white label sits on a fill that clears 4.5:1.
+ * These notices render at the top of /dashboard, which is the ordinary light
+ * AppShell page - not the full-bleed scene it once was. So each notice is a
+ * card in the app's own vocabulary (`rounded-card`, `border-line`, the
+ * `ink-*` text scale from kit/primitives.tsx), tinted with a literal status
+ * colour rather than the old dark, translucent, white-on-photograph panel.
+ *
+ * `--danger` (#DC2626) and `--warn` (#EA580C) are the same literals
+ * app/globals.css documents as reading the same on either ground; the tint
+ * behind them and the icon get an explicit dark: step for the same reason
+ * components/study/flow/PassageReader.tsx pairs `text-danger` with
+ * `dark:text-red-400` - a hairline safer on a near-black surface than the
+ * bare literal alone.
  */
-const TEAL_ON_DARK = "#2DD4BF"
-const DANGER_TEXT = "#FCA5A5"
-const DANGER_FILL = "#B91C1C"
-const WARN_TEXT = "#FCD34D"
-const WARN_FILL = "#92400E"
-/** Any solid fill under white type: white on #0D9488 is 3.74:1, on this 5.5:1. */
-const TEAL_DEEP = "#0F766E"
-
-/** The shared shape of all three notices: a panel, on the scene. */
-const NOTICE = "mb-5 flex items-start gap-3 rounded-xl p-4 backdrop-blur-md"
+const NOTICE = "mb-5 flex items-start gap-3 rounded-card border p-4"
 
 const ACTION =
-  "press mt-2.5 inline-flex h-8 max-md:h-10 items-center gap-1.5 rounded-md px-3.5 text-xs max-md:text-sm font-semibold text-white outline-none transition-colors focus-visible:ring-2 focus-visible:ring-white disabled:opacity-60"
+  "press mt-2.5 inline-flex h-8 max-md:h-10 items-center gap-1.5 rounded-btn px-3.5 text-xs max-md:text-sm font-semibold text-white outline-none transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-60"
 
 interface BillingState {
   subscribed: boolean
@@ -101,17 +99,17 @@ export function BillingNotices() {
     }
 
     return (
-      <div className={NOTICE} style={{ backgroundColor: "rgba(69,10,10,0.72)", boxShadow: "inset 0 0 0 1px rgba(252,165,165,0.45)" }}>
-        <AlertTriangle size={18} aria-hidden className="mt-0.5 flex-shrink-0" style={{ color: DANGER_TEXT }} />
+      <div className={`${NOTICE} border-red-200 bg-red-50 dark:border-red-900/40 dark:bg-red-950/30`}>
+        <AlertTriangle size={18} aria-hidden className="mt-0.5 flex-shrink-0 text-danger dark:text-red-400" />
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-white">
+          <p className="text-sm font-semibold text-ink">
             Je betaling is niet gelukt
           </p>
-          <p className="mt-0.5 text-xs leading-relaxed text-white/80">
+          <p className="mt-0.5 text-xs leading-relaxed text-ink-muted">
             We konden je laatste betaling niet verwerken - meestal is de kaart verlopen.
             Werk je gegevens bij om je toegang te behouden.
           </p>
-          <button onClick={openPortal} disabled={busy} className={ACTION} style={{ backgroundColor: DANGER_FILL }}>
+          <button onClick={openPortal} disabled={busy} className={ACTION} style={{ backgroundColor: "#DC2626" }}>
             {busy ? <Loader2 size={12} aria-hidden className="animate-spin" /> : null}
             Betaalgegevens bijwerken
           </button>
@@ -137,16 +135,16 @@ export function BillingNotices() {
     }
 
     return (
-      <div className={NOTICE} style={{ backgroundColor: "rgba(69,39,3,0.72)", boxShadow: "inset 0 0 0 1px rgba(253,230,138,0.4)" }}>
-        <PauseCircle size={18} aria-hidden className="mt-0.5 flex-shrink-0" style={{ color: WARN_TEXT }} />
+      <div className={`${NOTICE} border-amber-200 bg-amber-50 dark:border-amber-900/40 dark:bg-amber-950/30`}>
+        <PauseCircle size={18} aria-hidden className="mt-0.5 flex-shrink-0 text-warn dark:text-amber-400" />
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-white">
+          <p className="text-sm font-semibold text-ink">
             Je abonnement is gepauzeerd
           </p>
-          <p className="mt-0.5 text-xs text-white/80">
+          <p className="mt-0.5 text-xs text-ink-muted">
             {resumesAt ? `Het hervat automatisch op ${resumesAt}.` : "Het hervat automatisch."}
           </p>
-          <button onClick={resume} disabled={busy} className={ACTION} style={{ backgroundColor: WARN_FILL }}>
+          <button onClick={resume} disabled={busy} className={ACTION} style={{ backgroundColor: "#EA580C" }}>
             {busy ? <Loader2 size={12} aria-hidden className="animate-spin" /> : null}
             Nu hervatten
           </button>
@@ -175,19 +173,19 @@ export function BillingNotices() {
     }
 
     return (
-      <div className={`relative ${NOTICE}`} style={{ backgroundColor: "rgba(0,0,0,0.45)", boxShadow: "inset 0 0 0 1px rgba(45,212,191,0.35)" }}>
-        <CalendarClock size={18} aria-hidden className="mt-0.5 flex-shrink-0" style={{ color: TEAL_ON_DARK }} />
+      <div className={`relative ${NOTICE} border-line bg-teal-faint`}>
+        <CalendarClock size={18} aria-hidden className="mt-0.5 flex-shrink-0 text-teal-dark dark:text-teal-400" />
         <div className="min-w-0 flex-1 pr-6">
-          <p className="text-sm font-semibold text-white">
+          <p className="text-sm font-semibold text-ink">
             Stap over op jaarlijks en bespaar {annualSaving()}
           </p>
-          <p className="mt-0.5 text-xs leading-relaxed text-white/80">
+          <p className="mt-0.5 text-xs leading-relaxed text-ink-muted">
             Je gebruikt BijbelStudie al een tijd. Op het jaarplan betaal je{" "}
             {effectivePerMonth(PLANS.annual)} per maand in plaats van{" "}
             {effectivePerMonth(PLANS.monthly)}. Wat je deze maand al betaald hebt,
             wordt verrekend.
           </p>
-          <button onClick={accept} disabled={busy} className={ACTION} style={{ backgroundColor: TEAL_DEEP }}>
+          <button onClick={accept} disabled={busy} className={ACTION} style={{ backgroundColor: "#0F766E" }}>
             {busy ? <Loader2 size={12} aria-hidden className="animate-spin" /> : null}
             Overstappen naar jaarlijks
           </button>
@@ -195,7 +193,7 @@ export function BillingNotices() {
         <button
           onClick={dismiss}
           aria-label="Sluiten"
-          className="absolute right-3 top-3 max-md:right-1 max-md:top-1 max-md:flex max-md:h-10 max-md:w-10 max-md:items-center max-md:justify-center rounded-md text-white/60 outline-none transition-colors hover:text-white focus-visible:ring-2 focus-visible:ring-white"
+          className="absolute right-3 top-3 max-md:right-1 max-md:top-1 max-md:flex max-md:h-10 max-md:w-10 max-md:items-center max-md:justify-center rounded-btn text-ink-faint outline-none transition-colors hover:text-ink focus-visible:ring-2 focus-visible:ring-[#0D9488]"
         >
           <X size={14} aria-hidden />
         </button>

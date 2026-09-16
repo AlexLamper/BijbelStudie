@@ -99,11 +99,11 @@ function ReactionBar({
       ))}
       <div className="relative">
         <button onClick={() => setShowPicker(v => !v)}
-          className="text-xs px-1.5 py-0.5 max-md:min-h-8 max-md:min-w-8 max-md:text-sm rounded-full border border-gray-200 dark:border-border text-gray-400 hover:text-gray-600 dark:hover:text-foreground transition-colors">
+          className="text-xs px-1.5 py-0.5 max-md:min-h-8 max-md:min-w-8 max-md:text-sm rounded-full border border-line text-ink-faint hover:text-ink-body transition-colors">
           +
         </button>
         {showPicker && (
-          <div className="absolute bottom-7 left-0 flex gap-1 max-md:bottom-10 max-md:grid max-md:grid-cols-4 bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-2 shadow-lg z-10">
+          <div className="absolute bottom-7 left-0 flex gap-1 max-md:bottom-10 max-md:grid max-md:grid-cols-4 bg-surface border border-line rounded-btn p-2 shadow-lg z-10">
             {EMOJI_PICKER.map(e => (
               <button key={e} onClick={() => toggle(e)} className="hover:scale-125 transition-transform text-base max-md:h-10 max-md:w-10 max-md:text-xl">
                 {e}
@@ -142,26 +142,26 @@ function ReplyThread({
     onDeleteReply()
   }
 
-  if (loading) return <div className="ml-10 mt-2 h-4 bg-gray-100 dark:bg-secondary rounded skeleton-pulse w-2/3" />
+  if (loading) return <div className="ml-10 mt-2 h-4 bg-line rounded skeleton-pulse w-2/3" />
 
   return (
-    <div className="ml-10 max-md:ml-4 mt-2 space-y-2 border-l-2 border-gray-100 dark:border-border pl-3">
+    <div className="ml-10 max-md:ml-4 mt-2 space-y-2 border-l-2 border-line pl-3">
       {replies.map(r => (
         <div key={r._id} className="flex items-start gap-2">
-          {r.userId ? <Avatar name={r.userId.name} size={6} card={r.userId.levensboom} /> : <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-secondary" />}
+          {r.userId ? <Avatar name={r.userId.name} size={6} card={r.userId.levensboom} /> : <div className="w-6 h-6 rounded-full bg-line" />}
           <div className="flex-1 min-w-0">
             {r.deletedAt ? (
-              <p className="text-xs text-gray-400 dark:text-muted-foreground italic">Dit bericht is verwijderd.</p>
+              <p className="text-xs text-ink-faint italic">Dit bericht is verwijderd.</p>
             ) : (
               <>
                 <div className="flex items-center gap-2 mb-0.5">
-                  <span className="text-xs font-semibold text-gray-700 dark:text-foreground">{r.userId?.name}</span>
-                  <span className="text-[10px] text-gray-400">{relativeTime(r.createdAt)}</span>
+                  <span className="text-xs font-semibold text-ink-body">{r.userId?.name}</span>
+                  <span className="text-[10px] text-ink-faint">{relativeTime(r.createdAt)}</span>
                 </div>
-                <p className="text-sm text-gray-700 dark:text-foreground/80 leading-relaxed break-words">{r.content}</p>
+                <p className="text-sm text-ink-body leading-relaxed break-words">{r.content}</p>
                 {(r.userId?._id === currentUserId || currentUserRole === "leader") && (
                   <button onClick={() => handleDelete(r._id)}
-                    className="mt-0.5 text-[10px] max-md:min-h-8 max-md:text-xs text-gray-400 hover:text-red-500 transition-colors">
+                    className="mt-0.5 text-[10px] max-md:min-h-8 max-md:text-xs text-ink-faint hover:text-danger transition-colors">
                     Verwijderen
                   </button>
                 )}
@@ -191,28 +191,28 @@ function MessageCard({
   const cardBg =
     msg.type === "gebedsverzoek" ? "bg-purple-50 dark:bg-purple-950/20 border-purple-200 dark:border-purple-800" :
     msg.type === "aankondiging"  ? "bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800" :
-    "bg-white dark:bg-card border-gray-200 dark:border-border"
+    "bg-surface border-line"
 
   return (
-    <div className={`rounded-xl p-4 max-md:p-3 border ${cardBg}`}>
+    <div className={`rounded-card p-4 max-md:p-3 border ${cardBg}`}>
       {msg.deletedAt ? (
-        <p className="text-sm text-gray-400 dark:text-muted-foreground italic">Dit bericht is verwijderd.</p>
+        <p className="text-sm text-ink-faint italic">Dit bericht is verwijderd.</p>
       ) : (
         <>
           <div className="flex items-start gap-3">
-            {msg.userId ? <Avatar name={msg.userId.name} size={8} card={msg.userId.levensboom} /> : <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-secondary" />}
+            {msg.userId ? <Avatar name={msg.userId.name} size={8} card={msg.userId.levensboom} /> : <div className="w-8 h-8 rounded-full bg-line" />}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap mb-1">
-                <span className="text-sm font-semibold text-gray-900 dark:text-foreground">{msg.userId?.name}</span>
+                <span className="text-sm font-semibold text-ink">{msg.userId?.name}</span>
                 <TypeBadge type={msg.type} />
-                <span className="text-xs text-gray-400 dark:text-muted-foreground ml-auto">{relativeTime(msg.createdAt)}</span>
+                <span className="text-xs text-ink-faint ml-auto">{relativeTime(msg.createdAt)}</span>
               </div>
               {msg.verseRef && (
-                <p className="text-xs font-semibold mb-1 text-teal dark:text-teal-400">
+                <p className="text-xs font-semibold mb-1 text-teal-dark dark:text-teal-400">
                   {msg.verseRef.book} {msg.verseRef.chapter}{msg.verseRef.verse ? `:${msg.verseRef.verse}` : ""}
                 </p>
               )}
-              <p className="text-sm text-gray-800 dark:text-foreground leading-relaxed whitespace-pre-wrap break-words">
+              <p className="text-sm text-ink leading-relaxed whitespace-pre-wrap break-words">
                 {msg.content}
               </p>
 
@@ -225,12 +225,12 @@ function MessageCard({
                   onUpdate={onReactionUpdate}
                 />
                 <button onClick={() => { onReply(msg) }}
-                  className="flex items-center gap-1 max-md:min-h-8 text-xs text-gray-400 hover:text-gray-600 dark:hover:text-foreground transition-colors">
+                  className="flex items-center gap-1 max-md:min-h-8 text-xs text-ink-faint hover:text-ink-body transition-colors">
                   <Reply size={11} /> Antwoord
                 </button>
                 {localReplyCount > 0 && (
                   <button onClick={() => setShowReplies(v => !v)}
-                    className="flex items-center gap-1 max-md:min-h-8 text-xs text-gray-400 hover:text-gray-600 dark:hover:text-foreground transition-colors">
+                    className="flex items-center gap-1 max-md:min-h-8 text-xs text-ink-faint hover:text-ink-body transition-colors">
                     <ChevronDown size={11} className={showReplies ? "rotate-180" : ""} />
                     {localReplyCount} {localReplyCount === 1 ? "antwoord" : "antwoorden"}
                   </button>
@@ -238,7 +238,7 @@ function MessageCard({
                 {(msg.userId?._id === currentUserId || currentUserRole === "leader") && (
                   <button onClick={() => onDelete(msg._id)}
                     aria-label="Bericht verwijderen"
-                    className="ml-auto flex items-center gap-1 max-md:h-9 max-md:w-9 max-md:justify-center text-xs text-gray-400 hover:text-red-500 transition-colors">
+                    className="ml-auto flex items-center gap-1 max-md:h-9 max-md:w-9 max-md:justify-center text-xs text-ink-faint hover:text-danger transition-colors">
                     <Trash2 size={10} className="max-md:h-4 max-md:w-4" />
                   </button>
                 )}
@@ -376,7 +376,7 @@ export default function DiscussieTab({
       {/* "Load older" */}
       {hasMore && (
         <button onClick={handleLoadMore} disabled={loadingMore}
-          className="text-xs max-md:min-h-10 font-medium text-center py-2 text-gray-400 dark:text-muted-foreground hover:text-gray-600 dark:hover:text-foreground transition-colors">
+          className="text-xs max-md:min-h-10 font-medium text-center py-2 text-ink-faint hover:text-ink-body transition-colors">
           {loadingMore ? "Laden..." : "Oudere berichten laden"}
         </button>
       )}
@@ -385,24 +385,20 @@ export default function DiscussieTab({
       {loading ? (
         <div className="space-y-3">
           {[1,2,3].map(i => (
-            <div key={i} className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-4 space-y-2">
+            <div key={i} className="bg-surface border border-line rounded-card p-4 space-y-2">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-secondary skeleton-pulse" />
-                <div className="h-3 rounded bg-gray-100 dark:bg-secondary skeleton-pulse w-24" />
+                <div className="w-8 h-8 rounded-full bg-line skeleton-pulse" />
+                <div className="h-3 rounded bg-line skeleton-pulse w-24" />
               </div>
-              <div className="h-3 rounded bg-gray-100 dark:bg-secondary skeleton-pulse w-4/5" />
-              <div className="h-3 rounded bg-gray-100 dark:bg-secondary skeleton-pulse w-2/3" />
+              <div className="h-3 rounded bg-line skeleton-pulse w-4/5" />
+              <div className="h-3 rounded bg-line skeleton-pulse w-2/3" />
             </div>
           ))}
         </div>
       ) : messages.length === 0 ? (
-        <div className="content-in flex flex-col items-center text-center py-12 px-4">
-          <div className="w-14 h-14 rounded-full flex items-center justify-center mb-4"
-            style={{ backgroundColor: "rgba(13,148,136,0.07)" }}>
-            <Send className="w-6 h-6" style={{ color: "#0D9488" }} />
-          </div>
-          <p className="font-semibold text-gray-800 dark:text-foreground mb-1">Nog geen berichten</p>
-          <p className="text-sm text-gray-500 dark:text-muted-foreground">
+        <div className="content-in flex flex-col items-center rounded-card border border-line bg-surface text-center py-12 px-4">
+          <p className="font-semibold text-ink mb-1">Nog geen berichten</p>
+          <p className="text-sm text-ink-muted">
             Start de discussie - deel je gedachten over een bijbelgedeelte!
           </p>
         </div>
@@ -426,16 +422,15 @@ export default function DiscussieTab({
       <div ref={bottomRef} />
 
       {/* Composer */}
-      <div className="bg-white dark:bg-card border border-gray-200 dark:border-border rounded-xl p-4 max-md:p-3 space-y-3 sticky bottom-4">
+      <div className="bg-surface border border-line rounded-card p-4 max-md:p-3 space-y-3 sticky bottom-4">
         {/* Reply-to banner */}
         {replyTo && (
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs"
-            style={{ backgroundColor: "rgba(13,148,136,0.07)" }}>
-            <Reply size={11} style={{ color: "#0D9488" }} />
-            <span className="text-gray-600 dark:text-muted-foreground">
-              Antwoord op <span className="font-semibold text-gray-800 dark:text-foreground">{replyTo.userId?.name}</span>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-teal-faint text-xs">
+            <Reply size={11} aria-hidden className="text-teal-dark dark:text-teal-400" />
+            <span className="text-ink-muted">
+              Antwoord op <span className="font-semibold text-ink">{replyTo.userId?.name}</span>
             </span>
-            <button onClick={() => setReplyTo(null)} aria-label="Antwoord annuleren" className="ml-auto max-md:-my-1 max-md:flex max-md:h-8 max-md:w-8 max-md:items-center max-md:justify-center text-gray-400 hover:text-gray-600 dark:hover:text-foreground">
+            <button onClick={() => setReplyTo(null)} aria-label="Antwoord annuleren" className="ml-auto max-md:-my-1 max-md:flex max-md:h-8 max-md:w-8 max-md:items-center max-md:justify-center text-ink-faint hover:text-ink-body">
               <X size={12} />
             </button>
           </div>
@@ -447,7 +442,7 @@ export default function DiscussieTab({
           onKeyDown={e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) handleSubmit() }}
           placeholder={replyTo ? `Antwoord op ${replyTo.userId?.name}...` : "Schrijf een bericht..."}
           rows={3}
-          className="w-full text-sm max-md:text-base bg-transparent border-0 resize-none focus:outline-none text-gray-900 dark:text-foreground placeholder:text-gray-400 dark:placeholder:text-muted-foreground"
+          className="w-full text-sm max-md:text-base bg-transparent border-0 resize-none focus:outline-none text-ink placeholder:text-ink-faint"
           maxLength={2000}
         />
 
@@ -457,7 +452,7 @@ export default function DiscussieTab({
             {!replyTo && MSG_TYPES.map(({ type, label }) => (
               <button key={type} onClick={() => setType(type)}
                 className={`text-xs px-2.5 py-1 max-md:min-h-9 max-md:px-3 rounded-full border font-medium transition-colors ${
-                  composerType === type ? "bg-teal border-teal text-white" : "bg-transparent border-line text-ink-muted"
+                  composerType === type ? "bg-teal-dark border-teal-dark text-white" : "bg-transparent border-line text-ink-muted"
                 }`}>
                 {label}
               </button>
@@ -465,7 +460,7 @@ export default function DiscussieTab({
 
             {/* Verse ref toggle */}
             <button onClick={() => setShowVI(v => !v)}
-              className="flex items-center gap-1 text-xs px-2 py-1 max-md:min-h-9 max-md:px-3 rounded-full border text-gray-500 dark:text-muted-foreground border-gray-200 dark:border-border hover:text-gray-700 dark:hover:text-foreground transition-colors">
+              className="flex items-center gap-1 text-xs px-2 py-1 max-md:min-h-9 max-md:px-3 rounded-full border text-ink-muted border-line hover:text-ink-body transition-colors">
               <BookOpen size={10} />
               {showVerseInput ? "Verwijzing verbergen" : "Bijbelverwijzing"}
             </button>
@@ -474,8 +469,7 @@ export default function DiscussieTab({
           <button
             onClick={handleSubmit}
             disabled={!composerText.trim() || submitting}
-            className="flex items-center gap-1.5 px-4 py-1.5 max-md:min-h-10 max-md:ml-auto rounded-lg text-sm font-semibold text-white disabled:opacity-40 transition-opacity hover:opacity-90"
-            style={{ backgroundColor: "#0D9488" }}>
+            className="flex items-center gap-1.5 px-4 py-1.5 max-md:min-h-10 max-md:ml-auto rounded-btn bg-teal-dark text-sm font-semibold text-white disabled:opacity-40 transition-colors hover:bg-[#115E59]">
             <Send size={13} />
             {submitting ? "..." : "Versturen"}
           </button>
@@ -483,29 +477,29 @@ export default function DiscussieTab({
 
         {/* Verse reference inputs */}
         {showVerseInput && (
-          <div className="flex items-end gap-2 pt-1 border-t border-gray-100 dark:border-border">
+          <div className="flex items-end gap-2 pt-1 border-t border-line">
             <div className="flex-1 min-w-0">
-              <label className="text-[10px] text-gray-400 dark:text-muted-foreground block mb-1">Boek</label>
+              <label className="text-[10px] text-ink-faint block mb-1">Boek</label>
               <input value={verseBook} onChange={e => setVerseBook(e.target.value)}
                 placeholder="bijv. Johannes"
-                className="w-full px-2 py-1.5 max-md:min-h-10 max-md:text-base border border-gray-200 dark:border-border rounded-md text-xs bg-white dark:bg-card text-gray-900 dark:text-foreground focus:outline-none" />
+                className="w-full px-2 py-1.5 max-md:min-h-10 max-md:text-base border border-line rounded-md text-xs bg-surface text-ink placeholder:text-ink-faint focus:outline-none focus-visible:border-teal" />
             </div>
             <div className="w-16 max-md:w-[4.5rem]">
-              <label className="text-[10px] text-gray-400 dark:text-muted-foreground block mb-1">Hfdst.</label>
+              <label className="text-[10px] text-ink-faint block mb-1">Hfdst.</label>
               <input type="number" value={verseChapter} onChange={e => setVerseChapter(e.target.value)}
                 placeholder="3"
-                className="w-full px-2 py-1.5 max-md:min-h-10 max-md:text-base border border-gray-200 dark:border-border rounded-md text-xs bg-white dark:bg-card text-gray-900 dark:text-foreground focus:outline-none" />
+                className="w-full px-2 py-1.5 max-md:min-h-10 max-md:text-base border border-line rounded-md text-xs bg-surface text-ink placeholder:text-ink-faint focus:outline-none focus-visible:border-teal" />
             </div>
             <div className="w-16 max-md:w-[4.5rem]">
-              <label className="text-[10px] text-gray-400 dark:text-muted-foreground block mb-1">Vers</label>
+              <label className="text-[10px] text-ink-faint block mb-1">Vers</label>
               <input type="number" value={verseVerse} onChange={e => setVerseVerse(e.target.value)}
                 placeholder="16"
-                className="w-full px-2 py-1.5 max-md:min-h-10 max-md:text-base border border-gray-200 dark:border-border rounded-md text-xs bg-white dark:bg-card text-gray-900 dark:text-foreground focus:outline-none" />
+                className="w-full px-2 py-1.5 max-md:min-h-10 max-md:text-base border border-line rounded-md text-xs bg-surface text-ink placeholder:text-ink-faint focus:outline-none focus-visible:border-teal" />
             </div>
           </div>
         )}
 
-        <p className="text-[10px] text-gray-300 dark:text-muted-foreground/50 text-right">{composerText.length}/2000<span className="max-md:hidden"> · Ctrl+Enter om te versturen</span></p>
+        <p className="text-[10px] text-ink-faint text-right">{composerText.length}/2000<span className="max-md:hidden"> · Ctrl+Enter om te versturen</span></p>
       </div>
     </div>
   )

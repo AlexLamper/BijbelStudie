@@ -407,7 +407,7 @@ export default function StepQuiz({
         aside={aside}
         lead={
           unavailable === 'GUEST'
-            ? 'De vragen worden per lezer bewaard en nagekeken, en dat vraagt een account. Je kunt de les gewoon afronden; aan het einde kun je je voortgang bewaren.'
+            ? 'Je antwoorden worden per lezer bijgehouden en nagekeken, en dat werkt alleen met een account. Rond de les gerust af zonder de toets - maak aan het einde een gratis account aan, dan blijft ook je voortgang bewaard.'
             : unavailable === 'UNAVAILABLE'
               ? 'De quizvragen zijn nu even niet op te halen. Je kunt de les gewoon afronden.'
               : 'Voor dit bijbelgedeelte zijn nog geen vragen beschikbaar. Rond de les af om verder te gaan.'

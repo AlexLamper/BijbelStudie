@@ -69,22 +69,21 @@ scripts/*.cmt.mybible
 # static asset. Must NOT be published to GitHub (license: not freely downloadable).
 /private/
 
-# Bible translation data files - ignore everything except committed translations
+# Bible translation data files - only public-domain text may live under /public.
+# Anything licensed (NBG51, NET, Schlachter, HSV, BasisBijbel, ...) lives in the
+# private bijbelapi-data repo and is synced into /private by scripts/sync-data.mjs.
 /public/data/bibles/*
 !/public/data/bibles/statenvertaling
 !/public/data/bibles/statenvertaling/**
-!/public/data/bibles/basisbijbel.json
 !/public/data/bibles/heilige_schrift_1917
 !/public/data/bibles/heilige_schrift_1917/**
 !/public/data/bibles/canisiusbijbel
 !/public/data/bibles/canisiusbijbel/**
 
-# Commentaries - only KingComments ships in this repo. Matthew Henry, Dachsel
-# and Calvijn are Pro and served per chapter from BijbelAPI
-# (lib/commentaryRemote.ts); a copy under /public would be a free download.
+# Commentaries - none ship in this repo. Matthew Henry, Dachsel and Calvijn come
+# per chapter from BijbelAPI (lib/commentaryRemote.ts); KingComments is synced
+# into /private from bijbelapi-data. A copy under /public is a free download.
 /public/data/commentaries/*
-!/public/data/commentaries/kingcomments_nl
-!/public/data/commentaries/kingcomments_nl/**
 
 # Original-language (Hebrew/Greek) text - built locally from STEPBible CC BY data
 # (see scripts/build-original-text.mjs)

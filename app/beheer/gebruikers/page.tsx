@@ -64,7 +64,10 @@ const FLAG =
 
 function formatDate(d?: string): string {
   if (!d) return "-"
-  return new Date(d).toLocaleDateString("nl-NL", { day: "numeric", month: "short", year: "numeric" })
+  const date = new Date(d)
+  const datePart = date.toLocaleDateString("nl-NL", { day: "numeric", month: "short", year: "numeric" })
+  const timePart = date.toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })
+  return `${datePart}, ${timePart}`
 }
 
 /**

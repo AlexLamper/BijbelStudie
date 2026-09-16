@@ -138,13 +138,18 @@ function SignInPageInner() {
   }
 
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: SCENE_BG }}>
+    // `h-screen overflow-hidden`, not `min-h-screen`: this is a single window,
+    // not a scrolling document - the form has to fit the viewport it opens in,
+    // never taller. The form column below carries its own `overflow-y-auto` as
+    // a safety net for a very short viewport, so content scrolls inside that
+    // column rather than the page growing past the screen.
+    <div className="flex h-screen overflow-hidden" style={{ backgroundColor: SCENE_BG }}>
       {/* Left: the form.
           Nothing is drawn in front of it and nothing it shows waits on anything
           else - no canvas, no fetch, no gate. /inloggen measured an LCP of 9.33s
           in production; the heading, the fields and the primary button are plain
           markup so they arrive with the document. */}
-      <div className="relative flex flex-1 flex-col justify-center px-6 py-12 sm:px-10 md:px-16 lg:w-1/2 xl:px-24">
+      <div className="relative flex flex-1 flex-col justify-center overflow-y-auto px-6 py-6 sm:px-10 sm:py-8 md:px-16 lg:w-1/2 xl:px-24">
         <Link
           href="/"
           className="absolute left-6 top-6 inline-flex items-center gap-1.5 rounded text-sm text-white/70 no-underline outline-none transition-colors hover:text-white focus-visible:ring-2 focus-visible:ring-white"
@@ -153,7 +158,7 @@ function SignInPageInner() {
           Terug
         </Link>
 
-        <div className="mx-auto w-full max-w-sm space-y-8">
+        <div className="mx-auto w-full max-w-sm space-y-6">
           {/* Logo */}
           <div className="flex items-center gap-2.5">
             <BrandMark />

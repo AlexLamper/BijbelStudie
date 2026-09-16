@@ -50,15 +50,25 @@ const nextConfig: NextConfig = {
   },
   // Fixes "multiple lockfiles" workspace root warning
   outputFileTracingRoot: path.join(__dirname),
-  // Restricted Bible data lives in ./private (synced at build time, never in
-  // /public). Dynamic fs reads aren't auto-traced, so force-include it into the
-  // bible API serverless bundles or the files would be missing at runtime.
+  // Licensed text lives in ./private (synced at build time by
+  // scripts/sync-data.mjs, never in /public). Dynamic fs reads aren't
+  // auto-traced, so every route that reads it through lib/local-data.ts must be
+  // listed here or the files are missing at runtime. Bibles and commentaries
+  // are split so a bible route doesn't carry KingComments' 46 MB.
   outputFileTracingIncludes: {
-    "/api/bible/**": ["./private/**/*"],
-    // The AI chat route reads chapter text via getChapter() from ./private too.
-    "/api/ai/**": ["./private/**/*"],
-    // The daily verse swaps in the reader's translation, NBG51 included.
-    "/api/v1/daytext": ["./private/**/*"],
+    "/api/bible/**": ["./private/data/bibles/**/*"],
+    "/api/ai/**": ["./private/data/bibles/**/*"],
+    "/api/v1/ai/**": ["./private/data/bibles/**/*"],
+    "/api/v1/daytext": ["./private/data/bibles/**/*"],
+    "/api/v1/daytext/history": ["./private/data/bibles/**/*"],
+    "/api/v1/dashboard": ["./private/data/bibles/**/*"],
+    "/api/v1/notifications/copy": ["./private/data/bibles/**/*"],
+    "/api/v1/bibles/**": ["./private/data/bibles/**/*"],
+    "/api/v1/search": ["./private/data/bibles/**/*"],
+    "/api/v1/study-lesson-state": ["./private/data/bibles/**/*"],
+    "/api/v1/study-progress": ["./private/data/bibles/**/*"],
+    "/api/commentary": ["./private/data/commentaries/**/*"],
+    "/api/v1/commentaries/**": ["./private/data/commentaries/**/*"],
   },
   /**
    * Headers that affect Core Web Vitals or crawling. Nothing decorative here -
