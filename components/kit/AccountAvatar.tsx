@@ -3,6 +3,7 @@
 import NavTreeAvatar from "../levensboom/NavTreeAvatar";
 import { useIsPro } from "../../hooks/useIsPro";
 import { useLevensboom } from "../../hooks/useLevensboom";
+import { ringColors } from "../../lib/levensboom/ring";
 
 const SLATE_900 = "#0F172A";
 
@@ -97,7 +98,8 @@ function StreakMark({ size, streak }: { size: number; streak: number }) {
 /**
  * The frame every account avatar shares: the tree disc, a gap in the surface
  * colour, and the ring. Pro draws a thin teal-to-emerald ring with a barely
- * visible teal glow and a second hairline on the disc itself; a free account
+ * visible teal glow and a second hairline on the disc itself - or the same ring
+ * in gold when the studio ring (`avatar.ring`) is `goud`; a free account
  * draws one hairline in `line`, at the same inset, so the tree is the same size
  * either way.
  *
@@ -126,6 +128,17 @@ export function AvatarFrame({
   const inset = stroke + gap;
   const inner = Math.max(1, Math.round(size - inset * 2));
 
+  // The studio ring. `avatar.ring` is already the resolved one: the server's
+  // `resolveAvatar()` only hands out `goud` to an account entitled to it, the
+  // same gate every other Pro cosmetic goes through, and swaps it back for teal
+  // when Pro lapses. So gold needs no second check here - gating it on the
+  // session's `pro` as well would hide a paid ring whenever the two disagree.
+  // A free account keeps its hairline; a Pro account on teal keeps teal.
+  const { data } = useLevensboom();
+  const gold = data?.levensboom?.avatar.ring === "goud";
+  const ringed = pro || gold;
+  const frame = ringColors(gold ? "goud" : "teal").frame;
+
   return (
     <span
       className={`relative inline-block flex-none ${className}`}
@@ -136,11 +149,10 @@ export function AvatarFrame({
         aria-hidden
         className="absolute inset-0 rounded-full"
         style={
-          pro
+          ringed
             ? {
-                backgroundImage:
-                  "conic-gradient(from 210deg, #0D9488, #10B981 30%, #5EEAD4 50%, #10B981 70%, #0D9488)",
-                boxShadow: `0 0 ${glow}px rgba(13,148,136,.16)`,
+                backgroundImage: frame.gradient,
+                boxShadow: `0 0 ${glow}px ${frame.glow}`,
               }
             : { backgroundColor: "var(--line, #E5E7EB)" }
         }
@@ -148,7 +160,7 @@ export function AvatarFrame({
       <span
         aria-hidden
         className="absolute rounded-full"
-        style={{ inset: pro ? stroke : 1, backgroundColor: "var(--surface, #fff)" }}
+        style={{ inset: ringed ? stroke : 1, backgroundColor: "var(--surface, #fff)" }}
       />
       {/* The tree. NavTreeAvatar's own studio rim is clipped by this disc. */}
       <span
@@ -165,7 +177,7 @@ export function AvatarFrame({
           left: inset,
           width: inner,
           height: inner,
-          boxShadow: pro ? "inset 0 0 0 1px rgba(13,148,136,.28)" : "inset 0 0 0 1px rgba(15,23,42,.06)",
+          boxShadow: ringed ? `inset 0 0 0 1px ${frame.inner}` : "inset 0 0 0 1px rgba(15,23,42,.06)",
         }}
       />
       {streak != null && streak > 0 && <StreakMark size={size} streak={streak} />}

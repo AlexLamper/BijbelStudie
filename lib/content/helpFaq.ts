@@ -100,7 +100,7 @@ export const HELP_TOPICS: HelpTopic[] = [
     faqs: [
       {
         q: "Hoe reset ik mijn wachtwoord?",
-        a: "Klik op de inlogpagina op 'Wachtwoord vergeten' en vul je e-mailadres in. Je ontvangt een e-mail met een link om een nieuw wachtwoord in te stellen. Komt de e-mail niet aan, controleer dan je spamfolder.",
+        a: "Klik op de inlogpagina op 'Wachtwoord vergeten' en vul je e-mailadres in. Je ontvangt een e-mail met een link om een nieuw wachtwoord in te stellen. Komt de e-mail niet aan, controleer dan je spamfolder. Weet je je wachtwoord nog en wil je het alleen veranderen? Dat doe je onder Instellingen > Account. Log je in met Google of Apple, dan heb je geen apart wachtwoord.",
       },
       {
         q: "Kan ik mijn e-mailadres of naam wijzigen?",
@@ -108,7 +108,7 @@ export const HELP_TOPICS: HelpTopic[] = [
       },
       {
         q: "Hoe verwijder ik mijn account?",
-        a: "Neem contact met ons op via de contactpagina. We verwijderen je account en de bijbehorende gegevens; je notities en voortgang gaan daarbij definitief verloren.",
+        a: "Ga naar Instellingen > Account en kies onderaan 'Account verwijderen'. Ter bevestiging typ je je e-mailadres (en je wachtwoord, als je dat gebruikt). Je account en de bijbehorende gegevens worden meteen verwijderd; je notities en voortgang gaan daarbij definitief verloren. Heb je een abonnement via de website, zeg dat dan eerst op onder Instellingen > Abonnement. In de app vind je dezelfde optie onder Profiel.",
       },
       {
         q: "Zijn mijn notities privé?",
@@ -153,6 +153,23 @@ export const HELP_TOPICS: HelpTopic[] = [
     ],
   },
 ];
+
+/**
+ * The fragment id of one question on /help, e.g.
+ * `account-hoe-reset-ik-mijn-wachtwoord`. Derived from the topic and the
+ * question text so the command palette and the page can never disagree:
+ * lowercase, accents stripped, everything that is not a letter or a digit
+ * collapsed to one hyphen, capped at 80 characters.
+ */
+export function faqAnchor(topicId: string, question: string): string {
+  const slug = question
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return `${topicId}-${slug}`.slice(0, 80).replace(/-+$/g, "");
+}
 
 /** Flattened list for the FAQPage structured data. */
 export const ALL_HELP_FAQS: Faq[] = HELP_TOPICS.flatMap(topic => topic.faqs);

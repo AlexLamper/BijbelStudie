@@ -364,17 +364,20 @@ export default function DashboardPage() {
           {/* Bijbelboeken - `flex-none` so the card stops at its content
               instead of stretching to the foot of the rail. */}
           <Card className="flex-none p-[18px]">
-            <div className="flex items-center gap-[11px]">
+            <Link href="/profiel/bijbel" className="group flex items-center gap-[11px] no-underline">
               <span className="flex h-[38px] w-[38px] flex-none items-center justify-center rounded-btn bg-teal-tint">
                 <BookOpen size={19} strokeWidth={1.8} className="text-teal" />
               </span>
-              <div>
+              <div className="min-w-0 flex-1">
                 <div className="text-[15px] font-bold text-ink">Bijbelboeken</div>
                 <div className="mt-[2px] text-[12.5px] text-ink-muted tabular-nums">
                   {d.booksWithProgress} van 66 boeken geopend
                 </div>
               </div>
-            </div>
+              <span className="flex-none whitespace-nowrap text-[13px] font-semibold text-teal dark:text-teal-400 group-hover:text-teal-dark dark:group-hover:text-teal-300">
+                Bekijken →
+              </span>
+            </Link>
 
             <div className="mt-[14px]">
               <HeatLegend />

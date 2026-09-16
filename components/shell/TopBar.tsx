@@ -4,9 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { Search, Bell, User, Settings, LogOut } from "lucide-react";
+import { Bell, User, Settings, LogOut } from "lucide-react";
 import AccountAvatar from "../kit/AccountAvatar";
 import { MobileMenuButton } from "./MobileNav";
+import CommandTrigger from "../search/CommandTrigger";
 
 /**
  * The top bar, identical on all nine routes.
@@ -16,15 +17,12 @@ import { MobileMenuButton } from "./MobileNav";
  * the bell, and the account circle. No subtitle, no breadcrumb, no date - the
  * page's own first block says what the reader is looking at.
  *
- * TWO CONTROLS HAVE NO BACKEND YET (see design_handoff_web/RULES.md §5):
+ * The search field opens the command palette (components/search/): pages,
+ * settings, actions and help, all client-side. It deliberately does not search
+ * bible text, commentaries or notes.
  *
- * - The search field. There is no global search on the web, so this is an
- *   ordinary text field and nothing more: you can type in it, the text stays in
- *   local state, and no route, fetch or palette follows. Cmd-K focuses the
- *   field instead of navigating, which is what keeps the ⌘K hint honest. The
- *   bible search endpoint that does exist (app/api/v1/search) is the mobile
- *   API's and is deliberately not wired up here - that would be a new feature,
- *   not a redesign.
+ * ONE CONTROL HAS NO BACKEND YET (see design_handoff_web/RULES.md §5):
+ *
  * - The bell. Nothing on the web produces a notification feed, so it says so
  *   instead of showing an invented count. The design's orange dot is therefore
  *   not drawn: a dot that is always on is a worse lie than no dot.
@@ -35,22 +33,6 @@ export default function TopBar({ title, ownHeading = false }: { title: string; o
   const { data: session, status } = useSession();
   const [bellOpen, setBellOpen] = useState(false);
   const bellRef = useRef<HTMLDivElement>(null);
-  const [query, setQuery] = useState("");
-  const searchRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey)) {
-        // preventDefault blijft nodig: anders opent de zoekbalk van de browser
-        // zelf over de pagina heen.
-        e.preventDefault();
-        searchRef.current?.focus();
-        searchRef.current?.select();
-      }
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
 
   useEffect(() => {
     if (!bellOpen) return;
@@ -73,24 +55,8 @@ export default function TopBar({ title, ownHeading = false }: { title: string; o
       {/* 2. Spacer */}
       <div className="flex-1" />
 
-      {/* 3. Search. Een echt invoerveld dat nergens heen gaat: de tekst blijft
-             in lokale state staan. Het kruisje van Safari en Chrome is
-             weggehaald, anders schuift het tussen de tekst en de ⌘K-hint. */}
-      <div className="search-field flex h-[38px] w-[260px] max-md:hidden items-center gap-[9px] rounded-btn bg-line-soft px-3 transition-colors focus-within:bg-line">
-        <Search size={17} strokeWidth={1.9} className="flex-none text-ink-muted" />
-        <input
-          ref={searchRef}
-          type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          aria-label="Zoeken"
-          placeholder="Zoek vers, studie of notitie"
-          className="min-w-0 flex-1 border-0 bg-transparent p-0 text-[13px] text-ink outline-none placeholder:text-ink-faint [&::-webkit-search-cancel-button]:hidden"
-        />
-        <span className="flex-none rounded-[5px] border border-line bg-surface px-[5px] py-[2px] font-mono text-[10.5px] font-semibold text-ink-faint">
-          ⌘K
-        </span>
-      </div>
+      {/* 3. Search: the command palette. Hidden below md, like before. */}
+      <CommandTrigger />
 
       {/* 4 + 5, for a visitor without an account: /studies and /lezen are open,
              and a bell and a tree are both meaningless there. */}

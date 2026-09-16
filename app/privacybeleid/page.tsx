@@ -33,6 +33,10 @@ const sections = [
     body: "U kunt bepaalde informatie over uw account inzien en bijwerken door in te loggen op uw accountinstellingen. U kunt zich ook afmelden voor promotionele communicatie door de instructies in die berichten te volgen.",
   },
   {
+    title: "Account verwijderen en bewaartermijnen",
+    body: "U kunt uw account op elk moment verwijderen: in de app via Profiel > Account verwijderen, of per e-mail aan info@bijbelstudie.io. Daarmee verwijderen we uw account en de gegevens die erbij horen, zoals notities, markeringen, bladwijzers, leesgeschiedenis en voortgang. Een beveiligingskopie bewaren we maximaal 90 dagen, uitsluitend om een onterechte verwijdering te kunnen herstellen; daarna wordt ook die definitief gewist. Alle details staan op bijbelstudie.io/account-verwijderen.",
+  },
+  {
     title: "Cookies",
     body: "We gebruiken cookies en vergelijkbare technologieën om informatie te verzamelen over uw activiteit, browser en apparaat. U kunt uw cookievoorkeuren beheren via uw browserinstellingen.",
   },

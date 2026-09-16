@@ -103,6 +103,13 @@ const pageConfigs: Record<string, PageMetadataConfig> = {
     type: 'profile',
     indexable: false
   },
+  profileBible: {
+    title: 'Bijbel gelezen',
+    description: 'Alle 66 bijbelboeken met de hoofdstukken die je al gelezen hebt.',
+    path: '/profiel/bijbel',
+    type: 'profile',
+    indexable: false
+  },
   settings: {
     title: 'Instellingen',
     description: 'Beheer je accountinstellingen en voorkeuren.',
@@ -130,6 +137,12 @@ const pageConfigs: Record<string, PageMetadataConfig> = {
     title: 'Help en veelgestelde vragen',
     description: 'Antwoorden op de meestgestelde vragen over BijbelStudie: accounts, vertalingen, begeleide studies, de AI-assistent, Pro en privacy.',
     path: '/help',
+    type: 'website'
+  },
+  accountDeletion: {
+    title: 'Account verwijderen',
+    description: 'Zo verwijder je je BijbelStudie-account en alle bijbehorende gegevens, in de app of per e-mail. Met wat er wordt verwijderd en hoe lang iets bewaard blijft.',
+    path: '/account-verwijderen',
     type: 'website'
   },
   contact: {

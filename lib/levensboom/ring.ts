@@ -14,6 +14,12 @@ export type RingColors = {
   halo: string;
   /** The empty part of the ring. Null keeps the theme's neutral track. */
   track: string | null;
+  /**
+   * The account frame (components/kit/AccountAvatar `AvatarFrame`): a CSS
+   * conic gradient for the thin rim, its soft glow colour, and the hairline
+   * drawn on the edge of the tree disc inside it.
+   */
+  frame: { gradient: string; glow: string; inner: string };
 };
 
 const RINGS: Record<string, RingColors> = {
@@ -23,6 +29,11 @@ const RINGS: Record<string, RingColors> = {
     to: '#0D9488',
     halo: 'rgba(13,148,136,0.35)',
     track: null,
+    frame: {
+      gradient: 'conic-gradient(from 210deg, #0D9488, #10B981 30%, #5EEAD4 50%, #10B981 70%, #0D9488)',
+      glow: 'rgba(13,148,136,.16)',
+      inner: 'rgba(13,148,136,.28)',
+    },
   },
   /*
    * `goud` is cut from the same metal as the Pro badge (--grad-pro-badge in
@@ -47,6 +58,14 @@ const RINGS: Record<string, RingColors> = {
     to: '#926C10',
     halo: 'rgba(202,154,22,0.42)',
     track: 'rgba(202,154,22,0.22)',
+    // Same shape as the teal frame: deep ends, one lit highlight at the top
+    // left. The ends are `stroke`, so the rim holds its contrast on a white
+    // card; the highlight is the only pale stop and never spans the ring.
+    frame: {
+      gradient: 'conic-gradient(from 210deg, #926C10, #C4961F 30%, #EBCB6E 50%, #C4961F 70%, #926C10)',
+      glow: 'rgba(202,154,22,.24)',
+      inner: 'rgba(146,108,16,.32)',
+    },
   },
 };
 

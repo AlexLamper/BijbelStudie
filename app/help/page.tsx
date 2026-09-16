@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { generatePageMetadata } from "../../lib/pageMetadata";
-import { HELP_TOPICS, ALL_HELP_FAQS } from "../../lib/content/helpFaq";
+import { HELP_TOPICS, ALL_HELP_FAQS, faqAnchor } from "../../lib/content/helpFaq";
+import HashScroll from "../../components/search/HashScroll";
 import { JsonLd } from "../../components/seo/JsonLd";
 import { absoluteUrl } from "../../lib/seo/constants";
 import { graph, webPageNode, breadcrumbNode, faqNode } from "../../lib/seo/structuredData";
@@ -64,6 +65,7 @@ export default function HelpPage() {
     <SessionProvider>
       <JsonLd data={pageGraph} />
       <AppShell title={PAGE_TITLE}>
+        <HashScroll />
         <div className="max-w-[46rem] pb-10">
           {/* The visible trail has to exist for the BreadcrumbList markup to be
               eligible - Google drops structured data that describes navigation
@@ -137,7 +139,11 @@ export default function HelpPage() {
               <Card className="mt-3 px-4 sm:px-[22px]">
                 <dl>
                   {topic.faqs.map((faq, i) => (
-                    <div key={faq.q} className={`py-4 ${i === 0 ? "" : "border-t border-line-soft"}`}>
+                    <div
+                      key={faq.q}
+                      id={faqAnchor(topic.id, faq.q)}
+                      className={`scroll-mt-6 py-4 ${i === 0 ? "" : "border-t border-line-soft"}`}
+                    >
                       <dt className="text-[14.5px] font-semibold text-ink">{faq.q}</dt>
                       <dd className="mt-1.5 text-[13.5px] leading-[1.7] text-ink-body">{faq.a}</dd>
                     </div>

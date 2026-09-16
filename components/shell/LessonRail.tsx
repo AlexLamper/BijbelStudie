@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Fragment } from "react";
 import NavTreeAvatar from "../levensboom/NavTreeAvatar";
 import { useLevensboom } from "../../hooks/useLevensboom";
+import { ringColors } from "../../lib/levensboom/ring";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { NAV_GROUPS, isNavActive } from "./nav";
 import { useIsAdmin } from "./useIsAdmin";
@@ -94,7 +95,16 @@ export default function LessonRail() {
           <Tooltip>
             <TooltipTrigger asChild>
               <Link href="/profiel/boom" aria-label="Je boom" className="relative block no-underline">
-                <span className="block h-8 w-8 overflow-hidden rounded-full bg-sky">
+                {/* NavTreeAvatar's own rim is clipped by this disc, so the
+                    gold studio ring is drawn on the disc itself. */}
+                <span
+                  className="block h-8 w-8 overflow-hidden rounded-full bg-sky"
+                  style={
+                    data?.levensboom?.avatar.ring === "goud"
+                      ? { boxShadow: `0 0 0 2px ${ringColors("goud").stroke}` }
+                      : undefined
+                  }
+                >
                   <NavTreeAvatar size={32} showLevel={false} fallback={null} />
                 </span>
                 {data?.level != null && (
