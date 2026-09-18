@@ -456,6 +456,11 @@ input[type="search"]:focus-visible:not(.search-field *) { border-color: hsl(var(
   .bs-bob { animation: bs-bob 1.8s ease-in-out infinite; }
 }
 
+/* Hero's "Start gratis" button: hover colour as CSS, so the button (and the
+   Hero section around it) can stay a server component. */
+.hero-cta-primary { background-color: #0d7a66; }
+.hero-cta-primary:hover { background-color: #095c4d; }
+
 /* Sticky-header elevation. Also a scroll-progress timeline until now, and so
    also Chromium-only - the same observer that drives the reveals toggles
    `is-stuck` from a one-pixel sentinel at the top of the document, which costs

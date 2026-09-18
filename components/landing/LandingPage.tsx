@@ -293,14 +293,11 @@ function Hero() {
             <Link
               href="/inloggen"
               data-track="hero_cta_signup"
-              className="flex h-[52px] items-center justify-center gap-2.5 whitespace-nowrap rounded-[10px] text-[16px] font-bold text-white transition-colors lg:h-[60px] lg:w-[202px] lg:text-[17px]"
+              className="hero-cta-primary flex h-[52px] items-center justify-center gap-2.5 whitespace-nowrap rounded-[10px] text-[16px] font-bold text-white transition-colors lg:h-[60px] lg:w-[202px] lg:text-[17px]"
               style={{
-                backgroundColor: "#0d7a66",
                 letterSpacing: "-0.01em",
                 boxShadow: "0 10px 24px -8px rgba(13,122,102,0.55)",
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#095c4d")}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#0d7a66")}
             >
               Start gratis
               <ArrowRight className="h-[15px] w-[15px] flex-shrink-0 lg:h-[17px] lg:w-[17px]" />
