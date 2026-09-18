@@ -446,6 +446,16 @@ input[type="search"]:focus-visible:not(.search-field *) { border-color: hsl(var(
   .float-slow { animation: float-y 7s ease-in-out infinite; }
 }
 
+/* Hero scroll hint's gentle bob. */
+@keyframes bs-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(5px); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .bs-bob { animation: bs-bob 1.8s ease-in-out infinite; }
+}
+
 /* Sticky-header elevation. Also a scroll-progress timeline until now, and so
    also Chromium-only - the same observer that drives the reveals toggles
    `is-stuck` from a one-pixel sentinel at the top of the document, which costs
