@@ -1,6 +1,6 @@
 import Link from "next/link"
 import Image from "next/image"
-import { ArrowRight, Check, Menu, X } from "lucide-react"
+import { ArrowRight, Check, Menu, X, ChevronDown } from "lucide-react"
 import { Footer } from "./footer"
 import { FAQItem } from "./FAQItem"
 import { ScrollEffects } from "./ScrollEffects"
@@ -9,14 +9,14 @@ import { StudyDiscovery } from "./StudyDiscovery"
 import { HOME_FAQS } from "../../lib/content/homeFaq"
 import { APP_STORE_URL } from "../../lib/appStore"
 import { opstandingLessons } from "../../lib/data/study-lessons/opstanding"
-import { ALL_STUDIES } from "../../lib/bookStudies"
-import { PLANS, euro } from "../../lib/pricing"
-import LandingTree from "./LandingTree"
-import HeroLevensboom from "./HeroLevensboom"
 import StudyFlowDemo, { type DemoLesson } from "./StudyFlowDemo"
-import CountUp from "./CountUp"
 import { renderTreeSvg } from "../../lib/levensboom/svg"
 import { LP_THEME_VARS } from "./studyLandingShared"
+import { PLANS, euro } from "../../lib/pricing"
+import { PromoBanner } from "./PromoBanner"
+import { HeroVisual } from "./HeroVisual"
+import { HeroMobileCard } from "./HeroMobileCard"
+import { ReviewsRow, type ReviewsData } from "./ReviewsRow"
 
 /* ─── Design tokens ──────────────────────────────────────────── */
 /* The neutrals are CSS variables so the page follows dark mode: the global
@@ -179,6 +179,7 @@ function Navbar() {
             sitemap, maar horen niet in de hoofdnavigatie van de app. */}
         <nav className="hidden md:flex items-center justify-center gap-1">
           {[
+            { href: "/studies",       label: "Studies" },
             { href: "#prijzen",       label: "Prijzen" },
             { href: "#faq",           label: "FAQ" },
           ].map(({ href, label }) => (
@@ -218,6 +219,7 @@ function Navbar() {
               style={{ borderColor: T.border, backgroundColor: T.page }}
             >
               {[
+                { href: "/studies",    label: "Studies" },
                 { href: "#prijzen",    label: "Prijzen" },
                 { href: "#faq",        label: "FAQ" },
                 { href: "/inloggen",   label: "Inloggen" },
@@ -236,289 +238,119 @@ function Navbar() {
   )
 }
 
-/** Apple's mark. Inlined rather than an <img>: it is one path and must stay crisp. */
-function AppleLogo({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 384 512" aria-hidden focusable="false" className={className} fill="currentColor">
-      <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z" />
-    </svg>
-  )
-}
-
 /** One fixed seed for every tree on this page, so the build output is stable. */
 const LANDING_SEED = "bijbelstudie-levensboom"
 
 /**
- * The four facts under the hero copy. Every figure is counted from the data
- * the page is built from, so none of them is a claim to defend: the studies
- * and lessons from the catalogue, the translations and commentaries from the
- * library section further down.
+ * Real App Store rating data, once there is enough of it to average
+ * honestly. Until product hands over real `rating`/`count`/`avatars`,
+ * this stays `undefined` and ReviewsRow renders nothing - see its own
+ * comment and the ground rules in bijbelstudie-hero/PROMPT.md.
  */
-const LESSONS_TOTAL = ALL_STUDIES.reduce((sum, study) => sum + study.lessons.length, 0)
-const HERO_STATS = [
-  { value: ALL_STUDIES.length, label: "begeleide bijbelstudies", count: true },
-  { value: LESSONS_TOTAL, label: "lessen van een kwartier", count: true },
-  { value: 4, label: "Nederlandse vertalingen", count: false },
-  { value: 4, label: "commentaren, per vers", count: false },
-]
-
-/**
- * The light behind the hero frame: the dusk sky and ground of the scene it
- * shows (`waterbeken` at `dusk`, lib/levensboom/scenes.ts), blurred and laid
- * under the picture at low opacity. The frame then looks lit by its own
- * scene instead of cut out of the white page. The sky value doubles as the
- * frame's backdrop for the instant before the SVG paints.
- */
-const HERO_GLOW = { sky: "#5A3E6E", ground: "#F0A56B" }
+const HERO_REVIEWS: ReviewsData | undefined = undefined
 
 /* ─── Hero ───────────────────────────────────────────────────── */
 function Hero() {
   return (
     <section
-      className="relative overflow-hidden"
-      style={{
-        backgroundColor: T.page,
-        /* The laptop fix. This block was `py-20 lg:py-28`, so a 1440x800 laptop
-           and a 1440x1080 desktop got the same 112px top and bottom - and the
-           laptop, which also loses 64px to the sticky header, ended up with the
-           CTA row sitting on the fold and the trust line under it. A width-only
-           clamp cannot tell those two viewports apart because their vw is
-           identical, so the middle term takes whichever of a width- and a
-           height-derived value is smaller. On a short laptop the vh term wins
-           and the hero compresses; on a tall desktop the vw term wins and it
-           breathes. */
-        paddingTop: "clamp(3.5rem, min(6.5vw, 8vh), 5.5rem)",
-        paddingBottom: "clamp(3rem, min(6vw, 8vh), 6rem)",
-      }}
+      className="relative overflow-x-clip"
+      style={{ backgroundColor: "#fbfbf8" }}
     >
-      {/* Ambient glow behind mockup */}
-      <div
-        aria-hidden
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(ellipse 55% 60% at 80% 45%, rgba(13,148,136,0.10), transparent 70%)",
-        }}
-      />
-      {/* Top-left subtle glow */}
-      <div
-        aria-hidden
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(ellipse 45% 55% at 5% 10%, rgba(13,148,136,0.06), transparent 70%)",
-        }}
-      />
-
-      {/* An explicit two-track template instead of `lg:grid-cols-12` with a
-          7/5 span. In a twelve-column grid the gap sits between all twelve
-          tracks, so `gap-14` was spending 616px of a 1104px row on gutters and
-          the ratio the spans described was not the ratio that rendered - the
-          illustration column came out around 427px, which is where the mockup
-          started looking undersized next to a much taller text column. Two
-          tracks and one gutter make the split mean what it says. */}
-      <div
-        className={`relative ${SHELL} grid items-center gap-y-14 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:gap-x-[clamp(2rem,3vw,3.5rem)]`}
-      >
-        <div className="lg:max-w-[32rem]">
-          {/* The h1 carries the head term verbatim ("online bijbelstudie") and
-              is the only h1 on the page. Nothing here is inside a `.reveal`:
-              this is the LCP element and it must be painted from the served
-              HTML, not waiting on an observer. */}
-          <h1
-            className="font-extrabold text-balance"
-            style={{
-              color: T.text,
-              fontSize: TYPE.h1,
-              lineHeight: 1.08,
-              letterSpacing: "-0.025em",
-            }}
-          >
-            De Nederlandse tool voor online{" "}
-            <span style={{ color: T.tealText }}>bijbelstudie</span>
-          </h1>
-
-          {/* The claim leads, the evidence follows in the same sentence, so the
-              four items after the colon are doing the work of backing it up.
-              "#1" is a ranking claim and the owner's to stand behind: under the
-              Dutch/EU rules on misleading commercial practices the burden of
-              proof sits with us if it is ever challenged. Don't soften it
-              without asking - it is deliberate. */}
+      <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-[18px] px-5 py-7 sm:px-6 lg:min-h-[calc(100vh-112px)] lg:flex-row lg:items-center lg:gap-16 lg:py-0 lg:pl-[120px] lg:pr-0">
+        {/* Left column: fixed 540px from 1280px up, ~460px between 1024-1279. */}
+        <div className="flex flex-col items-start gap-[18px] lg:w-[460px] lg:flex-shrink-0 lg:gap-6 xl:w-[540px]">
           <p
-            className="mt-5 max-w-xl text-pretty"
-            style={{ color: T.muted, fontSize: TYPE.lead, lineHeight: 1.65 }}
+            className="text-[11px] font-bold uppercase leading-normal lg:text-[13px]"
+            style={{ letterSpacing: "0.12em", color: "#0b5f52" }}
           >
-            <strong style={{ color: T.text, fontWeight: 600 }}>
-              De #1 bijbelstudietool van Nederland
-            </strong>
-            : vier vertalingen, bijbelcommentaar per vers, de Hebreeuwse en
-            Griekse grondtekst en uw eigen notities - naast elkaar in één scherm.
+            Voor iedereen die de Bijbel dieper wil leren kennen
           </p>
 
-          {/* Two CTAs, not three. A "Bekijk functies" outline button used to sit
-              at the end of this row: it pushed the row wider than the column,
-              wrapped, and split attention across three equally-weighted choices.
-              The header nav already links to #functies, so nothing is lost.
-              Both survivors are h-14 with padding on the x-axis only - the teal
-              button and Apple's pill were previously sized by different vertical
-              padding around different content, so they never matched height.
+          {/* The only h1 on the page - the LCP element, so it is never
+              inside a `.reveal` and always painted from the served HTML. */}
+          <h1
+            className="text-balance font-extrabold"
+            style={{
+              fontSize: "clamp(2.625rem, 2rem + 3vw, 4rem)",
+              lineHeight: 1.05,
+              letterSpacing: "-0.035em",
+              color: "#0f172a",
+            }}
+          >
+            <span style={{ color: "#0d7a66" }}>Begrijp</span> wat je leest in de Bijbel.
+          </h1>
 
-              The teal button no longer sits in a pulsing ring. A CTA that
-              throbs forever is the single loudest thing on the page and reads
-              as an ad; a solid button with a soft teal cast under it carries the
-              same emphasis without the noise. */}
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-            {/* To the auth page, like every other start CTA on this page. Guest
-                mode is not lost: /inloggen offers "Doorgaan als gast" under the
-                sign-in options, and the dotted link below still opens the
-                studies directly. A signed-in visitor never sees this button -
-                middleware sends "/" to /dashboard when there is a session. */}
+          <p
+            className="text-pretty text-[17px] lg:max-w-[520px] lg:text-xl"
+            style={{ lineHeight: 1.55, color: "#475569" }}
+          >
+            Lees de tekst en het commentaar naast elkaar, met de grondtekst en je eigen notities één klik verder.
+          </p>
+
+          {/* Two buttons, exactly 202x60 from 1024px up; a 2-column grid of
+              equal 52px-high buttons below that. */}
+          <div className="grid w-full grid-cols-2 gap-2.5 pt-0.5 sm:flex sm:w-auto sm:gap-3">
             <Link
               href="/inloggen"
               data-track="hero_cta_signup"
-              className="press group h-14 w-full sm:w-auto inline-flex items-center justify-center gap-2 font-semibold text-white px-7 rounded-xl bg-teal-700 hover:bg-teal-800 transition-colors"
+              className="hero-cta-primary flex h-[52px] items-center justify-center gap-2.5 whitespace-nowrap rounded-[10px] text-[16px] font-bold text-white transition-colors lg:h-[60px] lg:w-[202px] lg:text-[17px]"
               style={{
-                boxShadow: "0 12px 28px -14px rgba(13,148,136,0.9)",
+                letterSpacing: "-0.01em",
+                boxShadow: "0 10px 24px -8px rgba(13,122,102,0.55)",
               }}
             >
               Start gratis
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              <ArrowRight className="h-[15px] w-[15px] flex-shrink-0 lg:h-[17px] lg:w-[17px]" />
             </Link>
-            {/* Apple's own black pill rather than another outline button: this
-                is the shape people recognise as "this app is really in the
-                store", and the app went live in August 2026. */}
             <a
               href={APP_STORE_URL}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Download BijbelStudie in de App Store"
               data-track="hero_cta_appstore"
-              className="press h-14 w-full sm:w-auto inline-flex items-center justify-center gap-3 rounded-xl bg-black px-6 text-white no-underline transition-colors hover:bg-gray-800"
+              className="flex items-center justify-center rounded-[10px]"
             >
-              <AppleLogo className="h-7 w-7 shrink-0" />
-              <span className="text-left leading-none">
-                <span className="block text-[10px] font-medium opacity-80">
-                  Download in de
-                </span>
-                <span className="block text-lg font-semibold tracking-tight">
-                  App Store
-                </span>
-              </span>
+              <Image
+                src="/images/hero/app-store-badge.png"
+                alt="Download on the App Store"
+                width={202}
+                height={60}
+                className="block h-[52px] w-full lg:h-[60px] lg:w-[202px]"
+              />
             </a>
           </div>
 
-          {/* Guest mode: the app works without an account, so the way in has
-              to say so in words. The studies are the product's front door -
-              /lezen is one rail item away once inside. */}
-          <Link
-            href="/studies"
-            data-track="hero_cta_guest"
-            className="mt-4 inline-block text-sm font-medium underline decoration-dotted underline-offset-4 transition-colors hover:no-underline"
-            style={{ color: T.muted }}
-          >
-            Of bekijk direct de studies - zonder account
-          </Link>
-
-          {/* Four counted facts under a rule. The two catalogue figures count
-              up the first time they scroll into view; the server renders the
-              final number, so the served HTML is complete without the bundle. */}
-          <ul
-            className="mt-8 grid grid-cols-2 gap-x-6 gap-y-5 border-t pt-6 sm:grid-cols-4"
-            style={{ borderColor: T.border }}
-            aria-label="In cijfers"
-          >
-            {HERO_STATS.map(stat => (
-              <li key={stat.label}>
-                <p
-                  className="text-2xl font-extrabold leading-none tabular-nums"
-                  style={{ color: T.text, letterSpacing: "-0.02em" }}
-                >
-                  {stat.count ? <CountUp value={stat.value} /> : stat.value}
-                </p>
-                <p className="mt-1.5 text-xs leading-snug" style={{ color: T.muted }}>
-                  {stat.label}
-                </p>
-              </li>
-            ))}
-          </ul>
+          <ReviewsRow data={HERO_REVIEWS} />
         </div>
 
-        {/* The product's face: a grown tree at dusk that grows in from a kiem
-            when the page lands, with the reader's own numbers laid over it.
-            Everything in the picture is the real generator.
-
-            A framed picture, lit from behind. Two earlier treatments were
-            rejected: a rounded box on a solid purple backdrop under a heavy
-            shadow (a hard rectangle cut out of a white hero), and a picture
-            that dissolved into the page on all four sides (a blur with no edge
-            to hold on to). This one keeps a real edge - a generous radius and
-            a hairline ring - and rests on a soft wash of its own dusk colours,
-            so it reads as an object lit by the scene rather than a cut-out.
-            `slice` keeps the SVG, drawn at 5:4, covering the 4:3 box on phones,
-            so the frame never shows a letterbox band. */}
-        <div className="relative w-full mx-auto max-w-[34rem] lg:max-w-none lg:w-full lg:mx-0 lg:justify-self-end">
-          {/* Ambient glow. Sits behind the frame, a little larger and offset
-              down-right, so the light seems to fall out of the picture onto
-              the page. Purely decorative and invisible to assistive tech. */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -inset-x-6 -bottom-8 -top-4 rounded-[3rem] blur-3xl"
-            style={{
-              background: `radial-gradient(60% 55% at 35% 30%, ${HERO_GLOW.sky}, transparent 70%), radial-gradient(55% 45% at 72% 88%, ${HERO_GLOW.ground}, transparent 70%)`,
-              opacity: 0.3,
-            }}
-          />
-          <div
-            className="relative aspect-[4/3] overflow-hidden rounded-[1.75rem] ring-1 ring-black/[0.06] lg:aspect-[5/4]"
-            style={{
-              backgroundColor: HERO_GLOW.sky,
-              boxShadow: "0 30px 60px -32px rgba(15,23,42,0.35), 0 10px 20px -14px rgba(15,23,42,0.18)",
-            }}
-          >
-            <HeroLevensboom
-              svg={renderTreeSvg({ seed: LANDING_SEED, level: 14, frac: 0.7, species: "eik", scene: "waterbeken", framing: "scene", width: 800, height: 640, season: "summer", timeOfDay: "dusk", rootAttributes: 'aria-hidden="true" preserveAspectRatio="xMidYMid slice"' })}
-              seed={LANDING_SEED}
-              level={14}
-            />
-
-            {/* Two cards, not three. The "+25 XP" pill that sat top-right went:
-                three floating labels read as clutter, and the progress card
-                already says what the XP is for. */}
-            <div
-              className="absolute left-4 top-4 flex items-center gap-3 rounded-2xl border border-slate-900/[0.08] bg-white/85 py-2 pl-2 pr-4 backdrop-blur-md dark:border-white/10 dark:bg-neutral-900/85"
-              style={{ boxShadow: "0 10px 24px -14px rgba(15,23,42,0.35)" }}
-            >
-              <LandingTree
-                svg={renderTreeSvg({ seed: LANDING_SEED, level: 14, frac: 0.7, species: "eik", framing: "portrait", width: 96, height: 96, rootAttributes: 'aria-hidden="true"' })}
-                seed={LANDING_SEED}
-                level={14}
-                species="eik"
-                framing="portrait"
-                className="h-11 w-11 overflow-hidden rounded-full ring-2 ring-teal-600/40"
-              />
-              <div>
-                <p className="text-[12px] font-bold leading-none" style={{ color: T.text }}>Jouw voortgang</p>
-                <p className="mt-1 text-[11px] leading-none" style={{ color: T.muted }}>Volwassen boom · niveau 14</p>
-              </div>
-            </div>
-
-            {/* Where it is going. The streak cell that used to share this card
-                came off: one line and one bar is the calmer composition. */}
-            <div
-              className="absolute inset-x-4 bottom-4 rounded-2xl border border-slate-900/[0.08] bg-white/85 px-4 py-3 backdrop-blur-md dark:border-white/10 dark:bg-neutral-900/85"
-              style={{ boxShadow: "0 10px 24px -14px rgba(15,23,42,0.35)" }}
-            >
-              <div className="flex items-baseline justify-between gap-3">
-                <p className="text-[12px] font-bold" style={{ color: T.text }}>Nog 340 XP tot de amandelboom</p>
-                <p className="text-[11px] tabular-nums" style={{ color: T.muted }}>62%</p>
-              </div>
-              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-900/[0.08] dark:bg-white/15">
-                <div className="h-full rounded-full" style={{ width: "62%", backgroundColor: T.teal }} />
-              </div>
-            </div>
+        {/* Right side: the product visual. Fixed-size inner box, scaled down
+            with a transform between 1024 and 1279px so the composition keeps
+            its proportions; hidden below 1024px in favour of HeroMobileCard. */}
+        <div className="relative hidden h-[500px] flex-grow items-center lg:flex xl:h-[600px]">
+          <div className="origin-left scale-[0.83] xl:scale-100">
+            <HeroVisual />
           </div>
         </div>
+
+        {/* Mobile: one compact lesson card instead of the two screenshots. */}
+        <div className="lg:hidden">
+          <HeroMobileCard />
+        </div>
       </div>
+
+      {/* Scroll hint - desktop/tablet only. */}
+      <a
+        href="#in-actie"
+        aria-label="Scroll naar: zo werkt een les"
+        className="group absolute bottom-[22px] left-1/2 hidden -translate-x-1/2 lg:flex lg:flex-col lg:items-center"
+      >
+        <span
+          className="bs-bob flex h-8 w-8 items-center justify-center rounded-full"
+          style={{ border: "1.5px solid #cfd8d4" }}
+        >
+          <ChevronDown className="h-[14px] w-[14px]" style={{ color: "#475569" }} />
+        </span>
+      </a>
     </section>
   );
 }
@@ -988,6 +820,7 @@ export default function LandingPage() {
       <div id="landing-top-sentinel" aria-hidden className="absolute left-0 top-0 h-px w-px" />
       <LandingSeenMarker />
       <ScrollEffects />
+      <PromoBanner />
       <Navbar />
       <main>
         <Hero />
