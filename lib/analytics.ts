@@ -1,6 +1,7 @@
 "use client";
 
 import type { EventName } from "./analyticsSchema";
+import { hasAnalyticsConsent } from "./cookieConsent";
 
 /**
  * Client-side funnel tracking. Fire-and-forget by design: a failed or blocked
@@ -70,8 +71,16 @@ function flush(useBeacon = false): void {
   }
 }
 
+/**
+ * The consent gate, checked at the moment of the event rather than once at
+ * module load: someone who accepts halfway through a visit starts being counted
+ * from there, and nothing is replayed from before they answered. Without an
+ * explicit "Accepteren" this returns false, so `bs_anon_id` is never written
+ * and /api/analytics is never called. See lib/cookieConsent.ts.
+ */
 export function track(name: EventName, props?: Record<string, string>): void {
   if (typeof window === "undefined") return;
+  if (!hasAnalyticsConsent()) return;
 
   queue.push({ name, props, anonId: anonId() });
 
