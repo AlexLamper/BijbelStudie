@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import connectMongoDB from "../../../../lib/mongodb";
 import User from "../../../../models/User";
 import { reconcileUserFromStripe } from "../../../../lib/subscriptionSync";
+import { expireCompedPro } from "../../../../lib/compedPro";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -58,6 +59,10 @@ export async function GET(req: NextRequest) {
 
   await connectMongoDB();
 
+  // Independent of the Stripe pass below: a comped account has no Stripe
+  // customer, so it never appears in `targetFilter`.
+  const comped = await expireCompedPro();
+
   let scanned = 0;
   let repaired = 0;
   let missing = 0;
@@ -110,6 +115,7 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({
     ok: true,
+    compedProExpired: comped,
     scanned,
     repaired,
     missing,

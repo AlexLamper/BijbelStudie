@@ -8,6 +8,7 @@ import { proRingGrant } from "./levensboom/proRing";
 import { isProtectedAccount } from "./accountArchive";
 import { archiveAndDeleteAccount } from "./accountDeletion";
 import { normaliseEmail } from "./userLookup";
+import { MAX_COMP_MONTHS, compedProExpiry } from "./compedPro";
 
 /**
  * The user list behind /beheer/gebruikers and /api/v1/admin/users.
@@ -37,7 +38,7 @@ export async function adminUsersPayload(params: {
 
   const users = await User.find(filter)
     .select(
-      "name email image isAdmin subscribed storePremium storePremiumPlatform subscriptionStatus " +
+      "name email image isAdmin subscribed compedProUntil storePremium storePremiumPlatform subscriptionStatus " +
         "stripeSubscriptionId " +
         "subscriptionInterval currentPeriodEnd cancelAtPeriodEnd billingIssueSince streak " +
         "createdAt lastStreakDate stripeCustomerId preferences.onboardingCompleted"
@@ -70,6 +71,8 @@ export async function adminUsersPayload(params: {
       // Pro without anyone paying: the App Store review account, or an admin
       // grant. Shown so it is never mistaken for a subscriber.
       isComped: !!u.subscribed && !u.storePremium && !u.stripeSubscriptionId && !u.subscriptionStatus,
+      // Set only on a time-limited grant; lib/compedPro.ts ends it on this date.
+      compedProUntil: u.compedProUntil ?? null,
       storePremiumPlatform: u.storePremiumPlatform ?? null,
       subscriptionStatus: u.subscriptionStatus ?? null,
       subscriptionInterval: u.subscriptionInterval ?? null,
@@ -112,13 +115,29 @@ export async function updateAdminUserPayload(
     if (typeof body[key] === "boolean") update[key] = body[key] as boolean;
   }
 
+  // A time-limited Pro grant. It is `subscribed: true` like the manual toggle,
+  // plus the end date the daily sweep in lib/compedPro.ts acts on.
+  let compedProUntil: Date | null | undefined;
+  if (body.compMonths !== undefined) {
+    const months = Number(body.compMonths);
+    if (!Number.isInteger(months) || months < 1 || months > MAX_COMP_MONTHS) {
+      return { status: 400, body: { error: "Ongeldige periode" } };
+    }
+    update.subscribed = true;
+    compedProUntil = compedProExpiry(months);
+  } else if (update.subscribed !== undefined) {
+    // Both plain toggles end the grant: switching Pro off revokes it, switching
+    // it on by hand is the open-ended grant it has always been.
+    compedProUntil = null;
+  }
+
   if (Object.keys(update).length === 0) {
     return { status: 400, body: { error: "Geen geldige velden om bij te werken" } };
   }
 
   await connectMongoDB();
 
-  const target = await User.findById(id).select("email isAdmin subscribed storePremium");
+  const target = await User.findById(id).select("email isAdmin subscribed compedProUntil storePremium");
   if (!target) return { status: 404, body: { error: "Gebruiker niet gevonden" } };
 
   if (target.email === callerEmail && update.isAdmin === false) {
@@ -136,10 +155,13 @@ export async function updateAdminUserPayload(
   Object.assign(target, update);
   await target.save();
 
-  // An explicit-path write, apart from the save(): `levensboom` is not in the
+  // Explicit-path writes, apart from the save(): `levensboom` is not in the
   // selection above, and this must not be able to touch the rest of the choice.
+  const set: Record<string, unknown> = {};
   const ring = proRingGrant(before, { ...before, ...update });
-  if (ring) await User.updateOne({ _id: target._id }, { $set: ring });
+  if (ring) Object.assign(set, ring);
+  if (compedProUntil !== undefined) set.compedProUntil = compedProUntil;
+  if (Object.keys(set).length > 0) await User.updateOne({ _id: target._id }, { $set: set });
 
   return {
     status: 200,
@@ -148,6 +170,7 @@ export async function updateAdminUserPayload(
         _id: String(target._id),
         isAdmin: !!target.isAdmin,
         subscribed: !!target.subscribed,
+        compedProUntil: compedProUntil !== undefined ? compedProUntil : (target.compedProUntil ?? null),
       },
     },
   };
