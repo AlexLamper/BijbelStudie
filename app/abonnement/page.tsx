@@ -15,6 +15,7 @@ import {
   perWeek,
   type BillingInterval,
 } from "../../lib/pricing"
+import { PRO_TRIAL_DAYS, promoWindow } from "../../lib/promo"
 import { track, trackNow } from "../../lib/analytics"
 import AppShell from "../../components/shell/AppShell"
 import { Card, Pill, Skeleton } from "../../components/kit/primitives"
@@ -28,6 +29,10 @@ const FREE_FEATURES = [
   "5 AI-vragen per dag",
   "Notities en markeringen",
 ]
+
+/** "21 september" - the current action's deadline, for the trial notice. */
+const promoEndLabel = (endsAt: number) =>
+  new Date(endsAt).toLocaleDateString("nl-NL", { day: "numeric", month: "long" })
 
 const GOOD_TO_KNOW = [
   { title: "Altijd opzegbaar", body: "Zeg op wanneer je wil. Je houdt toegang tot het einde van de periode." },
@@ -220,6 +225,21 @@ function SubscribePageInner() {
   // cards fall back to the same disabled "Huidig plan" state rather than
   // fabricating an interval.
   const [isPro, setIsPro] = useState(false)
+  // The current action window, or null in an off-week. Resolved after mount
+  // only: it is a comparison against the clock, and rendering it on the server
+  // would let a cached page keep promising a trial that the checkout route has
+  // already stopped granting. Re-checked once a minute so a page left open
+  // across the end of a window stops advertising a trial it no longer gets.
+  const [trialEndsAt, setTrialEndsAt] = useState<number | null>(null)
+  useEffect(() => {
+    const check = () => {
+      const win = promoWindow()
+      setTrialEndsAt(win.active ? win.endsAt : null)
+    }
+    check()
+    const id = setInterval(check, 60_000)
+    return () => clearInterval(id)
+  }, [])
 
   const { toast } = useToast()
   const router = useRouter()
@@ -333,6 +353,14 @@ function SubscribePageInner() {
         <p className="mt-[10px] text-[14.5px] leading-[1.6] text-ink-muted">
           Onbeperkte toegang tot commentaren, de grondtekst, notities en de AI-assistent.
         </p>
+        {trialEndsAt !== null && !isPro && (
+          <p className="mx-auto mt-[14px] max-w-[540px] rounded-card bg-teal-soft px-4 py-3 text-[13px] leading-[1.6] text-teal-dark">
+            <strong className="font-bold">De eerste {PRO_TRIAL_DAYS} dagen zijn gratis.</strong>{" "}
+            Daarna loopt je abonnement automatisch door tegen de prijs van je plan. Zeg je op
+            binnen {PRO_TRIAL_DAYS} dagen, dan betaal je niets. Deze actie loopt tot{" "}
+            {promoEndLabel(trialEndsAt)}.
+          </p>
+        )}
       </section>
 
       <div className="mt-[22px] grid grid-cols-1 gap-4 md:grid-cols-[300px_360px_300px] md:justify-center md:items-stretch">

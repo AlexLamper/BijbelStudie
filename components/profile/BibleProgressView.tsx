@@ -69,7 +69,7 @@ export default function BibleProgressView() {
 
   return (
     <AppShell title="Bijbel gelezen">
-      <div className="mx-auto flex w-full max-w-[880px] flex-col gap-[18px]">
+      <div className="mx-auto flex w-full max-w-[880px] flex-col gap-[18px] lg:max-w-[1100px] xl:max-w-[1320px] 2xl:max-w-[1500px]">
         <div>
           <Link
             href="/dashboard"

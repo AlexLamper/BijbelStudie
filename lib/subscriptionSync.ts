@@ -48,6 +48,14 @@ export interface BillingSnapshot {
   currentPeriodEnd: Date | null;
   pausedUntil: Date | null;
   subscriptionStartedAt: Date | null;
+  /**
+   * When this customer's free trial began, if it ever did.
+   *
+   * Optional so an `emptySnapshot()` (Stripe knows of no subscription) leaves
+   * the local marker alone: a trial that has been used stays used even after
+   * the subscription it belonged to is gone. Only ever written, never cleared.
+   */
+  trialStartedAt?: Date | null;
 }
 
 export interface SyncResult {
@@ -110,6 +118,9 @@ export function snapshotOf(subscription: Stripe.Subscription): BillingSnapshot {
     subscriptionStartedAt: subscription.start_date
       ? new Date(subscription.start_date * 1000)
       : null,
+    trialStartedAt: subscription.trial_start
+      ? new Date(subscription.trial_start * 1000)
+      : null,
   };
 }
 
@@ -153,6 +164,8 @@ export interface LocalBilling {
   currentPeriodEnd?: Date | null;
   pausedUntil?: Date | null;
   subscriptionStartedAt?: Date | null;
+  /** Set once, never cleared: this account has already had its free trial. */
+  proTrialUsedAt?: Date | null;
   billingIssueSince?: Date | null;
   stripeCustomerId?: string | null;
   /** Store entitlement, so a comped account is not confused with an App Store one. */
@@ -167,7 +180,7 @@ export interface LocalBilling {
 export const BILLING_SELECT =
   "email subscribed subscriptionStatus stripeSubscriptionId stripePriceId " +
   "subscriptionInterval cancelAtPeriodEnd currentPeriodEnd pausedUntil " +
-  "subscriptionStartedAt billingIssueSince stripeCustomerId storePremium isAdmin";
+  "subscriptionStartedAt proTrialUsedAt billingIssueSince stripeCustomerId storePremium isAdmin";
 
 function sameDate(a: Date | null | undefined, b: Date | null | undefined): boolean {
   const ta = a ? new Date(a).getTime() : null;
@@ -304,6 +317,15 @@ export function diffSnapshot(
   if (snapshot.subscriptionStartedAt && !local.subscriptionStartedAt) {
     set.subscriptionStartedAt = snapshot.subscriptionStartedAt;
     changed.push("subscriptionStartedAt");
+  }
+
+  // The free trial is once per account, ever. Recorded the moment Stripe reports
+  // a subscription that had one, and never unset - cancelling, letting the card
+  // fail or having the subscription deleted in Stripe must not hand the account
+  // a fresh trial on the next action week. See app/api/checkout.
+  if (snapshot.trialStartedAt && !local.proTrialUsedAt) {
+    set.proTrialUsedAt = snapshot.trialStartedAt;
+    changed.push("proTrialUsedAt");
   }
 
   // A healthy subscription means any recorded payment problem is over.

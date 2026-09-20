@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from "react"
+import { hasFunctionalConsent } from "../../lib/cookieConsent"
 
 /** Mirrors middleware.ts's GUEST_SEEN_LANDING_COOKIE - keep both in sync. */
 const GUEST_SEEN_LANDING_COOKIE = "bs_seen_landing"
@@ -25,6 +26,11 @@ export function LandingSeenMarker() {
       return
     }
     const timer = window.setTimeout(() => {
+      // Comfort, not necessity: skipping a marketing page is not needed to
+      // deliver anything the visitor asked for, so this waits for an explicit
+      // "Accepteren" in the cookiebanner. Checked inside the timer rather than
+      // on mount, so someone who accepts during those seconds still gets it.
+      if (!hasFunctionalConsent()) return
       const secure = window.location.protocol === "https:" ? "; Secure" : ""
       document.cookie = `${GUEST_SEEN_LANDING_COOKIE}=1; Path=/; Max-Age=${ONE_YEAR_SECONDS}; SameSite=Lax${secure}`
     }, 4000)

@@ -18,6 +18,7 @@ import { JsonLd } from "../components/seo/JsonLd";
 import EnvironmentBanner from "../components/layout/EnvironmentBanner";
 import AppPromoBanner from "../components/layout/AppPromoBanner";
 import { Toaster } from "../components/ui/toaster";
+import CookieConsent from "../components/ui/CookieConsent";
 import { APP_STORE_URL } from "../lib/appStore";
 import { appStoreIdFromUrl } from "../lib/mobilePlatform";
 import {
@@ -274,6 +275,11 @@ export default async function RootLayout({
             on a phone, so it never lands on the promo banner or the tab bar;
             bottom-right from md up - see components/ui/toast.tsx. */}
         <Toaster />
+        {/* Asks once, remembers the answer, and gates the usage statistics in
+            lib/analytics.ts behind it. Renders nothing until mounted, nothing
+            once answered, and nothing inside the /studie flow - see
+            components/ui/CookieConsent.tsx. */}
+        <CookieConsent />
         <SpeedInsights />
       </body>
     </html>

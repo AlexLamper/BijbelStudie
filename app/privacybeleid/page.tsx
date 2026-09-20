@@ -16,7 +16,7 @@ import { PublicFrame } from "../../components/content/PublicFrame";
  */
 export const metadata: Metadata = generatePageMetadata("privacyPolicy");
 
-const LAST_UPDATED = "16 september 2026";
+const LAST_UPDATED = "20 september 2026";
 const SUPPORT_EMAIL = "info@bijbelstudie.io";
 
 type Item = { title: string; body: string };
@@ -56,7 +56,7 @@ const DATA: Item[] = [
   },
   {
     title: "Gebruiksstatistieken",
-    body: "We meten zelf een beperkt aantal gebeurtenissen: welk soort pagina je opent (zonder hoofdstuk of zoekterm), klikken op bepaalde knoppen en de stappen rond een abonnement (prijzen bekeken, plan gekozen, aankoop gestart, voltooid of afgebroken). Een gebeurtenis bevat alleen vaste waarden, zoals het platform of de gekozen looptijd, en nooit vrije tekst of je IP-adres. Ben je ingelogd, dan is ze gekoppeld aan je account; op de website zonder account aan een willekeurig nummer in je browser. De laadsnelheid van de website meten we anoniem met Vercel Speed Insights.",
+    body: "Op de website meten we dit alleen als je daarmee akkoord gaat in de cookiebanner. We meten zelf een beperkt aantal gebeurtenissen: welk soort pagina je opent (zonder hoofdstuk of zoekterm), klikken op bepaalde knoppen en de stappen rond een abonnement (prijzen bekeken, plan gekozen, aankoop gestart, voltooid of afgebroken). Een gebeurtenis bevat alleen vaste waarden, zoals het platform of de gekozen looptijd, en nooit vrije tekst of je IP-adres. Ben je ingelogd, dan is ze gekoppeld aan je account; op de website zonder account aan een willekeurig nummer in je browser. De laadsnelheid van de website meten we anoniem met Vercel Speed Insights.",
   },
   {
     title: "Technische gegevens",
@@ -84,11 +84,11 @@ const BASES: Item[] = [
   },
   {
     title: "Gerechtvaardigd belang",
-    body: "Beveiliging en het beperken van misbruik (serverlogs, limieten per IP-adres, inlogsessies); een tijdelijke beveiligingskopie van een verwijderd account, zodat een onterechte verwijdering te herstellen is; BijbelStudie verbeteren met onze eigen gebruiksstatistieken, je feedback en meldingen over AI-antwoorden; de laadsnelheid meten. Deze verwerkingen zijn beperkt gehouden. Je kunt er bezwaar tegen maken.",
+    body: "Beveiliging en het beperken van misbruik (serverlogs, limieten per IP-adres, inlogsessies); een tijdelijke beveiligingskopie van een verwijderd account, zodat een onterechte verwijdering te herstellen is; BijbelStudie verbeteren met je feedback, meldingen over AI-antwoorden en de gebruiksstatistieken van de app; de laadsnelheid anoniem meten. Deze verwerkingen zijn beperkt gehouden. Je kunt er bezwaar tegen maken.",
   },
   {
     title: "Toestemming",
-    body: "Meldingen en herinneringen op je apparaat (via de toestemming van iOS of Android), een openbaar Levensboom-profiel en contactgegevens die je vrijwillig bij feedback invult. Je kunt je toestemming altijd intrekken, bijvoorbeeld door meldingen of je openbare profiel uit te zetten.",
+    body: "De gebruiksstatistieken van de website, waar we in de cookiebanner toestemming voor vragen; meldingen en herinneringen op je apparaat (via de toestemming van iOS of Android), een openbaar Levensboom-profiel en contactgegevens die je vrijwillig bij feedback invult. Je kunt je toestemming altijd intrekken, bijvoorbeeld door meldingen of je openbare profiel uit te zetten, of door de opgeslagen gegevens van deze website in je browser te wissen.",
   },
   {
     title: "Wettelijke plicht",
@@ -196,9 +196,12 @@ const RIGHTS = [
   "Toestemming intrekken: voor alles wat op toestemming berust.",
 ];
 
-function Card({ children }: { children: React.ReactNode }) {
+function Card({ children, id }: { children: React.ReactNode; id?: string }) {
   return (
-    <section className="rounded-card border border-line bg-surface px-4 py-[18px] sm:px-[22px]">
+    <section
+      id={id}
+      className="rounded-card border border-line bg-surface px-4 py-[18px] scroll-mt-24 sm:px-[22px]"
+    >
       {children}
     </section>
   );
@@ -413,9 +416,12 @@ export default function PrivacyPolicyPage() {
         </p>
       </Card>
 
-      <Card>
+      <Card id="cookies">
         <CardTitle>10. Cookies en opslag in je browser</CardTitle>
-        <p className={`${bodyClass} mt-1`}>De website gebruikt alleen deze cookies:</p>
+        <p className={`${bodyClass} mt-1`}>
+          Noodzakelijke cookies gebruiken we altijd; daarvoor is geen toestemming nodig, omdat de website zonder
+          die cookies niet werkt:
+        </p>
         <ul className={`${bodyClass} mt-2 list-disc space-y-1 pl-5`}>
           <li>
             <strong>Inlogcookies</strong> (next-auth): houden je ingelogd en beveiligen het inloggen. Tot 30 dagen na je laatste bezoek.
@@ -424,16 +430,30 @@ export default function PrivacyPolicyPage() {
             <strong>Taal</strong> (i18next): de taal van de website. 1 jaar.
           </li>
           <li>
+            <strong>Betalen</strong> (Stripe): alleen tijdens het afrekenen, om de betaling af te handelen en fraude
+            te voorkomen.
+          </li>
+        </ul>
+        <p className={`${bodyClass} mt-2`}>
+          Met je toestemming, die we in de cookiebanner vragen, gebruiken we daarnaast:
+        </p>
+        <ul className={`${bodyClass} mt-2 list-disc space-y-1 pl-5`}>
+          <li>
+            <strong>Gebruiksstatistieken</strong>: een willekeurig nummer in de opslag van je browser (bs_anon_id),
+            zodat we onze eigen statistieken kunnen bijhouden. Kies je &quot;Alleen noodzakelijk&quot;, dan slaan we dit
+            nummer niet op en meten we niets.
+          </li>
+          <li>
             <strong>Startpagina gezien</strong> (bs_seen_landing): zonder account slaan we de introductie over als je die
             al hebt gezien. 1 jaar.
           </li>
         </ul>
         <p className={`${bodyClass} mt-2`}>
-          In de opslag van je browser bewaren we daarnaast een willekeurig nummer voor onze eigen statistieken
-          (bs_anon_id) en instellingen zoals je gekozen commentaar en voorleesstem. Er zijn geen cookies van derden;
-          Vercel Speed Insights werkt zonder cookies. Omdat we alleen noodzakelijke cookies en eigen statistieken met
-          weinig gevolgen voor je privacy gebruiken, vragen we geen cookietoestemming. Je kunt cookies en opgeslagen
-          gegevens altijd wissen in je browser; daarna ben je uitgelogd. De app gebruikt geen cookies.
+          Je keuze bewaren we in de opslag van je browser (bs-cookie-consent-v1). Wil je die wijzigen of intrekken,
+          dan wis je de opgeslagen gegevens van deze website in je browser; daarna vragen we het opnieuw. Verder
+          bewaren we in je browser instellingen zoals je gekozen commentaar en voorleesstem. Er zijn geen advertentie-
+          of trackingcookies en geen cookies van derden; Vercel Speed Insights meet de laadsnelheid anoniem en zonder
+          cookies of opslag in je browser. Wis je cookies, dan ben je uitgelogd. De app gebruikt geen cookies.
         </p>
       </Card>
 

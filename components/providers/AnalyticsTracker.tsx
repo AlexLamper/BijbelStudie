@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
+import { useCookieConsent } from '../../hooks/useCookieConsent';
 
 /**
  * Page views and clicks, for /beheer/inzichten.
@@ -60,18 +61,28 @@ function send(name: string, props: Record<string, string>): void {
     .catch(() => {});
 }
 
+/**
+ * CONSENT. Nothing here runs until the reader has pressed "Accepteren" in the
+ * cookiebanner: the analytics chunk is not even fetched, so `bs_anon_id` is
+ * never written and /api/analytics is never called. `lib/analytics.ts` repeats
+ * the same check at the moment of every event, so a `track()` call from any
+ * other component is gated too. See lib/cookieConsent.ts.
+ */
 export default function AnalyticsTracker() {
   const pathname = usePathname();
   const lastPath = useRef<string | null>(null);
+  const { analyticsAllowed } = useCookieConsent();
 
   useEffect(() => {
+    if (!analyticsAllowed) return;
     if (!pathname || lastPath.current === pathname) return;
     lastPath.current = pathname;
     // `path` is normalised to a route key on the server - see lib/analyticsRoutes.
     send('page_view', { path: pathname });
-  }, [pathname]);
+  }, [pathname, analyticsAllowed]);
 
   useEffect(() => {
+    if (!analyticsAllowed) return;
     const onClick = (event: MouseEvent) => {
       try {
         const start = event.target;
@@ -91,7 +102,7 @@ export default function AnalyticsTracker() {
     // dialogs do - must not also stop this from counting.
     document.addEventListener('click', onClick, { capture: true, passive: true });
     return () => document.removeEventListener('click', onClick, { capture: true });
-  }, []);
+  }, [analyticsAllowed]);
 
   return null;
 }

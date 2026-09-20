@@ -18,6 +18,7 @@ import DashboardFeedbackSlot from "../../components/feedback/DashboardFeedbackSl
 import { useTreeSummary } from "../../components/dashboard/ProgressTree"
 import AppShell from "../../components/shell/AppShell"
 import StudyArtwork from "../studies/StudyArtwork"
+import { completedStudyIds, splitRecommendations } from "../../lib/studyRecommendations"
 import TreeAvatar from "../../components/kit/TreeAvatar"
 import {
   Card,
@@ -55,6 +56,9 @@ function heatStep(ratio: number): number {
   return 4
 }
 
+/** A stable empty set, so the effect's initial state is not a new object a render. */
+const EMPTY_IDS: Set<string> = new Set()
+
 /** The fields of a serialised enrolment this page reads. */
 interface EnrollmentSummary {
   studyId: string
@@ -75,6 +79,7 @@ interface EnrollmentSummary {
  */
 function useResumeStudy() {
   const [enrollment, setEnrollment] = useState<EnrollmentSummary | null>(null)
+  const [completed, setCompleted] = useState<Set<string>>(EMPTY_IDS)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -86,13 +91,16 @@ function useResumeStudy() {
         const list: EnrollmentSummary[] = data?.enrollments ?? []
         const active = list.find(e => e.status === "active" && !e.completedAt && findAnyStudy(e.studyId))
         setEnrollment(active ?? null)
+        // The same single response also says which studies are finished, so the
+        // recommendation rows cost no extra request.
+        setCompleted(completedStudyIds(list))
       })
       .catch(() => {})
       .finally(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true }
   }, [])
 
-  if (!enrollment) return { resume: null, loading }
+  if (!enrollment) return { resume: null, completed, loading }
 
   const study = findAnyStudy(enrollment.studyId)!
   const total = enrollment.lessonsTotal || study.lessons.length
@@ -105,7 +113,9 @@ function useResumeStudy() {
 
   return {
     loading,
+    completed,
     resume: {
+      studyId: study.id,
       href: `/studie/${study.id}`,
       title: study.title,
       day,
@@ -156,7 +166,7 @@ const STUDY_GRID =
 export default function DashboardPage() {
   const d = useDashboardData()
   const tree = useTreeSummary()
-  const { resume, loading: resumeLoading } = useResumeStudy()
+  const { resume, completed, loading: resumeLoading } = useResumeStudy()
   // Hold the card until both sources have answered, so it never flips from the
   // last chapter to the study lesson a moment later.
   const continueLoading = !resume && (d.loading || resumeLoading)
@@ -179,15 +189,16 @@ export default function DashboardPage() {
   const ntLevels = NT_BOOKS.map(b => heatStep(d.bookReadRatio(b)))
 
   // Four: one full row of four on a wide screen, a clean 2 x 2 below it.
-  const recommended = curatedStudies.slice(0, 4)
-  // "Meer om te ontdekken": the next curated studies, from the same static
-  // list (no request), never one already above and never the study the reader
-  // is in the middle of. There is no popularity signal to rank by, so the
-  // title does not claim one.
-  const moreStudies = curatedStudies
-    .slice(4)
-    .filter(study => resume?.href !== `/studie/${study.id}`)
-    .slice(0, 4)
+  // "Meer om te ontdekken" is the next four from the same static list (no
+  // request), never one already above and never the study the reader is in the
+  // middle of. There is no popularity signal to rank by, so the title does not
+  // claim one. A study this reader has already finished is in neither row: the
+  // finished ids come from the enrolment response the resume card already made.
+  const { recommended, more: moreStudies } = splitRecommendations({
+    studies: curatedStudies,
+    completed,
+    resumeStudyId: resume?.studyId ?? null,
+  })
 
   return (
     <AppShell title="Dashboard">
@@ -297,9 +308,31 @@ export default function DashboardPage() {
               fixed chrome. At xl (1280) that leaves ~690 px, ~160 px a card at
               four across, still room for a two-line title and the meta line;
               under xl four would crush them, so it stays at two. */}
-          <div className={STUDY_GRID}>
-            <StudyCards studies={recommended} />
-          </div>
+          {/* Until the enrolments have answered, the finished studies are not
+              known yet, so cards are held back rather than shown and then
+              pulled away again. */}
+          {resumeLoading ? (
+            <div className={STUDY_GRID} aria-busy="true">
+              {[0, 1, 2, 3].map(i => (
+                <div key={i} className="h-[178px] animate-pulse rounded-card bg-line-soft" />
+              ))}
+            </div>
+          ) : recommended.length === 0 ? (
+            <Card className="flex-none px-6 py-5 max-md:px-5">
+              <div className="text-[15px] font-bold text-ink">Je hebt alle studies afgerond</div>
+              <div className="mt-[6px] text-[13px] text-ink-muted">
+                Mooi werk. Kies via{" "}
+                <Link href="/studies" className="font-semibold text-teal no-underline hover:underline dark:text-teal-400">
+                  alle studies
+                </Link>{" "}
+                een studie om opnieuw te doen, of lees verder in de Bijbel.
+              </div>
+            </Card>
+          ) : (
+            <div className={STUDY_GRID}>
+              <StudyCards studies={recommended} />
+            </div>
+          )}
 
           {/* Always shown. From md up it follows the recommended row in the
               work column; below md it sits at the very bottom, under the rail. */}
