@@ -71,6 +71,12 @@ const UserSchema = new mongoose.Schema(
       seenItems: { type: [String], default: [] },
     },
     subscribed: { type: Boolean, default: false },
+    // An admin-granted Pro period that ends by itself. `subscribed` is the flag
+    // everything gates on, so a grant sets that too; this is the date the daily
+    // sweep in lib/compedPro.ts uses to take it away again. Null means the grant
+    // is open-ended (the App Store review account, the plain "Pro activeren"
+    // toggle), which is why expiry is opt-in rather than derived from a duration.
+    compedProUntil: { type: Date, default: null },
     stripeCustomerId: { type: String },
     stripeSubscriptionId: { type: String },
     // --- Billing state, written by the Stripe webhook (app/api/webhooks/stripe).

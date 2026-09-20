@@ -5,7 +5,7 @@ import Link from "next/link"
 import {
   Search, ShieldCheck, MoreVertical,
   Trash2, ShieldOff, ShieldPlus, UserCheck, UserX, X,
-  AlertTriangle, RefreshCw, Apple, Smartphone, ChevronLeft,
+  AlertTriangle, RefreshCw, Apple, Smartphone, ChevronLeft, Gift,
 } from "lucide-react"
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
@@ -39,6 +39,8 @@ interface AdminUser {
   isPro: boolean
   /** Pro without payment - review account or admin grant. Not a subscriber. */
   isComped: boolean
+  /** End of a time-limited grant; null when the grant is open-ended. */
+  compedProUntil: string | null
   storePremium: boolean
   storePremiumPlatform: "apple" | "google" | null
   subscriptionStatus: string | null
@@ -58,6 +60,9 @@ interface AdminUser {
 
 type Filter = "all" | "pro" | "free" | "admin"
 
+/** `compMonths` is an action, not a field: it grants Pro for that many months. */
+type UserPatch = Partial<Pick<AdminUser, "isAdmin" | "subscribed">> & { compMonths?: number }
+
 /** A neutral chip: GRATIS, ZEGT OP, the store a Pro came from. */
 const FLAG =
   "inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-line-soft px-[7px] py-[2px] text-[10.5px] font-semibold text-ink-muted"
@@ -68,6 +73,10 @@ function formatDate(d?: string): string {
   const datePart = date.toLocaleDateString("nl-NL", { day: "numeric", month: "short", year: "numeric" })
   const timePart = date.toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })
   return `${datePart}, ${timePart}`
+}
+
+function shortDate(d: string): string {
+  return new Date(d).toLocaleDateString("nl-NL", { day: "numeric", month: "short" }).toUpperCase()
 }
 
 /**
@@ -127,7 +136,7 @@ export default function AdminUsersPage() {
     })
   }, [users, search, filter])
 
-  async function patchUser(id: string, patch: Partial<Pick<AdminUser, "isAdmin" | "subscribed">>) {
+  async function patchUser(id: string, patch: UserPatch) {
     setPendingId(id)
     try {
       const res = await fetch(`/api/admin/users/${id}`, {
@@ -140,8 +149,23 @@ export default function AdminUsersPage() {
         setToast({ type: "err", msg: data?.error || "Bijwerken mislukt" })
         return
       }
-      setUsers(prev => prev.map(u => (u._id === id ? { ...u, ...patch } : u)))
-      setToast({ type: "ok", msg: "Bijgewerkt" })
+      // The server answers with the flags it actually wrote - a grant moves more
+      // of them than the patch names.
+      const { compMonths, ...optimistic } = patch
+      const next: Partial<AdminUser> = data?.user
+        ? { subscribed: data.user.subscribed, isAdmin: data.user.isAdmin, compedProUntil: data.user.compedProUntil ?? null }
+        : optimistic
+      setUsers(prev =>
+        prev.map(u =>
+          u._id === id
+            ? { ...u, ...next, isPro: Boolean((next.subscribed ?? u.subscribed) || u.storePremium || (next.isAdmin ?? u.isAdmin)) }
+            : u,
+        ),
+      )
+      setToast({
+        type: "ok",
+        msg: compMonths ? `Pro toegekend voor ${compMonths} ${compMonths === 1 ? "maand" : "maanden"}` : "Bijgewerkt",
+      })
     } catch {
       setToast({ type: "err", msg: "Netwerkfout" })
     } finally {
@@ -440,14 +464,21 @@ function StatusFlags({ user: u }: { user: AdminUser }) {
       ) : (
         <span className={FLAG}>GRATIS</span>
       )}
-      {u.isComped && (
+      {u.compedProUntil ? (
+        <span
+          title="Gratis Pro-periode. Stopt automatisch op deze datum; daarna betaalt de gebruiker zelf."
+          className={FLAG}
+        >
+          TOT {shortDate(u.compedProUntil)}
+        </span>
+      ) : u.isComped ? (
         <span
           title="Pro zonder betaling - reviewaccount of handmatig toegekend. Telt niet mee in MRR."
           className={FLAG}
         >
           GRATIS
         </span>
-      )}
+      ) : null}
       {u.storePremium && (
         <span className={FLAG}>
           {u.storePremiumPlatform === "apple" ? <Apple size={10} aria-hidden /> : <Smartphone size={10} aria-hidden />}
@@ -488,7 +519,7 @@ function UserActions({
 }: {
   user: AdminUser
   busy: boolean
-  onPatch: (id: string, patch: Partial<Pick<AdminUser, "isAdmin" | "subscribed">>) => void
+  onPatch: (id: string, patch: UserPatch) => void
   onReconcile: (u: AdminUser) => void
   onDelete: (u: AdminUser) => void
 }) {
@@ -527,6 +558,14 @@ function UserActions({
         ) : (
           <DropdownMenuItem onClick={() => onPatch(u._id, { subscribed: true })}>
             <UserCheck className="mr-2 h-4 w-4" /> Pro handmatig activeren
+          </DropdownMenuItem>
+        )}
+        {/* Stops by itself; daarna betaalt de gebruiker zelf of valt terug naar
+            gratis. Niet aangeboden aan wie al via Stripe of de store betaalt. */}
+        {!u.storePremium && !u.subscriptionStatus && (
+          <DropdownMenuItem onClick={() => onPatch(u._id, { compMonths: 1 })}>
+            <Gift className="mr-2 h-4 w-4" />
+            {u.compedProUntil ? "1 maand Pro opnieuw geven" : "1 maand Pro cadeau"}
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />

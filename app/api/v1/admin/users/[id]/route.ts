@@ -18,7 +18,8 @@ export async function OPTIONS() {
 }
 
 /**
- * PATCH /api/v1/admin/users/:id - `{ isAdmin?: boolean, subscribed?: boolean }`.
+ * PATCH /api/v1/admin/users/:id - `{ isAdmin?: boolean, subscribed?: boolean,
+ * compMonths?: number }` (compMonths grants Pro for that many months).
  * Everything else in the body is ignored by the shared helper.
  */
 export async function PATCH(req: NextRequest, { params }: RouteContext) {
