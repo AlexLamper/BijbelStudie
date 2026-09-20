@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "../../../lib/authOptions"
 import connectMongoDB from "../../../lib/mongodb"
 import User from "../../../models/User"
+import { PRO_TRIAL_DAYS, isPromoActive } from "../../../lib/promo"
 
 /**
  * Creates a Stripe Checkout session for the signed-in user.
@@ -137,6 +138,56 @@ export async function POST(req: NextRequest) {
 
     const origin = ALLOWED_ORIGIN
 
+    // The free trial is the advertised action, not a permanent feature of the
+    // product, and it is once per account, ever.
+    //
+    // The action repeats every other week (lib/promo), so "cancel, wait for the
+    // next window, subscribe again" is the obvious way to try to ride free weeks
+    // indefinitely. Stripe does not track "already used a trial" by itself, so
+    // eligibility is checked three ways and any one of them is disqualifying:
+    //
+    //  1. local billing fields - `subscriptionStartedAt` is write-once
+    //     (subscriptionSync keeps the first start date through a resubscribe) and
+    //     `proTrialUsedAt` is set from `trial_start` the moment a trialing
+    //     subscription is seen, and never cleared;
+    //  2. a live look at Stripe for *any* subscription this customer has ever
+    //     had, in any status - this one does not depend on a webhook having
+    //     arrived, so a missed or failed sync cannot open the door;
+    //  3. the action actually running right now.
+    //
+    // Deliberately not burned on an abandoned checkout: someone who opens
+    // checkout and does not finish creates no Stripe subscription, so they stay
+    // eligible. The marker follows the subscription, not the intent.
+    let trialEligible = isPromoActive() && !user.stripeSubscriptionId && !user.subscriptionStartedAt && !user.proTrialUsedAt
+
+    if (trialEligible) {
+      try {
+        const prior = await stripe.subscriptions.list({
+          customer: stripeCustomerId,
+          status: "all",
+          limit: 1,
+        })
+        if (prior.data.length > 0) {
+          trialEligible = false
+          // Backfill the marker so the next attempt is settled locally without
+          // another round trip. `updateOne` on the one field - never `save()` on
+          // a hydrated User (see the note above).
+          const priorTrial = prior.data.find((s) => s.trial_start)?.trial_start
+          await User.updateOne(
+            { _id: user._id },
+            { $set: { proTrialUsedAt: priorTrial ? new Date(priorTrial * 1000) : new Date() } },
+          )
+        }
+      } catch (err) {
+        // Stripe unreachable: refuse the trial rather than risk giving a repeat
+        // one away. Checkout itself still proceeds, just at full price.
+        console.error("[checkout] trial eligibility lookup failed, withholding trial", err)
+        trialEligible = false
+      }
+    }
+
+    const trialDays = trialEligible ? PRO_TRIAL_DAYS : 0
+
     const stripeSession = await stripe.checkout.sessions.create({
       payment_method_types: ["card", "ideal", "bancontact", "sepa_debit"],
       line_items: [{ price: priceId, quantity: 1 }],
@@ -152,6 +203,14 @@ export async function POST(req: NextRequest) {
       // even before stripeCustomerId has been written locally.
       subscription_data: {
         metadata: { userId: user._id.toString(), interval },
+        // The "7 dagen gratis" the landing banner promises. Without this line
+        // the banner was simply untrue: Stripe charged in full on day one.
+        //
+        // Payment-method behaviour is deliberately unchanged - Checkout in
+        // subscription mode defaults to `payment_method_collection: "always"`,
+        // so the card/iDEAL mandate is still collected up front and the first
+        // charge happens automatically when the trial ends.
+        ...(trialDays ? { trial_period_days: trialDays } : {}),
       },
       metadata: { userId: user._id.toString(), interval },
       // Supports the 14-day withdrawal right: the customer actively agrees to

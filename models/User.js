@@ -104,6 +104,11 @@ const UserSchema = new mongoose.Schema(
     // When the current subscription first started, so the month-3 annual upsell
     // can be timed without querying Stripe on every page load.
     subscriptionStartedAt: { type: Date, default: null },
+    // When this account started its one free trial. Write-once: the checkout
+    // route refuses a second trial while this is set, so cancelling and
+    // re-subscribing during the next action week cannot yield another free
+    // week. Never cleared, including when the Stripe subscription is deleted.
+    proTrialUsedAt: { type: Date, default: null },
     // Free-text reason captured on the cancellation screen. Without it every
     // later retention decision is guesswork.
     cancellationReason: { type: String },

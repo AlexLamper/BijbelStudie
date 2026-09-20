@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
-import { PROMO_ENABLED, PROMO_END, PROMO_LINK } from '../../lib/promo';
+import { PROMO_ENABLED, PROMO_LINK, promoWindow } from '../../lib/promo';
 
 function pad(n: number): string {
   return n < 10 ? `0${n}` : String(n);
@@ -18,43 +18,54 @@ function format(secondsLeft: number): string {
 }
 
 /**
- * Counts down to a fixed end date and never loops. `left` starts `null` so
- * server and first client paint both render nothing - the banner only
- * appears once the browser has checked the real clock, which is also what
- * keeps an expired promo from flashing on screen before it hides itself.
+ * Counts down to the end of the *current* action window.
+ *
+ * The action runs one week in every two, so the tick re-reads the window each
+ * second rather than closing over a single end date: when a window closes the
+ * banner disappears by itself, and when the next one opens a page left sitting
+ * open picks it up without a reload. `state` starts `null` so server and first
+ * client paint both render nothing - the banner only appears once the browser
+ * has checked the real clock, which is what keeps a closed window from flashing
+ * on screen before it hides itself.
  */
-function useCountdown(endIso: string) {
-  const [left, setLeft] = useState<number | null>(null);
+function usePromoCountdown() {
+  const [state, setState] = useState<{ endsAt: number; left: number } | null>(null);
 
   useEffect(() => {
-    const end = Date.parse(endIso);
-    const tick = () => setLeft(Math.max(0, Math.floor((end - Date.now()) / 1000)));
+    const tick = () => {
+      const now = Date.now();
+      const win = promoWindow(now);
+      setState(
+        win.active
+          ? { endsAt: win.endsAt, left: Math.max(0, Math.floor((win.endsAt - now) / 1000)) }
+          : null,
+      );
+    };
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
-  }, [endIso]);
+  }, []);
 
-  return left;
+  return state;
 }
 
-const endDateLabel = (() => {
-  const d = new Date(PROMO_END);
-  return d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' });
-})();
+function endDateLabel(endsAt: number): string {
+  return new Date(endsAt).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' });
+}
 
 export function PromoBanner() {
-  const secondsLeft = useCountdown(PROMO_END);
+  const promo = usePromoCountdown();
 
   if (!PROMO_ENABLED) return null;
-  // Unknown (still mounting) or already over: render nothing.
-  if (secondsLeft === null || secondsLeft <= 0) return null;
+  // Still mounting, or this week is an off-week: render nothing.
+  if (promo === null || promo.left <= 0) return null;
 
-  const countdown = format(secondsLeft);
+  const countdown = format(promo.left);
 
   return (
     <div
       style={{ backgroundColor: '#0b3f37' }}
-      aria-label={`Actie eindigt op ${endDateLabel}`}
+      aria-label={`Actie eindigt op ${endDateLabel(promo.endsAt)}`}
     >
       {/* Desktop / tablet: one row. */}
       <div
