@@ -1218,12 +1218,10 @@ export default function StudyFlowShell({
           </dl>
         </nav>
 
-        {/* A row: the step, and the assistant beside it.
-            `relative` because the Verdieping step's `half` dock pins itself to
-            the right half of THIS box. Everywhere else the dock is a real column
-            in this row, so opening it narrows the step instead of covering it -
-            the passage re-centres in the space that is left rather than being
-            read through a panel.
+        {/* A row: the step, and the assistant beside it. The dock is a real
+            column in this row on every step, so opening it narrows the step
+            instead of covering it - the content re-centres in the space that is
+            left rather than being read through a panel.
 
             The dock is scoped to the lesson body rather than the screen: an
             earlier version was a viewport-height drawer that pushed the header
@@ -1304,11 +1302,6 @@ export default function StudyFlowShell({
           chapter={lesson.passage.chapter}
           version={version}
           step={isStepKey(step) ? step : 'word'}
-          // Half the screen is right on the commentary step, where the left half
-          // is already a column of prose the assistant is talking about. On every
-          // other step it swallowed a centred passage, a textarea or a quiz card,
-          // so there it is a drawer against the right edge instead.
-          layout={step === 'depth' ? 'half' : 'push'}
           draft={aiDraft}
           onDraftConsumed={() => setAiDraft(null)}
           question={aiQuestion}
