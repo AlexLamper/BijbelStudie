@@ -9,6 +9,8 @@ import { StudyDiscovery } from "./StudyDiscovery"
 import { HOME_FAQS } from "../../lib/content/homeFaq"
 import { APP_STORE_URL } from "../../lib/appStore"
 import { opstandingLessons } from "../../lib/data/study-lessons/opstanding"
+import { buildLessonContext } from "../../lib/lessonContext"
+import { chapterStudyTemplate } from "../../lib/chapterStudyTemplate"
 import StudyFlowDemo, { type DemoLesson } from "./StudyFlowDemo"
 import { renderTreeSvg } from "../../lib/levensboom/svg"
 import { LP_THEME_VARS } from "./studyLandingShared"
@@ -496,14 +498,31 @@ function BibleLibrary() {
  */
 function demoLesson(): DemoLesson {
   const authored = opstandingLessons[1]
+  // The context step, off the same builder the real lesson uses, so what the
+  // landing page shows about Johannes is what a reader actually gets.
+  const context = buildLessonContext(
+    { book: "Johannes", chapter: 20, verseStart: 1, verseEnd: 18 },
+    authored,
+  )
   return {
     studyTitle: "De opstanding van Jezus",
     lessonsTotal: 3,
-    lesson: { day: 1, title: "Het lege graf", reference: "Johannes 20:1–18", minutes: 12 },
+    lesson: { day: 1, title: "Het lege graf", reference: "Johannes 20:1–18", minutes: 15 },
     intro: {
       headline: authored.intro?.headline ?? "Het lege graf",
       body: authored.intro?.body ?? [],
       watchFor: authored.intro?.watchFor ?? [],
+    },
+    context: {
+      bookName: context?.book?.name ?? "Johannes",
+      body: context?.body[0] ?? "",
+      // Four facts is a grid of two by two; the step itself shows the rest.
+      facts: (context?.facts ?? []).slice(0, 4),
+      outline: (context?.outline ?? []).map((section) => ({
+        range: section.range,
+        title: section.title,
+        current: section.current,
+      })),
     },
     readingCue: authored.word?.readingCue ?? "Lees rustig.",
     translation: "Statenvertaling",
@@ -529,6 +548,9 @@ function demoLesson(): DemoLesson {
       prompts: authored.reflection?.prompts ?? [],
       placeholder: authored.reflection?.placeholder ?? "Schrijf op wat je opviel...",
       sample: "Maria zoekt een lichaam en vindt een stem. Ik herken Hem ook vaker in wat ik lees dan in wat ik zie.",
+      // The same fallback the flow applies: an evangelie lesson with no
+      // authored practices gets the genre template.
+      practices: authored.reflection?.practices ?? [...chapterStudyTemplate("Evangelie").practices],
     },
     quiz: {
       question: "Wie komt in Johannes 20 als eerste bij het graf?",
@@ -558,8 +580,8 @@ function StudyFlowSection() {
       <div className={SHELL}>
         <SectionHeader
           label="Zo werkt een les"
-          title="Vijf stappen, een kwartier per dag"
-          subtitle="Elke les leidt je in dezelfde vijf stappen door één bijbelgedeelte: intro, het Woord, verdieping, reflectie en toetsing. Hieronder speelt de eerste les van De opstanding van Jezus vanzelf af - de echte les, geen schermafbeelding."
+          title="Zes stappen, een kwartier per dag"
+          subtitle="Elke les leidt je in dezelfde zes stappen door één bijbelgedeelte: inleiding, bijbelse context, lezen, verdieping, toetsing en toepassing. Hieronder speelt de eerste les van De opstanding van Jezus vanzelf af - de echte les, geen schermafbeelding."
         />
         <FadeUp>
           <StudyFlowDemo lesson={demoLesson()} />

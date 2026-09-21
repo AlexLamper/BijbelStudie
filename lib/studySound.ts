@@ -1,10 +1,10 @@
 /**
  * The study flow's two sounds, synthesised rather than downloaded.
  *
- * A page-turn is a filtered noise burst and a chime is two sine waves, so there
- * is no reason to ship audio files for them: no extra request, no decode, no
- * 40KB of MP3 on a route people open on mobile data, and nothing to keep in sync
- * with a CDN. Web Audio builds both in a handful of nodes.
+ * A step click is one band-passed noise burst and a chime is two sine waves,
+ * so there is no reason to ship audio files for them: no extra request, no
+ * decode, no 40KB of MP3 on a route people open on mobile data, and nothing to
+ * keep in sync with a CDN. Web Audio builds both in a handful of nodes.
  *
  * Everything here fails silently. Audio is decoration - a browser without
  * `AudioContext`, a device with output muted, an autoplay policy that has not
@@ -36,13 +36,28 @@ function audio(): AudioContext | null {
 }
 
 /**
- * The swipe: a short band-passed noise sweep, like a sheet of paper moving past.
+ * The swipe: a short, dry click. One burst of noise, 22 milliseconds, gone.
  *
- * The sweep runs downwards going forward and upwards going back, which is the
- * whole trick - the ear reads a falling sweep as something leaving and a rising
- * one as something arriving, so the sound carries the same direction the
- * animation does. Peak gain is deliberately low; this should sit under the
- * transition, not announce itself.
+ * Chosen after auditioning everything else, and the route there is worth
+ * keeping because it explains the shape. A 240ms band-passed noise sweep was
+ * too long and had no attack, so it read as the interface breathing. A tick
+ * with a pitched triangle under it fixed the attack and added a note, and a
+ * note becomes a tune by the fourth step - a lesson plays this six times. A
+ * softly struck marimba had the same problem in a nicer register.
+ *
+ * What is left is the smallest thing that can mark an event: no pitch, no tail,
+ * nothing to get used to. The ear dates an event by its attack, so a 1.5ms
+ * onset is what makes it feel like the press that caused it rather than a
+ * sound played afterwards. The cubed decay puts nearly all the energy in the
+ * first few milliseconds, which is where the eye is too.
+ *
+ * The bandpass is doing the timbre: 2.4kHz forward, 1.7kHz back, Q 2.2. High
+ * enough to stay crisp on a phone speaker, narrow enough not to hiss. Back is
+ * the duller and quieter of the two - stepping back is a correction and should
+ * not sound like progress.
+ *
+ * Peak gain is deliberately low. This is heard six times a lesson and must sit
+ * under the transition, not on top of it.
  */
 export function playSwipe(direction: 1 | -1) {
   const ctx = audio();
@@ -50,38 +65,37 @@ export function playSwipe(direction: 1 | -1) {
 
   try {
     const now = ctx.currentTime;
-    const duration = 0.24;
+    const forward = direction > 0;
+    const length = 0.022;
 
-    const frames = Math.floor(ctx.sampleRate * duration);
+    const frames = Math.max(1, Math.floor(ctx.sampleRate * length));
     const buffer = ctx.createBuffer(1, frames, ctx.sampleRate);
     const samples = buffer.getChannelData(0);
     for (let i = 0; i < frames; i += 1) {
-      // Slightly pink rather than white: pure white noise reads as a hiss, and
-      // paper is weighted to the low end.
-      samples[i] = (Math.random() * 2 - 1) * (1 - i / frames) ** 0.4;
+      samples[i] = (Math.random() * 2 - 1) * (1 - i / frames) ** 3.6;
     }
 
     const source = ctx.createBufferSource();
     source.buffer = buffer;
 
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'bandpass';
-    filter.Q.value = 0.9;
-    const from = direction > 0 ? 1100 : 420;
-    const to = direction > 0 ? 320 : 1400;
-    filter.frequency.setValueAtTime(from, now);
-    filter.frequency.exponentialRampToValueAtTime(to, now + duration);
+    const tone = ctx.createBiquadFilter();
+    tone.type = 'bandpass';
+    tone.frequency.value = forward ? 2400 : 1700;
+    tone.Q.value = 2.2;
 
     const gain = ctx.createGain();
-    gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.exponentialRampToValueAtTime(0.09, now + 0.035);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+    gain.gain.setValueAtTime(0, now);
+    // Linear into the peak, not exponential: a ramp that starts at near-zero
+    // spends its first milliseconds inaudible, and on a click those
+    // milliseconds ARE the sound.
+    gain.gain.linearRampToValueAtTime(forward ? 0.05 : 0.04, now + 0.0015);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + length);
 
-    source.connect(filter);
-    filter.connect(gain);
+    source.connect(tone);
+    tone.connect(gain);
     gain.connect(ctx.destination);
     source.start(now);
-    source.stop(now + duration);
+    source.stop(now + length);
   } catch {
     /* decoration only */
   }

@@ -53,6 +53,8 @@ export interface GuestLessonState {
   viewTranslation?: string | null;
   depthPanel?: string | null;
   reflectionText?: string;
+  /** Step 6. The practices ticked, by their text, exactly as the API stores them. */
+  practicesDone?: string[];
   completedAt?: string | null;
 }
 
@@ -107,6 +109,11 @@ export function writeGuestLesson(key: string, body: Record<string, unknown>): vo
     if ('viewTranslation' in body) next.viewTranslation = (body.viewTranslation as string | null) ?? null;
     if ('depthPanel' in body) next.depthPanel = (body.depthPanel as string | null) ?? null;
     if (typeof body.reflectionText === 'string') next.reflectionText = body.reflectionText;
+    if (Array.isArray(body.practicesDone)) {
+      next.practicesDone = body.practicesDone.filter(
+        (entry): entry is string => typeof entry === 'string',
+      );
+    }
     if (body.complete === true) next.completedAt = new Date().toISOString();
     localStorage.setItem(key, JSON.stringify(next));
   } catch {
@@ -178,8 +185,9 @@ async function patchLessonState(body: Record<string, unknown>): Promise<boolean>
 /**
  * Replays this browser's guest lessons onto the signed-in account.
  *
- * Order per lesson: start the study (idempotent), write the reflection draft,
- * mark each completed step, then finish it if the guest finished it. `complete`
+ * Order per lesson: start the study (idempotent), write the reflection draft
+ * and the ticked practices, mark each completed step, then finish it if the
+ * guest finished it. `complete`
  * is what pays XP and moves the enrollment cursor, so it goes last and only
  * when the guest actually got there.
  *
@@ -222,6 +230,10 @@ export async function migrateGuestLessons(
 
     if (ok && lesson.reflectionText?.trim()) {
       ok = await patchLessonState({ ...base, reflectionText: lesson.reflectionText });
+    }
+
+    if (ok && lesson.practicesDone?.length) {
+      ok = await patchLessonState({ ...base, practicesDone: lesson.practicesDone });
     }
 
     if (ok) {

@@ -20,7 +20,7 @@
  * only the plain hyphen.
  */
 
-import { STEP_LABELS } from './studyFlow';
+import { STEP_LABELS, STEP_ORDER } from './studyFlow';
 
 /** The surfaces that may ask. Mirrors the enum on models/Feedback.js. */
 export const TOUCHPOINTS = [
@@ -102,12 +102,15 @@ const RATING_OPTIONS: PromptOption[] = [
 const OPTIONAL_NOTE: PromptFollowUp = { key: 'toelichting', question: 'Wil je er iets over kwijt? (optioneel)' };
 
 /**
- * The five step labels, taken from the rail rather than retyped, so the
- * trade-off question cannot come to name a step the flow does not have.
+ * The step labels, off STEP_ORDER itself rather than retyped, so the trade-off
+ * question cannot come to name a step the flow does not have - or miss one it
+ * gained. The list was a literal once, and adding Bijbelse context to the flow
+ * would have left it silently asking about five of six steps.
  */
-const STEP_OPTIONS: PromptOption[] = (
-  ['intro', 'word', 'depth', 'reflection', 'quiz'] as const
-).map((key) => ({ key, label: STEP_LABELS[key] ?? key }));
+const STEP_OPTIONS: PromptOption[] = STEP_ORDER.map((key) => ({
+  key,
+  label: STEP_LABELS[key] ?? key,
+}));
 
 export const PROMPTS: Record<string, PromptDef> = {
   /**

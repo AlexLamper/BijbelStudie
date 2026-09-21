@@ -19,6 +19,7 @@ import {
   syncEnrollmentAfterLesson,
 } from '../../../../lib/studyEnrollmentService';
 import { promoteReflectionToNote, recordLessonCompletion } from '../../../../lib/studyCompletion';
+import { buildLessonContext } from '../../../../lib/lessonContext';
 import { upsertLessonState } from '../../../../lib/lessonStateWrite';
 import { nextPrompt } from '../../../../lib/feedbackService';
 import type { SerialisedPrompt } from '../../../../lib/feedbackPrompts';
@@ -32,6 +33,9 @@ import {
 export const dynamic = 'force-dynamic';
 
 const MAX_REFLECTION_CHARS = 8000;
+/** The Toepassing step offers three; the cap is for a body, not for the UI. */
+const MAX_PRACTICES = 8;
+const MAX_PRACTICE_CHARS = 240;
 
 export async function OPTIONS() {
   return corsPreflight();
@@ -44,6 +48,7 @@ interface LessonStateDoc {
   viewTranslation: string | null;
   depthPanel: string | null;
   reflection: { text: string; updatedAt: Date | null; noteId: unknown };
+  application?: { practicesDone?: string[] };
   quiz: {
     quizIds: string[];
     questionIds: string[];
@@ -79,6 +84,7 @@ function serialise(studyId: string, lessonDay: number, doc: LessonStateDoc | nul
       updatedAt: doc?.reflection?.updatedAt ?? null,
       noteId: doc?.reflection?.noteId ? String(doc.reflection.noteId) : null,
     },
+    application: { practicesDone: doc?.application?.practicesDone ?? [] },
     quiz: {
       answers: (doc?.quiz?.answers ?? []).map((entry) => ({
         questionId: entry.questionId,
@@ -136,7 +142,8 @@ function nextChapterFor(book: string, chapter: number): ChapterRefPayload | null
 }
 
 /**
- * `{ studyId, lessonDay, currentStep?, completeStep?, reflectionText?, complete?, entry? }`
+ * `{ studyId, lessonDay, currentStep?, completeStep?, reflectionText?,
+ * practicesDone?, complete?, entry? }`
  *
  * One endpoint for every write the flow makes, because they all happen on the
  * same document and separating them would mean two round trips per step
@@ -219,6 +226,23 @@ export async function PATCH(req: Request) {
       set['reflection.updatedAt'] = new Date();
     }
 
+    // The ticked practices, sent as the whole list rather than as a toggle:
+    // unticking is as ordinary as ticking, and a $set of the full set is the
+    // only shape where the last write wins cleanly.
+    if (body.practicesDone !== undefined) {
+      if (!Array.isArray(body.practicesDone)) {
+        return errorV1('INVALID_FIELDS', 400, 'practicesDone moet een lijst zijn');
+      }
+      set['application.practicesDone'] = [
+        ...new Set(
+          body.practicesDone
+            .filter((entry: unknown): entry is string => typeof entry === 'string')
+            .map((entry: string) => entry.trim().slice(0, MAX_PRACTICE_CHARS))
+            .filter((entry: string) => entry.length > 0),
+        ),
+      ].slice(0, MAX_PRACTICES);
+    }
+
     const update: Record<string, unknown> = {
       $setOnInsert: { userId: auth.id, studyId, lessonDay, startedAt: new Date() },
     };
@@ -272,7 +296,11 @@ export async function PATCH(req: Request) {
       // Writing the completion first inverts that: whatever happens afterwards,
       // the reader keeps what they earned, and a lesson left in the broken
       // state by an older deploy heals on its next attempt.
-      const steps = resolveSteps(lesson, content);
+      // `hasContext` the same way the payload resolved it, so finishing a
+      // lesson never ticks a step the reader was never shown.
+      const steps = resolveSteps(lesson, content, {
+        hasContext: !!buildLessonContext(passage, content),
+      });
       await StudyLessonState.updateOne(
         { userId: auth.id, studyId, lessonDay },
         {
@@ -295,15 +323,19 @@ export async function PATCH(req: Request) {
       // modes the completion itself does not have. Those must degrade, never
       // propagate. `noteId` stays null when it fails, which is the honest
       // answer for the client rather than a silent success.
-      if (current?.reflection?.text?.trim()) {
+      // Ticked practices count as much as written text: someone who chose what
+      // to do this week and wrote nothing still has something worth keeping.
+      const practicesDone = current?.application?.practicesDone ?? [];
+      if (current?.reflection?.text?.trim() || practicesDone.length > 0) {
         try {
           noteId = await promoteReflectionToNote({
+            practices: practicesDone,
             userId: auth.id,
             studyId,
             studyTitle: study.title,
             lessonTitle: lesson.title,
             question: resolveReflectionQuestion(lesson, content),
-            reflection: current.reflection.text,
+            reflection: current?.reflection?.text ?? '',
             translation: enrollment?.translation ?? study.startVersion,
             book: passage.book,
             chapter: passage.chapter,

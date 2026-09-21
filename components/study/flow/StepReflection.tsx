@@ -19,6 +19,10 @@ export interface ReflectionContentProps {
   question: string;
   prompts?: string[];
   placeholder?: string | null;
+  /** Concrete things to do with this passage this week. Usually three. */
+  practices?: string[];
+  /** A verse to carry through the week, as a reference. */
+  memoryVerse?: string | null;
 }
 
 type SaveState = 'idle' | 'saving' | 'saved' | 'error';
@@ -45,7 +49,19 @@ function readMirror(key: string): Mirror | null {
 }
 
 /**
- * Step 4. The personal question, and the answer to it.
+ * Step 6, "Toepassing". The personal question, the answer to it, and what the
+ * reader takes into the week.
+ *
+ * It is the last step on purpose: the quiz asks whether the passage landed and
+ * belongs behind the uitleg, while this is where the lesson ends up. A lesson
+ * that ends on a score ends like school; this one ends with something written
+ * down and something to do.
+ *
+ * The practice list is the half that was missing. A question on its own
+ * produces a paragraph about yourself, which is worth having and changes
+ * nothing by Tuesday. What gets ticked here is written into the note the
+ * lesson leaves behind (lib/studyCompletion.ts), so "deze week" is findable at
+ * /notities rather than being a good moment on a screen.
  *
  * Two things this component is careful about, because losing someone's written
  * reflection is the worst thing this feature could do:
@@ -63,6 +79,8 @@ export default function StepReflection({
   initialText,
   serverUpdatedAt,
   onSave,
+  initialPracticesDone,
+  onPracticesChange,
   eyebrow,
   passageReference,
 }: {
@@ -72,10 +90,15 @@ export default function StepReflection({
   initialText: string;
   serverUpdatedAt: string | null;
   onSave: (text: string) => Promise<boolean>;
+  /** The practices already ticked, by their text. */
+  initialPracticesDone: string[];
+  /** The WHOLE ticked set after a change - unticking is as ordinary as ticking. */
+  onPracticesChange: (practices: string[]) => void;
   eyebrow?: string;
   passageReference?: string;
 }) {
   const [text, setText] = useState(initialText);
+  const [practicesDone, setPracticesDone] = useState<string[]>(initialPracticesDone);
   const [saveState, setSaveState] = useState<SaveState>('idle');
   const [recovered, setRecovered] = useState<Mirror | null>(null);
 
@@ -84,6 +107,29 @@ export default function StepReflection({
   const lastSaved = useRef(initialText);
 
   const key = mirrorKey(studyId, lessonDay);
+
+  const practices = reflection.practices ?? [];
+
+  // Through a ref, so `togglePractice` stays stable and the practice list does
+  // not re-render on every keystroke in the textarea above it.
+  const onPracticesChangeRef = useRef(onPracticesChange);
+  onPracticesChangeRef.current = onPracticesChange;
+
+  /**
+   * Ticking writes at once rather than on a debounce: it is a discrete choice,
+   * there is nothing to coalesce, and the whole set goes up so the last write
+   * wins cleanly. Optimistic, because a checkbox that waits for a round trip
+   * before it moves reads as broken.
+   */
+  const togglePractice = useCallback((practice: string) => {
+    setPracticesDone((current) => {
+      const next = current.includes(practice)
+        ? current.filter((entry) => entry !== practice)
+        : [...current, practice];
+      onPracticesChangeRef.current(next);
+      return next;
+    });
+  }, []);
 
   // Offer the crash buffer when it is newer than what the server had.
   useEffect(() => {
@@ -154,7 +200,7 @@ export default function StepReflection({
 
   return (
     <LessonLayout
-      eyebrow={eyebrow ?? 'Reflectie'}
+      eyebrow={eyebrow ?? 'Toepassing'}
       heading={reflection.question}
       headingClassName="max-w-[30ch] sm:text-[27px] leading-[1.3] tracking-[-0.4px]"
       padTop={30}
@@ -167,6 +213,12 @@ export default function StepReflection({
                   <li key={index}>{prompt}</li>
                 ))}
               </ul>
+            </Marginal>
+          ) : null}
+
+          {reflection.memoryVerse ? (
+            <Marginal label="Neem mee deze week">
+              <p className="tabular-nums">{reflection.memoryVerse}</p>
             </Marginal>
           ) : null}
 
@@ -232,7 +284,7 @@ export default function StepReflection({
         onBlur={() => void persist(latest.current)}
         maxLength={MAX_CHARS}
         placeholder={reflection.placeholder ?? 'Schrijf hier je antwoord...'}
-        aria-label="Je reflectie"
+        aria-label="Je antwoord"
         className={`mt-2 h-[250px] w-full resize-y rounded-[12px] border border-les-card-line bg-les-card px-[17px] py-[15px] text-[14.5px] max-md:h-[200px] max-md:px-[14px] max-md:text-[16px] leading-[1.7] text-les-ink placeholder:text-les-faint ${FOCUS_RING}`}
       />
 
@@ -255,7 +307,45 @@ export default function StepReflection({
         </span>
       </div>
 
-      <p className={`mt-2 max-w-[30rem] text-[12px] leading-[1.55] ${INK_MUTED}`}>
+      {/* What to do with it. Under the answer rather than over it: picking a
+          practice before you have said what the passage did to you is picking
+          from a list, not applying anything. */}
+      {practices.length > 0 ? (
+        <fieldset className="mt-8 border-t border-les-line pt-6">
+          <legend className={`text-[10.5px] font-semibold uppercase tracking-[1.1px] ${INK_FAINT}`}>
+            Deze week
+          </legend>
+          <p className={`mt-2 max-w-[34rem] text-[13px] leading-[1.6] ${INK_MUTED}`}>
+            Kies wat je echt gaat doen. Wat je aanvinkt komt onder je aantekening te staan.
+          </p>
+          <ul className="mt-3 space-y-2">
+            {practices.map((practice) => {
+              const checked = practicesDone.includes(practice);
+              return (
+                <li key={practice}>
+                  <label
+                    className={`flex cursor-pointer items-start gap-3 rounded-[12px] border px-4 py-3 text-[14px] leading-[1.6] transition-colors ${
+                      checked
+                        ? 'border-teal bg-les-step-active text-les-ink'
+                        : `border-les-card-line bg-les-card ${INK_MUTED} hover:border-les-line`
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => togglePractice(practice)}
+                      className={`mt-[3px] h-[15px] w-[15px] flex-none accent-[#0D9488] ${FOCUS_RING}`}
+                    />
+                    <span className="min-w-0">{practice}</span>
+                  </label>
+                </li>
+              );
+            })}
+          </ul>
+        </fieldset>
+      ) : null}
+
+      <p className={`mt-6 max-w-[30rem] text-[12px] leading-[1.55] ${INK_MUTED}`}>
         Als je de les afrondt wordt dit bewaard als notitie, terug te vinden bij Notities.
       </p>
     </LessonLayout>

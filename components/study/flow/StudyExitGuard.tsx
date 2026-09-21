@@ -189,7 +189,7 @@ export default function StudyExitGuard({
             </h2>
             <p className={`mt-1 text-[13px] leading-relaxed ${INK_MUTED}`}>
               Je zit midden in een stap. Je afgeronde stappen zijn bewaard, maar een niet-opgeslagen
-              reflectie of quiz gaat verloren. Wil je de studie verlaten?
+              antwoord of quiz gaat verloren. Wil je de studie verlaten?
             </p>
           </div>
           <button

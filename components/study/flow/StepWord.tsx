@@ -142,7 +142,7 @@ export default function StepWord({
     // lights up are rendered by PassageReader in the column.
     <SpokenTextScope>
       <LessonLayout
-        eyebrow={eyebrow ?? 'Het Woord'}
+        eyebrow={eyebrow ?? 'Lezen'}
         heading={reference}
         // The passage takes the full width of the column; the scroller's own
         // side padding keeps it off the edges.

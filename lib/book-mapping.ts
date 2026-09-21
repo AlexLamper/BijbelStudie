@@ -231,6 +231,11 @@ const OSIS_CODES = [
 /** Spellings used elsewhere (NBV, NBG, BijbelQuiz) that no folder uses. */
 const EXTRA_SPELLINGS: Record<string, string> = {
   'Rechters': 'Judges',
+  // German editions, for Kings and Chronicles only - bookNameMap has the rest.
+  '1 Koenige': '1 Kings',
+  '2 Koenige': '2 Kings',
+  '1 Chronik': '1 Chronicles',
+  '2 Chronik': '2 Chronicles',
   'Psalm': 'Psalms',
   'Ester': 'Esther',
   'Sefanja': 'Zephaniah',

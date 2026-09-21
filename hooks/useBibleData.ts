@@ -248,13 +248,15 @@ export function useBibleData(lng: string, options: UseBibleDataOptions = {}): Us
       setLoadingBooks(false);
 
       // Determine book to open: a deep-linked passage wins over last-read, in
-      // whichever translation the reader already uses.
-      let book = restoredBook;
+      // whichever translation the reader already uses. Both are RESOLVED rather
+      // than compared - a last-read row written by the app, or by this reader
+      // in another translation, may spell the book differently than this list.
+      let book = resolveBookInList(restoredBook, bookList) ?? '';
       const linkedBook = initialBook ? resolveBookInList(initialBook, bookList) : null;
       if (linkedBook) {
         book = linkedBook;
         restoredChapter = linkChapter;
-      } else if (!book || !bookList.includes(book)) {
+      } else if (!book) {
         book = bookList.includes('Genesis') ? 'Genesis' : (bookList[0] ?? '');
         restoredChapter = 1;
       }
@@ -308,8 +310,12 @@ export function useBibleData(lng: string, options: UseBibleDataOptions = {}): Us
       const prevIdx = lastBookIndexRef.current;
       lastBookIndexRef.current = -1;
 
-      let nextBook = selectedBook;
-      if (!bookList.includes(nextBook)) {
+      // Switching translation keeps the BOOK, not the position in the list.
+      // Every list is the same 66 books in the same order, so the index was a
+      // decent guess - but it is only a guess, and it was wrong for every
+      // translation that carries the deuterocanonical books as well.
+      let nextBook = resolveBookInList(selectedBook, bookList) ?? '';
+      if (!nextBook) {
         nextBook = prevIdx >= 0 && prevIdx < bookList.length
           ? bookList[prevIdx]
           : (bookList.includes('Genesis') ? 'Genesis' : (bookList[0] ?? ''));

@@ -53,8 +53,12 @@ export function isBookStudyId(id: string): boolean {
 const GENERIC_QUESTION =
   'Wat laat dit hoofdstuk zien over wie God is, en wat vraagt dat van jou?';
 
-/** Twelve minutes is the authored default; a single chapter is a shorter sit. */
-const MINUTES_PER_CHAPTER = 10;
+/**
+ * Fifteen is the authored default; a single generated chapter is a shorter sit,
+ * but not as short as it was - the flow gained a Bijbelse context step and a
+ * practice list, and an estimate that stayed at ten would simply be wrong.
+ */
+const MINUTES_PER_CHAPTER = 13;
 
 /** The outline section a chapter falls in, for a lesson title with meaning. */
 function sectionFor(book: BibleBook, chapter: number): string | null {
@@ -197,8 +201,12 @@ const GENERATED_OFF_CATALOGUE = new Map<string, CuratedStudy>();
  */
 export type StudyCategory = 'ot' | 'nt' | 'personen' | 'themas';
 
-/** Minutes assumed for a lesson that carries no estimate of its own. */
-export const MINUTES_FALLBACK = 12;
+/**
+ * Minutes assumed for a lesson that carries no estimate of its own. Keep this
+ * equal to the default in lib/lessonPayload.ts, or the catalogue and the lesson
+ * promise two different sittings.
+ */
+export const MINUTES_FALLBACK = 15;
 
 export interface CatalogueEntry {
   study: CuratedStudy;

@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import { Check } from 'lucide-react';
 
-const SEGMENTS = ['done', 'done', 'done', 'current', 'todo', 'todo', 'todo'] as const;
+const SEGMENTS = ['done', 'done', 'done', 'current', 'todo', 'todo'] as const;
 
 const SEGMENT_COLOR: Record<(typeof SEGMENTS)[number], string> = {
   done: '#0d7a66',
@@ -41,14 +41,14 @@ export function HeroMobileCard() {
           Stap 4 van 7
         </span>
       </div>
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-6 gap-1">
         {SEGMENTS.map((s, i) => (
           <div key={i} className="h-1.5 rounded-[3px]" style={{ backgroundColor: SEGMENT_COLOR[s] }} />
         ))}
       </div>
       <div className="flex items-center justify-between text-[12.5px]">
         <span className="flex items-center gap-1" style={{ color: '#64748b' }}>
-          Het Woord lezen <Check className="h-[11px] w-[11px]" style={{ color: '#0d7a66' }} strokeWidth={3} />
+          Lezen <Check className="h-[11px] w-[11px]" style={{ color: '#0d7a66' }} strokeWidth={3} />
         </span>
         <span className="font-bold" style={{ color: '#0f172a' }}>Nu: Verdieping</span>
       </div>

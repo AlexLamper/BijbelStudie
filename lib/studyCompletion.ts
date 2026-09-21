@@ -155,6 +155,12 @@ export interface PromoteReflectionInput {
   lessonTitle: string;
   question: string;
   reflection: string;
+  /**
+   * The practices the reader ticked on the Toepassing step. They go into the
+   * note under the answer, because "wat ga ik deze week doen" is the half of
+   * that step you actually need to be able to find back.
+   */
+  practices?: string[];
   translation: string;
   book: string;
   chapter: number;
@@ -176,7 +182,10 @@ export async function promoteReflectionToNote(
   input: PromoteReflectionInput,
 ): Promise<string | null> {
   const reflection = input.reflection.trim();
-  if (!reflection) return null;
+  const practices = (input.practices ?? []).map((entry) => entry.trim()).filter(Boolean);
+  // Either half is enough to be worth keeping: someone who ticked what they
+  // will do this week and wrote nothing still finished the step.
+  if (!reflection && practices.length === 0) return null;
 
   await connectMongoDB();
 
@@ -188,7 +197,16 @@ export async function promoteReflectionToNote(
     input.verseEnd,
   );
 
-  const noteText = [`${input.question}`, '', reflection].join('\n');
+  const noteText = [
+    input.question,
+    '',
+    reflection,
+    ...(practices.length > 0
+      ? ['', 'Deze week:', ...practices.map((practice) => `- ${practice}`)]
+      : []),
+  ]
+    .join('\n')
+    .trim();
   const tags = [...new Set(['studie', input.studyId, ...(input.tags ?? [])])];
 
   // Re-finishing a lesson updates the note it already produced rather than

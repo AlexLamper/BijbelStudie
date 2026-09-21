@@ -9,9 +9,14 @@ import type { StepKey } from '../../../lib/studyFlow';
 /** Step-specific starters, replacing the assistant's generic ones. */
 const STARTERS: Record<StepKey, string[]> = {
   intro: [
-    'Wat is de context van dit gedeelte?',
+    'Waar gaat dit gedeelte over?',
+    'Waarom is dit gedeelte belangrijk?',
+    'Wat moet ik weten voordat ik ga lezen?',
+  ],
+  context: [
     'Wie schreef dit, en voor wie?',
     'Waar in de bijbelse tijdlijn staat dit?',
+    'Hoe zag het dagelijks leven er toen uit?',
   ],
   word: [
     'Leg dit gedeelte uit in eenvoudige woorden',
@@ -26,7 +31,7 @@ const STARTERS: Record<StepKey, string[]> = {
   reflection: [
     'Help me deze vraag te begrijpen',
     'Wat betekent dit gedeelte voor mijn leven vandaag?',
-    'Geef me een voorbeeld uit het dagelijks leven',
+    'Hoe breng ik dit deze week in praktijk?',
   ],
   quiz: [
     'Leg uit waarom dit het juiste antwoord is',
@@ -45,25 +50,23 @@ const STARTERS: Record<StepKey, string[]> = {
  * on the quiz step the pill covered it and the lesson could not be finished. The
  * trigger now lives in the flow header, where nothing else is.
  *
- * WHERE IT OPENS depends on the step, because the steps are not shaped alike.
+ * IT OPENS THE SAME WAY ON EVERY STEP: as a column in the FLOW, beside the
+ * step rather than over it. The step is `flex-1`, this is `flex-none`, and the
+ * width is what animates - so opening the assistant narrows the step and its
+ * content re-centres in what is left, which reads as the page making room
+ * rather than jumping.
  *
- *  - `half` is for the Verdieping step, which is already a 50/50 split. The dock
- *    lands exactly on the divider and replaces the supporting-panel column, so
- *    the commentary on the left keeps its width and its scroll position.
- *  - `push` is for every other step. Their content is a single centred column -
- *    a passage, a textarea, a quiz card - and taking half the screen from those
- *    left the reading squeezed into a gutter with a wall of white beside it.
- *    Here the assistant is a column in the FLOW: opening it narrows the step and
- *    the passage re-centres itself in what is left, so the assistant never sits
- *    on top of the text someone is reading. The width animates, so that
- *    re-centring reads as the page making room rather than jumping.
+ * Verdieping used to be the exception. It is already a 50/50 split, so the dock
+ * was pinned over the right half on the theory that it was replacing the
+ * supporting-panel column. On screen it simply covered the commentary that was
+ * being discussed, which is the one thing the assistant must never do.
  *
- * Neither variant resizes the lesson. An earlier version was a 420px drawer in
- * the layout flow that shrank the header, body and footer to make room, so
- * asking a question reflowed the whole lesson around the reader.
+ * It does not resize the lesson. An earlier version was a 420px drawer in the
+ * layout flow that shrank the header, body and footer to make room, so asking a
+ * question reflowed the whole lesson around the reader.
  *
- * It is positioned against the step body, so the shell must give that container
- * `relative`.
+ * Below lg it is a fixed bottom sheet: half a phone screen is not enough to
+ * read and ask at once.
  */
 export default function AiDock({
   open,
@@ -72,7 +75,6 @@ export default function AiDock({
   chapter,
   version,
   step,
-  layout = 'push',
   draft,
   onDraftConsumed,
   question,
@@ -84,8 +86,6 @@ export default function AiDock({
   chapter: number;
   version: string | null;
   step: StepKey;
-  /** `half` on the split Verdieping step, `push` everywhere else. */
-  layout?: 'half' | 'push';
   draft?: string | null;
   onDraftConsumed?: () => void;
   /** Sent immediately on arrival, unlike `draft` which only fills the input. */
@@ -115,31 +115,18 @@ export default function AiDock({
   // Hidden instead - the tree stays, the state stays, nothing is focusable.
   if (!open && !mounted) return null;
 
-  const push = layout === 'push';
-
   return (
-    // The outer element is what the flow lays out.
-    //
-    // For `push` it is an in-flow flex column whose WIDTH is the animation: zero
-    // when closed, 400px when open, with `overflow-hidden` clipping the panel
-    // inside it so the conversation does not squash while the width moves. The
-    // step beside it is `flex-1`, so it simply gets narrower.
-    //
-    // For `half` it is taken out of flow and pinned to the right half, which is
-    // the Verdieping step's supporting column - there, covering is correct.
-    //
-    // Below lg both are the same fixed bottom sheet: half a phone screen is not
-    // enough to read and ask at once.
+    // The outer element is what the flow lays out: an in-flow flex column whose
+    // WIDTH is the animation - zero when closed, 400px when open, with
+    // `overflow-hidden` clipping the panel inside it so the conversation does
+    // not squash while the width moves. The step beside it is `flex-1`, so it
+    // simply gets narrower.
     <div
       className={[
         open ? 'contents' : 'hidden',
-        push
-          ? [
-              'lg:block lg:h-full lg:flex-none lg:overflow-hidden',
-              'lg:transition-[width] lg:duration-300 lg:ease-out',
-              open ? 'lg:w-[min(400px,36vw)]' : 'lg:w-0',
-            ].join(' ')
-          : '',
+        'lg:block lg:h-full lg:flex-none lg:overflow-hidden',
+        'lg:transition-[width] lg:duration-300 lg:ease-out',
+        open ? 'lg:w-[min(400px,36vw)]' : 'lg:w-0',
       ].join(' ')}
       aria-hidden={!open}
     >
@@ -162,13 +149,9 @@ export default function AiDock({
           // Below md: taller, in dynamic viewport units so the browser's own
           // toolbar never hides the input, and clear of the home indicator.
           'fixed z-50 inset-x-0 bottom-0 h-[75vh] rounded-t-2xl border-t max-md:h-[85dvh] max-md:pb-[env(safe-area-inset-bottom)]',
-          push
-            ? // Static and fixed-width, so the clipping parent can animate around
-              // it without the header and the message list reflowing mid-slide.
-              'lg:static lg:inset-auto lg:z-auto lg:h-full lg:w-[min(400px,36vw)] lg:rounded-none lg:border-t-0 lg:border-l'
-            : // Lands on the divider the supporting panels already sit behind, so
-              // it replaces that column exactly.
-              'lg:absolute lg:z-30 lg:inset-y-0 lg:left-1/2 lg:right-0 lg:h-auto lg:w-auto lg:rounded-none lg:border-t-0 lg:border-l',
+          // Static and fixed-width, so the clipping parent can animate around it
+          // without the header and the message list reflowing mid-slide.
+          'lg:static lg:inset-auto lg:z-auto lg:h-full lg:w-[min(400px,36vw)] lg:rounded-none lg:border-t-0 lg:border-l',
         ].join(' ')}
       >
         <header className={`flex-none flex items-center justify-between px-4 h-14 border-b ${RULE}`}>

@@ -443,7 +443,7 @@ function GuestSaveGate({
           </h2>
           <p className={`mt-1.5 text-[13.5px] leading-relaxed ${INK_MUTED}`}>
             Je hebt deze les zonder account gedaan, dus er is nog niets bewaard. Met een gratis
-            account tellen je lessen mee, blijft je reflectie staan en groeit je boom vanaf hier.
+            account tellen je lessen mee, blijft je antwoord staan en groeit je boom vanaf hier.
           </p>
           <div className="mt-4 flex flex-col sm:flex-row gap-2">
             <Link
@@ -616,7 +616,7 @@ function SignedInCompletion({
             className={`mt-4 flex items-center gap-2 rounded-md text-[12.5px] no-underline ${INK_MUTED} transition-colors hover:text-les-ink ${FOCUS_RING}`}
           >
             <NotebookPen size={14} className="flex-none text-les-accent" />
-            Je reflectie is bewaard als notitie
+            Je antwoord staat bij je notities
             <ArrowRight size={13} className="flex-none" />
           </Link>
         )}
@@ -792,7 +792,7 @@ function ChapterCompletion({
             </h2>
             <p className={`mt-1.5 text-[13.5px] leading-relaxed ${INK_MUTED}`}>
               Je hebt dit hoofdstuk zonder account bestudeerd, dus er is nog niets bewaard. Met een
-              gratis account telt het mee en blijft je reflectie staan.
+              gratis account telt het mee en blijft je antwoord staan.
             </p>
             <div className="mt-4 flex flex-col sm:flex-row gap-2">
               <Link
@@ -839,7 +839,7 @@ function ChapterCompletion({
             className={`mt-4 flex items-center gap-2 rounded-md text-[12.5px] no-underline ${INK_MUTED} transition-colors hover:text-les-ink ${FOCUS_RING}`}
           >
             <NotebookPen size={14} className="flex-none text-les-accent" />
-            Je reflectie is bewaard als notitie
+            Je antwoord staat bij je notities
             <ArrowRight size={13} className="flex-none" />
           </Link>
         )}
