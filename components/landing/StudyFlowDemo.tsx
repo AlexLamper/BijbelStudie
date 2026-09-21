@@ -38,46 +38,69 @@ export type DemoLesson = {
   lessonsTotal: number;
   lesson: { day: number; title: string; reference: string; minutes: number };
   intro: { headline: string; body: string[]; watchFor: string[] };
+  context: {
+    bookName: string;
+    body: string;
+    facts: { label: string; value: string }[];
+    outline: { range: string; title: string; current: boolean }[];
+  };
   readingCue: string;
   translation: string;
   verses: { n: number; text: string }[];
   depth: { body: string[]; terms: { term: string; meaning: string }[] };
   greek: { word: string; translit: string; meaning: string; strong: string }[];
-  reflection: { question: string; prompts: string[]; placeholder: string; sample: string };
+  reflection: {
+    question: string;
+    prompts: string[];
+    placeholder: string;
+    sample: string;
+    practices: string[];
+  };
   quiz: { question: string; answers: string[]; correct: number };
   xp: number;
   nextLesson: { day: number; title: string; reference: string } | null;
   tree: { svg: string; seed: string; level: number; species: string };
 };
 
-type FrameKey = 'intro' | 'word' | 'depth' | 'reflection' | 'quiz' | 'done';
+type FrameKey = 'intro' | 'context' | 'word' | 'depth' | 'quiz' | 'reflection' | 'done';
 
-/** The five steps of a lesson, in the order the flow runs them, plus the reward. */
-const FRAMES: FrameKey[] = ['intro', 'word', 'depth', 'reflection', 'quiz', 'done'];
-const STEPS = FRAMES.slice(0, 5);
+/**
+ * The six steps of a lesson, in the order the flow runs them, plus the reward.
+ *
+ * Kept in step with lib/studyFlow.ts by hand rather than imported: this is a
+ * client component on a static page, and importing the flow would pull the
+ * study catalogue into the landing bundle. What must never drift is the ORDER -
+ * a landing page that promises a different lesson than the one people get is
+ * worse than no landing page.
+ */
+const FRAMES: FrameKey[] = ['intro', 'context', 'word', 'depth', 'quiz', 'reflection', 'done'];
+const STEPS = FRAMES.slice(0, 6);
 
 const STEP_LABEL: Record<FrameKey, string> = {
-  intro: 'Intro',
-  word: 'Het Woord',
+  intro: 'Inleiding',
+  context: 'Bijbelse context',
+  word: 'Lezen',
   depth: 'Verdieping',
-  reflection: 'Reflectie',
   quiz: 'Toetsing',
+  reflection: 'Toepassing',
   done: 'Afgerond',
 };
 
 /** What each step is for, in the list beside the frame. */
 const STEP_BLURB: Record<FrameKey, string> = {
   intro: 'Waar gaat dit gedeelte over, en waar let je op tijdens het lezen?',
+  context: 'Wie schreef dit, aan wie, wanneer, en waar sta je in het boek?',
   word: 'Het bijbelgedeelte zelf, in de vertaling die jij kiest.',
   depth: 'Commentaar, achtergrond bij het boek en de grondtekst, woord voor woord.',
-  reflection: 'Eén vraag voor jou. Je antwoord wordt bewaard als notitie.',
-  quiz: 'Een korte quiz, en de les is af.',
+  quiz: 'Een korte quiz: kwam het gedeelte binnen?',
+  reflection: 'Eén vraag voor jou, en wat je er deze week mee doet. Beide worden een notitie.',
   done: 'XP voor je boom, en de volgende les staat klaar.',
 };
 
 /** How long each frame stays. The ones with something happening in them get longer. */
 const DWELL: Record<FrameKey, number> = {
   intro: 2600,
+  context: 2800,
   word: 2800,
   depth: 3200,
   reflection: 3800,
@@ -139,6 +162,54 @@ function IntroFrame({ lesson }: { lesson: DemoLesson }) {
           ))}
         </ul>
       </aside>
+    </div>
+  );
+}
+
+function ContextFrame({ lesson }: { lesson: DemoLesson }) {
+  return (
+    <div className="mx-auto max-w-[30rem] px-5 py-5 sm:px-7 sm:py-6">
+      <Eyebrow icon={Landmark}>Bijbelse context</Eyebrow>
+      <h3 className="mt-2 text-[17px] font-bold leading-snug sm:text-[19px]" style={{ color: TEXT }}>
+        De wereld van {lesson.context.bookName}
+      </h3>
+      <p className="mt-3 text-[12.5px] leading-relaxed" style={{ color: MUTED }}>
+        {lesson.context.body}
+      </p>
+
+      <dl className="mt-4 grid grid-cols-2 gap-2">
+        {lesson.context.facts.map((fact) => (
+          <div key={fact.label} className="rounded-lg border px-3 py-2" style={{ borderColor: BORDER }}>
+            <dt className="text-[10px] font-bold uppercase tracking-wider" style={{ color: TEAL }}>
+              {fact.label}
+            </dt>
+            <dd className="mt-0.5 text-[11.5px] leading-snug" style={{ color: TEXT }}>
+              {fact.value}
+            </dd>
+          </div>
+        ))}
+      </dl>
+
+      <p className="mt-4 text-[10px] font-bold uppercase tracking-wider" style={{ color: FAINT }}>
+        Waar je bent in het boek
+      </p>
+      <ol className="mt-1.5">
+        {lesson.context.outline.map((section) => (
+          <li
+            key={section.range}
+            className="flex gap-2.5 border-l-2 py-[5px] pl-2.5 text-[11.5px] leading-snug"
+            style={{
+              borderColor: section.current ? TEAL : 'transparent',
+              color: section.current ? TEAL_TEXT : MUTED,
+              fontWeight: section.current ? 600 : 400,
+              backgroundColor: section.current ? 'rgba(13,148,136,0.06)' : undefined,
+            }}
+          >
+            <span className="w-[42px] flex-none tabular-nums opacity-70">{section.range}</span>
+            <span className="min-w-0">{section.title}</span>
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }
@@ -299,7 +370,7 @@ function ReflectionFrame({ lesson, reduce }: { lesson: DemoLesson; reduce: boole
 
   return (
     <div className="mx-auto max-w-[32rem] px-5 py-5 sm:px-7 sm:py-6">
-      <Eyebrow icon={PenLine}>Reflectie</Eyebrow>
+      <Eyebrow icon={PenLine}>Toepassing</Eyebrow>
       <h3 className="mt-2 text-[15px] font-bold leading-snug sm:text-[16px]" style={{ color: TEXT }}>
         {lesson.reflection.question}
       </h3>
@@ -333,6 +404,42 @@ function ReflectionFrame({ lesson, reduce }: { lesson: DemoLesson; reduce: boole
         </span>
         <span className="tabular-nums">{typed}/8000</span>
       </div>
+
+      {/* The half that makes it a toepassing rather than a reflectie. The first
+          one ticks itself once the answer is written, in the order a reader
+          does it: say what it did to you, then choose what you do with it. */}
+      <p className="mt-4 text-[10px] font-bold uppercase tracking-wider" style={{ color: FAINT }}>
+        Deze week
+      </p>
+      <ul className="mt-1.5 space-y-1.5">
+        {lesson.reflection.practices.map((practice, index) => {
+          const ticked = finished && index === 0;
+          return (
+            <li
+              key={practice}
+              className="flex items-start gap-2.5 rounded-lg border px-3 py-2 text-[11.5px] leading-snug"
+              style={{
+                borderColor: ticked ? TEAL : BORDER,
+                backgroundColor: ticked ? 'rgba(13,148,136,0.06)' : undefined,
+                color: ticked ? TEXT : MUTED,
+              }}
+            >
+              <span
+                aria-hidden
+                className="mt-px flex h-[13px] w-[13px] flex-none items-center justify-center rounded-[3px] border"
+                style={{
+                  borderColor: ticked ? TEAL : BORDER,
+                  backgroundColor: ticked ? TEAL : 'transparent',
+                  color: '#fff',
+                }}
+              >
+                {ticked && <Check size={9} strokeWidth={3.5} />}
+              </span>
+              <span className="min-w-0">{practice}</span>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }
@@ -544,6 +651,8 @@ export default function StudyFlowDemo({ lesson }: { lesson: DemoLesson }) {
     switch (frame) {
       case 'intro':
         return <IntroFrame lesson={lesson} />;
+      case 'context':
+        return <ContextFrame lesson={lesson} />;
       case 'word':
         return <WordFrame lesson={lesson} />;
       case 'depth':
@@ -557,7 +666,7 @@ export default function StudyFlowDemo({ lesson }: { lesson: DemoLesson }) {
     }
   })();
 
-  const nextLabel = frame === 'quiz' ? 'Les afronden' : frame === 'done' ? (lesson.nextLesson ? `Verder met les ${lesson.nextLesson.day}` : 'Terug naar de studie') : 'Volgende';
+  const nextLabel = frame === 'reflection' ? 'Les afronden' : frame === 'done' ? (lesson.nextLesson ? `Verder met les ${lesson.nextLesson.day}` : 'Terug naar de studie') : 'Volgende';
 
   return (
     <div ref={root} className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-start">

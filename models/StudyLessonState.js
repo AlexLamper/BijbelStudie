@@ -40,13 +40,26 @@ const studyLessonStateSchema = new mongoose.Schema(
     viewTranslation: { type: String, default: null },
     depthPanel: { type: String, default: null },
 
-    // Step 4. The DRAFT lives here, not in the Note collection - otherwise every
-    // abandoned half-sentence shows up at /notities. Promoted to a real Note on
-    // lesson completion, at which point `noteId` points at it.
+    // Step 6 (Toepassing). The DRAFT lives here, not in the Note collection -
+    // otherwise every abandoned half-sentence shows up at /notities. Promoted
+    // to a real Note on lesson completion, at which point `noteId` points at
+    // it. The field keeps the name `reflection`: the step key is frozen, see
+    // lib/studyFlow.ts.
     reflection: {
       text: { type: String, default: '', maxlength: 8000 },
       updatedAt: { type: Date, default: null },
       noteId: { type: mongoose.Schema.Types.ObjectId, ref: 'Note', default: null },
+    },
+
+    // Step 6. Which of the week's practices the reader ticked off.
+    //
+    // The practice TEXT, not its index: the list comes from authored content or
+    // from the genre template in lib/chapterStudyTemplate.ts, and an index
+    // silently points at a different line the moment either is edited. Text is
+    // self-describing, and five short lines cost nothing next to an 8000
+    // character reflection.
+    application: {
+      practicesDone: { type: [String], default: [] },
     },
 
     // Step 5, mirrored from bijbelquiz so a past result renders without a second

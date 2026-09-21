@@ -4,11 +4,16 @@ import type { LessonContent } from './data/study-lessons/types';
 /**
  * The prose every generated chapter lesson gets when nobody wrote any.
  *
- * A generated book study (boek-<slug>) used to open its Woord step with no
- * reading cue and its Reflectie step with a single question, which is thin for
+ * A generated book study (boek-<slug>) used to open its Lezen step with no
+ * reading cue and its Toepassing step with a single question, which is thin for
  * someone who opened one chapter on its own. The cue and the three prompts
  * below follow the observe / interpret / apply order and are written per
- * genre, because "let op wat Jezus zegt" is useless above a psalm.
+ * genre, because "let op wat Jezus zegt" is useless above a psalm. The three
+ * practices are what the reader leaves with.
+ *
+ * These 24 lines carry about 1200 generated chapter lessons, which is every
+ * chapter of the canon nobody has written a study for. They are worth the same
+ * care as authored prose.
  *
  * Deliberately NO reflection question: the lesson's own `focus` (a rotated
  * study question of that book) stays the question, and these prompts sit
@@ -21,6 +26,17 @@ export interface ChapterStudyTemplate {
   readingCue: string;
   /** Exactly three: waarnemen, uitleggen, toepassen. */
   prompts: [string, string, string];
+  /**
+   * Exactly three things to DO with this chapter this week.
+   *
+   * The Toepassing step asks a question and gets an answer; without these it
+   * stops there, and a lesson that ends in a paragraph about yourself is not a
+   * lesson that changes a week. Every line has to be startable today and
+   * finishable without preparation, which rules out "overdenk" and "bid meer"
+   * and rules in writing something down, telling someone, or doing the thing
+   * the passage does.
+   */
+  practices: [string, string, string];
 }
 
 export const CHAPTER_STUDY_TEMPLATES: Record<BookGenre, ChapterStudyTemplate> = {
@@ -31,6 +47,11 @@ export const CHAPTER_STUDY_TEMPLATES: Record<BookGenre, ChapterStudyTemplate> = 
       'Uitleggen: wat zegt dit over de heiligheid van God en over zijn verbond met Israël?',
       'Toepassen: hoe wijst dit hoofdstuk vooruit naar Christus, en wat betekent dat voor jou vandaag?',
     ],
+    practices: [
+      'Kies een gebod uit dit hoofdstuk en let deze week op het moment waarop het je echt iets kost.',
+      'Schrijf in hooguit drie zinnen op waarom God dit vraagt, in je eigen woorden.',
+      'Vertel iemand deze week wat je opviel aan de manier waarop God met zijn volk omgaat.',
+    ],
   },
   Geschiedenis: {
     readingCue: 'Lees het als een verhaal: wie handelt er, wat gebeurt er, en waar is God in het geheel?',
@@ -38,6 +59,11 @@ export const CHAPTER_STUDY_TEMPLATES: Record<BookGenre, ChapterStudyTemplate> = 
       'Waarnemen: wie zijn de hoofdpersonen, en welke keuzes maken ze?',
       'Uitleggen: wat laat dit verhaal zien over de trouw van God, ook waar mensen tekortschieten?',
       'Toepassen: in welke persoon of keuze herken je iets van jezelf, en wat neem je daarvan mee?',
+    ],
+    practices: [
+      'Noem de persoon uit dit hoofdstuk op wie jij het meest lijkt, en schrijf op waarin.',
+      'Zoek deze week een keuze in je eigen leven die lijkt op de keuze in dit hoofdstuk.',
+      'Vertel dit verhaal een keer na aan iemand anders, zonder het boek erbij.',
     ],
   },
   'Poëzie en wijsheid': {
@@ -47,6 +73,11 @@ export const CHAPTER_STUDY_TEMPLATES: Record<BookGenre, ChapterStudyTemplate> = 
       'Uitleggen: welke gevoelens of welke wijsheid brengt hij onder woorden, en wat zegt dat over God?',
       'Toepassen: welk vers neem je deze week mee in je gebed of in een keuze die je maakt?',
     ],
+    practices: [
+      'Leer een vers uit dit gedeelte uit je hoofd en zeg het deze week elke dag een keer.',
+      'Lees het hoofdstuk nog een keer hardop, op een moment dat je alleen bent.',
+      'Schrijf een paar eigen regels in dezelfde toon: klacht, dank of vertrouwen.',
+    ],
   },
   'Grote profeten': {
     readingCue: 'Let op tot wie de profeet spreekt, welke aanklacht hij brengt en welke belofte er klinkt.',
@@ -54,6 +85,11 @@ export const CHAPTER_STUDY_TEMPLATES: Record<BookGenre, ChapterStudyTemplate> = 
       'Waarnemen: tot wie spreekt de profeet, en in welke situatie?',
       'Uitleggen: welke oordelen en welke beloften staan hier naast elkaar, en wat zeggen ze over God?',
       'Toepassen: waar roept dit hoofdstuk jou op tot omkeer of tot vertrouwen?',
+    ],
+    practices: [
+      'Schrijf op welke aanklacht uit dit hoofdstuk ook over jouw leven zou kunnen gaan.',
+      'Zoek deze week een bericht in het nieuws waarin je hetzelfde onrecht herkent.',
+      'Neem een belofte uit dit hoofdstuk mee naar het moment waarop je die het hardst nodig hebt.',
     ],
   },
   'Kleine profeten': {
@@ -63,6 +99,11 @@ export const CHAPTER_STUDY_TEMPLATES: Record<BookGenre, ChapterStudyTemplate> = 
       'Uitleggen: wat wil God met deze boodschap bij zijn volk bereiken?',
       'Toepassen: waar klinkt deze roepstem ook in jouw leven of in de kerk van nu?',
     ],
+    practices: [
+      'Benoem een gewoonte waarvan je zelf weet dat die niet klopt, en zet deze week een eerste stap.',
+      'Lees dit hele bijbelboek deze week in een keer uit, het is kort genoeg.',
+      'Schrijf op wat God volgens dit hoofdstuk het liefst wil bereiken bij zijn volk.',
+    ],
   },
   Evangelie: {
     readingCue: 'Let op wat Jezus zegt en doet, en hoe de mensen om Hem heen reageren.',
@@ -70,6 +111,11 @@ export const CHAPTER_STUDY_TEMPLATES: Record<BookGenre, ChapterStudyTemplate> = 
       'Waarnemen: wat zegt en doet Jezus in dit hoofdstuk, en wie zijn erbij?',
       'Uitleggen: wat laat dit zien over wie Jezus is en over het koninkrijk van God?',
       'Toepassen: hoe zou jij gereageerd hebben als je erbij was, en wat vraagt Hij nu van jou?',
+    ],
+    practices: [
+      'Doe deze week een keer op jouw schaal wat Jezus in dit hoofdstuk doet.',
+      'Schrijf op met welke persoon uit dit hoofdstuk jij jezelf vergelijkt, en waarom.',
+      'Vertel iemand deze week in je eigen woorden wat Jezus hier zegt.',
     ],
   },
   Brief: {
@@ -79,6 +125,11 @@ export const CHAPTER_STUDY_TEMPLATES: Record<BookGenre, ChapterStudyTemplate> = 
       'Uitleggen: wat wilde de schrijver de eerste lezers leren of op het hart drukken?',
       'Toepassen: welke opdracht of troost uit dit hoofdstuk geldt ook voor jou vandaag?',
     ],
+    practices: [
+      'Schrijf de hoofdgedachte van dit hoofdstuk op in een zin en leg die ergens neer waar je hem ziet.',
+      'Kies een opdracht uit dit hoofdstuk en voer die deze week een keer concreet uit.',
+      'Zoek iemand voor wie de troost uit dit hoofdstuk nodig is, en deel die met hem of haar.',
+    ],
   },
   Apocalyptiek: {
     readingCue: 'Lees de beelden niet te snel. Vraag steeds wat ze zeggen over de overwinning van God.',
@@ -86,6 +137,11 @@ export const CHAPTER_STUDY_TEMPLATES: Record<BookGenre, ChapterStudyTemplate> = 
       'Waarnemen: welke beelden, getallen en personen komen in dit hoofdstuk voor?',
       'Uitleggen: wat zeggen deze beelden over de macht van God en over de afloop van de geschiedenis?',
       'Toepassen: hoe geeft dit hoofdstuk jou hoop of houvast in wat je nu meemaakt?',
+    ],
+    practices: [
+      'Schrijf in een zin op wat dit hoofdstuk zegt over hoe de geschiedenis afloopt.',
+      'Kies een beeld uit dit hoofdstuk en zoek deze week op waar het vandaan komt.',
+      'Noem een zorg van jezelf die kleiner wordt als dit hoofdstuk waar is.',
     ],
   },
 };
@@ -118,6 +174,7 @@ export function mergeTemplateUnder(
     ...(reflection ?? {}),
     question: reflection?.question ?? '',
     prompts: reflection?.prompts?.length ? reflection.prompts : [...template.prompts],
+    practices: reflection?.practices?.length ? reflection.practices : [...template.practices],
   };
   return merged;
 }

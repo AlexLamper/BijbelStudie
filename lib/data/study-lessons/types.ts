@@ -20,7 +20,32 @@ export interface IntroContent {
   watchFor?: string[];
 }
 
-/** Step 2. The passage itself, with as little around it as possible. */
+/**
+ * Step 2. Where this passage sits: who wrote it, to whom, when, and where it
+ * stands in the book.
+ *
+ * Every field is optional because the fallback is genuinely good: the book's
+ * own orientation in lib/content/bibleBooks (author, date, theme, summary and
+ * outline) exists for all 66 books, so this step has something honest to show
+ * for any chapter of the canon without a word being written. Authored prose
+ * REPLACES the book summary; the facts and the outline are always added.
+ */
+export interface ContextContent {
+  /** One paragraph per entry. Replaces the book's own summary when present. */
+  body?: string[];
+  /** Extra ankers beside the ones derived from the book, e.g. a date or a ruler. */
+  facts?: { label: string; value: string }[];
+  /**
+   * Terms worth knowing BEFORE the passage. Distinct from `DepthContent.terms`,
+   * which explains what the commentary is about to use: a word you need in
+   * order to read the text at all belongs here, in front of it.
+   */
+  terms?: { term: string; meaning: string }[];
+  /** Geo images / maps strip. Defaults to true. */
+  showMedia?: boolean;
+}
+
+/** Step 3. The passage itself, with as little around it as possible. */
 export interface WordContent {
   /**
    * Only when the reading differs from the passage the lesson is *about* - a
@@ -32,7 +57,7 @@ export interface WordContent {
   readingCue?: string;
 }
 
-/** Step 3. Commentary and media for exactly this passage. */
+/** Step 4. Commentary and media for exactly this passage. */
 export interface DepthContent {
   /** Optional authored framing above the commentary. */
   body?: string[];
@@ -42,7 +67,15 @@ export interface DepthContent {
   showMedia?: boolean;
 }
 
-/** Step 4. The personal question and the note it produces. */
+/**
+ * Step 6, "Toepassing". The personal question, the week's practice, and the
+ * note both produce.
+ *
+ * The interface keeps the name `ReflectionContent` and the wire key
+ * `reflection`: the step key is frozen (see lib/studyFlow.ts) and app builds
+ * already on phones read `content.reflection`. What changed is what the step
+ * asks for - an answer AND something to do with it - which is `practices`.
+ */
 export interface ReflectionContent {
   question: string;
   /** Sub-prompts, e.g. the Observation / Interpretation / Application framing. */
@@ -50,6 +83,16 @@ export interface ReflectionContent {
   placeholder?: string;
   /** Pre-set tags so the promoted note is findable at /notities. */
   noteTags?: string[];
+  /**
+   * Concrete things to do with this passage this week. Three is the working
+   * number: one is a slogan, five is a programme nobody starts. Each one has to
+   * be doable without preparation - "schrijf een keer op waar je ..." rather
+   * than "overdenk ...". Falls back to the genre template in
+   * lib/chapterStudyTemplate.ts.
+   */
+  practices?: string[];
+  /** A verse to carry through the week, as a reference. */
+  memoryVerse?: string;
 }
 
 /** Step 5. Which bijbelquiz questions close this lesson. */
@@ -67,8 +110,10 @@ export interface QuizContent {
 
 export interface LessonContent {
   intro?: IntroContent;
+  context?: ContextContent;
   word?: WordContent;
   depth?: DepthContent;
+  /** Step 6 "Toepassing" - the key stays `reflection`, see above. */
   reflection?: ReflectionContent;
   quiz?: QuizContent;
 }

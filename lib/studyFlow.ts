@@ -11,15 +11,27 @@ import type { LessonContent } from './data/study-lessons/types';
  */
 
 /**
- * The five steps, in order.
+ * The six steps, in order.
  *
  * A fixed pipeline rather than a declarative per-lesson array: progress and
- * reminder copy have to be able to say "stap 3 van 5", every step is a bespoke
+ * reminder copy have to be able to say "stap 3 van 6", every step is a bespoke
  * component anyway, and an authored typo in a free-form array would strand a
  * user on a step that does not render. Per-lesson variation is expressed as
  * *availability* below, not as ordering.
+ *
+ * TOETSING COMES BEFORE TOEPASSING. The quiz asks whether the passage landed,
+ * so it belongs directly behind the uitleg while that is still fresh; the
+ * application is where the lesson lands - a personal answer plus what to do
+ * with it this week - and that is what the reader should be holding when the
+ * lesson ends. A lesson that ends on a score ends like school.
+ *
+ * THE KEYS ARE FROZEN, THE LABELS ARE NOT. `reflection` is labelled
+ * "Toepassing" and `word` is labelled "Lezen": renaming the keys would
+ * invalidate every stored `stepsCompleted` row AND silently drop the step in
+ * every app build already on a phone, because the client parses this list and
+ * discards ids it does not know. Labels are free to change; keys are not.
  */
-export const STEP_ORDER = ['intro', 'word', 'depth', 'reflection', 'quiz'] as const;
+export const STEP_ORDER = ['intro', 'context', 'word', 'depth', 'quiz', 'reflection'] as const;
 
 export type StepKey = (typeof STEP_ORDER)[number];
 
@@ -33,11 +45,12 @@ export type StepKey = (typeof STEP_ORDER)[number];
  * unaffected.
  */
 export const STEP_LABELS: Record<StepKey, string> = {
-  intro: 'Intro',
-  word: 'Het Woord',
+  intro: 'Inleiding',
+  context: 'Bijbelse context',
+  word: 'Lezen',
   depth: 'Verdieping',
-  reflection: 'Reflectie',
   quiz: 'Toetsing',
+  reflection: 'Toepassing',
 };
 
 /** What a resume cursor can point at. `done` means the lesson is finished. */
@@ -53,15 +66,28 @@ export function isStepKey(value: unknown): value is StepKey {
  * `intro` is the only step that disappears when unauthored - a blank
  * introduction is worse than none. Every other step has a usable fallback, so
  * the flow works before a single word of prose is written.
+ *
+ * `context` is the one step this function cannot decide on its own: its
+ * fallback is the book's own orientation (author, date, theme, outline), which
+ * lives in lib/content/bibleBooks and must not be pulled into a client bundle
+ * through this module. So the caller resolves the book and passes the answer -
+ * lib/lessonPayload.ts does exactly that. Left unsaid it defaults to true,
+ * because every lesson in the catalogue is in the canon.
  */
-export function resolveSteps(lesson: Lesson, content?: LessonContent): StepKey[] {
+export function resolveSteps(
+  lesson: Lesson,
+  content?: LessonContent,
+  options: { hasContext?: boolean } = {},
+): StepKey[] {
   const steps: StepKey[] = [];
   if (content?.intro) steps.push('intro');
-  steps.push('word', 'depth', 'reflection');
+  if (options.hasContext !== false) steps.push('context');
+  steps.push('word', 'depth');
   // Rendered optimistically: whether bijbelquiz actually has questions for this
   // passage is only known at fetch time, and the step body handles the empty
   // case itself rather than the lesson silently losing a step.
   if (content?.quiz?.enabled !== false) steps.push('quiz');
+  steps.push('reflection');
   return steps;
 }
 
@@ -76,7 +102,7 @@ export function previousStep(steps: StepKey[], current: StepKey): StepKey | null
   return index > 0 ? steps[index - 1] : null;
 }
 
-/** 1-based position for "stap 2 van 5". Returns 0 when the step is not in the list. */
+/** 1-based position for "stap 2 van 6". Returns 0 when the step is not in the list. */
 export function stepPosition(steps: StepKey[], current: StepKey): number {
   return steps.indexOf(current) + 1;
 }

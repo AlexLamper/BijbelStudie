@@ -52,9 +52,13 @@ const studyEnrollmentSchema = new mongoose.Schema(
 
     // --- Resume cursor: the single source of truth for "waar was ik" ---
     currentLessonDay: { type: Number, default: 1 },
+    // Step KEYS from lib/studyFlow.ts, in flow order. `context` was added when
+    // Bijbelse context became a step of its own; the keys `word` and
+    // `reflection` keep their old names although they are now labelled Lezen
+    // and Toepassing, so no stored cursor had to be migrated.
     currentStep: {
       type: String,
-      enum: ['intro', 'word', 'depth', 'reflection', 'quiz', 'done'],
+      enum: ['intro', 'context', 'word', 'depth', 'quiz', 'reflection', 'done'],
       default: 'intro',
     },
 

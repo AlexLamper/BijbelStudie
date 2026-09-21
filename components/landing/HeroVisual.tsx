@@ -60,14 +60,14 @@ function BrowserFrame({
 
 type LessonStep = { label: string; status: 'done' | 'current' | 'todo' };
 
+/** The six steps of lib/studyFlow.ts, in order. Nothing here is aspirational. */
 const LESSON_STEPS: LessonStep[] = [
   { label: 'Inleiding', status: 'done' },
   { label: 'Bijbelse context', status: 'done' },
-  { label: 'Het Woord lezen', status: 'done' },
+  { label: 'Lezen', status: 'done' },
   { label: 'Verdieping', status: 'current' },
   { label: 'Toetsing', status: 'todo' },
-  { label: 'Reflectie', status: 'todo' },
-  { label: 'Gebed', status: 'todo' },
+  { label: 'Toepassing', status: 'todo' },
 ];
 
 function StepRow({ label, status }: LessonStep) {

@@ -9,9 +9,14 @@ import type { StepKey } from '../../../lib/studyFlow';
 /** Step-specific starters, replacing the assistant's generic ones. */
 const STARTERS: Record<StepKey, string[]> = {
   intro: [
-    'Wat is de context van dit gedeelte?',
+    'Waar gaat dit gedeelte over?',
+    'Waarom is dit gedeelte belangrijk?',
+    'Wat moet ik weten voordat ik ga lezen?',
+  ],
+  context: [
     'Wie schreef dit, en voor wie?',
     'Waar in de bijbelse tijdlijn staat dit?',
+    'Hoe zag het dagelijks leven er toen uit?',
   ],
   word: [
     'Leg dit gedeelte uit in eenvoudige woorden',
@@ -26,7 +31,7 @@ const STARTERS: Record<StepKey, string[]> = {
   reflection: [
     'Help me deze vraag te begrijpen',
     'Wat betekent dit gedeelte voor mijn leven vandaag?',
-    'Geef me een voorbeeld uit het dagelijks leven',
+    'Hoe breng ik dit deze week in praktijk?',
   ],
   quiz: [
     'Leg uit waarom dit het juiste antwoord is',

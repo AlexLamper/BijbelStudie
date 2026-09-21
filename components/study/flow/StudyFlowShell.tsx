@@ -24,6 +24,7 @@ import {
 import StudyStepRail, { STEP_LABELS } from './StudyStepRail';
 import { FOCUS_RING, INK, INK_FAINT, INK_MUTED, PANEL_SOLID, RULE, scrim } from './lesson-layout';
 import StepIntro from './StepIntro';
+import StepContext, { type LessonContextProps } from './StepContext';
 import StepWord from './StepWord';
 import StepDepth from './StepDepth';
 import StepReflection from './StepReflection';
@@ -139,9 +140,17 @@ export interface LessonPayload {
   commentaryId: string;
   content: {
     intro: { headline: string; body: string[]; watchFor?: string[] } | null;
+    /** Null when the lesson has no Bijbelse context step - see lib/lessonContext.ts. */
+    context: LessonContextProps | null;
     readingCue: string | null;
     depth: { body?: string[]; terms?: { term: string; meaning: string }[]; showMedia?: boolean } | null;
-    reflection: { question: string; prompts: string[]; placeholder: string | null };
+    reflection: {
+      question: string;
+      prompts: string[];
+      placeholder: string | null;
+      practices: string[];
+      memoryVerse: string | null;
+    };
     quiz: { enabled: boolean; questionCount: number };
   };
   nextLessonDay: number | null;
@@ -169,6 +178,8 @@ export interface LessonStatePayload {
   /** The Verdieping step's last open panel. */
   depthPanel: string | null;
   reflection: { text: string; updatedAt: string | null; noteId: string | null };
+  /** The week's practices the reader has ticked, by their text. */
+  application: { practicesDone: string[] };
   quiz: { score: number | null; total: number | null; attempts: number };
   completedAt: string | null;
 }
@@ -286,6 +297,12 @@ export default function StudyFlowShell({
    * safe in Mongo, but a reader who retyped would overwrite it.
    */
   const [reflectionText, setReflectionText] = useState(initialState.reflection.text);
+  /**
+   * Held here rather than in the step, because the step unmounts on every
+   * navigation: without this, walking back from Toepassing to Toetsing and
+   * forward again cleared the ticks a guest had just made.
+   */
+  const [practicesDone, setPracticesDone] = useState(initialState.application.practicesDone);
   const [fullscreen, setFullscreen] = useState(false);
   const [fullscreenHint, setFullscreenHint] = useState(false);
   /**
@@ -350,6 +367,7 @@ export default function StudyFlowShell({
     if (!saved) return;
     if (saved.stepsCompleted?.length) setCompleted(saved.stepsCompleted);
     if (typeof saved.reflectionText === 'string') setReflectionText(saved.reflectionText);
+    if (saved.practicesDone?.length) setPracticesDone(saved.practicesDone);
     if (saved.viewTranslation) setVersion(saved.viewTranslation);
     if (saved.depthPanel) setDepthPanel(saved.depthPanel);
     const fromUrl = new URL(window.location.href).searchParams.get('stap');
@@ -631,6 +649,17 @@ export default function StudyFlowShell({
     [patch],
   );
 
+  const savePractices = useCallback(
+    (practices: string[]) => {
+      setPracticesDone(practices);
+      // Fire and forget. The checkbox has already moved, and a failed write
+      // costs a tick rather than written words - so this deliberately has no
+      // error state of its own, unlike the reflection autosave above.
+      void patch({ practicesDone: practices });
+    },
+    [patch],
+  );
+
   const askAi = useCallback((questionText: string) => {
     setAiQuestion(questionText);
     setAiOpen(true);
@@ -650,6 +679,15 @@ export default function StudyFlowShell({
           <StepIntro
             intro={lesson.content.intro}
             lessonTitle={lesson.lesson.title}
+            eyebrow={eyebrow}
+          />
+        ) : null;
+      case 'context':
+        return lesson.content.context ? (
+          <StepContext
+            context={lesson.content.context}
+            book={lesson.passage.book}
+            chapter={lesson.passage.chapter}
             eyebrow={eyebrow}
           />
         ) : null;
@@ -692,6 +730,8 @@ export default function StudyFlowShell({
             initialText={reflectionText}
             serverUpdatedAt={initialState.reflection.updatedAt}
             onSave={saveReflection}
+            initialPracticesDone={practicesDone}
+            onPracticesChange={savePractices}
             eyebrow={eyebrow}
             passageReference={passageReference}
           />
@@ -730,6 +770,8 @@ export default function StudyFlowShell({
     updatePreferences,
     initialState,
     saveReflection,
+    practicesDone,
+    savePractices,
     quizScore,
     quizTotal,
     askAi,

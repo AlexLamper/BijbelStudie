@@ -6,13 +6,11 @@ import connectMongoDB from '../../../../lib/mongodb';
 import User from '../../../../models/User';
 import StudyLessonState from '../../../../models/StudyLessonState.js';
 import StudyProgress from '../../../../models/StudyProgress.js';
-import { getLessonContent } from '../../../../lib/data/study-lessons';
 import { getVersions } from '../../../../lib/local-data';
 import {
   findLesson,
   isStepKey,
   resolveCommentaryId,
-  resolveSteps,
   type StepKey,
 } from '../../../../lib/studyFlow';
 import {
@@ -93,8 +91,6 @@ export default async function StudyLessonPage({ params, searchParams }: PageProp
     () => [] as { id: string; name: string; language: string }[],
   );
 
-  const steps = resolveSteps(lesson, getLessonContent(studyId, lessonDay));
-
   // Which lessons are already done, for the navigator in the flow header. The
   // reader could previously only see that list by leaving the lesson.
   const completedDays = new Set(
@@ -104,15 +100,6 @@ export default async function StudyLessonPage({ params, searchParams }: PageProp
   );
 
   const state = await StudyLessonState.findOne({ userId, studyId, lessonDay }).lean<StoredLessonState>();
-
-  // The URL wins when it names a real step, so a shared or refreshed link lands
-  // where it says; otherwise resume where the reader left off.
-  const fromUrl = isStepKey(stap) && steps.includes(stap) ? (stap as StepKey) : null;
-  const fromState =
-    state?.currentStep && isStepKey(state.currentStep) && steps.includes(state.currentStep)
-      ? (state.currentStep as StepKey)
-      : null;
-  const initialStep: StepKey = fromUrl ?? fromState ?? steps[0];
 
   const payload: LessonPayload = buildLessonPayload({
     study,
@@ -125,6 +112,21 @@ export default async function StudyLessonPage({ params, searchParams }: PageProp
     }),
     completedDays,
   });
+
+  // Straight off the payload rather than resolved a second time: whether this
+  // lesson has a Bijbelse context step depends on its book, and two
+  // independent answers to that question would put the reader on a step the
+  // flow is not rendering.
+  const steps = payload.steps;
+
+  // The URL wins when it names a real step, so a shared or refreshed link lands
+  // where it says; otherwise resume where the reader left off.
+  const fromUrl = isStepKey(stap) && steps.includes(stap) ? (stap as StepKey) : null;
+  const fromState =
+    state?.currentStep && isStepKey(state.currentStep) && steps.includes(state.currentStep)
+      ? (state.currentStep as StepKey)
+      : null;
+  const initialStep: StepKey = fromUrl ?? fromState ?? steps[0];
 
   const initialState: LessonStatePayload = buildLessonState(state, steps[0]);
 
@@ -163,10 +165,6 @@ async function GuestLesson({
       ? vertaling
       : study.startVersion;
 
-  const steps = resolveSteps(lesson, getLessonContent(study.id, lesson.day));
-  const initialStep: StepKey =
-    isStepKey(stap) && steps.includes(stap) ? (stap as StepKey) : steps[0];
-
   const payload: LessonPayload = buildLessonPayload({
     study,
     lesson,
@@ -175,6 +173,10 @@ async function GuestLesson({
     commentaryId: resolveCommentaryId({ enrollmentCommentary: null, userPreference: null }),
     completedDays: new Set<number>(),
   });
+
+  const steps = payload.steps;
+  const initialStep: StepKey =
+    isStepKey(stap) && steps.includes(stap) ? (stap as StepKey) : steps[0];
 
   const initialState: LessonStatePayload = { ...EMPTY_LESSON_STATE, currentStep: initialStep };
 

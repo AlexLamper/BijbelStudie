@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { bookNameMap, normalizeBookName, BIBLE_BOOKS_ORDER } from '../lib/book-mapping';
+import { bookNameMap, normalizeBookName, resolveBookInList, BIBLE_BOOKS_ORDER } from '../lib/book-mapping';
 import { rememberReaderVersion } from '../lib/dailyVerseStore';
 
 /* ─── Static data - never changes ───────────────────────────── */
@@ -175,8 +175,23 @@ export function useBibleData(lng: string, options: UseBibleDataOptions = {}): Us
             fetchChaptersDirect(initialVersion, initialBook),
           ]);
           if (cancelled) return;
-          if (index) setBooks(resolveBooksFromIndex(index, initialVersion));
-          applyChapters(chaps, initialChapter);
+          const bookList = index ? resolveBooksFromIndex(index, initialVersion) : [];
+          setBooks(bookList);
+
+          // A link carries whatever spelling its sender had - bijbelquiz says
+          // "1 Korinthe", the Statenvertaling folder is "1 Corinthiërs". The
+          // chapter fetch above used the raw name and 404s on a mismatch, so
+          // when the list knows this book under another name, take that one and
+          // ask again rather than showing an empty chapter list.
+          const resolved = resolveBookInList(initialBook, bookList);
+          if (resolved && resolved !== initialBook) {
+            setSelectedBook(resolved);
+            const corrected = await fetchChaptersDirect(initialVersion, resolved);
+            if (cancelled) return;
+            applyChapters(corrected, initialChapter);
+          } else {
+            applyChapters(chaps, initialChapter);
+          }
           setLoadingBooks(false);
           return;
         }
@@ -235,9 +250,11 @@ export function useBibleData(lng: string, options: UseBibleDataOptions = {}): Us
       setBooks(bookList);
       setLoadingBooks(false);
 
-      // Determine book to open
-      let book = restoredBook;
-      if (!book || !bookList.includes(book)) {
+      // Determine book to open. Resolved rather than compared: a last-read row
+      // written by the app, or by this reader in another translation, may spell
+      // the book differently than the list does.
+      let book = resolveBookInList(restoredBook, bookList) ?? '';
+      if (!book) {
         book = bookList.includes('Genesis') ? 'Genesis' : (bookList[0] ?? '');
         restoredChapter = 1;
       }
@@ -289,8 +306,12 @@ export function useBibleData(lng: string, options: UseBibleDataOptions = {}): Us
       const prevIdx = lastBookIndexRef.current;
       lastBookIndexRef.current = -1;
 
-      let nextBook = selectedBook;
-      if (!bookList.includes(nextBook)) {
+      // Switching translation keeps the BOOK, not the position in the list.
+      // Every list is the same 66 books in the same order, so the index was a
+      // decent guess - but it is only a guess, and it was wrong for every
+      // translation that carries the deuterocanonical books as well.
+      let nextBook = resolveBookInList(selectedBook, bookList) ?? '';
+      if (!nextBook) {
         nextBook = prevIdx >= 0 && prevIdx < bookList.length
           ? bookList[prevIdx]
           : (bookList.includes('Genesis') ? 'Genesis' : (bookList[0] ?? ''));

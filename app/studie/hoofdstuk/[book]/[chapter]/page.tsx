@@ -6,9 +6,8 @@ import connectMongoDB from '../../../../../lib/mongodb';
 import User from '../../../../../models/User';
 import StudyLessonState from '../../../../../models/StudyLessonState.js';
 import StudyProgress from '../../../../../models/StudyProgress.js';
-import { getLessonContent } from '../../../../../lib/data/study-lessons';
 import { getVersions } from '../../../../../lib/local-data';
-import { isStepKey, resolveCommentaryId, resolveSteps, type StepKey } from '../../../../../lib/studyFlow';
+import { isStepKey, resolveCommentaryId, type StepKey } from '../../../../../lib/studyFlow';
 import { getEnrollment } from '../../../../../lib/studyEnrollmentService';
 import {
   chapterStudyContext,
@@ -21,6 +20,7 @@ import {
   buildLessonPayload,
   buildLessonState,
   EMPTY_LESSON_STATE,
+  resolveLessonSteps,
   type StoredLessonState,
 } from '../../../../../lib/lessonPayload';
 import StudyFlowShell from '../../../../../components/study/flow/StudyFlowShell';
@@ -67,7 +67,7 @@ export default async function ChapterStudyPage({ params, searchParams }: PagePro
   const fromUrlVersion =
     vertaling && versions.some((version) => version.id === vertaling) ? vertaling : null;
 
-  const steps = resolveSteps(lesson, getLessonContent(study.id, lesson.day));
+  const steps = resolveLessonSteps(study.id, lesson);
   const urlStep = isStepKey(stap) && steps.includes(stap) ? (stap as StepKey) : null;
   const context = chapterStudyContext(target);
 
