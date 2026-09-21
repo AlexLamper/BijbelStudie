@@ -1,6 +1,4 @@
-﻿import { normaliseBookName, toBookCode, type BookCode } from './bookCanon';
-
-export const bookNameMap: Record<string, string> = {
+﻿export const bookNameMap: Record<string, string> = {
   // ── Dutch (Statenvertaling / HSV shared names) ────────────────
   'Genesis': 'Genesis',
   'Exodus': 'Exodus',
@@ -210,119 +208,103 @@ export function getBookNameFromNumber(number: number): string {
     return BIBLE_BOOKS_ORDER[number - 1];
 }
 
-/* ─── Deep-link book resolution ───────────────────────────────────────────── */
-
-/**
- * One book, named by anything anyone has ever sent us.
- *
- * A reader link carries a book NAME, and every source spells it differently:
- * bijbelquiz sends "1 Korinthe", the Statenvertaling folder is "1 Corinthiërs",
- * a shared URL may carry the slug "1-korintiers", and the English translations
- * use "1 Corinthians". The reader used to compare these with `includes()`, so a
- * link whose spelling did not match the chosen translation's own label silently
- * dropped the reader in Genesis 1.
- *
- * Everything below resolves to the ENGLISH canonical name (`BIBLE_BOOKS_ORDER`),
- * which is the one list every translation can be mapped onto.
- *
- * Built on `bookNameMap` plus `lib/bookCanon.ts` rather than a fourth table:
- * bookCanon is duplicated byte for byte in bijbelquiz and must not grow a
- * bijbelstudie-only entry, so the spellings it lacks are added here instead.
+/* ─── Reader deep links ──────────────────────────────────────────
+ * Links into /lezen come from outside (BijbelQuiz, shared URLs, mail) and
+ * spell books however the sender does: "Hebreeën", "1 Korinthe",
+ * "1-korintiers", "Hebrews", "HEB". Each translation folder, on the other hand,
+ * has exactly one spelling ("2 Corinthiër", "Filémon", "Haggaï" in the
+ * Statenvertaling; English names in KJV). Matching the raw string made every
+ * link that did not use the exact folder name open Genesis 1 instead.
  */
 
-/** Every spelling we know, normalised, pointing at the English canonical name. */
-const SPELLINGS = new Map<string, string>();
+/** OSIS-style codes (as in lib/bookCanon.ts), in BIBLE_BOOKS_ORDER order. */
+const OSIS_CODES = [
+  'GEN', 'EXOD', 'LEV', 'NUM', 'DEUT', 'JOSH', 'JUDG', 'RUTH', '1SAM', '2SAM',
+  '1KGS', '2KGS', '1CHR', '2CHR', 'EZRA', 'NEH', 'ESTH', 'JOB', 'PS', 'PROV',
+  'ECCL', 'SONG', 'ISA', 'JER', 'LAM', 'EZEK', 'DAN', 'HOS', 'JOEL', 'AMOS',
+  'OBAD', 'JONAH', 'MIC', 'NAH', 'HAB', 'ZEPH', 'HAG', 'ZECH', 'MAL',
+  'MATT', 'MARK', 'LUKE', 'JOHN', 'ACTS', 'ROM', '1COR', '2COR', 'GAL', 'EPH',
+  'PHIL', 'COL', '1THESS', '2THESS', '1TIM', '2TIM', 'TITUS', 'PHLM', 'HEB', 'JAS',
+  '1PET', '2PET', '1JOHN', '2JOHN', '3JOHN', 'JUDE', 'REV',
+];
 
-function learn(spelling: string, english: string): void {
-  const key = normaliseBookName(spelling.replace(/[-_]+/g, ' '));
-  if (key && !SPELLINGS.has(key)) SPELLINGS.set(key, english);
-}
-
-for (const english of BIBLE_BOOKS_ORDER) {
-  learn(english, english);
-  const dutch = CANONICAL_NL[english];
-  if (dutch) learn(dutch, english);
-}
-for (const [spelling, english] of Object.entries(bookNameMap)) {
-  // The deuterocanonical entries map to names outside the 66, and a reader link
-  // to one of those has no canonical answer - better null than a wrong book.
-  if (BIBLE_BOOKS_ORDER.includes(english)) learn(spelling, english);
-}
-
-/**
- * Spellings that occur in public/data/books-index.json and are missing from
- * `bookNameMap` - the four the German editions use for Kings and Chronicles.
- *
- * Deliberately NOT added to `bookNameMap` itself: `englishToDutchMap` is folded
- * out of that object with the last key winning, so a German entry there takes
- * "1 Kings" away from "1 Koningen" and `getBookNameVariants` stops offering the
- * Dutch folder name that lib/local-data.ts looks files up by.
- */
+/** Spellings used elsewhere (NBV, NBG, BijbelQuiz) that no folder uses. */
 const EXTRA_SPELLINGS: Record<string, string> = {
+  'Rechters': 'Judges',
+  // German editions, for Kings and Chronicles only - bookNameMap has the rest.
   '1 Koenige': '1 Kings',
   '2 Koenige': '2 Kings',
   '1 Chronik': '1 Chronicles',
   '2 Chronik': '2 Chronicles',
+  'Psalm': 'Psalms',
+  'Ester': 'Esther',
+  'Sefanja': 'Zephaniah',
+  'Matteüs': 'Matthew',
+  'Marcus': 'Mark',
+  'Lucas': 'Luke',
+  'Handelingen der Apostelen': 'Acts',
+  '1 Korintiërs': '1 Corinthians',
+  '2 Korintiërs': '2 Corinthians',
+  '1 Korinthiërs': '1 Corinthians',
+  '2 Korinthiërs': '2 Corinthians',
+  '2 Corinthiërs': '2 Corinthians',
+  '1 Tessalonicenzen': '1 Thessalonians',
+  '2 Tessalonicenzen': '2 Thessalonians',
+  '1 Timoteüs': '1 Timothy',
+  '2 Timoteüs': '2 Timothy',
+  'Hebreeen': 'Hebrews',
+  'Openbaringen': 'Revelation',
+  'Song of Songs': 'Song of Solomon',
 };
-for (const [spelling, english] of Object.entries(EXTRA_SPELLINGS)) learn(spelling, english);
 
-/**
- * Code -> English canonical name, so a bare code in a URL ("2COR") still finds
- * its book.
- *
- * Derived by asking bookCanon about EVERY spelling of each book rather than
- * about its canonical Dutch name alone. The Statenvertaling calls 2 Corinthians
- * "2 Corinthiër" without the final s, which bookCanon does not list - so going
- * through the canonical name only would have left that one book with no code at
- * all, and silently.
- */
-const CODE_TO_ENGLISH = new Map<BookCode, string>();
-for (const [spelling, english] of SPELLINGS) {
-  const code = toBookCode(spelling);
-  if (code && !CODE_TO_ENGLISH.has(code)) CODE_TO_ENGLISH.set(code, english);
+/** Lowercase, no diacritics, no spaces/dots/dashes/underscores/plus signs. */
+function foldBookName(name: string): string {
+  return name
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[\s._+-]/g, '');
+}
+
+let foldedToEnglish: Map<string, string> | null = null;
+
+function getFoldedMap(): Map<string, string> {
+  if (foldedToEnglish) return foldedToEnglish;
+  const map = new Map<string, string>();
+  const add = (name: string, english: string) => {
+    const key = foldBookName(name);
+    if (key && !map.has(key)) map.set(key, english);
+  };
+  BIBLE_BOOKS_ORDER.forEach((english, i) => {
+    add(english, english);
+    add(OSIS_CODES[i], english);
+  });
+  Object.entries(CANONICAL_NL).forEach(([english, dutch]) => add(dutch, english));
+  Object.entries(bookNameMap).forEach(([name, english]) => add(name, english));
+  Object.entries(EXTRA_SPELLINGS).forEach(([name, english]) => add(name, english));
+  foldedToEnglish = map;
+  return map;
 }
 
 /**
- * The English canonical name for any spelling, or null when it is not one of
- * the 66 books.
- *
- * Null rather than a best guess: a wrong match sends someone to a different
- * book than the link promised, which is worse than the fallback.
+ * The canonical English name (a BIBLE_BOOKS_ORDER entry, or a deuterocanonical
+ * name) for any spelling of a book, or null when unrecognised.
  */
 export function canonicalBookName(name: string | null | undefined): string | null {
   if (!name) return null;
-  const cleaned = name.replace(/[-_]+/g, ' ').trim();
-  if (!cleaned) return null;
-
-  const known = SPELLINGS.get(normaliseBookName(cleaned));
-  if (known) return known;
-
-  // Dutch spellings bookCanon knows and this file does not ("1 Korintiërs").
-  const code = toBookCode(cleaned);
-  if (code) return CODE_TO_ENGLISH.get(code) ?? null;
-
-  // A bare code, the way bijbelquiz passes one around ("HEB", "2COR").
-  return CODE_TO_ENGLISH.get(cleaned.toUpperCase().replace(/\s+/g, '')) ?? null;
+  const trimmed = name.trim();
+  if (bookNameMap[trimmed]) return bookNameMap[trimmed];
+  return getFoldedMap().get(foldBookName(trimmed)) ?? null;
 }
 
 /**
- * The entry of `list` that is this book, spelled the way that list spells it.
- *
- * `list` is one translation's book list out of public/data/books-index.json, so
- * the answer is a string the reader can put straight in a path - which is the
- * whole point: resolving the name and then using the caller's spelling would
- * 404 on the chapters file.
+ * The entry of `bookList` (one translation's own folder names) that `name`
+ * refers to, whatever spelling `name` uses. Null when nothing matches.
  */
-export function resolveBookInList(
-  input: string | null | undefined,
-  list: readonly string[] | null | undefined,
-): string | null {
-  if (!input || !list?.length) return null;
-
-  // An exact hit first: it costs one comparison and it is the common case.
-  if (list.includes(input)) return input;
-
-  const target = canonicalBookName(input);
+export function resolveBookInList(name: string | null | undefined, bookList: readonly string[]): string | null {
+  if (!name) return null;
+  if (bookList.includes(name)) return name;
+  const target = canonicalBookName(name);
   if (!target) return null;
-  return list.find((entry) => canonicalBookName(entry) === target) ?? null;
+  return bookList.find(book => canonicalBookName(book) === target) ?? null;
 }

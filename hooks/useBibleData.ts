@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { bookNameMap, normalizeBookName, resolveBookInList, BIBLE_BOOKS_ORDER } from '../lib/book-mapping';
+import { bookNameMap, normalizeBookName, BIBLE_BOOKS_ORDER, resolveBookInList } from '../lib/book-mapping';
 import { rememberReaderVersion } from '../lib/dailyVerseStore';
 
 /* ─── Static data - never changes ───────────────────────────── */
@@ -161,37 +161,34 @@ export function useBibleData(lng: string, options: UseBibleDataOptions = {}): Us
     let cancelled = false;
 
     async function init() {
-      // Case A: URL params override everything - skip network calls
-      if (initialBook && initialChapter && initialVersion) {
-        const versionExists = VERSIONS.some(v => v.id === initialVersion);
-        if (versionExists) {
-          setSelectedVersion(initialVersion);
-          setSelectedBook(initialBook);
-          setSelectedChapter(initialChapter);
-          setLastReadLoaded(true);
-          // Still need books + chapters for the selector UI
-          const [index, chaps] = await Promise.all([
-            getBooksIndex(),
-            fetchChaptersDirect(initialVersion, initialBook),
-          ]);
-          if (cancelled) return;
-          const bookList = index ? resolveBooksFromIndex(index, initialVersion) : [];
-          setBooks(bookList);
+      // A deep link (?book=&chapter=[&version=]) names a passage. The book may
+      // be spelled any way (Dutch with or without diacritics, English, a slug,
+      // an OSIS code) and is resolved against the chosen translation's own
+      // folder names. `chapter` defaults to 1 and `version` is optional: links
+      // from BijbelQuiz used to carry only book + chapter, and requiring all
+      // three silently opened the last-read chapter or Genesis 1 instead.
+      const linkChapter =
+        initialChapter && Number.isFinite(initialChapter) && initialChapter > 0
+          ? Math.floor(initialChapter)
+          : 1;
+      const linkVersion =
+        initialVersion && VERSIONS.some(v => v.id === initialVersion) ? initialVersion : null;
 
-          // A link carries whatever spelling its sender had - bijbelquiz says
-          // "1 Korinthe", the Statenvertaling folder is "1 Corinthiërs". The
-          // chapter fetch above used the raw name and 404s on a mismatch, so
-          // when the list knows this book under another name, take that one and
-          // ask again rather than showing an empty chapter list.
-          const resolved = resolveBookInList(initialBook, bookList);
-          if (resolved && resolved !== initialBook) {
-            setSelectedBook(resolved);
-            const corrected = await fetchChaptersDirect(initialVersion, resolved);
-            if (cancelled) return;
-            applyChapters(corrected, initialChapter);
-          } else {
-            applyChapters(chaps, initialChapter);
-          }
+      // Case A: URL names both passage and version - skip last-read/preferences
+      if (initialBook && linkVersion) {
+        const index = await getBooksIndex();
+        if (cancelled) return;
+        const bookList = index ? resolveBooksFromIndex(index, linkVersion) : [];
+        const book = resolveBookInList(initialBook, bookList);
+        if (book) {
+          setSelectedVersion(linkVersion);
+          setSelectedBook(book);
+          setSelectedChapter(linkChapter);
+          setLastReadLoaded(true);
+          setBooks(bookList);
+          const chaps = await fetchChaptersDirect(linkVersion, book);
+          if (cancelled) return;
+          applyChapters(chaps, linkChapter);
           setLoadingBooks(false);
           return;
         }
@@ -250,15 +247,22 @@ export function useBibleData(lng: string, options: UseBibleDataOptions = {}): Us
       setBooks(bookList);
       setLoadingBooks(false);
 
-      // Determine book to open. Resolved rather than compared: a last-read row
-      // written by the app, or by this reader in another translation, may spell
-      // the book differently than the list does.
+      // Determine book to open: a deep-linked passage wins over last-read, in
+      // whichever translation the reader already uses. Both are RESOLVED rather
+      // than compared - a last-read row written by the app, or by this reader
+      // in another translation, may spell the book differently than this list.
       let book = resolveBookInList(restoredBook, bookList) ?? '';
-      if (!book) {
+      const linkedBook = initialBook ? resolveBookInList(initialBook, bookList) : null;
+      if (linkedBook) {
+        book = linkedBook;
+        restoredChapter = linkChapter;
+      } else if (!book) {
         book = bookList.includes('Genesis') ? 'Genesis' : (bookList[0] ?? '');
         restoredChapter = 1;
       }
 
+      // Chapter with the book, so the reader does not load chapter 1 first.
+      setSelectedChapter(restoredChapter);
       setSelectedBook(book);
       setLastReadLoaded(true);
 
