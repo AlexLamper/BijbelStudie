@@ -1,10 +1,10 @@
 /**
  * The study flow's two sounds, synthesised rather than downloaded.
  *
- * A step tick is a noise transient over a pitched glide and a chime is two sine
- * waves, so there is no reason to ship audio files for them: no extra request,
- * no decode, no 40KB of MP3 on a route people open on mobile data, and nothing
- * to keep in sync with a CDN. Web Audio builds both in a handful of nodes.
+ * A step click is one band-passed noise burst and a chime is two sine waves,
+ * so there is no reason to ship audio files for them: no extra request, no
+ * decode, no 40KB of MP3 on a route people open on mobile data, and nothing to
+ * keep in sync with a CDN. Web Audio builds both in a handful of nodes.
  *
  * Everything here fails silently. Audio is decoration - a browser without
  * `AudioContext`, a device with output muted, an autoplay policy that has not
@@ -36,27 +36,28 @@ function audio(): AudioContext | null {
 }
 
 /**
- * The swipe: a short tick with a pitched body under it, like a card being
- * snapped onto the next one.
+ * The swipe: a short, dry click. One burst of noise, 22 milliseconds, gone.
  *
- * It replaced a 240ms band-passed noise sweep. That sweep was accurate - paper
- * moving past a microphone really does sound like that - and it was the wrong
- * sound for this: it took longer than the eye needed, it had no attack, and a
- * soft wash of noise on every step reads as the interface breathing rather than
- * as something happening. What a step transition wants is a TRANSIENT. The ear
- * dates an event by its attack, so the faster the onset, the more the sound
- * feels like the press that caused it.
+ * Chosen after auditioning everything else, and the route there is worth
+ * keeping because it explains the shape. A 240ms band-passed noise sweep was
+ * too long and had no attack, so it read as the interface breathing. A tick
+ * with a pitched triangle under it fixed the attack and added a note, and a
+ * note becomes a tune by the fourth step - a lesson plays this six times. A
+ * softly struck marimba had the same problem in a nicer register.
  *
- * Two layers, 130ms end to end:
+ * What is left is the smallest thing that can mark an event: no pitch, no tail,
+ * nothing to get used to. The ear dates an event by its attack, so a 1.5ms
+ * onset is what makes it feel like the press that caused it rather than a
+ * sound played afterwards. The cubed decay puts nearly all the energy in the
+ * first few milliseconds, which is where the eye is too.
  *
- *  - the tick: 40ms of noise through a high-pass, up in 2ms and gone in 40, so
- *    it lands exactly on the press and never lingers into the animation.
- *  - the body: a triangle that glides 640 -> 380 Hz going forward and the other
- *    way going back. This is what keeps the direction the old sweep carried,
- *    and it gives the tick something to sit on - a tick alone is a mouse click.
+ * The bandpass is doing the timbre: 2.4kHz forward, 1.7kHz back, Q 2.2. High
+ * enough to stay crisp on a phone speaker, narrow enough not to hiss. Back is
+ * the duller and quieter of the two - stepping back is a correction and should
+ * not sound like progress.
  *
- * Peak gain stays low on both. This sits under the transition; it does not
- * announce itself, and it is heard forty times in a lesson.
+ * Peak gain is deliberately low. This is heard six times a lesson and must sit
+ * under the transition, not on top of it.
  */
 export function playSwipe(direction: 1 | -1) {
   const ctx = audio();
@@ -65,66 +66,36 @@ export function playSwipe(direction: 1 | -1) {
   try {
     const now = ctx.currentTime;
     const forward = direction > 0;
+    const length = 0.022;
 
-    /* ── the tick ──────────────────────────────────────────────── */
-    const tickLength = 0.04;
-    const frames = Math.max(1, Math.floor(ctx.sampleRate * tickLength));
+    const frames = Math.max(1, Math.floor(ctx.sampleRate * length));
     const buffer = ctx.createBuffer(1, frames, ctx.sampleRate);
     const samples = buffer.getChannelData(0);
     for (let i = 0; i < frames; i += 1) {
-      // Cubed decay, not linear: almost all of the energy is in the first few
-      // milliseconds, which is what makes it read as a click and not a burst.
-      samples[i] = (Math.random() * 2 - 1) * (1 - i / frames) ** 3;
+      samples[i] = (Math.random() * 2 - 1) * (1 - i / frames) ** 3.6;
     }
 
-    const tick = ctx.createBufferSource();
-    tick.buffer = buffer;
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
 
-    const tickFilter = ctx.createBiquadFilter();
-    tickFilter.type = 'highpass';
-    // Going back is the quieter, duller of the two - stepping back is a
-    // correction, and it should not sound like progress.
-    tickFilter.frequency.value = forward ? 1500 : 1100;
-    tickFilter.Q.value = 0.7;
+    const tone = ctx.createBiquadFilter();
+    tone.type = 'bandpass';
+    tone.frequency.value = forward ? 2400 : 1700;
+    tone.Q.value = 2.2;
 
-    const tickGain = ctx.createGain();
-    tickGain.gain.setValueAtTime(0, now);
-    // Linear, not exponential: an exponential ramp from near-zero spends its
-    // first milliseconds inaudible, which is the one thing a tick cannot do.
-    tickGain.gain.linearRampToValueAtTime(forward ? 0.055 : 0.04, now + 0.002);
-    tickGain.gain.exponentialRampToValueAtTime(0.0001, now + tickLength);
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0, now);
+    // Linear into the peak, not exponential: a ramp that starts at near-zero
+    // spends its first milliseconds inaudible, and on a click those
+    // milliseconds ARE the sound.
+    gain.gain.linearRampToValueAtTime(forward ? 0.05 : 0.04, now + 0.0015);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + length);
 
-    tick.connect(tickFilter);
-    tickFilter.connect(tickGain);
-    tickGain.connect(ctx.destination);
-    tick.start(now);
-    tick.stop(now + tickLength);
-
-    /* ── the body ──────────────────────────────────────────────── */
-    const bodyLength = 0.13;
-    const tone = ctx.createOscillator();
-    tone.type = 'triangle';
-    const from = forward ? 640 : 380;
-    const to = forward ? 380 : 640;
-    tone.frequency.setValueAtTime(from, now);
-    tone.frequency.exponentialRampToValueAtTime(to, now + 0.1);
-
-    // Takes the edge off the triangle's upper harmonics, which are what would
-    // make this sound like a game rather than a page.
-    const toneFilter = ctx.createBiquadFilter();
-    toneFilter.type = 'lowpass';
-    toneFilter.frequency.value = 2200;
-
-    const toneGain = ctx.createGain();
-    toneGain.gain.setValueAtTime(0, now);
-    toneGain.gain.linearRampToValueAtTime(0.05, now + 0.006);
-    toneGain.gain.exponentialRampToValueAtTime(0.0001, now + bodyLength);
-
-    tone.connect(toneFilter);
-    toneFilter.connect(toneGain);
-    toneGain.connect(ctx.destination);
-    tone.start(now);
-    tone.stop(now + bodyLength);
+    source.connect(tone);
+    tone.connect(gain);
+    gain.connect(ctx.destination);
+    source.start(now);
+    source.stop(now + length);
   } catch {
     /* decoration only */
   }
