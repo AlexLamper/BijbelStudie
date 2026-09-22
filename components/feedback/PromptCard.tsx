@@ -1,8 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useId, useState } from 'react';
 
 import type { SerialisedPrompt } from '../../lib/feedbackPrompts';
+import StoreReviewCard from './StoreReviewCard';
+
+/** What `POST /api/feedback/response` may send back with the 201. */
+type StoreReviewTarget = { url: string; storeName: string };
 
 /**
  * One short question, inline, on a dark scene surface.
@@ -45,6 +49,12 @@ export default function PromptCard({
   const [text, setText] = useState('');
   const [choice, setChoice] = useState<string | null>(null);
   const [state, setState] = useState<'open' | 'thanks' | 'gone'>('open');
+  // Consent to be quoted on the site. Unticked, always: an opt-in that starts
+  // ticked is not consent, and the answer is stored either way.
+  const [consent, setConsent] = useState(false);
+  const [displayName, setDisplayName] = useState('');
+  const [storeReview, setStoreReview] = useState<StoreReviewTarget | null>(null);
+  const nameFieldId = useId();
 
   const dark = tone === 'dark';
   const ink = dark ? 'text-white' : 'text-ink';
@@ -56,7 +66,21 @@ export default function PromptCard({
   const followUp = choice ? prompt.followUp?.[choice] ?? null : null;
   const needsSubmit = prompt.input === 'text' || Boolean(followUp);
 
+  // The consent line appears only on a happy rating that actually carries a
+  // note: there is nothing to quote in a bare 5, and asking a reader who gave a
+  // 2 whether we may advertise with it would be tone deaf. The server checks
+  // all of this again - this only decides what is drawn.
+  const rating = prompt.ratingScale && choice && /^[1-5]$/.test(choice) ? Number(choice) : null;
+  const consentOffered =
+    prompt.publishConsent && rating !== null && rating >= prompt.publishMinRating;
+  const consentAvailable = Boolean(consentOffered && text.trim());
+
   function send(answers: Record<string, string>) {
+    // Consent travels only when it is both offered and ticked. A stale tick
+    // from before the note was cleared never leaves the browser.
+    const publish =
+      consentAvailable && consent ? { mayPublish: true, displayName: displayName.trim() } : null;
+
     void fetch('/api/feedback/response', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -65,8 +89,18 @@ export default function PromptCard({
         token: prompt.token,
         answers,
         context,
+        ...(publish ? { publish } : {}),
       }),
-    }).catch(() => {});
+    })
+      // The write stays fire-and-forget - the reader is never shown a failure -
+      // but the reply may carry the one-time store invitation, which is decided
+      // and capped on the server.
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { storeReview?: StoreReviewTarget | null } | null) => {
+        const target = data?.storeReview;
+        if (target?.url) setStoreReview({ url: target.url, storeName: target.storeName });
+      })
+      .catch(() => {});
     setState('thanks');
     onDone?.('submitted');
   }
@@ -90,6 +124,16 @@ export default function PromptCard({
   if (state === 'gone') return null;
 
   if (state === 'thanks') {
+    if (storeReview) {
+      return (
+        <StoreReviewCard
+          url={storeReview.url}
+          storeName={storeReview.storeName}
+          tone={tone}
+          onDismiss={() => setStoreReview(null)}
+        />
+      );
+    }
     return (
       <p className={`mt-4 text-[12.5px] ${inkMuted}`} role="status">
         {prompt.chrome.thanks}
@@ -166,6 +210,52 @@ export default function PromptCard({
             }`}
           />
         </>
+      )}
+
+      {consentAvailable && (
+        <div className="mt-3 rounded-lg border px-2.5 py-2" style={{ borderColor: border }}>
+          <label className="flex cursor-pointer items-start gap-2">
+            <input
+              type="checkbox"
+              checked={consent}
+              onChange={(event) => setConsent(event.target.checked)}
+              className="mt-[3px] h-[15px] w-[15px] flex-none cursor-pointer"
+              style={{ accentColor: '#0D9488' }}
+            />
+            <span className={`text-[12.5px] font-semibold leading-snug ${ink}`}>
+              {prompt.chrome.consent}
+            </span>
+          </label>
+          <p className={`mt-1 pl-[23px] text-[11.5px] leading-snug ${inkMuted}`}>
+            {prompt.chrome.consentDetail}
+          </p>
+          {consent && (
+            <div className="mt-2 pl-[23px]">
+              <label
+                htmlFor={nameFieldId}
+                className={`block text-[11.5px] font-semibold ${inkMuted}`}
+              >
+                {prompt.chrome.consentName}
+              </label>
+              <input
+                id={nameFieldId}
+                type="text"
+                value={displayName}
+                onChange={(event) => setDisplayName(event.target.value)}
+                maxLength={prompt.displayNameMax}
+                placeholder={prompt.chrome.consentNamePlaceholder}
+                className={`mt-1 w-full rounded-lg border px-2.5 py-1.5 text-[13px] outline-none ${
+                  dark
+                    ? 'border-white/15 bg-white/10 text-white placeholder:text-white/45'
+                    : 'border-line bg-surface text-ink placeholder:text-ink-faint'
+                }`}
+              />
+              <p className={`mt-1 text-[11px] leading-snug ${inkMuted}`}>
+                {prompt.chrome.consentNameHint}
+              </p>
+            </div>
+          )}
+        </div>
       )}
 
       <div className="mt-3 flex items-center gap-4">

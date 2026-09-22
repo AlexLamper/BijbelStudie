@@ -170,6 +170,22 @@ const FeedbackSchema = new mongoose.Schema(
     lastReplyAt: { type: Date, default: null },
     userSeenReplyAt: { type: Date, default: null },
 
+    // Consent to quote this answer publicly, and nothing more.
+    //
+    // Without `mayPublish: true` no word of a submission may appear on the
+    // site: the default is false, the checkbox is unticked, and it is only ever
+    // offered on a 4 or 5 rating that carries an actual note (validated
+    // server-side in `resolvePublishConsent`, never trusted from the body).
+    //
+    // `displayName` is what the reader CHOSE to be credited as. It is never
+    // auto-filled from `name` or from the account: a reader who agrees to be
+    // quoted has not agreed to be named, so an empty string means "no name".
+    // `publishedAt` is set by hand in /beheer/feedback; nothing publishes
+    // itself, and clearing it takes the quote down again.
+    mayPublish: { type: Boolean, default: false, index: true },
+    displayName: { type: String, default: "", maxlength: 60 },
+    publishedAt: { type: Date, default: null },
+
     // Set by the retention job once `userId`, `name` and `email` have been
     // cleared. The answer itself is kept - it is about the product, not the
     // person.
@@ -187,5 +203,8 @@ FeedbackSchema.index({ "context.quizQuestionId": 1 })
 FeedbackSchema.index({ promptId: 1, createdAt: -1 })
 // "Mijn feedback" and the dashboard's unseen-reply check.
 FeedbackSchema.index({ userId: 1, createdAt: -1 })
+// The published testimonials, newest first. Sparse-ish by nature: almost every
+// document has `publishedAt: null`.
+FeedbackSchema.index({ publishedAt: -1 })
 
 export default mongoose.models.Feedback || mongoose.model("Feedback", FeedbackSchema)

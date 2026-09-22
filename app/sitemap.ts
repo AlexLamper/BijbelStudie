@@ -30,6 +30,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/hulpbronnen`,          lastModified: SITE_CONTENT_DATE, changeFrequency: "weekly",  priority: 0.8 },
     { url: `${BASE_URL}/abonnement`,           lastModified: SITE_CONTENT_DATE, changeFrequency: "monthly", priority: 0.7 },
     { url: `${BASE_URL}/help`,                 lastModified: SITE_CONTENT_DATE, changeFrequency: "monthly", priority: 0.6 },
+    // Its content is the review wall itself, which changes whenever a reader
+    // leaves a rating - hence "weekly" rather than the marketing-page date.
+    { url: `${BASE_URL}/beoordelingen`,        lastModified: SITE_CONTENT_DATE, changeFrequency: "weekly",  priority: 0.5 },
     { url: `${BASE_URL}/contact`,              lastModified: SITE_CONTENT_DATE, changeFrequency: "yearly",  priority: 0.4 },
     { url: `${BASE_URL}/privacybeleid`,        lastModified: SITE_CONTENT_DATE, changeFrequency: "yearly",  priority: 0.2 },
     { url: `${BASE_URL}/algemene-voorwaarden`, lastModified: SITE_CONTENT_DATE, changeFrequency: "yearly",  priority: 0.2 },

@@ -243,16 +243,14 @@ function Navbar() {
 /** One fixed seed for every tree on this page, so the build output is stable. */
 const LANDING_SEED = "bijbelstudie-levensboom"
 
-/**
- * Real App Store rating data, once there is enough of it to average
- * honestly. Until product hands over real `rating`/`count`/`avatars`,
- * this stays `undefined` and ReviewsRow renders nothing - see its own
- * comment and the ground rules in bijbelstudie-hero/PROMPT.md.
- */
-const HERO_REVIEWS: ReviewsData | undefined = undefined
-
 /* ─── Hero ───────────────────────────────────────────────────── */
-function Hero() {
+/**
+ * `reviews` is the real, imported App Store summary, handed down from
+ * app/page.tsx - this file stays a non-async component, so it never touches
+ * the database itself. Undefined until the first import, and ReviewsRow then
+ * renders nothing rather than a placeholder number or a stock face.
+ */
+function Hero({ reviews }: { reviews?: ReviewsData }) {
   return (
     <section
       className="relative overflow-x-clip"
@@ -327,7 +325,7 @@ function Hero() {
             </a>
           </div>
 
-          <ReviewsRow data={HERO_REVIEWS} />
+          <ReviewsRow data={reviews} />
         </div>
 
         {/* Right side: the product visual. Fixed-size inner box, scaled down
@@ -838,7 +836,7 @@ function CTA() {
 
 
 /* ─── Page ───────────────────────────────────────────────────── */
-export default function LandingPage() {
+export default function LandingPage({ reviews }: { reviews?: ReviewsData }) {
   return (
     <div className={`relative min-h-screen ${LP_THEME_VARS}`} style={{ backgroundColor: T.page }}>
       {/* The header's stuck state is "is this pixel still on screen". A
@@ -850,7 +848,7 @@ export default function LandingPage() {
       <PromoBanner />
       <Navbar />
       <main>
-        <Hero />
+        <Hero reviews={reviews} />
         <StudyFlowSection />
         <StudyDiscovery />
         <BibleLibrary />

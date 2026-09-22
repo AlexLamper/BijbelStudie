@@ -88,7 +88,26 @@ export interface PromptDef {
    * document's `rating`, so the inbox's rating filter covers it.
    */
   ratingScale?: boolean;
+  /**
+   * Whether a happy answer here may ask permission to be quoted on the site.
+   * Only on a `ratingScale` prompt, and the consent is only ever offered - and
+   * only ever accepted - on a rating of `PUBLISH_MIN_RATING` or better that
+   * also carries a written note. See `resolvePublishConsent`.
+   */
+  publishConsent?: boolean;
+  /**
+   * Whether a happy answer here may be followed by the one-time invitation to
+   * leave a public store review. Web only, once per reader ever, never paid
+   * for. See `lib/storeReviewCta.ts`.
+   */
+  storeReviewCta?: boolean;
 }
+
+/** A rating at or above this may be asked for consent, and for a store review. */
+export const PUBLISH_MIN_RATING = 4;
+
+/** What a reader may choose to be credited as. Short on purpose. */
+export const DISPLAY_NAME_MAX = 60;
 
 /** Five faces for a 1 to 5 rating. The keys are the numbers. */
 const RATING_OPTIONS: PromptOption[] = [
@@ -242,6 +261,8 @@ export const PROMPTS: Record<string, PromptDef> = {
     platforms: ['web'],
     budgeted: true,
     ratingScale: true,
+    publishConsent: true,
+    storeReviewCta: true,
   },
 
   /**
@@ -311,6 +332,18 @@ export const PROMPT_CHROME = {
   skip: 'Sla over',
   thanks: 'Dank je. Dit gaat rechtstreeks naar de maker.',
   privacy: 'Je antwoord is gekoppeld aan je account. Alleen de maker leest het.',
+  /**
+   * The consent to be quoted. Two lines on purpose: the first is what is being
+   * asked, the second is exactly what would end up on the site. The checkbox is
+   * unticked, the answer is stored either way, and nothing here is worded as a
+   * favour - consent that is nudged is not freely given.
+   */
+  consent: 'Je mag dit als aanbeveling op de site tonen',
+  consentDetail:
+    'We tonen dan alleen deze tekst en de naam die je hieronder kiest. Verder niets, en je kunt het later laten weghalen.',
+  consentName: 'Naam bij de aanbeveling',
+  consentNamePlaceholder: 'Bijvoorbeeld: Marieke',
+  consentNameHint: 'Laat leeg om zonder naam getoond te worden.',
 } as const;
 
 /**
@@ -352,6 +385,73 @@ export function validateAnswers(
   return out;
 }
 
+/**
+ * The 1 to 5 rating carried by a validated answer set, or null.
+ *
+ * Only a `ratingScale` prompt has one: the option keys of every other choice
+ * question are words, and a question that offers "ja" and "nee" has no score
+ * hiding in it.
+ */
+export function ratingFromAnswers(
+  def: PromptDef,
+  answers: { key: string; value: string }[],
+): number | null {
+  if (!def.ratingScale) return null;
+  const chosen = answers.find((entry) => entry.key === 'keuze')?.value;
+  return chosen && /^[1-5]$/.test(chosen) ? Number(chosen) : null;
+}
+
+/** Whether a validated answer set carries a written note beside the choice. */
+export function hasWrittenNote(answers: { key: string; value: string }[]): boolean {
+  return answers.some((entry) => entry.key !== 'keuze' && entry.value.trim().length > 0);
+}
+
+export interface PublishConsent {
+  mayPublish: boolean;
+  /** What the reader chose to be credited as. Empty means: no name. */
+  displayName: string;
+}
+
+const NO_CONSENT: PublishConsent = { mayPublish: false, displayName: '' };
+
+/**
+ * Whether this submission may be quoted on the site, decided on the server.
+ *
+ * The client sends `{ mayPublish, displayName }` and none of it is believed.
+ * Consent survives only when all four hold, and the last two are the reason
+ * this is a server-side function rather than a checkbox:
+ *
+ *   1. the prompt is one that may ask at all (`publishConsent`),
+ *   2. the reader actually ticked the box (strictly `true`, never "true"),
+ *   3. the rating is `PUBLISH_MIN_RATING` or better,
+ *   4. there is a written note - a bare 5 is a score, not a testimonial.
+ *
+ * Anything else is coerced to "no", not rejected: a 3-star answer that claims
+ * consent is still a perfectly good piece of feedback and is stored as one.
+ *
+ * `displayName` is only kept when consent stands, is taken from the body rather
+ * than from the account, and is never defaulted to the reader's real name.
+ */
+export function resolvePublishConsent(
+  def: PromptDef,
+  answers: { key: string; value: string }[],
+  raw: unknown,
+): PublishConsent {
+  if (!def.publishConsent) return NO_CONSENT;
+  if (!raw || typeof raw !== 'object') return NO_CONSENT;
+
+  const input = raw as Record<string, unknown>;
+  if (input.mayPublish !== true) return NO_CONSENT;
+
+  const rating = ratingFromAnswers(def, answers);
+  if (rating === null || rating < PUBLISH_MIN_RATING) return NO_CONSENT;
+  if (!hasWrittenNote(answers)) return NO_CONSENT;
+
+  const displayName =
+    typeof input.displayName === 'string' ? input.displayName.trim().slice(0, DISPLAY_NAME_MAX) : '';
+  return { mayPublish: true, displayName };
+}
+
 /** The shape served to a client. Copy included; internal rules excluded. */
 export function serialisePrompt(id: PromptId, token: string) {
   const def = PROMPTS[id];
@@ -366,6 +466,13 @@ export function serialisePrompt(id: PromptId, token: string) {
     freeTextKey: def.freeTextKey ?? null,
     placeholder: def.placeholder ?? null,
     maxLen: def.maxLen,
+    // The client needs to know whether the options are a score and whether the
+    // consent line may appear at all. Both are rules, not copy, so they are
+    // re-checked on the way back in; this only decides what is drawn.
+    ratingScale: def.ratingScale ?? false,
+    publishConsent: def.publishConsent ?? false,
+    publishMinRating: PUBLISH_MIN_RATING,
+    displayNameMax: DISPLAY_NAME_MAX,
     chrome: PROMPT_CHROME,
     token,
   };

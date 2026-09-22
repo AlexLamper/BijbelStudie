@@ -151,6 +151,12 @@ const pageConfigs: Record<string, PageMetadataConfig> = {
     path: '/contact',
     type: 'website'
   },
+  reviews: {
+    title: 'Beoordelingen',
+    description: 'Wat lezers van BijbelStudie vinden. Het echte gemiddelde uit de App Store, de verdeling over alle sterren, en reacties van lezers op de site.',
+    path: '/beoordelingen',
+    type: 'website'
+  },
   admin: {
     title: 'Beheer',
     description: 'Beheeromgeving van BijbelStudie.',

@@ -1,5 +1,7 @@
 import type { Metadata } from "next"
 import LandingPage from "../components/landing/LandingPage"
+import { reviewsDataFromSummary } from "../components/landing/ReviewsRow"
+import { getStoreReviewSummary } from "../lib/storeReviews"
 import { JsonLd } from "../components/seo/JsonLd"
 import { HOME_FAQS } from "../lib/content/homeFaq"
 import { BASE_URL, ogImageUrl, OG_IMAGE_WIDTH, OG_IMAGE_HEIGHT, SITE_NAME, TWITTER_HANDLE, SITE_LOCALE } from "../lib/seo/constants"
@@ -73,11 +75,23 @@ export const metadata: Metadata = {
  * If middleware's `getToken` throws on a stale cookie it falls through without
  * redirecting, and that visitor sees this page - exactly as they did before,
  * because the guard below would have read the same unreadable cookie as null.
+ *
+ * Built once, then rebuilt at most once an hour. The hero's trust row now
+ * shows the real App Store average, which lives in MongoDB, so the HTML is no
+ * longer identical forever - but it still must not cost a query per visitor.
+ * `revalidate` replaces the old `dynamic = "force-static"`, which pins
+ * revalidate to false and would have frozen the rating at whatever it was on
+ * deploy day. Nothing in the landing tree reads cookies, headers or
+ * searchParams, so the page still prerenders rather than going dynamic.
  */
-export const dynamic = "force-static"
+export const revalidate = 3600
 
 export default async function Page() {
   const homeUrl = `${BASE_URL}/`
+  // Null before the first import, and null again if the database is
+  // unreachable during a build (getStoreReviewSummary swallows that itself) -
+  // in both cases the trust row renders nothing rather than a placeholder.
+  const reviews = reviewsDataFromSummary(await getStoreReviewSummary())
   const pageGraph = graph(
     webPageNode({
       path: "/",
@@ -98,7 +112,7 @@ export default async function Page() {
   return (
     <>
       <JsonLd data={pageGraph} />
-      <LandingPage />
+      <LandingPage reviews={reviews} />
     </>
   )
 }
