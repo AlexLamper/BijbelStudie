@@ -39,7 +39,6 @@ const ALLOWED_STRING_KEYS = [
 
 const ALLOWED_BOOLEAN_KEYS = [
   'onboardingCompleted',
-  'tourCompleted',
   'highContrast',
   'showVerseNumbers',
   // The daily reading reminder. The notification still fires locally on the

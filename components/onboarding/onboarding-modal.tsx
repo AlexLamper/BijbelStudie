@@ -2,15 +2,15 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
-import { Check, BookOpen, BookMarked, Library, Sun, Moon, Monitor } from "lucide-react"
+import { ArrowLeft, Check, BookOpen, BookMarked, Library, Sun, Moon, Monitor } from "lucide-react"
 import { useTheme } from "next-themes"
 import { useRouter } from "next/navigation"
-import Image from "next/image"
 import Link from "next/link"
 import TreeCanvas from "../levensboom/TreeCanvas"
 import { useLevensboom } from "../../hooks/useLevensboom"
 import { catalogItem } from "../../lib/levensboom/catalog"
 import { getBibleAttribution } from "../../lib/bible-attribution"
+import { writeGuestOnboarding } from "../../lib/guestOnboarding"
 import { cn } from "../../lib/utils"
 import {
   useStudyStyle,
@@ -266,14 +266,17 @@ interface OnboardingModalProps {
    */
   preview?: boolean
   /**
-   * Run for a visitor with no account - "Doorgaan als gast" on /inloggen or
-   * /registreren. See components/onboarding/guest-onboarding-wrapper.tsx.
+   * Run for a visitor with no account - anyone who reaches the product
+   * signed out, plus "Doorgaan als gast" on /inloggen and /registreren. See
+   * components/onboarding/guest-onboarding-wrapper.tsx.
    *
-   * Shares `preview`'s shape (skip the preferences POST, skip `plant()`, since
-   * both are account-bound and there is no account to write onto) but is NOT
-   * `preview`: this is the visitor's own first run, not a reviewer's replay,
-   * so the theme they picked in step 4 stays picked instead of being put back,
-   * and the study-style answer still reorders their menu for this visit.
+   * The questions are the same ones an account answers, in the same order.
+   * Only the destination differs: the preferences POST and `plant()` are
+   * account-bound and would just 401, so the answers are written to
+   * localStorage and replayed onto the account the visitor later makes (see
+   * lib/guestOnboarding.ts). Unlike `preview`, this is the visitor's own first
+   * run, so the theme they picked in step 4 stays picked instead of being put
+   * back, and the study-style answer reorders their menu for this visit.
    */
   guest?: boolean
 }
@@ -438,9 +441,24 @@ export function OnboardingModal({
       }
       if (guest) {
         // No account to save onto: the preferences POST and plant() are both
-        // account-bound and would just 401. The theme is already live (set
-        // per click in step 4) and is left as the visitor chose it.
+        // account-bound and would just 401. The answers go to localStorage
+        // instead and are replayed onto the account the moment the visitor
+        // makes one - see lib/guestOnboarding.ts. The theme is already live
+        // (set per click in step 4) and is left as the visitor chose it.
         setStudyStyle(prefs.studyStyle)
+        writeGuestOnboarding(
+          complete
+            ? {
+                translation: prefs.translation,
+                commentary: prefs.commentary,
+                intent: prefs.intent,
+                studyStyle: prefs.studyStyle,
+                species,
+              }
+            // A skip answered nothing: the record exists only so this browser
+            // is not asked again, and carries nothing onto a later account.
+            : { skipped: true },
+        )
         setOpen(false)
         if (complete) onComplete()
         else onClose()
@@ -460,6 +478,17 @@ export function OnboardingModal({
   const next = async () => {
     if (step < TOTAL) goTo(step + 1)
     else await finish(true)
+  }
+
+  /**
+   * The guest's last screen, second button: keep the answers, then go and make
+   * an account for them. The flow closes first, so /registreren is not opened
+   * underneath it, and the answers are already in localStorage by the time the
+   * new account exists - where onboarding-wrapper.tsx picks them up.
+   */
+  const registerInstead = async () => {
+    await finish(true)
+    router.push("/registreren")
   }
 
   /**
@@ -552,29 +581,43 @@ export function OnboardingModal({
               surface scrolls instead of clipping the centred block. */}
           <div className="flex min-h-full flex-col">
 
-            {/* Top bar: who is asking, and how far along you are. The five
-                segments are the visual indicator; the "Stap x van y" line above
-                the question is the same information as text, which is what a
-                screen reader gets. */}
-            <div className="flex items-center justify-between gap-6 px-5 py-4 sm:px-8 sm:py-5">
-              <div className="flex items-center gap-2.5">
-                <Image src="/images/icon-192.png" alt="" width={28} height={28} className="rounded-lg" />
-                <span className="text-[15px] font-bold text-foreground">
-                  Bijbel<span style={{ color: "#0D9488" }}>Studie</span>
-                </span>
+            {/* Top bar: back, how far along you are, and the way out.
+                One continuous bar rather than five segments, because the bar
+                fills as you answer and that is the thing being communicated -
+                progress, not a count of screens. It is aria-hidden; the "Stap x
+                van y" line above the question says the same thing in words,
+                which is what a screen reader gets.
+
+                Both icons-and-controls rules hold: the arrow IS the back
+                control, not decoration next to one. */}
+            <div className="flex items-center gap-4 px-5 py-4 sm:gap-6 sm:px-8 sm:py-5">
+              <button
+                type="button"
+                onClick={() => goTo(step - 1)}
+                disabled={step === 1}
+                aria-label="Vorige stap"
+                className="flex h-9 w-9 flex-none items-center justify-center rounded-full text-gray-600 transition-colors hover:bg-muted hover:text-gray-900 disabled:invisible motion-reduce:transition-none dark:text-muted-foreground dark:hover:text-foreground"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </button>
+              <div
+                aria-hidden="true"
+                className="h-2.5 flex-1 overflow-hidden rounded-full bg-gray-200 dark:bg-neutral-800"
+              >
+                <span
+                  className="block h-full rounded-full transition-[width] duration-300 ease-out motion-reduce:transition-none"
+                  style={{ backgroundColor: TEAL, width: `${(step / TOTAL) * 100}%` }}
+                />
               </div>
-              <div aria-hidden="true" className="flex items-center gap-1.5">
-                {Array.from({ length: TOTAL }, (_, i) => (
-                  <span
-                    key={i}
-                    className={cn(
-                      "h-1.5 w-6 rounded-full transition-colors duration-300 motion-reduce:transition-none sm:w-10",
-                      i >= step && "bg-gray-300 dark:bg-neutral-700",
-                    )}
-                    style={i < step ? { backgroundColor: TEAL } : undefined}
-                  />
-                ))}
-              </div>
+              {/* Onboarding is never a gate: skipping keeps the defaults. */}
+              <button
+                type="button"
+                onClick={() => finish(false)}
+                disabled={busy}
+                className="flex-none py-2 text-sm text-gray-600 transition-colors hover:text-gray-900 disabled:opacity-60 motion-reduce:transition-none dark:text-muted-foreground dark:hover:text-foreground"
+              >
+                Overslaan
+              </button>
             </div>
 
             {/* The question, centred in whatever is left. One column width on
@@ -823,31 +866,38 @@ export function OnboardingModal({
                     className="w-full rounded-xl py-3.5 text-[15px] font-semibold text-white transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-60 motion-reduce:transition-none"
                     style={{ backgroundColor: TEAL_TEXT }}
                   >
-                    {step === TOTAL ? "Planten en beginnen" : "Volgende"}
+                    {step === TOTAL ? (guest ? "Beginnen" : "Planten en beginnen") : "Volgende"}
                   </button>
 
-                  <div className="mt-3 flex items-center justify-between">
+                  {/* The account prompt, and nowhere earlier.
+                      A guest answers every question without being asked to sign
+                      up; only here, with five answers and a tree behind them, is
+                      there something to keep. It is a link next to the button
+                      that carries on into the app, never in front of it. */}
+                  {step === TOTAL && guest && (
+                    // A button, not a link: the answers are written by `finish`,
+                    // so leaving for /registreren before it has run would lose
+                    // the five choices this screen exists to collect - and the
+                    // wrapper lives in the root layout, so the flow would still
+                    // be open on top of the registration form.
                     <button
-                      onClick={() => goTo(step - 1)}
-                      disabled={step === 1}
-                      className="py-2 text-sm text-gray-600 transition-colors hover:text-gray-900 disabled:invisible motion-reduce:transition-none dark:text-muted-foreground dark:hover:text-foreground"
-                    >
-                      Terug
-                    </button>
-                    {/* Onboarding is never a gate: skipping keeps the defaults. */}
-                    <button
-                      onClick={() => finish(false)}
+                      onClick={registerInstead}
                       disabled={busy}
-                      className="py-2 text-sm text-gray-600 transition-colors hover:text-gray-900 disabled:opacity-60 motion-reduce:transition-none dark:text-muted-foreground dark:hover:text-foreground"
+                      data-track="onboarding_guest_register"
+                      className={cn(
+                        "mt-3 block w-full rounded-xl border-2 py-3 text-center text-[15px] font-semibold transition-colors hover:bg-teal-50 disabled:opacity-60 motion-reduce:transition-none dark:hover:bg-[rgba(13,148,136,0.14)]",
+                        TEAL_INK,
+                      )}
+                      style={{ borderColor: TEAL }}
                     >
-                      Overslaan
+                      Gratis account maken
                     </button>
-                  </div>
+                  )}
 
                   {step === TOTAL && (
                     <p className="mt-4 text-xs leading-relaxed text-gray-600 dark:text-muted-foreground">
                       {guest ? (
-                        "Dit is een voorproefje: je keuzes worden pas bewaard zodra je een gratis account maakt."
+                        "Je keuzes staan klaar in deze browser. Maak later gratis een account aan: je voorkeuren en je boom gaan dan mee."
                       ) : (
                         <>
                           Lezen is gratis, in elke vertaling. Met{" "}

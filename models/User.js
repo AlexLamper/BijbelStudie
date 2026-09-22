@@ -148,6 +148,8 @@ const UserSchema = new mongoose.Schema(
       // the guided order either way, which is the order the menu already had.
       studyStyle: { type: String, enum: ["guided", "self", null] },
       onboardingCompleted: { type: Boolean, default: false },
+      // Legacy: the removed guided tour's "seen" flag. Nothing reads or writes
+      // it any more; kept so stored documents that carry it stay valid.
       tourCompleted: { type: Boolean, default: false },
       fontSize: { type: String, default: "base" },
       fontFamily: { type: String, default: "sans" },

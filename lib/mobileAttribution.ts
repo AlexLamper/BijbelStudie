@@ -1,5 +1,9 @@
 import { BIBLE_ATTRIBUTIONS } from './bible-attribution';
-import { STEPBIBLE_ATTRIBUTION } from './mobileLicensing';
+import {
+  OPENBIBLE_CROSSREF_ATTRIBUTION,
+  OPENBIBLE_CROSSREF_ATTRIBUTION_SHORT,
+  STEPBIBLE_ATTRIBUTION,
+} from './mobileLicensing';
 
 /**
  * Attribution shown in the mobile app under every chapter.
@@ -49,4 +53,19 @@ export function mobileCommentaryAttribution(commentaryId: string): string {
 
 export function mobileOriginalAttribution(): string {
   return STEPBIBLE_ATTRIBUTION;
+}
+
+/**
+ * CC BY credit for the cross-reference data.
+ *
+ * `short` is the default because the one caller today is the v1 chapter
+ * response, which the app renders as a sheet footer where the long notice
+ * would wrap to four lines. Both strings live in `mobileLicensing.ts` and the
+ * website imports the same constants, so app and web can never drift into two
+ * differently worded credits for the same licence.
+ */
+export function mobileCrossRefAttribution(form: 'short' | 'long' = 'short'): string {
+  return form === 'long'
+    ? OPENBIBLE_CROSSREF_ATTRIBUTION
+    : OPENBIBLE_CROSSREF_ATTRIBUTION_SHORT;
 }

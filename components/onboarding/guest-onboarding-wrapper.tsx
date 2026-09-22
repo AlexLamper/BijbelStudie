@@ -2,7 +2,12 @@
 
 import dynamic from "next/dynamic"
 import { useEffect, useState } from "react"
-import { GUEST_ONBOARDING_PENDING_KEY } from "../../lib/guestOnboarding"
+import { usePathname } from "next/navigation"
+import {
+  guestOnboardingRoute,
+  hasGuestOnboarding,
+  takeGuestOnboardingPending,
+} from "../../lib/guestOnboarding"
 
 /** Loaded on demand, never with the page - see onboarding-wrapper.tsx. */
 const OnboardingModal = dynamic(
@@ -11,39 +16,48 @@ const OnboardingModal = dynamic(
 )
 
 /**
- * The account onboarding's guest counterpart.
+ * The first-run flow for a visitor without an account.
  *
- * `OnboardingWrapper` only mounts once `session?.user` exists (app/layout.tsx
- * gates it there), because it reads the account's `onboardingCompleted` flag -
- * so a visitor who chooses "Doorgaan als gast" on /inloggen or /registreren
- * never saw the first-run tour at all, even though a guest is exactly who
- * benefits most from being shown around the platform.
+ * A guest gets the same questions a new account gets, in the same order, from
+ * the same component - there is no lesser guest version. What differs is where
+ * the answers go: an account posts them to /api/user/preferences, a guest keeps
+ * them in localStorage until there is an account to post them to (see
+ * lib/guestOnboarding.ts and components/onboarding/onboarding-wrapper.tsx).
  *
- * There is no account here to carry a flag, so the signal is a one-shot
- * localStorage key instead: `ContinueAsGuest` sets it the moment a visitor
- * confirms they want to continue without an account, right before it sends
- * them into the app. This wrapper - mounted in the root layout for every
- * signed-out page - reads it on the very next render and removes it
- * immediately, so a later refresh (or simply browsing on as a guest) can
- * never re-trigger the modal.
+ * Two things open it, and the order matters:
+ *
+ * 1. The one-shot key "Doorgaan als gast" leaves behind, which wins on any
+ *    page, because the visitor has just told us they are starting here.
+ * 2. Otherwise: a product route (the studies, the reader, a lesson) that this
+ *    browser has never answered the questions on. The wrapper is mounted by the
+ *    root layout, so it is also alive on the marketing pages, the pricing page
+ *    and the auth forms - a full-screen flow over any of those would interrupt
+ *    what the visitor actually came for, so it stays shut there.
+ *
+ * There is no sign-up wall anywhere in here. The account nudge is the last
+ * screen of the flow, after the visitor has answers worth keeping.
  */
 export function GuestOnboardingWrapper() {
+  const pathname = usePathname()
   const [shouldShow, setShouldShow] = useState(false)
   const [contentLoaded, setContentLoaded] = useState(false)
 
   useEffect(() => {
-    try {
-      if (localStorage.getItem(GUEST_ONBOARDING_PENDING_KEY)) {
-        localStorage.removeItem(GUEST_ONBOARDING_PENDING_KEY)
-        setShouldShow(true)
-      }
-    } catch {
-      /* no localStorage (private mode, etc.) - guest simply gets no tour */
+    if (shouldShow) return
+    // Both reads go through lib/guestOnboarding, which falls back to an
+    // in-memory copy when the browser hands back nothing at all - so a private
+    // window still runs the flow once and still closes it for good.
+    if (takeGuestOnboardingPending()) {
+      setShouldShow(true)
+      return
     }
-  }, [])
+    if (guestOnboardingRoute(pathname) && !hasGuestOnboarding()) {
+      setShouldShow(true)
+    }
+  }, [pathname, shouldShow])
 
   // Same "wait for the page behind it to finish loading" discipline as the
-  // account wrapper, so the modal never flashes over a half-rendered page.
+  // account wrapper, so the flow never flashes over a half-rendered page.
   useEffect(() => {
     if (!shouldShow) return
 

@@ -47,6 +47,7 @@
   "tabs": {
     "inductive_study": "Inductieve Studiemethode",
     "commentary": "Commentaar",
+    "crossrefs": "Verwijzingen",
     "historical": "Historische Context",
     "general_info": "Algemene Info",
     "related": "Gerelateerde Verzen",
@@ -157,6 +158,32 @@
       "completed_steps": "Voltooide stappen",
       "save_progress": "Voortgang Opslaan",
       "load_progress": "Voortgang Laden"
+    }
+  },
+  "cross_references": {
+    "panel_title": "Kruisverwijzingen · {{ref}}",
+    "expand": "Toon alle {{n}}",
+    "collapse": "Minder tonen",
+    "navigate": "Ga naar tekst",
+    "back": "Terug naar {{ref}}",
+    "empty": "Geen kruisverwijzingen bij dit vers.",
+    "error": "Kruisverwijzingen konden niet worden geladen.",
+    "numbering_fallback": "Versnummering kan in deze vertaling afwijken.",
+    "sort_hint": "Meest relevante eerst",
+    "open_in_lezen": "Openen in Lezen",
+    "missing_target": "Dit vers ontbreekt in deze vertaling.",
+    "offline": "Niet offline beschikbaar",
+    "tab_intro": "Andere bijbelteksten die over hetzelfde spreken.",
+    "chapter_empty": "Geen kruisverwijzingen in dit hoofdstuk.",
+    "passage_empty": "Geen kruisverwijzingen in dit gedeelte.",
+    "verse_heading": "Vers {{n}}",
+    "loading": "Kruisverwijzingen laden…",
+    "aria": {
+      "verse_actions": "Acties bij vers {{n}}",
+      "toggle": "Kruisverwijzingen bij vers {{n}}",
+      "expand_row": "Toon de tekst van {{ref}}",
+      "collapse_row": "Verberg de tekst van {{ref}}",
+      "jump_to_verse": "Spring naar vers {{n}} in de tekst"
     }
   },
   "file_type": "Bestandstype",

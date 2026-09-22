@@ -6,6 +6,8 @@ import AiAssistantIcon from '../ui/AiAssistantIcon';
 import { useSession } from 'next-auth/react';
 import TabComponent from './TabComponent';
 import { FadeBottom } from '../kit/primitives';
+import type { CrossRefNavigateTarget } from './crossrefs/CrossRefList';
+import { useCrossRefCopy } from './crossrefs/copy';
 
 import { ReadingPreferences } from '../../hooks/useReadingPreferences';
 import { useIsPro } from '../../hooks/useIsPro';
@@ -28,6 +30,12 @@ interface StudyMaterialsSectionProps {
   onActiveTabChange?: (id: string) => void;
   aiQuestion?: string | null;
   onAiQuestionConsumed?: () => void;
+  /** The translation's own book list, for cross-reference labels. */
+  books?: readonly string[];
+  /** The Verwijzingen tab scrolls the reader beside it to a verse. */
+  onFocusVerse?: (verse: number) => void;
+  /** A cross-reference was followed from the tab. */
+  onCrossRefNavigate?: (target: CrossRefNavigateTarget) => void;
 }
 
 export default function StudyMaterialsSection({
@@ -46,7 +54,11 @@ export default function StudyMaterialsSection({
   onActiveTabChange,
   aiQuestion,
   onAiQuestionConsumed,
+  books,
+  onFocusVerse,
+  onCrossRefNavigate,
 }: StudyMaterialsSectionProps) {
+  const c = useCrossRefCopy();
   const [internalTab, setInternalTab] = useState('commentary');
   const activeTab = activeTabProp ?? internalTab;
   const setActiveTab = onActiveTabChange ?? setInternalTab;
@@ -60,13 +72,19 @@ export default function StudyMaterialsSection({
   const showProMark = sessionStatus !== 'loading' && !isPro;
 
   /**
-   * The five tabs, in the design's order and with its two marks: a PRO label on
+   * The six tabs, in the design's order and with its two marks: a PRO label on
    * Grondtekst (not for Pro readers), and an "AI" speech bubble on the AI assistant. Only Commentaar carries
    * an icon - the rest are words, so the row fits the 446 px pane without
    * wrapping (design_handoff_web/PAGES.md §3).
+   *
+   * "Verwijzingen" sits after Commentaar (CROSS_LINKS_PLAN.md §4.1). It is the
+   * short label on purpose: the row is tight, and "Kruisverwijzingen" would be
+   * the widest thing in it. The row scrolls horizontally if it ever stops
+   * fitting, which is what `overflow-x-auto` below is already for.
    */
   const tabs = [
     { id: 'commentary', label: t('tabs.commentary'),   icon: true,  isPro: false, star: false },
+    { id: 'crossrefs',  label: c('tab'),               icon: false, isPro: false, star: false },
     { id: 'original',   label: t('tabs.original'),     icon: false, isPro: showProMark, star: false },
     { id: 'historical', label: t('tabs.general_info'), icon: false, isPro: false, star: false },
     { id: 'notes',      label: t('tabs.notes'),        icon: false, isPro: false, star: false },
@@ -128,6 +146,9 @@ export default function StudyMaterialsSection({
           preferences={preferences}
           aiQuestion={aiQuestion}
           onAiQuestionConsumed={onAiQuestionConsumed}
+          books={books}
+          onFocusVerse={onFocusVerse}
+          onCrossRefNavigate={onCrossRefNavigate}
         />
         {/* The same 96 px wash the passage pane draws. */}
         <FadeBottom />

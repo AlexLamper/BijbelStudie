@@ -8,10 +8,17 @@ import { useReadingPreferences } from '../../hooks/useReadingPreferences';
 import BibleViewerSection from '../../components/study/BibleViewerSection';
 import StudyMaterialsSection from '../../components/study/StudyMaterialsSection';
 import AiAssistantWidget from '../../components/study/AiAssistantWidget';
-import { BookOpen, CheckCircle, ChevronLeft, ChevronRight, X, Trophy, MessageCircle } from 'lucide-react';
+import { ArrowLeft, BookOpen, CheckCircle, ChevronLeft, ChevronRight, X, Trophy, MessageCircle } from 'lucide-react';
 import { toast } from '../../hooks/use-toast';
 import { normaliseDashes } from '../../lib/textFormat';
+import { trackNow } from '../../lib/analytics';
+import { toBookIndex } from '../../lib/readChaptersCanon';
+import { resolveBookInList } from '../../lib/book-mapping';
+import { buildReaderSearch, parseReaderLocation, readerLocationKey } from '../../lib/readerUrl';
 import AppShell from '../../components/shell/AppShell';
+import ResizableSplit from '../../components/ui/resizable-split';
+import { testamentPair, type CrossRefNavigateTarget } from '../../components/study/crossrefs/CrossRefList';
+import { useCrossRefCopy } from '../../components/study/crossrefs/copy';
 
 const COMPLETED_KEY = 'bijbelstudie_completed_studies';
 
@@ -213,6 +220,7 @@ function MiniStudyBar({
 /* ── Inner page ──────────────────────────────────────────────── */
 function StudyPageInner() {
   const { t, i18n } = useTranslation('study');
+  const c = useCrossRefCopy();
   const lng = i18n.resolvedLanguage;
   const searchParams = useSearchParams();
 
@@ -225,6 +233,26 @@ function StudyPageInner() {
   const [mobileView, setMobileView]                 = useState<'bible' | 'materials'>('bible');
   const [materialsTab, setMaterialsTab]             = useState('commentary');
   const [aiQuestion, setAiQuestion]                 = useState<string | null>(null);
+  /**
+   * Where a cross-reference (or a verse heading in the Verwijzingen tab) sent
+   * the reader. Stored as a full location rather than a bare verse number, so
+   * the mark disappears by itself the moment they turn the page - see
+   * `focusVerse` below.
+   *
+   * Seeded from `?vers`, which is what a cross-reference link carries and what
+   * the Back button restores. Straight from the query rather than through an
+   * effect, so the mark is already in place on the first render that has a
+   * passage - an effect would set it one render too late and the URL sync
+   * below would have written a `?vers`-less entry in between.
+   */
+  const [focusTarget, setFocusTarget] = useState<{ book: string; chapter: number; verse: number } | null>(() => {
+    const linked = parseReaderLocation(searchParams);
+    return linked?.verse ? { book: linked.book, chapter: linked.chapter, verse: linked.verse } : null;
+  });
+  /** One level of "back", offered as a chip beside the chapter line. */
+  const [crossRefBack, setCrossRefBack] = useState<
+    { book: string; chapter: number; verse: number; label: string; surface: string } | null
+  >(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -302,6 +330,184 @@ function StudyPageInner() {
   }, []);
 
   const handleAiQuestionConsumed = useCallback(() => setAiQuestion(null), []);
+
+  /**
+   * Opens a passage in this reader and marks the verse.
+   *
+   * Same two-step as `goToLesson`: a different book has to change the book
+   * first and park the chapter in `pendingChapter`, because `handleBookChange`
+   * resets the chapter to 1 and the real one can only be applied once that
+   * book's chapter list has loaded.
+   *
+   * `verse` is null when the passage was asked for without one - a Back to a
+   * plain chapter URL - and then nothing is marked.
+   */
+  const openPassage = useCallback((book: string, chapter: number, verse: number | null) => {
+    setFocusTarget(verse === null ? null : { book, chapter, verse });
+    if (book !== selectedBook) {
+      bookChangeRef.current(book);
+      setPendingChapter(chapter);
+    } else {
+      chapterChangeRef.current(chapter);
+    }
+    // On a phone only one pane is on screen; the jump is pointless behind the
+    // materials pane.
+    setMobileView('bible');
+  }, [selectedBook]);
+
+  const handleCrossRefNavigate = useCallback((target: CrossRefNavigateTarget) => {
+    // ONE level of back, never a chain: the chip always points at the verse the
+    // reader was on when they followed a reference (CROSS_LINKS_PLAN.md §4.2).
+    setCrossRefBack({
+      book: selectedBook,
+      chapter: selectedChapter,
+      verse: target.fromVerse,
+      label: target.fromLabel,
+      surface: target.surface,
+    });
+    openPassage(target.book, target.chapter, target.verse);
+  }, [openPassage, selectedBook, selectedChapter]);
+
+  /** A verse heading in the Verwijzingen tab: scroll the reader beside it. */
+  const handleFocusVerse = useCallback((verse: number) => {
+    setFocusTarget({ book: selectedBook, chapter: selectedChapter, verse });
+    setMobileView('bible');
+  }, [selectedBook, selectedChapter]);
+
+  const handleCrossRefBack = useCallback(() => {
+    if (!crossRefBack) return;
+    const from = crossRefBack;
+    setCrossRefBack(null);
+    const pair = testamentPair(toBookIndex(selectedBook), toBookIndex(from.book));
+    trackNow('crossref_followed', {
+      surface: from.surface,
+      action: 'back',
+      platform: 'web',
+      ...(pair ? { testament: pair } : {}),
+    });
+    openPassage(from.book, from.chapter, from.verse);
+  }, [crossRefBack, openPassage, selectedBook]);
+
+  /**
+   * The mark only belongs to the passage it was set on, so turning the page
+   * clears it without anything having to remember to.
+   */
+  const focusVerse =
+    focusTarget && focusTarget.book === selectedBook && focusTarget.chapter === selectedChapter
+      ? focusTarget.verse
+      : null;
+
+  /** Back where they started: nothing left to go back to. */
+  const showBackChip =
+    crossRefBack !== null &&
+    !(crossRefBack.book === selectedBook && crossRefBack.chapter === selectedChapter);
+
+  /* ── URL ⇄ reader (CROSS_LINKS_PLAN.md §4.2, phase 2b) ────────
+   *
+   * The reader's place lived in React state only: `useBibleData` read
+   * `?book`/`?chapter` on mount and never again, so following a
+   * cross-reference changed the screen but not the address bar, and Back left
+   * /lezen altogether instead of undoing the jump.
+   *
+   * Two effects keep the two in step, both guarded by the same ref - the
+   * location the URL is currently understood to name. Whichever side moves
+   * first writes that ref, so the other side recognises its own move and does
+   * not bounce it back. That is the whole loop guard.
+   *
+   * `history.pushState` rather than `router.push`: the history entry is the
+   * same one (Back and Forward work), it is what this codebase already uses to
+   * rewrite a query string (`lib/commands/deepLink.ts`,
+   * `components/study/flow/StudyFlowShell.tsx`, /notities, /feedback), and it
+   * is the only one of the two that is free - `router.push` to the same route
+   * with different params still fetches an RSC payload and runs middleware on
+   * every chapter turn, and per-request CPU here is a standing constraint.
+   * Next.js patches both history methods, so `usePathname`/`useSearchParams`
+   * follow along and a popstate restores the entry client-side.
+   */
+  /** Key of the location the URL names; null while it names none. */
+  const urlLocationRef = useRef<string | null>(null);
+  /** `?version` as last agreed, so a translation switch can be told apart. */
+  const urlVersionRef  = useRef<string | null>(null);
+  const urlSeededRef   = useRef(false);
+  const urlWrittenRef  = useRef(false);
+
+  // URL → reader. Declared first so that on mount it seeds the refs from the
+  // deep link before the writing effect below can normalise it away.
+  useEffect(() => {
+    const target = parseReaderLocation(searchParams);
+
+    if (!urlSeededRef.current) {
+      // Mount: `useBibleData` is already opening this passage from these same
+      // params, and `focusTarget` was seeded from `?vers`. Nothing to do but
+      // remember what the URL says.
+      urlSeededRef.current  = true;
+      urlLocationRef.current = readerLocationKey(target);
+      urlVersionRef.current  = searchParams.get('version');
+      return;
+    }
+
+    // A bare /lezen - what the command palette and the rail link to - names no
+    // passage, and that is not an instruction to move anyone.
+    if (!target) return;
+    // Our own write, coming back around through `useSearchParams`.
+    if (readerLocationKey(target) === urlLocationRef.current) return;
+
+    // Back, Forward, or a link into the reader from a page already on screen.
+    // The book is resolved against the translation's own list first: a link
+    // may spell it any way (`lib/bibleProgress.ts`, BijbelQuiz, an English
+    // name), and handing an unknown one to the reader empties its chapter
+    // list. Unresolvable for now (the book list is still loading) - leave the
+    // ref alone and let the effect run again when `books` arrives.
+    const book = books.length === 0 ? target.book : resolveBookInList(target.book, books);
+    if (!book) return;
+
+    urlLocationRef.current = readerLocationKey({ ...target, book });
+    urlVersionRef.current  = searchParams.get('version');
+
+    if (book === selectedBook && target.chapter === selectedChapter) {
+      // Same passage, only the mark moves (Back over a `?vers` step).
+      setFocusTarget(target.verse ? { book, chapter: target.chapter, verse: target.verse } : null);
+      return;
+    }
+    openPassage(book, target.chapter, target.verse);
+  }, [searchParams, books, selectedBook, selectedChapter, openPassage]);
+
+  // Reader → URL.
+  useEffect(() => {
+    if (!urlSeededRef.current) return;
+    if (!selectedBook || !selectedChapter || !selectedVersion) return;
+    // Mid-navigation: a book change shows chapter 1 until `pendingChapter` is
+    // applied, and that chapter is not a place anybody asked to be, let alone
+    // a step Back should walk through.
+    if (pendingChapter !== null || loadingBooks || loadingChapters) return;
+
+    const key = readerLocationKey({ book: selectedBook, chapter: selectedChapter, verse: focusVerse });
+    const sameLocation  = key === urlLocationRef.current;
+    const sameVersion   = selectedVersion === urlVersionRef.current;
+    const firstWrite    = !urlWrittenRef.current;
+    urlWrittenRef.current = true;
+    if (sameLocation && sameVersion) return;
+
+    urlLocationRef.current = key;
+    urlVersionRef.current  = selectedVersion;
+
+    const search = buildReaderSearch(
+      window.location.search,
+      { book: selectedBook, chapter: selectedChapter, verse: focusVerse },
+      selectedVersion,
+    );
+    const url = `${window.location.pathname}${search}${window.location.hash}`;
+
+    // A new entry only for a passage the reader moved to themselves. The first
+    // write only spells out where they already are (a bare /lezen resolves to
+    // last-read), and switching translation keeps the same verse in view - two
+    // Backs that would do nothing visible.
+    if (firstWrite || !sameVersion) window.history.replaceState(null, '', url);
+    else window.history.pushState(null, '', url);
+  }, [
+    selectedBook, selectedChapter, selectedVersion, focusVerse,
+    pendingChapter, loadingBooks, loadingChapters,
+  ]);
 
   // No highlight range when study is completed
   const currentLesson  = activeStudy?.lessons[lessonIdx] ?? null;
@@ -446,11 +652,28 @@ function StudyPageInner() {
           </button>
         </div>
 
-        <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden lg:flex-row">
+        {/* The two panes, with a divider the reader can move. The passage kept
+            `flex:1.05` against the materials' `flex:1` for years, which is
+            51.22% - that is still what an untouched reader gets, and the number
+            is repeated in the `var()` fallback so the pane is never width:auto
+            if the property is missing.
+
+            The rule down the middle IS the handle now: the passage pane used to
+            carry `lg:border-r`, and two hairlines next to each other would read
+            as a seam. Below `lg` nothing changes - the panes stack and the
+            handle is not rendered at all. */}
+        <ResizableSplit
+          className="flex min-h-0 w-full flex-1 flex-col overflow-hidden lg:flex-row"
+          storageKey="bs:split:lezen"
+          defaultRatio={51.22}
+          minRatio={28}
+          maxRatio={72}
+          minPaneWidth={280}
+          ariaLabel="Breedte van bijbeltekst en studiemateriaal aanpassen"
+        >
         <div
-          data-tour="bible-text"
           className={[
-            'h-full min-h-0 w-full min-w-0 overflow-hidden lg:h-auto lg:flex-[1.05] lg:border-r lg:border-line',
+            'h-full min-h-0 w-full min-w-0 overflow-hidden lg:h-auto lg:w-[var(--bs-split-a,51.22%)] lg:flex-none',
             mobileView === 'bible' ? 'block' : 'hidden',
             'lg:block',
           ].join(' ')}
@@ -476,11 +699,25 @@ function StudyPageInner() {
             onUpdatePreferences={updatePreferences}
             highlightRange={highlightRange}
             bottomBar={studyBar}
+            focusVerse={focusVerse}
+            onCrossRefNavigate={handleCrossRefNavigate}
+            headerChip={
+              showBackChip && crossRefBack ? (
+                <button
+                  type="button"
+                  onClick={handleCrossRefBack}
+                  title={c('back_to', { ref: crossRefBack.label })}
+                  className="inline-flex max-w-[55%] flex-none items-center gap-1 rounded-btn border border-line bg-surface px-2 py-[3px] text-[11.5px] font-semibold text-[#0D9488] outline-none transition-colors hover:bg-line-soft dark:text-[#2DD4BF]"
+                >
+                  <ArrowLeft size={12} aria-hidden className="flex-none" />
+                  <span className="truncate">{c('back_to', { ref: crossRefBack.label })}</span>
+                </button>
+              ) : null
+            }
           />
         </div>
 
         <div
-          data-tour="commentary"
           className={[
             'relative h-full min-h-0 w-full min-w-0 overflow-hidden lg:h-auto lg:flex-1',
             mobileView === 'materials' ? 'block' : 'hidden',
@@ -503,9 +740,12 @@ function StudyPageInner() {
             onActiveTabChange={setMaterialsTab}
             aiQuestion={aiQuestion}
             onAiQuestionConsumed={handleAiQuestionConsumed}
+            books={books}
+            onFocusVerse={handleFocusVerse}
+            onCrossRefNavigate={handleCrossRefNavigate}
           />
         </div>
-        </div>
+        </ResizableSplit>
       </div>
 
       {/* Hide the floating widget whenever the AI tab itself is visible:

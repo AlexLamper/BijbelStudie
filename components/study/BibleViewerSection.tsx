@@ -13,6 +13,7 @@ import { ReadingPreferences } from '../../hooks/useReadingPreferences';
 import { useVerseAnnotations } from '../../hooks/useVerseAnnotations';
 import { FadeBottom } from '../kit/primitives';
 import { chapterStudyHref } from '../../lib/chapterStudyRef';
+import type { CrossRefNavigateTarget } from './crossrefs/CrossRefList';
 
 interface BibleViewerSectionProps {
   selectedBook: string;
@@ -35,6 +36,19 @@ interface BibleViewerSectionProps {
   onUpdatePreferences: (prefs: Partial<ReadingPreferences>) => void;
   highlightRange?: { start: number; end: number };
   bottomBar?: React.ReactNode;
+  /**
+   * Scroll to and mark one verse - where a followed cross-reference lands.
+   * Handed straight to `ChapterViewer`, which reuses its highlight scroll.
+   */
+  focusVerse?: number | null;
+  /** A cross-reference was followed; the page moves the reader. */
+  onCrossRefNavigate?: (target: CrossRefNavigateTarget) => void;
+  /**
+   * A chip beside the chapter line - today only "Terug naar Psalmen 51:3"
+   * after a cross-reference jump. A node rather than a string, because the page
+   * owns the one-level back stack and this pane only finds it a place to sit.
+   */
+  headerChip?: React.ReactNode;
 }
 
 /** A 36 px square control in the toolbar: white, hairline border, radius 9. */
@@ -62,6 +76,9 @@ export default function BibleViewerSection({
   onUpdatePreferences,
   highlightRange,
   bottomBar,
+  focusVerse,
+  onCrossRefNavigate,
+  headerChip,
 }: BibleViewerSectionProps) {
   /**
    * What the reader has already marked in THIS chapter.
@@ -117,7 +134,6 @@ export default function BibleViewerSection({
             top; previous, book, chapter and next underneath. The DOM order -
             and with it the md+ row - is untouched. */}
         <div
-          data-tour="bible-selector"
           className="flex h-14 flex-none items-center gap-[9px] border-b border-line px-4 max-md:h-auto max-md:flex-wrap max-md:gap-x-2 max-md:gap-y-0 max-md:px-3 max-md:py-2"
         >
           <ReadingPreferencesMenu
@@ -194,10 +210,12 @@ export default function BibleViewerSection({
         {/* The chapter line. It sits ABOVE the scroller, so it stays put while
             the passage moves under it. */}
         {selectedBook && selectedChapter ? (
-          <div className="flex flex-none items-center px-[30px] pt-[14px] max-md:px-4">
-            <div className="flex-1 text-[12px] font-bold uppercase tracking-[1.3px] text-ink-muted">
+          <div className="flex flex-none items-center gap-2 px-[30px] pt-[14px] max-md:px-4">
+            <div className="flex-none text-[12px] font-bold uppercase tracking-[1.3px] text-ink-muted">
               {selectedBook} {selectedChapter}
             </div>
+            {headerChip}
+            <div className="flex-1" />
             {(marks.notes > 0 || marks.highlights > 0) && (
               <div className="flex items-center gap-[6px]">
                 <NotebookPen size={15} strokeWidth={1.8} className="text-teal dark:text-teal-400" />
@@ -228,6 +246,9 @@ export default function BibleViewerSection({
                 onAnnotationsChanged={reloadAnnotations}
                 onChapterText={setChapterText}
                 studyHref={studyHref}
+                books={books}
+                focusVerse={focusVerse}
+                onCrossRefNavigate={onCrossRefNavigate}
               />
             ) : (
               <EmptyState

@@ -210,13 +210,14 @@ export const CLICK_TARGETS = [
   'reading_tab_historical',
   'reading_tab_notes',
   'reading_tab_ai',
+  'reading_tab_crossrefs',
   // Assistant
   'ai_open',
   'ai_ask',
   // Other
-  'tour_start',
-  'tour_complete',
   'onboarding_complete',
+  /** The account nudge at the end of the guest's first-run flow. */
+  'onboarding_guest_register',
   // Which of the two working styles new users pick in onboarding. Worth its own
   // pair of counters: the split decides how much of the product should lead
   // with guided studies at all.

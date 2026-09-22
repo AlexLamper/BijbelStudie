@@ -1,14 +1,20 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AlertCircle, Plus } from 'lucide-react';
 
 import { CreateNoteModal } from '../CreateNoteModal';
 import SpeakButton from '../SpeakButton';
 import { SpokenText, SpokenTextScope } from '../SpokenText';
 import VerseMarkers from '../VerseMarkers';
+import { FOCUS_RING } from './lesson-layout';
+import CrossRefButton from '../crossrefs/CrossRefButton';
+import CrossRefPanel from '../crossrefs/CrossRefPanel';
+import { useCrossRefCopy } from '../crossrefs/copy';
 import { getBibleAttribution } from '../../../lib/bible-attribution';
+import { toBookIndex } from '../../../lib/readChaptersCanon';
 import { cn } from '../../../lib/utils';
+import { useCrossRefs } from '../../../hooks/useCrossRefs';
 import { HIGHLIGHT_TINTS, useVerseAnnotations } from '../../../hooks/useVerseAnnotations';
 import type { ReadingPreferences } from '../../../hooks/useReadingPreferences';
 
@@ -58,6 +64,41 @@ export default function PassageReader({
   const [selected, setSelected] = useState<{ verseNumber: string; text: string } | null>(null);
   const { annotations, reload: reloadAnnotations } = useVerseAnnotations(book, chapter);
 
+  /** The verse whose cross-reference panel is open, or null. One at a time. */
+  const [crossRefVerse, setCrossRefVerse] = useState<number | null>(null);
+  /**
+   * The verse whose hover cluster was revealed by tapping its number. There is
+   * no hover on a phone, and inside this window there is no materials tab to
+   * fall back on either, so without this the controls are simply unreachable
+   * there (CROSS_LINKS_PLAN.md §4.3).
+   */
+  const [revealedVerse, setRevealedVerse] = useState<number | null>(null);
+  const crossRefButtons = useRef(new Map<number, HTMLButtonElement | null>());
+  const crossRefCopy = useCrossRefCopy();
+
+  /**
+   * The chapter's references. `enabled` keeps the shard fetch lazy: it is a
+   * static CDN file, but a lesson that nobody opens a panel in should not pay
+   * for it. No `books` list is passed - the lesson has no translation book
+   * index loaded, so targets fall back to their canonical Dutch names, which
+   * `getChapter` resolves for every version through `getBookNameVariants`.
+   */
+  const crossRefs = useCrossRefs({
+    version,
+    book,
+    chapter,
+    enabled: crossRefVerse !== null,
+  });
+  const sourceBookIndex = useMemo(() => toBookIndex(book), [book]);
+
+  const closeCrossRefs = (returnFocus = true) => {
+    const verse = crossRefVerse;
+    setCrossRefVerse(null);
+    if (returnFocus && verse !== null) {
+      crossRefButtons.current.get(verse)?.focus();
+    }
+  };
+
   const prefs = preferences ?? {
     fontSize: 'base',
     fontFamily: 'serif',
@@ -90,6 +131,11 @@ export default function PassageReader({
     setLoading(true);
     setError(null);
     setVerses({});
+    // A new passage is a new set of verse numbers: an open panel or a revealed
+    // cluster from the previous one would reopen on the wrong line.
+    setCrossRefVerse(null);
+    setRevealedVerse(null);
+    crossRefButtons.current.clear();
 
     (async () => {
       try {
@@ -178,12 +224,28 @@ export default function PassageReader({
           {inRange.map(([number, text]) => {
             const marks = annotations.get(number);
             const tint = marks?.highlight ? HIGHLIGHT_TINTS[marks.highlight] : null;
+            const crossRefsOpen = crossRefVerse === number;
+            const clusterRevealed = revealedVerse === number || crossRefsOpen;
+            // An IDREF, so no spaces: the book name never goes in here.
+            const crossRefPanelId = `studie-crossrefs-verse-${number}`;
 
             return (
             <div
               key={number}
               id={`verse-${number}`}
               className="group relative rounded-md -mx-2 px-2"
+              onKeyDown={
+                crossRefsOpen
+                  ? (event) => {
+                      if (event.key !== 'Escape') return;
+                      // The window listens for Escape too (it leaves the
+                      // lesson); closing the panel is what Escape means while
+                      // one is open.
+                      event.stopPropagation();
+                      closeCrossRefs();
+                    }
+                  : undefined
+              }
               style={
                 tint
                   ? { backgroundColor: tint.bg, boxShadow: `inset 2px 0 0 0 ${tint.border}` }
@@ -194,8 +256,21 @@ export default function PassageReader({
                   and #EDEDED on the dark one. */}
               <p className={`${typography} text-les-scripture`}>
                 {prefs.showVerseNumbers && (
-                  <sup className="mr-[6px] select-none align-super font-sans text-[11px] font-semibold text-les-faint">
-                    {number}
+                  <sup className="mr-[6px] select-none align-super">
+                    {/* The number is also the touch handle for the controls
+                        beside the verse - same face, size and colour as the
+                        plain number it replaced, and only the label says what
+                        it does. */}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setRevealedVerse((current) => (current === number ? null : number))
+                      }
+                      aria-label={crossRefCopy('verse_actions_label', { n: number })}
+                      className={`font-sans text-[11px] font-semibold text-les-faint outline-none transition-colors hover:text-les-accent ${FOCUS_RING}`}
+                    >
+                      {number}
+                    </button>
                   </sup>
                 )}
                 <span
@@ -214,14 +289,35 @@ export default function PassageReader({
 
               {/* Hover controls. Below md there is no hover: a tap on a phone left
                     them stuck over the end of the verse, and the tap itself
-                    already opens the note dialog they lead to. */}
-                  <div className="max-md:hidden absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
+                    already opens the note dialog they lead to. The way in there
+                    is the verse number above, which reveals this cluster at any
+                    width; keyboard users get it through `focus-within`. */}
+              <div
+                data-no-page-swipe
+                className={cn(
+                  'absolute right-0 top-0 flex items-center gap-0.5 transition-opacity focus-within:opacity-100',
+                  clusterRevealed
+                    ? 'opacity-100'
+                    : 'max-md:hidden opacity-0 group-hover:opacity-100',
+                )}
+              >
                 <SpeakButton
                   compact
                   showSettings={false}
                   getText={() => text}
                   label={`Vers ${number} voorlezen`}
                   className="border border-les-card-line bg-les-bg shadow-sm"
+                />
+                <CrossRefButton
+                  ref={(element) => {
+                    crossRefButtons.current.set(number, element);
+                  }}
+                  verse={number}
+                  open={crossRefsOpen}
+                  panelId={crossRefPanelId}
+                  onToggle={() =>
+                    crossRefsOpen ? closeCrossRefs(false) : setCrossRefVerse(number)
+                  }
                 />
                 <button
                   onClick={() => setSelected({ verseNumber: String(number), text })}
@@ -233,6 +329,31 @@ export default function PassageReader({
                   <Plus className="h-3 w-3" />
                 </button>
               </div>
+
+              {/* Inline, under the verse it belongs to - not a popover, which in
+                  this window would have to win a z-index argument with the AI
+                  dock and the hover rail. `data-no-page-swipe` is what keeps a
+                  drag inside it from turning the lesson page (see
+                  StudyFlowShell#startsInSidewaysRegion); the panel is an
+                  ordinary block in the step column, so the ResizableSplit
+                  divider beside the dock never has to know it is there. */}
+              {crossRefsOpen && (
+                <div data-no-page-swipe>
+                  <CrossRefPanel
+                    id={crossRefPanelId}
+                    verse={number}
+                    sourceLabel={`${book} ${chapter}:${number}`}
+                    sourceBookIndex={sourceBookIndex}
+                    refs={crossRefs.forVerse(number)}
+                    loading={crossRefs.loading}
+                    error={crossRefs.error}
+                    numberingMayDiffer={crossRefs.numberingMayDiffer}
+                    version={version}
+                    surface="study_flow"
+                    onClose={() => closeCrossRefs()}
+                  />
+                </div>
+              )}
             </div>
             );
           })}

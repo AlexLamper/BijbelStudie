@@ -7,7 +7,6 @@ declare module "next-auth" {
       isAdmin?: boolean;
       isSubscribed?: boolean;
       onboardingCompleted?: boolean;
-      tourCompleted?: boolean;
       /** Raw `preferences.studyStyle`; narrowed by normaliseStudyStyle(). */
       studyStyle?: string;
     } & DefaultSession["user"];
@@ -17,7 +16,6 @@ declare module "next-auth" {
     isAdmin?: boolean;
     isSubscribed?: boolean;
     onboardingCompleted?: boolean;
-    tourCompleted?: boolean;
     studyStyle?: string;
   }
 }
@@ -28,7 +26,6 @@ declare module "next-auth/jwt" {
     isAdmin?: boolean;
     isSubscribed?: boolean;
     onboardingCompleted?: boolean;
-    tourCompleted?: boolean;
     studyStyle?: string;
   }
 }

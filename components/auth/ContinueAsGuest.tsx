@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { guestTarget } from "../../lib/guestTarget"
-import { GUEST_ONBOARDING_PENDING_KEY } from "../../lib/guestOnboarding"
+import { markGuestOnboardingPending } from "../../lib/guestOnboarding"
 import { Modal } from "../ui/modal"
 import { Button } from "../ui/button"
 
@@ -31,12 +31,10 @@ export default function ContinueAsGuest({ next }: { next: string | null }) {
   const target = guestTarget(next)
 
   const proceed = () => {
-    // Tells the root layout's GuestOnboardingWrapper to show the first-run
-    // tour on the very next render, now that there is no account whose
-    // `onboardingCompleted` flag could carry the same signal.
-    try {
-      localStorage.setItem(GUEST_ONBOARDING_PENDING_KEY, "1")
-    } catch {}
+    // Tells the root layout's GuestOnboardingWrapper to run the first-run
+    // flow on the very next render, wherever `target` lands, now that there is
+    // no account whose `onboardingCompleted` flag could carry the same signal.
+    markGuestOnboardingPending()
     setConfirmOpen(false)
     router.push(target)
   }

@@ -73,7 +73,7 @@ export default function LessonRail() {
                         <Link
                           href={item.url}
                           aria-label={item.title}
-                          data-track={item.tourId ? item.tourId.replace(/^nav-/, "sidebar_") : undefined}
+                          data-track={item.trackId}
                           className={[
                             "flex h-10 w-10 flex-none items-center justify-center rounded-[10px] no-underline transition-colors",
                             active ? "bg-les-nav-active text-les-accent" : "text-les-muted hover:bg-les-card",

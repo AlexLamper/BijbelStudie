@@ -343,7 +343,7 @@ export default function OriginalText({ book, chapter, highlightVerses, embedded 
                 <UpgradePrompt
                   surface="original_text"
                   title="Bekijk de volledige grondtekst"
-                  body={`Lees alle verzen in het ${langLabel}, met transliteratie en Strong-nummers.`}
+                  body={`Lees alle verzen in de originele grondtekst in het ${langLabel}, met uitspraak en betekenis.`}
                   cta="Grondtekst ontgrendelen"
                 />
               </div>

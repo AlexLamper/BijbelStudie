@@ -69,6 +69,12 @@ const nextConfig: NextConfig = {
     "/api/v1/study-progress": ["./private/data/bibles/**/*"],
     "/api/commentary": ["./private/data/commentaries/**/*"],
     "/api/v1/commentaries/**": ["./private/data/commentaries/**/*"],
+    // Cross-reference shards are CC BY, so they live in ./public rather than
+    // ./private - but the reason they are listed here is the same one: the
+    // route builds its path at runtime, nothing static-analyses that, and an
+    // untraced file is simply absent from the lambda. The website reads the
+    // very same files straight off the CDN and needs no entry.
+    "/api/v1/crossrefs/**": ["./public/data/crossrefs/v1/**/*"],
   },
   /**
    * Headers that affect Core Web Vitals or crawling. Nothing decorative here -
@@ -89,6 +95,21 @@ const nextConfig: NextConfig = {
         source: "/og",
         headers: [
           { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
+      },
+      {
+        // Cross-reference shards. The website reads these directly, so this
+        // header is the whole caching story for the web path - no function is
+        // involved at all. The URL carries the dataset version (`/v1/`) and a
+        // data change bumps it to `/v2/`, which is what makes a year on the
+        // shared copy safe; the browser copy stays a day so a reader is never
+        // more than that behind a corrected shard.
+        source: "/data/crossrefs/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=86400, s-maxage=31536000, stale-while-revalidate=86400",
+          },
         ],
       },
       {

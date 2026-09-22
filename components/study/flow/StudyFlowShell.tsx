@@ -33,6 +33,7 @@ import LessonCompleteCard, { type CompletionSummary } from './LessonCompleteCard
 import type { SerialisedPrompt } from '../../../lib/feedbackPrompts';
 import { useLevensboom } from '../../../hooks/useLevensboom';
 import AiAssistantIcon from '../../ui/AiAssistantIcon';
+import ResizableSplit from '../../ui/resizable-split';
 import AiDock from './AiDock';
 import StudyExitGuard from './StudyExitGuard';
 import StudySettingsMenu from './StudySettingsMenu';
@@ -713,6 +714,9 @@ export default function StudyFlowShell({
           <StepDepth
             book={lesson.passage.book}
             chapter={lesson.passage.chapter}
+            version={version}
+            verseStart={lesson.passage.verseStart}
+            verseEnd={lesson.passage.verseEnd}
             commentaryId={lesson.commentaryId}
             depth={lesson.content.depth}
             preferences={preferences}
@@ -1225,8 +1229,27 @@ export default function StudyFlowShell({
 
             The dock is scoped to the lesson body rather than the screen: an
             earlier version was a viewport-height drawer that pushed the header
-            and footer too, so asking a question reflowed the whole frame. */}
-        <div className="relative flex-1 min-w-0 min-h-0 overflow-hidden flex">
+            and footer too, so asking a question reflowed the whole frame.
+
+            The divider between the two is draggable from `lg` up, and only
+            while the dock is open: with it closed there is one column and
+            nothing to divide. `defaultRatio={null}` leaves the dock at its
+            designed `min(400px,36vw)` until someone actually moves the handle -
+            that width is not a fixed share of anything, and pinning it to a
+            percentage would have resized the dock for every reader who never
+            touches it. Once moved, the share is what is stored, so it holds
+            across window sizes. */}
+        <ResizableSplit
+          className="relative flex-1 min-w-0 min-h-0 overflow-hidden flex"
+          storageKey="bs:split:studie"
+          defaultRatio={null}
+          minRatio={50}
+          maxRatio={80}
+          minPaneWidth={300}
+          enabled={aiOpen}
+          lineClassName="bg-les-line"
+          ariaLabel="Breedte van de les en de AI-assistent aanpassen"
+        >
         <div className="relative flex-1 min-w-0 h-full">
         {/* No `mode`, deliberately: both steps are mounted for the length of the
             transition so one can slide over the other. `initial={false}` keeps
@@ -1307,7 +1330,7 @@ export default function StudyFlowShell({
           question={aiQuestion}
           onQuestionConsumed={() => setAiQuestion(null)}
         />
-        </div>
+        </ResizableSplit>
       </div>
 
       {/* The foot: 68 px, "Vorige" outlined on the left (nothing at all on
@@ -1401,14 +1424,21 @@ export default function StudyFlowShell({
 
 /**
  * Whether a touch began somewhere a horizontal drag belongs to something other
- * than the page-turn: a field (moving the caret, selecting a word) or any box
- * between the target and the step that scrolls sideways. Phone-only; the
- * caller does not consult it from md up.
+ * than the page-turn: a field (moving the caret, selecting a word), any box
+ * between the target and the step that scrolls sideways, or anything that has
+ * opted out with `data-no-page-swipe`. Phone-only; the caller does not consult
+ * it from md up.
+ *
+ * The opt-out is what the cross-reference control and its inline panel carry
+ * (`flow/PassageReader.tsx`, `flow/StepDepth.tsx`): a reader who opened a panel
+ * on a line of scripture is reading inside it, and a sideways drag there is
+ * never "next step".
  */
 function startsInSidewaysRegion(target: Element | null, boundary: Element): boolean {
   let node: Element | null = target;
   while (node && node !== boundary) {
     if (node instanceof HTMLElement) {
+      if (node.dataset.noPageSwipe !== undefined) return true;
       if (node.isContentEditable || /^(input|textarea|select)$/i.test(node.tagName)) return true;
       if (node.scrollWidth > node.clientWidth + 1) {
         const overflowX = window.getComputedStyle(node).overflowX;

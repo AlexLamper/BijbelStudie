@@ -1,15 +1,21 @@
-﻿import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { AlertCircle, ArrowRight, Plus } from 'lucide-react';
 import { SkeletonChapter } from '../ui/skeletons';
 import { CreateNoteModal } from './CreateNoteModal';
 import { ReadingPreferences } from '../../hooks/useReadingPreferences';
 import { HIGHLIGHT_TINTS, type AnnotationMap } from '../../hooks/useVerseAnnotations';
+import { useCrossRefs } from '../../hooks/useCrossRefs';
 import { cn } from '../../lib/utils';
 import { getBibleAttribution } from '../../lib/bible-attribution';
+import { toBookIndex } from '../../lib/readChaptersCanon';
 import SpeakButton from './SpeakButton';
 import { SpokenText } from './SpokenText';
 import VerseMarkers from './VerseMarkers';
+import CrossRefButton from './crossrefs/CrossRefButton';
+import CrossRefPanel from './crossrefs/CrossRefPanel';
+import type { CrossRefNavigateTarget } from './crossrefs/CrossRefList';
+import { useCrossRefCopy } from './crossrefs/copy';
 
 type Props = {
   version: string | null;
@@ -29,6 +35,19 @@ type Props = {
   onChapterText?: (text: string) => void;
   /** The single-chapter study for this chapter; a link under the last verse when set. */
   studyHref?: string | null;
+  /**
+   * This translation's own book list. Only cross-references use it: a target is
+   * labelled with the spelling the reader has on screen ("1 Corinthiërs" in the
+   * Statenvertaling, "1 Corinthians" in the KJV) rather than a canonical one.
+   */
+  books?: readonly string[];
+  /**
+   * Scroll to, and mark, one verse - how a cross-reference lands the reader on
+   * the verse it pointed at. Rides the same scroll effect as `highlightRange`.
+   */
+  focusVerse?: number | null;
+  /** A cross-reference was followed; the page moves the reader and offers a way back. */
+  onCrossRefNavigate?: (target: CrossRefNavigateTarget) => void;
 };
 
 type VerseData = { [key: string]: string };
@@ -56,12 +75,46 @@ export default function ChapterViewer({
   onAnnotationsChanged,
   onChapterText,
   studyHref,
+  books,
+  focusVerse,
+  onCrossRefNavigate,
 }: Props) {
   const [verses, setVerses] = useState<VerseData>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedVerse, setSelectedVerse] = useState<SelectedVerse | null>(null);
   const [showCreateNoteModal, setShowCreateNoteModal] = useState(false);
+  /** The verse whose cross-reference panel is open, or null. One at a time. */
+  const [crossRefVerse, setCrossRefVerse] = useState<number | null>(null);
+  /**
+   * The verse whose hover cluster was revealed by tapping its number. There is
+   * no hover on a touch screen, so without this the three controls are simply
+   * unreachable there (CROSS_LINKS_PLAN.md §4.3).
+   */
+  const [revealedVerse, setRevealedVerse] = useState<number | null>(null);
+  const crossRefButtons = useRef(new Map<number, HTMLButtonElement | null>());
+  const crossRefCopy = useCrossRefCopy();
+
+  /**
+   * The chapter's cross-references. `enabled` keeps the shard fetch lazy: it is
+   * a static CDN file, but nobody should pay for it before they ask.
+   */
+  const crossRefs = useCrossRefs({
+    version,
+    book,
+    chapter,
+    books,
+    enabled: crossRefVerse !== null,
+  });
+  const sourceBookIndex = useMemo(() => toBookIndex(book), [book]);
+
+  const closeCrossRefs = (returnFocus = true) => {
+    const verse = crossRefVerse;
+    setCrossRefVerse(null);
+    if (returnFocus && verse !== null) {
+      crossRefButtons.current.get(verse)?.focus();
+    }
+  };
 
   const API_BASE_URL = '/api/bible';
 
@@ -167,14 +220,26 @@ export default function ChapterViewer({
     onChapterText(Object.keys(verses).length > 0 ? buildChapterText(verses) : '');
   }, [verses, onChapterText]);
 
-  // Auto-scroll to the first highlighted verse when highlightRange or verses change
+  // A new passage closes whatever was open on the old one, panel and reveal
+  // both - they are anchored to a verse number that now means something else.
   useEffect(() => {
-    if (!highlightRange || loading || Object.keys(verses).length === 0) return;
-    const el = document.getElementById(`verse-${highlightRange.start}`);
+    setCrossRefVerse(null);
+    setRevealedVerse(null);
+    crossRefButtons.current.clear();
+  }, [book, chapter, version]);
+
+  // Auto-scroll to the first highlighted verse when highlightRange or verses
+  // change - and to `focusVerse`, which is the same journey with a different
+  // reason (a cross-reference was followed), so it reuses this effect. The
+  // followed verse wins: it is the thing the reader just asked for.
+  const scrollTarget = focusVerse ?? highlightRange?.start ?? null;
+  useEffect(() => {
+    if (scrollTarget === null || loading || Object.keys(verses).length === 0) return;
+    const el = document.getElementById(`verse-${scrollTarget}`);
     if (el) {
       setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 120);
     }
-  }, [highlightRange, verses, loading]);
+  }, [scrollTarget, verses, loading]);
 
   const handleVerseClick = (verseNumber: string, text: string) => {
     const reference = `${book} ${chapter}:${verseNumber}`;
@@ -234,6 +299,11 @@ export default function ChapterViewer({
                 // The reader's own highlight wins over the lesson's range tint:
                 // one is something they chose, the other is context.
                 const tint = marks?.highlight ? HIGHLIGHT_TINTS[marks.highlight] : null;
+                const isFocused = focusVerse === vNum;
+                const crossRefsOpen = crossRefVerse === vNum;
+                const clusterRevealed = revealedVerse === vNum || crossRefsOpen;
+                // An IDREF, so no spaces: the book name never goes in here.
+                const crossRefPanelId = `crossrefs-verse-${verseNumber}`;
                 return (
                 <div
                   key={verseNumber}
@@ -244,7 +314,20 @@ export default function ChapterViewer({
                   className={cn(
                     'group relative -mx-1 mb-[14px] rounded-[4px] px-1',
                     isHighlighted && !tint && 'bg-highlight',
+                    // Where a followed cross-reference landed. The teal wash,
+                    // not the amber one: this is "you are here", not "this is
+                    // today's passage".
+                    isFocused && !isHighlighted && !tint && 'bg-[var(--teal-wash)]',
                   )}
+                  onKeyDown={
+                    crossRefsOpen
+                      ? (event) => {
+                          if (event.key !== 'Escape') return;
+                          event.stopPropagation();
+                          closeCrossRefs();
+                        }
+                      : undefined
+                  }
                   style={
                     tint
                       ? { backgroundColor: tint.bg, boxShadow: `inset 2px 0 0 0 ${tint.border}` }
@@ -263,13 +346,23 @@ export default function ChapterViewer({
                         scripture rather than as part of it. 11 px is the floor
                         the token sheet allows for it. */}
                     {prefs.showVerseNumbers && (
-                      <sup
-                        className={cn(
-                          'mr-[5px] align-super font-sans text-[11px] font-semibold',
-                          isHighlighted ? 'text-teal-dark dark:text-teal-400' : 'text-ink-faint',
-                        )}
-                      >
-                        {verseNumber}
+                      <sup className="mr-[5px] align-super">
+                        {/* The number is also the touch handle for the three
+                            hover controls beside the verse. It stays a plain
+                            number to look at - same face, size and colour - and
+                            only the label says what it does. */}
+                        <button
+                          type="button"
+                          onClick={() => setRevealedVerse(current => (current === vNum ? null : vNum))}
+                          aria-label={crossRefCopy('verse_actions_label', { n: verseNumber })}
+                          className={cn(
+                            'font-sans text-[11px] font-semibold outline-none transition-colors',
+                            isHighlighted ? 'text-teal-dark dark:text-teal-400' : 'text-ink-faint',
+                            'hover:text-teal-dark dark:hover:text-teal-400',
+                          )}
+                        >
+                          {verseNumber}
+                        </button>
                       </sup>
                     )}
                     <span
@@ -280,16 +373,37 @@ export default function ChapterViewer({
                     </span>
                     <VerseMarkers annotation={marks} />
                   </p>
-                  {/* Hover controls. Below md there is no hover: a tap on a phone left
-                    them stuck over the end of the verse, and the tap itself
-                    already opens the note dialog they lead to. */}
-                  <div className="max-md:hidden absolute right-0 top-0 flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+                  {/* Hover controls. Below md there is still no hover: a tap on
+                    a phone left them stuck over the end of the verse, and the
+                    tap itself already opens the note dialog they lead to. The
+                    way in there is the verse number above, which reveals this
+                    cluster at any width; keyboard users get it through
+                    `focus-within`. */}
+                  <div
+                    className={cn(
+                      'absolute right-0 top-0 flex items-center gap-0.5 transition-opacity focus-within:opacity-100',
+                      clusterRevealed
+                        ? 'opacity-100'
+                        : 'max-md:hidden opacity-0 group-hover:opacity-100',
+                    )}
+                  >
                     <SpeakButton
                       compact
                       showSettings={false}
                       getText={() => text}
                       label={`Vers ${verseNumber} voorlezen`}
                       className="border border-line bg-surface shadow-field"
+                    />
+                    <CrossRefButton
+                      ref={(element) => {
+                        crossRefButtons.current.set(vNum, element);
+                      }}
+                      verse={verseNumber}
+                      open={crossRefsOpen}
+                      panelId={crossRefPanelId}
+                      onToggle={() =>
+                        crossRefsOpen ? closeCrossRefs(false) : setCrossRefVerse(vNum)
+                      }
                     />
                     <button
                       onClick={() => handleVerseClick(verseNumber, text)}
@@ -301,6 +415,24 @@ export default function ChapterViewer({
                       <Plus className="h-3 w-3" />
                     </button>
                   </div>
+
+                  {/* Inline, under the verse it belongs to - not a popover.
+                      See CrossRefPanel for why. */}
+                  {crossRefsOpen && (
+                    <CrossRefPanel
+                      id={crossRefPanelId}
+                      verse={verseNumber}
+                      sourceLabel={`${book} ${chapter}:${verseNumber}`}
+                      sourceBookIndex={sourceBookIndex}
+                      refs={crossRefs.forVerse(vNum)}
+                      loading={crossRefs.loading}
+                      error={crossRefs.error}
+                      numberingMayDiffer={crossRefs.numberingMayDiffer}
+                      version={version}
+                      onClose={() => closeCrossRefs()}
+                      onNavigate={onCrossRefNavigate}
+                    />
+                  )}
                 </div>
                 );
               })}

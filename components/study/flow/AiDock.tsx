@@ -126,7 +126,13 @@ export default function AiDock({
         open ? 'contents' : 'hidden',
         'lg:block lg:h-full lg:flex-none lg:overflow-hidden',
         'lg:transition-[width] lg:duration-300 lg:ease-out',
-        open ? 'lg:w-[min(400px,36vw)]' : 'lg:w-0',
+        // `--bs-split-b` is the share the reader dragged the divider to
+        // (ResizableSplit writes it on the row that holds the step and this
+        // dock). Unset until they do, so the designed width is still the
+        // default. The panel inside takes the SAME expression, deliberately:
+        // the clip and its contents have to move as one, or the conversation
+        // reflows inside a box that is still animating.
+        open ? 'lg:w-[var(--bs-split-b,min(400px,36vw))]' : 'lg:w-0',
       ].join(' ')}
       aria-hidden={!open}
     >
@@ -151,7 +157,10 @@ export default function AiDock({
           'fixed z-50 inset-x-0 bottom-0 h-[75vh] rounded-t-2xl border-t max-md:h-[85dvh] max-md:pb-[env(safe-area-inset-bottom)]',
           // Static and fixed-width, so the clipping parent can animate around it
           // without the header and the message list reflowing mid-slide.
-          'lg:static lg:inset-auto lg:z-auto lg:h-full lg:w-[min(400px,36vw)] lg:rounded-none lg:border-t-0 lg:border-l',
+          // No left hairline from `lg` up any more: the resize handle in the row
+          // stands exactly there and paints the rule, and two 1 px lines beside
+          // each other read as a seam rather than as one divider.
+          'lg:static lg:inset-auto lg:z-auto lg:h-full lg:w-[var(--bs-split-b,min(400px,36vw))] lg:rounded-none lg:border-t-0 lg:border-l-0',
         ].join(' ')}
       >
         <header className={`flex-none flex items-center justify-between px-4 h-14 border-b ${RULE}`}>

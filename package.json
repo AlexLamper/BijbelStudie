@@ -12,6 +12,7 @@
   "scripts": {
     "dev": "next dev",
     "sync-data": "node scripts/sync-data.mjs",
+    "build-crossrefs": "node scripts/build-crossrefs.mjs",
     "prebuild": "node scripts/sync-data.mjs",
     "build": "next build",
     "start": "next start",

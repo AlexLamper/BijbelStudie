@@ -120,6 +120,25 @@ export const EVENTS = {
     logged_in: ["yes", "no"],
     platform: PLATFORM,
   },
+  /**
+   * The cross-references panel/tab/sheet was opened for a verse. `surface`
+   * distinguishes the four entry points (web verse panel, web materials tab,
+   * the /studie flow panel, the app's action-sheet and study tab) without ever
+   * carrying which verse - book/chapter/verse values are refused by design,
+   * the same unbounded-cardinality rule as `page_view`'s route keys.
+   */
+  crossref_opened: {
+    surface: ["verse_panel", "materials_tab", "study_flow", "app_sheet", "app_tab"],
+    platform: PLATFORM,
+  },
+  /** A cross-reference row was acted on, once opened. See `crossref_opened`. */
+  crossref_followed: {
+    surface: ["verse_panel", "materials_tab", "study_flow", "app_sheet", "app_tab"],
+    action: ["preview", "navigate", "back", "open_in_lezen", "ask_ai"],
+    /** Which testaments the source and target verse belong to - not the verses themselves. */
+    testament: ["ot_ot", "ot_nt", "nt_ot", "nt_nt"],
+    platform: PLATFORM,
+  },
 } as const;
 
 export type EventName = keyof typeof EVENTS;

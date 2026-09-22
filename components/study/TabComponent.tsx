@@ -7,6 +7,8 @@ import { useKeyboardShortcuts, KeyboardShortcut } from '../../hooks/useKeyboardS
 import CommentaryComponent from './CommentaryComponent';
 import OriginalText from './OriginalText';
 import AiAssistant from './AiAssistant';
+import CrossRefsTab from './crossrefs/CrossRefsTab';
+import type { CrossRefNavigateTarget } from './crossrefs/CrossRefList';
 import { ReadingPreferences } from '../../hooks/useReadingPreferences';
 
 interface TabComponentProps {
@@ -25,6 +27,12 @@ interface TabComponentProps {
   preferences?: ReadingPreferences;
   aiQuestion?: string | null;
   onAiQuestionConsumed?: () => void;
+  /** The translation's own book list - cross-reference labels are spelled from it. */
+  books?: readonly string[];
+  /** Scroll the reader pane to a verse (a heading in the Verwijzingen tab). */
+  onFocusVerse?: (verse: number) => void;
+  /** A cross-reference was followed from the tab. */
+  onCrossRefNavigate?: (target: CrossRefNavigateTarget) => void;
 }
 
 export default function TabComponent({
@@ -42,6 +50,9 @@ export default function TabComponent({
   preferences,
   aiQuestion,
   onAiQuestionConsumed,
+  books,
+  onFocusVerse,
+  onCrossRefNavigate,
 }: TabComponentProps & { activeTab: string }) {
   // Define keyboard shortcuts
   const shortcuts: KeyboardShortcut[] = [
@@ -76,6 +87,18 @@ export default function TabComponent({
             onSourceChange={onCommentaryChange}
             height={height}
             preferences={preferences}
+          />
+        );
+      // After Commentaar, before Grondtekst - the plan's order (§4.1 point 2).
+      case 'crossrefs':
+        return (
+          <CrossRefsTab
+            book={selectedBook || ''}
+            chapter={selectedChapter || 1}
+            version={selectedVersion ?? null}
+            books={books}
+            onFocusVerse={onFocusVerse}
+            onNavigate={onCrossRefNavigate}
           />
         );
       case 'original':

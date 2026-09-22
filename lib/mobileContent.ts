@@ -17,8 +17,22 @@ import {
 import {
   mobileBibleAttribution,
   mobileCommentaryAttribution,
+  mobileCrossRefAttribution,
   mobileOriginalAttribution,
 } from './mobileAttribution';
+// Cross-reference foundation, owned by lib/crossRefs and fed by the committed
+// shards under public/data/crossrefs/v1.
+import {
+  bookNameLookupFrom,
+  canonicalDutchBookName,
+  formatCrossRefLabel,
+  type BookNameLookup,
+} from './crossRefs/format';
+import { loadShard } from './crossRefs/loadShard';
+import { bookCodeFromIndex } from './crossRefs/osis';
+import type { CrossRef } from './crossRefs/types';
+import { numberingMayDiffer, profileForVersion } from './crossRefs/versionProfiles';
+import { toAnyBookCode, toBookIndex } from './readChaptersCanon';
 
 /**
  * The mobile view of the content store.
@@ -272,6 +286,140 @@ function fold(value: string): string {
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase();
+}
+
+/**
+ * Cross references (OpenBible.info, CC BY).
+ *
+ * References are verse *coordinates*, so one dataset serves every translation
+ * and nothing here redistributes scripture text. What does differ per
+ * translation is the numbering, and that is resolved at build time: the shards
+ * are written once per versification profile, already renumbered, so no client
+ * - not the website, not Dart - carries a mapping table.
+ *
+ * Book names are resolved here too, against the translation the reader is
+ * actually in (`getBooks`), which is why the app needs no book-code table
+ * either. A book that translation does not name falls back to the canonical
+ * Dutch spelling rather than showing a bare OSIS code.
+ */
+
+/**
+ * Mirrors `datasetVersion` in `public/data/crossrefs/v1/index.json`. It is not
+ * the shard's own `v`, which is the *file format* version: a re-run with a
+ * different vote threshold changes the data without changing the format.
+ */
+const CROSSREF_DATASET_VERSION = 1;
+
+export type CrossRefTarget = {
+  osis: string;
+  book: string;
+  chapter: number;
+  verse: number;
+  endChapter: number | null;
+  endVerse: number | null;
+  label: string;
+  votes: number;
+};
+
+export type CrossRefVerse = { n: number; refs: CrossRefTarget[] };
+
+export type CrossRefEnvelope = {
+  id: 'openbible';
+  datasetVersion: number;
+  versification: string;
+  version: string;
+  book: string;
+  osis: string;
+  chapter: number;
+  verses: CrossRefVerse[];
+  numberingMayDiffer: boolean;
+  attribution: string;
+  updatedAt: string;
+};
+
+function toTarget(ref: CrossRef, books: BookNameLookup): CrossRefTarget | null {
+  const osis = bookCodeFromIndex(ref.b);
+  const label = formatCrossRefLabel(ref, books);
+  // A ref whose book index does not resolve is corrupt shard data. Dropping it
+  // is right: a reference the reader cannot follow is worse than one fewer.
+  if (!osis || !label) return null;
+  return {
+    osis,
+    book: books(ref.b) ?? canonicalDutchBookName(ref.b) ?? osis,
+    chapter: ref.c,
+    verse: ref.v,
+    // Absent end fields are `null` rather than omitted, so a client rendering a
+    // range has one shape to branch on.
+    endChapter: ref.ec ?? null,
+    endVerse: ref.ev ?? null,
+    label,
+    votes: ref.w,
+  };
+}
+
+/**
+ * Returns `null` only for a book or chapter that does not exist in this
+ * translation - that is the 404. A real chapter that simply has no references
+ * comes back with an empty `verses` array, because "nothing points here" is an
+ * answer and caching it is the point.
+ */
+export async function getMobileCrossRefChapter(
+  versionId: string,
+  book: string,
+  chapter: number,
+): Promise<CrossRefEnvelope | null> {
+  // Both gates, in this order: the dataset itself, then the translation whose
+  // numbering the shard was built for and whose book names are rendered below.
+  assertMobileAllowed('crossref', 'openbible');
+  assertMobileAllowed('bible', versionId);
+
+  const code = toAnyBookCode(book);
+  if (!code) return null;
+
+  const profile = profileForVersion(versionId);
+  // Per book, because nbg51 rides on the sv shards and only parts company with
+  // them in Haggai - see VERSION_BOOK_DEVIATIONS.
+  const mayDiffer = numberingMayDiffer(versionId, code);
+  const shard = await loadShard(profile, code, chapter);
+
+  if (!shard) {
+    // A missing shard is the normal state for a chapter nobody cross-references
+    // and the abnormal state for a chapter that does not exist. Only the second
+    // is a 404, so ask the translation which chapters it actually has.
+    const chapters = await getChapters(versionId, book);
+    if (!chapters.includes(chapter)) return null;
+  }
+
+  let verses: CrossRefVerse[] = [];
+  if (shard && shard.verses.length > 0) {
+    // The translation's own spelling, resolved by code rather than by position:
+    // a version with a short or reordered book list must not shift every label.
+    // Only built when there is something to label - a chapter with no refs must
+    // not cost a book-index read.
+    const books = bookNameLookupFrom(await getBooks(versionId), toBookIndex);
+    verses = shard.verses
+      .map((verse) => ({
+        n: verse.n,
+        refs: verse.refs
+          .map((ref) => toTarget(ref, books))
+          .filter((target): target is CrossRefTarget => target !== null),
+      }))
+      .filter((verse) => verse.refs.length > 0);
+  }
+
+  return {
+    id: 'openbible',
+    datasetVersion: CROSSREF_DATASET_VERSION,
+    versification: profile,
+    version: versionId,
+    book,
+    osis: code,
+    chapter,
+    verses,
+    numberingMayDiffer: mayDiffer,
+    attribution: mobileCrossRefAttribution(),
+    updatedAt: contentUpdatedAt(),
+  };
 }
 
 export { isMobileAllowed };

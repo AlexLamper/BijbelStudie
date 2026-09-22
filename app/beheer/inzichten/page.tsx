@@ -112,15 +112,15 @@ const CLICK_LABELS: Record<string, string> = {
   reading_speak: "Voorlezen",
   reading_preferences: "Leesvoorkeuren",
   reading_tab_commentary: "Tab: commentaar",
+  reading_tab_crossrefs: "Tab: verwijzingen",
   reading_tab_original: "Tab: grondtekst",
   reading_tab_historical: "Tab: algemene info",
   reading_tab_notes: "Tab: notities",
   reading_tab_ai: "Tab: AI-assistent",
   ai_open: "AI-assistent geopend",
   ai_ask: "Vraag aan AI",
-  tour_start: "Rondleiding gestart",
-  tour_complete: "Rondleiding afgerond",
   onboarding_complete: "Onboarding afgerond",
+  onboarding_guest_register: "Onboarding: account maken (gast)",
 }
 
 function formatDate(d: string, short = true): string {

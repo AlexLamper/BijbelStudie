@@ -29,10 +29,7 @@ function NavRow({ item, active, drawer = false }: { item: NavItem; active: boole
   return (
     <Link
       href={item.url}
-      // The guided tour looks rows up by data-tour; the drawer copy must not
-      // shadow the column's.
-      data-tour={drawer ? undefined : item.tourId}
-      data-track={item.tourId ? item.tourId.replace(/^nav-/, "sidebar_") : undefined}
+      data-track={item.trackId}
       aria-current={drawer && active ? "page" : undefined}
       className={[
         "flex items-center gap-[11px] rounded-[9px] px-[11px] no-underline transition-colors",
