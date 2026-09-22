@@ -81,7 +81,6 @@ const ALLOWED_PREFERENCE_KEYS = [
   'showVerseNumbers',
   'ttsVoice',
   'onboardingCompleted',
-  'tourCompleted',
 ] as const;
 
 type Preferences = Record<string, unknown> | null | undefined;

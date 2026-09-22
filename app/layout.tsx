@@ -6,7 +6,6 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../lib/authOptions";
 import { OnboardingWrapper } from "../components/onboarding/onboarding-wrapper";
 import { GuestOnboardingWrapper } from "../components/onboarding/guest-onboarding-wrapper";
-import { GuidedTourLauncher } from "../components/onboarding/guided-tour";
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Suspense } from "react";
 import { PrefetchProvider } from "../components/providers/prefetch-provider";
@@ -245,18 +244,18 @@ export default async function RootLayout({
                         nothing when this browser has no guest lessons - see
                         components/auth/GuestProgressMigration.tsx. */}
                     <GuestProgressMigration />
+                    {/* The first-run questions - and, before them, the
+                        handover of whatever this browser answered while it was
+                        still a guest, so nobody is asked the same five things
+                        twice. See components/onboarding/onboarding-wrapper.tsx. */}
                     <OnboardingWrapper shouldShow={!session.user.onboardingCompleted} />
-                    {/* Numbered first-time tour: launches after a tiny delay if
-                        localStorage flag isn't set. Won't fight the OnboardingModal
-                        because the launcher's setTimeout starts immediately but
-                        the modal blocks interaction until dismissed. */}
-                    <GuidedTourLauncher canShow={!!session.user.onboardingCompleted} tourCompleted={!!session.user.tourCompleted} isSubscribed={!!session.user.isSubscribed} />
                   </>
                 ) : (
-                  // The same first-run tour, for a visitor who chose "Doorgaan
-                  // als gast" instead of an account - see
+                  // The same first-run flow, for a visitor without an
+                  // account: same questions, answers kept in this browser until
+                  // there is an account to move them to - see
                   // components/onboarding/guest-onboarding-wrapper.tsx. Idle on
-                  // every other signed-out page load.
+                  // the marketing, pricing, legal and auth pages.
                   <GuestOnboardingWrapper />
                 )}
               </LevensboomProvider>

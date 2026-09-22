@@ -1,0 +1,41 @@
+{
+  "datasetVersion": 1,
+  "source": "OpenBible.info Cross References",
+  "sourceId": "openbible",
+  "sourceUrl": "https://a.openbible.info/data/cross-references.zip",
+  "sourceSha256": "d18f0cdee1fd9a0bb289e0c30154485857b396124f68fe0dcc37aaa5982644f8",
+  "sourceZipSha256": "83e9db0a08054ed99848531512729f0190dbbac85416f408f2362b5dc36d421d",
+  "sourceDate": "2026-09-21",
+  "builtAt": "2026-09-21T00:00:00.000Z",
+  "minVotes": 1,
+  "topN": 25,
+  "attribution": "Kruisverwijzingen: OpenBible.info (CC BY), bewerkt: gefilterd en omgezet naar de versnummering van deze vertaling. Versnummering via STEPBible TVTMS (CC BY 4.0).",
+  "profiles": [
+    "eng",
+    "heb",
+    "sv"
+  ],
+  "counts": {
+    "rawRows": 344799,
+    "malformedRows": 0,
+    "droppedLowVotes": 3517,
+    "eng.refs": 322500,
+    "eng.sourceVerses": 29314,
+    "eng.chapters": 1189,
+    "eng.bytes": 4885245,
+    "eng.droppedTargetMissing": 0,
+    "eng.droppedSourceMissing": 1,
+    "heb.refs": 322472,
+    "heb.sourceVerses": 29311,
+    "heb.chapters": 1189,
+    "heb.bytes": 4885963,
+    "heb.droppedTargetMissing": 0,
+    "heb.droppedSourceMissing": 1,
+    "sv.refs": 322493,
+    "sv.sourceVerses": 29312,
+    "sv.chapters": 1189,
+    "sv.bytes": 4884914,
+    "sv.droppedTargetMissing": 0,
+    "sv.droppedSourceMissing": 0
+  }
+}

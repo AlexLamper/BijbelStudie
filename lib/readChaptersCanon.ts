@@ -17,11 +17,19 @@
  * handful of malformed keys already sitting in the database.
  */
 
-import { normaliseBookName, toBookCode, type BookCode } from './bookCanon';
+import { normaliseBookName, toBookCode } from './bookCanon';
 import { BIBLE_BOOKS_ORDER, bookNameMap } from './book-mapping';
+// Type-only: erased at compile time, so this stays a leaf module at runtime.
+import type { BookCode } from './crossRefs/types';
 
-/** OSIS-ish codes in canonical order - the same order `bookCanon` assigns. */
-const CODES_IN_ORDER: BookCode[] = [
+export type { BookCode };
+
+/**
+ * OSIS-ish codes in canonical order - the same order `bookCanon` assigns, and
+ * the same list the OpenBible OSIS book ids upper-case to (asserted in
+ * `tests/crossRefsBooks.test.ts`).
+ */
+const CODES: BookCode[] = [
   'GEN', 'EXOD', 'LEV', 'NUM', 'DEUT', 'JOSH', 'JUDG', 'RUTH', '1SAM', '2SAM',
   '1KGS', '2KGS', '1CHR', '2CHR', 'EZRA', 'NEH', 'ESTH', 'JOB', 'PS', 'PROV',
   'ECCL', 'SONG', 'ISA', 'JER', 'LAM', 'EZEK', 'DAN', 'HOS', 'JOEL', 'AMOS',
@@ -30,6 +38,20 @@ const CODES_IN_ORDER: BookCode[] = [
   'PHIL', 'COL', '1THESS', '2THESS', '1TIM', '2TIM', 'TITUS', 'PHLM', 'HEB',
   'JAS', '1PET', '2PET', '1JOHN', '2JOHN', '3JOHN', 'JUDE', 'REV',
 ];
+
+/**
+ * The 66 canonical codes, in canonical order: `index + 1` is the book number
+ * the cross-reference shards and their build script address books by, so both
+ * sides read the order from here instead of keeping a fourth copy of it.
+ */
+export const CODES_IN_ORDER: readonly BookCode[] = CODES;
+
+const CODE_SET = new Set<string>(CODES);
+
+/** True when `value` is one of the 66 codes, exactly spelled. */
+export function isBookCode(value: unknown): value is BookCode {
+  return typeof value === 'string' && CODE_SET.has(value);
+}
 
 /**
  * Canonical Dutch display name per code - spelled exactly as the two dashboards
@@ -72,23 +94,54 @@ const EXTRA_TO_CODE: Record<string, BookCode> = {
 };
 
 /**
- * The canonical Dutch name for a book, whatever translation spelled it, or
- * `null` when the name is not recognised (a made-up or deuterocanonical book).
+ * The canonical code for a book, whatever language or translation spelled it -
+ * Dutch (`Mattheüs`, `1 Corinthiërs`), English (`John`), German (`1 Mose`) and
+ * the malformed keys that exist in production data (`Numberi`) all resolve
+ * here. `null` when the name is not recognised (a made-up or deuterocanonical
+ * book).
+ *
+ * This is the one resolver; `toCanonicalDutchBook` is a display wrapper over
+ * it, and the cross-reference feature uses the code directly (the shard path
+ * and the tuple book index are both keyed by code, not by Dutch name).
  */
-export function toCanonicalDutchBook(name: string | null | undefined): string | null {
+export function toAnyBookCode(name: string | null | undefined): BookCode | null {
   if (!name || typeof name !== 'string') return null;
   const key = normaliseBookName(name);
   // `bookNameMap` covers the German source names (1 Mose, Apostelgeschichte, …)
   // that `bookCanon` - Dutch-only - does not; it yields an English name, which
   // ENGLISH_TO_CODE then resolves.
   const viaEnglish = bookNameMap[name.trim()];
-  const code =
-    toBookCode(name) ??
+  // `bookCanon` types its codes as a bare `string` (it is duplicated in
+  // bijbelquiz and must not change), so its answer is checked against the list
+  // here rather than cast.
+  const fromCanon = toBookCode(name);
+  return (
+    (isBookCode(fromCanon) ? fromCanon : null) ??
     ENGLISH_TO_CODE[key] ??
     EXTRA_TO_CODE[key] ??
     (viaEnglish ? ENGLISH_TO_CODE[normaliseBookName(viaEnglish)] : undefined) ??
-    null;
+    null
+  );
+}
+
+/**
+ * The canonical Dutch name for a book, whatever translation spelled it, or
+ * `null` when the name is not recognised (a made-up or deuterocanonical book).
+ */
+export function toCanonicalDutchBook(name: string | null | undefined): string | null {
+  const code = toAnyBookCode(name);
   return code ? CODE_TO_NL[code] : null;
+}
+
+/**
+ * The 1-based canonical book number for any spelling of a book name - the
+ * index the cross-reference tuples store targets as - or `null`.
+ */
+export function toBookIndex(name: string | null | undefined): number | null {
+  const code = toAnyBookCode(name);
+  if (!code) return null;
+  const index = CODES.indexOf(code);
+  return index === -1 ? null : index + 1;
 }
 
 /**

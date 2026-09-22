@@ -104,11 +104,20 @@ export function contentEtag(payload: unknown): string {
  * The long `max-age` is kept either way. `private` restricts *who* may store
  * the response, not for how long, so the reader's own device still revalidates
  * with one empty round trip.
+ *
+ * `cdnMaxAge` adds `s-maxage`, which is what Vercel's Edge Network actually
+ * reads; without it a public response is still re-computed by a function on
+ * every cold client, which on Fluid pricing is Active CPU per request. It is
+ * opt-in rather than derived from `maxAge` so that adding it to one route
+ * cannot silently change the headers of the eight callers that already exist.
+ * It is ignored on a `private` response: `s-maxage` is an instruction to the
+ * *shared* cache, and the whole point of `private` is that no shared cache may
+ * keep a copy.
  */
 export function cachedJsonV1(
   req: Request,
   payload: unknown,
-  options?: { maxAge?: number; immutable?: boolean; private?: boolean },
+  options?: { maxAge?: number; immutable?: boolean; private?: boolean; cdnMaxAge?: number },
 ) {
   const etag = contentEtag(payload);
   const maxAge = options?.maxAge ?? 60 * 60 * 24 * 365;
@@ -117,7 +126,12 @@ export function cachedJsonV1(
   // of scripture and false of anything gated, which changes the moment the
   // reader subscribes.
   const immutable = options?.immutable ?? !options?.private;
-  const cacheControl = `${scope}, max-age=${maxAge}${immutable ? ', immutable' : ', must-revalidate'}`;
+  const shared =
+    !options?.private && typeof options?.cdnMaxAge === 'number' && options.cdnMaxAge > 0
+      ? `, s-maxage=${Math.floor(options.cdnMaxAge)}`
+      : '';
+  const cacheControl =
+    `${scope}, max-age=${maxAge}${shared}${immutable ? ', immutable' : ', must-revalidate'}`;
 
   const headers: Record<string, string> = {
     ...V1_CORS_HEADERS,

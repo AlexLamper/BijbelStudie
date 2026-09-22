@@ -106,3 +106,6 @@ STUDY_FLOW_SETUP.md
 
 # Prompt for Claude Design (end-card animation) - local reference only
 /CLAUDE_DESIGN_ENDCARD_PROMPT.md
+
+# cross-reference build inputs (OpenBible + TVTMS, downloaded by hand)
+scripts/.cache/

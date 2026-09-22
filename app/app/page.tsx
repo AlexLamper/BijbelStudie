@@ -58,12 +58,12 @@ export default function AppDownloadPage() {
             data-track="app_page_appstore"
             className="press inline-flex h-14 w-full items-center justify-center gap-3 rounded-xl bg-black px-6 text-white no-underline transition-colors hover:bg-gray-800"
           >
-            <AppleLogo className="h-7 w-7 shrink-0" />
+            <AppleLogo className="h-6 w-6 shrink-0" />
             <span className="text-left leading-none">
-              <span className="block text-[10px] font-medium opacity-80">
+              <span className="block text-[9px] font-medium opacity-80">
                 Download voor iOS
               </span>
-              <span className="block text-lg font-semibold tracking-tight">
+              <span className="block text-base font-semibold tracking-tight">
                 App Store
               </span>
             </span>
@@ -85,10 +85,10 @@ export default function AppDownloadPage() {
               style={{ backgroundColor: "#0D9488" }}
             >
               <span className="text-left leading-none">
-                <span className="block text-[10px] font-medium opacity-80">
+                <span className="block text-[9px] font-medium opacity-80">
                   Download voor Android
                 </span>
-                <span className="block text-lg font-semibold tracking-tight">
+                <span className="block text-base font-semibold tracking-tight">
                   Google Play
                 </span>
               </span>

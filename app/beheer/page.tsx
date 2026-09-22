@@ -121,7 +121,7 @@ function describeStatsFailure({ status, detail }: FetchResult): string {
 /**
  * /beheer (design_handoff_web/PAGES.md §5).
  *
- * One column: five figures with MRR first, then the users table, then the two
+ * One column: six figures with MRR and ARR first, then the users table, then the two
  * cards under it as siblings of that table - never nested in it. Everything
  * below those three blocks is what the design has no row for and RULES.md §2
  * forbids throwing away: the Stripe health card, the two 30-day charts, the
@@ -276,18 +276,33 @@ export default function AdminDashboardPage() {
           </div>
         )}
 
-        {/* ── Five figures, MRR first ───────────────────────────────── */}
-        <div className="grid flex-none grid-cols-2 gap-[13px] sm:grid-cols-3 xl:grid-cols-5">
+        {/* ── Six figures, MRR and ARR first ────────────────────────── */}
+        <div className="grid flex-none grid-cols-2 gap-[13px] sm:grid-cols-3 xl:grid-cols-6">
           <StatCard
             className="col-span-2 min-w-0 sm:col-span-1"
             label="MRR"
             value={
-              // The only figure in this row that is money, in the same green the
+              // The two money figures in this row are shown in the same green the
               // rest of the page keeps for a gain. A missing MRR stays a plain
               // dash: an unknown amount is not a good number, so it is not green.
               stats?.revenue.mrrEur != null ? (
                 <span className="text-success dark:text-emerald-400">
                   {`€ ${stats.revenue.mrrEur.toLocaleString("nl-NL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                </span>
+              ) : (
+                "-"
+              )
+            }
+          />
+          <StatCard
+            className="col-span-2 min-w-0 sm:col-span-1"
+            label="ARR"
+            value={
+              // MRR times twaalf, straight from the API - never recomputed here.
+              // Same green-or-dash rule as MRR: a missing ARR is a dash, not 0.
+              stats?.revenue.arrEur != null ? (
+                <span className="text-success dark:text-emerald-400">
+                  {`€ ${stats.revenue.arrEur.toLocaleString("nl-NL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                 </span>
               ) : (
                 "-"

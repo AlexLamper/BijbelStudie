@@ -310,14 +310,19 @@ function Hero() {
               rel="noopener noreferrer"
               aria-label="Download BijbelStudie in de App Store"
               data-track="hero_cta_appstore"
-              className="flex items-center justify-center rounded-[10px]"
+              className="flex h-[52px] w-full items-center justify-center rounded-[10px] lg:h-[60px] lg:w-[202px]"
             >
+              {/* The badge artwork carries its own wordmark and glyph, so it is
+                  drawn a little inside the 52/60px button box rather than
+                  filling it - at full bleed the lettering reads larger than the
+                  "Start gratis" label beside it. w-auto keeps Apple's ratio;
+                  the old w-full stretched the PNG in the 2-column mobile grid. */}
               <Image
                 src="/images/hero/app-store-badge.png"
                 alt="Download on the App Store"
                 width={202}
                 height={60}
-                className="block h-[52px] w-full lg:h-[60px] lg:w-[202px]"
+                className="block h-[46px] w-auto max-w-full object-contain lg:h-[53px]"
               />
             </a>
           </div>

@@ -24,8 +24,8 @@ export type NavItem = {
   title: string;
   url: string;
   icon: ElementType;
-  /** Reuses the guided tour's ids so nav instrumentation keeps one naming scheme. */
-  tourId?: string;
+  /** Click-tracking id, registered in CLICK_TARGETS (lib/analyticsRoutes.ts). */
+  trackId?: string;
   badge?: string;
 };
 
@@ -33,18 +33,18 @@ export const NAV_GROUPS: { label: string; items: NavItem[]; adminOnly?: boolean 
   {
     label: "Studeren",
     items: [
-      { title: "Dashboard", url: "/dashboard", icon: House, tourId: "nav-dashboard" },
-      { title: "Studies", url: "/studies", icon: GraduationCap, tourId: "nav-studies" },
-      { title: "Lezen", url: "/lezen", icon: BookMarked, tourId: "nav-studie" },
-      { title: "Notities", url: "/notities", icon: NotebookPen, tourId: "nav-notities" },
+      { title: "Dashboard", url: "/dashboard", icon: House, trackId: "sidebar_dashboard" },
+      { title: "Studies", url: "/studies", icon: GraduationCap, trackId: "sidebar_studies" },
+      { title: "Lezen", url: "/lezen", icon: BookMarked, trackId: "sidebar_lezen" },
+      { title: "Notities", url: "/notities", icon: NotebookPen, trackId: "sidebar_notities" },
     ],
   },
   {
     label: "Account",
     items: [
-      { title: "Profiel", url: "/profiel", icon: User, tourId: "nav-profiel" },
-      { title: "Instellingen", url: "/instellingen", icon: Settings, tourId: "nav-instellingen" },
-      { title: "Feedback", url: "/feedback", icon: MessageSquare, tourId: "nav-feedback" },
+      { title: "Profiel", url: "/profiel", icon: User, trackId: "sidebar_profiel" },
+      { title: "Instellingen", url: "/instellingen", icon: Settings, trackId: "sidebar_instellingen" },
+      { title: "Feedback", url: "/feedback", icon: MessageSquare, trackId: "sidebar_feedback" },
     ],
   },
   {

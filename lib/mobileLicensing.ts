@@ -75,7 +75,36 @@ export const MOBILE_ALLOWED_ORIGINALS: ReadonlySet<string> = new Set([
 export const STEPBIBLE_ATTRIBUTION =
   'Grondtekst: STEPBible (TAHOT/TAGNT), CC BY 4.0 - tyndale.org';
 
-export type MobileContentKind = 'bible' | 'commentary' | 'original';
+/**
+ * Cross-reference datasets. OpenBible.info's cross-reference file is CC BY:
+ * visible credit, a pointer at the source, and - because the build script
+ * filters the pairs and renumbers both ends onto each versification profile -
+ * an explicit statement that the data was changed.
+ *
+ * References are verse *coordinates*, not text, so no translation is
+ * redistributed by this source. The preview text a client renders next to a
+ * reference always comes from the chapter endpoints and keeps that
+ * translation's own attribution.
+ */
+export const MOBILE_ALLOWED_CROSSREFS: ReadonlySet<string> = new Set([
+  'openbible', // OpenBible.info cross references, CC BY
+]);
+
+/**
+ * The full CC BY notice. Rendered wherever there is room for it: the website
+ * panel and materials tab, the licences page, the app's Over screen. The
+ * "bewerkt" clause is the licence's "indicate changes" obligation, so it is
+ * not trimmable copy.
+ */
+export const OPENBIBLE_CROSSREF_ATTRIBUTION =
+  'Kruisverwijzingen: OpenBible.info (CC BY), bewerkt: gefilterd en omgezet naar '
+  + 'de versnummering van deze vertaling. Versnummering via STEPBible TVTMS (CC BY 4.0).';
+
+/** Short form for places where the long notice does not fit (app sheet footer). */
+export const OPENBIBLE_CROSSREF_ATTRIBUTION_SHORT =
+  'Kruisverwijzingen: OpenBible.info, CC BY (bewerkt)';
+
+export type MobileContentKind = 'bible' | 'commentary' | 'original' | 'crossref';
 
 export class MobileLicensingError extends Error {
   /** 451 Unavailable For Legal Reasons. */
@@ -95,6 +124,7 @@ export class MobileLicensingError extends Error {
 function setFor(kind: MobileContentKind): ReadonlySet<string> {
   if (kind === 'bible') return MOBILE_ALLOWED_BIBLES;
   if (kind === 'commentary') return MOBILE_ALLOWED_COMMENTARIES;
+  if (kind === 'crossref') return MOBILE_ALLOWED_CROSSREFS;
   return MOBILE_ALLOWED_ORIGINALS;
 }
 
