@@ -289,8 +289,14 @@ type IndexedVerse = SearchHit & { folded: string };
  * Every verse of one translation in canonical order, with its folded text
  * beside it, so a query is one pass over memory rather than ~1200 file reads.
  * Kept for the life of the instance - the text does not change between
- * deploys - and shared by concurrent first queries. The chapter files are read
- * in parallel; a failed build is dropped so the next query tries again.
+ * deploys - and shared by concurrent first queries. A failed build is dropped
+ * so the next query tries again.
+ *
+ * One book at a time, its chapters in parallel. Reading all ~1200 chapter
+ * files at once would hold ~1200 file descriptors open together (every open
+ * is queued ahead of every read), past the 1024 a serverless function gets -
+ * EMFILE, and the index would fail to build on every query. Per book the peak
+ * is Psalms' 150.
  */
 const searchIndexes = new Map<string, Promise<IndexedVerse[]>>();
 
@@ -298,17 +304,15 @@ function loadSearchIndex(versionId: string): Promise<IndexedVerse[]> {
   let pending = searchIndexes.get(versionId);
   if (!pending) {
     pending = (async () => {
-      const books = await getBooks(versionId);
-      const perBook = await Promise.all(
-        books.map(async (book) => {
-          const chapters = await getChapters(versionId, book);
-          const perChapter = await Promise.all(
-            chapters.map((chapter) => readChapterVerses(versionId, book, chapter)),
-          );
-          return perChapter.flat();
-        }),
-      );
-      return perBook.flat();
+      const index: IndexedVerse[] = [];
+      for (const book of await getBooks(versionId)) {
+        const chapters = await getChapters(versionId, book);
+        const perChapter = await Promise.all(
+          chapters.map((chapter) => readChapterVerses(versionId, book, chapter)),
+        );
+        for (const verses of perChapter) index.push(...verses);
+      }
+      return index;
     })();
     searchIndexes.set(versionId, pending);
     pending.catch(() => searchIndexes.delete(versionId));
