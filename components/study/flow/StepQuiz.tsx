@@ -92,6 +92,7 @@ export default function StepQuiz({
   previousScore,
   previousTotal,
   onAnswered,
+  onSkip,
   eyebrow,
   passageReference,
   reflectionQuestion,
@@ -108,6 +109,12 @@ export default function StepQuiz({
   previousScore: number | null;
   previousTotal: number | null;
   onAnswered: (score: number, total: number) => void;
+  /**
+   * Moves on past Toetsing without finishing it - the same walk as Volgende.
+   * Offered as a quiet link while answering, so a reader stuck on a question
+   * knows the quiz is not a gate. Omitted, the link is not shown.
+   */
+  onSkip?: () => void;
   eyebrow?: string;
   passageReference?: string;
   reflectionQuestion?: string | null;
@@ -231,6 +238,17 @@ export default function StepQuiz({
               ]),
             ),
           );
+          // Back on the question the reader left for the passage, not on
+          // question one: the first one still without an answer. A graded quiz
+          // opens on its review instead, which starts at the top.
+          if (typeof data.savedScore !== 'number') {
+            const answered = new Set(
+              saved.map((entry: { questionId: string }) => entry.questionId),
+            );
+            const served: Question[] = data.questions ?? [];
+            const open = served.findIndex((question) => !answered.has(question.id));
+            setIndex(open === -1 ? Math.max(served.length - 1, 0) : open);
+          }
         }
         if (typeof data.savedScore === 'number') {
           setScore(data.savedScore);
@@ -447,7 +465,7 @@ export default function StepQuiz({
           </p>
           {reviewing && score !== null && total !== null && (
             <p className="text-[13px] font-bold text-les-accent">
-              {score} van {total} goed
+              {score}/{total} {total === 1 ? 'vraag' : 'vragen'} goed
             </p>
           )}
         </div>
@@ -667,6 +685,22 @@ export default function StepQuiz({
             </button>
           )}
         </div>
+
+        {/* Quiet on purpose: not knowing an answer after one reading is
+            normal, and the reader should know they can move on without
+            feeling pushed. */}
+        {!reviewing && onSkip && (
+          <p className={`mt-5 text-center text-[12px] ${INK_FAINT}`}>
+            Niet verplicht ·{' '}
+            <button
+              type="button"
+              onClick={onSkip}
+              className={`underline underline-offset-2 hover:text-les-ink rounded ${FOCUS_RING}`}
+            >
+              Toetsing overslaan
+            </button>
+          </p>
+        )}
 
         {quizPrompt && (
           <PromptCard
