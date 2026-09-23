@@ -1,13 +1,16 @@
 import type { Metadata } from "next"
 import LandingPage from "../components/landing/LandingPage"
+import { reviewsDataFromSummary } from "../components/landing/ReviewsRow"
+import { getStoreReviewSummary } from "../lib/storeReviews"
 import { JsonLd } from "../components/seo/JsonLd"
 import { HOME_FAQS } from "../lib/content/homeFaq"
 import { BASE_URL, ogImageUrl, OG_IMAGE_WIDTH, OG_IMAGE_HEIGHT, SITE_NAME, TWITTER_HANDLE, SITE_LOCALE } from "../lib/seo/constants"
 import { graph, webPageNode, faqNode } from "../lib/seo/structuredData"
 
 const HOME_TITLE = "Bijbelstudie Online - Gratis de Bijbel Bestuderen | BijbelStudie"
+// Kept under ~155 characters: Google cuts a longer snippet off mid-sentence.
 const HOME_DESCRIPTION =
-  "Online bijbelstudie in het Nederlands. Lees de Bijbel in vier Nederlandse vertalingen, bekijk bijbelcommentaren en de grondtekst, volg begeleide studies en stel je vragen aan een AI-assistent. Gratis beginnen, geen creditcard nodig."
+  "Online bijbelstudie in het Nederlands: vier vertalingen, bijbelcommentaren, grondtekst, begeleide studies en een AI-assistent. Gratis, zonder creditcard."
 
 const HOME_OG = ogImageUrl({
   title: "Bijbelstudie online",
@@ -73,11 +76,32 @@ export const metadata: Metadata = {
  * If middleware's `getToken` throws on a stale cookie it falls through without
  * redirecting, and that visitor sees this page - exactly as they did before,
  * because the guard below would have read the same unreadable cookie as null.
+ *
+ * Built once, then rebuilt at most once an hour. The hero's trust row now
+ * shows the real App Store average, which lives in MongoDB, so the HTML is no
+ * longer identical forever - but it still must not cost a query per visitor.
+ *
+ * Both lines are needed. `revalidate` alone is NOT enough to stay static:
+ * nothing in the landing tree reads cookies, but the root layout does - it
+ * calls getServerSession() - and a route whose render reads the request is
+ * rendered per request, try/catch or not. That is visible on the live site:
+ * /bijbelboeken/[slug] has generateStaticParams but no `force-static`, and
+ * every one of those pages is served `private, no-store`, rendered in a
+ * function. Here that would mean a render AND a MongoDB query per visit.
+ * `force-static` makes the layout's session read return nothing (the page is
+ * the same for everyone - middleware already sends a signed-in visitor on to
+ * /dashboard), and the explicit `revalidate` keeps the hourly rebuild, so the
+ * rating is not frozen at deploy day.
  */
 export const dynamic = "force-static"
+export const revalidate = 3600
 
 export default async function Page() {
   const homeUrl = `${BASE_URL}/`
+  // Null before the first import, and null again if the database is
+  // unreachable during a build (getStoreReviewSummary swallows that itself) -
+  // in both cases the trust row renders nothing rather than a placeholder.
+  const reviews = reviewsDataFromSummary(await getStoreReviewSummary())
   const pageGraph = graph(
     webPageNode({
       path: "/",
@@ -98,7 +122,7 @@ export default async function Page() {
   return (
     <>
       <JsonLd data={pageGraph} />
-      <LandingPage />
+      <LandingPage reviews={reviews} />
     </>
   )
 }

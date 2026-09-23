@@ -17,7 +17,9 @@
  */
 export const LP_THEME_VARS =
   "[--lp-teal-text:#0F766E] [--lp-teal-deep:#115E59] [--lp-teal-light:#CCFBF1] [--lp-muted:#4B5563] [--lp-page:#FFFFFF] " +
-  "dark:[--lp-teal-text:#2DD4BF] dark:[--lp-teal-deep:#5EEAD4] dark:[--lp-teal-light:rgba(45,212,191,0.15)] dark:[--lp-muted:#A3A3A3] dark:[--lp-page:#171717]"
+  "[--lp-hero-bg:#fbfbf8] [--lp-hero-eyebrow:#0b5f52] [--lp-hero-heading:#0f172a] [--lp-hero-accent:#0d7a66] [--lp-hero-lead:#475569] [--lp-hero-scroll-border:#cfd8d4] [--lp-hero-scroll-icon:#475569] " +
+  "dark:[--lp-teal-text:#2DD4BF] dark:[--lp-teal-deep:#5EEAD4] dark:[--lp-teal-light:rgba(45,212,191,0.15)] dark:[--lp-muted:#A3A3A3] dark:[--lp-page:#171717] " +
+  "dark:[--lp-hero-bg:#171717] dark:[--lp-hero-eyebrow:#2DD4BF] dark:[--lp-hero-heading:#F5F5F5] dark:[--lp-hero-accent:#5EEAD4] dark:[--lp-hero-lead:#A3A3A3] dark:[--lp-hero-scroll-border:#383838] dark:[--lp-hero-scroll-icon:#A3A3A3]"
 
 export const ST = {
   teal: "#0D9488",

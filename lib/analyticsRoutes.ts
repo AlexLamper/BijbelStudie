@@ -37,6 +37,9 @@ export const ROUTE_KEYS = [
   'hulpbronnen_detail',
   'bijbelboeken',
   'bijbelboeken_detail',
+  'bijbel_hoofdstuk',
+  'bijbel_over',
+  'bijbel_over_detail',
   'bijbelstudie',
   'help',
   'contact',
@@ -74,6 +77,9 @@ export const ROUTE_LABELS: Record<RouteKey, string> = {
   hulpbronnen_detail: 'Hulpbron (detail)',
   bijbelboeken: 'Bijbelboeken',
   bijbelboeken_detail: 'Bijbelboek (detail)',
+  bijbel_hoofdstuk: 'Bijbelhoofdstuk (SEO)',
+  bijbel_over: 'Wat zegt de Bijbel over (overzicht)',
+  bijbel_over_detail: 'Wat zegt de Bijbel over (onderwerp)',
   bijbelstudie: 'Bijbelstudie (SEO)',
   help: 'Help',
   contact: 'Contact',
@@ -103,6 +109,7 @@ const EXACT: Record<string, RouteKey> = {
   '/geannuleerd': 'geannuleerd',
   '/hulpbronnen': 'hulpbronnen',
   '/bijbelboeken': 'bijbelboeken',
+  '/bijbel-over': 'bijbel_over',
   '/bijbelstudie': 'bijbelstudie',
   '/help': 'help',
   '/contact': 'contact',
@@ -124,6 +131,10 @@ const PREFIXES: [string, RouteKey][] = [
   ['/groepen/', 'groepen_detail'],
   ['/hulpbronnen/', 'hulpbronnen_detail'],
   ['/bijbelboeken/', 'bijbelboeken_detail'],
+  // '/bijbel/' cannot swallow '/bijbel-over/x' or '/bijbelboeken/x': the slash
+  // right after 'bijbel' is part of the prefix.
+  ['/bijbel/', 'bijbel_hoofdstuk'],
+  ['/bijbel-over/', 'bijbel_over_detail'],
   ['/beheer', 'admin'],
 ];
 
@@ -201,6 +212,8 @@ export const CLICK_TARGETS = [
   'chapter_study_picker_open',
   'chapter_study_picker_choose',
   'chapter_study_book_page',
+  /** "Bestudeer dit hoofdstuk" on a public chapter page, /bijbel/<boek>/<n>. */
+  'chapter_study_chapter_page',
   // Reading
   'reading_note_create',
   'reading_speak',

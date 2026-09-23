@@ -180,6 +180,12 @@ export type AdminFeedbackPayload = {
           adminNote: string;
           themes: string[];
           sentiment: string | null;
+          /** The reader ticked "je mag dit tonen". Nothing may be quoted without it. */
+          mayPublish: boolean;
+          /** What they chose to be credited as. Empty means: show no name. */
+          displayName: string;
+          /** Set by hand here. Null means it is not on the site. */
+          publishedAt: string | null;
           replies: { at: string; body: string; channel: string; emailStatus: string | null }[];
           lastReplyAt: string | null;
         }>;
@@ -281,6 +287,9 @@ export async function adminFeedbackPayload(filters: AdminFeedbackFilters): Promi
         adminNote: d.adminNote || "",
         themes: Array.isArray(d.themes) ? d.themes : [],
         sentiment: d.sentiment ?? null,
+        mayPublish: d.mayPublish === true,
+        displayName: d.displayName || "",
+        publishedAt: d.publishedAt ? new Date(d.publishedAt).toISOString() : null,
         replies: Array.isArray(d.replies)
           ? d.replies.map((r: { at?: Date; body?: string; channel?: string; emailStatus?: string | null }) => ({
               at: r.at ? new Date(r.at).toISOString() : "",
@@ -401,11 +410,16 @@ export async function adminFeedbackByLesson(limit?: string | null): Promise<Admi
 }
 
 /**
- * Triage edits from the inbox: status, the internal note, themes and
- * sentiment. Every field is validated on its own and written with one `$set`
- * of only the fields that were sent.
+ * Triage edits from the inbox: status, the internal note, themes, sentiment
+ * and whether a consented note is on the site. Every field is validated on its
+ * own and written with one `$set` of only the fields that were sent.
+ *
+ * `published` is the only one that changes what the public sees. It is a
+ * deliberate switch, never inferred from anything: `mayPublish` says the reader
+ * allows it, this says a human decided to. The clock is a parameter so the
+ * behaviour is testable without freezing time.
  */
-export function buildTriageUpdate(body: Record<string, unknown>):
+export function buildTriageUpdate(body: Record<string, unknown>, now: Date = new Date()):
   | { ok: true; set: Record<string, unknown> }
   | { ok: false; error: string } {
   const set: Record<string, unknown> = {};
@@ -436,6 +450,12 @@ export function buildTriageUpdate(body: Record<string, unknown>):
     }
     set.sentiment = body.sentiment;
   }
+  if (body.published !== undefined) {
+    if (typeof body.published !== "boolean") return { ok: false, error: "Ongeldige publicatie" };
+    // false takes it back down again, which has to stay as easy as putting it
+    // up: a reader who withdraws consent must be off the site the same minute.
+    set.publishedAt = body.published ? now : null;
+  }
   if (Object.keys(set).length === 0) return { ok: false, error: "Niets om bij te werken" };
   return { ok: true, set };
 }
@@ -448,8 +468,19 @@ export async function adminFeedbackUpdate(
   const built = buildTriageUpdate(body);
   if (built.ok === false) return { status: 400, body: { error: built.error } };
   await connectMongoDB();
-  const result = await Feedback.updateOne({ _id: id }, { $set: built.set });
-  if (!result.matchedCount) return { status: 404, body: { error: "Niet gevonden" } };
+
+  // Publishing is the one edit with a precondition in the filter rather than in
+  // the caller: a document may only be put on the site while it still carries
+  // the reader's consent. Taking one down is always allowed.
+  const publishing = built.set.publishedAt instanceof Date;
+  const filter = publishing ? { _id: id, mayPublish: true } : { _id: id };
+
+  const result = await Feedback.updateOne(filter, { $set: built.set });
+  if (!result.matchedCount) {
+    return publishing
+      ? { status: 409, body: { error: "Niet gevonden, of de gebruiker gaf geen toestemming" } }
+      : { status: 404, body: { error: "Niet gevonden" } };
+  }
   return { status: 200, body: { ok: true } };
 }
 

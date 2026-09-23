@@ -131,7 +131,15 @@ export default async function StudyLessonPage({ params, searchParams }: PageProp
   const initialState: LessonStatePayload = buildLessonState(state, steps[0]);
 
   return (
-    <StudyFlowShell lesson={payload} initialState={initialState} initialStep={initialStep} />
+    <StudyFlowShell
+      // Keyed by lesson so moving from one lesson to the next always starts a
+      // fresh shell: its step, completed steps and finished-state summary are
+      // all seeded once from props and must never carry over to another day.
+      key={`${payload.study.id}:${payload.lesson.day}`}
+      lesson={payload}
+      initialState={initialState}
+      initialStep={initialStep}
+    />
   );
 }
 

@@ -1,3 +1,4 @@
+import { FREE_AI_DAILY_CAP, PRO_AI_DAILY_CAP } from "../../../../lib/entitlements";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../lib/authOptions";
@@ -36,8 +37,9 @@ import {
  */
 export const maxDuration = 60;
 
-const FREE_DAILY_CAP = 5;
-const PREMIUM_DAILY_CAP = 200; // soft anti-abuse cap for Pro/admin
+// The caps live in lib/entitlements.ts, shared by the website and the app route.
+const FREE_DAILY_CAP = FREE_AI_DAILY_CAP;
+const PREMIUM_DAILY_CAP = PRO_AI_DAILY_CAP;
 const MAX_MESSAGE_LENGTH = 2000;
 const MAX_HISTORY_MESSAGES = 10;
 const MAX_HISTORY_ITEM_LENGTH = 4000;
@@ -152,7 +154,7 @@ export async function POST(req: NextRequest) {
           cap,
           hint: unlimited
             ? undefined
-            : `Morgen kun je weer ${FREE_DAILY_CAP} vragen stellen, of upgrade naar Pro voor onbeperkt gebruik.`,
+            : `Morgen kun je weer ${FREE_DAILY_CAP} vragen stellen, of upgrade naar Pro voor ${PREMIUM_DAILY_CAP} vragen per dag.`,
         },
         { status: 429 },
       );

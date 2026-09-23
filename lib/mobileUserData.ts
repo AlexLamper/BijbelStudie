@@ -276,7 +276,11 @@ export async function listTombstones(
 
 export type UpsertOutcome = {
   record: SyncRecord | null;
-  skipped: 'stale' | 'deleted' | null;
+  /**
+   * `limit`: the write would have created a note and the free note limit
+   * (lib/entitlements.ts) refused it. Nothing was written.
+   */
+  skipped: 'stale' | 'deleted' | 'limit' | null;
   /**
    * True only when this call brought the record into existence. Note XP
    * (lib/noteXp.ts) is paid on creates and never on edits, and the caller has
@@ -299,6 +303,15 @@ export async function upsertRecord(
   clientId: string,
   data: Record<string, unknown>,
   clientUpdatedAt?: Date | null,
+  options: {
+    /**
+     * Asked only when the write would CREATE a note (kind "note"), never for an
+     * edit or a highlight - see `noteCreationGuard` in lib/noteXp.ts. Every v1
+     * path that can create a note passes it: POST, PATCH (which upserts too)
+     * and the batched /sync.
+     */
+    canCreateNote?: () => Promise<boolean>;
+  } = {},
 ): Promise<UpsertOutcome> {
   const user = oid(userId);
 
@@ -309,6 +322,9 @@ export async function upsertRecord(
     const existing = await findNoteBySyncId(user, clientId);
     if (existing && isStale(existing.updatedAt, clientUpdatedAt)) {
       return { record: serialiseNote(existing.toObject(), kind), skipped: 'stale', created: false };
+    }
+    if (!existing && kind === 'note' && options.canCreateNote && !(await options.canCreateNote())) {
+      return { record: null, skipped: 'limit', created: false };
     }
     const fields = noteFieldsFrom(data, kind);
     // A website "both" note shows up in the app's notes list; editing its text

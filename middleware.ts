@@ -2,13 +2,15 @@
 import { getToken } from "next-auth/jwt";
 import type { NextRequest } from "next/server";
 import { fallbackLng, cookieName } from "./app/i18n/settings";
+import { memberRedirectFor } from "./lib/memberRedirects";
 
 export const config = {
   matcher: [
     // `og` and the crawler-facing files are excluded so a social crawler or
     // Googlebot never pays for a getToken() round-trip just to fetch an image
-    // or robots.txt.
-    "/((?!api|og|_next/static|_next/image|assets|favicon.ico|icon.svg|robots.txt|sitemap.xml|sitemap|sw.js|site.webmanifest|data|images/appstore-badge.png).*)",
+    // or robots.txt. `images/` is all static files from public/ (icons, the
+    // touch icon Google reads for search results, photos) - no page lives there.
+    "/((?!api|og|_next/static|_next/image|assets|favicon.ico|icon.svg|robots.txt|sitemap.xml|sitemap|sw.js|site.webmanifest|data|images/).*)",
   ],
 };
 
@@ -41,24 +43,6 @@ export async function middleware(req: NextRequest) {
     const redirectUrl = req.nextUrl.clone();
     redirectUrl.host = "www.bijbelstudie.io";
     return NextResponse.redirect(redirectUrl, 308);
-  }
-
-  // The domain moved from bijbel-studie.com to bijbelstudie.io. Both old hosts
-  // still resolve (Hostinger DNS + Vercel keep serving this same deployment
-  // under them) and must 301/308 straight to the new domain - not just to
-  // themselves - because that single-hop redirect is what Search Console's
-  // Change of Address tool requires before it will transfer ranking signals,
-  // and what carries an existing visitor's or search result's link equity
-  // across. Redirects straight to www (the canonical host, see above) rather
-  // than the apex, so this never has to bounce through Vercel's apex->www
-  // redirect as a second hop. 301 rather than 308: the redirect target's
-  // method may as well always be GET, and 301 is what Google's migration
-  // tooling explicitly checks for.
-  if (host === "bijbel-studie.com" || host === "www.bijbel-studie.com") {
-    const redirectUrl = req.nextUrl.clone();
-    redirectUrl.protocol = "https";
-    redirectUrl.host = "www.bijbelstudie.io";
-    return NextResponse.redirect(redirectUrl, 301);
   }
 
   if (pathname.startsWith("/api/")) {
@@ -105,6 +89,20 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
+  // Members never see the public reference pages (/bijbelboeken,
+  // /bijbelboeken/<slug>, /bijbel/<slug>/<chapter>): each has a page inside
+  // the app that does the same job - see lib/memberRedirects.ts for the table
+  // and why each target. Guests and crawlers get the static page untouched.
+  // 307, not 308: the public URL stays the canonical one, and a browser must
+  // not remember the redirect for when the member signs out. Unknown slugs and
+  // out-of-range chapters return null here and fall through to the 404.
+  if (session) {
+    const memberTarget = memberRedirectFor(pathname);
+    if (memberTarget) {
+      return NextResponse.redirect(new URL(memberTarget, req.url), 307);
+    }
+  }
+
   // Guest mode (Phase 1 MVP): a visitor who has already seen the landing page
   // once (marked by GUEST_SEEN_LANDING_COOKIE, set client-side when they leave
   // "/" for the app) skips straight past the marketing page on repeat visits -
@@ -116,20 +114,21 @@ export async function middleware(req: NextRequest) {
 
   // Only /beheer is closed at the edge. Everything else is open to a guest:
   //
-  //  - /studies and /hulpbronnen are the crawlable SEO surface (pro content
-  //    inside /hulpbronnen/:slug is gated server-side).
+  //  - /studies is the crawlable SEO surface.
   //  - /studie and /lezen are the guest-mode shell: reading is client-side
   //    against static /data/*.json, a lesson can be stepped through without an
   //    account, and every account-bound WRITE underneath (AI chat, TTS,
   //    study-progress, enrollment) gates itself with requireUser() in its own
   //    API route.
-  //  - /dashboard, /notities, /profiel, /instellingen, /groepen and /feedback
-  //    used to be listed here and 307'd a guest to "/", which made every one of
-  //    those links in the rail a dead end. Each of their LAYOUTS now reads the
+  //  - /notities, /profiel, /instellingen, /groepen and /feedback used to be
+  //    listed here and 307'd a guest to "/", which made every one of those
+  //    links in the rail a dead end. Each of their LAYOUTS now reads the
   //    session itself and renders components/auth/GuestGate.tsx for a guest,
   //    so the page component never mounts without a session. Do not add a
   //    route back here without removing that guard, or the guard will never be
   //    reached; do not remove a guard without adding the route back here.
+  //  - /dashboard is the one exception: its layout renders the real page for a
+  //    guest too, degraded to a generic empty state (app/dashboard/layout.tsx).
   //
   // The old English entries (/study, /notes, /plans, ...) are long gone: after
   // the rename they prefix-matched nothing.

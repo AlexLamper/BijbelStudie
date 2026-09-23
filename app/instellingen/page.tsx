@@ -8,6 +8,8 @@ import { useGeneralSettings } from "../../hooks/useGeneralSettings"
 import { useReadingPreferences } from "../../hooks/useReadingPreferences"
 import { Switch } from "../../components/ui/switch"
 import { CLOUD_VOICES } from "../../lib/cloudVoices"
+import { useIsPro } from "../../hooks/useIsPro"
+import { openProOffer } from "../../lib/proOffer"
 import SubscriptionSection from "../../components/settings/SubscriptionSection"
 import LevensboomSection from "../../components/settings/LevensboomSection"
 import PasswordSection from "../../components/settings/PasswordSection"
@@ -135,6 +137,7 @@ const SECTIONS: { id: Section; label: string }[] = [
  */
 export default function SettingsPage() {
   const { settings, updateSettings, loading: settingsLoading } = useGeneralSettings()
+  const isPro = useIsPro()
   const { preferences, updatePreferences } = useReadingPreferences()
   const { theme, setTheme, resolvedTheme } = useTheme()
   const [section, setSection] = useState<Section>("lezen")
@@ -464,6 +467,25 @@ export default function SettingsPage() {
                     Je kunt de stem altijd per onderdeel wijzigen via het tandwiel-icoon naast de voorlees-knop.
                     Deze keuze is je <strong className="font-semibold text-ink">standaard</strong> over alle apparaten waar je inlogt.
                   </p>
+                  {/* app/api/tts serves these voices to Pro only; a free
+                      account reads with the browser's own voice. */}
+                  {!isPro && (
+                    <p className={FOOTNOTE}>
+                      De natuurlijke stemmen horen bij Pro. Zonder Pro lees je voor met de stem van je browser.{" "}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          openProOffer({
+                            surface: "tts",
+                            reason: "De natuurlijke voorleesstemmen horen bij Pro. Zonder Pro lees je voor met de stem van je browser.",
+                          })
+                        }
+                        className="font-semibold text-teal-dark underline underline-offset-2"
+                      >
+                        Bekijk Pro
+                      </button>
+                    </p>
+                  )}
                 </SectionCard>
               </>
             )}

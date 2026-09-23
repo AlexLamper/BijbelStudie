@@ -1,9 +1,12 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Check, Lock } from 'lucide-react';
+import { normaliseBookName } from '../../../lib/bookCanon';
+import { memberRedirectFor } from '../../../lib/memberRedirects';
 
 export interface LessonRow {
   day: number;
@@ -18,6 +21,28 @@ export interface LessonRow {
    * enrollment, or null (theme studies, partial passages).
    */
   chapterHref: string | null;
+}
+
+/**
+ * The reader's key for 2 Corinthiërs drops the final s (see the naming rule in
+ * lib/content/bibleBooks/types.ts), and a generated book study carries that key
+ * as its lessons' book name.
+ */
+const READER_KEY_SLUGS: Record<string, string> = { '2-corinthier': '2-corinthiers' };
+
+/**
+ * The slug of a book's page under /bijbelboeken, from the name a lesson
+ * carries ("2 Timotheüs" -> "2-timotheus").
+ *
+ * Derived from the name rather than looked up in lib/content/bibleBooks: this
+ * is a client component, and that dataset is every book's full introduction -
+ * far too much to ship for 66 slugs. tests/seo.test.ts checks that every
+ * lesson of every study resolves to a real book page, so a new spelling fails
+ * there instead of linking to a 404.
+ */
+export function bookPageSlug(book: string): string {
+  const slug = normaliseBookName(book).replace(/ /g, '-');
+  return READER_KEY_SLUGS[slug] ?? slug;
 }
 
 /**
@@ -69,6 +94,24 @@ export default function LessonList({
 
   const done = useMemo(() => new Set(completedDays), [completedDays]);
   const doneCount = lessons.filter((lesson) => done.has(lesson.day)).length;
+
+  /** The books this study reads from, once each, in lesson order. */
+  const books = useMemo(() => {
+    const bySlug = new Map<string, string>();
+    for (const lesson of lessons) {
+      const slug = bookPageSlug(lesson.book);
+      if (!bySlug.has(slug)) bySlug.set(slug, lesson.book);
+    }
+    // A member never sees /bijbelboeken/<slug> (middleware sends them to the
+    // book's study), so link a member straight there - and drop the book whose
+    // study is this very page, which would only link back to itself.
+    return [...bySlug]
+      .map(([slug, name]) => {
+        const publicHref = `/bijbelboeken/${slug}`;
+        return { slug, name, href: guest ? publicHref : memberRedirectFor(publicHref) ?? publicHref };
+      })
+      .filter((book) => book.href !== `/studies/${studyId}`);
+  }, [lessons, guest, studyId]);
 
   return (
     <section
@@ -220,6 +263,30 @@ export default function LessonList({
             })}
           </ol>
         </div>
+      )}
+
+      {/* The introduction to each book the lessons read from: who wrote it,
+          when, and how it is built - the background a reader wants before
+          lesson one. Outside the tabs so it is in the served HTML whichever
+          tab is open, and plain links, so a crawler can follow them too.
+          `text-teal-dark` because #0D9488 is short of AA as small type. No
+          prefetch: prefetching a page nobody opens still costs a render. */}
+      {books.length > 0 && (
+        <p className="flex-none border-t border-line px-[18px] py-[11px] text-[12.5px] leading-relaxed text-ink-muted">
+          {books.length === 1 ? 'Over het bijbelboek: ' : 'Over de bijbelboeken in deze studie: '}
+          {books.map((book, index) => (
+            <React.Fragment key={book.slug}>
+              {index > 0 && <span aria-hidden> · </span>}
+              <Link
+                href={book.href}
+                prefetch={false}
+                className="font-semibold text-teal-dark no-underline hover:underline dark:text-teal-400 dark:hover:text-teal-300"
+              >
+                {book.name}
+              </Link>
+            </React.Fragment>
+          ))}
+        </p>
       )}
     </section>
   );

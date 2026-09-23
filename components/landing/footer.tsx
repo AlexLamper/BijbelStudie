@@ -1,5 +1,6 @@
 import Link from "next/link"
 import Image from "next/image"
+import CookieSettingsButton from "../ui/CookieSettingsButton"
 
 /**
  * Labels are inline rather than pulled through i18next. The site ships one
@@ -14,16 +15,22 @@ import Image from "next/image"
  */
 const FOOTER_MUTED = "#9CA3AF"
 
-export function Footer() {
+/**
+ * `frame` replaces the centred container with the caller's own horizontal
+ * frame, as on Header: ContentShell passes its full-width CONTENT_FRAME so the
+ * footer lines up with the content pages above it.
+ */
+export function Footer({ frame }: { frame?: string } = {}) {
   return (
     <footer style={{ backgroundColor: "#1F2937", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
       {/* Matches the landing page's shell exactly, so the footer's outer margin
           lines up with every section above it instead of sitting 1rem wider. */}
-      <div className="mx-auto w-full max-w-6xl xl:max-w-[76rem] px-5 sm:px-6 lg:px-8 py-16 lg:py-20">
+      <div className={`${frame ?? "mx-auto w-full max-w-6xl xl:max-w-[76rem] px-5 sm:px-6 lg:px-8"} py-16 lg:py-20`}>
 
-        {/* Main grid. The reference pages (/bijbelstudie, /bijbelboeken,
-            /hulpbronnen) are no longer advertised here - the footer sells the
-            product, not the reading material around it. One link into
+        {/* Main grid. The reference pages (/bijbelstudie, /bijbelboeken)
+            are no longer advertised here - the footer sells the
+            product, not the reading material around it; they are linked
+            from the copy that is about them instead. One link into
             /bijbelboeken survives on purpose: see the note beside it.
 
             The brand column is given more room than the three link columns:
@@ -87,13 +94,19 @@ export function Footer() {
                 { href: "/#prijzen",  label: "Prijzen" },
                 { href: "/#faq",      label: "FAQ" },
                 { href: "/studies",   label: "Begeleide studies" },
-                // The single internal link into the reference cluster. A sitemap
+                // The footer's one link into the reference cluster. A sitemap
                 // entry only tells Google a URL exists; it passes no authority
-                // and no anchor text. Without one inbound link from a real page,
-                // /bijbelboeken and the 66 book pages hanging off it are orphans
-                // that slowly lose their rankings. This one line is what keeps
-                // that cluster connected to the rest of the site.
+                // and no anchor text. The cluster's real links now come from
+                // running copy - the landing page's library, lesson and pricing
+                // sections, the study pages' book links, /help - and from the
+                // content pages' own header (components/landing/navbar.tsx),
+                // which is why the footer can keep selling the product. This
+                // line stays as the sitewide floor: Google weighs boilerplate
+                // links lightly, but it is the one that is on every page.
                 { href: "/bijbelboeken", label: "Bijbelboeken" },
+                // Same reasoning for the second reference cluster: the topic
+                // hub, whose question is itself a search ("wat zegt de Bijbel").
+                { href: "/bijbel-over", label: "Wat zegt de Bijbel?" },
               ].map(({ href, label }) => (
                 <li key={href}>
                   <Link href={href}
@@ -148,6 +161,12 @@ export function Footer() {
                   </Link>
                 </li>
               ))}
+              <li>
+                <CookieSettingsButton
+                  className="text-left text-sm transition-colors hover:text-white"
+                  style={{ color: FOOTER_MUTED }}
+                />
+              </li>
             </ul>
           </div>
         </div>

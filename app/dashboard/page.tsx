@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import { useSession } from "next-auth/react"
 import { ArrowRight, BookOpen, ChartNoAxesColumn } from "lucide-react"
 import { CHAPTER_COUNTS } from "../../lib/data/bible-chapter-counts"
 import { curatedStudies } from "../../lib/data/curated-studies"
@@ -163,7 +164,42 @@ function StudyCards({ studies }: { studies: typeof curatedStudies }) {
 const STUDY_GRID =
   "grid grid-cols-1 gap-[14px] sm:grid-cols-2 xl:grid-cols-4 max-md:flex max-md:snap-x max-md:overflow-x-auto max-md:pb-1 max-md:[&>*]:w-[min(78%,280px)] max-md:[&>*]:flex-none max-md:[&>*]:snap-start"
 
+/**
+ * The one line a guest sees at the top of the otherwise-generic dashboard:
+ * everything below it is already the empty state a brand new account would
+ * see (hooks/useDashboardData.ts fails closed with no session), this just
+ * says why and offers the two doors GuestGate used to.
+ */
+function GuestBanner() {
+  return (
+    <Card className="flex flex-none flex-wrap items-center justify-between gap-x-6 gap-y-3 border-teal/30 bg-teal-faint px-6 py-4 max-md:px-5">
+      <p className="min-w-[min(100%,260px)] flex-1 text-[13.5px] leading-[1.6] text-ink-body">
+        Dit is een voorbeelddashboard. Maak een gratis account om je leesstreak, voortgang en
+        tekst van de dag te bewaren.
+      </p>
+      <div className="flex flex-none items-center gap-3">
+        <Link
+          href="/registreren?next=%2Fdashboard"
+          data-track="guest_gate_register"
+          className="inline-flex h-9 items-center rounded-btn bg-teal px-4 text-[13px] font-semibold text-white no-underline transition-opacity hover:opacity-90"
+        >
+          Gratis account maken
+        </Link>
+        <Link
+          href="/inloggen?next=%2Fdashboard"
+          data-track="guest_gate_signin"
+          className="text-[13px] font-semibold text-ink-body no-underline transition-colors hover:text-teal dark:hover:text-teal-400"
+        >
+          Ik heb al een account
+        </Link>
+      </div>
+    </Card>
+  )
+}
+
 export default function DashboardPage() {
+  const { status } = useSession()
+  const isGuest = status !== "authenticated"
   const d = useDashboardData()
   const tree = useTreeSummary()
   const { resume, completed, loading: resumeLoading } = useResumeStudy()
@@ -208,6 +244,8 @@ export default function DashboardPage() {
             stacked page directly and "Meer om te ontdekken" can move under
             the rail with `order-last`. */}
         <div className="flex min-w-0 flex-1 flex-col gap-[18px] max-md:contents">
+          {isGuest && <GuestBanner />}
+
           {/* A flex gap is not created for a `display:none` child, so on the
               usual screen - where there is no billing notice - the verse still
               starts flush with the rail beside it. */}

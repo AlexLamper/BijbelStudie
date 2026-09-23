@@ -39,9 +39,18 @@ const CRUMBS = [
   { name: "Help", path: "/help" },
 ];
 
+/**
+ * Onward from the answers: the product, the reading material around it, and
+ * the pages behind the account questions above ("Hoe verwijder ik mijn
+ * account?" is answered here, the full procedure lives on its own page).
+ */
 const MORE_LINKS = [
   { href: "/studies", label: "Begeleide studies", description: "Kant-en-klare studies om mee te beginnen." },
+  { href: "/bijbelboeken", label: "De 66 bijbelboeken", description: "Schrijver, tijd, thema en hoofdlijn per boek." },
+  { href: "/bijbelstudie", label: "Bijbelstudie: de complete gids", description: "Methoden, hulpmiddelen en hoe je vandaag begint." },
+  { href: "/bijbelstudie/gratis", label: "Gratis bijbelstudie", description: "Alles wat gratis is, op BijbelStudie en daarbuiten." },
   { href: "/abonnement", label: "Prijzen", description: "Wat gratis blijft en wat Pro toevoegt." },
+  { href: "/account-verwijderen", label: "Account verwijderen", description: "Wat er wordt verwijderd, en wat we hoe lang bewaren." },
   { href: "/contact", label: "Contact", description: "Staat je vraag er niet bij? Laat het weten." },
 ];
 
@@ -54,7 +63,9 @@ export default function HelpPage() {
       name: PAGE_TITLE,
       description:
         "Antwoorden op de meestgestelde vragen over BijbelStudie: accounts, vertalingen, begeleide studies, de AI-assistent, Pro en privacy.",
-      type: "FAQPage",
+      // WebPage, not FAQPage: faqNode below is the page's FAQPage. Two nodes of
+      // that type on one URL is a duplicate-structured-data error.
+      type: "WebPage",
       breadcrumbId: `${url}#breadcrumb`,
     }),
     breadcrumbNode(CRUMBS, url),
@@ -162,6 +173,9 @@ export default function HelpPage() {
                   <li key={link.href} className={i === 0 ? "" : "border-t border-line-soft"}>
                     <Link
                       href={link.href}
+                      // A prefetch is a render of a page most readers of the
+                      // FAQ never open.
+                      prefetch={false}
                       className="group flex items-center justify-between gap-4 px-4 py-3.5 no-underline outline-none transition-colors hover:bg-line-soft focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#0D9488] sm:px-[22px]"
                     >
                       <span className="min-w-0">

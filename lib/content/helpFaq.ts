@@ -1,4 +1,5 @@
 import type { Faq } from "./homeFaq";
+import { FREE_AI_DAILY_CAP, FREE_NOTE_LIMIT, PRO_AI_DAILY_CAP } from "../entitlements";
 
 /**
  * The help centre content, grouped by topic.
@@ -24,7 +25,7 @@ export const HELP_TOPICS: HelpTopic[] = [
       },
       {
         q: "Heb ik een account nodig om de Bijbel te lezen?",
-        a: "Voor bijbellezen, notities en voortgang wel, omdat je voortgang aan je account wordt gekoppeld en op elk apparaat beschikbaar moet zijn. De bibliotheek met publiek-domein werken en de begeleide studies zijn zonder account te bekijken.",
+        a: "Voor bijbellezen, notities en voortgang wel, omdat je voortgang aan je account wordt gekoppeld en op elk apparaat beschikbaar moet zijn. De begeleide studies zijn zonder account te bekijken.",
       },
       {
         q: "Waar begin ik het beste?",
@@ -46,7 +47,7 @@ export const HELP_TOPICS: HelpTopic[] = [
       },
       {
         q: "Kan ik twee vertalingen naast elkaar leggen?",
-        a: "Ja. In de vergelijkingsweergave zet je vertalingen naast elkaar per vers. Juist op de plekken waar ze uiteenlopen zit meestal de interessantste vraag van je studie.",
+        a: "Nog niet in één scherm: je wisselt met de vertalingkeuze tussen vertalingen. Lees een lastig vers in twee vertalingen na elkaar; juist op de plekken waar ze uiteenlopen zit meestal de interessantste vraag van je studie.",
       },
       {
         q: "Wat is de grondtekstfunctie?",
@@ -90,7 +91,7 @@ export const HELP_TOPICS: HelpTopic[] = [
       },
       {
         q: "Hoeveel vragen kan ik stellen?",
-        a: "Met een gratis account vijf vragen per dag. Met Pro is het aantal onbeperkt.",
+        a: `Met een gratis account ${FREE_AI_DAILY_CAP} vragen per dag. Met Pro zijn het er ${PRO_AI_DAILY_CAP} per dag.`,
       },
       {
         q: "Kan ik de antwoorden vertrouwen?",
@@ -126,11 +127,11 @@ export const HELP_TOPICS: HelpTopic[] = [
     faqs: [
       {
         q: "Wat kost BijbelStudie Pro?",
-        a: "Pro kost €9,99 per maand, maandelijks gefactureerd, of €89,99 per jaar, in één keer gefactureerd. Zonder Pro blijft bijbellezen, notities, begeleide studies, de bibliotheek, het KingComments-commentaar en vijf AI-vragen per dag gratis beschikbaar.",
+        a: `Pro kost €9,99 per maand, maandelijks gefactureerd, of €89,99 per jaar, in één keer gefactureerd. Zonder Pro blijven bijbellezen, markeringen, begeleide studies, het KingComments-commentaar, meedoen met studiegroepen en ${FREE_AI_DAILY_CAP} AI-vragen per dag gratis. Zonder Pro schrijf je ${FREE_NOTE_LIMIT} notities, op de website en in de app samen.`,
       },
       {
         q: "Wat krijg ik met Pro?",
-        a: "Toegang tot de overige bijbelcommentaren - Matthew Henry, Calvijn en Dachsel - naast het gratis KingComments, 200 AI-vragen per dag in plaats van vijf, en de volledige Hebreeuwse en Griekse grondtekst.",
+        a: `Toegang tot de overige bijbelcommentaren - Matthew Henry, Calvijn en Dachsel - naast het gratis KingComments, de Hebreeuwse en Griekse grondtekst bij elk vers, ${PRO_AI_DAILY_CAP} AI-vragen per dag in plaats van ${FREE_AI_DAILY_CAP}, onbeperkt notities, zoveel studiegroepen leiden als je wilt, voorlezen met natuurlijke stemmen, streakbescherming en extra bomen en landschappen voor je boom. Had je Pro nog niet eerder, dan zijn de eerste 7 dagen gratis.`,
       },
       {
         q: "Hoe zeg ik mijn abonnement op?",

@@ -9,7 +9,7 @@ export const GUIDE_ONLINE: Guide = {
   intro:
     "Wat levert online bijbelstudie op ten opzichte van een papieren bijbel, waar is papier nog steeds beter, en hoe zet je een digitale werkwijze op die je een jaar volhoudt.",
   datePublished: "2026-08-21",
-  dateModified: "2026-08-21",
+  dateModified: "2026-09-23",
   readingMinutes: 11,
   sections: [
     {
@@ -152,14 +152,34 @@ export const GUIDE_ONLINE: Guide = {
       description: "Welke online bronnen gratis te gebruiken zijn.",
     },
     {
-      href: "/hulpbronnen",
-      label: "Bibliotheek",
-      description: "Publiek-domein bijbels, commentaren en preken om online te lezen.",
+      href: "/studies",
+      label: "Begeleide studies",
+      description: "Uitgewerkte studies over personen en bijbelboeken.",
     },
     {
       href: "/bijbelboeken",
       label: "De 66 bijbelboeken",
       description: "Achtergrond en hoofdlijn per bijbelboek.",
+    },
+    {
+      href: "/bijbelstudie/methoden",
+      label: "Bijbelstudie methoden",
+      description: "Zes methoden uitgewerkt, elk met een concreet voorbeeld.",
+    },
+    {
+      href: "/bijbelstudie/beginnen",
+      label: "Bijbelstudie voor beginners",
+      description: "Een stappenplan van dertig dagen naar een vaste gewoonte.",
+    },
+    {
+      href: "/studies/opstanding",
+      label: "Voorbeeld: een online studie",
+      description: "De opstanding van Jezus in drie lessen, met bijbelse context, grondtekst en vragen.",
+    },
+    {
+      href: "/bijbelstudie/bijbel-met-uitleg",
+      label: "Bijbel met uitleg",
+      description: "Commentaar, context en grondtekst naast de tekst - en hoe je ze gebruikt.",
     },
   ],
 };

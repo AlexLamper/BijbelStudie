@@ -21,7 +21,7 @@
  * lucky one never, and it makes the rate impossible to test.
  */
 
-import { PROMPTS, type PromptId, type Segment } from './feedbackPrompts';
+import { PROMPTS, PUBLISH_MIN_RATING, type PromptId, type Segment } from './feedbackPrompts';
 
 export const GLOBAL_COOLDOWN_DAYS = 14;
 export const MONTHLY_CAP = 1;
@@ -244,4 +244,44 @@ export function shownUpdate(
   if (Object.keys(set).length) update.$set = set;
   if (Object.keys(inc).length) update.$inc = inc;
   return update;
+}
+
+/* -------------------------------------------------------------------------- */
+/* The store-review invitation                                                 */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Not a question, so not in `PROMPTS` - but it is an ask, so it is counted in
+ * the same place every other ask is counted: a row in `FeedbackState.prompts`.
+ * That is deliberately not a second mechanism. The array already survives a
+ * logout, a new device and a cleared browser, which is what "once, ever" has to
+ * mean, and `findPromptState` already reads it.
+ */
+export const STORE_REVIEW_CTA_ID = 'store_review_cta';
+
+/** Once. Ever. A reader who has seen this invitation has seen it. */
+export const STORE_REVIEW_CTA_LIFETIME_CAP = 1;
+
+export interface StoreReviewCtaInput {
+  state: FeedbackStateLike;
+  /** The 1 to 5 rating just submitted, or null when there was none. */
+  rating: number | null;
+  /** False when the prompt that was answered does not carry the invitation. */
+  offered: boolean;
+}
+
+/**
+ * Whether to invite this reader to review in the store.
+ *
+ * Pure, for the same reason the rest of this file is: a cap that only ever
+ * shows up in production is a cap nobody has checked. A reader who opted out of
+ * being asked things is not asked this either - "stop asking" is not a setting
+ * with exceptions.
+ */
+export function canShowStoreReviewCta({ state, rating, offered }: StoreReviewCtaInput): boolean {
+  if (!offered) return false;
+  if (state.optedOut) return false;
+  if (rating === null || rating < PUBLISH_MIN_RATING) return false;
+  const own = findPromptState(state, STORE_REVIEW_CTA_ID);
+  return Math.max(0, Math.floor(own?.shownCount ?? 0)) < STORE_REVIEW_CTA_LIFETIME_CAP;
 }

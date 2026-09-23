@@ -6,6 +6,7 @@ import StudyGroup from "../../../models/StudyGroup"
 import User from "../../../models/User"
 import { isAdminEmail } from "../../../lib/adminEmails"
 import { resolveIsPro, type PremiumUserFields } from "../../../lib/mobilePremium"
+import { canCreateGroup, GROUP_LIMIT_MESSAGE } from "../../../lib/entitlements"
 
 function generateCode(length = 6) {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
@@ -65,18 +66,20 @@ export async function POST(req: NextRequest) {
   const proUser = user as PremiumUserFields & { _id: unknown }
   const userId = proUser._id
 
-  // `subscribed` is the Stripe-only flag, so gating on it alone sent two kinds
-  // of entitled users to the paywall for something they already have: App Store
-  // subscribers (storePremium) and admins. Both /api/user - the source the
-  // header and the sidebar Pro CTA read - and the NextAuth session callback
-  // already resolve Pro through `resolveIsPro`, so this route was the odd one
-  // out: the header showed a Pro badge while the create call answered
-  // SUBSCRIPTION_REQUIRED. Same helper here means the two cannot disagree.
-  if (!resolveIsPro(proUser, isAdminEmail(session.user.email))) {
-    return NextResponse.json(
-      { error: "Upgrade naar Premium om een studiegroep aan te maken.", code: "SUBSCRIPTION_REQUIRED" },
-      { status: 403 }
-    )
+  // Leading one group is free; leading more is Pro (lib/entitlements.ts).
+  // Joining is never limited. Pro is resolved through `resolveIsPro` - the
+  // Stripe-only `subscribed` flag sent App Store subscribers and admins to the
+  // paywall for something they already had. The app's /api/v1/groups applies
+  // the same rule, so a limit cannot be walked around by switching clients.
+  const isPro = resolveIsPro(proUser, isAdminEmail(session.user.email))
+  if (!isPro) {
+    const led = await StudyGroup.countDocuments({ createdBy: userId })
+    if (!canCreateGroup(led, isPro)) {
+      return NextResponse.json(
+        { error: GROUP_LIMIT_MESSAGE, code: "GROUP_LIMIT_REACHED" },
+        { status: 403 }
+      )
+    }
   }
 
   // Generate unique invite code

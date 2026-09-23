@@ -115,7 +115,14 @@ export function generateBookStudy(book: BibleBook): CuratedStudy {
     // One cover photo per book, shared with the web catalogue.
     image: bookImage(book),
     lessons: generateLessons(book),
-    about: book.summary.slice(0, 2),
+    // Its own two sentences, not the book page's summary: /studies/boek-<slug>
+    // is crawlable (noindex), and repeating the first paragraphs of
+    // /bijbelboeken/<slug> there made Google treat the two as duplicates and
+    // pick another canonical for the book page.
+    about: [
+      `Je leest ${book.name} van begin tot eind, één hoofdstuk per les (${book.chapters} ${book.chapters === 1 ? 'les' : 'lessen'}), met bij elke les een vraag om bij stil te staan.`,
+      `Waar ${book.name} over gaat, wie het schreef en hoe het boek is opgebouwd, staat op de pagina over ${book.name} bij de bijbelboeken.`,
+    ],
     suggestedRhythm: 'dagelijks',
     suggestedDepth: 'kort',
   };

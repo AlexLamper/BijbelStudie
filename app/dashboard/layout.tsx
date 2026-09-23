@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../lib/authOptions";
 import SessionProvider from "../../components/providers/SessionProvider";
-import GuestGateScene from "../../components/auth/GuestGateScene";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -12,30 +11,18 @@ export const metadata: Metadata = {
 /**
  * Providers only - no chrome.
  *
- * The dashboard is the one signed-in screen that owns its whole viewport: a
- * fixed full-bleed scene with the navbar drawn transparently over it and the
- * sidebar replaced by a rail that floats rather than taking a column out of the
- * page. A layout in the App Router can only ADD chrome, never replace what a
- * parent rendered, so the header and the sidebar are the page's to draw - see
- * app/dashboard/page.tsx, which renders `<Header variant="scene" />` and
- * `<SceneRail />` itself.
- *
- * Signed out, the route is no longer bounced to "/" by the middleware: the
- * layout answers with the GuestGate in the same scene chrome, so the Dashboard
- * link in the rail leads somewhere for a guest too. The page itself never
- * renders without a session.
+ * Signed out, the dashboard used to answer with a GuestGate card instead of
+ * the page itself. It now renders the real dashboard for a guest too: every
+ * fetch it makes is already session-gated or fails closed to an empty
+ * default (see hooks/useDashboardData.ts, useTreeSummary,
+ * DashboardFeedbackSlot, BillingNotices) so a guest sees the same generic,
+ * empty-state layout a brand new account would - no name, no streak, no
+ * saved progress - with a slim banner of its own (app/dashboard/page.tsx)
+ * pointing at registreren/inloggen. That degrade-to-generic behaviour is
+ * exactly what "basic, non-personal" means here; nothing further to gate.
  */
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions);
-  if (!session?.user?.email) {
-    return (
-      <GuestGateScene
-        title="Dashboard"
-        description="Je dashboard laat zien waar je gebleven bent: je leesstreak, je voortgang per studie, de tekst van de dag en de hoofdstukken die je al las."
-        next="/dashboard"
-      />
-    );
-  }
   return (
     <SessionProvider session={session}>
       {children}

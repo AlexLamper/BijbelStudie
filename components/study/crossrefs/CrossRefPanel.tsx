@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
+import { X } from 'lucide-react';
 
 import { track } from '../../../lib/analytics';
 import { cn } from '../../../lib/utils';
@@ -83,13 +84,23 @@ export default function CrossRefPanel({
         className,
       )}
     >
-      <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
-        <h3 className="text-[12px] font-bold uppercase tracking-[1.1px] text-ink-muted">
-          {c('panel_title', { ref: sourceLabel })}
-        </h3>
-        {refs.length > 0 && (
-          <span className="text-[11px] text-ink-faint">{c('sort_hint')}</span>
-        )}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
+          <h3 className="text-[12px] font-bold uppercase tracking-[1.1px] text-ink-muted">
+            {c('panel_title', { ref: sourceLabel })}
+          </h3>
+          {refs.length > 0 && (
+            <span className="text-[11px] text-ink-faint">{c('sort_hint')}</span>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Kruisverwijzingen sluiten"
+          className="rounded-md p-1 text-ink-faint transition-colors hover:bg-[var(--teal-wash)] hover:text-ink"
+        >
+          <X className="h-3.5 w-3.5" aria-hidden />
+        </button>
       </div>
 
       {numberingMayDiffer && (

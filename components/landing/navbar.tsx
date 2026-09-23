@@ -7,12 +7,39 @@ import { Menu, X } from "lucide-react"
 import Image from "next/image"
 import { ModeToggle } from "../dark-mode-toggle"
 
-export function Header() {
+/**
+ * The header of the public content pages (components/content/ContentShell.tsx:
+ * /bijbelstudie and its guides, /bijbelboeken and the 66 book pages).
+ *
+ * Its links used to be "#features", "#about", "#faq" and "#pricing" - landing
+ * page anchors, three of which never existed even there, and which on
+ * /bijbelboeken/genesis resolved to /bijbelboeken/genesis#features: a menu
+ * that went nowhere. It now does what a section header should: the two hubs
+ * of the reading material the visitor is in, the studies, and the prices.
+ *
+ * The landing page's own navbar deliberately leaves the two hubs out (it sells
+ * the product); this one is where they belong. No prefetch: the header is on
+ * every content page, and a prefetched /studies is a server render per view.
+ */
+const NAV_LINKS = [
+  { href: "/bijbelstudie", label: "Bijbelstudie" },
+  { href: "/bijbelboeken", label: "Bijbelboeken" },
+  { href: "/studies", label: "Studies" },
+  { href: "/#prijzen", label: "Prijzen" },
+]
+
+/**
+ * `frame` replaces the inner row's centred `container` with the caller's own
+ * horizontal frame. ContentShell passes its full-width CONTENT_FRAME so the
+ * logo lines up with the breadcrumbs and the page below it on a wide screen;
+ * without it the header keeps the default container.
+ */
+export function Header({ frame }: { frame?: string } = {}) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   return (
     <header className="border-b border-border bg-white/90 dark:bg-background/95 backdrop-blur-md sticky top-0 z-50">
-      <div className="container mx-auto px-4 md:px-6 lg:px-8">
+      <div className={frame ?? "container mx-auto px-4 md:px-6 lg:px-8"}>
         <div className="relative flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5">
@@ -30,16 +57,12 @@ export function Header() {
           </Link>
 
           {/* Centered nav */}
-          <nav className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:flex items-center gap-8">
-            {[
-              { href: "#features", label: "Functies" },
-              { href: "#about", label: "Over ons" },
-              { href: "#faq", label: "FAQ" },
-              { href: "#pricing", label: "Prijzen" },
-            ].map(({ href, label }) => (
+          <nav className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:flex items-center gap-6 lg:gap-8">
+            {NAV_LINKS.map(({ href, label }) => (
               <Link
                 key={href}
                 href={href}
+                prefetch={false}
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 {label}
@@ -74,13 +97,8 @@ export function Header() {
         {isMenuOpen && (
           <div className="md:hidden border-t border-border py-4 bg-white dark:bg-background">
             <nav className="flex flex-col gap-3">
-              {[
-                { href: "#about", label: "Over ons" },
-                { href: "#features", label: "Functies" },
-                { href: "#pricing", label: "Prijzen" },
-                { href: "#faq", label: "FAQ" },
-              ].map(({ href, label }) => (
-                <Link key={href} href={href} onClick={() => setIsMenuOpen(false)} className="flex min-h-10 items-center text-base text-muted-foreground hover:text-foreground">
+              {NAV_LINKS.map(({ href, label }) => (
+                <Link key={href} href={href} prefetch={false} onClick={() => setIsMenuOpen(false)} className="flex min-h-10 items-center text-base text-muted-foreground hover:text-foreground">
                   {label}
                 </Link>
               ))}

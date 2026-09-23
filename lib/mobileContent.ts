@@ -233,17 +233,19 @@ export type SearchHit = {
 /**
  * Server-side full-text search over one allowlisted translation.
  *
- * Deliberately simple: a case- and diacritic-insensitive substring scan over
- * the requested books, capped at `limit` hits so a one-letter query cannot
- * stream the whole corpus back.
+ * Deliberately simple: a case- and diacritic-insensitive substring scan,
+ * capped at `limit` hits so a one-letter query cannot stream the whole corpus
+ * back. `truncated: true` means there were more - the client shows "meer
+ * resultaten beschikbaar, verfijn je zoekopdracht".
  *
- * A whole-version scan is ~1200 small file reads. That is survivable because
- * `local-data` memoises each chapter, but the first cold query would still
- * blow a serverless timeout, so there is a wall-clock budget as well as a hit
- * cap. Both surface as `truncated: true` rather than a silent short answer -
- * the client shows "meer resultaten beschikbaar, verfijn je zoekopdracht".
+ * A whole-version search runs over [loadSearchIndex], built once per instance.
+ * It used to walk the chapter files one by one against a 3.5 s wall clock, and
+ * a cold instance ran out of time around the historical books: "liefde" came
+ * back with four hits from 1 Samuël and "apostel" with none at all, because the
+ * New Testament was never reached - while a warm instance answered the same
+ * query in full. One book is small enough to read directly.
  */
-const SEARCH_BUDGET_MS = 3500;
+const BOOK_SEARCH_BUDGET_MS = 3500;
 
 export async function searchMobileBible(params: {
   versionId: string;
@@ -257,27 +259,81 @@ export async function searchMobileBible(params: {
   const needle = fold(params.query);
   if (needle.length < 2) return { hits: [], truncated: false };
 
-  const deadline = Date.now() + SEARCH_BUDGET_MS;
-  const books = params.book ? [params.book] : await getBooks(params.versionId);
-  const hits: SearchHit[] = [];
-
-  for (const book of books) {
-    const chapters = await getChapters(params.versionId, book);
-    for (const chapter of chapters) {
-      if (Date.now() > deadline) return { hits, truncated: true };
-
-      const data = await getChapter(params.versionId, book, chapter);
-      const verses = (data?.verses ?? {}) as Record<string, string>;
-      for (const [n, text] of Object.entries(verses)) {
-        if (fold(text).includes(needle)) {
-          hits.push({ book, chapter, verse: Number(n), text: String(text) });
-          if (hits.length >= limit) return { hits, truncated: true };
-        }
-      }
+  if (!params.book) {
+    const index = await loadSearchIndex(params.versionId);
+    const hits: SearchHit[] = [];
+    for (const entry of index) {
+      if (!entry.folded.includes(needle)) continue;
+      if (hits.length >= limit) return { hits, truncated: true };
+      hits.push({ book: entry.book, chapter: entry.chapter, verse: entry.verse, text: entry.text });
     }
+    return { hits, truncated: false };
   }
 
+  const deadline = Date.now() + BOOK_SEARCH_BUDGET_MS;
+  const hits: SearchHit[] = [];
+  for (const chapter of await getChapters(params.versionId, params.book)) {
+    if (Date.now() > deadline) return { hits, truncated: true };
+    for (const entry of await readChapterVerses(params.versionId, params.book, chapter)) {
+      if (!entry.folded.includes(needle)) continue;
+      if (hits.length >= limit) return { hits, truncated: true };
+      hits.push({ book: entry.book, chapter: entry.chapter, verse: entry.verse, text: entry.text });
+    }
+  }
   return { hits, truncated: false };
+}
+
+type IndexedVerse = SearchHit & { folded: string };
+
+/**
+ * Every verse of one translation in canonical order, with its folded text
+ * beside it, so a query is one pass over memory rather than ~1200 file reads.
+ * Kept for the life of the instance - the text does not change between
+ * deploys - and shared by concurrent first queries. A failed build is dropped
+ * so the next query tries again.
+ *
+ * One book at a time, its chapters in parallel. Reading all ~1200 chapter
+ * files at once would hold ~1200 file descriptors open together (every open
+ * is queued ahead of every read), past the 1024 a serverless function gets -
+ * EMFILE, and the index would fail to build on every query. Per book the peak
+ * is Psalms' 150.
+ */
+const searchIndexes = new Map<string, Promise<IndexedVerse[]>>();
+
+function loadSearchIndex(versionId: string): Promise<IndexedVerse[]> {
+  let pending = searchIndexes.get(versionId);
+  if (!pending) {
+    pending = (async () => {
+      const index: IndexedVerse[] = [];
+      for (const book of await getBooks(versionId)) {
+        const chapters = await getChapters(versionId, book);
+        const perChapter = await Promise.all(
+          chapters.map((chapter) => readChapterVerses(versionId, book, chapter)),
+        );
+        for (const verses of perChapter) index.push(...verses);
+      }
+      return index;
+    })();
+    searchIndexes.set(versionId, pending);
+    pending.catch(() => searchIndexes.delete(versionId));
+  }
+  return pending;
+}
+
+async function readChapterVerses(
+  versionId: string,
+  book: string,
+  chapter: number,
+): Promise<IndexedVerse[]> {
+  const data = await getChapter(versionId, book, chapter);
+  const verses = (data?.verses ?? {}) as Record<string, string>;
+  return Object.entries(verses).map(([n, text]) => ({
+    book,
+    chapter,
+    verse: Number(n),
+    text: String(text),
+    folded: fold(String(text)),
+  }));
 }
 
 /** Lowercase + strip combining marks, so "Jesaja" matches "jesaja" and "Ezechiël" matches "ezechiel". */

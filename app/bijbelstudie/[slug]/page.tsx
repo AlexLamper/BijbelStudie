@@ -25,6 +25,15 @@ interface PageProps {
  */
 export const dynamicParams = false;
 
+/**
+ * Served prerendered. Without this the root layout's session read (it calls
+ * getServerSession, which reads cookies) renders every guide per request -
+ * production answered `private, no-store` for them. Nothing here depends on
+ * the visitor; a signed-in reader gets the layout's signed-out branch, as on
+ * /bijbelstudie and /help.
+ */
+export const dynamic = "force-static";
+
 export function generateStaticParams() {
   return GUIDE_PAGES.map(guide => ({ slug: guide.slug }));
 }

@@ -41,6 +41,12 @@ interface FeedbackRow {
   sentiment: string | null
   replies: TriageItem["replies"]
   lastReplyAt: string | null
+  /** The reader ticked "je mag dit tonen". Nothing is quotable without it. */
+  mayPublish?: boolean
+  /** What they chose to be credited as. Empty means: show no name. */
+  displayName?: string
+  /** Set by hand below. Null means it is not on the site. */
+  publishedAt?: string | null
 }
 
 /** One study/lesson row of view 2: where the prompted answers came from. */
@@ -157,6 +163,7 @@ export default function AdminFeedbackPage() {
   /** URL params are read once on mount before the first load. */
   const [ready, setReady] = useState(false)
   const [pendingId, setPendingId] = useState<string | null>(null)
+  const [publishPendingId, setPublishPendingId] = useState<string | null>(null)
   /**
    * View 2: the same answers grouped per lesson. The list says what people
    * wrote; this says where. Loaded once, not per filter - it is a rollup of
@@ -274,6 +281,30 @@ export default function AdminFeedbackPage() {
       }
     } finally {
       setPendingId(null)
+    }
+  }, [])
+
+  /**
+   * Put a consented note on the site, or take it back down. Nothing here is
+   * automatic: `mayPublish` is the reader's permission, this click is the
+   * decision. The server refuses to publish a document without the permission,
+   * so this is the second lock, not the only one.
+   */
+  const setPublished = useCallback(async (id: string, published: boolean) => {
+    setPublishPendingId(id)
+    try {
+      const res = await fetch(`/api/admin/feedback/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ published }),
+      })
+      if (res.ok) {
+        const at = published ? new Date().toISOString() : null
+        setRows((prev) => prev.map((r) => (r._id === id ? { ...r, publishedAt: at } : r)))
+      }
+    } finally {
+      setPublishPendingId(null)
     }
   }, [])
 
@@ -490,6 +521,14 @@ export default function AdminFeedbackPage() {
                           Beantwoord
                         </span>
                       )}
+                      {row.mayPublish && (
+                        <span
+                          className="rounded-full px-[7px] py-[2px] text-[11px] font-semibold text-white"
+                          style={{ backgroundColor: "#0D9488" }}
+                        >
+                          {row.publishedAt ? "Op de site" : "Mag getoond"}
+                        </span>
+                      )}
                     </div>
                     {row.subject && <p className="mb-1 break-words text-[14px] font-semibold text-ink">{row.subject}</p>}
                     <p className="whitespace-pre-wrap break-words text-[13.5px] leading-[1.6] text-ink">{row.message}</p>
@@ -525,6 +564,25 @@ export default function AdminFeedbackPage() {
                     </p>
                     {contextLine(row) && (
                       <p className="mt-0.5 break-words text-[11.5px] text-ink-faint">{contextLine(row)}</p>
+                    )}
+                    {row.mayPublish && (
+                      <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-md border border-line bg-sunken px-2.5 py-2">
+                        <span className="text-[11.5px] text-ink-muted">
+                          Toestemming om te tonen als{" "}
+                          <span className="font-semibold text-ink">
+                            {row.displayName ? row.displayName : "zonder naam"}
+                          </span>
+                          {row.publishedAt ? ` · op de site sinds ${formatDate(row.publishedAt)}` : ""}
+                        </span>
+                        <button
+                          type="button"
+                          disabled={publishPendingId === row._id}
+                          onClick={() => void setPublished(row._id, !row.publishedAt)}
+                          className={`ml-auto ${ADMIN_BUTTON}`}
+                        >
+                          {row.publishedAt ? "Van de site halen" : "Op de site zetten"}
+                        </button>
+                      </div>
                     )}
                     <button
                       type="button"

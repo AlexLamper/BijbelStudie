@@ -1,12 +1,15 @@
 /**
- * What the "Tekst van de dag" card remembers, on this device only.
+ * What the "Tekst van de dag" card remembers, on this device, plus the merge
+ * with the shared archive.
  *
- * `GET /api/bible/daytext` serves one verse and nothing else - no archive, no
- * per-user state - so the heart and "Bekijk voorgaande dagen" are backed by
- * localStorage, exactly as the mobile card backs them with SharedPreferences
- * (`lib/features/dashboard/data/daily_verse_store.dart`). Keeping the two
- * stores parallel means the two cards behave the same even though neither
- * knows about the other.
+ * `GET /api/bible/daytext` serves one verse and nothing else, so the heart and
+ * the device's own record of each day are backed by localStorage, exactly as
+ * the mobile card backs them with SharedPreferences
+ * (`lib/features/dashboard/data/daily_verse_store.dart`). "Bekijk voorgaande
+ * dagen" also reads the shared server archive (`GET /api/v1/daytext/history`,
+ * the route the app uses too) and folds it in with `previousDays` - without it
+ * a browser only ever knew the days it happened to be opened on, which on a
+ * fresh browser is just today.
  *
  * Everything here tolerates localStorage being unavailable or corrupt: a
  * private window, cleared site data, or a browser refusing storage. The card
@@ -33,6 +36,9 @@ const LIKES_KEY = 'bijbelstudie_daytext_likes';
 /** Roughly two months of verses. Beyond that nobody scrolls. */
 const MAX_HISTORY = 60;
 
+/** A day as both stores key it. */
+const DAY_KEY = /^\d{4}-\d{2}-\d{2}$/;
+
 function read<T>(key: string, fallback: T): T {
   if (typeof window === 'undefined') return fallback;
   try {
@@ -54,10 +60,42 @@ function write(key: string, value: unknown): void {
   }
 }
 
+/** The device's own calendar day, `yyyy-mm-dd`. */
 export function todayKey(date = new Date()): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(
     date.getDate(),
   ).padStart(2, '0')}`;
+}
+
+/**
+ * The Amsterdam calendar day, `yyyy-mm-dd` - the day the verse belongs to.
+ *
+ * The verse changes at Amsterdam midnight and the server files its archive
+ * under this key (`dayKeyNL` in `lib/mobileDayText.ts`, which cannot be
+ * imported here: it pulls in `next/cache` and the database). Keying the
+ * device's copy on the browser's own day instead would, for a reader outside
+ * the Netherlands, file one day's verse under the neighbouring date and put
+ * two different verses on one day once the two lists are merged.
+ *
+ * Built from parts rather than from a locale's formatted string, so no
+ * browser's idea of "en-CA" can change the shape. Falls back to the device's
+ * day where the timezone database is missing.
+ */
+export function dayKeyNL(date = new Date()): string {
+  try {
+    const parts = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Europe/Amsterdam',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).formatToParts(date);
+    const part = (type: string) => parts.find((p) => p.type === type)?.value ?? '';
+    const key = `${part('year')}-${part('month')}-${part('day')}`;
+    if (DAY_KEY.test(key)) return key;
+  } catch {
+    // No tz data, or an invalid date: the device's own day will do.
+  }
+  return todayKey(date);
 }
 
 /** The archive, newest day first. */
@@ -80,6 +118,82 @@ export function rememberVerse(entry: StoredVerse): StoredVerse[] {
   const next = [entry, ...withoutToday].slice(0, MAX_HISTORY);
   write(HISTORY_KEY, next);
   return next;
+}
+
+/** How many earlier days "Voorgaande dagen" lists. A month is plenty to scroll. */
+export const PREVIOUS_DAYS_SHOWN = 30;
+
+/**
+ * One row of `GET /api/v1/daytext/history` as a stored day, or null when the
+ * row is unusable.
+ *
+ * The archive is filed in the Statenvertaling (`recordDayText`), whose name it
+ * carries in full ("Statenvertaling"; rows from before the field existed carry
+ * ""). It is labelled the way the device's own entries are - the abbreviation,
+ * "SV" - and linked to the reader in that translation. A row naming any other
+ * translation is dropped rather than shown: this card would have no licence
+ * notice to print with it.
+ */
+export function fromArchiveEntry(raw: unknown): StoredVerse | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const row = raw as Record<string, unknown>;
+  if (typeof row.date !== 'string' || !DAY_KEY.test(row.date)) return null;
+  if (typeof row.text !== 'string' || !row.text.trim()) return null;
+  if (typeof row.reference !== 'string' || !row.reference.trim()) return null;
+  if (typeof row.book !== 'string' || !row.book.trim()) return null;
+  const chapter = Number(row.chapter);
+  if (!Number.isInteger(chapter) || chapter < 1) return null;
+
+  const abbreviation = versionAbbreviation(typeof row.version === 'string' ? row.version : '');
+  if (abbreviation && abbreviation !== 'SV') return null;
+
+  const verse = Number(row.verse);
+  return {
+    date: row.date,
+    text: row.text,
+    reference: row.reference,
+    book: row.book,
+    chapter,
+    ...(Number.isInteger(verse) && verse > 0 ? { verse } : {}),
+    version: 'SV',
+    versionId: 'statenvertaling',
+  };
+}
+
+/** The `{ entries }` body of `GET /api/v1/daytext/history`, as stored days. */
+export function parseDayTextArchive(body: unknown): StoredVerse[] {
+  const entries =
+    body && typeof body === 'object' ? (body as { entries?: unknown }).entries : undefined;
+  if (!Array.isArray(entries)) return [];
+  return entries
+    .map(fromArchiveEntry)
+    .filter((entry): entry is StoredVerse => entry !== null);
+}
+
+/**
+ * What "Voorgaande dagen" lists: the device's days and the shared archive's,
+ * one per date, strictly before `today`, newest first, at most `limit`.
+ *
+ * Today is left out - it is on the card already, and a list called "earlier
+ * days" that opens with today reads as if nothing earlier exists. So is any
+ * date after it (a day filed under the device's own clock, ahead of
+ * Amsterdam's). On a clash the device's copy wins, as in the app's
+ * `mergeServer`: it is the verse the reader actually saw, in the translation
+ * they were reading.
+ */
+export function previousDays(
+  local: readonly StoredVerse[],
+  archive: readonly StoredVerse[],
+  today: string,
+  limit = PREVIOUS_DAYS_SHOWN,
+): StoredVerse[] {
+  const byDate = new Map<string, StoredVerse>();
+  for (const entry of archive) byDate.set(entry.date, entry);
+  for (const entry of local) byDate.set(entry.date, entry);
+  return Array.from(byDate.values())
+    .filter((entry) => typeof entry.date === 'string' && DAY_KEY.test(entry.date) && entry.date < today)
+    .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
+    .slice(0, Math.max(0, limit));
 }
 
 const READER_VERSION_KEY = 'bijbelstudie_reader_version';

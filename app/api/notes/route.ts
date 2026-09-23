@@ -4,7 +4,7 @@ import { authOptions } from "../../../lib/authOptions";
 import connectMongoDB from "../../../lib/mongodb";
 import Note from "../../../models/Note";
 import User from "../../../models/User";
-import { grantNoteXp, canCreateAnotherNote } from "../../../lib/noteXp";
+import { grantNoteXp, canCreateAnotherNote, limitedNotesFilter, NOTE_LIMIT_MESSAGE } from "../../../lib/noteXp";
 import { resolveIsPro } from "../../../lib/mobilePremium";
 import { isAdminEmail } from "../../../lib/adminEmails";
 import { randomUUID } from "crypto";
@@ -94,18 +94,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    const body = await request.json();
+
+    // The free limit is on written notes only - a highlight is never blocked
+    // and never counted. See limitedNotesFilter.
     const isPro = resolveIsPro(user, isAdminEmail(session.user.email));
-    if (!isPro) {
-      const noteCount = await Note.countDocuments({ userId: user._id });
+    if (!isPro && body?.type !== "highlight") {
+      const noteCount = await Note.countDocuments(limitedNotesFilter(user._id));
       if (!canCreateAnotherNote(noteCount, isPro)) {
         return NextResponse.json(
-          { error: "Je hebt het gratis limiet van 7 notities bereikt. Upgrade naar Pro voor onbeperkte notities.", code: "NOTE_LIMIT_REACHED" },
+          { error: NOTE_LIMIT_MESSAGE, code: "NOTE_LIMIT_REACHED" },
           { status: 403 }
         );
       }
     }
 
-    const body = await request.json();
     const {
       verseReference,
       book,

@@ -18,6 +18,8 @@ import StudyEnrollment from '../models/StudyEnrollment.js';
 import User from '../models/User';
 import { tenureBucket } from './analyticsSchema';
 import {
+  STORE_REVIEW_CTA_ID,
+  canShowStoreReviewCta,
   choosePrompt,
   findPromptState,
   sampleRateFromEnv,
@@ -27,6 +29,8 @@ import {
 import {
   PROMPTS,
   promptsFor,
+  ratingFromAnswers,
+  resolvePublishConsent,
   serialisePrompt,
   validateAnswers,
   type PromptId,
@@ -34,6 +38,7 @@ import {
   type Segment,
   type Touchpoint,
 } from './feedbackPrompts';
+import { storeReviewTargetFor, type StoreReviewTarget } from './storeReviewCta';
 import { lessonsBucket, resolveSegment, streakBucket, type SegmentInput } from './feedbackSegments';
 import { issueToken, verifyToken } from './feedbackToken';
 
@@ -207,11 +212,25 @@ export interface SubmitArgs {
   token: unknown;
   answers: unknown;
   context?: FeedbackContext;
+  /**
+   * `{ mayPublish, displayName }` straight off the request body. Nothing in it
+   * is trusted; `resolvePublishConsent` decides what survives.
+   */
+  publish?: unknown;
+  /** The request's user agent, only to pick which store to link to. */
+  userAgent?: string | null;
   now?: Date;
 }
 
 export type SubmitResult =
-  | { ok: true }
+  | {
+      ok: true;
+      /**
+       * Set only when this answer earned the one-time invitation to review in
+       * the store. Returning it has already spent the once-ever cap.
+       */
+      storeReview: StoreReviewTarget | null;
+    }
   | { ok: false; code: 'UNKNOWN_PROMPT' | 'BAD_TOKEN' | 'INVALID_ANSWERS' | 'OPTED_OUT' };
 
 /**
@@ -227,6 +246,8 @@ export async function submitResponse({
   token,
   answers,
   context = {},
+  publish,
+  userAgent = null,
   now = new Date(),
 }: SubmitArgs): Promise<SubmitResult> {
   const def = PROMPTS[promptId];
@@ -251,13 +272,20 @@ export async function submitResponse({
 
   // A rating prompt also fills the top-level `rating`, so the inbox can filter
   // on it next to the ratings from the /feedback form.
-  const chosen = validated.find((entry) => entry.key === 'keuze')?.value;
-  const rating = def.ratingScale && chosen && /^[1-5]$/.test(chosen) ? Number(chosen) : undefined;
+  const rating = ratingFromAnswers(def, validated);
+
+  // Consent to be quoted, re-decided here from the answers that were actually
+  // validated. A body claiming `mayPublish: true` on a 3-star answer, or on a
+  // rating with no note, is stored with `mayPublish: false` - the feedback is
+  // still worth having, it just may not appear on the site.
+  const consent = resolvePublishConsent(def, validated, publish);
 
   await Feedback.create({
     userId,
     category: 'other',
     ...(rating ? { rating } : {}),
+    mayPublish: consent.mayPublish,
+    displayName: consent.displayName,
     // The answer lives in `answers`; `message` carries the free text as well so
     // the existing inbox and the admin list keep working unchanged.
     message: validated.map((entry) => entry.value).join(' | ').slice(0, 2000),
@@ -288,7 +316,49 @@ export async function submitResponse({
     { $set: { 'prompts.$.answeredAt': now } },
   );
 
-  return { ok: true };
+  // The store invitation, at most once in this reader's life. The cap is spent
+  // by SERVING it, exactly as a prompt's budget is - the card is fire-and-
+  // forget on the client, and a reader whose browser dropped the response is
+  // better off never seeing it than seeing it on every happy rating.
+  if (!canShowStoreReviewCta({ state, rating, offered: def.storeReviewCta === true })) {
+    return { ok: true, storeReview: null };
+  }
+  const storeReview = storeReviewTargetFor(userAgent);
+  if (!storeReview) return { ok: true, storeReview: null };
+
+  await markStoreReviewCtaShown(userId, state, now);
+  return { ok: true, storeReview };
+}
+
+/**
+ * Records that the store invitation was served.
+ *
+ * Deliberately does NOT touch `lastPromptAt` or the monthly and annual
+ * counters: those are the budget for QUESTIONS, and spending a month's worth of
+ * it on a link would mean a reader who liked a study is asked nothing else for
+ * the rest of the month.
+ */
+async function markStoreReviewCtaShown(
+  userId: string,
+  state: FeedbackStateLike,
+  now: Date,
+): Promise<void> {
+  if (findPromptState(state, STORE_REVIEW_CTA_ID)) {
+    await FeedbackState.updateOne(
+      { userId, 'prompts.promptId': STORE_REVIEW_CTA_ID },
+      { $inc: { 'prompts.$.shownCount': 1 }, $set: { 'prompts.$.lastShownAt': now } },
+    );
+    return;
+  }
+
+  await FeedbackState.updateOne(
+    { userId },
+    {
+      $setOnInsert: { userId },
+      $push: { prompts: { promptId: STORE_REVIEW_CTA_ID, shownCount: 1, lastShownAt: now } },
+    },
+    { upsert: true },
+  );
 }
 
 /** A skip. Costs the same budget as an answer, and is worth counting. */

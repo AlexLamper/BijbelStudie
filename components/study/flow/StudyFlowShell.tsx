@@ -564,6 +564,22 @@ export default function StudyFlowShell({
     [patch, steps, step, swipeSound],
   );
 
+  // A tap on the rail. Leaving a step that way counts it as done, exactly as
+  // Volgende does - otherwise the segment the reader was just on, lit only
+  // because it was current, goes dark the moment they tap away from it.
+  const jumpTo = useCallback(
+    (next: StepKey) => {
+      if (next === step) return;
+      const towards: 1 | -1 = steps.indexOf(next) >= steps.indexOf(step) ? 1 : -1;
+      setDirection(towards);
+      swipeSound(towards);
+      setCompleted((current) => (current.includes(step) ? current : [...current, step]));
+      setStep(next);
+      void patch({ completeStep: step, currentStep: next });
+    },
+    [patch, steps, step, swipeSound],
+  );
+
   const onNext = useCallback(async () => {
     setDirection(1);
     swipeSound(1);
@@ -752,6 +768,7 @@ export default function StudyFlowShell({
               setQuizScore(score);
               setQuizTotal(total);
             }}
+            onSkip={() => void onNext()}
             eyebrow={eyebrow}
             passageReference={passageReference}
             reflectionQuestion={lesson.content.reflection.question}
@@ -778,6 +795,7 @@ export default function StudyFlowShell({
     savePractices,
     quizScore,
     quizTotal,
+    onNext,
     askAi,
     passageReference,
   ]);
@@ -1042,7 +1060,7 @@ export default function StudyFlowShell({
             steps={steps}
             current={step}
             completed={completed}
-            onSelect={goTo}
+            onSelect={jumpTo}
             variant="bar"
           />
         </div>
@@ -1194,7 +1212,7 @@ export default function StudyFlowShell({
             steps={steps}
             current={step}
             completed={completed}
-            onSelect={goTo}
+            onSelect={jumpTo}
             variant="index"
           />
 

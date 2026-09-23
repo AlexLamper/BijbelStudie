@@ -9,7 +9,6 @@ import {
   nextLessonDay,
   resolvePassage,
   resolveReflectionQuestion,
-  resolveSteps,
 } from '../../../../lib/studyFlow';
 import {
   findStudy,
@@ -19,7 +18,7 @@ import {
   syncEnrollmentAfterLesson,
 } from '../../../../lib/studyEnrollmentService';
 import { promoteReflectionToNote, recordLessonCompletion } from '../../../../lib/studyCompletion';
-import { buildLessonContext } from '../../../../lib/lessonContext';
+import { resolveLessonSteps } from '../../../../lib/lessonPayload';
 import { upsertLessonState } from '../../../../lib/lessonStateWrite';
 import { nextPrompt } from '../../../../lib/feedbackService';
 import type { SerialisedPrompt } from '../../../../lib/feedbackPrompts';
@@ -298,9 +297,7 @@ export async function PATCH(req: Request) {
       // state by an older deploy heals on its next attempt.
       // `hasContext` the same way the payload resolved it, so finishing a
       // lesson never ticks a step the reader was never shown.
-      const steps = resolveSteps(lesson, content, {
-        hasContext: !!buildLessonContext(passage, content),
-      });
+      const steps = resolveLessonSteps(study, lesson);
       await StudyLessonState.updateOne(
         { userId: auth.id, studyId, lessonDay },
         {

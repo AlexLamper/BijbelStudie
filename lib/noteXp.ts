@@ -1,6 +1,7 @@
 import connectMongoDB from './mongodb';
 import Note from '../models/Note';
 import { grantXp, type GrantResult } from './gamification';
+import { FREE_NOTE_LIMIT } from './entitlements';
 
 /**
  * XP for writing an aantekening.
@@ -24,10 +25,52 @@ export const NOTE_XP_MIN_LENGTH = 15;
 export const NOTE_XP_DAILY_CAP = 3;
 
 // isPro must come from resolveIsPro (Stripe, store and admin), never `subscribed` alone.
-export const FREE_NOTE_LIMIT = 7;
+// The number itself lives in lib/entitlements.ts, beside the other free limits.
+export { FREE_NOTE_LIMIT };
 
 export function canCreateAnotherNote(existingNoteCount: number, isPro: boolean): boolean {
   return isPro || existingNoteCount < FREE_NOTE_LIMIT;
+}
+
+/**
+ * The notes that count towards FREE_NOTE_LIMIT: every note the reader wrote,
+ * on the website or in the app. Deliberately NOT counted:
+ *  - pure highlights (type "highlight"): markeringen stay free and unlimited;
+ *  - the note a finished lesson writes from the Toepassing answer
+ *    (lib/studyCompletion.ts, tag "studie") - finishing a handful of lessons
+ *    would otherwise use up the whole allowance.
+ * `type: { $ne }` rather than `$in` so an old note without a type still counts
+ * as the note it is.
+ *
+ * App notes used to be excluded (by `clientId`) because the app had no limit.
+ * That also excluded every note written on the website since app/api/notes
+ * started stamping a `web-<uuid>` clientId, so the website limit had quietly
+ * stopped counting new notes. One limit for both clients, counted the same way.
+ */
+export function limitedNotesFilter(userId: unknown): Record<string, unknown> {
+  return {
+    userId,
+    type: { $ne: 'highlight' },
+    tags: { $ne: 'studie' },
+  };
+}
+
+/** Shown when a free account reaches the limit, on the website and in the app. */
+export const NOTE_LIMIT_MESSAGE =
+  `Je hebt je ${FREE_NOTE_LIMIT} gratis notities gebruikt. Met Pro schrijf je onbeperkt notities. ` +
+  'Markeringen en je antwoorden uit de studies tellen niet mee.';
+
+/**
+ * For the v1 sync paths, which only learn whether a write creates a note once
+ * they have looked the record up: answers "may this account add one more?"
+ * lazily, so an edit of an existing note never pays for the count.
+ */
+export function noteCreationGuard(userId: unknown, isPro: boolean): () => Promise<boolean> {
+  return async () => {
+    if (isPro) return true;
+    const count = await Note.countDocuments(limitedNotesFilter(userId));
+    return canCreateAnotherNote(count, isPro);
+  };
 }
 
 function startOfDay(date: Date): Date {

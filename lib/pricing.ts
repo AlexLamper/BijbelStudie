@@ -11,6 +11,8 @@
  * is why every plan below carries an explicit `billedLabel`.
  */
 
+import { FREE_AI_DAILY_CAP, PRO_AI_DAILY_CAP } from "./entitlements";
+
 export type BillingInterval = "monthly" | "annual";
 
 export interface Plan {
@@ -114,14 +116,27 @@ export function freeMonthsOnAnnual(): number {
 
 /**
  * Every entry must name something the code actually withholds from a free
- * account. Two claims were removed for failing that test: "Historische context
- * en kaarten" (HistoricalContext and /api/geo/images are ungated - free for
- * everyone) and the word "onbeperkt" on the AI, which app/api/ai/chat caps at
- * PREMIUM_DAILY_CAP = 200 per day.
+ * account - this list is what the pricing page, the Pro offer dialog and the
+ * plan cards promise. Checked against the code, not against what reads well:
+ *  - commentaries: lib/proContent.ts (`gateCommentary`, KingComments stays free)
+ *  - grondtekst: lib/proContent.ts (`FREE_ORIGINAL_VERSES`) and the per-verse
+ *    grondtekst in the lesson, which is Pro only (components/study/flow/PassageReader)
+ *  - AI, notes, groups: lib/entitlements.ts, enforced by the web AND app routes
+ *  - voorlezen: app/api/tts refuses the cloud voices without Pro
+ *  - streak protection: lib/streak.ts spends a freeze only for a Pro reader
+ *  - tree items: lib/levensboom/catalog.ts, the `pro` unlocks
+ * Two claims were removed earlier for failing that test ("Historische context
+ * en kaarten" is free for everyone, and the AI is capped, so never
+ * "onbeperkt"), and "Prioriteit bij ondersteuning" was removed because nothing
+ * in the code or the support process gives Pro a queue of its own.
  */
 export const PRO_FEATURES = [
   "Matthew Henry, Calvijn en Dachsel volledig",
-  "200 AI-vragen per dag, i.p.v. 5",
-  "Grondtekst: Hebreeuws en Grieks",
-  "Prioriteit bij ondersteuning",
+  "Grondtekst: Hebreeuws en Grieks bij elk vers",
+  `${PRO_AI_DAILY_CAP} AI-vragen per dag, i.p.v. ${FREE_AI_DAILY_CAP}`,
+  "Onbeperkt notities, op de website en in de app",
+  "Zoveel studiegroepen leiden als je wilt",
+  "Voorlezen met natuurlijke stemmen",
+  "Streakbescherming als je een dag mist",
+  "Extra bomen, landschappen en de gouden ring",
 ];

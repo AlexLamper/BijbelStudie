@@ -100,6 +100,8 @@ export async function GET(req: Request, { params }: RouteContext) {
         lesson,
         translation,
         commentaryId,
+        // A single chapter, opened on its own: the context step always shows.
+        standalone: true,
       }),
     });
   } catch (error) {

@@ -80,16 +80,8 @@ export function websiteNode(): Node {
       "Online bijbelstudie in het Nederlands: bijbel lezen, commentaren, grondtekst en een AI-assistent.",
     publisher: { "@id": ORG_ID },
     inLanguage: "nl-NL",
-    // Sitelinks search box. Google only honours this on the homepage and only
-    // if the target URL really performs a site search.
-    potentialAction: {
-      "@type": "SearchAction",
-      target: {
-        "@type": "EntryPoint",
-        urlTemplate: `${BASE_URL}/hulpbronnen?q={search_term_string}`,
-      },
-      "query-input": "required name=search_term_string",
-    },
+    // No SearchAction: its target was the /hulpbronnen search, which is gone,
+    // and Google retired the sitelinks search box it fed in November 2024.
   };
 }
 
@@ -282,31 +274,6 @@ export function courseNode(opts: {
       courseWorkload: `PT${Math.max(1, opts.lessonCount) * 20}M`,
       instructor: { "@id": ORG_ID },
     },
-  };
-}
-
-/** A public-domain work in the /hulpbronnen library. */
-export function bookNode(opts: {
-  title: string;
-  author?: string;
-  year?: string;
-  description: string;
-  path: string;
-  sourceUrl: string;
-}): Node {
-  const url = absoluteUrl(opts.path);
-  return {
-    "@type": "Book",
-    "@id": `${url}#book`,
-    name: opts.title,
-    url,
-    description: opts.description,
-    inLanguage: "nl",
-    ...(opts.author ? { author: { "@type": "Person", name: opts.author } } : {}),
-    ...(opts.year ? { datePublished: opts.year } : {}),
-    sameAs: opts.sourceUrl,
-    isAccessibleForFree: true,
-    publisher: { "@id": ORG_ID },
   };
 }
 

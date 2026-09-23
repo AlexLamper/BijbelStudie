@@ -12,14 +12,17 @@ import { PrefetchProvider } from "../components/providers/prefetch-provider";
 import { StudyStyleProvider } from "../components/providers/study-style-provider";
 import { LevensboomProvider } from "../components/providers/levensboom-provider";
 import AnalyticsTracker from "../components/providers/AnalyticsTracker";
+import GoogleAnalytics from "../components/providers/GoogleAnalytics";
 import GuestProgressMigration from "../components/auth/GuestProgressMigration";
 import { JsonLd } from "../components/seo/JsonLd";
 import EnvironmentBanner from "../components/layout/EnvironmentBanner";
 import AppPromoBanner from "../components/layout/AppPromoBanner";
 import { Toaster } from "../components/ui/toaster";
+import ProOfferDialog from "../components/pricing/ProOfferDialog";
 import CookieConsent from "../components/ui/CookieConsent";
 import { APP_STORE_URL } from "../lib/appStore";
 import { appStoreIdFromUrl } from "../lib/mobilePlatform";
+import { appEnv } from "../lib/appEnv";
 import {
   BASE_URL,
   SITE_NAME,
@@ -88,16 +91,28 @@ export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   manifest: "/site.webmanifest",
   applicationName: SITE_NAME,
+  // Every icon, declared here and only here: there is deliberately no
+  // app/favicon.ico / app/icon.* / app/apple-icon.* file convention (it adds a
+  // second <link rel="icon"> with a misleading sizes="16x16", and a public file
+  // on the same URL fails the build). One mark everywhere: the #262626 tile
+  // with the #F9F9F9 cross of public/images/logo.svg, which is the App Store
+  // icon's geometry. Google picks ANY of these for the search-result favicon
+  // (it had picked a touch icon whose cross was shrunk to 62%), so none may
+  // differ from the mark. The touch and maskable PNGs are that same mark full
+  // bleed, because iOS and Android apply their own corner mask.
   icons: {
     icon: [
-      { url: "/images/favicon.ico", type: "image/x-icon" },
+      {
+        url: "/favicon.ico",
+        type: "image/x-icon",
+        sizes: "16x16 32x32 48x48 64x64 96x96 128x128 256x256",
+      },
       { url: "/icon.svg", type: "image/svg+xml" },
       { url: "/images/icon-192.png", type: "image/png", sizes: "192x192" },
       { url: "/images/icon-512.png", type: "image/png", sizes: "512x512" },
     ],
-    shortcut: "/images/favicon.ico",
-    // iOS ignores .ico for the home-screen icon and needs a PNG.
-    apple: [{ url: "/images/apple-touch-icon.png", sizes: "180x180" }],
+    // iOS ignores .ico for the home-screen icon and needs an opaque PNG.
+    apple: [{ url: "/images/apple-touch-icon.png", type: "image/png", sizes: "180x180" }],
   },
   alternates: {
     canonical: "/",
@@ -201,8 +216,9 @@ export default async function RootLayout({
   return (
     <html lang="nl" suppressHydrationWarning>
       <head>
-        <meta charSet="UTF-8" />
-        <link rel="icon" href="/images/favicon.ico" sizes="any" />
+        {/* No <meta charSet> or icon <link> here: Next already emits the
+            charset, and `metadata.icons` above emits every icon - a second
+            copy of each was duplicated in the head. */}
         {/* No preconnect to fonts.googleapis.com / fonts.gstatic.com: the three
             faces above come from next/font/google, which downloads them at
             build time and serves them from this origin. Those hosts are never
@@ -274,11 +290,18 @@ export default async function RootLayout({
             on a phone, so it never lands on the promo banner or the tab bar;
             bottom-right from md up - see components/ui/toast.tsx. */}
         <Toaster />
+        {/* The Pro offer (free trial or upgrade), raised by a paywall through
+            lib/proOffer.ts - never on its own. Renders nothing until then. */}
+        <ProOfferDialog />
         {/* Asks once, remembers the answer, and gates the usage statistics in
             lib/analytics.ts behind it. Renders nothing until mounted, nothing
             once answered, and nothing inside the /studie flow - see
             components/ui/CookieConsent.tsx. */}
         <CookieConsent />
+        {/* Google Analytics, behind the same "Accepteren" and only on the live
+            site - previews and local dev would pollute the property. Nothing is
+            downloaded before consent; see lib/googleAnalytics.ts. */}
+        <GoogleAnalytics enabled={appEnv() === "production"} />
         <SpeedInsights />
       </body>
     </html>

@@ -1,4 +1,5 @@
 import type { Guide } from "./types";
+import { FREE_AI_DAILY_CAP, FREE_NOTE_LIMIT } from "../../entitlements";
 
 /** /bijbelstudie/gratis - target: "gratis bijbelstudie", "gratis bijbelstudie materiaal". */
 export const GUIDE_FREE: Guide = {
@@ -9,7 +10,7 @@ export const GUIDE_FREE: Guide = {
   intro:
     "Een eerlijk overzicht van wat je zonder te betalen kunt gebruiken voor bijbelstudie in het Nederlands: vertalingen, commentaren, de grondtekst, begeleide studies en publiek-domein bibliotheken.",
   datePublished: "2026-08-21",
-  dateModified: "2026-08-21",
+  dateModified: "2026-09-23",
   readingMinutes: 9,
   sections: [
     {
@@ -46,7 +47,7 @@ export const GUIDE_FREE: Guide = {
         },
       ],
       callout:
-        "Op BijbelStudie zijn deze vertalingen gratis te lezen en naast elkaar te vergelijken. De NBG-vertaling 1951 is beschikbaar onder licentie van het Nederlands-Vlaams Bijbelgenootschap.",
+        "Op BijbelStudie zijn deze vertalingen gratis te lezen, en je wisselt op elk moment van vertaling. De NBG-vertaling 1951 is beschikbaar onder licentie van het Nederlands-Vlaams Bijbelgenootschap.",
     },
     {
       id: "gratis-commentaren",
@@ -86,27 +87,19 @@ export const GUIDE_FREE: Guide = {
       list: [
         {
           title: "Gratis: de Bijbel lezen",
-          text: "Alle beschikbare Nederlandse, Engelse en Duitse vertalingen, met de mogelijkheid ze naast elkaar te vergelijken.",
-        },
-        {
-          title: "Gratis: begeleide studies",
-          text: "Tien begeleide studies, stap voor stap door een gedeelte, met voortgang en streak.",
+          text: "Alle beschikbare Nederlandse, Engelse en Duitse vertalingen, en je wisselt op elk moment van vertaling.",
         },
         {
           title: "Gratis: notities en markeringen",
-          text: "Onbeperkt notities per hoofdstuk en vers, doorzoekbaar en op elk apparaat beschikbaar.",
+          text: "Onbeperkt markeringen, en notities per hoofdstuk en vers: op de website zeven, in de app onbeperkt. Je antwoorden uit de studies tellen niet mee. Doorzoekbaar en op elk apparaat beschikbaar.",
         },
         {
           title: "Gratis: begeleide studies",
-          text: "Tien uitgewerkte studies over personen, gedeelten, onderwerpen en bijbelboeken.",
+          text: "Uitgewerkte studies over personen, gedeelten en onderwerpen, en een studie bij elk bijbelboek.",
         },
         {
-          title: "Gratis: de bibliotheek",
-          text: "Publiek-domein bijbels, prekenbundels, commentaren en dogmatische werken, zonder account te bekijken.",
-        },
-        {
-          title: "Gratis: 5 AI-vragen per dag",
-          text: "De AI-assistent is elke dag vijf vragen lang beschikbaar zonder abonnement.",
+          title: `Gratis: ${FREE_AI_DAILY_CAP} AI-vragen per dag`,
+          text: `De AI-assistent beantwoordt elke dag ${FREE_AI_DAILY_CAP} vragen zonder abonnement.`,
         },
         {
           title: "Gratis: het KingComments-commentaar",
@@ -142,14 +135,12 @@ export const GUIDE_FREE: Guide = {
           text: "Open bijbeldata met grondtekst, woordanalyse en concordantiegegevens onder een Creative Commons-licentie.",
         },
       ],
-      callout:
-        "Een selectie uit deze archieven is direct doorzoekbaar in de bibliotheek op deze site, met per werk vermeld waarom het publiek domein is.",
     },
   ],
   faqs: [
     {
       q: "Is bijbelstudie online echt gratis?",
-      a: "Voor een groot deel wel. Bijbel lezen in meerdere vertalingen, notities maken, begeleide studies doorlopen, het KingComments-commentaar lezen en de publiek-domein bibliotheek raadplegen kan zonder te betalen. Op BijbelStudie is daarnaast elke dag vijf keer de AI-assistent te gebruiken. Alleen de overige bijbelcommentaren, de ruimere AI-limiet en de volledige grondtekst zitten in het betaalde Pro-abonnement.",
+      a: `Voor een groot deel wel. Bijbel lezen in meerdere vertalingen, notities maken, begeleide studies doorlopen en het KingComments-commentaar lezen kan zonder te betalen. Op BijbelStudie is daarnaast elke dag ${FREE_AI_DAILY_CAP} keer de AI-assistent te gebruiken en schrijf je ${FREE_NOTE_LIMIT} notities. De overige bijbelcommentaren, de ruimere AI-limiet, onbeperkt notities en de volledige grondtekst zitten in het betaalde Pro-abonnement.`,
     },
     {
       q: "Welke bijbelvertalingen zijn gratis te gebruiken?",
@@ -161,7 +152,7 @@ export const GUIDE_FREE: Guide = {
     },
     {
       q: "Heb ik een account nodig om gratis te beginnen?",
-      a: "Voor bijbellezen, notities en voortgang wel, omdat je voortgang aan je account gekoppeld wordt. Aanmelden kost minder dan een minuut en er is geen creditcard voor nodig. De bibliotheek en de begeleide studies zijn zonder account te bekijken.",
+      a: "Voor bijbellezen, notities en voortgang wel, omdat je voortgang aan je account gekoppeld wordt. Aanmelden kost minder dan een minuut en er is geen creditcard voor nodig. De begeleide studies zijn zonder account te bekijken.",
     },
   ],
   related: [
@@ -176,14 +167,29 @@ export const GUIDE_FREE: Guide = {
       description: "Een stappenplan van dertig dagen.",
     },
     {
-      href: "/hulpbronnen",
-      label: "Bibliotheek",
-      description: "De publiek-domein werken die op deze site te lezen zijn.",
+      href: "/bijbelstudie/online",
+      label: "Online bijbelstudie",
+      description: "Wat digitaal beter kan dan op papier - en wat niet.",
     },
     {
       href: "/abonnement",
       label: "Wat kost Pro?",
       description: "Wat er in het betaalde abonnement zit en wat gratis blijft.",
+    },
+    {
+      href: "/bijbelstudie/methoden",
+      label: "Bijbelstudie methoden",
+      description: "Zes methoden uitgewerkt, elk met een concreet voorbeeld.",
+    },
+    {
+      href: "/bijbelboeken",
+      label: "De 66 bijbelboeken",
+      description: "Gratis inleiding per boek: schrijver, tijd, thema en hoofdlijn.",
+    },
+    {
+      href: "/studies",
+      label: "Begeleide studies",
+      description: "Gratis te volgen, les voor les.",
     },
   ],
 };

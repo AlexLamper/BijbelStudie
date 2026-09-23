@@ -150,7 +150,7 @@ export async function PUT(req: Request) {
 
     await connectMongoDB();
     const state = await StudyLessonState.findOne({ userId: auth.id, studyId, lessonDay }).lean<{
-      quiz?: { questionIds?: string[] };
+      quiz?: { questionIds?: string[]; answers?: { questionId: string; answerId: string }[] };
     }>();
     const served = new Set(state?.quiz?.questionIds ?? []);
 
@@ -164,12 +164,24 @@ export async function PUT(req: Request) {
           entry.questionId && entry.answerId && served.has(entry.questionId),
       );
 
+    // Merged into what is already saved, never a replacement: the app sends
+    // only the pick just made, and a PUT that lands late must not take the
+    // later picks with it. A question answered again keeps the newest pick.
+    const merged = new Map<string, string>();
+    for (const entry of state?.quiz?.answers ?? []) {
+      if (served.has(entry.questionId)) merged.set(entry.questionId, entry.answerId);
+    }
+    for (const entry of answers as { questionId: string; answerId: string }[]) {
+      merged.set(entry.questionId, entry.answerId);
+    }
+    const saved = [...merged].map(([questionId, answerId]) => ({ questionId, answerId }));
+
     await StudyLessonState.updateOne(
       { userId: auth.id, studyId, lessonDay },
-      { $set: { 'quiz.answers': answers } },
+      { $set: { 'quiz.answers': saved } },
     );
 
-    return jsonV1({ saved: answers.length });
+    return jsonV1({ saved: saved.length });
   } catch (error) {
     return handleV1Error(error);
   }

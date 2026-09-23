@@ -61,9 +61,20 @@ export async function POST(req: Request) {
     token: body.token,
     answers: body.answers,
     context,
+    // `{ mayPublish, displayName }`, believed by nobody: the rating and the
+    // note it claims to belong to are re-read from the validated answers in
+    // `resolvePublishConsent`, so a 3-star body claiming consent gets none.
+    publish: body.publish,
+    // Only to choose between the App Store and Play links.
+    userAgent: req.headers.get("user-agent"),
   })
 
-  if (result.ok === true) return NextResponse.json({ ok: true }, { status: 201 })
+  // `storeReview` is non-null at most once per reader, ever. It is a link to
+  // the store, not an in-app review prompt - see lib/storeReviewCta.ts for why
+  // that distinction is what makes it allowed here and forbidden in the app.
+  if (result.ok === true) {
+    return NextResponse.json({ ok: true, storeReview: result.storeReview }, { status: 201 })
+  }
 
   // A bad token is the interesting failure: it means an answer arrived for a
   // prompt this reader was not served. It is refused rather than stored,

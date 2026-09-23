@@ -10,8 +10,12 @@ import { Skeleton } from "../../components/kit/primitives"
  * after the body: only the column inside is grey.
  */
 export default function StudiesLoading() {
+  // `ownHeading`: no <h1> in the fallback. It also covers /studies/[id], and a
+  // slow render there streamed this fallback's "Studies" h1 ahead of the
+  // study's own - two h1s in the HTML a crawler reads. The real pages bring
+  // their own heading.
   return (
-    <AppShell title="Studies">
+    <AppShell title="Studies" ownHeading>
       <div role="status" aria-label="Studies laden" className="flex h-full flex-col gap-[13px]">
         <Skeleton className="h-[46px] w-full max-w-[440px] rounded-[12px]" />
         <Skeleton className="h-[76px] rounded-card" />

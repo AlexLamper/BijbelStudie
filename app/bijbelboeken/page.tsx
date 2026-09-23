@@ -8,7 +8,13 @@ import {
   type BibleBook,
   type BookGenre,
 } from "../../lib/content/bibleBooks";
-import { ContentShell, RelatedLinks } from "../../components/content/ContentShell";
+import {
+  CONTENT_H2,
+  CONTENT_PAGE,
+  ContentHeader,
+  ContentShell,
+  RelatedLinks,
+} from "../../components/content/ContentShell";
 import { Card } from "../../components/kit/primitives";
 import { JsonLd } from "../../components/seo/JsonLd";
 import { absoluteUrl } from "../../lib/seo/constants";
@@ -60,7 +66,7 @@ export default function BijbelboekenPage() {
       path: "/bijbelboeken",
       name: "De 66 bijbelboeken op een rij",
       description:
-        "Alle 66 boeken van de Bijbel met schrijver, ontstaanstijd, genre, kernthema en hoofdlijn.",
+        "Alle 66 boeken van de Bijbel: waar ze over gaan, wie ze schreef en wanneer, de opbouw, kernthema's en bekende gedeelten.",
       type: "CollectionPage",
       breadcrumbId: `${url}#breadcrumb`,
     }),
@@ -80,28 +86,27 @@ export default function BijbelboekenPage() {
   return (
     <ContentShell crumbs={CRUMBS}>
       <JsonLd data={pageGraph} />
-      <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12 lg:py-16">
-        <header className="mb-10">
-          <p
-            className="mb-2 text-[10.5px] font-semibold uppercase tracking-[1.1px] text-teal-dark dark:text-teal-400"
-          >
-            Naslag
-          </p>
-          <h1 className="text-[28px] font-bold leading-tight tracking-[-0.5px] text-ink sm:text-[34px]">
-            De 66 bijbelboeken op een rij
-          </h1>
-          <p className="mt-3 text-[15px] leading-[1.7] text-ink-muted sm:text-[16px]">
-            Van Genesis tot Openbaring: per boek de schrijver, de ontstaanstijd,
-            het genre, het kernthema en de hoofdlijn - plus studievragen om er
-            zelf mee aan de slag te gaan.
-          </p>
-        </header>
-
-        <div className="mb-10 grid grid-cols-3 gap-2 sm:mb-12 sm:gap-[13px]">
-          <Stat label="Boeken" value="66" />
-          <Stat label="Oude Testament" value={String(ot.length)} />
-          <Stat label="Nieuwe Testament" value={String(nt.length)} />
-        </div>
+      <div className={CONTENT_PAGE}>
+        {/* The stat tiles sit beside the title from lg up, under it below. */}
+        <ContentHeader
+          eyebrow="Naslag"
+          title="De 66 bijbelboeken op een rij"
+          lede={
+            <>
+              Van Genesis tot Openbaring: per boek waar het over gaat, wie het
+              schreef en wanneer, de opbouw, de kernthema&apos;s en de bekendste
+              gedeelten - plus studievragen en alle hoofdstukken om direct te
+              lezen.
+            </>
+          }
+          aside={
+            <div className="grid grid-cols-3 gap-2 sm:gap-[13px]">
+              <Stat label="Boeken" value="66" />
+              <Stat label="Oude Testament" value={String(ot.length)} />
+              <Stat label="Nieuwe Testament" value={String(nt.length)} />
+            </div>
+          }
+        />
 
         <TestamentSection
           title="Het Oude Testament"
@@ -115,13 +120,14 @@ export default function BijbelboekenPage() {
           books={nt}
         />
 
-        <section id="veelgestelde-vragen" className="mt-16 scroll-mt-24">
-          <h2 className="mb-4 text-[19px] font-bold tracking-[-0.2px] text-ink sm:text-[21px]">
+        <section id="veelgestelde-vragen" className="mt-10 scroll-mt-24 lg:mt-12">
+          <h2 className={`${CONTENT_H2} mb-4`}>
             Veelgestelde vragen over de bijbelboeken
           </h2>
-          <div className="rounded-card border border-line bg-surface px-4 py-1 sm:px-[22px]">
-            {FAQS.map((faq, i) => (
-              <div key={faq.q} className={`py-4 ${i === 0 ? "" : "border-t border-line-soft"}`}>
+          {/* Two across from md, all four in one row on a wide screen. */}
+          <div className="grid gap-3 md:grid-cols-2 2xl:grid-cols-4">
+            {FAQS.map(faq => (
+              <div key={faq.q} className="rounded-card border border-line bg-surface p-5">
                 <h3 className="text-[14.5px] font-bold text-ink">
                   {faq.q}
                 </h3>
@@ -151,9 +157,9 @@ export default function BijbelboekenPage() {
               description: "Uitgewerkte studies over personen en bijbelboeken.",
             },
             {
-              href: "/hulpbronnen",
-              label: "Bibliotheek",
-              description: "Gratis commentaren en klassieke werken.",
+              href: "/bijbelstudie/beginnen",
+              label: "Bijbelstudie voor beginners",
+              description: "Een stappenplan van dertig dagen.",
             },
           ]}
         />
@@ -187,50 +193,60 @@ function TestamentSection({
   const genres = GENRE_ORDER.filter(g => books.some(b => b.genre === g));
 
   return (
-    <section className="mb-14">
-      <h2 className="text-[19px] font-bold tracking-[-0.2px] text-ink sm:text-[21px]">{title}</h2>
-      <p className="mb-6 mt-2 text-[13.5px] leading-[1.7] text-ink-muted">
+    <section className="mt-8 lg:mt-10">
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <h2 className={CONTENT_H2}>{title}</h2>
+        <span className="text-[12.5px] text-ink-faint tabular-nums">{books.length} boeken</span>
+      </div>
+      <p className="mb-5 mt-1.5 max-w-[48rem] text-[13.5px] leading-[1.7] text-ink-muted">
         {description}
       </p>
 
-      {genres.map(genre => (
-        <GenreGroup
-          key={genre}
-          genre={genre}
-          books={books.filter(b => b.genre === genre)}
-        />
-      ))}
+      <div className="space-y-6">
+        {genres.map(genre => (
+          <GenreGroup
+            key={genre}
+            genre={genre}
+            books={books.filter(b => b.genre === genre)}
+          />
+        ))}
+      </div>
     </section>
   );
 }
 
+/**
+ * One genre as a grid of book tiles that adds a column each time another
+ * ~15 rem fits: two on a phone held sideways, three at lg, five at 2xl, seven
+ * on a 1920 px screen. Tiles in a row share its height.
+ */
 function GenreGroup({ genre, books }: { genre: BookGenre; books: BibleBook[] }) {
   return (
-    <div className="mb-7">
-      <h3 className="mb-3 text-[10.5px] font-semibold uppercase tracking-[1.1px] text-ink-faint">
+    <div>
+      <h3 className="mb-2.5 text-[10.5px] font-semibold uppercase tracking-[1.1px] text-ink-faint">
         {genre}
         <span className="ml-2 font-medium normal-case tracking-normal">
           ({books.length})
         </span>
       </h3>
-      <ul className="grid gap-2 sm:grid-cols-2">
+      <ul className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,15rem),1fr))] gap-2.5">
         {books.map(book => (
           <li key={book.slug}>
             <Link
               href={`/bijbelboeken/${book.slug}`}
-              className="group flex items-baseline gap-3 rounded-btn border border-line bg-surface px-4 py-3 no-underline transition-colors hover:border-line-strong"
+              className="group flex h-full items-start gap-3 rounded-card border border-line bg-surface px-4 py-3.5 no-underline transition-colors hover:border-line-strong"
             >
               <span
-                className="text-[10px] font-bold tabular-nums shrink-0 w-5 text-teal-dark dark:text-teal-400"
+                className="flex h-7 w-7 flex-none items-center justify-center rounded-[8px] bg-teal-faint text-[11px] font-bold tabular-nums text-teal-dark dark:text-teal-400"
                 aria-hidden
               >
                 {book.position}
               </span>
               <span className="min-w-0">
-                <span className="block text-[14px] font-semibold text-ink group-hover:text-teal-dark dark:group-hover:text-teal-400">
+                <span className="block text-[14.5px] font-semibold text-ink group-hover:text-teal-dark dark:group-hover:text-teal-400">
                   {book.name}
                 </span>
-                <span className="mt-0.5 block text-[12px] text-ink-faint">
+                <span className="mt-0.5 block text-[12px] leading-[1.5] text-ink-muted">
                   {book.chapters} {book.chapters === 1 ? "hoofdstuk" : "hoofdstukken"} · {book.theme}
                 </span>
               </span>

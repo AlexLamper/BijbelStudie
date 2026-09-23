@@ -15,10 +15,12 @@ import StudyFlowDemo, { type DemoLesson } from "./StudyFlowDemo"
 import { renderTreeSvg } from "../../lib/levensboom/svg"
 import { LP_THEME_VARS } from "./studyLandingShared"
 import { PLANS, euro } from "../../lib/pricing"
+import { getBibleBook } from "../../lib/content/bibleBooks"
 import { PromoBanner } from "./PromoBanner"
 import { HeroVisual } from "./HeroVisual"
 import { HeroMobileCard } from "./HeroMobileCard"
 import { ReviewsRow, type ReviewsData } from "./ReviewsRow"
+import { FREE_AI_DAILY_CAP, FREE_NOTE_LIMIT, PRO_AI_DAILY_CAP } from "../../lib/entitlements"
 
 /* ─── Design tokens ──────────────────────────────────────────── */
 /* The neutrals are CSS variables so the page follows dark mode: the global
@@ -87,6 +89,24 @@ const SECTION_Y = "py-[clamp(3.5rem,6vw,6.5rem)]"
  * sections instead of merging into one long block.
  */
 const EDGE = { borderTop: `1px solid ${T.border}` }
+
+/**
+ * A link inside running copy: the teal text colour, underlined. No prefetch -
+ * next/link prefetches every link that scrolls into view, and each of these is
+ * a page most visitors never open; prefetching it would still cost a render.
+ */
+function InlineLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <Link
+      href={href}
+      prefetch={false}
+      className="font-semibold underline underline-offset-2"
+      style={{ color: T.tealText }}
+    >
+      {children}
+    </Link>
+  )
+}
 
 /* ─── Reusable animation primitives ─────────────────────────── */
 /**
@@ -181,7 +201,7 @@ function Navbar() {
             sitemap, maar horen niet in de hoofdnavigatie van de app. */}
         <nav className="hidden md:flex items-center justify-center gap-1">
           {[
-            { href: "/studies",       label: "Studies" },
+            { href: "#in-actie",      label: "Studies" },
             { href: "#prijzen",       label: "Prijzen" },
             { href: "#faq",           label: "FAQ" },
           ].map(({ href, label }) => (
@@ -221,7 +241,7 @@ function Navbar() {
               style={{ borderColor: T.border, backgroundColor: T.page }}
             >
               {[
-                { href: "/studies",    label: "Studies" },
+                { href: "#in-actie",   label: "Studies" },
                 { href: "#prijzen",    label: "Prijzen" },
                 { href: "#faq",        label: "FAQ" },
                 { href: "/inloggen",   label: "Inloggen" },
@@ -243,27 +263,25 @@ function Navbar() {
 /** One fixed seed for every tree on this page, so the build output is stable. */
 const LANDING_SEED = "bijbelstudie-levensboom"
 
-/**
- * Real App Store rating data, once there is enough of it to average
- * honestly. Until product hands over real `rating`/`count`/`avatars`,
- * this stays `undefined` and ReviewsRow renders nothing - see its own
- * comment and the ground rules in bijbelstudie-hero/PROMPT.md.
- */
-const HERO_REVIEWS: ReviewsData | undefined = undefined
-
 /* ─── Hero ───────────────────────────────────────────────────── */
-function Hero() {
+/**
+ * `reviews` is the real, imported App Store summary, handed down from
+ * app/page.tsx - this file stays a non-async component, so it never touches
+ * the database itself. Undefined until the first import, and ReviewsRow then
+ * renders nothing rather than a placeholder number or a stock face.
+ */
+function Hero({ reviews }: { reviews?: ReviewsData }) {
   return (
     <section
       className="relative overflow-x-clip"
-      style={{ backgroundColor: "#fbfbf8" }}
+      style={{ backgroundColor: "var(--lp-hero-bg)" }}
     >
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-[18px] px-5 py-7 sm:px-6 lg:min-h-[calc(100vh-112px)] lg:flex-row lg:items-center lg:gap-16 lg:py-0 lg:pl-[120px] lg:pr-0">
         {/* Left column: fixed 540px from 1280px up, ~460px between 1024-1279. */}
         <div className="flex flex-col items-start gap-[18px] lg:w-[460px] lg:flex-shrink-0 lg:gap-6 xl:w-[540px]">
           <p
             className="text-[11px] font-bold uppercase leading-normal lg:text-[13px]"
-            style={{ letterSpacing: "0.12em", color: "#0b5f52" }}
+            style={{ letterSpacing: "0.12em", color: "var(--lp-hero-eyebrow)" }}
           >
             Voor iedereen die de Bijbel dieper wil leren kennen
           </p>
@@ -276,15 +294,15 @@ function Hero() {
               fontSize: "clamp(2.625rem, 2rem + 3vw, 4rem)",
               lineHeight: 1.05,
               letterSpacing: "-0.035em",
-              color: "#0f172a",
+              color: "var(--lp-hero-heading)",
             }}
           >
-            <span style={{ color: "#0d7a66" }}>Begrijp</span> wat je leest in de Bijbel.
+            <span style={{ color: "var(--lp-hero-accent)" }}>Begrijp</span> wat je leest in de Bijbel.
           </h1>
 
           <p
             className="text-pretty text-[17px] lg:max-w-[520px] lg:text-xl"
-            style={{ lineHeight: 1.55, color: "#475569" }}
+            style={{ lineHeight: 1.55, color: "var(--lp-hero-lead)" }}
           >
             Lees de tekst en het commentaar naast elkaar, met de grondtekst en je eigen notities één klik verder.
           </p>
@@ -327,7 +345,7 @@ function Hero() {
             </a>
           </div>
 
-          <ReviewsRow data={HERO_REVIEWS} />
+          <ReviewsRow data={reviews} />
         </div>
 
         {/* Right side: the product visual. Fixed-size inner box, scaled down
@@ -353,9 +371,9 @@ function Hero() {
       >
         <span
           className="bs-bob flex h-8 w-8 items-center justify-center rounded-full"
-          style={{ border: "1.5px solid #cfd8d4" }}
+          style={{ border: "1.5px solid var(--lp-hero-scroll-border)" }}
         >
-          <ChevronDown className="h-[14px] w-[14px]" style={{ color: "#475569" }} />
+          <ChevronDown className="h-[14px] w-[14px]" style={{ color: "var(--lp-hero-scroll-icon)" }} />
         </span>
       </a>
     </section>
@@ -379,7 +397,16 @@ const TRANSLATIONS = [
   { name: "De Heilige Schrift", year: "1917", note: "De eerste NBG-vertaling, in de taal van haar tijd" },
   { name: "Canisiusbijbel",     year: "1939", note: "Rooms-katholieke vertaling met deuterocanonieke boeken" },
 ]
-const ENGLISH_TRANSLATIONS = 5
+const ENGLISH_TRANSLATIONS = 6
+
+/**
+ * Named in the library's closing line as examples of a book introduction. Read
+ * from the dataset, so the names are spelled the way the pages spell them and
+ * a slug that ever stops existing drops out instead of linking to a 404.
+ */
+const LIBRARY_BOOKS = ["genesis", "psalmen", "jesaja", "johannes", "romeinen"].flatMap(
+  (slug) => getBibleBook(slug) ?? [],
+)
 
 /** `free` is not rendered per row - four access badges next to eight names was
  *  more furniture than information - but it is what the group's closing line
@@ -451,7 +478,7 @@ function BibleLibrary() {
         <SectionHeader
           label="Bibliotheek"
           title="Vertalingen en commentaren op één plek"
-          subtitle="Vier Nederlandse vertalingen naast elkaar, en bij elk vers de uitleg van vier commentaren."
+          subtitle="Vier Nederlandse vertalingen, en bij elk vers de uitleg van vier commentaren."
         />
 
         <FadeUp className="mx-auto max-w-4xl">
@@ -470,6 +497,32 @@ function BibleLibrary() {
               footnote="KingComments is voor iedereen gratis en volledig te lezen; de overige drie horen bij Pro."
             />
           </div>
+
+          {/* The third thing in the library, and the one a visitor can read
+              right now without an account: an introduction per book. */}
+          <p className="mx-auto mt-8 max-w-2xl text-center text-sm leading-relaxed text-pretty" style={{ color: T.muted }}>
+            En bij elk van de <InlineLink href="/bijbelboeken">66 bijbelboeken</InlineLink> een
+            inleiding met schrijver, ontstaanstijd, thema en hoofdlijn, zoals bij{" "}
+            {LIBRARY_BOOKS.map((book, i) => (
+              <span key={book.slug}>
+                {i > 0 && (i === LIBRARY_BOOKS.length - 1 ? " en " : ", ")}
+                <InlineLink href={`/bijbelboeken/${book.slug}`}>{book.name}</InlineLink>
+              </span>
+            ))}
+            .
+          </p>
+
+          {/* Anchors for what the homepage already appears for in search
+              ("bijbel met uitleg online", "wat zegt de bijbel", "bijbelstudie met
+              vragen en antwoorden"), pointing at the pages written for them. */}
+          <p className="mx-auto mt-4 max-w-2xl text-center text-sm leading-relaxed text-pretty" style={{ color: T.muted }}>
+            Lees ook hoe je de <InlineLink href="/bijbelstudie/bijbel-met-uitleg">Bijbel met uitleg</InlineLink> leest,
+            hoe een <InlineLink href="/bijbelstudie/vragen-en-antwoorden">bijbelstudie met vragen en antwoorden</InlineLink> werkt,
+            en <InlineLink href="/bijbel-over">wat de Bijbel zegt</InlineLink> over onderwerpen als{" "}
+            <InlineLink href="/bijbel-over/angst">angst</InlineLink>,{" "}
+            <InlineLink href="/bijbel-over/vergeving">vergeving</InlineLink> en{" "}
+            <InlineLink href="/bijbel-over/rouw">rouw</InlineLink>.
+          </p>
 
           <p className="mt-8 text-center">
             <Link
@@ -591,6 +644,14 @@ function StudyFlowSection() {
         <FadeUp>
           <StudyFlowDemo lesson={demoLesson()} />
         </FadeUp>
+        <FadeUp className="mx-auto mt-8 max-w-2xl text-center">
+          <p className="text-sm leading-relaxed text-pretty" style={{ color: T.muted }}>
+            De stappen volgen de volgorde van elke goede bijbelstudie: eerst waarnemen, dan
+            uitleggen, dan toepassen. Meer daarover in de{" "}
+            <InlineLink href="/bijbelstudie">gids over bijbelstudie</InlineLink> en bij de{" "}
+            <InlineLink href="/bijbelstudie/methoden">zes bijbelstudiemethoden</InlineLink>.
+          </p>
+        </FadeUp>
       </div>
     </section>
   )
@@ -617,18 +678,21 @@ function Pricing() {
   const free = [
     "Bijbel lezen (vier Nederlandse vertalingen)",
     "KingComments commentaar, volledig",
-    "5 vragen per dag aan de AI-assistent",
-    "Persoonlijke notities bij verzen",
+    `${FREE_AI_DAILY_CAP} vragen per dag aan de AI-assistent`,
+    `Markeringen, en ${FREE_NOTE_LIMIT} notities bij verzen`,
+    "Meedoen met studiegroepen",
     "Historische context per hoofdstuk",
     "Voortgang bijhouden",
   ]
   const pro = [
     "Alles in het gratis plan",
-    "200 AI-vragen per dag, i.p.v. 5",
+    `${PRO_AI_DAILY_CAP} AI-vragen per dag, i.p.v. ${FREE_AI_DAILY_CAP}`,
+    "Onbeperkt notities, op de website en in de app",
     "Matthew Henry commentaar (NL)",
     "Calvijn en Dachsel",
-    "Grondtekst: Hebreeuws en Grieks",
-    "Prioriteitsondersteuning",
+    "Grondtekst: Hebreeuws en Grieks bij elk vers",
+    "Voorlezen met natuurlijke stemmen",
+    "Zoveel studiegroepen leiden als je wilt",
   ]
 
   return (
@@ -720,6 +784,13 @@ function Pricing() {
               </div>
             </FadeUp>
           </div>
+
+          <FadeUp className="mt-8 text-center">
+            <p className="text-sm leading-relaxed text-pretty" style={{ color: T.muted }}>
+              Wat u zonder abonnement kunt gebruiken, hier en elders, staat op een rij in{" "}
+              <InlineLink href="/bijbelstudie/gratis">gratis bijbelstudie</InlineLink>.
+            </p>
+          </FadeUp>
         </div>
       </div>
     </section>
@@ -757,10 +828,9 @@ function FAQ() {
           </FadeUp>
           <FadeUp className="mt-6 text-center">
             <p className="text-sm" style={{ color: T.muted }}>
-              Staat uw vraag er niet bij?{" "}
-              <Link href="/contact" className="font-semibold underline underline-offset-2" style={{ color: T.tealText }}>
-                Neem contact op
-              </Link>
+              Staat uw vraag er niet bij? Kijk in het{" "}
+              <InlineLink href="/help">helpcentrum</InlineLink> of{" "}
+              <InlineLink href="/contact">neem contact op</InlineLink>.
             </p>
           </FadeUp>
         </div>
@@ -838,7 +908,7 @@ function CTA() {
 
 
 /* ─── Page ───────────────────────────────────────────────────── */
-export default function LandingPage() {
+export default function LandingPage({ reviews }: { reviews?: ReviewsData }) {
   return (
     <div className={`relative min-h-screen ${LP_THEME_VARS}`} style={{ backgroundColor: T.page }}>
       {/* The header's stuck state is "is this pixel still on screen". A
@@ -850,7 +920,7 @@ export default function LandingPage() {
       <PromoBanner />
       <Navbar />
       <main>
-        <Hero />
+        <Hero reviews={reviews} />
         <StudyFlowSection />
         <StudyDiscovery />
         <BibleLibrary />

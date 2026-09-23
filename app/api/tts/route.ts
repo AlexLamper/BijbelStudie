@@ -4,6 +4,9 @@ import { authOptions } from "../../../lib/authOptions";
 import { CLOUD_VOICES, getCloudVoice } from "../../../lib/cloudVoices";
 import connectMongoDB from "../../../lib/mongodb";
 import TtsUsage from "../../../models/TtsUsage";
+import User from "../../../models/User";
+import { resolveIsPro, type PremiumUserFields } from "../../../lib/mobilePremium";
+import { isAdminEmail } from "../../../lib/adminEmails";
 
 const MAX_CHARS_PER_REQUEST = 4500;
 const MONTHLY_CAP = 800_000; // hard cap (Google free tier = 1,000,000 chars/maand Wavenet)
@@ -37,6 +40,20 @@ const GOOGLE_ERROR_HINTS: Record<string, string> = {
 const GENERIC_GOOGLE_HINT =
   "De voorleesdienst weigerde de aanvraag. Probeer het later opnieuw of gebruik een browser-stem.";
 
+/**
+ * The cloud voices are billed per character, so they are a Pro feature. A free
+ * reader still has voorlezen through the browser's own voice (hooks/useTTS.ts),
+ * which costs nothing - only this route is gated. Resolved from the account
+ * through `resolveIsPro` (Stripe, App Store or admin), like every other gate.
+ */
+async function isProAccount(email: string): Promise<boolean> {
+  await connectMongoDB();
+  const user = await User.findOne({ email })
+    .select("subscribed storePremium isAdmin")
+    .lean<PremiumUserFields>();
+  return user ? resolveIsPro(user, isAdminEmail(email)) : false;
+}
+
 function currentMonth(): string {
   const d = new Date();
   return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
@@ -52,6 +69,17 @@ export async function POST(req: NextRequest) {
     const apiKey = process.env.GOOGLE_TTS_API_KEY;
     if (!apiKey) {
       return NextResponse.json({ error: "TTS niet geconfigureerd" }, { status: 503 });
+    }
+
+    if (!(await isProAccount(session.user.email))) {
+      return NextResponse.json(
+        {
+          error: "De natuurlijke voorleesstemmen horen bij Pro.",
+          hint: "De natuurlijke voorleesstemmen horen bij Pro. Zonder Pro lees je voor met de stem van je browser.",
+          code: "PRO_REQUIRED",
+        },
+        { status: 403 },
+      );
     }
 
     const body = await req.json().catch(() => null);
@@ -178,6 +206,15 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
   const configured = !!process.env.GOOGLE_TTS_API_KEY;
+  // Whether THIS reader may use the cloud voices. The voices are still listed
+  // for everyone, so a free reader can see what Pro would give them.
+  let allowed = false;
+  if (configured) {
+    try {
+      const session = await getServerSession(authOptions);
+      allowed = session?.user?.email ? await isProAccount(session.user.email) : false;
+    } catch { /* treated as not allowed */ }
+  }
   let used = 0;
   if (configured) {
     try {
@@ -188,6 +225,7 @@ export async function GET() {
   }
   return NextResponse.json({
     configured,
+    allowed,
     voices: configured ? CLOUD_VOICES : [],
     usage: configured ? { used, cap: MONTHLY_CAP } : null,
   });

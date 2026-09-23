@@ -51,12 +51,6 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
         disallow,
       },
-      {
-        // The OG card endpoint lives at /og and must stay fetchable: a blocked
-        // og:image is a blank unfurl on every social platform.
-        userAgent: "Googlebot-Image",
-        allow: ["/og", "/images/", "/_next/image"],
-      },
     ],
     sitemap: `${BASE_URL}/sitemap.xml`,
     host: BASE_URL,

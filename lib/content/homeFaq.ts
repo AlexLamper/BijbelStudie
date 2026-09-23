@@ -7,6 +7,8 @@
  * hand-kept copies would drift into structured data that does not match the
  * visible page - which Google treats as a spam signal, not a typo.
  */
+import { FREE_AI_DAILY_CAP, FREE_NOTE_LIMIT, PRO_AI_DAILY_CAP } from "../entitlements";
+
 export interface Faq {
   q: string;
   a: string;
@@ -15,7 +17,7 @@ export interface Faq {
 export const HOME_FAQS: Faq[] = [
   {
     q: "Is BijbelStudie helemaal gratis?",
-    a: "Het gratis plan geeft volledige toegang tot bijbellezen, notities, begeleide studies, het KingComments-commentaar en 5 vragen per dag aan de AI-assistent. De Pro versie (€9,99 per maand of €89,99 per jaar) voegt de overige bijbelcommentaren, 200 AI-vragen per dag en de volledige grondtekst toe.",
+    a: `Het gratis plan geeft volledige toegang tot bijbellezen, markeringen, begeleide studies, het KingComments-commentaar, studiegroepen en ${FREE_AI_DAILY_CAP} vragen per dag aan de AI-assistent, en u schrijft gratis ${FREE_NOTE_LIMIT} notities. De Pro versie (€9,99 per maand of €89,99 per jaar) voegt de overige bijbelcommentaren, de grondtekst bij elk vers, ${PRO_AI_DAILY_CAP} AI-vragen per dag, onbeperkt notities en voorlezen met natuurlijke stemmen toe.`,
   },
   {
     q: "Wat doet de AI-assistent?",
@@ -23,7 +25,7 @@ export const HOME_FAQS: Faq[] = [
   },
   {
     q: "Welke bijbelvertalingen zijn beschikbaar?",
-    a: "In het Nederlands ondersteunen wij vier vertalingen: de Statenvertaling, de Canisiusbijbel 1939, De Heilige Schrift 1917 en de NBG-vertaling 1951. Daarnaast zijn er zes Engelse vertalingen (King James Version, American Standard Version, NET Bible, World English Bible, Geneva Bible 1599 en Coverdale Bible 1535) en drie Duitse (Elberfelder 1905, Luther 1912 en Schlachter 2000). U kunt vertalingen naast elkaar vergelijken.",
+    a: "In het Nederlands ondersteunen wij vier vertalingen: de Statenvertaling, de Canisiusbijbel 1939, De Heilige Schrift 1917 en de NBG-vertaling 1951. Daarnaast zijn er zes Engelse vertalingen (King James Version, American Standard Version, NET Bible, World English Bible, Geneva Bible 1599 en Coverdale Bible 1535) en drie Duitse (Elberfelder 1905, Luther 1912 en Schlachter 2000). U kunt op elk moment van vertaling wisselen.",
   },
   {
     q: "Kan ik de Bijbel in de grondtekst lezen?",
@@ -35,7 +37,7 @@ export const HOME_FAQS: Faq[] = [
   },
   {
     q: "Heb ik een account nodig om te beginnen?",
-    a: "Voor bijbellezen, notities en voortgang is een gratis account nodig, zodat uw voortgang bewaard blijft. Aanmelden duurt minder dan een minuut en er is geen creditcard voor nodig. De bibliotheek met publiek-domein werken en de begeleide studies kunt u zonder account bekijken.",
+    a: "Voor bijbellezen, notities en voortgang is een gratis account nodig, zodat uw voortgang bewaard blijft. Aanmelden duurt minder dan een minuut en er is geen creditcard voor nodig. De begeleide studies kunt u zonder account bekijken.",
   },
   {
     q: "Is mijn persoonlijke data veilig?",

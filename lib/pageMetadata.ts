@@ -83,12 +83,6 @@ const pageConfigs: Record<string, PageMetadataConfig> = {
     type: 'website',
     indexable: false
   },
-  resources: {
-    title: 'Hulpbronnen: gratis bijbelstudieboeken',
-    description: 'Een groeiende bibliotheek met gratis, publiek-domein bijbels, bijbelcommentaren, prekenbundels en dogmatische werken. Direct online te lezen.',
-    path: '/hulpbronnen',
-    type: 'website'
-  },
   profile: {
     title: 'Profiel',
     description: 'Beheer je BijbelStudie-profiel, volg je voortgang en personaliseer je ervaring.',
@@ -125,7 +119,7 @@ const pageConfigs: Record<string, PageMetadataConfig> = {
     indexable: false
   },
   subscribe: {
-    title: 'Prijzen en abonnement',
+    title: 'Prijzen: wat gratis is en wat Pro kost',
     // Keep any price in this snippet identical to what Stripe actually charges
     // (lib/pricing.ts). A derived per-week/per-month figure without its billing
     // period is exactly what the EU Omnibus price-indication rules forbid.
@@ -149,6 +143,12 @@ const pageConfigs: Record<string, PageMetadataConfig> = {
     title: 'Contact',
     description: 'Neem contact op met het team van BijbelStudie. We beantwoorden vragen over de app, je account en je abonnement.',
     path: '/contact',
+    type: 'website'
+  },
+  reviews: {
+    title: 'Beoordelingen',
+    description: 'Wat lezers van BijbelStudie vinden. Het echte gemiddelde uit de App Store, de verdeling over alle sterren, en reacties van lezers op de site.',
+    path: '/beoordelingen',
     type: 'website'
   },
   admin: {
@@ -202,13 +202,13 @@ const pageConfigs: Record<string, PageMetadataConfig> = {
   },
   privacyPolicy: {
     title: 'Privacybeleid',
-    description: 'Het privacybeleid van de BijbelStudie-website en -app: welke gegevens we verwerken, waarom, met wie we ze delen, hoe lang we ze bewaren en welke rechten je hebt.',
+    description: 'Welke gegevens de BijbelStudie-website en -app verwerken, waarom, met wie we ze delen, hoe lang we ze bewaren en welke rechten je hebt.',
     path: '/privacybeleid',
     type: 'website'
   },
   termsOfService: {
     title: 'Algemene voorwaarden',
-    description: 'De algemene voorwaarden van BijbelStudie.',
+    description: 'De algemene voorwaarden van BijbelStudie: je account, het gratis gebruik, Pro-abonnementen, betalen en opzeggen, en wat je van ons mag verwachten.',
     path: '/algemene-voorwaarden',
     type: 'website'
   },
@@ -238,7 +238,7 @@ const pageConfigs: Record<string, PageMetadataConfig> = {
   },
   guideOnline: {
     title: 'Online bijbelstudie: wat digitaal beter kan',
-    description: 'Wat levert online bijbelstudie op ten opzichte van papier? Vertalingen vergelijken, commentaren, grondtekst, zoeken en doorzoekbare notities - met de valkuilen erbij.',
+    description: 'Wat levert online bijbelstudie op tegenover papier? Vertalingen, commentaren, grondtekst, zoeken en notities - met de valkuilen erbij.',
     path: '/bijbelstudie/online',
     type: 'article',
     ogEyebrow: 'Gids',
@@ -247,6 +247,20 @@ const pageConfigs: Record<string, PageMetadataConfig> = {
     title: 'Gratis bijbelstudie: alles wat gratis kan',
     description: 'Een compleet overzicht van gratis bijbelstudiemateriaal in het Nederlands: vertalingen, commentaren, de grondtekst, begeleide studies en publiek-domein boeken.',
     path: '/bijbelstudie/gratis',
+    type: 'article',
+    ogEyebrow: 'Gids',
+  },
+  guideExplained: {
+    title: 'Bijbel met uitleg online: commentaar per vers',
+    description: 'Bijbel met uitleg online lezen: welke soorten bijbelverklaring er zijn, hoe je een commentaar goed gebruikt en welke uitleg hier gratis is.',
+    path: '/bijbelstudie/bijbel-met-uitleg',
+    type: 'article',
+    ogEyebrow: 'Gids',
+  },
+  guideQuestions: {
+    title: 'Bijbelstudie met vragen en antwoorden',
+    description: 'Bijbelstudie met vragen en antwoorden: waarnemen, uitleggen en toepassen, uitgewerkt op Psalm 23, Lukas 15 en Johannes 3. Voor alleen of in een groep.',
+    path: '/bijbelstudie/vragen-en-antwoorden',
     type: 'article',
     ogEyebrow: 'Gids',
   },
@@ -326,7 +340,7 @@ export function generatePageMetadata(
   const fullUrl = config.path === '/' ? `${BASE_URL}/` : `${BASE_URL}${config.path}`;
   const isIndexable = config.indexable ?? true;
   const description = customDescription || config.description;
-  const fullTitle = `${SITE_NAME} | ${pageTitle}`;
+  const fullTitle = fullTitleFor(pageTitle);
 
   const image = ogImageUrl({
     title: pageTitle,
@@ -372,8 +386,20 @@ export function generatePageMetadata(
 }
 
 /**
+ * "<page> | BijbelStudie": the words someone searched for first, the brand
+ * last - the same order as the root layout's "%s | BijbelStudie" template.
+ * Google shows roughly 60 characters; a title that is already that long drops
+ * the brand rather than losing its own ending (Google shows the site name
+ * above the result anyway).
+ */
+export function fullTitleFor(pageTitle: string): string {
+  const branded = `${pageTitle} | ${SITE_NAME}`;
+  return branded.length <= 60 ? branded : pageTitle;
+}
+
+/**
  * Metadata for pages that are not in `pageConfigs` - dynamic routes such as
- * /bijbelboeken/:slug and /hulpbronnen/:slug. Same shape, explicit canonical.
+ * /bijbelboeken/:slug. Same shape, explicit canonical.
  */
 export function buildMetadata(opts: {
   title: string;
@@ -387,7 +413,7 @@ export function buildMetadata(opts: {
   modifiedTime?: string;
 }): Metadata {
   const fullUrl = `${BASE_URL}${opts.path}`;
-  const fullTitle = `${SITE_NAME} | ${opts.title}`;
+  const fullTitle = fullTitleFor(opts.title);
   const indexable = opts.indexable ?? true;
   const image = ogImageUrl({
     title: opts.title,

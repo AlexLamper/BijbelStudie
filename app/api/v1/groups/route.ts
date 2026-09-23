@@ -3,6 +3,7 @@ import { corsPreflight, errorV1, handleV1Error, jsonV1 } from '../../../../lib/a
 import connectMongoDB from '../../../../lib/mongodb';
 import StudyGroup from '../../../../models/StudyGroup.js';
 import { serialiseGroup, type GroupDoc } from '../../../../lib/mobileGroups';
+import { canCreateGroup, GROUP_LIMIT_MESSAGE } from '../../../../lib/entitlements';
 import { randomBytes } from 'crypto';
 
 export const dynamic = 'force-dynamic';
@@ -48,6 +49,16 @@ export async function POST(req: Request) {
     }
 
     await connectMongoDB();
+
+    // The same rule as the website's /api/groepen: one group led for free,
+    // more with Pro. Joining is never limited.
+    if (!auth.isPro) {
+      const led = await StudyGroup.countDocuments({ createdBy: auth.id });
+      if (!canCreateGroup(led, auth.isPro)) {
+        return errorV1('GROUP_LIMIT_REACHED', 403, GROUP_LIMIT_MESSAGE);
+      }
+    }
+
     const group = await StudyGroup.create({
       name: name.trim(),
       description: typeof description === 'string' ? description : '',

@@ -216,7 +216,8 @@ export default function StepWord({
             {/* The line that used to sit under the passage. It belongs in the
                 rail with the other notes about how to read, not in the measure. */}
             <Marginal label="Markeren">
-              Selecteer een vers om het te markeren of er een notitie bij te schrijven.
+              Selecteer een vers om het te markeren of er een notitie bij te schrijven. Via het
+              versnummer vind je ook de verwijzingen en de grondtekst van dat vers.
             </Marginal>
           </>
         }

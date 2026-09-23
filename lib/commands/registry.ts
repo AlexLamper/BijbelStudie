@@ -86,17 +86,6 @@ export const PAGE_COMMANDS: CommandItem[] = [
     pageKey: "groups",
   },
   {
-    id: "pagina-hulpbronnen",
-    group: "pagina",
-    title: "Hulpbronnen",
-    subtitle: "Gratis bijbelstudieboeken",
-    keywords: ["bibliotheek", "boeken", "bronnen", "publiek domein", "materiaal", "e-books"],
-    icon: "library",
-    visibility: "iedereen",
-    target: { type: "link", href: "/hulpbronnen" },
-    pageKey: "resources",
-  },
-  {
     id: "pagina-profiel",
     group: "pagina",
     title: "Profiel",
@@ -228,6 +217,10 @@ export const PAGE_COMMANDS: CommandItem[] = [
     target: { type: "link", href: "/bijbelstudie/gratis" },
     pageKey: "guideFree",
   },
+  // Two items, one per audience. /bijbelboeken is the public reference page
+  // and middleware.ts sends a member away from it (lib/memberRedirects.ts), so
+  // a member's item links straight to the in-app list the redirect would
+  // land on, and the public one is for guests only.
   {
     id: "pagina-bijbelboeken",
     group: "pagina",
@@ -235,9 +228,20 @@ export const PAGE_COMMANDS: CommandItem[] = [
     subtitle: "De 66 boeken op een rij",
     keywords: ["boeken", "66 boeken", "oude testament", "nieuwe testament", "overzicht", "canon"],
     icon: "book",
-    visibility: "iedereen",
+    visibility: "gast",
     target: { type: "link", href: "/bijbelboeken" },
     pageKey: "bibleBooks",
+  },
+  {
+    id: "pagina-bijbel-gelezen",
+    group: "pagina",
+    title: "Bijbelboeken",
+    subtitle: "Alle 66 boeken en wat je al gelezen hebt",
+    keywords: ["boeken", "66 boeken", "oude testament", "nieuwe testament", "overzicht", "canon", "bijbel gelezen", "gelezen", "leesvoortgang", "hoofdstukken"],
+    icon: "book",
+    visibility: "ingelogd",
+    target: { type: "link", href: "/profiel/bijbel" },
+    pageKey: "profileBible",
   },
   {
     id: "pagina-app",

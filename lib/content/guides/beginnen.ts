@@ -1,239 +1,396 @@
 import type { Guide } from "./types";
 
-/** /bijbelstudie/beginnen - target: "bijbelstudie voor beginners", "hoe begin ik met bijbelstudie". */
+/**
+ * /bijbelstudie/beginnen - target: "bijbelstudie voor beginners", "hoe begin ik met bijbelstudie".
+ *
+ * Rewritten 2026-09-23 after Search Console reported it "Gecrawld - momenteel
+ * niet geïndexeerd". Four of its six sections restated the hub (/bijbelstudie):
+ * the same three things you need, the same six-step first session on Markus 1,
+ * the same pitfalls and two of the same FAQs. Google had no reason to index a
+ * second page answering the hub's questions.
+ *
+ * The page now owns what the hub does not do: the reading route. How the Bible
+ * is put together, which book fits which question, and a day-by-day plan with a
+ * question per day whose answer is in the chapter itself. The study method
+ * stays on the hub and /bijbelstudie/methoden; this page links there instead
+ * of repeating it. Keep it that way when editing either page.
+ */
 export const GUIDE_START: Guide = {
   slug: "beginnen",
   path: "/bijbelstudie/beginnen",
   metadataKey: "guideStart",
   h1: "Bijbelstudie voor beginners: zo begin je",
   intro:
-    "Nooit eerder de Bijbel bestudeerd? Dit is het plan: wat je nodig hebt, waar je begint, hoeveel tijd het kost, en een schema van dertig dagen dat van je eerste hoofdstuk een gewoonte maakt.",
+    "Nooit eerder de Bijbel bestudeerd? Dit is een route, geen theorie: hoe de Bijbel in elkaar zit, welk boek bij jouw vraag past, en een plan van dertig dagen met voor elke dag een hoofdstuk en één vraag om mee te nemen.",
   datePublished: "2026-08-21",
-  dateModified: "2026-08-21",
-  readingMinutes: 10,
+  dateModified: "2026-09-23",
+  readingMinutes: 18,
   sections: [
     {
-      id: "wat-heb-je-nodig",
-      heading: "Wat je nodig hebt (en wat niet)",
+      id: "zo-zit-de-bijbel-in-elkaar",
+      heading: "Eerst: hoe de Bijbel in elkaar zit",
       body: [
-        "Er is een hardnekkig idee dat je voor bijbelstudie eerst iets moet weten. Dat klopt niet. Je hebt drie dingen nodig, en die heb je waarschijnlijk al.",
-        "Wat je níet nodig hebt: een theologische opleiding, kennis van Hebreeuws of Grieks, een dure studiebijbel, of het gevoel dat je er klaar voor bent. Dat laatste komt pas ná een paar weken, niet ervoor.",
+        "De Bijbel is geen boek maar een bibliotheek: 66 boeken, geschreven over een periode van meer dan duizend jaar, in het Hebreeuws, het Aramees en het Grieks. Protestantse bijbels tellen 39 boeken in het Oude Testament en 27 in het Nieuwe; rooms-katholieke uitgaven hebben in het Oude Testament enkele boeken meer.",
+        "Wie weet in welk deel van die bibliotheek hij staat, leest anders. Een wet lees je niet als een gedicht, en een brief niet als een verhaal. In een protestantse bijbel staan de boeken in deze zes afdelingen, in deze volgorde.",
+        "Hoofdstukken en verzen stonden niet in de oorspronkelijke tekst. De hoofdstukindeling is in de dertiende eeuw aangebracht, de versnummering van het Nieuwe Testament in 1551. Een hoofdstukgrens valt daardoor soms midden in een gedachte: lees bij twijfel de laatste verzen van het vorige hoofdstuk mee.",
       ],
       list: [
         {
-          title: "Een vertaling die je begrijpt",
-          text: "Een vertaling waarvan je de zinnen kunt volgen. Als de Statenvertaling je afremt, begin dan met een vlottere vertaling en leg de Statenvertaling er later naast.",
+          title: "De wet: Genesis t/m Deuteronomium",
+          text: "De vijf boeken van Mozes. Het begin van de wereld, de aartsvaders, de uittocht uit Egypte en de wetten voor Israël.",
         },
         {
-          title: "Iets om in te schrijven",
-          text: "Een schrift of een notitie-app. Wat je niet opschrijft, ben je binnen twee weken kwijt.",
+          title: "De geschiedenis: Jozua t/m Esther",
+          text: "Israël in het beloofde land: de richters, de koningen, de ballingschap in Babel en de terugkeer.",
         },
         {
-          title: "Twintig minuten, drie keer per week",
-          text: "Niet één uur op zondag. Regelmaat verslaat lengte, elke keer weer.",
-        },
-      ],
-    },
-    {
-      id: "waar-beginnen",
-      heading: "Waar begin je in de Bijbel?",
-      body: [
-        "Niet op bladzijde één. Wie bij Genesis 1 begint en doorleest, loopt vast in Leviticus - dat is geen falen maar een voorspelbaar gevolg van de indeling. De Bijbel is een bibliotheek, geen roman, en je mag zelf kiezen waar je binnenkomt.",
-        "Voor een eerste kennismaking is er een korte lijst met boeken die snel lezen en meteen iets opleveren.",
-      ],
-      list: [
-        {
-          title: "Markus",
-          text: "Het kortste evangelie, zestien hoofdstukken, hoog tempo. Je hebt in twee weken een compleet beeld van wie Jezus is.",
+          title: "Poëzie en wijsheid: Job t/m Hooglied",
+          text: "Gebeden, liederen en levenswijsheid. Hier staan de Psalmen en de Spreuken.",
         },
         {
-          title: "Genesis 1-12",
-          text: "De fundamenten waar de rest van de Bijbel op terugvalt: schepping, zondeval, zondvloed, en de roeping van Abraham.",
+          title: "De profeten: Jesaja t/m Maleachi",
+          text: "Boodschappen aan Israël en de volken, vaak in beeldende taal en in dichtvorm.",
         },
         {
-          title: "Ruth of Jona",
-          text: "Vier hoofdstukken elk. Kort genoeg om in één zitting te lezen, rijk genoeg om er weken over te doen.",
+          title: "Evangeliën en Handelingen: Mattheüs t/m Handelingen",
+          text: "Het leven van Jezus, vier keer verteld vanuit een eigen invalshoek, en het ontstaan van de eerste gemeenten.",
         },
         {
-          title: "Filippenzen",
-          text: "Vier hoofdstukken, warm van toon, en een goede eerste kennismaking met een brief van Paulus.",
-        },
-        {
-          title: "Psalmen 1, 23, 51 en 139",
-          text: "Vier psalmen die elk een andere toon aanslaan: onderwijs, vertrouwen, schuld en verwondering.",
+          title: "Brieven en Openbaring: Romeinen t/m Openbaring",
+          text: "Eenentwintig brieven aan gemeenten en personen, en tot slot het profetische boek Openbaring.",
         },
       ],
       callout:
-        "Bewaar Openbaring, Leviticus, Ezechiël en Daniël voor later. Niet omdat ze minder waard zijn, maar omdat ze veel achtergrond veronderstellen.",
+        "Een verwijzing als Markus 4:35-41 betekent: het boek Markus, hoofdstuk 4, vers 35 tot en met 41. Zo zijn alle verwijzingen in deze gids geschreven.",
     },
     {
-      id: "eerste-sessie",
-      heading: "Je allereerste studiesessie, stap voor stap",
+      id: "waar-beginnen",
+      heading: "Waar begin je? Kies op grond van je vraag",
       body: [
-        "Neem Markus 1. Zet een timer op dertig minuten. Zo ziet die dertig minuten eruit.",
+        "Niet op bladzijde één. Wie bij Genesis begint en doorleest, komt na een paar weken in Leviticus terecht: offerwetten en reinheidsregels die veel achtergrond vragen. Daar haken de meeste beginners af, en dat zegt niets over hun doorzettingsvermogen.",
+        "Kies daarom een ingang die past bij wat je wilt weten. Het dertigdagenplan verderop begint bij Markus, maar als een van de andere vragen meer bij je past, kun je ook daar beginnen.",
+      ],
+      list: [
+        {
+          title: "Wie is Jezus eigenlijk?",
+          text: "Markus. Zestien hoofdstukken, kort en in hoog tempo verteld. Het is ook het boek waarmee het plan hieronder begint.",
+        },
+        {
+          title: "Hoe begint het verhaal?",
+          text: "Genesis 1 t/m 12: schepping, zondeval, de vloed, de toren van Babel en de roeping van Abraham. De rest van de Bijbel grijpt steeds op deze hoofdstukken terug.",
+        },
+        {
+          title: "Ik zoek woorden voor gebed, twijfel of verdriet",
+          text: "De Psalmen. Begin bij Psalm 23, 42 en 139, en lees er één per keer. Een psalm is een gedicht: langzaam lezen, liefst hardop.",
+        },
+        {
+          title: "Hoe geloof je in het gewone leven?",
+          text: "Jakobus, vijf korte hoofdstukken, of Spreuken: 31 hoofdstukken, één voor elke dag van de maand.",
+        },
+        {
+          title: "Hoe is de kerk begonnen?",
+          text: "Handelingen, het vervolg op het evangelie van Lucas. Achtentwintig hoofdstukken over de eerste gemeenten en de reizen van Paulus.",
+        },
+        {
+          title: "Ik heb maar weinig tijd",
+          text: "Ruth of Jona, elk vier hoofdstukken. In één avond uit, en toch genoeg om weken over na te denken.",
+        },
+      ],
+      callout:
+        "Bewaar Leviticus, Ezechiël, Daniël en Openbaring voor later. Ze zijn niet minder waard, maar ze leunen zwaar op de rest van de Bijbel. Na een paar maanden lezen ze heel anders.",
+    },
+    {
+      id: "een-dag",
+      heading: "Zo ziet een dag eruit: een kwartier",
+      body: [
+        "Het plan hieronder vraagt geen uur per dag. Eén hoofdstuk, één vraag, twee zinnen. Wie wil, begint met een kort gebed om aandacht; verder heb je alleen een bijbel en een schrift nodig.",
+        "Dit is bewust lichter dan een volledige studie. De eerste maand gaat het om de gewoonte en om leren waarnemen wat er staat. Een hoofdstuk echt uitdiepen, met vergelijken en commentaren, komt daarna: daarvoor staat in de complete gids over bijbelstudie een uitgebreider stappenplan.",
       ],
       steps: [
         {
-          title: "Bid kort (1 minuut)",
-          text: "Niet uitgebreid. Vraag eenvoudig om aandacht en om bereidheid je te laten corrigeren.",
+          title: "Lees het hoofdstuk één keer door (5 minuten)",
+          text: "Zonder te stoppen, zoals je een verhaal leest. Wat je niet begrijpt, sla je voorlopig over.",
         },
         {
-          title: "Lees het hoofdstuk (5 minuten)",
-          text: "In één keer door, zonder pen. Alleen om te horen wat er staat.",
+          title: "Beantwoord de vraag van de dag (5 minuten)",
+          text: "Blader terug in het hoofdstuk. De vragen zijn zo gekozen dat het antwoord in de tekst zelf staat, niet in een commentaar.",
         },
         {
-          title: "Lees opnieuw en noteer (10 minuten)",
-          text: "Nu met pen. Schrijf op: wie komen erin voor, waar speelt het, wat wordt herhaald, welke woorden begrijp je niet.",
-        },
-        {
-          title: "Stel drie vragen (5 minuten)",
-          text: "Vragen bij wat je noteerde. Ook - en juist - vragen waarop je het antwoord niet weet.",
-        },
-        {
-          title: "Zoek één antwoord op (5 minuten)",
-          text: "Kies de vraag die het meest kriebelt. Vergelijk een tweede vertaling of lees een commentaar bij dat vers.",
-        },
-        {
-          title: "Schrijf twee zinnen (4 minuten)",
-          text: "Eén zin: waar gaat dit hoofdstuk over? Eén zin: wat neem ik hiervan mee deze week?",
+          title: "Schrijf twee zinnen op (5 minuten)",
+          text: "Eén zin: wat gebeurt er, of wat wordt er gezegd? Eén zin: welke vraag blijft er over? Die open vragen zijn over een maand je beste studiemateriaal.",
         },
       ],
     },
     {
       id: "dertig-dagen",
-      heading: "Een schema van dertig dagen",
+      heading: "Het plan: dertig dagen, dag voor dag",
       body: [
-        "Onderstaand schema brengt je in een maand van nul naar een lopende gewoonte. Het is bewust rustig opgebouwd: eerst korte stukken, later langere, en pas in week vier een eigen keuze.",
-        "Sla je een dag over, ga dan gewoon verder waar je gebleven was. Opnieuw beginnen is de snelste manier om te stoppen.",
+        "Vier weken met elk een vaste inhaaldag. Je leest eerst het evangelie van Markus, wisselt in week drie naar de Psalmen en eindigt met de brief aan de Filippenzen: verhaal, poëzie en brief, de drie soorten tekst die je in de rest van de Bijbel het vaakst tegenkomt.",
+        "Mis je een dag, ga dan verder waar je was en gebruik de inhaaldag. Opnieuw beginnen bij dag 1 is de snelste manier om te stoppen.",
       ],
       steps: [
         {
-          title: "Week 1 - Markus 1 t/m 7",
-          text: "Eén hoofdstuk per dag, met de zes stappen hierboven. Doel: de gewoonte, niet de diepgang.",
+          title: "Dag 1 - Markus 1",
+          text: "Wat zegt het eerste vers over Jezus, en wat laat de rest van het hoofdstuk van hem zien?",
         },
         {
-          title: "Week 2 - Markus 8 t/m 14",
-          text: "Zelfde ritme. Let vanaf hoofdstuk 8 op de drie keer dat Jezus zijn lijden aankondigt en hoe de discipelen reageren.",
+          title: "Dag 2 - Markus 2",
+          text: "Waar nemen mensen in dit hoofdstuk aanstoot aan, en hoe antwoordt Jezus telkens?",
         },
         {
-          title: "Week 3 - Markus 15-16 en Psalm 1, 23, 51, 139, 139 herhaald",
-          text: "Rond het evangelie af en wissel van genre. Poëzie leest anders dan verhaal; merk op wat dat met je manier van lezen doet.",
+          title: "Dag 3 - Markus 3",
+          text: "Wie horen er bij Jezus, en wie niet? Let op wat zijn familie doet in vers 21 en in vers 31-35.",
         },
         {
-          title: "Week 4 - Filippenzen, één hoofdstuk per twee dagen",
-          text: "Nu langzamer. Een brief vraagt om verzenanalyse: trek de zinnen uit elkaar en let op de verbindingswoorden.",
+          title: "Dag 4 - Markus 4",
+          text: "Welke vraag stellen de discipelen aan het slot (vers 41), en waarom zijn ze nog steeds bang als de storm al voorbij is?",
         },
         {
-          title: "Dag 29 - Lees je notities terug",
-          text: "Alles van de afgelopen vier weken. Dit is het moment waarop het rendement van opschrijven zichtbaar wordt.",
+          title: "Dag 5 - Markus 5",
+          text: "Drie mensen in nood. Wat hebben ze gemeen, en waarom wordt het verhaal van Jaïrus halverwege onderbroken?",
         },
         {
-          title: "Dag 30 - Kies zelf",
-          text: "Welk boek wil je hierna? Kies op grond van een vraag die de afgelopen maand is opgekomen.",
+          title: "Dag 6 - Markus 6",
+          text: "Het verhaal over de dood van Johannes de Doper staat tussen het uitzenden en het terugkomen van de twaalf discipelen. Waarom zou Markus het daar plaatsen?",
+        },
+        {
+          title: "Dag 7 - Inhaaldag",
+          text: "Haal een gemiste dag in, of lees je aantekeningen van deze week terug. Welke vraag kwam vaker dan één keer op?",
+        },
+        {
+          title: "Dag 8 - Markus 7",
+          text: "Wat maakt een mens volgens Jezus onrein, en wat juist niet (vers 14-23)?",
+        },
+        {
+          title: "Dag 9 - Markus 8",
+          text: "Petrus zegt wie Jezus is (vers 29). Waarom gaat het direct daarna mis tussen hen (vers 31-33)?",
+        },
+        {
+          title: "Dag 10 - Markus 9",
+          text: "Jezus spreekt opnieuw over zijn lijden (vers 31). Waar hebben de discipelen het onderweg over (vers 33-34)?",
+        },
+        {
+          title: "Dag 11 - Markus 10",
+          text: "Zet het verzoek van Jakobus en Johannes (vers 35-37) naast wat Jezus in vers 45 over zichzelf zegt.",
+        },
+        {
+          title: "Dag 12 - Markus 11",
+          text: "Het verhaal van de vijgenboom is in tweeën geknipt, met de tempel ertussen. Wat zegt het ene over het andere?",
+        },
+        {
+          title: "Dag 13 - Markus 12",
+          text: "Welke vragen krijgt Jezus in dit hoofdstuk, van wie, en met welke bedoeling?",
+        },
+        {
+          title: "Dag 14 - Inhaaldag",
+          text: "Haal een gemiste dag in, of zoek de drie keer op dat Jezus zijn lijden aankondigt: Markus 8:31, 9:31 en 10:33-34. Wat doen de discipelen telkens direct daarna?",
+        },
+        {
+          title: "Dag 15 - Markus 13",
+          text: "Het moeilijkste hoofdstuk van Markus. Schrijf op wat je niet begrijpt, en let op welke oproep aan het slot steeds terugkomt.",
+        },
+        {
+          title: "Dag 16 - Markus 14",
+          text: "Zet de belofte van Petrus (vers 29-31) naast wat hij aan het eind van het hoofdstuk doet (vers 66-72).",
+        },
+        {
+          title: "Dag 17 - Markus 15",
+          text: "Wie zegt in dit hoofdstuk wie Jezus is? Lees vers 39 en blader dan terug naar het eerste vers van Markus.",
+        },
+        {
+          title: "Dag 18 - Markus 16",
+          text: "Hoe reageren de vrouwen op wat ze bij het graf horen (vers 8)? Sommige uitgaven vermelden bij vers 9-20 dat de oudste handschriften bij vers 8 eindigen.",
+        },
+        {
+          title: "Dag 19 - Psalm 1",
+          text: "Welke twee wegen beschrijft deze psalm, en met welke beelden?",
+        },
+        {
+          title: "Dag 20 - Psalm 23",
+          text: "Halverwege verandert het beeld: van herder naar gastheer. Bij welk vers gebeurt dat?",
+        },
+        {
+          title: "Dag 21 - Inhaaldag",
+          text: "Haal een gemiste dag in, of kijk terug: poëzie leest anders dan een verhaal. Wat deed je bij de psalmen anders dan bij Markus?",
+        },
+        {
+          title: "Dag 22 - Psalm 51",
+          text: "Lees eerst het opschrift boven de psalm en daarna 2 Samuël 12:1-13. Wat vraagt David in deze psalm allemaal van God?",
+        },
+        {
+          title: "Dag 23 - Psalm 139",
+          text: "Waar gaat de verwondering van de dichter aan het slot over in een gebed (vers 23-24)?",
+        },
+        {
+          title: "Dag 24 - Filippenzen 1",
+          text: "Paulus zit gevangen (vers 13). Waarover is hij toch blij?",
+        },
+        {
+          title: "Dag 25 - Filippenzen 2",
+          text: "Welke voorbeelden houdt Paulus zijn lezers voor? Let naast Christus (vers 5-11) ook op Timotheüs en Epafroditus.",
+        },
+        {
+          title: "Dag 26 - Filippenzen 3",
+          text: "Wat stond bij Paulus vroeger aan de winstkant (vers 4-6), en waarom schrijft hij het nu af als verlies (vers 7-8)?",
+        },
+        {
+          title: "Dag 27 - Filippenzen 4",
+          text: "Paulus zegt dat hij geleerd heeft tevreden te zijn (vers 11-13). Waar heeft hij dat geleerd?",
+        },
+        {
+          title: "Dag 28 - Inhaaldag",
+          text: "De laatste inhaaldag. Maak af wat nog openstaat, zodat je de laatste twee dagen met een volledig schrift begint.",
+        },
+        {
+          title: "Dag 29 - Lees je aantekeningen terug",
+          text: "Alles van de afgelopen vier weken. Zet een streep onder de drie vragen die nog openstaan.",
+        },
+        {
+          title: "Dag 30 - Kies je volgende boek",
+          text: "Kies op grond van een van die drie vragen. Na Markus ligt Handelingen voor de hand, of een ingang uit het rijtje hierboven.",
         },
       ],
     },
     {
-      id: "volhouden",
-      heading: "Hoe je het volhoudt",
+      id: "eerste-vragen",
+      heading: "Vragen die je de eerste weken tegenkomt",
       body: [
-        "De meeste mensen stoppen niet omdat bijbelstudie tegenvalt, maar omdat het ritme wegvalt. Een paar dingen die aantoonbaar helpen.",
+        "Bij het lezen van Markus en de Psalmen lopen bijna alle beginners tegen dezelfde vragen aan. Hier zijn korte antwoorden, zodat ze je niet een hele avond ophouden.",
       ],
       list: [
         {
-          title: "Koppel het aan iets bestaands",
-          text: "Direct na de koffie, direct voor het slapen. Een gewoonte die aan een bestaande gewoonte hangt, overleeft veel langer dan een gewoonte die op wilskracht drijft.",
+          title: "Waarom staat HEERE soms in hoofdletters?",
+          text: "Zo geven de Statenvertaling (HEERE) en de NBG-vertaling 1951 (HERE) de Hebreeuwse eigennaam van God weer, die in het Oude Testament duizenden keren voorkomt. Staat er 'Heere' of 'Here' in gewone letters, dan gaat het meestal om een ander Hebreeuws woord, dat 'heer' betekent.",
         },
         {
-          title: "Kies liever kort en vaak",
-          text: "Twintig minuten drie keer per week levert meer op dan een uur dat je één keer volhoudt.",
+          title: "Wie zijn de Farizeeën en de schriftgeleerden?",
+          text: "Farizeeën waren een beweging van vrome Joden die de wet tot in detail wilden naleven; schriftgeleerden waren kenners en uitleggers van die wet. In Markus zijn ze vaak de tegenspelers van Jezus, maar niet allemaal: in Markus 12:28-34 zegt Jezus tegen een schriftgeleerde dat hij niet ver van het koninkrijk van God is.",
         },
         {
-          title: "Houd je voortgang zichtbaar",
-          text: "Een streepje per dag, een streak in een app - het maakt niet uit wat, als je maar ziet dat er een reeks staat.",
+          title: "Waarom zegt Jezus zo vaak dat mensen niets mogen vertellen?",
+          text: "Het valt in Markus direct op, bijvoorbeeld in 1:44 en 8:30. Uitleggers spreken van het 'messiasgeheim'. Een veelgenoemde verklaring is dat Jezus niet bekend wil worden als wonderdoener of politieke bevrijder voordat duidelijk is wat voor Messias hij is. Houd het vast als vraag: vanaf hoofdstuk 8 wordt het helderder.",
         },
         {
-          title: "Vertel iemand wat je las",
-          text: "Eén keer per week hardop uitleggen wat je gevonden hebt. Dat is de snelste manier om te merken of je het begrepen hebt.",
+          title: "Wat betekent 'de Zoon des mensen'?",
+          text: "Zo noemt Jezus zichzelf het vaakst. De uitdrukking gaat terug op Daniël 7:13-14, waar iemand 'als eens mensen Zoon' (Statenvertaling) met de wolken des hemels komt en van God heerschappij ontvangt. Tegelijk klinkt er gewoon 'mens' in door. In Markus 8:31 en 10:45 zie je beide kanten.",
         },
         {
-          title: "Accepteer saaie dagen",
-          text: "Niet elke sessie levert iets op. Dat is normaal en geen reden om te stoppen; het gemiddelde telt.",
+          title: "Waarom kloppen de versnummers van de Psalmen niet met een Engelse bijbel?",
+          text: "In Nederlandse vertalingen als de Statenvertaling telt het opschrift boven een psalm mee als vers, soms als twee. Engelse vertalingen beginnen te tellen bij de eerste regel van het lied, waardoor de nummers een of twee verzen verschillen. Zoek je een psalmvers op, gebruik dan de nummering van je eigen vertaling.",
+        },
+        {
+          title: "Wat doe ik met een tekst die me schokt of die ik niet kan geloven?",
+          text: "Schrijf hem op en lees door. Veel beginners lopen vast op een hard verhaal of een scherpe uitspraak. Dat is geen reden om te stoppen, maar een goede vraag voor later: voor een commentaar, een bijbelkring of iemand die er al langer mee bezig is.",
         },
       ],
     },
     {
-      id: "veelgemaakte-fouten",
-      heading: "Fouten die bijna elke beginner maakt",
+      id: "valkuilen-eerste-maand",
+      heading: "Valkuilen in de eerste maand",
       body: [
-        "Ze zijn allemaal te vermijden zodra je ze kent.",
+        "De fouten die beginners maken, zitten zelden in de uitleg. Ze zitten in de aanpak: te veel, te snel, te duur. Zes die je kunt vermijden zodra je ze kent.",
       ],
       list: [
         {
-          title: "Te veel tegelijk willen",
-          text: "Drie hoofdstukken per dag houd je twee weken vol. Eén hoofdstuk houd je een jaar vol.",
+          title: "Beginnen met een jaarplan",
+          text: "Een schema om de Bijbel in een jaar uit te lezen vraagt drie tot vier hoofdstukken per dag en brengt je rond februari bij Leviticus. Voor een eerste maand is één hoofdstuk per dag genoeg.",
         },
         {
-          title: "Bij Genesis beginnen en doorlezen",
-          text: "Je strandt in Leviticus. Kies een startpunt op grond van wat je wilt weten, niet op grond van de bladzijdenummering.",
+          title: "Opnieuw beginnen na een gemiste dag",
+          text: "Wie na een gemiste week weer bij dag 1 begint, leest Markus 1 vijf keer en Markus 16 nooit. Ga verder waar je was.",
         },
         {
-          title: "Meteen willen toepassen",
-          text: "Eerst begrijpen wat er staat. De toepassing die je vindt vóór je de tekst begrijpt, komt van jezelf.",
+          title: "Elk onbekend woord meteen opzoeken",
+          text: "Dan kom je nooit aan het eind van een hoofdstuk. Zet een streep onder het woord en zoek er na afloop hooguit één op.",
         },
         {
-          title: "Niets opschrijven",
-          text: "Zonder aantekeningen bouw je niets op en begin je elke keer opnieuw.",
+          title: "Alleen de bekende verzen lezen",
+          text: "Losse bekende teksten geven houvast, maar geen overzicht. Een heel boek achter elkaar laat zien waar die verzen thuishoren en wat eromheen staat.",
         },
         {
-          title: "Denken dat je het alleen moet doen",
-          text: "Een commentaar raadplegen of iemand om uitleg vragen is geen zwaktebod maar normale studiepraktijk.",
+          title: "Eerst alles willen aanschaffen",
+          text: "Een studiebijbel, drie commentaren en een nieuwe app, nog voor je een hoofdstuk hebt gelezen. Begin met een bijbel en een schrift, en zoek pas een hulpmiddel als je een vraag hebt die erom vraagt.",
+        },
+        {
+          title: "Je meten aan anderen",
+          text: "In een kring of een kerk lijkt het alsof iedereen alles al weet. Ook zij zijn ooit bij het eerste hoofdstuk begonnen, en de meesten hebben vragen die ze niet hardop stellen.",
+        },
+      ],
+    },
+    {
+      id: "na-dertig-dagen",
+      heading: "Na de dertig dagen",
+      body: [
+        "Na een maand heb je een gewoonte, een schrift vol vragen en een eerste indruk van drie soorten bijbeltekst. De volgende stap is kiezen wat je verder wilt: doorlezen, of dieper gaan.",
+      ],
+      list: [
+        {
+          title: "Doorlezen",
+          text: "Handelingen sluit aan op de evangeliën en vertelt hoe het verderging. Of lees Lucas, een uitgebreider evangelie, nu je Markus nog vers in je hoofd hebt: je ziet meteen wat Lucas toevoegt.",
+        },
+        {
+          title: "Een methode kiezen",
+          text: "Wil je één gedeelte grondig bestuderen, kies dan een methode die bij je vraag past: inductief, thematisch, biografisch of een woordstudie. De pagina over bijbelstudie methoden werkt ze elk uit met een voorbeeld.",
+        },
+        {
+          title: "Een begeleide studie volgen",
+          text: "Op BijbelStudie kun je elk hoofdstuk bestuderen in zes stappen: inleiding, bijbelse context, lezen, verdieping, toetsing en toepassing. Dat is gratis, en je voortgang wordt bijgehouden.",
         },
       ],
     },
   ],
   faqs: [
     {
-      q: "Hoe begin ik met bijbelstudie als beginner?",
-      a: "Begin met Markus 1, neem dertig minuten en werk in zes stappen: kort bidden, het hoofdstuk in één keer lezen, opnieuw lezen met pen en noteren wat opvalt, drie vragen stellen, één ervan opzoeken, en twee zinnen opschrijven over de kern en de toepassing. Herhaal dat drie keer per week.",
+      q: "Welk bijbelboek lees ik als beginner het eerst?",
+      a: "Markus: zestien korte hoofdstukken, van de doop van Jezus tot zijn opstanding, in ruim twee weken uit. Zoek je iets anders, kies dan op grond van je vraag: Genesis 1 t/m 12 voor het begin van het verhaal, de Psalmen voor gebed en twijfel, Jakobus voor het dagelijks leven, of Ruth en Jona als je weinig tijd hebt.",
     },
     {
-      q: "Welk bijbelboek lees je het beste als eerste?",
-      a: "Markus, omdat het het kortste evangelie is en snel leest. Daarna Genesis 1-12 voor de fundamenten, of Filippenzen als eerste kennismaking met een brief. Begin niet bij Leviticus, Ezechiël of Openbaring.",
+      q: "Hoeveel tijd kost het dertigdagenplan per dag?",
+      a: "Ongeveer een kwartier: één hoofdstuk lezen, de vraag van de dag beantwoorden en twee zinnen opschrijven. Elke zevende dag is een inhaaldag, dus een drukke dag hoeft het plan niet te breken.",
     },
     {
-      q: "Hoeveel tijd moet ik uittrekken voor bijbelstudie?",
-      a: "Twintig tot dertig minuten, drie keer per week, is voor een beginner een goed uitgangspunt. Regelmaat weegt zwaarder dan lengte: kort en vaak levert meer op dan een lange sessie die je na drie weken niet volhoudt.",
+      q: "Wat doe ik als ik een dag van het plan mis?",
+      a: "Ga verder waar je gebleven was en gebruik de inhaaldag aan het eind van de week. Begin niet opnieuw bij dag 1: wie steeds opnieuw begint, komt nooit verder dan het eerste hoofdstuk.",
     },
     {
-      q: "Wat doe ik als ik een gedeelte niet begrijp?",
-      a: "Schrijf de vraag op en ga door - je hoeft niet alles vandaag te snappen. Vergelijk daarna een tweede vertaling, lees een bijbelcommentaar bij dat vers, of leg de vraag voor aan iemand die er meer van weet. Blijvende vragen zijn normaal en horen bij serieuze studie.",
+      q: "Welke vertaling gebruik ik voor dit plan?",
+      a: "Elke vertaling werkt; de verwijzingen volgen de nummering van de Statenvertaling en de NBG-vertaling 1951. Vind je de Statenvertaling lastig om te volgen, lees dan de NBG-vertaling 1951 en leg de Statenvertaling er af en toe naast. Waar ze verschillen, zit vaak een goede vraag.",
     },
     {
-      q: "Heb ik een studiebijbel nodig?",
-      a: "Nee. Een gewone vertaling en een schrift zijn genoeg om te beginnen. Achtergrondinformatie en commentaren zijn tegenwoordig gratis online te raadplegen, dus een dure uitgave is geen voorwaarde.",
+      q: "Kan ik het plan samen met iemand doen?",
+      a: "Ja, en het helpt om vol te houden. Lees op dezelfde dag hetzelfde hoofdstuk en stuur elkaar je twee zinnen. Eén keer per week samen de open vragen bespreken is genoeg.",
     },
   ],
   related: [
     {
       href: "/bijbelstudie",
       label: "Bijbelstudie: de complete gids",
-      description: "De hoofdgids met alle methoden en hulpmiddelen.",
+      description: "Wat bijbelstudie is, en een stappenplan om één hoofdstuk echt uit te diepen.",
     },
     {
       href: "/bijbelstudie/methoden",
       label: "Bijbelstudie methoden",
-      description: "Zes methoden, elk met een concreet voorbeeld.",
-    },
-    {
-      href: "/bijbelstudie/gratis",
-      label: "Gratis bijbelstudie",
-      description: "Alles wat je gratis kunt gebruiken om te beginnen.",
+      description: "Zes methoden voor na de eerste maand, elk met een voorbeeld.",
     },
     {
       href: "/bijbelboeken/markus",
       label: "Het boek Markus",
-      description: "Achtergrond en hoofdlijn van het boek waar je mee begint.",
+      description: "Achtergrond en hoofdlijn van het boek waarmee het plan begint.",
+    },
+    {
+      href: "/bijbelboeken/psalmen",
+      label: "Het boek Psalmen",
+      description: "Achtergrond bij de psalmen uit week drie en vier.",
+    },
+    {
+      href: "/bijbelboeken/filippenzen",
+      label: "De brief aan de Filippenzen",
+      description: "Achtergrond bij de brief waarmee het plan eindigt.",
+    },
+    {
+      href: "/studies",
+      label: "Begeleide studies",
+      description: "Elk hoofdstuk stap voor stap bestuderen, gratis.",
     },
   ],
 };

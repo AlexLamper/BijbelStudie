@@ -8,6 +8,7 @@ import { Textarea } from "../ui/textarea";
 import { Badge } from "../ui/badge";
 import { Modal } from "../ui/modal";
 import { useTranslation } from "../../app/i18n/client";
+import { openProOffer } from "../../lib/proOffer";
 
 interface Note {
   _id: string;
@@ -169,6 +170,10 @@ export function EditNoteModal({
 
       if (!response.ok) {
         const errorData = await response.json();
+        // Turning a highlight into a note counts towards the free note limit.
+        if (errorData?.code === "NOTE_LIMIT_REACHED") {
+          openProOffer({ surface: "note_limit", reason: errorData.error });
+        }
         throw new Error(errorData.error || t("error_save_failed"));
       }
 

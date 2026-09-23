@@ -1,22 +1,15 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname } from "next/navigation"
 import { PLANS, perWeek } from "../../lib/pricing"
 import { track, trackNow } from "../../lib/analytics"
+import { openProOffer } from "../../lib/proOffer"
 import type { SerialisedPrompt } from "../../lib/feedbackPrompts"
 import PromptCard from "../feedback/PromptCard"
 
 /** Which gated surface this prompt is standing in for. */
 export type PaywallSurface = "commentary" | "ai_limit" | "original_text" | "plan_limit"
-
-/** Maps a surface onto the `source` the pricing page reports in its funnel. */
-const SOURCE_FOR: Record<PaywallSurface, string> = {
-  commentary: "paywall_commentary",
-  ai_limit: "paywall_ai",
-  original_text: "paywall_commentary",
-  plan_limit: "paywall_plan",
-}
 
 /**
  * The single upgrade prompt used at every gated surface.
@@ -44,7 +37,6 @@ export function UpgradePrompt({
   cta?: string
   compact?: boolean
 }) {
-  const router = useRouter()
   const pathname = usePathname()
   const reported = useRef(false)
   const [declined, setDeclined] = useState(false)
@@ -75,9 +67,13 @@ export function UpgradePrompt({
       .catch(() => {})
   }
 
+  // The Pro offer dialog (components/pricing/ProOfferDialog.tsx), not a trip
+  // to /abonnement: the trial, the plans and the checkout are one step away
+  // from the thing the reader was looking at, and they land back on it if they
+  // decline.
   const handleClick = () => {
     trackNow("paywall_cta_clicked", { surface })
-    router.push(`/abonnement?source=${SOURCE_FOR[surface]}`)
+    openProOffer({ surface, reason: body })
   }
 
   return (
