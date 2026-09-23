@@ -353,12 +353,12 @@ export const OT_POETRY_PROPHETS: BibleBook[] = [
     summary: [
       "Joël begint met een ramp die iedereen kan zien: een sprinkhanenplaag heeft het land kaalgevreten. Vier soorten sprinkhanen worden genoemd, laag na laag, tot er niets meer over is. De priesters kunnen geen spijsoffer meer brengen omdat er geen graan is.",
       "De profeet gebruikt die ramp als venster. Wat je nu ziet, zegt hij, is een voorproefje van de dag des HEEREN - een dag die niet vanzelf gunstig is, ook niet voor Israël. Zijn oproep is een nationale vastendag: 'scheurt uw hart en niet uw klederen'.",
-      "Het derde deel bevat de belofte die Petrus op de Pinksterdag aanhaalt: God zal Zijn Geest uitstorten op alle vlees, en zonen en dochters, oude en jonge mensen, dienstknechten en dienstmaagden zullen profeteren. Voor het Nieuwe Testament is dit hoofdstuk het antwoord op de vraag wat er in Handelingen 2 gebeurt.",
+      "Het slot van hoofdstuk 2 bevat de belofte die Petrus op de Pinksterdag aanhaalt: God zal Zijn Geest uitstorten op alle vlees, en zonen en dochters, oude en jonge mensen, dienstknechten en dienstmaagden zullen profeteren. Voor het Nieuwe Testament is dit gedeelte het antwoord op de vraag wat er in Handelingen 2 gebeurt.",
     ],
     outline: [
       { range: "1", title: "De plaag", summary: "Sprinkhanen, misoogst en een oproep tot rouw." },
-      { range: "2", title: "De dag des HEEREN", summary: "Het leger uit het noorden, en de oproep het hart te scheuren." },
-      { range: "3", title: "Geest en oordeel", summary: "De uitstorting van de Geest en het oordeel in het dal van Josafat." },
+      { range: "2", title: "De dag des HEEREN", summary: "Het leger uit het noorden, de oproep het hart te scheuren, en de belofte van de Geest (2:28-32)." },
+      { range: "3", title: "Het oordeel over de volken", summary: "Het dal van Josafat, en de HEERE die op Sion woont." },
     ],
     keyVerses: ["Joël 2:13", "Joël 2:25", "Joël 2:28-29"],
     studyQuestions: [

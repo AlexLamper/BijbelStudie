@@ -60,7 +60,7 @@ export default function BijbelboekenPage() {
       path: "/bijbelboeken",
       name: "De 66 bijbelboeken op een rij",
       description:
-        "Alle 66 boeken van de Bijbel met schrijver, ontstaanstijd, genre, kernthema en hoofdlijn.",
+        "Alle 66 boeken van de Bijbel: waar ze over gaan, wie ze schreef en wanneer, de opbouw, kernthema's en bekende gedeelten.",
       type: "CollectionPage",
       breadcrumbId: `${url}#breadcrumb`,
     }),
@@ -91,9 +91,10 @@ export default function BijbelboekenPage() {
             De 66 bijbelboeken op een rij
           </h1>
           <p className="mt-3 text-[15px] leading-[1.7] text-ink-muted sm:text-[16px]">
-            Van Genesis tot Openbaring: per boek de schrijver, de ontstaanstijd,
-            het genre, het kernthema en de hoofdlijn - plus studievragen om er
-            zelf mee aan de slag te gaan.
+            Van Genesis tot Openbaring: per boek waar het over gaat, wie het
+            schreef en wanneer, de opbouw, de kernthema&apos;s en de bekendste
+            gedeelten - plus studievragen en alle hoofdstukken om direct te
+            lezen.
           </p>
         </header>
 
