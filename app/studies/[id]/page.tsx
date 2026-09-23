@@ -20,6 +20,10 @@ import StudyArtwork from '../StudyArtwork';
 import StudySetupProvider, { StudyActionBar, StudySettingsButton } from './StudyOnboardingForm';
 import LessonList from './LessonList';
 import { chapterStudyPath, findBook, resolveChapterStudy } from '../../../lib/chapterStudy';
+import { curatedStudies, type CuratedStudy } from '../../../lib/data/curated-studies';
+import { JsonLd } from '../../../components/seo/JsonLd';
+import { absoluteUrl } from '../../../lib/seo/constants';
+import { breadcrumbNode, courseNode, graph, webPageNode } from '../../../lib/seo/structuredData';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -176,6 +180,44 @@ export default async function StudyDetailPage({ params }: PageProps) {
    * twice. A study with no `about` simply has no panel.
    */
   const about = (study.about ?? []).slice(0, 2);
+  /** "Wat ga je leren?" - under the pitch, in the same card. */
+  const outcomes = study.outcomes ?? [];
+  const related = relatedStudies(study);
+
+  /**
+   * Structured data for the authored studies only: the generated book
+   * studies are noindex (see generateMetadata). The Course node carries the
+   * same @id, url and image as its copy in the /studies graph, so Google reads
+   * both as one course.
+   */
+  const path = `/studies/${study.id}`;
+  const url = absoluteUrl(path);
+  const studyGraph = isBookStudyId(study.id)
+    ? null
+    : graph(
+        webPageNode({
+          path,
+          name: study.title,
+          description: study.description,
+          breadcrumbId: `${url}#breadcrumb`,
+        }),
+        breadcrumbNode(
+          [
+            { name: 'Home', path: '/' },
+            { name: 'Studies', path: '/studies' },
+            { name: study.title, path },
+          ],
+          url,
+        ),
+        courseNode({
+          name: study.title,
+          description: study.description,
+          path,
+          lessonCount: study.lessons.length,
+          image: `/og?${new URLSearchParams({ title: study.title, subtitle: study.description }).toString()}`,
+          anchor: study.id,
+        }),
+      );
 
   /** Books in lesson order, each with the chapters this study visits. */
   const readingPlan = books.map((book) => {
@@ -216,6 +258,7 @@ export default async function StudyDetailPage({ params }: PageProps) {
       lessonsCompleted={lessonsDone}
     >
       <AppShell title={study.title} active="/studies" ownHeading>
+        {studyGraph && <JsonLd data={studyGraph} />}
         <div className="flex min-h-full flex-col gap-4">
           {/* Back to the catalogue. A real link rather than history.back():
               plenty of visitors land here straight from search or a shared
@@ -308,16 +351,34 @@ export default async function StudyDetailPage({ params }: PageProps) {
           <div className="flex min-h-0 flex-1 gap-5 max-md:flex-col max-md:gap-4">
             {/* The pitch, then the lessons. */}
             <div className="flex min-w-0 flex-1 flex-col gap-4">
-              {about.length > 0 && (
+              {(about.length > 0 || outcomes.length > 0) && (
                 <Card className="flex-none px-[21px] py-[19px]">
-                  <h2 className="text-[16px] font-bold text-ink">Waar gaat deze studie over?</h2>
-                  <div className="mt-[9px] space-y-3">
-                    {about.map((paragraph, index) => (
-                      <p key={index} className="text-[14.5px] leading-[1.7] text-ink-body">
-                        {paragraph}
-                      </p>
-                    ))}
-                  </div>
+                  {about.length > 0 && (
+                    <>
+                      <h2 className="text-[16px] font-bold text-ink">Waar gaat deze studie over?</h2>
+                      <div className="mt-[9px] space-y-3">
+                        {about.map((paragraph, index) => (
+                          <p key={index} className="text-[14.5px] leading-[1.7] text-ink-body">
+                            {paragraph}
+                          </p>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                  {outcomes.length > 0 && (
+                    <>
+                      <h2
+                        className={`text-[16px] font-bold text-ink ${about.length > 0 ? 'mt-5' : ''}`}
+                      >
+                        Wat ga je leren?
+                      </h2>
+                      <ul className="mt-[9px] list-disc space-y-1.5 pl-5 text-[14.5px] leading-[1.6] text-ink-body marker:text-teal">
+                        {outcomes.map((outcome) => (
+                          <li key={outcome}>{outcome}</li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
                 </Card>
               )}
 
@@ -366,6 +427,36 @@ export default async function StudyDetailPage({ params }: PageProps) {
                 <AboutRow label="Lessen" value={`${lessonsTotal}`} />
                 <AboutRow label="Tijd per les" value={`± ${study.lessons[0]?.estimatedMinutes ?? 12} min`} last />
               </Card>
+
+              {/* Where to go next. Also the only links between the authored
+                  studies that a crawler can follow: on /studies they sit
+                  behind "Meer tonen". */}
+              {related.length > 0 && (
+                <Card className="flex-none p-[18px]">
+                  <h2 className="text-[14.5px] font-bold text-ink">Meer studies</h2>
+                  <div className="mb-1 mt-3 h-px bg-line" />
+                  <ul>
+                    {related.map((other, index) => (
+                      <li
+                        key={other.id}
+                        className={`py-2.5 ${index === related.length - 1 ? '' : 'border-b border-line-soft'}`}
+                      >
+                        <Link
+                          href={`/studies/${other.id}`}
+                          className="group block rounded-md no-underline outline-none focus-visible:ring-2 focus-visible:ring-teal"
+                        >
+                          <span className="block text-[13.5px] font-semibold text-ink group-hover:text-teal dark:group-hover:text-teal-400">
+                            {other.title}
+                          </span>
+                          <span className="mt-0.5 block text-[12.5px] leading-snug text-ink-muted">
+                            {other.description}
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              )}
             </aside>
           </div>
         </div>
@@ -398,6 +489,27 @@ function DetailStat({
       </p>
     </Card>
   );
+}
+
+/**
+ * Up to three authored studies to go on to, most related first: every shared
+ * bible book counts double, the same kind of study (Persoon, Gedeelte, ...)
+ * once, and ties keep catalogue order. A generated book study only lists
+ * authored studies that read from its book - otherwise nothing.
+ */
+function relatedStudies(study: CuratedStudy): CuratedStudy[] {
+  const books = new Set(study.lessons.map((lesson) => lesson.book));
+  const scored = curatedStudies
+    .filter((other) => other.id !== study.id)
+    .map((other, index) => {
+      const shared = new Set(other.lessons.map((lesson) => lesson.book).filter((book) => books.has(book)));
+      return { other, index, score: 2 * shared.size + (other.type === study.type ? 1 : 0) };
+    });
+  const pool = isBookStudyId(study.id) ? scored.filter((entry) => entry.score >= 2) : scored;
+  return pool
+    .sort((a, b) => b.score - a.score || a.index - b.index)
+    .slice(0, 3)
+    .map((entry) => entry.other);
 }
 
 /** One label/value row in "Over deze studie". */

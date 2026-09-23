@@ -98,7 +98,7 @@ export const GUIDE_FREE: Guide = {
         },
         {
           title: "Gratis: begeleide studies",
-          text: "Tien uitgewerkte studies over personen, gedeelten, onderwerpen en bijbelboeken.",
+          text: "Uitgewerkte studies over personen, gedeelten en onderwerpen, en een studie bij elk bijbelboek.",
         },
         {
           title: "Gratis: 5 AI-vragen per dag",
@@ -178,6 +178,11 @@ export const GUIDE_FREE: Guide = {
       href: "/abonnement",
       label: "Wat kost Pro?",
       description: "Wat er in het betaalde abonnement zit en wat gratis blijft.",
+    },
+    {
+      href: "/bijbelstudie/methoden",
+      label: "Bijbelstudie methoden",
+      description: "Zes methoden uitgewerkt, elk met een concreet voorbeeld.",
     },
   ],
 };

@@ -13,7 +13,7 @@ import {
 import { bookStudyId } from "../../../lib/bookStudies";
 import { ContentShell, RelatedLinks } from "../../../components/content/ContentShell";
 import { JsonLd } from "../../../components/seo/JsonLd";
-import { absoluteUrl } from "../../../lib/seo/constants";
+import { absoluteUrl, SITE_NAME } from "../../../lib/seo/constants";
 import {
   graph,
   webPageNode,
@@ -34,6 +34,11 @@ export function generateStaticParams() {
   return BIBLE_BOOKS.map(book => ({ slug: book.slug }));
 }
 
+function bookTitle(name: string): string {
+  const full = `${name}: samenvatting, schrijver en uitleg`;
+  return `${SITE_NAME} | ${full}`.length <= 60 ? full : `${name}: samenvatting en uitleg`;
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const book = getBibleBook(slug);
@@ -46,8 +51,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   return buildMetadata({
     // Title leads with the book name because that is the query, then adds the
-    // two things people search alongside it.
-    title: `${book.name}: samenvatting, schrijver en uitleg`,
+    // two things people search alongside it. Long names (Deuteronomium,
+    // 1 Thessalonicenzen) drop "schrijver" so the whole title, brand included,
+    // stays within the ~60 characters Google shows.
+    title: bookTitle(book.name),
     description: book.blurb,
     path: `/bijbelboeken/${book.slug}`,
     type: "article",

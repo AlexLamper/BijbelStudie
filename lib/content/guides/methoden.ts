@@ -183,5 +183,15 @@ export const GUIDE_METHODS: Guide = {
       label: "Begeleide studies",
       description: "Tien studies waarin deze methoden al zijn uitgewerkt.",
     },
+    {
+      href: "/bijbelstudie/online",
+      label: "Online bijbelstudie",
+      description: "Wat digitaal beter kan dan op papier - en wat niet.",
+    },
+    {
+      href: "/bijbelstudie/gratis",
+      label: "Gratis bijbelstudie",
+      description: "Alle gratis Nederlandse bronnen op een rij.",
+    },
   ],
 };

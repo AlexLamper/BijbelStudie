@@ -439,6 +439,21 @@ export default function StudiesBrowser() {
             <span className="text-[12px] text-ink-faint">
               {visibleRows.length} van {rows.length} getoond
             </span>
+            {/* The rows behind "Meer tonen", as plain links in the HTML.
+                Crawlers do not press buttons, and the catalogue opens on the
+                66 book studies - so without these the authored studies at
+                the end had no followable link anywhere on the site. `hidden`
+                keeps them out of sight and out of the accessibility tree:
+                the button above is how a person reaches them. */}
+            <ul hidden>
+              {rows.slice(visibleRows.length).map(entry => (
+                <li key={entry.study.id}>
+                  <Link href={`/studies/${entry.study.id}`} prefetch={false}>
+                    {entry.study.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
 

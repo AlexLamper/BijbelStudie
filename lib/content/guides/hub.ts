@@ -228,7 +228,7 @@ export const GUIDE_HUB: Guide = {
     {
       href: "/studies",
       label: "Begeleide studies",
-      description: "Tien uitgewerkte studies om direct mee te beginnen.",
+      description: "Uitgewerkte studies over personen, thema's en bijbelboeken.",
     },
   ],
 };

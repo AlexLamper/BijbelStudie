@@ -161,5 +161,15 @@ export const GUIDE_ONLINE: Guide = {
       label: "De 66 bijbelboeken",
       description: "Achtergrond en hoofdlijn per bijbelboek.",
     },
+    {
+      href: "/bijbelstudie/methoden",
+      label: "Bijbelstudie methoden",
+      description: "Zes methoden uitgewerkt, elk met een concreet voorbeeld.",
+    },
+    {
+      href: "/bijbelstudie/beginnen",
+      label: "Bijbelstudie voor beginners",
+      description: "Een stappenplan van dertig dagen naar een vaste gewoonte.",
+    },
   ],
 };

@@ -235,5 +235,10 @@ export const GUIDE_START: Guide = {
       label: "Het boek Markus",
       description: "Achtergrond en hoofdlijn van het boek waar je mee begint.",
     },
+    {
+      href: "/bijbelstudie/online",
+      label: "Online bijbelstudie",
+      description: "Wat digitaal beter kan dan op papier - en wat niet.",
+    },
   ],
 };
