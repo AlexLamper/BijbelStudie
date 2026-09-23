@@ -6,21 +6,36 @@
  *
  *   npm run seo-audit                                  www.bijbelstudie.io
  *   npm run seo-audit -- --base https://<preview>.vercel.app
+ *   npm run seo-audit -- --targets <Search Console export>.csv
  *
  * Per URL: status and redirects, X-Robots-Tag, meta robots, canonical (must be
  * the URL itself), title and description length, number of <h1>, words of
  * text in the HTML, how many sitemap pages link to it, JSON-LD that does not
- * parse. Site-wide: duplicate titles and descriptions, and crawlable pages
- * that are linked but missing from the sitemap.
+ * parse. Site-wide: duplicate titles and descriptions, crawlable pages that
+ * are linked but missing from the sitemap, and time to first byte per page
+ * type together with whether Vercel served it from the cache (prerendered) or
+ * rendered it for this request.
+ *
+ * --targets takes a Search Console table export (first column the URL, e.g.
+ * "Gevonden - momenteel niet geindexeerd") and prints, for each URL in it,
+ * whether it is still in the sitemap and which sitemap pages link to it. That
+ * is the report to read when Google knows a URL but will not crawl it: a page
+ * nothing links to gets the lowest crawl priority there is.
  *
  * Only raw HTML is inspected. Googlebot also renders JavaScript, so a page
  * that fills in client-side can look thinner here than it is - but links
  * behind a button stay invisible to both.
  */
 
+import { readFileSync } from "node:fs";
+
 const args = process.argv.slice(2);
-const baseArg = args.indexOf("--base");
-const BASE = (baseArg >= 0 ? args[baseArg + 1] : "https://www.bijbelstudie.io").replace(/\/$/, "");
+const argValue = name => {
+  const i = args.indexOf(name);
+  return i >= 0 ? args[i + 1] : undefined;
+};
+const BASE = (argValue("--base") ?? "https://www.bijbelstudie.io").replace(/\/$/, "");
+const TARGETS = argValue("--targets");
 const HOST = new URL(BASE).host;
 const UA =
   "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)";
@@ -58,6 +73,8 @@ async function main() {
   const urls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1].trim().replace(/^https:\/\/www\.bijbelstudie\.io/, BASE));
   const results = [];
   const inlinks = new Map();
+  /** target URL -> the sitemap pages that link to it */
+  const sources = new Map();
   const linkedNotInSitemap = new Map();
 
   async function audit(url) {
@@ -88,6 +105,8 @@ async function main() {
     }
     for (const target of own) {
       inlinks.set(target, (inlinks.get(target) ?? 0) + 1);
+      if (!sources.has(target)) sources.set(target, []);
+      sources.get(target).push(url.slice(BASE.length) || "/");
       const path = new URL(target).pathname;
       if (!urls.includes(target) && !blocked(path) && !/\.[a-z0-9]+$/i.test(path)) {
         linkedNotInSitemap.set(target, (linkedNotInSitemap.get(target) ?? 0) + 1);
@@ -97,6 +116,10 @@ async function main() {
     results.push({
       url, status: res.status, location: res.headers.get("location"), xRobots: res.headers.get("x-robots-tag"),
       ms, robots, canonical: canonicalTag ? attr(canonicalTag, "href") : null, title, description, h1, words, badJsonLd,
+      // HIT / STALE / PRERENDER = served from Vercel's cache; MISS together
+      // with `private, no-store` = rendered in a function for this request.
+      cache: res.headers.get("x-vercel-cache") ?? "-",
+      dynamic: /no-store|private/i.test(res.headers.get("cache-control") ?? ""),
     });
   }
 
@@ -147,6 +170,40 @@ async function main() {
     console.log(`\nGelinkt en crawlbaar, maar niet in de sitemap (noindex-pagina's horen hier ook bij):`);
     for (const [url, count] of [...linkedNotInSitemap].sort((a, b) => b[1] - a[1]).slice(0, 40)) {
       console.log(`  ${count}x ${url.slice(BASE.length)}`);
+    }
+  }
+
+  // Grouped by route rather than by URL: every page of one route shares its
+  // rendering mode, so one slow group is one fix.
+  const groups = new Map();
+  for (const r of results.filter(r => r.status === 200)) {
+    const segments = new URL(r.url).pathname.split("/").filter(Boolean);
+    const key = segments.length === 0 ? "/" : segments.length === 1 ? `/${segments[0]}` : `/${segments[0]}/[..]`;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(r);
+  }
+  console.log(`\nTijd tot eerste byte per paginatype (mediaan / max, cache, gerenderd):`);
+  for (const [key, rows] of [...groups].sort((a, b) => a[0].localeCompare(b[0]))) {
+    const ms = rows.map(r => r.ms).sort((a, b) => a - b);
+    const caches = [...new Set(rows.map(r => r.cache))].join("/");
+    const dynamicCount = rows.filter(r => r.dynamic).length;
+    const mode = dynamicCount === 0 ? "statisch" : dynamicCount === rows.length ? "per request" : `${dynamicCount}/${rows.length} per request`;
+    console.log(`  ${key.padEnd(24)} ${String(rows.length).padStart(3)}x  ${String(ms[Math.floor(ms.length / 2)]).padStart(5)} / ${String(ms[ms.length - 1]).padStart(5)} ms  ${caches.padEnd(10)} ${mode}`);
+  }
+
+  if (TARGETS) {
+    const inSitemap = new Set(urls);
+    const targets = readFileSync(TARGETS, "utf8")
+      .split(/\r?\n/)
+      .map(line => line.split(",")[0].trim().replace(/^"|"$/g, ""))
+      .filter(cell => /^https?:\/\//.test(cell))
+      .map(cell => cell.replace(/^https:\/\/www\.bijbelstudie\.io/, BASE).replace(/\/$/, ""));
+    console.log(`\nInterne links naar ${targets.length} URL's uit ${TARGETS} (bron: sitemap-pagina's):`);
+    for (const target of targets) {
+      const from = sources.get(target) ?? [];
+      const listed = inSitemap.has(target) ? "" : "  [niet in sitemap]";
+      const shown = from.length > 6 ? `${from.slice(0, 6).join(", ")}, +${from.length - 6}` : from.join(", ");
+      console.log(`  ${String(from.length).padStart(3)}  ${target.slice(BASE.length)}${listed}${from.length ? `  <- ${shown}` : ""}`);
     }
   }
   if (results.some(r => r.status !== 200)) process.exitCode = 1;

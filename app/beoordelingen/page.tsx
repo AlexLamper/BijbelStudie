@@ -50,6 +50,9 @@ import { getPublicTestimonials, type PublicTestimonial } from "../../lib/testimo
  */
 export const metadata: Metadata = generatePageMetadata("reviews");
 
+// Both lines are needed: `revalidate` alone does not keep the page static,
+// because the root layout reads cookies (see app/page.tsx).
+export const dynamic = "force-static";
 export const revalidate = 3600;
 
 /** Cards are a selection; the number above them is not. */

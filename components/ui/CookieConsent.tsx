@@ -9,6 +9,11 @@ import { useCookieConsent } from "../../hooks/useCookieConsent";
 /**
  * Cookiebanner.
  *
+ * KEEP THE TEXT SHORT. The banner mounts on the client, and a long paragraph
+ * made it the largest element on every page - so Largest Contentful Paint was
+ * measured on the banner, seconds after the page itself had painted. Two
+ * lines, the details on /privacybeleid#cookies.
+ *
  * WHAT IT ASKS AND WHAT IT DOES NOT. The login/session cookies, the language
  * cookie and whatever Stripe sets during a running checkout are strictly
  * necessary and are never gated - asking about them would be theatre, and
@@ -67,10 +72,8 @@ export default function CookieConsent() {
         <div className="min-w-0">
           <h2 className="text-[15px] font-bold leading-6 text-ink">Cookies</h2>
           <p className="mt-1 text-[14px] leading-6 text-ink-body">
-            Noodzakelijke cookies gebruiken we altijd: ze houden je ingelogd, beveiligen het inloggen en
-            maken betalen via Stripe mogelijk. Daarnaast meten we graag hoe BijbelStudie gebruikt wordt, met
-            onze eigen statistieken en met Google Analytics, om de website te verbeteren. Dat doen we alleen
-            als je daarmee akkoord gaat. We gebruiken geen advertentiecookies.{" "}
+            Noodzakelijke cookies gebruiken we altijd. Met je toestemming meten we ook hoe de website wordt
+            gebruikt, met onze eigen statistieken en Google Analytics. Geen advertentiecookies.{" "}
             <Link href="/privacybeleid#cookies" className="font-semibold underline underline-offset-2" style={{ color: TEAL }}>
               Meer informatie
             </Link>

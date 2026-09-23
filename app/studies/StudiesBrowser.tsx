@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Search, Check } from 'lucide-react'
 import type { CuratedStudy } from '../../lib/data/curated-studies'
-import { CATALOGUE_ENTRIES } from '../../lib/bookStudies'
+import { CATALOGUE_ENTRIES, isBookStudyId } from '../../lib/bookStudies'
 import { Card, Chip } from '../../components/kit/primitives'
 import StudyArtwork from './StudyArtwork'
 import ChapterStudyPicker from '../../components/study/ChapterStudyPicker'
@@ -444,9 +444,12 @@ export default function StudiesBrowser() {
                 66 book studies - so without these the authored studies at
                 the end had no followable link anywhere on the site. `hidden`
                 keeps them out of sight and out of the accessibility tree:
-                the button above is how a person reaches them. */}
+                the button above is how a person reaches them.
+                Only the indexable studies: the generated book studies
+                (boek-<slug>) are noindex, and fifty links to pages Google may
+                not index only spend its crawl on renders that lead nowhere. */}
             <ul hidden>
-              {rows.slice(visibleRows.length).map(entry => (
+              {rows.slice(visibleRows.length).filter(entry => !isBookStudyId(entry.study.id)).map(entry => (
                 <li key={entry.study.id}>
                   <Link href={`/studies/${entry.study.id}`} prefetch={false}>
                     {entry.study.title}
@@ -456,6 +459,20 @@ export default function StudiesBrowser() {
             </ul>
           </div>
         )}
+
+        {/* Most of this catalogue is one study per bible book; the book's
+            own introduction is the natural step before starting one. */}
+        <p className="pt-1 text-[13px] leading-relaxed text-ink-muted">
+          Eerst weten waar een boek over gaat, wie het schreef en hoe het is opgebouwd? Lees de{' '}
+          <Link
+            href="/bijbelboeken"
+            prefetch={false}
+            className="font-semibold text-teal-dark no-underline hover:underline dark:text-teal-400"
+          >
+            inleiding per bijbelboek
+          </Link>
+          .
+        </p>
 
         <p className="mt-2 text-[12px] leading-relaxed text-ink-faint md:hidden">
           {startedCount} {startedCount === 1 ? 'studie' : 'studies'} begonnen, {completedCount} afgerond van de {ENTRIES.length}.

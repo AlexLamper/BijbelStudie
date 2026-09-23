@@ -20,7 +20,15 @@ const nextConfig: NextConfig = {
       { source: "/study",                 destination: "/studie",                  permanent: true },
       { source: "/study/:path*",          destination: "/studie/:path*",           permanent: true },
       { source: "/read",                  destination: "/lezen",                   permanent: true },
-      { source: "/read/:path*",           destination: "/lezen/:path*",            permanent: true },
+      // /lezen has no sub-routes (the book and chapter live in the query), so
+      // the old /read/<...> paths land on the reader itself, not on a 404.
+      { source: "/read/:path*",           destination: "/lezen",                   permanent: true },
+      // Locale-prefixed URLs from the bilingual era. The site is Dutch-only and
+      // there is no /nl or /en route to shadow.
+      { source: "/nl",                    destination: "/",                        permanent: true },
+      { source: "/nl/:path*",             destination: "/:path*",                  permanent: true },
+      { source: "/en",                    destination: "/",                        permanent: true },
+      { source: "/en/:path*",             destination: "/:path*",                  permanent: true },
       // /leesplannen was removed with the reading-plans feature, so these two
       // permanent redirects pointed at a 404 - exactly the failure the note
       // above warns about. Guided studies are what replaced them.
@@ -37,6 +45,11 @@ const nextConfig: NextConfig = {
       { source: "/hulpbronnen/:path*",    destination: "/bijbelstudie/gratis",     permanent: true },
       { source: "/resources",             destination: "/bijbelstudie/gratis",     permanent: true },
       { source: "/resources/:path*",      destination: "/bijbelstudie/gratis",     permanent: true },
+      // Only /bijbel/<boek>/<hoofdstuk> is a page (app/bijbel/[slug]/[chapter]).
+      // The two shorter URLs a reader might type or trim to go to the book
+      // overview; a single-segment :slug cannot match a chapter URL.
+      { source: "/bijbel",                destination: "/bijbelboeken",            permanent: true },
+      { source: "/bijbel/:slug",          destination: "/bijbelboeken/:slug",      permanent: true },
       { source: "/profile",               destination: "/profiel",                 permanent: true },
       { source: "/settings",              destination: "/instellingen",            permanent: true },
       { source: "/subscribe",             destination: "/abonnement",              permanent: true },

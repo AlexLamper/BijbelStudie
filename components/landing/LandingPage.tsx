@@ -15,6 +15,7 @@ import StudyFlowDemo, { type DemoLesson } from "./StudyFlowDemo"
 import { renderTreeSvg } from "../../lib/levensboom/svg"
 import { LP_THEME_VARS } from "./studyLandingShared"
 import { PLANS, euro } from "../../lib/pricing"
+import { getBibleBook } from "../../lib/content/bibleBooks"
 import { PromoBanner } from "./PromoBanner"
 import { HeroVisual } from "./HeroVisual"
 import { HeroMobileCard } from "./HeroMobileCard"
@@ -87,6 +88,24 @@ const SECTION_Y = "py-[clamp(3.5rem,6vw,6.5rem)]"
  * sections instead of merging into one long block.
  */
 const EDGE = { borderTop: `1px solid ${T.border}` }
+
+/**
+ * A link inside running copy: the teal text colour, underlined. No prefetch -
+ * next/link prefetches every link that scrolls into view, and each of these is
+ * a page most visitors never open; prefetching it would still cost a render.
+ */
+function InlineLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <Link
+      href={href}
+      prefetch={false}
+      className="font-semibold underline underline-offset-2"
+      style={{ color: T.tealText }}
+    >
+      {children}
+    </Link>
+  )
+}
 
 /* ─── Reusable animation primitives ─────────────────────────── */
 /**
@@ -379,6 +398,15 @@ const TRANSLATIONS = [
 ]
 const ENGLISH_TRANSLATIONS = 5
 
+/**
+ * Named in the library's closing line as examples of a book introduction. Read
+ * from the dataset, so the names are spelled the way the pages spell them and
+ * a slug that ever stops existing drops out instead of linking to a 404.
+ */
+const LIBRARY_BOOKS = ["genesis", "psalmen", "jesaja", "johannes", "romeinen"].flatMap(
+  (slug) => getBibleBook(slug) ?? [],
+)
+
 /** `free` is not rendered per row - four access badges next to eight names was
  *  more furniture than information - but it is what the group's closing line
  *  says out loud, so it stays here as the source of that claim. */
@@ -449,7 +477,7 @@ function BibleLibrary() {
         <SectionHeader
           label="Bibliotheek"
           title="Vertalingen en commentaren op één plek"
-          subtitle="Vier Nederlandse vertalingen naast elkaar, en bij elk vers de uitleg van vier commentaren."
+          subtitle="Vier Nederlandse vertalingen, en bij elk vers de uitleg van vier commentaren."
         />
 
         <FadeUp className="mx-auto max-w-4xl">
@@ -468,6 +496,32 @@ function BibleLibrary() {
               footnote="KingComments is voor iedereen gratis en volledig te lezen; de overige drie horen bij Pro."
             />
           </div>
+
+          {/* The third thing in the library, and the one a visitor can read
+              right now without an account: an introduction per book. */}
+          <p className="mx-auto mt-8 max-w-2xl text-center text-sm leading-relaxed text-pretty" style={{ color: T.muted }}>
+            En bij elk van de <InlineLink href="/bijbelboeken">66 bijbelboeken</InlineLink> een
+            inleiding met schrijver, ontstaanstijd, thema en hoofdlijn, zoals bij{" "}
+            {LIBRARY_BOOKS.map((book, i) => (
+              <span key={book.slug}>
+                {i > 0 && (i === LIBRARY_BOOKS.length - 1 ? " en " : ", ")}
+                <InlineLink href={`/bijbelboeken/${book.slug}`}>{book.name}</InlineLink>
+              </span>
+            ))}
+            .
+          </p>
+
+          {/* Anchors for what the homepage already appears for in search
+              ("bijbel met uitleg online", "wat zegt de bijbel", "bijbelstudie met
+              vragen en antwoorden"), pointing at the pages written for them. */}
+          <p className="mx-auto mt-4 max-w-2xl text-center text-sm leading-relaxed text-pretty" style={{ color: T.muted }}>
+            Lees ook hoe je de <InlineLink href="/bijbelstudie/bijbel-met-uitleg">Bijbel met uitleg</InlineLink> leest,
+            hoe een <InlineLink href="/bijbelstudie/vragen-en-antwoorden">bijbelstudie met vragen en antwoorden</InlineLink> werkt,
+            en <InlineLink href="/bijbel-over">wat de Bijbel zegt</InlineLink> over onderwerpen als{" "}
+            <InlineLink href="/bijbel-over/angst">angst</InlineLink>,{" "}
+            <InlineLink href="/bijbel-over/vergeving">vergeving</InlineLink> en{" "}
+            <InlineLink href="/bijbel-over/rouw">rouw</InlineLink>.
+          </p>
 
           <p className="mt-8 text-center">
             <Link
@@ -589,6 +643,14 @@ function StudyFlowSection() {
         <FadeUp>
           <StudyFlowDemo lesson={demoLesson()} />
         </FadeUp>
+        <FadeUp className="mx-auto mt-8 max-w-2xl text-center">
+          <p className="text-sm leading-relaxed text-pretty" style={{ color: T.muted }}>
+            De stappen volgen de volgorde van elke goede bijbelstudie: eerst waarnemen, dan
+            uitleggen, dan toepassen. Meer daarover in de{" "}
+            <InlineLink href="/bijbelstudie">gids over bijbelstudie</InlineLink> en bij de{" "}
+            <InlineLink href="/bijbelstudie/methoden">zes bijbelstudiemethoden</InlineLink>.
+          </p>
+        </FadeUp>
       </div>
     </section>
   )
@@ -616,13 +678,14 @@ function Pricing() {
     "Bijbel lezen (vier Nederlandse vertalingen)",
     "KingComments commentaar, volledig",
     "5 vragen per dag aan de AI-assistent",
-    "Persoonlijke notities bij verzen",
+    "Markeringen, en notities bij verzen (7 op de website, onbeperkt in de app)",
     "Historische context per hoofdstuk",
     "Voortgang bijhouden",
   ]
   const pro = [
     "Alles in het gratis plan",
     "200 AI-vragen per dag, i.p.v. 5",
+    "Onbeperkt notities op de website",
     "Matthew Henry commentaar (NL)",
     "Calvijn en Dachsel",
     "Grondtekst: Hebreeuws en Grieks",
@@ -718,6 +781,13 @@ function Pricing() {
               </div>
             </FadeUp>
           </div>
+
+          <FadeUp className="mt-8 text-center">
+            <p className="text-sm leading-relaxed text-pretty" style={{ color: T.muted }}>
+              Wat u zonder abonnement kunt gebruiken, hier en elders, staat op een rij in{" "}
+              <InlineLink href="/bijbelstudie/gratis">gratis bijbelstudie</InlineLink>.
+            </p>
+          </FadeUp>
         </div>
       </div>
     </section>
@@ -755,10 +825,9 @@ function FAQ() {
           </FadeUp>
           <FadeUp className="mt-6 text-center">
             <p className="text-sm" style={{ color: T.muted }}>
-              Staat uw vraag er niet bij?{" "}
-              <Link href="/contact" className="font-semibold underline underline-offset-2" style={{ color: T.tealText }}>
-                Neem contact op
-              </Link>
+              Staat uw vraag er niet bij? Kijk in het{" "}
+              <InlineLink href="/help">helpcentrum</InlineLink> of{" "}
+              <InlineLink href="/contact">neem contact op</InlineLink>.
             </p>
           </FadeUp>
         </div>

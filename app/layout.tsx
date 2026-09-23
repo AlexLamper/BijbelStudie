@@ -203,8 +203,9 @@ export default async function RootLayout({
   return (
     <html lang="nl" suppressHydrationWarning>
       <head>
-        <meta charSet="UTF-8" />
-        <link rel="icon" href="/images/favicon.ico" sizes="any" />
+        {/* No <meta charSet> or icon <link> here: Next already emits the
+            charset, and `metadata.icons` above emits every icon - a second
+            copy of each was duplicated in the head. */}
         {/* No preconnect to fonts.googleapis.com / fonts.gstatic.com: the three
             faces above come from next/font/google, which downloads them at
             build time and serves them from this origin. Those hosts are never

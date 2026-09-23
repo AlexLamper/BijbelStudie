@@ -109,3 +109,6 @@ STUDY_FLOW_SETUP.md
 
 # cross-reference build inputs (OpenBible + TVTMS, downloaded by hand)
 scripts/.cache/
+
+# Search Console exports (URL lists from GSC) - local working files, never committed.
+/seo-exports/

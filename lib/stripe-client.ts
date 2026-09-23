@@ -1,4 +1,8 @@
-import { loadStripe, Stripe } from "@stripe/stripe-js";
+// `/pure`: the plain entry point injects Stripe.js (~1 MB) the moment this
+// module is imported, i.e. on every /abonnement view. `/pure` waits for
+// loadStripe(), which only runs when a checkout starts.
+import { loadStripe } from "@stripe/stripe-js/pure";
+import type { Stripe } from "@stripe/stripe-js";
 
 let stripePromise: Promise<Stripe | null> | null = null;
 

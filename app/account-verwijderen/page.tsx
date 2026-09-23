@@ -13,6 +13,9 @@ import { PublicFrame } from "../../components/content/PublicFrame";
  */
 export const metadata: Metadata = generatePageMetadata("accountDeletion");
 
+/** Prerendered: the text is the same for everyone. See app/bijbelstudie/[slug]/page.tsx. */
+export const dynamic = "force-static";
+
 const SUPPORT_EMAIL = "info@bijbelstudie.io";
 const MAILTO =
   `mailto:${SUPPORT_EMAIL}` +

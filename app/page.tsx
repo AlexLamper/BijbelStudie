@@ -80,11 +80,20 @@ export const metadata: Metadata = {
  * Built once, then rebuilt at most once an hour. The hero's trust row now
  * shows the real App Store average, which lives in MongoDB, so the HTML is no
  * longer identical forever - but it still must not cost a query per visitor.
- * `revalidate` replaces the old `dynamic = "force-static"`, which pins
- * revalidate to false and would have frozen the rating at whatever it was on
- * deploy day. Nothing in the landing tree reads cookies, headers or
- * searchParams, so the page still prerenders rather than going dynamic.
+ *
+ * Both lines are needed. `revalidate` alone is NOT enough to stay static:
+ * nothing in the landing tree reads cookies, but the root layout does - it
+ * calls getServerSession() - and a route whose render reads the request is
+ * rendered per request, try/catch or not. That is visible on the live site:
+ * /bijbelboeken/[slug] has generateStaticParams but no `force-static`, and
+ * every one of those pages is served `private, no-store`, rendered in a
+ * function. Here that would mean a render AND a MongoDB query per visit.
+ * `force-static` makes the layout's session read return nothing (the page is
+ * the same for everyone - middleware already sends a signed-in visitor on to
+ * /dashboard), and the explicit `revalidate` keeps the hourly rebuild, so the
+ * rating is not frozen at deploy day.
  */
+export const dynamic = "force-static"
 export const revalidate = 3600
 
 export default async function Page() {

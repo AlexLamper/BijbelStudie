@@ -10,7 +10,7 @@ import StudyProgress from '../../../models/StudyProgress.js';
 import { buildMetadata } from '../../../lib/pageMetadata';
 import { getVersions } from '../../../lib/local-data';
 import { estimateStudyMinutes, formatStudyMinutes } from '../../../lib/studyFlow';
-import { isBookStudyId } from '../../../lib/bookStudies';
+import { BOOK_STUDY_PREFIX, isBookStudyId } from '../../../lib/bookStudies';
 import { findStudy, getEnrollment } from '../../../lib/studyEnrollmentService';
 import AppShell from '../../../components/shell/AppShell';
 import { Card } from '../../../components/kit/primitives';
@@ -427,6 +427,24 @@ export default async function StudyDetailPage({ params }: PageProps) {
                 <AboutRow label="Lessen" value={`${lessonsTotal}`} />
                 <AboutRow label="Tijd per les" value={`± ${study.lessons[0]?.estimatedMinutes ?? 12} min`} last />
               </Card>
+
+              {/* A generated book study points back to the book's own page,
+                  which carries the introduction this page deliberately does
+                  not repeat (see lib/bookStudies.ts). */}
+              {isBookStudyId(study.id) && (
+                <Card className="flex-none p-[18px]">
+                  <h2 className="text-[14.5px] font-bold text-ink">Over {study.title}</h2>
+                  <p className="mt-2 text-[13px] leading-relaxed text-ink-muted">
+                    Waar het boek over gaat, wie het schreef, wanneer, en hoe het is opgebouwd.
+                  </p>
+                  <Link
+                    href={`/bijbelboeken/${study.id.slice(BOOK_STUDY_PREFIX.length)}`}
+                    className="mt-3 inline-flex text-[13.5px] font-semibold text-teal no-underline hover:text-teal-dark dark:text-teal-400"
+                  >
+                    Lees de inleiding op {study.title} ›
+                  </Link>
+                </Card>
+              )}
 
               {/* Where to go next. Also the only links between the authored
                   studies that a crawler can follow: on /studies they sit

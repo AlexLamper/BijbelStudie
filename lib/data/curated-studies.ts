@@ -87,7 +87,7 @@ export const curatedStudies: CuratedStudy[] = [
     ],
     outcomes: [
       'Je kent de verslagen van het lege graf en de verschijningen in Johannes 20',
-      'Je begrijpt waarom de belijdenis van Thomas, "Mijn Heer en mijn God", een hoogtepunt van het evangelie is',
+      'Je begrijpt waarom de belijdenis van Thomas, "Mijn Heere en mijn God!", een hoogtepunt van het evangelie is',
       'Je ziet hoe Petrus de opstanding verbindt met Psalm 16 en de belofte aan David',
       'Je kunt uitleggen wat de opstanding betekent voor twijfel, hoop en getuigenis',
     ],
@@ -315,7 +315,7 @@ export const curatedStudies: CuratedStudy[] = [
     startVersion: 'statenvertaling',
     image: photo('paulus'),
     about: [
-      'Saulus van Tarsus reist naar Damascus met brieven om volgelingen van Jezus gevangen te nemen. Onderweg omschijnt hem een licht uit de hemel en hoort hij een stem: "Saul, Saul, wat vervolgt gij Mij?" De vervolger wordt de apostel die het evangelie tot ver buiten Israël brengt.',
+      'Saulus van Tarsus reist naar Damascus met brieven om volgelingen van Jezus gevangen te nemen. Onderweg omschijnt hem een licht uit de hemel en hoort hij een stem: "Saul, Saul! wat vervolgt gij Mij?" De vervolger wordt de apostel die het evangelie tot ver buiten Israël brengt.',
       'Je volgt hem in zes lessen: zijn bekering, zijn toespraak op de Areopagus in Athene, twee hoofdstukken uit de brief die hij vanuit gevangenschap aan de Filippenzen schreef, het slot van Romeinen 8 en zijn laatste brief aan Timotheüs, geschreven met het einde in zicht.',
     ],
     outcomes: [

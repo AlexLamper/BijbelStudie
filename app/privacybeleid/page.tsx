@@ -17,6 +17,9 @@ import CookieSettingsButton from "../../components/ui/CookieSettingsButton";
  */
 export const metadata: Metadata = generatePageMetadata("privacyPolicy");
 
+/** Prerendered: the text is the same for everyone. See app/bijbelstudie/[slug]/page.tsx. */
+export const dynamic = "force-static";
+
 const LAST_UPDATED = "23 september 2026";
 const SUPPORT_EMAIL = "info@bijbelstudie.io";
 
