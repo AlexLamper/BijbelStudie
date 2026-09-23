@@ -1,7 +1,7 @@
 'use client';
 
 import React, { forwardRef } from 'react';
-import { Link2 } from 'lucide-react';
+import { ArrowLeftRight } from 'lucide-react';
 
 import { cn } from '../../../lib/utils';
 import { useCrossRefCopy } from './copy';
@@ -43,12 +43,12 @@ const CrossRefButton = forwardRef<
       className={cn(
         'inline-flex items-center justify-center rounded-md border p-1.5 shadow-field transition-colors',
         open
-          ? 'border-teal bg-[var(--teal-wash)] text-teal-dark dark:text-teal-400'
-          : 'border-line bg-surface text-gray-500 hover:bg-[rgba(13,148,136,0.08)] hover:text-[#0D9488] dark:text-muted-foreground dark:hover:text-teal-400',
+          ? 'border-teal bg-teal-dark text-white'
+          : 'border-line bg-surface text-gray-500 hover:border-teal-dark hover:bg-teal-dark hover:text-white dark:text-muted-foreground',
         className,
       )}
     >
-      <Link2 className="h-3.5 w-3.5" aria-hidden />
+      <ArrowLeftRight className="h-3.5 w-3.5" aria-hidden />
     </button>
   );
 });

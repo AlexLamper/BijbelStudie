@@ -139,7 +139,7 @@ export default function BibleSelector({
           </optgroup>
         )}
         {nt.length > 0 && (
-          <optgroup label="Nieuwe Testament">
+          <optgroup label="Nieuwe Testament" style={{ marginTop: '10px' }}>
             {nt.map(b => <option key={b} value={b}>{b}</option>)}
           </optgroup>
         )}

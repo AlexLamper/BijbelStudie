@@ -397,7 +397,7 @@ const TRANSLATIONS = [
   { name: "De Heilige Schrift", year: "1917", note: "De eerste NBG-vertaling, in de taal van haar tijd" },
   { name: "Canisiusbijbel",     year: "1939", note: "Rooms-katholieke vertaling met deuterocanonieke boeken" },
 ]
-const ENGLISH_TRANSLATIONS = 5
+const ENGLISH_TRANSLATIONS = 6
 
 /**
  * Named in the library's closing line as examples of a book introduction. Read

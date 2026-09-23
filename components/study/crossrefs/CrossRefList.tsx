@@ -36,7 +36,7 @@ export type CrossRefNavigateTarget = {
 };
 
 /** How many rows before "Toon alle …" (CROSS_LINKS_PLAN.md §4.2). */
-const DEFAULT_VISIBLE = 8;
+const DEFAULT_VISIBLE = 5;
 /** A range shows at most this many verses; a longer one ends in an ellipsis. */
 const MAX_RANGE_VERSES = 5;
 /** Characters of preview in a collapsed row. */

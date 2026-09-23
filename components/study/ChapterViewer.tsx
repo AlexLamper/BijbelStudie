@@ -1,14 +1,16 @@
 ﻿import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { AlertCircle, ArrowRight, Plus } from 'lucide-react';
+import { AlertCircle, ArrowRight, Languages, Plus } from 'lucide-react';
 import { SkeletonChapter } from '../ui/skeletons';
 import { CreateNoteModal } from './CreateNoteModal';
 import { ReadingPreferences } from '../../hooks/useReadingPreferences';
 import { HIGHLIGHT_TINTS, type AnnotationMap } from '../../hooks/useVerseAnnotations';
 import { useCrossRefs } from '../../hooks/useCrossRefs';
+import { useIsPro } from '../../hooks/useIsPro';
 import { cn } from '../../lib/utils';
 import { getBibleAttribution } from '../../lib/bible-attribution';
 import { toBookIndex } from '../../lib/readChaptersCanon';
+import { openProOffer } from '../../lib/proOffer';
 import SpeakButton from './SpeakButton';
 import { SpokenText } from './SpokenText';
 import VerseMarkers from './VerseMarkers';
@@ -16,6 +18,7 @@ import CrossRefButton from './crossrefs/CrossRefButton';
 import CrossRefPanel from './crossrefs/CrossRefPanel';
 import type { CrossRefNavigateTarget } from './crossrefs/CrossRefList';
 import { useCrossRefCopy } from './crossrefs/copy';
+import OriginalVersePanel from './flow/OriginalVersePanel';
 
 type Props = {
   version: string | null;
@@ -94,6 +97,20 @@ export default function ChapterViewer({
   const [revealedVerse, setRevealedVerse] = useState<number | null>(null);
   const crossRefButtons = useRef(new Map<number, HTMLButtonElement | null>());
   const crossRefCopy = useCrossRefCopy();
+  /** The verse whose grondtekst is open under it, or null. One at a time. */
+  const [originalVerse, setOriginalVerse] = useState<number | null>(null);
+  const isPro = useIsPro();
+  const toggleOriginal = (verse: number) => {
+    if (!isPro) {
+      openProOffer({
+        surface: 'original_tap',
+        reason:
+          'Met Pro zie je bij elk vers het Hebreeuws of Grieks eronder, woord voor woord, terwijl je leest.',
+      });
+      return;
+    }
+    setOriginalVerse((current) => (current === verse ? null : verse));
+  };
 
   /**
    * The chapter's cross-references. `enabled` keeps the shard fetch lazy: it is
@@ -224,6 +241,7 @@ export default function ChapterViewer({
   // both - they are anchored to a verse number that now means something else.
   useEffect(() => {
     setCrossRefVerse(null);
+    setOriginalVerse(null);
     setRevealedVerse(null);
     crossRefButtons.current.clear();
   }, [book, chapter, version]);
@@ -301,9 +319,11 @@ export default function ChapterViewer({
                 const tint = marks?.highlight ? HIGHLIGHT_TINTS[marks.highlight] : null;
                 const isFocused = focusVerse === vNum;
                 const crossRefsOpen = crossRefVerse === vNum;
-                const clusterRevealed = revealedVerse === vNum || crossRefsOpen;
+                const originalOpen = originalVerse === vNum;
+                const clusterRevealed = revealedVerse === vNum || crossRefsOpen || originalOpen;
                 // An IDREF, so no spaces: the book name never goes in here.
                 const crossRefPanelId = `crossrefs-verse-${verseNumber}`;
+                const originalPanelId = `lezen-grondtekst-verse-${verseNumber}`;
                 return (
                 <div
                   key={verseNumber}
@@ -320,11 +340,12 @@ export default function ChapterViewer({
                     isFocused && !isHighlighted && !tint && 'bg-[var(--teal-wash)]',
                   )}
                   onKeyDown={
-                    crossRefsOpen
+                    crossRefsOpen || originalOpen
                       ? (event) => {
                           if (event.key !== 'Escape') return;
                           event.stopPropagation();
-                          closeCrossRefs();
+                          if (crossRefsOpen) closeCrossRefs();
+                          if (originalOpen) setOriginalVerse(null);
                         }
                       : undefined
                   }
@@ -394,6 +415,22 @@ export default function ChapterViewer({
                       label={`Vers ${verseNumber} voorlezen`}
                       className="border border-line bg-surface shadow-field"
                     />
+                    <button
+                      type="button"
+                      onClick={() => toggleOriginal(vNum)}
+                      aria-expanded={isPro ? originalOpen : undefined}
+                      aria-controls={isPro ? originalPanelId : undefined}
+                      aria-label={`Grondtekst van vers ${verseNumber}`}
+                      title={isPro ? `Grondtekst van vers ${verseNumber}` : `Grondtekst van vers ${verseNumber} (Pro)`}
+                      className={cn(
+                        'inline-flex items-center justify-center rounded-md border p-1.5 shadow-field transition-colors',
+                        originalOpen
+                          ? 'border-teal bg-teal-dark text-white'
+                          : 'border-line bg-surface text-gray-500 hover:border-teal-dark hover:bg-teal-dark hover:text-white dark:text-muted-foreground',
+                      )}
+                    >
+                      <Languages className="h-3.5 w-3.5" aria-hidden />
+                    </button>
                     <CrossRefButton
                       ref={(element) => {
                         crossRefButtons.current.set(vNum, element);
@@ -418,6 +455,16 @@ export default function ChapterViewer({
 
                   {/* Inline, under the verse it belongs to - not a popover.
                       See CrossRefPanel for why. */}
+                  {originalOpen && (
+                    <OriginalVersePanel
+                      id={originalPanelId}
+                      book={book}
+                      chapter={chapter}
+                      verse={vNum}
+                      onClose={() => setOriginalVerse(null)}
+                    />
+                  )}
+
                   {crossRefsOpen && (
                     <CrossRefPanel
                       id={crossRefPanelId}

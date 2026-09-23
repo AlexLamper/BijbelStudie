@@ -345,8 +345,8 @@ export default function PassageReader({
                   className={cn(
                     'inline-flex items-center justify-center rounded-md border p-1.5 shadow-field transition-colors',
                     originalOpen
-                      ? 'border-teal bg-[var(--teal-wash)] text-teal-dark dark:text-teal-400'
-                      : 'border-line bg-surface text-gray-500 hover:bg-[rgba(13,148,136,0.08)] hover:text-[#0D9488] dark:text-muted-foreground dark:hover:text-teal-400',
+                      ? 'border-teal bg-teal-dark text-white'
+                      : 'border-line bg-surface text-gray-500 hover:border-teal-dark hover:bg-teal-dark hover:text-white dark:text-muted-foreground',
                   )}
                 >
                   <Languages className="h-3.5 w-3.5" aria-hidden />
