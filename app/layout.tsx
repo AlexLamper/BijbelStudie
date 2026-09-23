@@ -12,6 +12,7 @@ import { PrefetchProvider } from "../components/providers/prefetch-provider";
 import { StudyStyleProvider } from "../components/providers/study-style-provider";
 import { LevensboomProvider } from "../components/providers/levensboom-provider";
 import AnalyticsTracker from "../components/providers/AnalyticsTracker";
+import GoogleAnalytics from "../components/providers/GoogleAnalytics";
 import GuestProgressMigration from "../components/auth/GuestProgressMigration";
 import { JsonLd } from "../components/seo/JsonLd";
 import EnvironmentBanner from "../components/layout/EnvironmentBanner";
@@ -20,6 +21,7 @@ import { Toaster } from "../components/ui/toaster";
 import CookieConsent from "../components/ui/CookieConsent";
 import { APP_STORE_URL } from "../lib/appStore";
 import { appStoreIdFromUrl } from "../lib/mobilePlatform";
+import { appEnv } from "../lib/appEnv";
 import {
   BASE_URL,
   SITE_NAME,
@@ -279,6 +281,10 @@ export default async function RootLayout({
             once answered, and nothing inside the /studie flow - see
             components/ui/CookieConsent.tsx. */}
         <CookieConsent />
+        {/* Google Analytics, behind the same "Accepteren" and only on the live
+            site - previews and local dev would pollute the property. Nothing is
+            downloaded before consent; see lib/googleAnalytics.ts. */}
+        <GoogleAnalytics enabled={appEnv() === "production"} />
         <SpeedInsights />
       </body>
     </html>

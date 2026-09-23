@@ -12,11 +12,11 @@ import { useCookieConsent } from "../../hooks/useCookieConsent";
  * WHAT IT ASKS AND WHAT IT DOES NOT. The login/session cookies, the language
  * cookie and whatever Stripe sets during a running checkout are strictly
  * necessary and are never gated - asking about them would be theatre, and
- * turning them off would break signing in and paying. The one thing that
- * genuinely waits for an answer is our own usage statistics
- * (lib/analytics.ts), plus the `bs_seen_landing` convenience cookie. There is
- * no third-party tracker on this site, so there is nothing to build a category
- * matrix around and no fake toggles here. See lib/cookieConsent.ts.
+ * turning them off would break signing in and paying. What genuinely waits for
+ * an answer is usage measurement - our own statistics (lib/analytics.ts) and
+ * Google Analytics (lib/googleAnalytics.ts) - plus the `bs_seen_landing`
+ * convenience cookie. That is one purpose, so one question and no fake
+ * toggles. See lib/cookieConsent.ts.
  *
  * BOTH ANSWERS ARE EQUAL. "Accepteren" and "Alleen noodzakelijk" are the same
  * size, the same shape and one click each; refusing is remembered exactly as
@@ -68,9 +68,9 @@ export default function CookieConsent() {
           <h2 className="text-[15px] font-bold leading-6 text-ink">Cookies</h2>
           <p className="mt-1 text-[14px] leading-6 text-ink-body">
             Noodzakelijke cookies gebruiken we altijd: ze houden je ingelogd, beveiligen het inloggen en
-            maken betalen via Stripe mogelijk. Daarnaast houden we graag anonieme gebruiksstatistieken bij
-            om BijbelStudie te verbeteren. Die plaatsen we alleen als je daarmee akkoord gaat. We gebruiken
-            geen advertentie- of trackingcookies van derden.{" "}
+            maken betalen via Stripe mogelijk. Daarnaast meten we graag hoe BijbelStudie gebruikt wordt, met
+            onze eigen statistieken en met Google Analytics, om de website te verbeteren. Dat doen we alleen
+            als je daarmee akkoord gaat. We gebruiken geen advertentiecookies.{" "}
             <Link href="/privacybeleid#cookies" className="font-semibold underline underline-offset-2" style={{ color: TEAL }}>
               Meer informatie
             </Link>

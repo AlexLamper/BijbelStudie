@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { generatePageMetadata } from "../../lib/pageMetadata";
 import { PublicFrame } from "../../components/content/PublicFrame";
+import CookieSettingsButton from "../../components/ui/CookieSettingsButton";
 
 /**
  * Privacy policy for the website and the app (the app links here via
@@ -16,7 +17,7 @@ import { PublicFrame } from "../../components/content/PublicFrame";
  */
 export const metadata: Metadata = generatePageMetadata("privacyPolicy");
 
-const LAST_UPDATED = "20 september 2026";
+const LAST_UPDATED = "23 september 2026";
 const SUPPORT_EMAIL = "info@bijbelstudie.io";
 
 type Item = { title: string; body: string };
@@ -56,7 +57,7 @@ const DATA: Item[] = [
   },
   {
     title: "Gebruiksstatistieken",
-    body: "Op de website meten we dit alleen als je daarmee akkoord gaat in de cookiebanner. We meten zelf een beperkt aantal gebeurtenissen: welk soort pagina je opent (zonder hoofdstuk of zoekterm), klikken op bepaalde knoppen en de stappen rond een abonnement (prijzen bekeken, plan gekozen, aankoop gestart, voltooid of afgebroken). Een gebeurtenis bevat alleen vaste waarden, zoals het platform of de gekozen looptijd, en nooit vrije tekst of je IP-adres. Ben je ingelogd, dan is ze gekoppeld aan je account; op de website zonder account aan een willekeurig nummer in je browser. De laadsnelheid van de website meten we anoniem met Vercel Speed Insights.",
+    body: "Op de website meten we dit alleen als je daarmee akkoord gaat in de cookiebanner. We meten zelf een beperkt aantal gebeurtenissen: welk soort pagina je opent (zonder hoofdstuk of zoekterm), klikken op bepaalde knoppen en de stappen rond een abonnement (prijzen bekeken, plan gekozen, aankoop gestart, voltooid of afgebroken). Een gebeurtenis bevat alleen vaste waarden, zoals het platform of de gekozen looptijd, en nooit vrije tekst of je IP-adres. Ben je ingelogd, dan is ze gekoppeld aan je account; op de website zonder account aan een willekeurig nummer in je browser. De laadsnelheid van de website meten we anoniem met Vercel Speed Insights. Ga je akkoord, dan gebruiken we op de website ook Google Analytics. Dat meet welke pagina's je bekijkt en wat je daar ongeveer doet (zoals scrollen en klikken op links naar andere websites), via welke website of zoekmachine je binnenkwam, je apparaat- en browsertype, je taal en je land of regio. Het webadres sturen we mee zonder zoekopdrachten of andere gegevens erin. Google Analytics herkent je browser aan een willekeurig nummer in een cookie; we koppelen het niet aan je account en sturen geen naam, e-mailadres of account-ID mee.",
   },
   {
     title: "Technische gegevens",
@@ -88,7 +89,7 @@ const BASES: Item[] = [
   },
   {
     title: "Toestemming",
-    body: "De gebruiksstatistieken van de website, waar we in de cookiebanner toestemming voor vragen; meldingen en herinneringen op je apparaat (via de toestemming van iOS of Android), een openbaar Levensboom-profiel en contactgegevens die je vrijwillig bij feedback invult. Je kunt je toestemming altijd intrekken, bijvoorbeeld door meldingen of je openbare profiel uit te zetten, of door de opgeslagen gegevens van deze website in je browser te wissen.",
+    body: "De gebruiksstatistieken van de website, inclusief Google Analytics, waar we in de cookiebanner toestemming voor vragen; meldingen en herinneringen op je apparaat (via de toestemming van iOS of Android), een openbaar Levensboom-profiel en contactgegevens die je vrijwillig bij feedback invult. Je kunt je toestemming altijd intrekken, bijvoorbeeld door meldingen of je openbare profiel uit te zetten, of via Cookie-instellingen op de website.",
   },
   {
     title: "Wettelijke plicht",
@@ -122,6 +123,12 @@ const RECIPIENTS: Recipient[] = [
     role: "Voorlezen op de website",
     data: "De tekst die wordt voorgelezen. Geen accountgegevens",
     location: "Verenigde Staten",
+  },
+  {
+    name: "Google (Google Analytics)",
+    role: "Websitestatistieken, alleen als je daarmee akkoord gaat",
+    data: "Bekeken pagina's zonder zoekopdrachten of andere gegevens in het webadres, de herkomst van je bezoek, apparaat- en browsertype, taal en een willekeurig nummer uit een cookie. Je IP-adres gebruikt Google alleen om je land of regio te bepalen en slaat het niet op. Geen naam, e-mailadres of account-ID",
+    location: "Ierland en Verenigde Staten",
   },
   {
     name: "Resend Inc.",
@@ -171,6 +178,10 @@ const RETENTION: Item[] = [
   {
     title: "Gebruiksstatistieken",
     body: "400 dagen, daarna automatisch gewist. Verwijder je je account, dan koppelen we ze direct los.",
+  },
+  {
+    title: "Google Analytics",
+    body: "14 maanden bij Google, daarna automatisch gewist. De cookies _ga en _ga_34DVLFFCBS vervallen 2 jaar na je laatste bezoek, en we verwijderen ze direct als je je toestemming intrekt.",
   },
   {
     title: "Link om je wachtwoord te herstellen",
@@ -252,7 +263,7 @@ export default function PrivacyPolicyPage() {
         <CardTitle>In het kort</CardTitle>
         <ul className={`${bodyClass} mt-2 list-disc space-y-1 pl-5`}>
           <li>We verkopen je gegevens niet en tonen geen advertenties.</li>
-          <li>Geen advertentie- of trackingcookies en geen trackingdiensten van derden.</li>
+          <li>Geen advertentiecookies. Op de website meten we het gebruik, ook met Google Analytics, alleen als je daarmee akkoord gaat.</li>
           <li>Je vragen aan de AI-assistent gaan naar Google (Gemini) om een antwoord te maken, zonder je naam of e-mailadres.</li>
           <li>
             Je kunt je account en alle bijbehorende gegevens altijd verwijderen, in de app of via{" "}
@@ -444,17 +455,26 @@ export default function PrivacyPolicyPage() {
             nummer niet op en meten we niets.
           </li>
           <li>
+            <strong>Google Analytics</strong> (_ga en _ga_34DVLFFCBS): herkennen je browser bij een volgend bezoek,
+            zodat we bezoeken en bezoekers kunnen tellen. 2 jaar.
+          </li>
+          <li>
             <strong>Startpagina gezien</strong> (bs_seen_landing): zonder account slaan we de introductie over als je die
             al hebt gezien. 1 jaar.
           </li>
         </ul>
         <p className={`${bodyClass} mt-2`}>
-          Je keuze bewaren we in de opslag van je browser (bs-cookie-consent-v1). Wil je die wijzigen of intrekken,
-          dan wis je de opgeslagen gegevens van deze website in je browser; daarna vragen we het opnieuw. Verder
-          bewaren we in je browser instellingen zoals je gekozen commentaar en voorleesstem. Er zijn geen advertentie-
-          of trackingcookies en geen cookies van derden; Vercel Speed Insights meet de laadsnelheid anoniem en zonder
-          cookies of opslag in je browser. Wis je cookies, dan ben je uitgelogd. De app gebruikt geen cookies.
+          Je keuze bewaren we in de opslag van je browser (bs-cookie-consent-v2). Wil je die wijzigen of intrekken,
+          gebruik dan de knop hieronder of Cookie-instellingen onderaan de website; daarna vragen we het opnieuw. Trek
+          je je toestemming in, dan stoppen we direct met meten en verwijderen we de cookies van Google Analytics.
+          Verder bewaren we in je browser instellingen zoals je gekozen commentaar en voorleesstem. We gebruiken geen
+          advertentiecookies; Vercel Speed Insights meet de laadsnelheid anoniem en zonder cookies of opslag in je
+          browser. Wis je cookies, dan ben je uitgelogd. De app gebruikt geen cookies.
         </p>
+        <CookieSettingsButton
+          label="Cookiekeuze wijzigen"
+          className="mt-3 rounded-full border border-line px-4 py-2 text-[13.5px] font-semibold text-ink transition-colors hover:bg-sunken"
+        />
       </Card>
 
       <Card>

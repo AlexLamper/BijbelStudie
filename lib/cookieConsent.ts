@@ -18,16 +18,22 @@
  * Consent-gated:
  *  - our own usage statistics (lib/analytics.ts, which writes the `bs_anon_id`
  *    key into localStorage and posts events to /api/analytics),
+ *  - Google Analytics (lib/googleAnalytics.ts, the `_ga` / `_ga_<id>` cookies),
+ *    which is not even downloaded before "Accepteren",
  *  - the `bs_seen_landing` convenience cookie, which is a comfort feature and
  *    not required to deliver anything.
  *
- * There is no third-party tracking on this site, so there are no categories to
- * toggle - the choice is the whole consent, and "declined" is a real, honoured
- * answer rather than a dark pattern.
+ * All of it is one purpose - measuring how the site is used - so there is one
+ * question, not a category matrix. "Declined" is a real, honoured answer rather
+ * than a dark pattern, and clearConsent() lets the reader change it at any time.
  */
 
-/** Bump the version suffix to re-ask everyone after a material change. */
-export const CONSENT_STORAGE_KEY = "bs-cookie-consent-v1";
+/**
+ * Bump the version suffix to re-ask everyone after a material change.
+ * v2: Google Analytics added - an "Accepteren" given under the v1 text ("geen
+ * trackingcookies van derden") does not cover it.
+ */
+export const CONSENT_STORAGE_KEY = "bs-cookie-consent-v2";
 
 /** Fired on `window` after every write, so open tabs react without a reload. */
 export const CONSENT_EVENT = "bs-cookie-consent-change";
@@ -90,6 +96,24 @@ export function setConsent(status: ConsentStatus): ConsentRecord {
     /* never let a notification break the click that caused it */
   }
   return record;
+}
+
+/**
+ * Forgets the choice, so the cookiebanner asks again. Withdrawing consent has
+ * to be as easy as giving it; until the new answer, nothing optional runs.
+ */
+export function clearConsent(): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(CONSENT_STORAGE_KEY);
+  } catch {
+    /* storage blocked: there was no stored choice to forget */
+  }
+  try {
+    window.dispatchEvent(new CustomEvent(CONSENT_EVENT));
+  } catch {
+    /* never let a notification break the click that caused it */
+  }
 }
 
 /**

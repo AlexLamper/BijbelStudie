@@ -1,5 +1,6 @@
 import Link from "next/link"
 import Image from "next/image"
+import CookieSettingsButton from "../ui/CookieSettingsButton"
 
 /**
  * Labels are inline rather than pulled through i18next. The site ships one
@@ -148,6 +149,12 @@ export function Footer() {
                   </Link>
                 </li>
               ))}
+              <li>
+                <CookieSettingsButton
+                  className="text-left text-sm transition-colors hover:text-white"
+                  style={{ color: FOOTER_MUTED }}
+                />
+              </li>
             </ul>
           </div>
         </div>
