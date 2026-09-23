@@ -46,7 +46,7 @@ export const GUIDE_FREE: Guide = {
         },
       ],
       callout:
-        "Op BijbelStudie zijn deze vertalingen gratis te lezen en naast elkaar te vergelijken. De NBG-vertaling 1951 is beschikbaar onder licentie van het Nederlands-Vlaams Bijbelgenootschap.",
+        "Op BijbelStudie zijn deze vertalingen gratis te lezen, en je wisselt op elk moment van vertaling. De NBG-vertaling 1951 is beschikbaar onder licentie van het Nederlands-Vlaams Bijbelgenootschap.",
     },
     {
       id: "gratis-commentaren",
@@ -86,15 +86,11 @@ export const GUIDE_FREE: Guide = {
       list: [
         {
           title: "Gratis: de Bijbel lezen",
-          text: "Alle beschikbare Nederlandse, Engelse en Duitse vertalingen, met de mogelijkheid ze naast elkaar te vergelijken.",
-        },
-        {
-          title: "Gratis: begeleide studies",
-          text: "Tien begeleide studies, stap voor stap door een gedeelte, met voortgang en streak.",
+          text: "Alle beschikbare Nederlandse, Engelse en Duitse vertalingen, en je wisselt op elk moment van vertaling.",
         },
         {
           title: "Gratis: notities en markeringen",
-          text: "Onbeperkt notities per hoofdstuk en vers, doorzoekbaar en op elk apparaat beschikbaar.",
+          text: "Onbeperkt markeringen, en notities per hoofdstuk en vers: op de website zeven, in de app onbeperkt. Je antwoorden uit de studies tellen niet mee. Doorzoekbaar en op elk apparaat beschikbaar.",
         },
         {
           title: "Gratis: begeleide studies",
@@ -183,6 +179,16 @@ export const GUIDE_FREE: Guide = {
       href: "/bijbelstudie/methoden",
       label: "Bijbelstudie methoden",
       description: "Zes methoden uitgewerkt, elk met een concreet voorbeeld.",
+    },
+    {
+      href: "/bijbelboeken",
+      label: "De 66 bijbelboeken",
+      description: "Gratis inleiding per boek: schrijver, tijd, thema en hoofdlijn.",
+    },
+    {
+      href: "/studies",
+      label: "Begeleide studies",
+      description: "Gratis te volgen, les voor les.",
     },
   ],
 };

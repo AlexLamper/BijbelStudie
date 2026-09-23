@@ -9,7 +9,7 @@ export const GUIDE_METHODS: Guide = {
   intro:
     "Zes manieren om een bijbelgedeelte te bestuderen, elk uitgewerkt met wanneer je hem gebruikt, hoe je hem uitvoert en een concreet voorbeeld om vandaag mee te beginnen.",
   datePublished: "2026-08-21",
-  dateModified: "2026-08-21",
+  dateModified: "2026-09-23",
   readingMinutes: 14,
   sections: [
     {
@@ -181,7 +181,7 @@ export const GUIDE_METHODS: Guide = {
     {
       href: "/studies",
       label: "Begeleide studies",
-      description: "Tien studies waarin deze methoden al zijn uitgewerkt.",
+      description: "Studies waarin deze methoden al zijn uitgewerkt.",
     },
     {
       href: "/bijbelstudie/online",
@@ -192,6 +192,33 @@ export const GUIDE_METHODS: Guide = {
       href: "/bijbelstudie/gratis",
       label: "Gratis bijbelstudie",
       description: "Alle gratis Nederlandse bronnen op een rij.",
+    },
+    // The books this guide uses as its worked examples, so a reader who wants
+    // to try one lands on the book's own introduction.
+    {
+      href: "/bijbelboeken/filippenzen",
+      label: "Filippenzen",
+      description: "Het voorbeeld bij de inductieve methode en de boekstudie: vier hoofdstukken, één zitting.",
+    },
+    {
+      href: "/bijbelboeken/efeziers",
+      label: "Efeziërs",
+      description: "Het voorbeeld bij de verzenanalyse, met het scharnier bij 4:1.",
+    },
+    {
+      href: "/bijbelboeken/ruth",
+      label: "Ruth",
+      description: "Kort genoeg voor een eerste boekstudie, en een persoon om biografisch te volgen.",
+    },
+    {
+      href: "/bijbelstudie/vragen-en-antwoorden",
+      label: "Bijbelstudie met vragen en antwoorden",
+      description: "Waarnemen, uitleggen en toepassen, uitgewerkt op drie bekende gedeelten.",
+    },
+    {
+      href: "/bijbel-over",
+      label: "Wat zegt de Bijbel over...?",
+      description: "Angst, vergeving, gebed, rouw en meer: de belangrijkste gedeelten per onderwerp.",
     },
   ],
 };

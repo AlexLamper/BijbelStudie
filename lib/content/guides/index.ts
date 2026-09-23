@@ -4,6 +4,8 @@ import { GUIDE_METHODS } from "./methoden";
 import { GUIDE_START } from "./beginnen";
 import { GUIDE_ONLINE } from "./online";
 import { GUIDE_FREE } from "./gratis";
+import { GUIDE_EXPLAINED } from "./bijbel-met-uitleg";
+import { GUIDE_QUESTIONS } from "./vragen-en-antwoorden";
 
 export type { Guide, GuideSection } from "./types";
 
@@ -15,6 +17,8 @@ export const GUIDE_PAGES: Guide[] = [
   GUIDE_START,
   GUIDE_ONLINE,
   GUIDE_FREE,
+  GUIDE_EXPLAINED,
+  GUIDE_QUESTIONS,
 ];
 
 /** Hub plus sub-guides. Used for the sitemap and the link tests. */

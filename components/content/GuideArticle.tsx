@@ -175,7 +175,7 @@ export function GuideArticle({ guide }: { guide: Guide }) {
         </h2>
         <p className="mt-2 text-sm text-gray-600 dark:text-muted-foreground max-w-lg mx-auto">
           Lees de Bijbel in meerdere vertalingen, met commentaren, grondtekst,
-          leesplannen en notities. Gratis te beginnen, geen creditcard nodig.
+          begeleide studies en notities. Gratis te beginnen, geen creditcard nodig.
         </p>
         <Link
           href="/registreren"

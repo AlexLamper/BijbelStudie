@@ -9,7 +9,7 @@ export const GUIDE_HUB: Guide = {
   intro:
     "Wat bijbelstudie is, waarin het verschilt van bijbellezen, welke methoden er zijn en hoe je vandaag begint - zonder voorkennis, zonder theologische opleiding.",
   datePublished: "2026-08-21",
-  dateModified: "2026-08-21",
+  dateModified: "2026-09-23",
   readingMinutes: 12,
   sections: [
     {
@@ -196,7 +196,7 @@ export const GUIDE_HUB: Guide = {
     },
     {
       q: "Waar begin ik als ik nog nooit de Bijbel bestudeerd heb?",
-      a: "Markus is het kortste evangelie en leest snel; het is een goed startpunt voor het Nieuwe Testament. Genesis geeft de fundamenten waar de rest van de Bijbel op terugvalt. Begin niet bij Leviticus of Openbaring.",
+      a: "Met een evangelie, bijvoorbeeld Markus: het kortste evangelie, dat snel leest. Begin niet bij Leviticus of Openbaring. De gids Bijbelstudie voor beginners werkt dit uit in een leesplan van dertig dagen, met één hoofdstuk en één vraag per dag.",
     },
   ],
   related: [
@@ -208,7 +208,7 @@ export const GUIDE_HUB: Guide = {
     {
       href: "/bijbelstudie/beginnen",
       label: "Bijbelstudie voor beginners",
-      description: "Een stappenplan van dertig dagen naar een vaste gewoonte.",
+      description: "Waar je begint, en een leesplan van dertig dagen met een vraag per dag.",
     },
     {
       href: "/bijbelstudie/online",
@@ -229,6 +229,31 @@ export const GUIDE_HUB: Guide = {
       href: "/studies",
       label: "Begeleide studies",
       description: "Uitgewerkte studies over personen, thema's en bijbelboeken.",
+    },
+    {
+      href: "/studies/paulus",
+      label: "Studie: Paulus",
+      description: "Een biografische studie, uitgewerkt: zes lessen van Damascus tot zijn laatste brief.",
+    },
+    {
+      href: "/studies/geloof-in-storm",
+      label: "Studie: Geloof in de storm",
+      description: "Vier gedeelten over vertrouwen naast elkaar gelegd - een thematische studie, uitgewerkt.",
+    },
+    {
+      href: "/bijbelstudie/bijbel-met-uitleg",
+      label: "Bijbel met uitleg",
+      description: "Commentaar, context en grondtekst naast de tekst - en hoe je ze gebruikt.",
+    },
+    {
+      href: "/bijbelstudie/vragen-en-antwoorden",
+      label: "Bijbelstudie met vragen en antwoorden",
+      description: "Waarnemen, uitleggen en toepassen, uitgewerkt op drie bekende gedeelten.",
+    },
+    {
+      href: "/bijbel-over",
+      label: "Wat zegt de Bijbel over...?",
+      description: "Angst, vergeving, gebed, rouw en meer: de belangrijkste gedeelten per onderwerp.",
     },
   ],
 };
