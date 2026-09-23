@@ -9,7 +9,7 @@ export const GUIDE_FREE: Guide = {
   intro:
     "Een eerlijk overzicht van wat je zonder te betalen kunt gebruiken voor bijbelstudie in het Nederlands: vertalingen, commentaren, de grondtekst, begeleide studies en publiek-domein bibliotheken.",
   datePublished: "2026-08-21",
-  dateModified: "2026-08-21",
+  dateModified: "2026-09-23",
   readingMinutes: 9,
   sections: [
     {
@@ -101,10 +101,6 @@ export const GUIDE_FREE: Guide = {
           text: "Tien uitgewerkte studies over personen, gedeelten, onderwerpen en bijbelboeken.",
         },
         {
-          title: "Gratis: de bibliotheek",
-          text: "Publiek-domein bijbels, prekenbundels, commentaren en dogmatische werken, zonder account te bekijken.",
-        },
-        {
           title: "Gratis: 5 AI-vragen per dag",
           text: "De AI-assistent is elke dag vijf vragen lang beschikbaar zonder abonnement.",
         },
@@ -142,14 +138,12 @@ export const GUIDE_FREE: Guide = {
           text: "Open bijbeldata met grondtekst, woordanalyse en concordantiegegevens onder een Creative Commons-licentie.",
         },
       ],
-      callout:
-        "Een selectie uit deze archieven is direct doorzoekbaar in de bibliotheek op deze site, met per werk vermeld waarom het publiek domein is.",
     },
   ],
   faqs: [
     {
       q: "Is bijbelstudie online echt gratis?",
-      a: "Voor een groot deel wel. Bijbel lezen in meerdere vertalingen, notities maken, begeleide studies doorlopen, het KingComments-commentaar lezen en de publiek-domein bibliotheek raadplegen kan zonder te betalen. Op BijbelStudie is daarnaast elke dag vijf keer de AI-assistent te gebruiken. Alleen de overige bijbelcommentaren, de ruimere AI-limiet en de volledige grondtekst zitten in het betaalde Pro-abonnement.",
+      a: "Voor een groot deel wel. Bijbel lezen in meerdere vertalingen, notities maken, begeleide studies doorlopen en het KingComments-commentaar lezen kan zonder te betalen. Op BijbelStudie is daarnaast elke dag vijf keer de AI-assistent te gebruiken. Alleen de overige bijbelcommentaren, de ruimere AI-limiet en de volledige grondtekst zitten in het betaalde Pro-abonnement.",
     },
     {
       q: "Welke bijbelvertalingen zijn gratis te gebruiken?",
@@ -161,7 +155,7 @@ export const GUIDE_FREE: Guide = {
     },
     {
       q: "Heb ik een account nodig om gratis te beginnen?",
-      a: "Voor bijbellezen, notities en voortgang wel, omdat je voortgang aan je account gekoppeld wordt. Aanmelden kost minder dan een minuut en er is geen creditcard voor nodig. De bibliotheek en de begeleide studies zijn zonder account te bekijken.",
+      a: "Voor bijbellezen, notities en voortgang wel, omdat je voortgang aan je account gekoppeld wordt. Aanmelden kost minder dan een minuut en er is geen creditcard voor nodig. De begeleide studies zijn zonder account te bekijken.",
     },
   ],
   related: [
@@ -176,9 +170,9 @@ export const GUIDE_FREE: Guide = {
       description: "Een stappenplan van dertig dagen.",
     },
     {
-      href: "/hulpbronnen",
-      label: "Bibliotheek",
-      description: "De publiek-domein werken die op deze site te lezen zijn.",
+      href: "/bijbelstudie/online",
+      label: "Online bijbelstudie",
+      description: "Wat digitaal beter kan dan op papier - en wat niet.",
     },
     {
       href: "/abonnement",

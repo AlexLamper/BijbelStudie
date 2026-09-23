@@ -151,9 +151,9 @@ export default function BijbelboekenPage() {
               description: "Uitgewerkte studies over personen en bijbelboeken.",
             },
             {
-              href: "/hulpbronnen",
-              label: "Bibliotheek",
-              description: "Gratis commentaren en klassieke werken.",
+              href: "/bijbelstudie/beginnen",
+              label: "Bijbelstudie voor beginners",
+              description: "Een stappenplan van dertig dagen.",
             },
           ]}
         />

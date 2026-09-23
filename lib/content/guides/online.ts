@@ -152,9 +152,9 @@ export const GUIDE_ONLINE: Guide = {
       description: "Welke online bronnen gratis te gebruiken zijn.",
     },
     {
-      href: "/hulpbronnen",
-      label: "Bibliotheek",
-      description: "Publiek-domein bijbels, commentaren en preken om online te lezen.",
+      href: "/studies",
+      label: "Begeleide studies",
+      description: "Uitgewerkte studies over personen en bijbelboeken.",
     },
     {
       href: "/bijbelboeken",

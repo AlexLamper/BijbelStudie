@@ -86,17 +86,6 @@ export const PAGE_COMMANDS: CommandItem[] = [
     pageKey: "groups",
   },
   {
-    id: "pagina-hulpbronnen",
-    group: "pagina",
-    title: "Hulpbronnen",
-    subtitle: "Gratis bijbelstudieboeken",
-    keywords: ["bibliotheek", "boeken", "bronnen", "publiek domein", "materiaal", "e-books"],
-    icon: "library",
-    visibility: "iedereen",
-    target: { type: "link", href: "/hulpbronnen" },
-    pageKey: "resources",
-  },
-  {
     id: "pagina-profiel",
     group: "pagina",
     title: "Profiel",

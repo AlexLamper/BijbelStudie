@@ -63,8 +63,6 @@ const PAGE_TITLES: Record<string, string> = {
   profile: "Profiel",
   instellingen: "Instellingen",
   settings: "Instellingen",
-  hulpbronnen: "Hulpbronnen",
-  resources: "Hulpbronnen",
   groepen: "Groepen",
   community: "Gemeenschap",
   abonnement: "Abonnement",

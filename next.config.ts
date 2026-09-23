@@ -30,8 +30,13 @@ const nextConfig: NextConfig = {
       { source: "/leesplannen/:path*",    destination: "/studies",                 permanent: true },
       { source: "/notes",                 destination: "/notities",                permanent: true },
       { source: "/notes/:path*",          destination: "/notities/:path*",         permanent: true },
-      { source: "/resources",             destination: "/hulpbronnen",             permanent: true },
-      { source: "/resources/:path*",      destination: "/hulpbronnen/:path*",      permanent: true },
+      // /hulpbronnen was removed from the website (the app keeps its own
+      // Hulpbronnen screen through /api/v1/resources). Its items all linked
+      // out to DBNL, Delpher and Archive.org, which the gratis guide covers.
+      { source: "/hulpbronnen",           destination: "/bijbelstudie/gratis",     permanent: true },
+      { source: "/hulpbronnen/:path*",    destination: "/bijbelstudie/gratis",     permanent: true },
+      { source: "/resources",             destination: "/bijbelstudie/gratis",     permanent: true },
+      { source: "/resources/:path*",      destination: "/bijbelstudie/gratis",     permanent: true },
       { source: "/profile",               destination: "/profiel",                 permanent: true },
       { source: "/settings",              destination: "/instellingen",            permanent: true },
       { source: "/subscribe",             destination: "/abonnement",              permanent: true },

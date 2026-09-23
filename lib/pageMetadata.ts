@@ -83,12 +83,6 @@ const pageConfigs: Record<string, PageMetadataConfig> = {
     type: 'website',
     indexable: false
   },
-  resources: {
-    title: 'Hulpbronnen: gratis bijbelstudieboeken',
-    description: 'Een groeiende bibliotheek met gratis, publiek-domein bijbels, bijbelcommentaren, prekenbundels en dogmatische werken. Direct online te lezen.',
-    path: '/hulpbronnen',
-    type: 'website'
-  },
   profile: {
     title: 'Profiel',
     description: 'Beheer je BijbelStudie-profiel, volg je voortgang en personaliseer je ervaring.',
@@ -379,7 +373,7 @@ export function generatePageMetadata(
 
 /**
  * Metadata for pages that are not in `pageConfigs` - dynamic routes such as
- * /bijbelboeken/:slug and /hulpbronnen/:slug. Same shape, explicit canonical.
+ * /bijbelboeken/:slug. Same shape, explicit canonical.
  */
 export function buildMetadata(opts: {
   title: string;

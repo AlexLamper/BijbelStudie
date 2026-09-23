@@ -35,7 +35,7 @@ export const HOME_FAQS: Faq[] = [
   },
   {
     q: "Heb ik een account nodig om te beginnen?",
-    a: "Voor bijbellezen, notities en voortgang is een gratis account nodig, zodat uw voortgang bewaard blijft. Aanmelden duurt minder dan een minuut en er is geen creditcard voor nodig. De bibliotheek met publiek-domein werken en de begeleide studies kunt u zonder account bekijken.",
+    a: "Voor bijbellezen, notities en voortgang is een gratis account nodig, zodat uw voortgang bewaard blijft. Aanmelden duurt minder dan een minuut en er is geen creditcard voor nodig. De begeleide studies kunt u zonder account bekijken.",
   },
   {
     q: "Is mijn persoonlijke data veilig?",

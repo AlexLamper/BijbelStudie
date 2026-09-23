@@ -22,8 +22,8 @@ export function Footer() {
           lines up with every section above it instead of sitting 1rem wider. */}
       <div className="mx-auto w-full max-w-6xl xl:max-w-[76rem] px-5 sm:px-6 lg:px-8 py-16 lg:py-20">
 
-        {/* Main grid. The reference pages (/bijbelstudie, /bijbelboeken,
-            /hulpbronnen) are no longer advertised here - the footer sells the
+        {/* Main grid. The reference pages (/bijbelstudie, /bijbelboeken)
+            are no longer advertised here - the footer sells the
             product, not the reading material around it. One link into
             /bijbelboeken survives on purpose: see the note beside it.
 

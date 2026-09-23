@@ -1,6 +1,5 @@
 import { MetadataRoute } from "next";
 import { BASE_URL } from "../lib/seo/constants";
-import { LIBRARY } from "./hulpbronnen/library";
 import { GUIDES } from "../lib/content/guides";
 import { BIBLE_BOOKS } from "../lib/content/bibleBooks";
 import { curatedStudies } from "../lib/data/curated-studies";
@@ -27,7 +26,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/bijbelstudie`,         lastModified: SITE_CONTENT_DATE, changeFrequency: "monthly", priority: 0.9 },
     { url: `${BASE_URL}/bijbelboeken`,         lastModified: SITE_CONTENT_DATE, changeFrequency: "monthly", priority: 0.9 },
     { url: `${BASE_URL}/studies`,              lastModified: SITE_CONTENT_DATE, changeFrequency: "weekly",  priority: 0.8 },
-    { url: `${BASE_URL}/hulpbronnen`,          lastModified: SITE_CONTENT_DATE, changeFrequency: "weekly",  priority: 0.8 },
     { url: `${BASE_URL}/abonnement`,           lastModified: SITE_CONTENT_DATE, changeFrequency: "monthly", priority: 0.7 },
     { url: `${BASE_URL}/help`,                 lastModified: SITE_CONTENT_DATE, changeFrequency: "monthly", priority: 0.6 },
     // Its content is the review wall itself, which changes whenever a reader
@@ -59,17 +57,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: book.chapters >= 20 ? 0.7 : 0.6,
   }));
 
-  // Free library items render their full text to anonymous visitors, so they are
-  // real indexable content. Pro items only show a paywalled preview - excluded.
-  const libraryRoutes: MetadataRoute.Sitemap = LIBRARY
-    .filter(item => !item.isPro)
-    .map(item => ({
-      url: `${BASE_URL}/hulpbronnen/${item.slug}`,
-      lastModified: SITE_CONTENT_DATE,
-      changeFrequency: "yearly" as const,
-      priority: 0.5,
-    }));
-
   // Each curated study has its own public detail page with hand-authored
   // description, outcomes and lesson list. They were previously unreachable
   // (the route was a redirect stub), so they were correctly absent here.
@@ -85,6 +72,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...guideRoutes,
     ...studyRoutes,
     ...bibleBookRoutes,
-    ...libraryRoutes,
   ];
 }

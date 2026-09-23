@@ -1,6 +1,6 @@
 import { resolveUser } from '../../../../lib/apiAuth';
 import { corsPreflight, handleV1Error, jsonV1 } from '../../../../lib/apiV1';
-import { CATEGORIES, LIBRARY } from '../../../hulpbronnen/library';
+import { CATEGORIES, LIBRARY } from '../../../../lib/content/library';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,7 +9,9 @@ export async function OPTIONS() {
 }
 
 /**
- * The Hulpbronnen library.
+ * The Hulpbronnen library, for the app's Hulpbronnen screen. The website's
+ * /hulpbronnen section was removed (it now redirects), but installed app builds
+ * still call this, so the endpoint and lib/content/library.ts stay.
  *
  * Every entry is a public-domain scan hosted by a third party (DBNL, Archive,
  * Gutenberg, Delpher), so the app links out rather than mirroring anything.

@@ -116,8 +116,7 @@ export async function middleware(req: NextRequest) {
 
   // Only /beheer is closed at the edge. Everything else is open to a guest:
   //
-  //  - /studies and /hulpbronnen are the crawlable SEO surface (pro content
-  //    inside /hulpbronnen/:slug is gated server-side).
+  //  - /studies is the crawlable SEO surface.
   //  - /studie and /lezen are the guest-mode shell: reading is client-side
   //    against static /data/*.json, a lesson can be stepped through without an
   //    account, and every account-bound WRITE underneath (AI chat, TTS,
