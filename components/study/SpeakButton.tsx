@@ -165,8 +165,8 @@ export default function SpeakButton({
             tts.error
               ? 'text-[#E11D48] bg-[rgba(225,29,72,0.08)]'
               : isPlaying
-                ? 'bg-[rgba(13,148,136,0.15)] text-[#0D9488] dark:text-teal-400'
-                : 'text-gray-500 hover:text-[#0D9488] hover:bg-[rgba(13,148,136,0.08)] dark:text-muted-foreground dark:hover:text-teal-400',
+                ? 'bg-teal-dark text-white'
+                : 'text-gray-500 hover:bg-teal-dark hover:text-white dark:text-muted-foreground dark:hover:text-white',
             className,
           )}
         >

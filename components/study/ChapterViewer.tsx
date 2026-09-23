@@ -1,5 +1,6 @@
 ﻿import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { AlertCircle, ArrowRight, Languages, Plus } from 'lucide-react';
 import { SkeletonChapter } from '../ui/skeletons';
 import { CreateNoteModal } from './CreateNoteModal';
@@ -10,7 +11,6 @@ import { useIsPro } from '../../hooks/useIsPro';
 import { cn } from '../../lib/utils';
 import { getBibleAttribution } from '../../lib/bible-attribution';
 import { toBookIndex } from '../../lib/readChaptersCanon';
-import { openProOffer } from '../../lib/proOffer';
 import SpeakButton from './SpeakButton';
 import { SpokenText } from './SpokenText';
 import VerseMarkers from './VerseMarkers';
@@ -97,16 +97,18 @@ export default function ChapterViewer({
   const [revealedVerse, setRevealedVerse] = useState<number | null>(null);
   const crossRefButtons = useRef(new Map<number, HTMLButtonElement | null>());
   const crossRefCopy = useCrossRefCopy();
-  /** The verse whose grondtekst is open under it, or null. One at a time. */
+  /**
+   * The verse whose grondtekst is open under it, or null. One at a time. Pro
+   * only: a free reader who taps the control goes straight to /abonnement -
+   * see PassageReader.tsx's own toggleOriginal for why this is a redirect and
+   * not the ProOfferDialog.
+   */
   const [originalVerse, setOriginalVerse] = useState<number | null>(null);
   const isPro = useIsPro();
+  const router = useRouter();
   const toggleOriginal = (verse: number) => {
     if (!isPro) {
-      openProOffer({
-        surface: 'original_tap',
-        reason:
-          'Met Pro zie je bij elk vers het Hebreeuws of Grieks eronder, woord voor woord, terwijl je leest.',
-      });
+      router.push('/abonnement?source=original_tap');
       return;
     }
     setOriginalVerse((current) => (current === verse ? null : verse));
@@ -426,7 +428,7 @@ export default function ChapterViewer({
                         'inline-flex items-center justify-center rounded-md border p-1.5 shadow-field transition-colors',
                         originalOpen
                           ? 'border-teal bg-teal-dark text-white'
-                          : 'border-line bg-surface text-gray-500 hover:border-teal-dark hover:bg-teal-dark hover:text-white dark:text-muted-foreground',
+                          : 'border-line bg-surface text-gray-500 hover:border-teal-dark hover:bg-teal-dark hover:text-white dark:text-muted-foreground dark:hover:text-white',
                       )}
                     >
                       <Languages className="h-3.5 w-3.5" aria-hidden />

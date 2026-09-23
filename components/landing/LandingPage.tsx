@@ -274,14 +274,14 @@ function Hero({ reviews }: { reviews?: ReviewsData }) {
   return (
     <section
       className="relative overflow-x-clip"
-      style={{ backgroundColor: "#fbfbf8" }}
+      style={{ backgroundColor: "var(--lp-hero-bg)" }}
     >
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-[18px] px-5 py-7 sm:px-6 lg:min-h-[calc(100vh-112px)] lg:flex-row lg:items-center lg:gap-16 lg:py-0 lg:pl-[120px] lg:pr-0">
         {/* Left column: fixed 540px from 1280px up, ~460px between 1024-1279. */}
         <div className="flex flex-col items-start gap-[18px] lg:w-[460px] lg:flex-shrink-0 lg:gap-6 xl:w-[540px]">
           <p
             className="text-[11px] font-bold uppercase leading-normal lg:text-[13px]"
-            style={{ letterSpacing: "0.12em", color: "#0b5f52" }}
+            style={{ letterSpacing: "0.12em", color: "var(--lp-hero-eyebrow)" }}
           >
             Voor iedereen die de Bijbel dieper wil leren kennen
           </p>
@@ -294,15 +294,15 @@ function Hero({ reviews }: { reviews?: ReviewsData }) {
               fontSize: "clamp(2.625rem, 2rem + 3vw, 4rem)",
               lineHeight: 1.05,
               letterSpacing: "-0.035em",
-              color: "#0f172a",
+              color: "var(--lp-hero-heading)",
             }}
           >
-            <span style={{ color: "#0d7a66" }}>Begrijp</span> wat je leest in de Bijbel.
+            <span style={{ color: "var(--lp-hero-accent)" }}>Begrijp</span> wat je leest in de Bijbel.
           </h1>
 
           <p
             className="text-pretty text-[17px] lg:max-w-[520px] lg:text-xl"
-            style={{ lineHeight: 1.55, color: "#475569" }}
+            style={{ lineHeight: 1.55, color: "var(--lp-hero-lead)" }}
           >
             Lees de tekst en het commentaar naast elkaar, met de grondtekst en je eigen notities één klik verder.
           </p>
@@ -371,9 +371,9 @@ function Hero({ reviews }: { reviews?: ReviewsData }) {
       >
         <span
           className="bs-bob flex h-8 w-8 items-center justify-center rounded-full"
-          style={{ border: "1.5px solid #cfd8d4" }}
+          style={{ border: "1.5px solid var(--lp-hero-scroll-border)" }}
         >
-          <ChevronDown className="h-[14px] w-[14px]" style={{ color: "#475569" }} />
+          <ChevronDown className="h-[14px] w-[14px]" style={{ color: "var(--lp-hero-scroll-icon)" }} />
         </span>
       </a>
     </section>

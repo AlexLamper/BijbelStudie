@@ -44,7 +44,7 @@ const CrossRefButton = forwardRef<
         'inline-flex items-center justify-center rounded-md border p-1.5 shadow-field transition-colors',
         open
           ? 'border-teal bg-teal-dark text-white'
-          : 'border-line bg-surface text-gray-500 hover:border-teal-dark hover:bg-teal-dark hover:text-white dark:text-muted-foreground',
+          : 'border-line bg-surface text-gray-500 hover:border-teal-dark hover:bg-teal-dark hover:text-white dark:text-muted-foreground dark:hover:text-white',
         className,
       )}
     >

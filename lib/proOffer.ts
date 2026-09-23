@@ -19,7 +19,6 @@ export type ProOfferSurface =
   | 'ai_limit'
   | 'note_limit'
   | 'group_limit'
-  | 'original_tap'
   | 'original_text'
   | 'commentary'
   | 'tts'

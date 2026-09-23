@@ -194,12 +194,15 @@ export default function ProOfferDialog() {
             )}
           </DialogPrimitive.Title>
 
-          <p id="pro-offer-summary" className="mt-2 text-[13.5px] leading-[1.55] text-ink-muted">
+          <p id="pro-offer-summary" className="mt-1.5 text-[13.5px] leading-[1.5] text-ink-muted">
             {request?.reason ?? "Alles om een gedeelte grondig te bestuderen."}
           </p>
 
-          <ul className="mt-4 space-y-[9px]">
-            {PRO_FEATURES.map((feature) => (
+          {/* The full list lives on /abonnement ("Alles over Pro" below); a
+              dialog raised mid-task only needs the headline reasons, not all
+              eight - the first four cover what most readers reach for. */}
+          <ul className="mt-4 space-y-[7px]">
+            {PRO_FEATURES.slice(0, 4).map((feature) => (
               <li key={feature} className="flex items-start gap-2 text-[13.5px] text-ink-body">
                 <Check size={16} strokeWidth={2.2} aria-hidden className="mt-[1px] flex-shrink-0 text-teal" />
                 {feature}
@@ -207,7 +210,7 @@ export default function ProOfferDialog() {
             ))}
           </ul>
 
-          <fieldset className="mt-5 space-y-2">
+          <fieldset className="mt-4 space-y-2">
             <legend className="sr-only">Kies je plan</legend>
             {(["annual", "monthly"] as const).map((key) => {
               const option = PLANS[key]
@@ -215,7 +218,7 @@ export default function ProOfferDialog() {
               return (
                 <label
                   key={key}
-                  className={`flex cursor-pointer items-start gap-3 rounded-btn border px-3.5 py-3 transition-colors ${
+                  className={`flex cursor-pointer items-start gap-3 rounded-btn border px-3.5 py-2.5 transition-colors ${
                     selected ? "border-teal bg-teal-faint" : "border-line hover:bg-sunken"
                   }`}
                 >
@@ -252,7 +255,7 @@ export default function ProOfferDialog() {
             type="button"
             onClick={handleContinue}
             disabled={busy || loadingStatus}
-            className="mt-5 flex h-11 w-full items-center justify-center gap-2 rounded-btn bg-teal-dark text-[14.5px] font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+            className="mt-5 flex h-14 w-full items-center justify-center gap-2 rounded-btn bg-teal-dark text-[15.5px] font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
           >
             {busy && <Loader2 size={16} className="animate-spin" aria-hidden />}
             {offersTrial ? `Start ${trialDays} dagen gratis` : `Word Pro voor ${euro(plan.amountCents)}`}

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { AlertCircle, Languages, Plus } from 'lucide-react';
 
 import { CreateNoteModal } from '../CreateNoteModal';
@@ -19,7 +20,6 @@ import { useCrossRefs } from '../../../hooks/useCrossRefs';
 import { HIGHLIGHT_TINTS, useVerseAnnotations } from '../../../hooks/useVerseAnnotations';
 import type { ReadingPreferences } from '../../../hooks/useReadingPreferences';
 import { useIsPro } from '../../../hooks/useIsPro';
-import { openProOffer } from '../../../lib/proOffer';
 
 type VerseMap = Record<string, string>;
 
@@ -80,19 +80,20 @@ export default function PassageReader({
 
   /**
    * The verse whose grondtekst is open under it, or null. One at a time, like
-   * the cross-references. Pro only: a free reader who taps the control gets
-   * the Pro offer instead (the whole-chapter grondtekst in Verdieping keeps its
-   * free first verse - lib/proContent.ts).
+   * the cross-references. Pro only: a free reader who taps the control goes
+   * straight to /abonnement - this is a bare icon in a hover cluster with no
+   * surrounding context, not a moment worth interrupting with a dialog. The
+   * ProOfferDialog stays for limits actually hit mid-task (notes, AI, groups)
+   * and for the inline UpgradePrompt cards, which already carry their own
+   * explanation (the whole-chapter grondtekst in Verdieping keeps its free
+   * first verse - lib/proContent.ts).
    */
   const [originalVerse, setOriginalVerse] = useState<number | null>(null);
   const isPro = useIsPro();
+  const router = useRouter();
   const toggleOriginal = (verse: number) => {
     if (!isPro) {
-      openProOffer({
-        surface: 'original_tap',
-        reason:
-          'Met Pro zie je bij elk vers het Hebreeuws of Grieks eronder, woord voor woord, terwijl je leest.',
-      });
+      router.push('/abonnement?source=original_tap');
       return;
     }
     setOriginalVerse((current) => (current === verse ? null : verse));
@@ -346,7 +347,7 @@ export default function PassageReader({
                     'inline-flex items-center justify-center rounded-md border p-1.5 shadow-field transition-colors',
                     originalOpen
                       ? 'border-teal bg-teal-dark text-white'
-                      : 'border-line bg-surface text-gray-500 hover:border-teal-dark hover:bg-teal-dark hover:text-white dark:text-muted-foreground',
+                      : 'border-line bg-surface text-gray-500 hover:border-teal-dark hover:bg-teal-dark hover:text-white dark:text-muted-foreground dark:hover:text-white',
                   )}
                 >
                   <Languages className="h-3.5 w-3.5" aria-hidden />

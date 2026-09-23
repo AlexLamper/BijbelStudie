@@ -211,7 +211,7 @@ export default function StudyExitGuard({
           </div>
         )}
 
-        <div className="flex flex-col-reverse sm:flex-row gap-2 sm:justify-end px-5 sm:px-6 pb-5 sm:pb-6">
+        <div className="mt-5 flex flex-col-reverse sm:flex-row gap-2 sm:justify-end px-5 sm:px-6 pb-5 sm:pb-6">
           <button
             type="button"
             onClick={leave}
