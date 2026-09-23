@@ -430,8 +430,10 @@ export default async function StudyDetailPage({ params }: PageProps) {
 
               {/* A generated book study points back to the book's own page,
                   which carries the introduction this page deliberately does
-                  not repeat (see lib/bookStudies.ts). */}
-              {isBookStudyId(study.id) && (
+                  not repeat (see lib/bookStudies.ts). Guests only: a member
+                  is redirected from that page back to this one
+                  (lib/memberRedirects.ts). */}
+              {isBookStudyId(study.id) && !signedIn && (
                 <Card className="flex-none p-[18px]">
                   <h2 className="text-[14.5px] font-bold text-ink">Over {study.title}</h2>
                   <p className="mt-2 text-[13px] leading-relaxed text-ink-muted">

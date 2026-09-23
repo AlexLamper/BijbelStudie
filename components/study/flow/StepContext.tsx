@@ -90,9 +90,12 @@ export default function StepContext({
               href={context.book.href}
               className={`${SURFACE} block px-4 py-[14px] text-[12.5px] leading-[1.55] ${INK_MUTED} transition-colors hover:bg-les-card ${FOCUS_RING}`}
             >
-              <span className={`font-semibold ${INK}`}>Alles over {context.book.name}</span>
+              {/* Neutral on purpose: a guest lands on /bijbelboeken/<slug>, a
+                  member is redirected to the book's study (lib/memberRedirects.ts).
+                  Both show how the whole book is built. */}
+              <span className={`font-semibold ${INK}`}>Meer over {context.book.name}</span>
               <span className="mt-[2px] block">
-                Indeling, kernverzen en studievragen van het hele boek.
+                De opbouw en hoofdlijn van het hele boek.
               </span>
             </Link>
           ) : null}

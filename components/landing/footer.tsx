@@ -15,12 +15,17 @@ import CookieSettingsButton from "../ui/CookieSettingsButton"
  */
 const FOOTER_MUTED = "#9CA3AF"
 
-export function Footer() {
+/**
+ * `frame` replaces the centred container with the caller's own horizontal
+ * frame, as on Header: ContentShell passes its full-width CONTENT_FRAME so the
+ * footer lines up with the content pages above it.
+ */
+export function Footer({ frame }: { frame?: string } = {}) {
   return (
     <footer style={{ backgroundColor: "#1F2937", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
       {/* Matches the landing page's shell exactly, so the footer's outer margin
           lines up with every section above it instead of sitting 1rem wider. */}
-      <div className="mx-auto w-full max-w-6xl xl:max-w-[76rem] px-5 sm:px-6 lg:px-8 py-16 lg:py-20">
+      <div className={`${frame ?? "mx-auto w-full max-w-6xl xl:max-w-[76rem] px-5 sm:px-6 lg:px-8"} py-16 lg:py-20`}>
 
         {/* Main grid. The reference pages (/bijbelstudie, /bijbelboeken)
             are no longer advertised here - the footer sells the

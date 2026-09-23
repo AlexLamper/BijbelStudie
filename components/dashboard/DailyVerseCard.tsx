@@ -20,12 +20,14 @@ import { useLevensboom } from "../../hooks/useLevensboom"
 import { paletteForNow } from "../../lib/levensboom/palette"
 import {
   dailyVersePhoto,
+  dayKeyNL,
   dayLabel,
   isLiked as isReferenceLiked,
+  parseDayTextArchive,
+  previousDays,
   readHistory,
   readLikes,
   rememberVerse,
-  todayKey,
   toggleLike,
   versionAbbreviation,
   type StoredVerse,
@@ -91,9 +93,11 @@ export type DailyVerse = {
  * photographs, in either light or dark mode, and a token that flips with the
  * theme would go invisible on half of them.
  *
- * Like the app's card, everything it remembers is local: `/api/bible/daytext`
- * serves one verse and keeps no archive, so the heart and "Bekijk voorgaande
- * dagen" are backed by localStorage. See `lib/dailyVerseStore.ts`.
+ * Like the app's card, the heart and the record of each day this browser saw
+ * live in localStorage (`/api/bible/daytext` serves today's verse only).
+ * "Bekijk voorgaande dagen" merges that record with the shared archive,
+ * `GET /api/v1/daytext/history`, fetched only when the dialog is opened. See
+ * `lib/dailyVerseStore.ts`.
  */
 export default function DailyVerseCard({
   verse,
@@ -107,7 +111,12 @@ export default function DailyVerseCard({
   const beatTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [history, setHistory] = useState<StoredVerse[]>([])
   const [historyOpen, setHistoryOpen] = useState(false)
+  const menuButton = useRef<HTMLButtonElement>(null)
   const [shareNote, setShareNote] = useState<string | null>(null)
+  // The shared archive behind "Voorgaande dagen", and where its request is.
+  const [archive, setArchive] = useState<StoredVerse[]>([])
+  const [archiveState, setArchiveState] = useState<"idle" | "loading" | "done" | "failed">("idle")
+  const archiveRequest = useRef<AbortController | null>(null)
 
   // The id first: it is exact, where the display name ("De Heilige Schrift
   // 1917") has no abbreviation of its own.
@@ -145,7 +154,8 @@ export default function DailyVerseCard({
     setLiked(isReferenceLiked(verse.reference, readLikes()))
     setHistory(
       rememberVerse({
-        date: todayKey(),
+        // Amsterdam's day, the one the verse and the server archive belong to.
+        date: dayKeyNL(),
         text: verse.text,
         reference: verse.reference,
         book: verse.book,
@@ -156,6 +166,43 @@ export default function DailyVerseCard({
       }),
     )
   }, [verse, version])
+
+  // The shared archive, from the same public route the app reads
+  // (`?limit=60` as the app asks, so both share one cached copy). Only once
+  // the dialog is opened, and at most once per mount: most dashboard visits
+  // never open it, and a request on every load would spend Active CPU for
+  // nothing. A failure leaves the device's own days on screen.
+  useEffect(() => {
+    if (!historyOpen || archiveRequest.current) return
+    const controller = new AbortController()
+    archiveRequest.current = controller
+    setArchiveState("loading")
+    fetch("/api/v1/daytext/history?limit=60", { signal: controller.signal })
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        return res.json()
+      })
+      .then((body) => {
+        setArchive(parseDayTextArchive(body))
+        setArchiveState("done")
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setArchiveState("failed")
+      })
+  }, [historyOpen])
+
+  // Cancelled on unmount, and forgotten, so a remount (Fast Refresh in dev)
+  // asks again instead of waiting on a request that was aborted.
+  useEffect(() => () => {
+    archiveRequest.current?.abort()
+    archiveRequest.current = null
+  }, [])
+
+  // Earlier days only: today is on the card itself. Worked out on every render
+  // (a merge of at most 120 short rows) rather than memoised, so the clock is
+  // read afresh: a dashboard left open past midnight moves yesterday's verse
+  // into the list when the dialog is next opened.
+  const earlierDays = previousDays(history, archive, dayKeyNL())
 
   // A short confirmation after a copy, since the clipboard gives no feedback
   // of its own.
@@ -346,9 +393,23 @@ export default function DailyVerseCard({
             <Share2 size={19} />
           </RoundAction>
 
-          <DropdownMenu>
+          {/* NOT MODAL, because an item here opens a Dialog. A modal menu and a
+              modal Dialog both freeze the page by setting `pointer-events:
+              none` on <body> and later put back the value they found. But
+              react-menu and react-dialog each bundle their own copy of Radix's
+              DismissableLayer (1.1.5 and 1.1.4), so neither sees the other.
+              onSelect mounts the Dialog while the menu is still open, so the
+              Dialog records the menu's "none" as the value to restore; the menu
+              then closes and restores "", and closing the Dialog writes "none"
+              back for good - nothing on the page could be clicked until a
+              reload. A non-modal menu never touches <body>, so there is nothing
+              to leave behind. Escape, an outside click and the arrow keys still
+              work as before. The same fix is on the notes menu
+              (app/notities/page.tsx). */}
+          <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <button
+                ref={menuButton}
                 type="button"
                 aria-label="Meer"
                 className="flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.32] text-white transition-colors hover:bg-white/20"
@@ -379,19 +440,40 @@ export default function DailyVerseCard({
       </div>
 
       <Dialog open={historyOpen} onOpenChange={setHistoryOpen}>
-        <DialogContent className="max-w-lg max-h-[72vh] overflow-y-auto">
+        {/* The Dialog has no trigger of its own (it opens from a menu item
+            that is gone by then), so without this focus would drop to the top
+            of the page on close. Back to the "…" button it came from. */}
+        <DialogContent
+          className="max-w-lg max-h-[72vh] overflow-y-auto"
+          onCloseAutoFocus={(event) => {
+            event.preventDefault()
+            menuButton.current?.focus()
+          }}
+        >
           <DialogHeader>
             <DialogTitle>Voorgaande dagen</DialogTitle>
           </DialogHeader>
 
-          {history.length === 0 ? (
-            <p className="text-sm text-gray-500 dark:text-muted-foreground">
-              Nog geen eerdere teksten bewaard. Vanaf vandaag wordt de tekst van de dag hier
-              verzameld.
-            </p>
+          {/* The device's own days show at once; the archive's join them when
+              it answers. "idle" counts as waiting: it is the one render
+              between opening and the request going out. */}
+          {earlierDays.length === 0 ? (
+            archiveState === "idle" || archiveState === "loading" ? (
+              <p role="status" className="text-sm text-gray-500 dark:text-muted-foreground">
+                Eerdere dagen laden…
+              </p>
+            ) : archiveState === "failed" ? (
+              <p className="text-sm text-gray-500 dark:text-muted-foreground">
+                De eerdere dagen konden nu niet worden geladen. Probeer het later nog eens.
+              </p>
+            ) : (
+              <p className="text-sm text-gray-500 dark:text-muted-foreground">
+                Er zijn nog geen eerdere dagen. De tekst van vandaag staat hier vanaf morgen.
+              </p>
+            )
           ) : (
             <ul className="divide-y divide-gray-200 dark:divide-border">
-              {history.map((entry) => (
+              {earlierDays.map((entry) => (
                 <li key={entry.date} className="py-3.5">
                   <Link
                     href={`/lezen?book=${encodeURIComponent(entry.book)}&chapter=${entry.chapter}&version=${encodeURIComponent(entry.versionId ?? "statenvertaling")}`}
@@ -420,6 +502,17 @@ export default function DailyVerseCard({
                 </li>
               ))}
             </ul>
+          )}
+
+          {earlierDays.length > 0 && (archiveState === "idle" || archiveState === "loading") && (
+            <p role="status" className="pt-1 text-xs text-gray-400 dark:text-muted-foreground">
+              Meer dagen laden…
+            </p>
+          )}
+          {earlierDays.length > 0 && archiveState === "failed" && (
+            <p className="pt-1 text-xs text-gray-400 dark:text-muted-foreground">
+              Alleen de dagen die in deze browser bewaard zijn; de rest kon nu niet worden geladen.
+            </p>
           )}
         </DialogContent>
       </Dialog>

@@ -64,6 +64,10 @@ const nextConfig: NextConfig = {
       { source: "/auth/reset-password",   destination: "/wachtwoord-herstellen",   permanent: true },
       { source: "/privacy-policy",        destination: "/privacybeleid",           permanent: true },
       { source: "/terms-of-service",      destination: "/algemene-voorwaarden",    permanent: true },
+      // The favicon lived here until the icon set was consolidated on
+      // /favicon.ico (public/favicon.ico). Browsers and Google cached this URL;
+      // one file, so the old address follows it instead of keeping a copy.
+      { source: "/images/favicon.ico",    destination: "/favicon.ico",             permanent: true },
     ]
   },
   // Fixes "multiple lockfiles" workspace root warning

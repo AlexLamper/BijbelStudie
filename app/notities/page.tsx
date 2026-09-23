@@ -348,7 +348,15 @@ export default function NotesPage() {
                         </>
                       )}
                       <div className="flex-1" />
-                      <DropdownMenu>
+                      {/* Not modal: both items open a Radix Dialog
+                          (EditNoteModal, ConfirmDialog). A modal menu and the
+                          Dialog each set `pointer-events: none` on <body> from
+                          separate copies of Radix's DismissableLayer, and the
+                          Dialog, opened while the menu is still up, restores
+                          the menu's "none" when it closes - the page stays
+                          unclickable. Full account in
+                          components/dashboard/DailyVerseCard.tsx. */}
+                      <DropdownMenu modal={false}>
                         <DropdownMenuTrigger asChild>
                           <button
                             type="button"

@@ -28,12 +28,18 @@ const NAV_LINKS = [
   { href: "/#prijzen", label: "Prijzen" },
 ]
 
-export function Header() {
+/**
+ * `frame` replaces the inner row's centred `container` with the caller's own
+ * horizontal frame. ContentShell passes its full-width CONTENT_FRAME so the
+ * logo lines up with the breadcrumbs and the page below it on a wide screen;
+ * without it the header keeps the default container.
+ */
+export function Header({ frame }: { frame?: string } = {}) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   return (
     <header className="border-b border-border bg-white/90 dark:bg-background/95 backdrop-blur-md sticky top-0 z-50">
-      <div className="container mx-auto px-4 md:px-6 lg:px-8">
+      <div className={frame ?? "container mx-auto px-4 md:px-6 lg:px-8"}>
         <div className="relative flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5">

@@ -2,13 +2,15 @@
 import { getToken } from "next-auth/jwt";
 import type { NextRequest } from "next/server";
 import { fallbackLng, cookieName } from "./app/i18n/settings";
+import { memberRedirectFor } from "./lib/memberRedirects";
 
 export const config = {
   matcher: [
     // `og` and the crawler-facing files are excluded so a social crawler or
     // Googlebot never pays for a getToken() round-trip just to fetch an image
-    // or robots.txt.
-    "/((?!api|og|_next/static|_next/image|assets|favicon.ico|icon.svg|robots.txt|sitemap.xml|sitemap|sw.js|site.webmanifest|data|images/appstore-badge.png).*)",
+    // or robots.txt. `images/` is all static files from public/ (icons, the
+    // touch icon Google reads for search results, photos) - no page lives there.
+    "/((?!api|og|_next/static|_next/image|assets|favicon.ico|icon.svg|robots.txt|sitemap.xml|sitemap|sw.js|site.webmanifest|data|images/).*)",
   ],
 };
 
@@ -85,6 +87,20 @@ export async function middleware(req: NextRequest) {
 
   if (session && pathname === "/") {
     return NextResponse.redirect(new URL("/dashboard", req.url));
+  }
+
+  // Members never see the public reference pages (/bijbelboeken,
+  // /bijbelboeken/<slug>, /bijbel/<slug>/<chapter>): each has a page inside
+  // the app that does the same job - see lib/memberRedirects.ts for the table
+  // and why each target. Guests and crawlers get the static page untouched.
+  // 307, not 308: the public URL stays the canonical one, and a browser must
+  // not remember the redirect for when the member signs out. Unknown slugs and
+  // out-of-range chapters return null here and fall through to the 404.
+  if (session) {
+    const memberTarget = memberRedirectFor(pathname);
+    if (memberTarget) {
+      return NextResponse.redirect(new URL(memberTarget, req.url), 307);
+    }
   }
 
   // Guest mode (Phase 1 MVP): a visitor who has already seen the landing page

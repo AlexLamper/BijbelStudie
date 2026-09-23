@@ -1,5 +1,24 @@
 import Link from "next/link";
-import { RelatedLinks } from "../../../components/content/ContentShell";
+import {
+  ArticleHeader,
+  ArticleLayout,
+  ArticleSection,
+  BUTTON_PRIMARY,
+  BUTTON_SECONDARY,
+  CtaCard,
+  EYEBROW,
+  FaqSection,
+  NumberedSteps,
+  Prose,
+  RelatedCards,
+  TEAL_CALLOUT,
+  TEAL_FILL,
+  TILE,
+  formatDutchDate,
+  tileColumns,
+  type Fact,
+  type TocItem,
+} from "../../../components/content/GuideArticle";
 import {
   TOPICS,
   getTopic,
@@ -15,11 +34,7 @@ import {
 /* Brand teal as a fill (#0D9488, inline like GuideArticle). As type it is
    text-teal-dark (#0F766E): #0D9488 is 3.7:1 on white, short of AA for text.
    On dark it lifts to teal-400. */
-const TEAL = "#0D9488";
 const TEAL_TEXT = "text-teal-dark dark:text-teal-400";
-
-const H2 = "mb-4 text-[19px] font-bold tracking-[-0.2px] text-ink sm:text-[21px]";
-const BODY = "text-[15px] leading-[1.75] text-ink-body";
 
 /**
  * One "Wat zegt de Bijbel over ...?" page.
@@ -30,16 +45,36 @@ const BODY = "text-[15px] leading-[1.75] text-ink-body";
  * the chapter in the reader with rel="nofollow" - /lezen is disallowed in
  * robots.txt, and a plain <a> keeps next/link from prefetching fifteen reader
  * routes per page view.
+ *
+ * Layout: the article kit from GuideArticle - full window width, one card per
+ * section, prose at a reading measure, passages and points as tile grids, and
+ * a sticky "Op deze pagina" column from lg up.
  */
 export function TopicArticle({ topic }: { topic: Topic }) {
   const heading = topicHeading(topic);
   const minutes = topicReadingMinutes(topic);
 
-  const toc = [
+  const toc: TocItem[] = [
     ...topic.sections.map(s => ({ id: s.id, heading: s.heading })),
     { id: "misverstanden", heading: `Wat de Bijbel niet zegt over ${topic.subject}` },
     { id: "in-de-praktijk", heading: topic.practiceHeading },
     { id: "veelgestelde-vragen", heading: "Veelgestelde vragen" },
+  ];
+
+  const passages = topic.sections.flatMap(s => s.passages ?? []);
+  const books = new Set(passages.map(p => p.book)).size;
+  const facts: Fact[] = [
+    { label: "Leestijd", value: `${minutes} ${minutes === 1 ? "minuut" : "minuten"}` },
+    {
+      label: "Bijbelteksten",
+      value: `${passages.length} ${passages.length === 1 ? "tekst" : "teksten"} uit ${books} ${
+        books === 1 ? "boek" : "boeken"
+      }`,
+    },
+    {
+      label: "Bijgewerkt",
+      value: <time dateTime={topic.dateModified}>{formatDutchDate(topic.dateModified)}</time>,
+    },
   ];
 
   const relatedTopics = topic.relatedTopics
@@ -50,159 +85,72 @@ export function TopicArticle({ topic }: { topic: Topic }) {
   const otherTopics = TOPICS.filter(t => t.slug !== topic.slug);
 
   return (
-    <article className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12 lg:py-16">
-      <header className="mb-10">
-        <p className={`mb-2 text-[10.5px] font-semibold uppercase tracking-[1.1px] ${TEAL_TEXT}`}>
-          Bijbelse onderwerpen
-        </p>
-        <h1 className="text-[28px] font-bold leading-tight tracking-[-0.5px] text-ink sm:text-[34px]">
-          {heading}
-        </h1>
+    <ArticleLayout
+      toc={toc}
+      header={
+        <ArticleHeader eyebrow="Bijbelse onderwerpen" title={heading} facts={facts}>
+          {/* The direct answer. Kept as one plain paragraph right under the H1:
+              this is the text a featured snippet would lift. */}
+          <div className="mt-5 max-w-[46rem] rounded-btn border-l-4 p-5" style={TEAL_CALLOUT}>
+            <p className={`${EYEBROW} text-ink-muted`}>Kort antwoord</p>
+            <p className="mt-1.5 text-[16px] leading-[1.7] text-ink sm:text-[17px]">{topic.answer}</p>
+          </div>
+        </ArticleHeader>
+      }
+    >
+      {topic.sections.map(section => (
+        <ArticleSection key={section.id} id={section.id} heading={section.heading}>
+          <Prose paragraphs={section.body} />
+          {section.passages && section.passages.length > 0 && (
+            <ul className={`mt-6 grid gap-3 ${tileColumns(section.passages.length, "md")}`}>
+              {section.passages.map(p => (
+                <Passage key={passageRef(p)} passage={p} />
+              ))}
+            </ul>
+          )}
+        </ArticleSection>
+      ))}
 
-        {/* The direct answer. Kept as one plain paragraph right under the H1:
-            this is the text a featured snippet would lift. */}
-        <div
-          className="mt-5 rounded-card border-l-4 p-5"
-          style={{ borderColor: TEAL, backgroundColor: "rgba(13,148,136,0.06)" }}
-        >
-          <p className="text-[10.5px] font-semibold uppercase tracking-[1.1px] text-ink-muted">
-            Kort antwoord
-          </p>
-          <p className="mt-1.5 text-[16px] leading-[1.7] text-ink sm:text-[17px]">
-            {topic.answer}
-          </p>
-        </div>
-
-        <p className="mt-4 text-[12.5px] text-ink-muted">
-          {minutes} minuten lezen · Bijgewerkt op{" "}
-          <time dateTime={topic.dateModified}>{formatDutchDate(topic.dateModified)}</time>
-        </p>
-      </header>
-
-      <nav aria-label="Inhoudsopgave" className="mb-12 rounded-card border border-line bg-surface p-5">
-        <h2 className="mb-3 text-[10.5px] font-semibold uppercase tracking-[1.1px] text-ink-faint">
-          In dit artikel
-        </h2>
-        <ol className="space-y-1.5">
-          {toc.map((item, i) => (
-            <li key={item.id}>
-              <a href={`#${item.id}`} className="text-[14px] text-ink-body no-underline hover:underline">
-                <span className={`mr-2 tabular-nums ${TEAL_TEXT}`}>{String(i + 1).padStart(2, "0")}</span>
-                {item.heading}
-              </a>
+      <ArticleSection id="misverstanden" heading={`Wat de Bijbel niet zegt over ${topic.subject}`}>
+        <ul className={`grid gap-3 ${tileColumns(topic.misunderstandings.length, "md")}`}>
+          {topic.misunderstandings.map(item => (
+            <li key={item.title} className={`min-w-0 ${TILE}`}>
+              <h3 className="text-[14.5px] font-bold text-ink">{item.title}</h3>
+              <p className="mt-1 text-[14px] leading-[1.7] text-ink-body">{item.text}</p>
             </li>
           ))}
-        </ol>
-      </nav>
+        </ul>
+      </ArticleSection>
 
-      <div className="space-y-12">
-        {topic.sections.map(section => (
-          <section key={section.id} id={section.id} className="scroll-mt-24">
-            <h2 className={H2}>{section.heading}</h2>
-            <div className="space-y-4">
-              {section.body.map((paragraph, i) => (
-                <p key={i} className={BODY}>
-                  {paragraph}
-                </p>
-              ))}
-            </div>
-            {section.passages && section.passages.length > 0 && (
-              <ul className="mt-6 space-y-3">
-                {section.passages.map(p => (
-                  <Passage key={passageRef(p)} passage={p} />
-                ))}
-              </ul>
-            )}
-          </section>
-        ))}
+      <ArticleSection id="in-de-praktijk" heading={topic.practiceHeading}>
+        <NumberedSteps steps={topic.practice} titleAs="h3" />
+        {topic.careNote && (
+          <aside className="mt-6 max-w-[46rem] rounded-btn border-l-4 p-4" style={TEAL_CALLOUT}>
+            <p className="text-[14.5px] leading-[1.7] text-ink">{topic.careNote}</p>
+          </aside>
+        )}
+      </ArticleSection>
 
-        <section id="misverstanden" className="scroll-mt-24">
-          <h2 className={H2}>Wat de Bijbel niet zegt over {topic.subject}</h2>
-          <ul className="space-y-3">
-            {topic.misunderstandings.map(item => (
-              <li key={item.title} className="rounded-btn border border-line bg-surface p-4">
-                <h3 className="text-[14.5px] font-bold text-ink">{item.title}</h3>
-                <p className="mt-1 text-[14px] leading-[1.7] text-ink-body">{item.text}</p>
-              </li>
-            ))}
-          </ul>
-        </section>
+      <FaqSection heading={`Veelgestelde vragen over ${topic.subject}`} faqs={topic.faqs} />
 
-        <section id="in-de-praktijk" className="scroll-mt-24">
-          <h2 className={H2}>{topic.practiceHeading}</h2>
-          <ol className="space-y-4">
-            {topic.practice.map((step, i) => (
-              <li key={step.title} className="flex gap-4">
-                <span
-                  className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-[12px] font-bold tabular-nums text-white"
-                  style={{ backgroundColor: TEAL }}
-                  aria-hidden
-                >
-                  {i + 1}
-                </span>
-                <div className="min-w-0">
-                  <h3 className="text-[14.5px] font-bold text-ink">{step.title}</h3>
-                  <p className="mt-0.5 text-[14px] leading-[1.7] text-ink-body">{step.text}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
-          {topic.careNote && (
-            <aside
-              className="mt-6 rounded-card border-l-4 p-4"
-              style={{ borderColor: TEAL, backgroundColor: "rgba(13,148,136,0.06)" }}
-            >
-              <p className="text-[14px] leading-[1.7] text-ink">{topic.careNote}</p>
-            </aside>
-          )}
-        </section>
+      <CtaCard
+        title="Lees de teksten zelf, in hun context"
+        text="Met een gratis account lees je elk hoofdstuk in de Statenvertaling en andere vertalingen, met commentaar, grondtekst en je eigen notities ernaast."
+      >
+        <Link href="/registreren" className={BUTTON_PRIMARY} style={TEAL_FILL}>
+          Gratis account aanmaken
+        </Link>
+        <Link href="/studies" className={BUTTON_SECONDARY}>
+          Begeleide studies bekijken
+        </Link>
+      </CtaCard>
 
-        <section id="veelgestelde-vragen" className="scroll-mt-24">
-          <h2 className={H2}>Veelgestelde vragen over {topic.subject}</h2>
-          <div className="rounded-card border border-line bg-surface px-4 py-1 sm:px-[22px]">
-            {topic.faqs.map((faq, i) => (
-              <div key={faq.q} className={`py-4 ${i === 0 ? "" : "border-t border-line-soft"}`}>
-                {/* h3 + visible answer, not a <details>: the FAQPage markup
-                    must describe text that is actually on the page. */}
-                <h3 className="text-[14.5px] font-bold text-ink">{faq.q}</h3>
-                <p className="mt-1.5 text-[14px] leading-[1.7] text-ink-body">{faq.a}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-      </div>
-
-      <section className="mt-16 rounded-card border border-line bg-surface p-5 text-center sm:p-6">
-        <h2 className="text-[16.5px] font-bold text-ink">Lees de teksten zelf, in hun context</h2>
-        <p className="mx-auto mt-1.5 max-w-lg text-[13.5px] leading-[1.6] text-ink-muted">
-          Met een gratis account lees je elk hoofdstuk in de Statenvertaling en andere vertalingen,
-          met commentaar, grondtekst en je eigen notities ernaast.
-        </p>
-        <div className="mt-4 flex flex-col items-stretch justify-center gap-2.5 sm:flex-row sm:items-center">
-          <Link
-            href="/registreren"
-            className="inline-flex h-11 items-center justify-center rounded-btn px-5 text-[14px] font-semibold text-white no-underline transition-opacity hover:opacity-90"
-            style={{ backgroundColor: TEAL }}
-          >
-            Gratis account aanmaken
-          </Link>
-          <Link
-            href="/studies"
-            className="inline-flex h-11 items-center justify-center rounded-btn border border-line bg-surface px-5 text-[14px] font-semibold text-ink-body no-underline transition-colors hover:bg-line-soft"
-          >
-            Begeleide studies bekijken
-          </Link>
-        </div>
-      </section>
-
-      <RelatedLinks links={[...relatedTopics, ...topic.related]} />
+      <RelatedCards links={[...relatedTopics, ...topic.related]} />
 
       {/* Every other topic, so each page links the whole cluster and a crawler
           that lands on one topic reaches all of them without the hub. */}
-      <nav aria-label="Meer onderwerpen" className="mt-12">
-        <h2 className="mb-3 text-[10.5px] font-semibold uppercase tracking-[1.1px] text-ink-faint">
-          Meer onderwerpen
-        </h2>
+      <nav aria-label="Meer onderwerpen" className="pt-2">
+        <h2 className={`${EYEBROW} mb-3 text-ink-muted`}>Meer onderwerpen</h2>
         <ul className="flex flex-wrap gap-2">
           {otherTopics.map(t => (
             <li key={t.slug}>
@@ -225,12 +173,12 @@ export function TopicArticle({ topic }: { topic: Topic }) {
         </ul>
       </nav>
 
-      <p className="mt-10 text-[12px] leading-[1.6] text-ink-faint">
+      <p className="max-w-[46rem] text-[12px] leading-[1.6] text-ink-muted">
         Bijbelcitaten uit de Statenvertaling (publiek domein). Verwijzingen volgen de
         versnummering van de Statenvertaling; in sommige andere vertalingen, vooral Engelse,
         wijkt de nummering van psalmverzen af.
       </p>
-    </article>
+    </ArticleLayout>
   );
 }
 
@@ -241,7 +189,7 @@ function Passage({ passage }: { passage: TopicPassage }) {
     "inline-block rounded-[7px] bg-teal-faint px-2 py-1 text-[12px] font-bold tabular-nums text-teal-dark dark:text-teal-400";
 
   return (
-    <li className="rounded-btn border border-line bg-surface p-4">
+    <li className={`min-w-0 ${TILE}`}>
       {href ? (
         <a
           href={href}
@@ -262,14 +210,4 @@ function Passage({ passage }: { passage: TopicPassage }) {
       <p className="mt-2 text-[14px] leading-[1.7] text-ink-body">{passage.text}</p>
     </li>
   );
-}
-
-/** "23 september 2026" from an ISO date. */
-function formatDutchDate(iso: string): string {
-  const months = [
-    "januari", "februari", "maart", "april", "mei", "juni",
-    "juli", "augustus", "september", "oktober", "november", "december",
-  ];
-  const [year, month, day] = iso.split("-").map(Number);
-  return `${day} ${months[month - 1]} ${year}`;
 }

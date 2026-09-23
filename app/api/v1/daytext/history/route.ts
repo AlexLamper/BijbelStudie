@@ -21,7 +21,9 @@ export async function GET(request: Request) {
     const entries = await readDayTextHistory(Number.isFinite(limit) ? limit : 60);
     return jsonV1(
       { entries },
-      { headers: { 'Cache-Control': 'public, max-age=1800, stale-while-revalidate=86400' } },
+      // `s-maxage` is what Vercel's CDN reads; `max-age` alone only caches in
+      // the browser, so every dialog open elsewhere would reach the function.
+      { headers: { 'Cache-Control': 'public, max-age=1800, s-maxage=1800, stale-while-revalidate=86400' } },
     );
   } catch (error) {
     return handleV1Error(error);

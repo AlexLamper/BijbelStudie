@@ -91,16 +91,28 @@ export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   manifest: "/site.webmanifest",
   applicationName: SITE_NAME,
+  // Every icon, declared here and only here: there is deliberately no
+  // app/favicon.ico / app/icon.* / app/apple-icon.* file convention (it adds a
+  // second <link rel="icon"> with a misleading sizes="16x16", and a public file
+  // on the same URL fails the build). One mark everywhere: the #262626 tile
+  // with the #F9F9F9 cross of public/images/logo.svg, which is the App Store
+  // icon's geometry. Google picks ANY of these for the search-result favicon
+  // (it had picked a touch icon whose cross was shrunk to 62%), so none may
+  // differ from the mark. The touch and maskable PNGs are that same mark full
+  // bleed, because iOS and Android apply their own corner mask.
   icons: {
     icon: [
-      { url: "/images/favicon.ico", type: "image/x-icon" },
+      {
+        url: "/favicon.ico",
+        type: "image/x-icon",
+        sizes: "16x16 32x32 48x48 64x64 96x96 128x128 256x256",
+      },
       { url: "/icon.svg", type: "image/svg+xml" },
       { url: "/images/icon-192.png", type: "image/png", sizes: "192x192" },
       { url: "/images/icon-512.png", type: "image/png", sizes: "512x512" },
     ],
-    shortcut: "/images/favicon.ico",
-    // iOS ignores .ico for the home-screen icon and needs a PNG.
-    apple: [{ url: "/images/apple-touch-icon.png", sizes: "180x180" }],
+    // iOS ignores .ico for the home-screen icon and needs an opaque PNG.
+    apple: [{ url: "/images/apple-touch-icon.png", type: "image/png", sizes: "180x180" }],
   },
   alternates: {
     canonical: "/",

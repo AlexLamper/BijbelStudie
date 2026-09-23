@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Check, Lock } from 'lucide-react';
 import { normaliseBookName } from '../../../lib/bookCanon';
+import { memberRedirectFor } from '../../../lib/memberRedirects';
 
 export interface LessonRow {
   day: number;
@@ -101,8 +102,16 @@ export default function LessonList({
       const slug = bookPageSlug(lesson.book);
       if (!bySlug.has(slug)) bySlug.set(slug, lesson.book);
     }
-    return [...bySlug].map(([slug, name]) => ({ slug, name }));
-  }, [lessons]);
+    // A member never sees /bijbelboeken/<slug> (middleware sends them to the
+    // book's study), so link a member straight there - and drop the book whose
+    // study is this very page, which would only link back to itself.
+    return [...bySlug]
+      .map(([slug, name]) => {
+        const publicHref = `/bijbelboeken/${slug}`;
+        return { slug, name, href: guest ? publicHref : memberRedirectFor(publicHref) ?? publicHref };
+      })
+      .filter((book) => book.href !== `/studies/${studyId}`);
+  }, [lessons, guest, studyId]);
 
   return (
     <section
@@ -269,7 +278,7 @@ export default function LessonList({
             <React.Fragment key={book.slug}>
               {index > 0 && <span aria-hidden> · </span>}
               <Link
-                href={`/bijbelboeken/${book.slug}`}
+                href={book.href}
                 prefetch={false}
                 className="font-semibold text-teal-dark no-underline hover:underline dark:text-teal-400 dark:hover:text-teal-300"
               >
