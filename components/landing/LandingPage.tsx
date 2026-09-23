@@ -201,7 +201,7 @@ function Navbar() {
             sitemap, maar horen niet in de hoofdnavigatie van de app. */}
         <nav className="hidden md:flex items-center justify-center gap-1">
           {[
-            { href: "/studies",       label: "Studies" },
+            { href: "#in-actie",      label: "Studies" },
             { href: "#prijzen",       label: "Prijzen" },
             { href: "#faq",           label: "FAQ" },
           ].map(({ href, label }) => (
@@ -241,7 +241,7 @@ function Navbar() {
               style={{ borderColor: T.border, backgroundColor: T.page }}
             >
               {[
-                { href: "/studies",    label: "Studies" },
+                { href: "#in-actie",   label: "Studies" },
                 { href: "#prijzen",    label: "Prijzen" },
                 { href: "#faq",        label: "FAQ" },
                 { href: "/inloggen",   label: "Inloggen" },

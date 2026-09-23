@@ -120,13 +120,15 @@ export async function middleware(req: NextRequest) {
   //    account, and every account-bound WRITE underneath (AI chat, TTS,
   //    study-progress, enrollment) gates itself with requireUser() in its own
   //    API route.
-  //  - /dashboard, /notities, /profiel, /instellingen, /groepen and /feedback
-  //    used to be listed here and 307'd a guest to "/", which made every one of
-  //    those links in the rail a dead end. Each of their LAYOUTS now reads the
+  //  - /notities, /profiel, /instellingen, /groepen and /feedback used to be
+  //    listed here and 307'd a guest to "/", which made every one of those
+  //    links in the rail a dead end. Each of their LAYOUTS now reads the
   //    session itself and renders components/auth/GuestGate.tsx for a guest,
   //    so the page component never mounts without a session. Do not add a
   //    route back here without removing that guard, or the guard will never be
   //    reached; do not remove a guard without adding the route back here.
+  //  - /dashboard is the one exception: its layout renders the real page for a
+  //    guest too, degraded to a generic empty state (app/dashboard/layout.tsx).
   //
   // The old English entries (/study, /notes, /plans, ...) are long gone: after
   // the rename they prefix-matched nothing.

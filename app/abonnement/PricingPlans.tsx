@@ -330,10 +330,8 @@ export default function PricingPlans() {
     <>
       {offersTrial && !isPro && (
         <p className="mx-auto mt-[14px] max-w-[540px] rounded-card bg-teal-soft px-4 py-3 text-center text-[13px] leading-[1.6] text-teal-dark">
-          <strong className="font-bold">De eerste {PRO_TRIAL_DAYS} dagen zijn gratis.</strong>{" "}
-          Je kiest een betaalmethode, maar betaalt vandaag niets. Daarna loopt je abonnement
-          automatisch door tegen de prijs van je plan; zeg je binnen {PRO_TRIAL_DAYS} dagen op, dan
-          betaal je niets. Eén keer per account.
+          <strong className="font-bold">Eerste {PRO_TRIAL_DAYS} dagen gratis.</strong>{" "}
+          Zeg binnen {PRO_TRIAL_DAYS} dagen op en je betaalt niets. Eén keer per account.
         </p>
       )}
 
