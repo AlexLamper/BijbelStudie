@@ -30,6 +30,34 @@ export function canCreateAnotherNote(existingNoteCount: number, isPro: boolean):
   return isPro || existingNoteCount < FREE_NOTE_LIMIT;
 }
 
+/**
+ * The notes that count towards FREE_NOTE_LIMIT: the ones the reader wrote on
+ * the website. Deliberately NOT counted:
+ *  - pure highlights (type "highlight"): markeringen stay free and unlimited;
+ *  - the note a finished lesson writes from the Toepassing answer
+ *    (lib/studyCompletion.ts, tag "studie") - finishing seven lessons used to
+ *    use up the whole allowance, so a free reader could no longer write a note
+ *    of their own;
+ *  - notes made in the app, which carry the device's `clientId` (the website
+ *    never sets it): the app's notes have no free limit, so they must not lock
+ *    the website either.
+ * `type: { $ne }` rather than `$in` so an old note without a type still counts
+ * as the note it is.
+ */
+export function limitedNotesFilter(userId: unknown): Record<string, unknown> {
+  return {
+    userId,
+    type: { $ne: 'highlight' },
+    tags: { $ne: 'studie' },
+    clientId: { $exists: false },
+  };
+}
+
+/** Shown when a free account reaches the limit. */
+export const NOTE_LIMIT_MESSAGE =
+  `Je hebt je ${FREE_NOTE_LIMIT} gratis notities op de website gebruikt. Met Pro schrijf je onbeperkt notities. ` +
+  'Markeringen en je antwoorden uit de studies tellen niet mee.';
+
 function startOfDay(date: Date): Date {
   const d = new Date(date);
   d.setHours(0, 0, 0, 0);

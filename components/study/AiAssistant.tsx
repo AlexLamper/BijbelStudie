@@ -553,8 +553,8 @@ export default function AiAssistant({
             <UpgradePrompt
               surface="ai_limit"
               title="Dagelijkse limiet bereikt"
-              body={`Je hebt je ${quota?.cap ?? 5} gratis vragen voor vandaag gesteld. Morgen kun je weer verder, of ga onbeperkt verder met Pro.`}
-              cta="Onbeperkt vragen stellen"
+              body={`Je hebt je ${quota?.cap ?? 5} gratis vragen voor vandaag gesteld. Morgen kun je weer verder, of stel er tot 200 per dag met Pro.`}
+              cta="Meer vragen met Pro"
             />
           ) : (
             <>

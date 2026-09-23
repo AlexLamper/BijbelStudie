@@ -4,6 +4,9 @@ import { authOptions } from "../../../../lib/authOptions";
 import connectMongoDB from "../../../../lib/mongodb";
 import Note from "../../../../models/Note";
 import User from "../../../../models/User";
+import { canCreateAnotherNote, limitedNotesFilter, NOTE_LIMIT_MESSAGE } from "../../../../lib/noteXp";
+import { resolveIsPro } from "../../../../lib/mobilePremium";
+import { isAdminEmail } from "../../../../lib/adminEmails";
 
 interface RouteParams {
   params: Promise<{
@@ -77,6 +80,24 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       isPrivate,
       type
     } = body;
+
+    // Adding text to a highlight turns it into a note, which is where the free
+    // limit applies - otherwise "highlight, then edit" would walk around it.
+    if (type && type !== "highlight") {
+      const existing = await Note.findOne({ _id: resolvedParams.id, userId: user._id })
+        .select("type")
+        .lean<{ type?: string }>();
+      const isPro = resolveIsPro(user, isAdminEmail(session.user.email));
+      if (existing?.type === "highlight" && !isPro) {
+        const noteCount = await Note.countDocuments(limitedNotesFilter(user._id));
+        if (!canCreateAnotherNote(noteCount, isPro)) {
+          return NextResponse.json(
+            { error: NOTE_LIMIT_MESSAGE, code: "NOTE_LIMIT_REACHED" },
+            { status: 403 }
+          );
+        }
+      }
+    }
 
     const updatedNote = await Note.findOneAndUpdate(
       { _id: resolvedParams.id, userId: user._id },

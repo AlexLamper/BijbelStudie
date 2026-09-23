@@ -9,7 +9,8 @@ import { generatePageMetadata } from "../../lib/pageMetadata";
 import { JsonLd } from "../../components/seo/JsonLd";
 import { PLANS } from "../../lib/pricing";
 import { absoluteUrl, BASE_URL, ORG_ID } from "../../lib/seo/constants";
-import { graph, webPageNode, breadcrumbNode } from "../../lib/seo/structuredData";
+import { graph, webPageNode, breadcrumbNode, faqNode } from "../../lib/seo/structuredData";
+import { ABONNEMENT_FAQ } from "./content";
 
 export async function generateMetadata(): Promise<Metadata> {
   const cookieStore = await cookies();
@@ -26,6 +27,10 @@ const CRUMBS = [
  * Prices come from lib/pricing.ts, the same module the page renders from, so
  * the structured data can never advertise an amount Stripe does not charge -
  * which is both a Google policy violation and an EU price-indication problem.
+ *
+ * The FAQPage node is built from ABONNEMENT_FAQ, the list page.tsx renders
+ * visibly. It is the only FAQPage on this URL: the root layout's graph carries
+ * Organization/WebSite/WebApplication and no FAQ.
  */
 function pricingGraph() {
   const url = absoluteUrl("/abonnement");
@@ -34,7 +39,7 @@ function pricingGraph() {
       path: "/abonnement",
       name: "Prijzen en abonnement",
       description:
-        "BijbelStudie is gratis te gebruiken, inclusief KingComments. Pro ontgrendelt Matthew Henry, Calvijn en Dachsel, 200 AI-vragen per dag en de grondtekst.",
+        "Wat gratis blijft en wat BijbelStudie Pro toevoegt: KingComments, begeleide studies en 5 AI-vragen per dag zijn gratis. Pro ontgrendelt Matthew Henry, Calvijn en Dachsel, 200 AI-vragen per dag en de volledige grondtekst.",
       breadcrumbId: `${url}#breadcrumb`,
     }),
     breadcrumbNode(CRUMBS, url),
@@ -75,7 +80,8 @@ function pricingGraph() {
           seller: { "@id": ORG_ID },
         },
       ],
-    }
+    },
+    faqNode(ABONNEMENT_FAQ, url)
   );
 }
 

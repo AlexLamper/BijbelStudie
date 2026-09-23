@@ -46,7 +46,7 @@ export const HELP_TOPICS: HelpTopic[] = [
       },
       {
         q: "Kan ik twee vertalingen naast elkaar leggen?",
-        a: "Ja. In de vergelijkingsweergave zet je vertalingen naast elkaar per vers. Juist op de plekken waar ze uiteenlopen zit meestal de interessantste vraag van je studie.",
+        a: "Nog niet in één scherm: je wisselt met de vertalingkeuze tussen vertalingen. Lees een lastig vers in twee vertalingen na elkaar; juist op de plekken waar ze uiteenlopen zit meestal de interessantste vraag van je studie.",
       },
       {
         q: "Wat is de grondtekstfunctie?",
@@ -90,7 +90,7 @@ export const HELP_TOPICS: HelpTopic[] = [
       },
       {
         q: "Hoeveel vragen kan ik stellen?",
-        a: "Met een gratis account vijf vragen per dag. Met Pro is het aantal onbeperkt.",
+        a: "Met een gratis account vijf vragen per dag. Met Pro zijn het er 200 per dag.",
       },
       {
         q: "Kan ik de antwoorden vertrouwen?",
@@ -126,7 +126,7 @@ export const HELP_TOPICS: HelpTopic[] = [
     faqs: [
       {
         q: "Wat kost BijbelStudie Pro?",
-        a: "Pro kost €9,99 per maand, maandelijks gefactureerd, of €89,99 per jaar, in één keer gefactureerd. Zonder Pro blijft bijbellezen, notities, begeleide studies, het KingComments-commentaar en vijf AI-vragen per dag gratis beschikbaar.",
+        a: "Pro kost €9,99 per maand, maandelijks gefactureerd, of €89,99 per jaar, in één keer gefactureerd. Zonder Pro blijven bijbellezen, markeringen, begeleide studies, het KingComments-commentaar en vijf AI-vragen per dag gratis. Notities zijn in de app onbeperkt; op de website schrijf je er zonder Pro zeven.",
       },
       {
         q: "Wat krijg ik met Pro?",

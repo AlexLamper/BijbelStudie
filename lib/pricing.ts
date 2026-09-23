@@ -122,6 +122,7 @@ export function freeMonthsOnAnnual(): number {
 export const PRO_FEATURES = [
   "Matthew Henry, Calvijn en Dachsel volledig",
   "200 AI-vragen per dag, i.p.v. 5",
+  "Onbeperkt notities op de website",
   "Grondtekst: Hebreeuws en Grieks",
   "Prioriteit bij ondersteuning",
 ];

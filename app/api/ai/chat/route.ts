@@ -152,7 +152,7 @@ export async function POST(req: NextRequest) {
           cap,
           hint: unlimited
             ? undefined
-            : `Morgen kun je weer ${FREE_DAILY_CAP} vragen stellen, of upgrade naar Pro voor onbeperkt gebruik.`,
+            : `Morgen kun je weer ${FREE_DAILY_CAP} vragen stellen, of upgrade naar Pro voor ${PREMIUM_DAILY_CAP} vragen per dag.`,
         },
         { status: 429 },
       );
