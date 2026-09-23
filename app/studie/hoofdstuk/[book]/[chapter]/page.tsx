@@ -67,7 +67,9 @@ export default async function ChapterStudyPage({ params, searchParams }: PagePro
   const fromUrlVersion =
     vertaling && versions.some((version) => version.id === vertaling) ? vertaling : null;
 
-  const steps = resolveLessonSteps(study.id, lesson);
+  // Opened on its own, so the context step is always there - there is no
+  // lesson before this one that already showed it (lib/lessonPayload.ts).
+  const steps = resolveLessonSteps(study, lesson, { standalone: true });
   const urlStep = isStepKey(stap) && steps.includes(stap) ? (stap as StepKey) : null;
   const context = chapterStudyContext(target);
 
@@ -84,6 +86,7 @@ export default async function ChapterStudyPage({ params, searchParams }: PagePro
           translations: versions,
           commentaryId: resolveCommentaryId({ enrollmentCommentary: null, userPreference: null }),
           completedDays: new Set<number>(),
+          standalone: true,
         })}
         initialState={{ ...EMPTY_LESSON_STATE, currentStep: initialStep }}
         initialStep={initialStep}
@@ -139,6 +142,7 @@ export default async function ChapterStudyPage({ params, searchParams }: PagePro
           userPreference: user.preferences?.commentary ?? null,
         }),
         completedDays,
+        standalone: true,
       })}
       initialState={buildLessonState(state, steps[0])}
       initialStep={initialStep}

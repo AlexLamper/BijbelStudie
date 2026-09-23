@@ -2,6 +2,7 @@ import type { NextRequest } from 'next/server';
 import connectMongoDB from '../../../../lib/mongodb';
 import { corsPreflight, errorV1, handleV1Error, jsonV1 } from '../../../../lib/apiV1';
 import { requireUser } from '../../../../lib/apiAuth';
+import { noteCreationGuard } from '../../../../lib/noteXp';
 import {
   SYNC_KINDS,
   assertClientId,
@@ -20,6 +21,17 @@ export async function OPTIONS() {
 }
 
 const MAX_CHANGES = 500;
+
+/**
+ * Why a change was not applied. NOTE_LIMIT_REACHED is the free note limit
+ * (lib/entitlements.ts): the note stays on the device and is not stored here
+ * until the reader has room again or has Pro.
+ */
+const SKIP_REASON = {
+  stale: 'STALE',
+  deleted: 'DELETED',
+  limit: 'NOTE_LIMIT_REACHED',
+} as const;
 
 /**
  * POST /api/v1/sync
@@ -58,6 +70,9 @@ export async function POST(req: NextRequest) {
 
     await connectMongoDB();
 
+    // One guard for the whole batch; it counts lazily, and only for creates.
+    const canCreateNote = noteCreationGuard(user.id, user.isPro);
+
     let applied = 0;
     const rejected: Array<{ id: string; reason: string }> = [];
 
@@ -86,10 +101,11 @@ export async function POST(req: NextRequest) {
           id,
           (change.data ?? {}) as Record<string, unknown>,
           clientUpdatedAt && !Number.isNaN(clientUpdatedAt.getTime()) ? clientUpdatedAt : null,
+          { canCreateNote },
         );
 
         if (outcome.skipped) {
-          rejected.push({ id, reason: outcome.skipped === 'stale' ? 'STALE' : 'DELETED' });
+          rejected.push({ id, reason: SKIP_REASON[outcome.skipped] });
         } else {
           applied += 1;
         }

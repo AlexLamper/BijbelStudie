@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { AlertCircle, Plus } from 'lucide-react';
+import { AlertCircle, Languages, Plus } from 'lucide-react';
 
 import { CreateNoteModal } from '../CreateNoteModal';
 import SpeakButton from '../SpeakButton';
@@ -10,6 +10,7 @@ import VerseMarkers from '../VerseMarkers';
 import { FOCUS_RING } from './lesson-layout';
 import CrossRefButton from '../crossrefs/CrossRefButton';
 import CrossRefPanel from '../crossrefs/CrossRefPanel';
+import OriginalVersePanel from './OriginalVersePanel';
 import { useCrossRefCopy } from '../crossrefs/copy';
 import { getBibleAttribution } from '../../../lib/bible-attribution';
 import { toBookIndex } from '../../../lib/readChaptersCanon';
@@ -17,6 +18,8 @@ import { cn } from '../../../lib/utils';
 import { useCrossRefs } from '../../../hooks/useCrossRefs';
 import { HIGHLIGHT_TINTS, useVerseAnnotations } from '../../../hooks/useVerseAnnotations';
 import type { ReadingPreferences } from '../../../hooks/useReadingPreferences';
+import { useIsPro } from '../../../hooks/useIsPro';
+import { openProOffer } from '../../../lib/proOffer';
 
 type VerseMap = Record<string, string>;
 
@@ -74,6 +77,26 @@ export default function PassageReader({
    */
   const [revealedVerse, setRevealedVerse] = useState<number | null>(null);
   const crossRefButtons = useRef(new Map<number, HTMLButtonElement | null>());
+
+  /**
+   * The verse whose grondtekst is open under it, or null. One at a time, like
+   * the cross-references. Pro only: a free reader who taps the control gets
+   * the Pro offer instead (the whole-chapter grondtekst in Verdieping keeps its
+   * free first verse - lib/proContent.ts).
+   */
+  const [originalVerse, setOriginalVerse] = useState<number | null>(null);
+  const isPro = useIsPro();
+  const toggleOriginal = (verse: number) => {
+    if (!isPro) {
+      openProOffer({
+        surface: 'original_tap',
+        reason:
+          'Met Pro zie je bij elk vers het Hebreeuws of Grieks eronder, woord voor woord, terwijl je leest.',
+      });
+      return;
+    }
+    setOriginalVerse((current) => (current === verse ? null : verse));
+  };
   const crossRefCopy = useCrossRefCopy();
 
   /**
@@ -225,7 +248,9 @@ export default function PassageReader({
             const marks = annotations.get(number);
             const tint = marks?.highlight ? HIGHLIGHT_TINTS[marks.highlight] : null;
             const crossRefsOpen = crossRefVerse === number;
-            const clusterRevealed = revealedVerse === number || crossRefsOpen;
+            const originalOpen = originalVerse === number;
+            const clusterRevealed = revealedVerse === number || crossRefsOpen || originalOpen;
+            const originalPanelId = `studie-grondtekst-verse-${number}`;
             // An IDREF, so no spaces: the book name never goes in here.
             const crossRefPanelId = `studie-crossrefs-verse-${number}`;
 
@@ -308,6 +333,24 @@ export default function PassageReader({
                   label={`Vers ${number} voorlezen`}
                   className="border border-les-card-line bg-les-bg shadow-sm"
                 />
+                {/* Languages IDENTIFIES the control: it is the glyph the
+                    Grondtekst panel in Verdieping carries. */}
+                <button
+                  type="button"
+                  onClick={() => toggleOriginal(number)}
+                  aria-expanded={isPro ? originalOpen : undefined}
+                  aria-controls={isPro ? originalPanelId : undefined}
+                  aria-label={`Grondtekst van vers ${number}`}
+                  title={isPro ? `Grondtekst van vers ${number}` : `Grondtekst van vers ${number} (Pro)`}
+                  className={cn(
+                    'inline-flex items-center justify-center rounded-md border p-1.5 shadow-field transition-colors',
+                    originalOpen
+                      ? 'border-teal bg-[var(--teal-wash)] text-teal-dark dark:text-teal-400'
+                      : 'border-line bg-surface text-gray-500 hover:bg-[rgba(13,148,136,0.08)] hover:text-[#0D9488] dark:text-muted-foreground dark:hover:text-teal-400',
+                  )}
+                >
+                  <Languages className="h-3.5 w-3.5" aria-hidden />
+                </button>
                 <CrossRefButton
                   ref={(element) => {
                     crossRefButtons.current.set(number, element);
@@ -337,6 +380,18 @@ export default function PassageReader({
                   StudyFlowShell#startsInSidewaysRegion); the panel is an
                   ordinary block in the step column, so the ResizableSplit
                   divider beside the dock never has to know it is there. */}
+              {originalOpen && (
+                <div data-no-page-swipe>
+                  <OriginalVersePanel
+                    id={originalPanelId}
+                    book={book}
+                    chapter={chapter}
+                    verse={number}
+                    onClose={() => setOriginalVerse(null)}
+                  />
+                </div>
+              )}
+
               {crossRefsOpen && (
                 <div data-no-page-swipe>
                   <CrossRefPanel

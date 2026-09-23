@@ -5,11 +5,12 @@ import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { SessionContext } from 'next-auth/react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
-import { Play, Pause, Square, Volume2, Settings2, Loader2, Cloud, Monitor, Sparkles, AlertCircle, X } from 'lucide-react';
+import { Play, Pause, Square, Volume2, Settings2, Loader2, Cloud, Monitor, AlertCircle, X } from 'lucide-react';
 import { useTTS, type SelectedVoice } from '../../hooks/useTTS';
 import { useSpokenTextPublisher } from './SpokenText';
 import type { CloudVoice } from '../../lib/cloudVoices';
 import { cn } from '../../lib/utils';
+import { openProOffer } from '../../lib/proOffer';
 import { Dialog, DialogPortal, DialogOverlay, DialogTitle, DialogDescription, DialogClose } from '../ui/dialog';
 
 interface SpeakButtonProps {
@@ -28,6 +29,10 @@ interface SpeakButtonProps {
 }
 
 const TEAL = '#0D9488';
+
+/** Why the natural voices are locked, said the same way wherever they are. */
+const TTS_PRO_REASON =
+  'De natuurlijke voorleesstemmen horen bij Pro. Zonder Pro lees je voor met de stem van je browser.';
 const RATES: { value: number; label: string }[] = [
   { value: 0.85, label: 'Langzaam' },
   { value: 1,    label: 'Normaal' },
@@ -79,6 +84,18 @@ export default function SpeakButton({
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, [settingsOpen]);
+
+  // A cloud voice refused with 403 (an account that is no longer Pro, still
+  // holding a stored cloud voice): offer Pro, and fall back to the browser
+  // voice so the next tap simply reads.
+  useEffect(() => {
+    if (!tts.proRequired) return;
+    tts.clearProRequired();
+    const fallback =
+      tts.browserVoices.find(v => v.lang.toLowerCase().startsWith('nl')) ?? tts.browserVoices[0];
+    if (fallback) tts.setSelected({ kind: 'browser', voice: fallback });
+    openProOffer({ surface: 'tts', reason: TTS_PRO_REASON });
+  }, [tts]);
 
   // Hand the reader's position to whatever is rendering this text. Publishing
   // from an effect rather than from the hook itself keeps useTTS free of any
@@ -429,16 +446,18 @@ function SettingsPopover({
         </div>
       </div>
 
-      {/* Cloud voices */}
-      {tts.cloudAvailable && (
+      {/* Cloud voices. Listed for a free reader too, marked Pro: they are
+          billed per character (app/api/tts refuses them without Pro), and
+          seeing them is what makes the upgrade concrete. */}
+      {(tts.cloudAvailable || tts.cloudLocked) && (
         <div>
           <div className="flex items-center justify-between mb-2">
             <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-muted-foreground inline-flex items-center gap-1">
-              <Cloud className="h-2.5 w-2.5" /> Cloud-stemmen
+              <Cloud className="h-2.5 w-2.5" /> Natuurlijke stemmen
             </p>
             <span className="inline-flex items-center gap-0.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full text-[#0D9488] dark:text-teal-400"
               style={{ backgroundColor: 'rgba(13,148,136,0.1)' }}>
-              <Sparkles className="h-2 w-2" /> Hoge kwaliteit
+              {tts.cloudLocked ? 'Pro' : 'Hoge kwaliteit'}
             </span>
           </div>
           <div className="grid grid-cols-1 gap-1">
@@ -447,8 +466,16 @@ function SettingsPopover({
                 key={v.id}
                 voice={v}
                 selected={selectedCloudId === v.id}
-                onSelect={() => tts.setSelected({ kind: 'cloud', voice: v })}
-                onPreview={() => previewCloudVoice(v, tts, onSpeak)}
+                onSelect={() =>
+                  tts.cloudLocked
+                    ? openProOffer({ surface: 'tts', reason: TTS_PRO_REASON })
+                    : tts.setSelected({ kind: 'cloud', voice: v })
+                }
+                onPreview={() =>
+                  tts.cloudLocked
+                    ? openProOffer({ surface: 'tts', reason: TTS_PRO_REASON })
+                    : previewCloudVoice(v, tts, onSpeak)
+                }
                 isLoading={tts.isLoading && selectedCloudId === v.id}
               />
             ))}
@@ -475,14 +502,14 @@ function SettingsPopover({
         </div>
       )}
 
-      {!tts.cloudAvailable && browserDutch.length === 0 && (
+      {!tts.cloudAvailable && !tts.cloudLocked && browserDutch.length === 0 && (
         <p className="text-[11px] text-gray-500 dark:text-muted-foreground leading-relaxed">
           Geen Nederlandse stem gevonden. Voor de beste kwaliteit: gebruik Chrome of Edge,
           of vraag de beheerder om cloud-stemmen te activeren.
         </p>
       )}
 
-      {!tts.cloudAvailable && (
+      {!tts.cloudAvailable && !tts.cloudLocked && (
         <p className="text-[10px] text-gray-400 dark:text-muted-foreground leading-relaxed border-t border-gray-100 dark:border-border pt-2.5">
           Tip: cloud-stemmen (mannen- en vrouwenstemmen, neuraal) worden geactiveerd zodra de beheerder
           een Google TTS sleutel configureert.

@@ -50,6 +50,19 @@ export interface UseTTSReturn {
    */
   authRequired: boolean;
   clearAuthRequired: () => void;
+  /**
+   * The cloud voices exist but this reader is not Pro: they are listed with a
+   * Pro mark and the browser voice is used instead. `cloudAvailable` is only
+   * true when the reader may actually use them.
+   */
+  cloudLocked: boolean;
+  /**
+   * The voorleesdienst answered 403 PRO_REQUIRED - a stored cloud voice from
+   * an account that is no longer Pro, for instance. Like `authRequired`, not an
+   * error to report but a reason to show the Pro offer.
+   */
+  proRequired: boolean;
+  clearProRequired: () => void;
 }
 
 const PREFERRED_VOICE_KEYWORDS = [
@@ -102,15 +115,18 @@ const ERR_BROWSER_VOICE = 'De browser-stem stopte onverwacht. Probeer een andere
 // Shared across all hook instances so mounting many SpeakButtons (e.g. one per
 // verse) does not fire one request per instance. Deduped to a single in-flight
 // promise each.
-let _cloudConfigPromise: Promise<boolean> | null = null;
+let _cloudConfigPromise: Promise<CloudConfig> | null = null;
 let _accountVoicePromise: Promise<string | null> | null = null;
 
-function fetchCloudConfigOnce(): Promise<boolean> {
+/** Whether the cloud voices exist, and whether this reader may use them (Pro). */
+type CloudConfig = { configured: boolean; allowed: boolean };
+
+function fetchCloudConfigOnce(): Promise<CloudConfig> {
   if (!_cloudConfigPromise) {
     _cloudConfigPromise = fetch('/api/tts')
       .then(r => (r.ok ? r.json() : null))
-      .then(data => !!data?.configured)
-      .catch(() => false);
+      .then(data => ({ configured: !!data?.configured, allowed: !!data?.allowed }))
+      .catch(() => ({ configured: false, allowed: false }));
   }
   return _cloudConfigPromise;
 }
@@ -368,6 +384,7 @@ function wordAtTime(timeline: TimedWord[], time: number): TimedWord | null {
 export function useTTS(): UseTTSReturn {
   const [isSupported, setIsSupported] = useState(false);
   const [cloudAvailable, setCloudAvailable] = useState(false);
+  const [cloudLocked, setCloudLocked] = useState(false);
   const [browserVoices, setBrowserVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [selected, setSelectedState] = useState<SelectedVoice>(null);
   const [rate, setRateState] = useState<number>(() => {
@@ -382,6 +399,8 @@ export function useTTS(): UseTTSReturn {
   const clearError = useCallback(() => setError(null), []);
   const [authRequired, setAuthRequired] = useState(false);
   const clearAuthRequired = useCallback(() => setAuthRequired(false), []);
+  const [proRequired, setProRequired] = useState(false);
+  const clearProRequired = useCallback(() => setProRequired(false), []);
 
   const [spokenRange, setSpokenRange] = useState<SpokenRange | null>(null);
 
@@ -486,7 +505,11 @@ export function useTTS(): UseTTSReturn {
   useEffect(() => {
     let cancelled = false;
     fetchCloudConfigOnce()
-      .then(configured => { if (!cancelled && configured) setCloudAvailable(true); })
+      .then(config => {
+        if (cancelled || !config.configured) return;
+        if (config.allowed) setCloudAvailable(true);
+        else setCloudLocked(true);
+      })
       .finally(() => { if (!cancelled) setConfigChecked(true); });
     fetchAccountVoiceOnce()
       .then(v => { if (!cancelled && v) setAccountVoiceId(v); })
@@ -683,6 +706,21 @@ export function useTTS(): UseTTSReturn {
       return;
     }
 
+    if (res.status === 403) {
+      // The cloud voices are Pro (app/api/tts). Same reset as above; the
+      // button answers with the Pro offer rather than an error banner.
+      if (!stoppedRef.current) {
+        queueRef.current = [];
+        idxRef.current = 0;
+        setIsSpeaking(false);
+        setIsPaused(false);
+        setIsLoading(false);
+        setSpokenRange(null);
+        setProRequired(true);
+      }
+      return;
+    }
+
     if (!res.ok) {
       // The route always sends a Dutch `hint` now; Google's own English
       // `message` is deliberately no longer used as user-facing copy.
@@ -858,5 +896,6 @@ export function useTTS(): UseTTSReturn {
     rate, setRate,
     error, clearError,
     authRequired, clearAuthRequired,
+    cloudLocked, proRequired, clearProRequired,
   };
 }

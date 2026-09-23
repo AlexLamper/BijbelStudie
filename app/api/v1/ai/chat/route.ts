@@ -1,3 +1,4 @@
+import { FREE_AI_DAILY_CAP, PRO_AI_DAILY_CAP } from '../../../../../lib/entitlements';
 import { requireUser } from '../../../../../lib/apiAuth';
 import { corsPreflight, errorV1, handleV1Error, jsonV1 } from '../../../../../lib/apiV1';
 import connectMongoDB from '../../../../../lib/mongodb';
@@ -40,8 +41,9 @@ export async function OPTIONS() {
 }
 
 // Mirrors `/api/ai/chat` on the website: same model, same caps, same prompt.
-const FREE_DAILY_CAP = 5;
-const PREMIUM_DAILY_CAP = 200;
+// The caps live in lib/entitlements.ts, shared by the website and the app route.
+const FREE_DAILY_CAP = FREE_AI_DAILY_CAP;
+const PREMIUM_DAILY_CAP = PRO_AI_DAILY_CAP;
 const MAX_MESSAGE_LENGTH = 2000;
 const MAX_HISTORY_MESSAGES = 10;
 const MAX_HISTORY_ITEM_LENGTH = 4000;

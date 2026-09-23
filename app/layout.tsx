@@ -18,6 +18,7 @@ import { JsonLd } from "../components/seo/JsonLd";
 import EnvironmentBanner from "../components/layout/EnvironmentBanner";
 import AppPromoBanner from "../components/layout/AppPromoBanner";
 import { Toaster } from "../components/ui/toaster";
+import ProOfferDialog from "../components/pricing/ProOfferDialog";
 import CookieConsent from "../components/ui/CookieConsent";
 import { APP_STORE_URL } from "../lib/appStore";
 import { appStoreIdFromUrl } from "../lib/mobilePlatform";
@@ -277,6 +278,9 @@ export default async function RootLayout({
             on a phone, so it never lands on the promo banner or the tab bar;
             bottom-right from md up - see components/ui/toast.tsx. */}
         <Toaster />
+        {/* The Pro offer (free trial or upgrade), raised by a paywall through
+            lib/proOffer.ts - never on its own. Renders nothing until then. */}
+        <ProOfferDialog />
         {/* Asks once, remembers the answer, and gates the usage statistics in
             lib/analytics.ts behind it. Renders nothing until mounted, nothing
             once answered, and nothing inside the /studie flow - see

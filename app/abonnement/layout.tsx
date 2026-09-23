@@ -11,6 +11,7 @@ import { PLANS } from "../../lib/pricing";
 import { absoluteUrl, BASE_URL, ORG_ID } from "../../lib/seo/constants";
 import { graph, webPageNode, breadcrumbNode, faqNode } from "../../lib/seo/structuredData";
 import { ABONNEMENT_FAQ } from "./content";
+import { FREE_AI_DAILY_CAP, PRO_AI_DAILY_CAP } from "../../lib/entitlements";
 
 export async function generateMetadata(): Promise<Metadata> {
   const cookieStore = await cookies();
@@ -39,7 +40,7 @@ function pricingGraph() {
       path: "/abonnement",
       name: "Prijzen en abonnement",
       description:
-        "Wat gratis blijft en wat BijbelStudie Pro toevoegt: KingComments, begeleide studies en 5 AI-vragen per dag zijn gratis. Pro ontgrendelt Matthew Henry, Calvijn en Dachsel, 200 AI-vragen per dag en de volledige grondtekst.",
+        `Wat gratis blijft en wat BijbelStudie Pro toevoegt: KingComments, begeleide studies en ${FREE_AI_DAILY_CAP} AI-vragen per dag zijn gratis. Pro ontgrendelt Matthew Henry, Calvijn en Dachsel, de grondtekst bij elk vers, ${PRO_AI_DAILY_CAP} AI-vragen per dag en onbeperkt notities.`,
       breadcrumbId: `${url}#breadcrumb`,
     }),
     breadcrumbNode(CRUMBS, url),
@@ -48,7 +49,7 @@ function pricingGraph() {
       "@id": `${url}#product`,
       name: "BijbelStudie Pro",
       description:
-        "De commentaren van Matthew Henry, Calvijn en Dachsel, 200 AI-vragen per dag en de volledige Hebreeuwse en Griekse grondtekst, boven op alles wat gratis blijft - inclusief KingComments.",
+        `De commentaren van Matthew Henry, Calvijn en Dachsel, ${PRO_AI_DAILY_CAP} AI-vragen per dag, onbeperkt notities en de volledige Hebreeuwse en Griekse grondtekst, boven op alles wat gratis blijft - inclusief KingComments.`,
       brand: { "@id": ORG_ID },
       url,
       offers: [

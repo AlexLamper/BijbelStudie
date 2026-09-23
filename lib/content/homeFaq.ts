@@ -7,6 +7,8 @@
  * hand-kept copies would drift into structured data that does not match the
  * visible page - which Google treats as a spam signal, not a typo.
  */
+import { FREE_AI_DAILY_CAP, FREE_NOTE_LIMIT, PRO_AI_DAILY_CAP } from "../entitlements";
+
 export interface Faq {
   q: string;
   a: string;
@@ -15,7 +17,7 @@ export interface Faq {
 export const HOME_FAQS: Faq[] = [
   {
     q: "Is BijbelStudie helemaal gratis?",
-    a: "Het gratis plan geeft volledige toegang tot bijbellezen, markeringen, begeleide studies, het KingComments-commentaar en 5 vragen per dag aan de AI-assistent. Notities zijn in de app onbeperkt; op de website schrijft u er gratis zeven. De Pro versie (€9,99 per maand of €89,99 per jaar) voegt de overige bijbelcommentaren, 200 AI-vragen per dag, de volledige grondtekst en onbeperkt notities op de website toe.",
+    a: `Het gratis plan geeft volledige toegang tot bijbellezen, markeringen, begeleide studies, het KingComments-commentaar, studiegroepen en ${FREE_AI_DAILY_CAP} vragen per dag aan de AI-assistent, en u schrijft gratis ${FREE_NOTE_LIMIT} notities. De Pro versie (€9,99 per maand of €89,99 per jaar) voegt de overige bijbelcommentaren, de grondtekst bij elk vers, ${PRO_AI_DAILY_CAP} AI-vragen per dag, onbeperkt notities en voorlezen met natuurlijke stemmen toe.`,
   },
   {
     q: "Wat doet de AI-assistent?",

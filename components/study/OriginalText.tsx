@@ -7,14 +7,14 @@ import { useSession } from 'next-auth/react';
 import { bookNameMap } from '../../lib/book-mapping';
 import UpgradePrompt from "../pricing/UpgradePrompt";
 
-interface OriginalWord {
+export interface OriginalWord {
   h: string; // Hebrew or Greek surface form
   t: string; // Transliteration
   e: string; // English gloss
   s: string; // Strong's number, e.g. "H0430" or "G2424"
 }
 
-type ChapterData = Record<string, OriginalWord[]>; // verseNumber → words
+export type ChapterData = Record<string, OriginalWord[]>; // verseNumber → words
 
 interface OriginalTextProps {
   book: string;          // Dutch book name from selector
@@ -59,6 +59,40 @@ async function fetchChapter(slug: string, chapter: number): Promise<ChapterData 
   } catch {
     return null;
   }
+}
+
+/** Either `data` or `error` is set. A flat shape rather than a union: this
+ *  project compiles without strictNullChecks, where a boolean discriminant does
+ *  not narrow. */
+export type OriginalChapterResult = { data: ChapterData | null; isHebrew: boolean; error: string | null };
+
+const failed = (error: string): OriginalChapterResult => ({ data: null, isHebrew: false, error });
+
+/**
+ * One chapter of grondtekst, resolved from a Dutch book name. Shared by this
+ * panel and the per-verse grondtekst in the lesson's reading step
+ * (components/study/flow/OriginalVersePanel.tsx), so both say the same thing
+ * when a book or chapter is missing. Cached per page load.
+ */
+export async function loadOriginalChapter(book: string, chapter: number): Promise<OriginalChapterResult> {
+  const englishBook = bookNameMap[book] || book;
+  const index = await fetchIndex();
+  if (!index) return failed('Kon de grondtekst-index niet laden.');
+
+  const entry = index[englishBook];
+  if (!entry) {
+    return failed(
+      `Geen grondtekst beschikbaar voor "${book}". Originele tekst is alleen beschikbaar voor de 66 protocanonieke boeken.`,
+    );
+  }
+  if (!entry.chapters.includes(chapter)) {
+    return failed(`Hoofdstuk ${chapter} is niet beschikbaar in de grondtekst van ${book}.`);
+  }
+
+  const slug = entry.slug || englishBook.replace(/ /g, '_');
+  const data = await fetchChapter(slug, chapter);
+  if (!data) return failed('Kon de grondtekst voor dit hoofdstuk niet laden.');
+  return { data, isHebrew: entry.lang === 'heb', error: null };
 }
 
 /** Strong's number → biblehub.com lexicon URL (strip leading zeros after H/G). */
@@ -143,7 +177,7 @@ interface VerseRowProps {
   highlighted: boolean;
 }
 
-function VerseRow({ verseNum, words, isHebrew, highlighted }: VerseRowProps) {
+export function VerseRow({ verseNum, words, isHebrew, highlighted }: VerseRowProps) {
   return (
     <div
       className={[
@@ -181,9 +215,8 @@ function VerseRow({ verseNum, words, isHebrew, highlighted }: VerseRowProps) {
 }
 
 export default function OriginalText({ book, chapter, highlightVerses, embedded = false }: OriginalTextProps) {
-  const englishBook = bookNameMap[book] || book;
   const [data, setData] = useState<ChapterData | null>(null);
-  const [meta, setMeta] = useState<IndexEntry | null>(null);
+  const [isHebrew, setIsHebrew] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { data: session } = useSession();
@@ -195,50 +228,20 @@ export default function OriginalText({ book, chapter, highlightVerses, embedded 
     setError(null);
     setData(null);
 
-    (async () => {
-      const index = await fetchIndex();
+    loadOriginalChapter(book, chapter).then((result) => {
       if (cancelled) return;
-
-      if (!index) {
-        setError('Kon de grondtekst-index niet laden.');
-        setLoading(false);
-        return;
+      if (result.data) {
+        setData(result.data);
+        setIsHebrew(result.isHebrew);
+      } else {
+        setError(result.error);
       }
-
-      const entry = index[englishBook];
-      if (!entry) {
-        setMeta(null);
-        setError(`Geen grondtekst beschikbaar voor "${book}". Originele tekst is alleen beschikbaar voor de 66 protocanonieke boeken.`);
-        setLoading(false);
-        return;
-      }
-
-      setMeta(entry);
-
-      if (!entry.chapters.includes(chapter)) {
-        setError(`Hoofdstuk ${chapter} is niet beschikbaar in de grondtekst van ${book}.`);
-        setLoading(false);
-        return;
-      }
-
-      const slug = entry.slug || englishBook.replace(/ /g, '_');
-      const ch = await fetchChapter(slug, chapter);
-      if (cancelled) return;
-
-      if (!ch) {
-        setError('Kon de grondtekst voor dit hoofdstuk niet laden.');
-        setLoading(false);
-        return;
-      }
-
-      setData(ch);
       setLoading(false);
-    })();
+    });
 
     return () => { cancelled = true; };
-  }, [englishBook, chapter, book]);
+  }, [book, chapter]);
 
-  const isHebrew = meta?.lang === 'heb';
   const langLabel = isHebrew ? 'Hebreeuws' : 'Grieks';
   const testamentLabel = isHebrew ? 'Oude Testament' : 'Nieuwe Testament';
 

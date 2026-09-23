@@ -7,6 +7,8 @@ import { Plus, Search, Lock, Globe, RefreshCw, ChevronRight, UserPlus } from "lu
 import { GroupDialog } from "./_GroupDialog"
 import AppShell from "../../components/shell/AppShell"
 import { Card, SectionHeading, Skeleton } from "../../components/kit/primitives"
+import { openProOffer } from "../../lib/proOffer"
+import { GROUP_LIMIT_MESSAGE } from "../../lib/entitlements"
 
 interface Member { _id: string; name: string; image?: string }
 interface Group {
@@ -189,7 +191,13 @@ function CreateModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
       })
       const data = await res.json()
       if (!res.ok) {
-        if (data.code === "SUBSCRIPTION_REQUIRED") setNeedsPro(true)
+        // GROUP_LIMIT_REACHED: a free account already leads a group
+        // (lib/entitlements.ts). SUBSCRIPTION_REQUIRED is the code the route
+        // answered before the free group existed; kept for a cached page.
+        if (data.code === "GROUP_LIMIT_REACHED" || data.code === "SUBSCRIPTION_REQUIRED") {
+          setNeedsPro(true)
+          openProOffer({ surface: "group_limit", reason: GROUP_LIMIT_MESSAGE })
+        }
         else setError(data.error || "Aanmaken mislukt")
         return
       }
@@ -259,7 +267,7 @@ function CreateModal({ onClose, onCreated }: { onClose: () => void; onCreated: (
         {needsPro && (
           <div className="mt-3 rounded-btn border border-line bg-teal-faint p-3">
             <p className="text-sm text-ink">
-              Een eigen groep aanmaken hoort bij Pro. Deelnemen aan bestaande groepen is gratis.
+              {GROUP_LIMIT_MESSAGE}
             </p>
             <Link href="/abonnement"
               className={`mt-2 inline-block text-sm font-semibold underline underline-offset-2 ${TEAL_TEXT}`}>

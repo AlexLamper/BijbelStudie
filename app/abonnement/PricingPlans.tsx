@@ -3,8 +3,9 @@
 /**
  * The interactive half of /abonnement: the trial notice, the three plan cards
  * and the checkout they start. Moved out of page.tsx unchanged in behaviour -
- * the checkout call, the sign-up redirect, the `?plan=` resume and the promo
- * window are the same code as before.
+ * the checkout call, the sign-up redirect and the `?plan=` resume are the same
+ * code as before; the trial notice now follows /api/trial instead of the old
+ * one-week-on, one-week-off promo window.
  *
  * Everything static (the heading, the comparison, the FAQ) now lives in
  * page.tsx as server components, so it is in the HTML for every visitor and
@@ -16,7 +17,6 @@ import { ArrowRight, Check, Loader2 } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { useState, useEffect, useCallback } from "react"
 import { useToast } from "../../hooks/use-toast"
-import getStripe from "../../lib/stripe-client"
 import { useRouter, useSearchParams } from "next/navigation"
 import {
   PLANS,
@@ -27,7 +27,9 @@ import {
   perWeek,
   type BillingInterval,
 } from "../../lib/pricing"
-import { PRO_TRIAL_DAYS, promoWindow } from "../../lib/promo"
+import { PRO_TRIAL_DAYS } from "../../lib/promo"
+import { FREE_AI_DAILY_CAP } from "../../lib/entitlements"
+import { signupForCheckoutHref, startCheckout as requestCheckout } from "../../lib/startCheckout"
 import { track, trackNow } from "../../lib/analytics"
 import { Card, Skeleton } from "../../components/kit/primitives"
 
@@ -43,12 +45,8 @@ const FREE_FEATURES = [
   "Bijbeltekst in alle vertalingen",
   "Alle begeleide studies",
   "KingComments volledig",
-  "5 AI-vragen per dag",
+  `${FREE_AI_DAILY_CAP} AI-vragen per dag`,
 ]
-
-/** "21 september" - the current action's deadline, for the trial notice. */
-const promoEndLabel = (endsAt: number) =>
-  new Date(endsAt).toLocaleDateString("nl-NL", { day: "numeric", month: "long" })
 
 function FreeCard({ isPro }: { isPro: boolean }) {
   return (
@@ -229,21 +227,21 @@ export default function PricingPlans() {
   // cards fall back to the same disabled "Huidig plan" state rather than
   // fabricating an interval.
   const [isPro, setIsPro] = useState(false)
-  // The current action window, or null in an off-week. Resolved after mount
-  // only: it is a comparison against the clock, and rendering it on the server
-  // would let a cached page keep promising a trial that the checkout route has
-  // already stopped granting. Re-checked once a minute so a page left open
-  // across the end of a window stops advertising a trial it no longer gets.
-  const [trialEndsAt, setTrialEndsAt] = useState<number | null>(null)
+  // Whether the checkout will include the free trial for this visitor. Asked
+  // of /api/trial, which runs the same check as app/api/checkout
+  // (lib/trialEligibility.ts), so the notice never promises a trial the
+  // checkout will not give: once per account, never to someone who had Pro.
+  // Resolved after mount only - a cached server render cannot know who is
+  // looking.
+  const [offersTrial, setOffersTrial] = useState(false)
   useEffect(() => {
-    const check = () => {
-      const win = promoWindow()
-      setTrialEndsAt(win.active ? win.endsAt : null)
-    }
-    check()
-    const id = setInterval(check, 60_000)
-    return () => clearInterval(id)
-  }, [])
+    let cancelled = false
+    fetch("/api/trial", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => { if (!cancelled) setOffersTrial(Boolean(data?.eligible)) })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [session])
 
   const { toast } = useToast()
   const router = useRouter()
@@ -287,27 +285,8 @@ export default function PricingPlans() {
   const startCheckout = useCallback(async (interval: BillingInterval) => {
     setLoading(interval)
     try {
-      const res = await fetch("/api/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ interval }),
-      })
-
-      const data = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(data?.error || "Betaling mislukt")
-
       trackNow("checkout_started", { interval })
-
-      if (data.url) {
-        window.location.assign(data.url)
-        return
-      }
-
-      if (!data.sessionId) throw new Error("Geen sessie ontvangen")
-      const stripe = await getStripe()
-      if (!stripe) throw new Error("Stripe kon niet worden geladen")
-      const { error } = await stripe.redirectToCheckout({ sessionId: data.sessionId })
-      if (error) throw error
+      await requestCheckout(interval)
     } catch (err) {
       toast({
         title: "Er ging iets mis",
@@ -326,7 +305,7 @@ export default function PricingPlans() {
 
     if (!session) {
       trackNow("signup_for_checkout", { interval })
-      router.push(`/registreren?next=${encodeURIComponent(`/abonnement?plan=${interval}`)}`)
+      router.push(signupForCheckoutHref(interval))
       return
     }
 
@@ -349,12 +328,12 @@ export default function PricingPlans() {
 
   return (
     <>
-      {trialEndsAt !== null && !isPro && (
+      {offersTrial && !isPro && (
         <p className="mx-auto mt-[14px] max-w-[540px] rounded-card bg-teal-soft px-4 py-3 text-center text-[13px] leading-[1.6] text-teal-dark">
           <strong className="font-bold">De eerste {PRO_TRIAL_DAYS} dagen zijn gratis.</strong>{" "}
-          Daarna loopt je abonnement automatisch door tegen de prijs van je plan. Zeg je op
-          binnen {PRO_TRIAL_DAYS} dagen, dan betaal je niets. Deze actie loopt tot{" "}
-          {promoEndLabel(trialEndsAt)}.
+          Je kiest een betaalmethode, maar betaalt vandaag niets. Daarna loopt je abonnement
+          automatisch door tegen de prijs van je plan; zeg je binnen {PRO_TRIAL_DAYS} dagen op, dan
+          betaal je niets. Eén keer per account.
         </p>
       )}
 

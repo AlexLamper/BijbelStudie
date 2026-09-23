@@ -10,6 +10,8 @@ import { SkeletonBlock } from '../ui/skeletons';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import UpgradePrompt from "../pricing/UpgradePrompt";
+import { openProOffer } from "../../lib/proOffer";
+import { FREE_AI_DAILY_CAP, PRO_AI_DAILY_CAP } from "../../lib/entitlements";
 import AiAnswerThumbs from '../feedback/AiAnswerThumbs';
 import {
   Dialog,
@@ -189,7 +191,7 @@ export default function AiAssistant({
         setQuota({
           configured: !!data.configured,
           used: data.used ?? 0,
-          cap: data.cap ?? 5,
+          cap: data.cap ?? FREE_AI_DAILY_CAP,
           unlimited: !!data.unlimited,
         });
         if (!data.unlimited && data.used >= data.cap) setQuotaHit(true);
@@ -266,6 +268,14 @@ export default function AiAssistant({
           if (!res.ok) {
             if (data?.code === 'QUOTA_EXCEEDED') {
               setQuotaHit(true);
+              // The moment the limit bites is the moment the offer means
+              // something. A Pro reader at the 200 ceiling gets no offer.
+              if ((data.cap ?? FREE_AI_DAILY_CAP) < PRO_AI_DAILY_CAP) {
+                openProOffer({
+                  surface: 'ai_limit',
+                  reason: `Je hebt je ${data.cap ?? FREE_AI_DAILY_CAP} gratis AI-vragen voor vandaag gebruikt. Met Pro stel je er ${PRO_AI_DAILY_CAP} per dag.`,
+                });
+              }
               setQuota((q) => (q ? { ...q, used: data.used ?? q.used } : q));
               // Remove the optimistically added user message
               setMessages((prev) => prev.slice(0, -1));
@@ -553,7 +563,7 @@ export default function AiAssistant({
             <UpgradePrompt
               surface="ai_limit"
               title="Dagelijkse limiet bereikt"
-              body={`Je hebt je ${quota?.cap ?? 5} gratis vragen voor vandaag gesteld. Morgen kun je weer verder, of stel er tot 200 per dag met Pro.`}
+              body={`Je hebt je ${quota?.cap ?? FREE_AI_DAILY_CAP} gratis vragen voor vandaag gesteld. Morgen kun je weer verder, of stel er tot ${PRO_AI_DAILY_CAP} per dag met Pro.`}
               cta="Meer vragen met Pro"
             />
           ) : (

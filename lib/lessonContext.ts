@@ -50,6 +50,21 @@ function rangeCovers(range: string, chapter: number): boolean {
 }
 
 /**
+ * Which part of its book a passage falls in: the book's slug and the range of
+ * the outline section that covers the chapter ("1-11"), or null when the book
+ * is not in the canon list. `section` is null for a chapter no section covers.
+ *
+ * What lib/lessonPayload.ts compares between two consecutive lessons to decide
+ * whether the context step has anything new to say.
+ */
+export function placementOf(passage: Passage): { book: string; section: string | null } | null {
+  const book = findBook(passage.book);
+  if (!book) return null;
+  const section = book.outline.find((entry) => rangeCovers(entry.range, passage.chapter));
+  return { book: book.slug, section: section?.range ?? null };
+}
+
+/**
  * The context step's content, or null when there is genuinely nothing to show.
  *
  * Null is the signal `resolveSteps` needs: a step that would render an empty

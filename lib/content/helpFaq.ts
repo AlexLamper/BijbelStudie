@@ -1,4 +1,5 @@
 import type { Faq } from "./homeFaq";
+import { FREE_AI_DAILY_CAP, FREE_NOTE_LIMIT, PRO_AI_DAILY_CAP } from "../entitlements";
 
 /**
  * The help centre content, grouped by topic.
@@ -90,7 +91,7 @@ export const HELP_TOPICS: HelpTopic[] = [
       },
       {
         q: "Hoeveel vragen kan ik stellen?",
-        a: "Met een gratis account vijf vragen per dag. Met Pro zijn het er 200 per dag.",
+        a: `Met een gratis account ${FREE_AI_DAILY_CAP} vragen per dag. Met Pro zijn het er ${PRO_AI_DAILY_CAP} per dag.`,
       },
       {
         q: "Kan ik de antwoorden vertrouwen?",
@@ -126,11 +127,11 @@ export const HELP_TOPICS: HelpTopic[] = [
     faqs: [
       {
         q: "Wat kost BijbelStudie Pro?",
-        a: "Pro kost €9,99 per maand, maandelijks gefactureerd, of €89,99 per jaar, in één keer gefactureerd. Zonder Pro blijven bijbellezen, markeringen, begeleide studies, het KingComments-commentaar en vijf AI-vragen per dag gratis. Notities zijn in de app onbeperkt; op de website schrijf je er zonder Pro zeven.",
+        a: `Pro kost €9,99 per maand, maandelijks gefactureerd, of €89,99 per jaar, in één keer gefactureerd. Zonder Pro blijven bijbellezen, markeringen, begeleide studies, het KingComments-commentaar, meedoen met studiegroepen en ${FREE_AI_DAILY_CAP} AI-vragen per dag gratis. Zonder Pro schrijf je ${FREE_NOTE_LIMIT} notities, op de website en in de app samen.`,
       },
       {
         q: "Wat krijg ik met Pro?",
-        a: "Toegang tot de overige bijbelcommentaren - Matthew Henry, Calvijn en Dachsel - naast het gratis KingComments, 200 AI-vragen per dag in plaats van vijf, en de volledige Hebreeuwse en Griekse grondtekst.",
+        a: `Toegang tot de overige bijbelcommentaren - Matthew Henry, Calvijn en Dachsel - naast het gratis KingComments, de Hebreeuwse en Griekse grondtekst bij elk vers, ${PRO_AI_DAILY_CAP} AI-vragen per dag in plaats van ${FREE_AI_DAILY_CAP}, onbeperkt notities, zoveel studiegroepen leiden als je wilt, voorlezen met natuurlijke stemmen, streakbescherming en extra bomen en landschappen voor je boom. Had je Pro nog niet eerder, dan zijn de eerste 7 dagen gratis.`,
       },
       {
         q: "Hoe zeg ik mijn abonnement op?",

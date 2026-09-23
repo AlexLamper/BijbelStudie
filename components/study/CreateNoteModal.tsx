@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X, Lock, Users } from "lucide-react";
 import { useTranslation } from "../../app/i18n/client";
+import { openProOffer } from "../../lib/proOffer";
 
 /* ── Styling ────────────────────────────────────────────────────────────────
    The kit's language (components/kit/primitives.tsx, /feedback, /notities):
@@ -239,6 +240,11 @@ export function CreateNoteModal({
 
       if (!res.ok) {
         const err = await res.json();
+        // The free note limit: offer Pro right here. The note dialog stays
+        // open underneath, so nothing the reader typed is lost.
+        if (err?.code === "NOTE_LIMIT_REACHED") {
+          openProOffer({ surface: "note_limit", reason: err.error });
+        }
         throw new Error(err.error || t("error_save_failed"));
       }
 

@@ -20,6 +20,7 @@ import { PromoBanner } from "./PromoBanner"
 import { HeroVisual } from "./HeroVisual"
 import { HeroMobileCard } from "./HeroMobileCard"
 import { ReviewsRow, type ReviewsData } from "./ReviewsRow"
+import { FREE_AI_DAILY_CAP, FREE_NOTE_LIMIT, PRO_AI_DAILY_CAP } from "../../lib/entitlements"
 
 /* ─── Design tokens ──────────────────────────────────────────── */
 /* The neutrals are CSS variables so the page follows dark mode: the global
@@ -677,19 +678,21 @@ function Pricing() {
   const free = [
     "Bijbel lezen (vier Nederlandse vertalingen)",
     "KingComments commentaar, volledig",
-    "5 vragen per dag aan de AI-assistent",
-    "Markeringen, en notities bij verzen (7 op de website, onbeperkt in de app)",
+    `${FREE_AI_DAILY_CAP} vragen per dag aan de AI-assistent`,
+    `Markeringen, en ${FREE_NOTE_LIMIT} notities bij verzen`,
+    "Meedoen met studiegroepen",
     "Historische context per hoofdstuk",
     "Voortgang bijhouden",
   ]
   const pro = [
     "Alles in het gratis plan",
-    "200 AI-vragen per dag, i.p.v. 5",
-    "Onbeperkt notities op de website",
+    `${PRO_AI_DAILY_CAP} AI-vragen per dag, i.p.v. ${FREE_AI_DAILY_CAP}`,
+    "Onbeperkt notities, op de website en in de app",
     "Matthew Henry commentaar (NL)",
     "Calvijn en Dachsel",
-    "Grondtekst: Hebreeuws en Grieks",
-    "Prioriteitsondersteuning",
+    "Grondtekst: Hebreeuws en Grieks bij elk vers",
+    "Voorlezen met natuurlijke stemmen",
+    "Zoveel studiegroepen leiden als je wilt",
   ]
 
   return (

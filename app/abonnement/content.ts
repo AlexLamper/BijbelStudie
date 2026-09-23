@@ -1,5 +1,12 @@
 import { PLANS, annualSaving, euro, perYear } from "../../lib/pricing";
 import { FREE_COMMENTARY_CHARS } from "../../lib/proContent";
+import {
+  FREE_AI_DAILY_CAP,
+  FREE_GROUP_LIMIT,
+  FREE_NOTE_LIMIT,
+  PRO_AI_DAILY_CAP,
+} from "../../lib/entitlements";
+import { PRO_TRIAL_DAYS } from "../../lib/promo";
 
 /**
  * The part of /abonnement that is not the checkout: what the free account
@@ -16,9 +23,12 @@ import { FREE_COMMENTARY_CHARS } from "../../lib/proContent";
  *  - commentary preview: lib/proContent.ts (`FREE_COMMENTARY_CHARS`, KingComments
  *    always free via `isAlwaysFreeCommentary`)
  *  - grondtekst preview: lib/proContent.ts (`FREE_ORIGINAL_VERSES` = 1)
- *  - AI: app/api/ai/chat/route.ts (FREE_DAILY_CAP 5, PREMIUM_DAILY_CAP 200)
- *  - notes: app/api/notes/route.ts via lib/noteXp.ts (`FREE_NOTE_LIMIT`, web only;
- *    the app's /api/v1/notes has no cap)
+ *  - AI, notes, groups: lib/entitlements.ts, enforced by the website routes
+ *    (app/api/ai/chat, app/api/notes, app/api/groepen) AND the app's v1 routes
+ *  - voorlezen: app/api/tts serves the natural (cloud) voices to Pro only
+ *  - streak protection: lib/streak.ts spends a freeze only for a Pro reader
+ *  - tree items: lib/levensboom/catalog.ts (`pro` unlocks)
+ *  - trial: lib/promo.ts `PRO_TRIAL_DAYS`, once per account (lib/trialEligibility.ts)
  *  - payment methods: app/api/checkout/route.ts `payment_method_types`
  *  - pause 1-3 months: app/api/subscription/pause/route.ts (Stripe only)
  *  - cancel, withdrawal, App Store: app/i18n/locales/nl/terms-of-service.json
@@ -29,12 +39,8 @@ import { FREE_COMMENTARY_CHARS } from "../../lib/proContent";
  * that are both genuinely charged, which is what lib/pricing.ts allows.
  */
 
-/**
- * Mirrors FREE_NOTE_LIMIT in lib/noteXp.ts. Not imported from there: that
- * module pulls in Mongoose and three models, and this file is only copy. The
- * test keeps the two equal.
- */
-export const FREE_NOTES_ON_WEB = 7;
+/** "één groep" rather than "1 groepen" in running text. */
+const groupsLed = FREE_GROUP_LIMIT === 1 ? "één groep" : `${FREE_GROUP_LIMIT} groepen`;
 
 const MONTHLY = PLANS.monthly;
 const ANNUAL = PLANS.annual;
@@ -42,7 +48,7 @@ const ANNUAL = PLANS.annual;
 /** "1.200" - Dutch thousands separator. */
 const commentaryChars = FREE_COMMENTARY_CHARS.toLocaleString("nl-NL");
 
-export const PRICING_INTRO = `De Bijbel lezen, de begeleide studies, het KingComments-commentaar en vijf AI-vragen per dag zijn gratis, zonder tijdslimiet en zonder creditcard. Pro kost ${euro(MONTHLY.amountCents)} per maand of ${euro(ANNUAL.amountCents)} per jaar en voegt de volledige commentaren van Matthew Henry, Calvijn en Dachsel toe, 200 AI-vragen per dag en de volledige Hebreeuwse en Griekse grondtekst.`;
+export const PRICING_INTRO = `De Bijbel lezen, de begeleide studies, het KingComments-commentaar en ${FREE_AI_DAILY_CAP} AI-vragen per dag zijn gratis, zonder tijdslimiet en zonder creditcard. Pro kost ${euro(MONTHLY.amountCents)} per maand of ${euro(ANNUAL.amountCents)} per jaar en voegt de volledige commentaren van Matthew Henry, Calvijn en Dachsel toe, de Hebreeuwse en Griekse grondtekst bij elk vers, ${PRO_AI_DAILY_CAP} AI-vragen per dag, onbeperkt notities en voorlezen met natuurlijke stemmen. Had je Pro nog niet eerder, dan zijn de eerste ${PRO_TRIAL_DAYS} dagen gratis.`;
 
 export interface ComparisonRow {
   feature: string;
@@ -80,22 +86,37 @@ export const COMPARISON: ComparisonRow[] = [
   {
     feature: "Grondtekst (Hebreeuws en Grieks)",
     free: "Het eerste vers van elk hoofdstuk",
-    pro: "Elk vers, woord voor woord",
+    pro: "Elk vers, woord voor woord, ook direct onder het vers dat je in een studie leest",
   },
   {
     feature: "AI-assistent",
-    free: "5 vragen per dag",
-    pro: "200 vragen per dag",
+    free: `${FREE_AI_DAILY_CAP} vragen per dag`,
+    pro: `${PRO_AI_DAILY_CAP} vragen per dag`,
   },
   {
-    feature: "Notities op de website",
-    free: `Tot ${FREE_NOTES_ON_WEB} eigen notities; markeringen en je antwoorden uit de studies tellen niet mee`,
+    feature: "Notities",
+    free: `Tot ${FREE_NOTE_LIMIT} eigen notities, op de website en in de app samen; markeringen en je antwoorden uit de studies tellen niet mee`,
     pro: "Onbeperkt",
   },
   {
-    feature: "Ondersteuning",
-    free: "Ja",
-    pro: "Met voorrang",
+    feature: "Studiegroepen",
+    free: `Deelnemen aan elke groep; zelf ${groupsLed} leiden`,
+    pro: "Deelnemen en zoveel groepen leiden als je wilt",
+  },
+  {
+    feature: "Voorlezen",
+    free: "Met de stem van je browser",
+    pro: "Met natuurlijke Nederlandse stemmen",
+  },
+  {
+    feature: "Streakbescherming",
+    free: "Nee",
+    pro: "Elke vijf dagen verdien je een bescherming; mis je een dag, dan blijft je streak staan",
+  },
+  {
+    feature: "Je boom",
+    free: "Groeit mee, met alles wat je vrijspeelt door te lezen en te studeren",
+    pro: "Daarnaast de ceder en de cipres, twee extra landschappen, de leeuw en de gouden ring",
   },
   {
     feature: "Prijs",
@@ -124,11 +145,23 @@ export const PRO_EXPLAINED: { title: string; text: string }[] = [
   },
   {
     title: "De grondtekst bij elk vers",
-    text: "Onder de vertaling het Hebreeuwse of Griekse woord, met transliteratie, een korte Engelse woordbetekenis en het Strong-nummer, met een link naar het lexicon. Je hoeft de taal niet te kennen. Zonder Pro zie je dit bij het eerste vers van elk hoofdstuk.",
+    text: "Onder de vertaling het Hebreeuwse of Griekse woord, met transliteratie, een korte Engelse woordbetekenis en het Strong-nummer, met een link naar het lexicon. In een studie open je het direct onder het vers dat je leest, zodat je vertaling en grondtekst samen ziet. Je hoeft de taal niet te kennen. Zonder Pro zie je de grondtekst van het eerste vers van elk hoofdstuk.",
   },
   {
-    title: "200 vragen per dag aan de AI-assistent",
-    text: "De assistent beantwoordt je vragen over het gedeelte dat je leest, bijvoorbeeld over een begrip, de achtergrond of een verband met een andere tekst. Met een gratis account stel je er vijf per dag, met Pro tweehonderd.",
+    title: `${PRO_AI_DAILY_CAP} vragen per dag aan de AI-assistent`,
+    text: `De assistent beantwoordt je vragen over het gedeelte dat je leest, bijvoorbeeld over een begrip, de achtergrond of een verband met een andere tekst. Met een gratis account stel je er ${FREE_AI_DAILY_CAP} per dag, met Pro ${PRO_AI_DAILY_CAP}.`,
+  },
+  {
+    title: "Onbeperkt notities, overal",
+    text: `Schrijf bij elk vers zoveel notities als je wilt, op de website en in de app. Zonder Pro zijn het er ${FREE_NOTE_LIMIT} in totaal; markeringen en je antwoorden uit de begeleide studies tellen nooit mee, en wat je al schreef blijft altijd leesbaar en bewerkbaar.`,
+  },
+  {
+    title: "Studiegroepen leiden",
+    text: `Deelnemen aan een studiegroep is voor iedereen gratis. Met een gratis account leid je zelf ${groupsLed}; met Pro start je er zoveel als je wilt, bijvoorbeeld voor meerdere kringen.`,
+  },
+  {
+    title: "Voorlezen met natuurlijke stemmen",
+    text: "Laat een hoofdstuk of een vers voorlezen door een natuurlijke Nederlandse mannen- of vrouwenstem. Zonder Pro lees je voor met de stem die je browser meebrengt.",
   },
 ];
 
@@ -140,7 +173,7 @@ export const PRO_EXPLAINED: { title: string; text: string }[] = [
 export const ABONNEMENT_FAQ: { q: string; a: string }[] = [
   {
     q: "Is BijbelStudie gratis te gebruiken?",
-    a: "Ja. Met een gratis account lees je de Bijbel in alle beschikbare vertalingen, volg je alle begeleide studies, lees je het KingComments-commentaar volledig en stel je vijf vragen per dag aan de AI-assistent. Er zit geen tijdslimiet aan en je hebt geen creditcard nodig. Bij Pro horen alleen de volledige commentaren van Matthew Henry, Calvijn en Dachsel, de volledige grondtekst, de extra AI-vragen en onbeperkt notities op de website.",
+    a: `Ja. Met een gratis account lees je de Bijbel in alle beschikbare vertalingen, volg je alle begeleide studies, lees je het KingComments-commentaar volledig, stel je ${FREE_AI_DAILY_CAP} vragen per dag aan de AI-assistent, schrijf je ${FREE_NOTE_LIMIT} notities en doe je mee met elke studiegroep. Er zit geen tijdslimiet aan en je hebt geen creditcard nodig. Pro voegt de volledige commentaren van Matthew Henry, Calvijn en Dachsel toe, de grondtekst bij elk vers, ${PRO_AI_DAILY_CAP} AI-vragen per dag, onbeperkt notities, meer dan ${groupsLed} leiden, voorlezen met natuurlijke stemmen, streakbescherming en extra bomen en landschappen voor je boom.`,
   },
   {
     q: "Wat kost BijbelStudie Pro?",
@@ -148,7 +181,7 @@ export const ABONNEMENT_FAQ: { q: string; a: string }[] = [
   },
   {
     q: "Kan ik Pro eerst gratis proberen?",
-    a: "Het gratis account is de beste manier om BijbelStudie te leren kennen: alles wat niet bij Pro hoort, kun je zonder tijdslimiet gebruiken. Loopt er een actie met gratis proefdagen, dan staat die bovenaan deze pagina, met de datum waarop die afloopt. Zo'n proefperiode is er alleen voor wie nog nooit Pro heeft gehad.",
+    a: `Ja, als je nog nooit Pro hebt gehad: de eerste ${PRO_TRIAL_DAYS} dagen zijn gratis. Je kiest een plan en een betaalmethode, maar betaalt vandaag niets. Zeg je binnen ${PRO_TRIAL_DAYS} dagen op via Instellingen, dan wordt er niets afgeschreven; anders gaat je abonnement daarna vanzelf in tegen de prijs van je plan. De proefperiode is er één keer per account.`,
   },
   {
     q: "Hoe zeg ik mijn abonnement op?",

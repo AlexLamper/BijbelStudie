@@ -1,4 +1,5 @@
 import type { Guide } from "./types";
+import { FREE_AI_DAILY_CAP, PRO_AI_DAILY_CAP } from "../../entitlements";
 
 /**
  * /bijbelstudie/bijbel-met-uitleg - target: "bijbel met uitleg online (lezen)",
@@ -173,7 +174,7 @@ export const GUIDE_EXPLAINED: Guide = {
           text: "Het Hebreeuws of Grieks bij elk vers, met transliteratie, een korte betekenis en het Strong-nummer. Zonder abonnement zie je het eerste vers van elk hoofdstuk.",
         },
         {
-          title: "AI-assistent: 5 vragen per dag gratis, 200 met Pro",
+          title: `AI-assistent: ${FREE_AI_DAILY_CAP} vragen per dag gratis, ${PRO_AI_DAILY_CAP} met Pro`,
           text: "Handig voor 'wat betekent dit woord' of 'waar komt dit nog meer voor'. Behandel het antwoord als dat van een belezen gesprekspartner en toets het aan de tekst.",
         },
       ],

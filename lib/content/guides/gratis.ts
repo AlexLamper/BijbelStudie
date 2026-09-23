@@ -1,4 +1,5 @@
 import type { Guide } from "./types";
+import { FREE_AI_DAILY_CAP, FREE_NOTE_LIMIT } from "../../entitlements";
 
 /** /bijbelstudie/gratis - target: "gratis bijbelstudie", "gratis bijbelstudie materiaal". */
 export const GUIDE_FREE: Guide = {
@@ -97,8 +98,8 @@ export const GUIDE_FREE: Guide = {
           text: "Uitgewerkte studies over personen, gedeelten en onderwerpen, en een studie bij elk bijbelboek.",
         },
         {
-          title: "Gratis: 5 AI-vragen per dag",
-          text: "De AI-assistent is elke dag vijf vragen lang beschikbaar zonder abonnement.",
+          title: `Gratis: ${FREE_AI_DAILY_CAP} AI-vragen per dag`,
+          text: `De AI-assistent beantwoordt elke dag ${FREE_AI_DAILY_CAP} vragen zonder abonnement.`,
         },
         {
           title: "Gratis: het KingComments-commentaar",
@@ -139,7 +140,7 @@ export const GUIDE_FREE: Guide = {
   faqs: [
     {
       q: "Is bijbelstudie online echt gratis?",
-      a: "Voor een groot deel wel. Bijbel lezen in meerdere vertalingen, notities maken, begeleide studies doorlopen en het KingComments-commentaar lezen kan zonder te betalen. Op BijbelStudie is daarnaast elke dag vijf keer de AI-assistent te gebruiken. Alleen de overige bijbelcommentaren, de ruimere AI-limiet en de volledige grondtekst zitten in het betaalde Pro-abonnement.",
+      a: `Voor een groot deel wel. Bijbel lezen in meerdere vertalingen, notities maken, begeleide studies doorlopen en het KingComments-commentaar lezen kan zonder te betalen. Op BijbelStudie is daarnaast elke dag ${FREE_AI_DAILY_CAP} keer de AI-assistent te gebruiken en schrijf je ${FREE_NOTE_LIMIT} notities. De overige bijbelcommentaren, de ruimere AI-limiet, onbeperkt notities en de volledige grondtekst zitten in het betaalde Pro-abonnement.`,
     },
     {
       q: "Welke bijbelvertalingen zijn gratis te gebruiken?",

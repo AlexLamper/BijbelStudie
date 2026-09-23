@@ -1,8 +1,9 @@
 import type { CuratedStudy, Lesson } from './data/curated-studies';
 import { getLessonContent } from './data/study-lessons';
-import { buildLessonContext } from './lessonContext';
+import { buildLessonContext, placementOf } from './lessonContext';
 import { chapterStudyTemplate } from './chapterStudyTemplate';
 import { findBook } from './chapterStudyRef';
+import type { LessonContent } from './data/study-lessons/types';
 import type { StepKey } from './studyFlow';
 import {
   nextLessonDay,
@@ -40,6 +41,62 @@ function fallbackPractices(bookName: string): string[] {
   return book ? [...chapterStudyTemplate(book.genre).practices] : [];
 }
 
+/**
+ * Whether this lesson's "Bijbelse context" step has something the reader has
+ * not just seen.
+ *
+ * The step's body, facts and outline come from the BOOK, so in a whole-book
+ * study they were the same page thirty or fifty times over. It is shown when:
+ *  - the lesson authored its own context (that is about this lesson);
+ *  - it is the first lesson of the study;
+ *  - it is the first lesson in a different book than the one before it (a
+ *    study about a person or theme moves between books);
+ *  - it opens a new section of the book's outline ("hfst 12-25: Abraham"),
+ *    which is what the step's placement card is for;
+ *  - it is opened on its own (`standalone`: "Bestudeer dit hoofdstuk"), where
+ *    there is no lesson before it.
+ * Otherwise the step is left out and the lesson has five steps. The book's
+ * background stays one tap away in Verdieping ("Context van <boek>").
+ *
+ * Stateless on purpose: decided by the study alone, so the website, the v1 API
+ * and the completion route (which ticks every step of a finished lesson) all
+ * arrive at the same list, and an installed app build simply receives a step
+ * list one entry shorter - which it already handles.
+ */
+export function contextStepIsDue(
+  study: CuratedStudy,
+  lesson: Lesson,
+  content: LessonContent | undefined,
+  options: { standalone?: boolean } = {},
+): boolean {
+  if (options.standalone) return true;
+  if (content?.context) return true;
+
+  const ordered = [...study.lessons].sort((a, b) => a.day - b.day);
+  const index = ordered.findIndex((entry) => entry.day === lesson.day);
+  if (index <= 0) return true;
+
+  const previous = ordered[index - 1];
+  const here = placementOf(resolvePassage(lesson, content));
+  const before = placementOf(resolvePassage(previous, getLessonContent(study.id, previous.day)));
+  if (!here || !before) return true;
+  if (here.book !== before.book) return true;
+  return here.section !== before.section;
+}
+
+/** The step list of a lesson, with the context step only when it is due. */
+function stepsFor(
+  study: CuratedStudy,
+  lesson: Lesson,
+  content: LessonContent | undefined,
+  options: { standalone?: boolean },
+): StepKey[] {
+  const hasContext =
+    !!buildLessonContext(resolvePassage(lesson, content), content) &&
+    contextStepIsDue(study, lesson, content, options);
+  return resolveSteps(lesson, content, { hasContext });
+}
+
 export interface LessonCoreInput {
   study: CuratedStudy;
   lesson: Lesson;
@@ -47,6 +104,11 @@ export interface LessonCoreInput {
   translation: string;
   /** Already resolved through `resolveCommentaryId`. */
   commentaryId: string;
+  /**
+   * The lesson is opened on its own - the single-chapter study - rather than
+   * as a step in a study, so the context step is always shown.
+   */
+  standalone?: boolean;
 }
 
 /**
@@ -60,7 +122,7 @@ export interface LessonCoreInput {
  * `reflection`: renaming it would have deleted the step on every phone that
  * has not updated.
  */
-export function buildLessonCore({ study, lesson, translation, commentaryId }: LessonCoreInput) {
+export function buildLessonCore({ study, lesson, translation, commentaryId, standalone }: LessonCoreInput) {
   const content = getLessonContent(study.id, lesson.day);
   const passage = resolvePassage(lesson, content);
   const context = buildLessonContext(passage, content);
@@ -71,7 +133,7 @@ export function buildLessonCore({ study, lesson, translation, commentaryId }: Le
       title: lesson.title,
       estimatedMinutes: lesson.estimatedMinutes ?? 15,
     },
-    steps: resolveSteps(lesson, content, { hasContext: !!context }),
+    steps: stepsFor(study, lesson, content, { standalone }),
     passage,
     translation,
     commentaryId,
@@ -113,10 +175,12 @@ export function buildLessonCore({ study, lesson, translation, commentaryId }: Le
  * this lesson have a context step" is how a reader lands on a step the flow
  * will not render.
  */
-export function resolveLessonSteps(studyId: string, lesson: Lesson): StepKey[] {
-  const content = getLessonContent(studyId, lesson.day);
-  const passage = resolvePassage(lesson, content);
-  return resolveSteps(lesson, content, { hasContext: !!buildLessonContext(passage, content) });
+export function resolveLessonSteps(
+  study: CuratedStudy,
+  lesson: Lesson,
+  options: { standalone?: boolean } = {},
+): StepKey[] {
+  return stepsFor(study, lesson, getLessonContent(study.id, lesson.day), options);
 }
 
 export interface LessonPayloadInput extends LessonCoreInput {

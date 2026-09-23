@@ -10,7 +10,7 @@ import {
   upsertRecord,
   type SyncKind,
 } from './mobileUserData';
-import { grantNoteXp } from './noteXp';
+import { grantNoteXp, noteCreationGuard, NOTE_LIMIT_MESSAGE } from './noteXp';
 
 /**
  * The four user-data collections differ only in their kind, so they share one
@@ -55,10 +55,14 @@ export function collectionHandlers(kind: SyncKind) {
           id,
           data,
           parseDate(typeof body.updatedAt === 'string' ? body.updatedAt : null),
+          { canCreateNote: noteCreationGuard(user.id, user.isPro) },
         );
 
         if (outcome.skipped === 'deleted') {
           return errorV1('RECORD_DELETED', 409, 'Dit item is verwijderd.');
+        }
+        if (outcome.skipped === 'limit') {
+          return errorV1('NOTE_LIMIT_REACHED', 403, NOTE_LIMIT_MESSAGE);
         }
 
         // Writing a reflection feeds the Levensboom like reading and studying
@@ -102,10 +106,14 @@ export function itemHandlers(kind: SyncKind) {
           id,
           data,
           parseDate(typeof body.updatedAt === 'string' ? body.updatedAt : null),
+          { canCreateNote: noteCreationGuard(user.id, user.isPro) },
         );
 
         if (outcome.skipped === 'deleted') {
           return errorV1('RECORD_DELETED', 409, 'Dit item is verwijderd.');
+        }
+        if (outcome.skipped === 'limit') {
+          return errorV1('NOTE_LIMIT_REACHED', 403, NOTE_LIMIT_MESSAGE);
         }
         return jsonV1({ item: outcome.record, skipped: outcome.skipped });
       } catch (error) {
