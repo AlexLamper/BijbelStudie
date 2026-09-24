@@ -109,6 +109,21 @@ const UserSchema = new mongoose.Schema(
     // re-subscribing during the next action week cannot yield another free
     // week. Never cleared, including when the Stripe subscription is deleted.
     proTrialUsedAt: { type: Date, default: null },
+    // "Nodig een vriend uit" (lib/referral.ts, lib/referralRules.ts). None of
+    // these has a default: a missing field is what "never" looks like, and a
+    // default null on the sparse unique `referralCode` would index every account
+    // under the same value.
+    // This account's own code, created the first time the invite card loads.
+    referralCode: { type: String, unique: true, sparse: true },
+    // Who invited this account, and with which code. Set once, when the code is
+    // entered; the code is kept separately so the trail survives the inviter
+    // deleting their account.
+    referredBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", index: true, sparse: true },
+    referredByCode: { type: String },
+    referralClaimedAt: { type: Date },
+    // When this account's activity was counted for its inviter. Set once, by the
+    // conditional write in lib/referral.ts, so a reward can never be paid twice.
+    referralCreditedAt: { type: Date },
     // Free-text reason captured on the cancellation screen. Without it every
     // later retention decision is guesswork.
     cancellationReason: { type: String },

@@ -14,6 +14,7 @@ import { LevensboomProvider } from "../components/providers/levensboom-provider"
 import AnalyticsTracker from "../components/providers/AnalyticsTracker";
 import GoogleAnalytics from "../components/providers/GoogleAnalytics";
 import GuestProgressMigration from "../components/auth/GuestProgressMigration";
+import ReferralClaim from "../components/referral/ReferralClaim";
 import { JsonLd } from "../components/seo/JsonLd";
 import EnvironmentBanner from "../components/layout/EnvironmentBanner";
 import AppPromoBanner from "../components/layout/AppPromoBanner";
@@ -260,6 +261,10 @@ export default async function RootLayout({
                         nothing when this browser has no guest lessons - see
                         components/auth/GuestProgressMigration.tsx. */}
                     <GuestProgressMigration />
+                    {/* An invite code this browser kept from /uitnodiging, used
+                        once there is an account. Renders nothing - see
+                        components/referral/ReferralClaim.tsx. */}
+                    <ReferralClaim />
                     {/* The first-run questions - and, before them, the
                         handover of whatever this browser answered while it was
                         still a guest, so nobody is asked the same five things

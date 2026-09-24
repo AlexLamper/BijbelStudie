@@ -1,5 +1,8 @@
 import stripe from './stripe';
 import User from '../models/User';
+import { hasHadProOrTrial, type TrialUserFields } from './proHistory';
+
+export { hasHadProOrTrial, TRIAL_USER_FIELDS, type TrialUserFields } from './proHistory';
 
 /**
  * Who may start the free Pro trial (lib/promo.ts `PRO_TRIAL_DAYS`).
@@ -23,33 +26,6 @@ import User from '../models/User';
  * creates no subscription, so the account stays eligible. The marker follows
  * the subscription, not the intent.
  */
-
-export interface TrialUserFields {
-  _id: unknown;
-  stripeCustomerId?: string | null;
-  stripeSubscriptionId?: string | null;
-  subscriptionStartedAt?: Date | null;
-  proTrialUsedAt?: Date | null;
-  storePremium?: boolean | null;
-  storePremiumPlatform?: string | null;
-  storePremiumExpiresAt?: Date | null;
-}
-
-/** The fields `resolveTrialEligibility` reads, for a `.select()`. */
-export const TRIAL_USER_FIELDS =
-  'stripeCustomerId stripeSubscriptionId subscriptionStartedAt proTrialUsedAt storePremium storePremiumPlatform storePremiumExpiresAt';
-
-/** Layer 1 only: what the account itself says. Pure, so it is tested directly. */
-export function hasHadProOrTrial(user: Omit<TrialUserFields, '_id'>): boolean {
-  return Boolean(
-    user.stripeSubscriptionId ||
-      user.subscriptionStartedAt ||
-      user.proTrialUsedAt ||
-      user.storePremium ||
-      user.storePremiumPlatform ||
-      user.storePremiumExpiresAt,
-  );
-}
 
 /**
  * Both layers. `customerId` overrides the stored one, for the checkout route,
