@@ -24,6 +24,7 @@
     "test:watch": "vitest",
     "tree:calibrate": "vitest run -c vitest.tools.config.ts calibrate",
     "tree:fixtures": "vitest run -c vitest.tools.config.ts fixtures",
+    "tree:probe": "vitest run -c vitest.tools.config.ts probe",
     "tree:sheet": "vitest run -c vitest.tools.config.ts sheet"
   },
   "dependencies": {

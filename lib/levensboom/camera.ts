@@ -11,10 +11,10 @@ import { fillPortrait, fillScene, PORTRAIT_FIT_BELOW_PX } from './growth';
  * lesson card shows growth as width, a wide one as height). The share is exact
  * for every seed, so every step is bigger on screen than the last and a
  * level-up never zooms out past the tree. Bounds include wilted leaves, so
- * health never moves the camera.
+ * a wilting tree does not shrink on screen (droop still moves the bounds a little).
  *
  * One function for every renderer: `svg.ts`, `TreeCanvas.tsx`, and the app's
- * `measureTreeFrame` in `backdrop_painter.dart`, which mirrors it.
+ * `measureFrame` in `domain/camera.dart`, which mirrors it.
  */
 
 export type TreeFraming = 'scene' | 'portrait';

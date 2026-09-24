@@ -11,9 +11,9 @@ import type { TreeForm } from './species';
  * nothing here feeds back into the generator, and season, time and health only
  * reach it through the palette.
  *
- * Placeholder design numbers, written out so the Dart port
- * (`lib/features/levensboom/present/tree_paint.dart`) can copy them 1:1; the
- * designer refines them. Colours are mixes of existing palette tokens only.
+ * Design numbers, written out so the Dart port
+ * (`lib/features/levensboom/domain/paint_spec.dart`) copies them 1:1
+ * (docs/levensboom-spec.md §10.6). Colours are mixes of existing palette tokens only.
  * All geometry is in tree units, on the scene's own branch geometry, so a
  * renderer applies its camera exactly as it does to the branches.
  */

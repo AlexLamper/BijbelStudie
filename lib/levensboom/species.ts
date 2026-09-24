@@ -92,7 +92,7 @@ export type SpeciesParams = {
    * 0..1. How far branch tips hang toward straight down when the tree is
    * perfectly healthy - the weeping willow. Added to the wilt droop, which is
    * why it is a generator parameter and not paint. Zero for every species
-   * that existed before it, so their fixtures did not move.
+   * but the wilg.
    */
   droopBase: number;
   leafCountMul: number;

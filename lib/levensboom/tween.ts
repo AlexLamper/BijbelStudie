@@ -69,7 +69,7 @@ function lerp(a: number, b: number, t: number): number {
  * Time to tween progress: a short wake-up, the growth through the middle, a
  * long settle - `smoothstep(u^0.75)`, so nothing jolts at either end and the
  * tree is still visibly growing past the halfway mark (0.30 at a quarter,
- * 0.65 at half, 0.90 at three quarters).
+ * 0.64 at half, 0.90 at three quarters).
  */
 export function tweenEase(u: number): number {
   return smoothstep(Math.pow(clamp01(u), TWEEN.easeBias));
@@ -295,7 +295,8 @@ export function lerpScenes(a: TreeScene, b: TreeScene, t: number): TreeScene {
   const blossoms: Ornament[] = [];
   const blossomOn = (o: Ornament, presence: number): Ornament => {
     const leaf = leafAt.get(o.path);
-    if (leaf) return { ...o, x: leaf.x, y: leaf.y, size: leaf.size * presence };
+    // Capped like the generator caps it (`blossomMaxSize`), so it never snaps at t = 1.
+    if (leaf) return { ...o, x: leaf.x, y: leaf.y, size: Math.min(leaf.size, o.size) * presence };
     return { ...o, size: o.size * presence };
   };
   if (leave > 0) {

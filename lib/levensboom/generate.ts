@@ -835,7 +835,8 @@ export function generateTree(input: TreeInput): TreeScene {
 
   // Padded by a leaf's worth so the outermost canopy is never clipped; a frond
   // is drawn well past its anchor, so it pads by its own length. Wilted leaves
-  // count too: the camera frames by these bounds, and health must not move it.
+  // count too: the camera frames by these bounds, so shedding leaves never
+  // zooms it (wilt droop still moves the branches a little).
   const bounds: TreeBounds = { minX: TRUNK_X, maxX: TRUNK_X, minY: GROUND_Y, maxY: GROUND_Y + GROUND_PAD };
   for (const branch of branches) {
     bounds.minX = Math.min(bounds.minX, branch.x0, branch.x1);

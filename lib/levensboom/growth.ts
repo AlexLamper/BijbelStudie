@@ -213,7 +213,7 @@ export function growthInfo(level: number, frac: number, floor?: GrowthFloor | nu
 }
 
 // ---------------------------------------------------------------------------
-// The design table (placeholder numbers until the design pass - plan §10)
+// The design table (the design pass, docs/levensboom-spec.md §10)
 // ---------------------------------------------------------------------------
 
 export type FormTable = {
