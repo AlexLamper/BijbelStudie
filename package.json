@@ -23,7 +23,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "tree:calibrate": "vitest run -c vitest.tools.config.ts calibrate",
-    "tree:fixtures": "vitest run -c vitest.tools.config.ts fixtures"
+    "tree:fixtures": "vitest run -c vitest.tools.config.ts fixtures",
+    "tree:sheet": "vitest run -c vitest.tools.config.ts sheet"
   },
   "dependencies": {
     "@google/genai": "^2.16.0",
@@ -62,6 +63,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@resvg/resvg-js": "^2.6.2",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
