@@ -470,3 +470,100 @@ the owl's eyes are open only when the palette is night). `schaap`, `hert`,
 the account is not (or no longer) entitled to replaced by that kind's default.
 The stored choice is never rewritten, so a lapsed Pro item comes straight back
 on renewal.
+
+## 10. Growth v2 storyboard
+
+Design pass 2026-09-24 (Fable). The tree grows in 20 steps, one per level, and
+matures from step 21 on. This section is the design contract for
+`lib/levensboom/growth.ts` (`FORM_TABLES`, `GEOMETRY`, `SEEDLING`) and the
+parts of `generate.ts` the design needed; the engine's rules (one seeded
+stream per node, births, `ramp`, the taper) are in
+`LEVENSBOOM_GROWTH_PLAN.md` §4-§5. Everything below is arithmetic, integer
+steps, table literals and node draws, so it ports to Dart 1:1. Every number
+named here lives in `growth.ts` unless it says otherwise.
+
+The phase bands are unchanged: Kiem 1-2, Scheut 3-6, Jonge boom 7-12,
+Volwassen boom 13-20, Eeuwenoude boom 21+.
+
+### 10.1 Storyboard: branching form (eik and the other broadleaves)
+
+| step | what the reader sees |
+|---|---|
+| 1 | Today's kiem, unchanged: a 4-unit green stem with two round seed leaves at its top. |
+| 2 | The stem is taller (6.3); the first whorl - a pair of leaves in the species' own shape - opens at the top as two buds. The seed leaves stay where they were. |
+| 3 | Second whorl at the new top. The seed leaves start to yellow (paint) and shrink. The stem starts turning woody at the base (`wood` from position 3). |
+| 4 | Third whorl. Seed leaves smaller still. A slender green-brown stem: a scheut, not a tree. |
+| 5 | Seed leaves gone. Fourth whorl, and the first side shoot(s) appear at the stem's top as buds (depth 1, born 5 or 6). Blossom (trait level 5) opens on the shoot tips. |
+| 6 | Fifth whorl at the crotch; the second shoot if it was late; the first shoots may already fork once (depth 2, born 6-7). The stem is bark to the top. |
+| 7 | The shoots fork: a small Y with tufts of 5 leaves on every tip. The lowest whorl falls (7), the others follow one per step (8, 9, 10, 11), shrinking over their last two positions before they go, so the trunk clears as the crown forms. |
+| 8 | Depth 3 begins (8-10). First fruit on a twig of the youngest depth. |
+| 9-10 | The crown forms: 12-18 branches, tufts of 5 leaves, inner foliage of 2 leaves on every forked node. |
+| 11-13 | Depth 4 (11-13): a proper small crown, 20-40 branches. The last whorl falls at 11. |
+| 14-19 | Depth 5 arrives over six steps (14-19), so every level-up adds twigs; the third (middle) children keep trickling in as their chance rises. The twin trunk sprouts at 16 and grows in over 17-19. |
+| 20 | The finale: every tip gains a sixth leaf, the crown closes. 100-140 branches, 400-640 leaves. At least as full as today's level-20 tree. |
+| 21-40 | Maturing: girth +1.5 % per step (to +30 % at 40); tips fork into fine two-armed twigs by chance (3 % of tips per step to 30 % at 30, 33 % at 40, 40 % at 60), each twig carrying one leaf fewer; bark knots from 22, moss from 26, root flare from 30 (paint). Height keeps creeping (asymptote `sizeMax`) so an old v1 tree never needs a floor. Never above 915 leaves / 288 branches at 40 on any of the 16 probe seeds. |
+
+Width has its own curve (`WIDTH_V2`, about size^1.4): the scheut is slender
+(trunk 1.05 at step 3, was 1.5), the young tree slim (2.5 at 10), and most of
+the girth arrives after step 12 (5.1 at 20, 6.7 at 40 with maturing girth).
+
+### 10.2 Storyboard: conical form (ceder, cipres)
+
+| step | what the reader sees |
+|---|---|
+| 1 | A short stem with a whorl of five needle seed leaves fanned over ±70°. |
+| 2-4 | A needle whorl of four per step stacks on the stem: a tiny fir. Seed leaves fade over 3.5-6, gone at 6. |
+| 5 | The leader extends (segment 2) and the first side tier (two near-flat branches) leaves the stem at its foot. Whorls persist. |
+| 6-12 | A segment plus a tier at 6, 8, 9, 11, 12: the spire rises one whorl at a time. Each tier forks 2 steps after it was born and again 2 steps later; tips carry 3-4 needles, forked tier nodes keep 3, so the shelves are dense. Whorls fall at 8, 9, 10. |
+| 13-20 | Segments at 14, 15, 17, 18, 20. Tiers born after step 12 fork only once, so the top stays pointed while the base broadens: a cone with flat shelves (ceder, tiers at 75° off the leader) or a column (cipres, 30°). Step 20: 12 segments, 141-163 branches, 640-760 needles. |
+| 21-40 | Segments at 24, 28, 34 (15 in all); girth; the spine's upper tiers keep forking. 181-201 branches, at most 915 needles. |
+
+### 10.3 Storyboard: palm
+
+| step | what the reader sees |
+|---|---|
+| 1 | Two strap leaves straight out of the ground; no trunk (the first segment is a 15 % stub). |
+| 2-6 | One frond more per step (3 at 2 ... 7 at 6), the fan filling fixed slots (`PALM_FROND_FAN`). |
+| 7 | The stub emerges into a first trunk segment (full at position 7); segment 2 appears. |
+| 8-10, 12, 14, 16, 18 | A segment per listed step: the trunk rises. Fronds: 8 at 7, 12 at 11, 14 at 15, 16 at 19. Dates from 8 hang under the crown. |
+| 16 | The twin palm sprouts beside the trunk and rises over 17-20. |
+| 20 | Nine segments, 16 fronds (+ twin). |
+| 25, 30, 35 | One frond more at each (19 at 35); girth. |
+
+### 10.4 Species notes
+
+- **wilg** weeps through `droopBase` as before: it shows from the first forks at 7 and is unmistakable from 13.
+- **acacia** gets its flat crown from the wide spread and short children; it reads flat from 15 and fully at 18-20.
+- **sycomoor** and **vijg** are low and wide with big leaves from step 2 (their whorls are already large blobs).
+- **mosterd** and **amandel** (`blossom: 'always'`) flower on their seedling whorls from step 3; every other blossoming species flowers from level 5 on the shoot tips.
+- Species values changed for v2 (`species.ts`, all commented in place): `thirdChildBias` acacia 0.25→0.06, mosterd 0.30→0.06, granaatappel 0.20→0.06, sycomoor 0.20→0.12, wilg 0.15→0.06, vijg 0.15→0.12, appel 0.12→0.06, olijf 0.10→0.06 (the leaf budget at step 40); mosterd `leafCountMul` 1.3→1.05; ceder `trunkLenMul` 1.15→0.5 and `leafSizeMul` 0.8→1.15; cipres `trunkLenMul` 1.3→0.42 and `leafSizeMul` 0.7→1.0 (the spine now supplies the height; needles were hairlines at the v2 camera scale).
+
+### 10.5 Topology rules added by the design (portable, integers and draws only)
+
+Names are the `FormTable` / `GEOMETRY` / `SEEDLING` fields.
+
+- **Child delay.** `appear = max(parent.appear + childDelay, base + delay + floor(birthJitter · spread))`, `childDelay = 1`: a late limb grows out one depth per step instead of popping in whole.
+- **Seedling whorls.** Whorl `j` (1-based, `seedlingPairs` of them, `pairLeaves` leaves each: 2 branching, 4 conical) is born at step `j + 1` and falls at `pairDeath − (seedlingPairs − j)` (branching: 7, 8, 9, 10, 11; conical: 8, 9, 10). Leaf `i` of a whorl sits at angle `heading + fan · pairAngle + (2·u − 1) · pairAngleJitter` with `fan = 2i/(n−1) − 1` (0 when n < 2), at `pairHeight` of the stem's length at its birth. Size and distance are multiplied by `ramp(e, born) · fade`, `fade = pairFadeMin + (1 − pairFadeMin) · clamp((death − e) / pairFadeSteps, 0, 1)` (0.45 over the last 2 positions). Seed leaves fade the same way with `cotyledonFadeSteps` 2.5 and `cotyledonFadeMin` 0.4 towards `cotyledonDeath`.
+- **Leaves per tip.** `max(2, round(table[k] · (1 + (leafCountMul − 1) · leafMulWeight)) − (twig ? twigLeafDrop : 0)) + bonus`, `leafMulWeight = 0.5`. Branching table: 2 to step 4, 4.4 at 5, 4.6 at 6, 4.9 from 7, 5.85 at 20 (so 5 leaves through the young tree and 6 from step 20 for every broadleaf; vijg and sycomoor 4→5). Conical: 3 from 5 rising to 4 at 11, 4.4 at 20, times 1.25-1.3. Leaf `i` is born at the first step whose count exceeds `i`.
+- **Inner foliage.** A forked node keeps its full tuft for `innerKeep` steps (3 branching, 2 conical), then its first `innerLeaves` leaves for good (2, at depths 2-4; conical 3, from depth 1), the rest fall. The trunk `T` never carries a tuft; a leader (conical spine, twin root) only while it is the top. Blossom never lands on a reduced (inner) leaf.
+- **Maturing twigs (reserve draw 8).** A tip at the depth just past `birth`'s end (branching: depth 6; twin: `twinMaxDepth + 1`) forks from `twigFrom = 21` at the first step where `parent.d[8] < twigChance[k − 21]` (0.03 per step to 0.30 at 30, 0.33 at 40, 0.40 at 60). Twig forks have two children (no third), carry `twigLeafDrop = 1` leaf fewer, and never fork further.
+- **Third children** keep the v1 chance shape (0.15 → 0.306 at step 20, flat after) plus the species bias; the conical table is 0 to step 10 and 0.1 at 20.
+- **Conical spine and tiers.** `birth` is the leader schedule: segment `d` and the tier at its foot appear at `birth[d]` (1, 5, 6, 8, 9, 11, 12, 14, 15, 17, 18, 20, 24, 28, 34), no jitter. Segment length = parent segment × `leaderLen` (0.82) × lenJitter, width share `leaderWidth` 0.8, angle jitter share 0.35. A tier root leaves at `±spread · tierAngle` (2.5) with length `trunk.baseLen · childLenRatio · tierLen (1.1) · (1 − tierTaper (0.8) · min(1, segment / conicalDepth (12)))` and width share 0.5. Tier children (depth `t` inside the tier) are born at `tierBirth + tierFork[t − 1]` (2, 4) + `floor(jitter · tierForkSpread (2))`, fan `±spread · 0.55` with 0.6 of the slot jitter, length × 0.66, width × 0.66. A tier born at or before `tierDeepUntil` (12) forks twice, later tiers once.
+- **Width and girth.** Trunk width `(0.8 + 6.2 · widthAt(e)) · trunkWidthMul · girthAt(e)`, `widthAt` interpolating `WIDTH_V2` (0, 0.016, 0.04, 0.065, 0.095, 0.125, 0.16, 0.195, 0.23, 0.27, 0.31, 0.35, 0.39, 0.43, 0.47, 0.515, 0.56, 0.605, 0.65, 0.7) with the same asymptotic tail as size; `girthAt(e) = 1 + 0.015 · clamp(e − 20, 0, 20)`.
+- **Leaf size by depth.** A tuft's leaf size is multiplied by `max(0.9, 1.5 − 0.07 · depth)`: a sapling's shoots carry big leaves (1.43 at depth 1), the outer twigs of a crown small ones (1.15 at depth 5, 1.08 on twigs). Leaf scatter from the tip is × `leafScatter` (1 branching, 0.5 conical so needles bunch into tufts).
+- **Blossom.** Candidates are visible leaves of kind `leaf` that are not inner-reduced, plus kind `seedling` when the species' blossom is `always`; ranked by (birth, hash) as before; the ornament size is `min(leaf.size, blossomMaxSize = 1.2)`.
+- **Palm.** `palmSegments` 1, 7, 8, 9, 10, 12, 14, 16, 18; `palmFronds` 2, 3, ... 12 (steps 1-11), then 12, 13, 13, 14, 14, 15, 15, 16, 16; `palmEmergeSteps` 6; `leafBonusAt` 25, 30, 35.
+
+### 10.6 Drawing primitives (both renderers; numbers in `lib/levensboom/paint.ts`)
+
+- **Wood colour.** `woodColor(palette, wood) = mix(mix(leaf, bark, 0.35), bark, wood)`; bark at `wood >= 1`. A renderer buckets `wood` to tenths. The trunk turns from position 3 over 3 positions; any other branch from one position after its birth, over 3.
+- **Seed leaf (kind `cotyledon`).** Drawn in the leaf's rotated frame with `s` the pixel size a species leaf would get: broad-leaved forms an ellipse at centre (0.55·s, 0), radii (0.62·s, 0.46·s); the conical form a needle at (0.75·s, 0), radii (0.85·s, 0.16·s). Colour: `base = mix(leaf or leafAlt (phase > 0.5), light, 0.14)`; from step 3 `age = clamp(0.3 + 0.25·(position − 3), 0, 0.8)` and `fill = mix(base, mix(mix(base, barkLit, 0.4), glow, 0.3), age)` - it yellows while the generator shrinks it.
+- **Seedling whorl leaves (kind `seedling`)** are species leaves; the generator shrinks them before they fall (10.5). Renderer wish for CP5: fade their opacity with the same curve.
+- **Bark knots** (from position 22, not on a palm), **moss** (from 26, not on a palm) and **root flare** (from 30, every form) are drawn from one seeded stream `"<seed>:mature"` on the trunk branch `T` exactly as `paint.ts` specifies (knot count `min(6, 1 + floor((position − 22) / 3))`, moss `min(7, 3 + floor((position − 26) / 2))`, flare amount `0.35 + 0.65·min(1, (position − 30) / 6)`); the colours are palette mixes only (`knotColors`, `mossColor`, `rootColor`).
+
+### 10.7 Never-shrink calibration
+
+`npm run tree:calibrate` with this table gives `LEGACY_EQUIV` floors for v1
+levels 2-19 only (2→5.7, 5→10.1, 10→14.8, 15→17.9, 19→19.1); from level 20 on
+the v2 tree at position L is at least as tall as the v1 tree was, so no
+maturing account gets a floor.

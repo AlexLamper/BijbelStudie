@@ -3,11 +3,15 @@ import { fruitCount, fruitLevel, hasTrait, traitsForLevel, TRAIT_LEVELS, type Tr
 import { DEFAULT_SPECIES, isSpeciesId, SPECIES, type SpeciesId, type SpeciesParams, type TreeForm } from './species';
 import {
   effectivePosition,
+  fadeAt,
   FORM_TABLES,
   GEOMETRY,
+  girthAt,
   GROWTH_MODEL,
   isFloor,
+  leafSizeAtDepth,
   leavesPerTip,
+  pairDeath,
   PALM_FROND_FAN,
   palmFronds,
   ramp,
@@ -17,6 +21,8 @@ import {
   sizeAtStep,
   structuralStep,
   thirdChanceAt,
+  twigChanceAt,
+  widthAt,
   type GrowthFloor,
 } from './growth';
 import { phaseForStep, type StageId } from './stages';
@@ -162,7 +168,7 @@ export const MAX_FRUIT_SIZE = 1.6;
 export const MAX_BRANCHES = 900;
 export const MAX_LEAVES = 1400;
 
-/** Values per node stream: 0 curve · 1 spread · 2 thirdU · 3-5 jitter per child slot · 6 lenJitter · 7 birthJitter · 8-9 reserve. */
+/** Values per node stream: 0 curve · 1 spread · 2 thirdU · 3-5 jitter per child slot · 6 lenJitter · 7 birthJitter · 8 twigU · 9 reserve. */
 export const DRAWS = 10;
 /** Values per leaf stream: 0 angle · 1 distance · 2 size · 3 phase · 4 hardiness. */
 export const LEAF_DRAWS = 5;
@@ -174,6 +180,8 @@ const JITTER = 3;
 const LEN = 6;
 /** Birth jitter. The trunk has no birth to jitter, so its slot 7 is the lean; the twin root's is its side. */
 const BIRTH = 7;
+/** Reserve slot 8, taken by growth v2's maturing twigs: whether (and when) this tip forks once past step 20. */
+const TWIG = 8;
 
 const DEG = Math.PI / 180;
 const SLOT_OFFSET = [-1, 1, 0];
@@ -206,6 +214,12 @@ type Node = {
   twin: boolean;
   /** Conical spine: keeps going up and always forks three ways. */
   leader: boolean;
+  /** Conical: depth inside a side tier (0 = the tier's root), -1 on the spine and in other forms. */
+  tier: number;
+  /** Conical: the step the tier this node belongs to was born; its forks are timed from it. */
+  tierBirth: number;
+  /** A maturing twig (the fork past the depth table): carries a smaller tuft. */
+  twig: boolean;
   d: number[];
   appear: number;
   /** Index of this node's branch in `branches`. */
@@ -285,24 +299,34 @@ export function generateTree(input: TreeInput): TreeScene {
     });
   };
 
-  /** The leaves on a tip (and, for `innerKeep` steps after it forks, on a young fork). */
-  const tipLeaves = (node: Node, firstChild: number) => {
-    const bearing = firstChild > k || k < firstChild + table.innerKeep;
-    if (!bearing) return;
-    const count = leavesPerTip(form, k, sp.leafCountMul);
+  /**
+   * The leaves on a tip: the full tuft, kept for `innerKeep` steps after it
+   * forks; then (when `inner`) the first `innerLeaves` of them for good, as the
+   * foliage inside the crown. Leaves fall from the top of the index down, so
+   * the ones that stay are the oldest.
+   */
+  const tipLeaves = (node: Node, firstChild: number, inner: boolean) => {
+    const full = firstChild > k || k < firstChild + table.innerKeep;
+    const tuft = leavesPerTip(form, k, sp.leafCountMul, node.twig);
+    let count: number;
+    if (full) count = tuft;
+    else if (inner && node.depth >= table.innerMinDepth && node.depth <= table.innerMaxDepth) count = Math.min(table.innerLeaves, tuft);
+    else return;
+    const sizeMul = sp.leafSizeMul * leafSizeAtDepth(node.depth);
     for (let i = 0; i < count; i += 1) {
       let born = node.appear;
-      while (born < k && leavesPerTip(form, born, sp.leafCountMul) <= i) born += 1;
+      while (born < k && leavesPerTip(form, born, sp.leafCountMul, node.twig) <= i) born += 1;
       const path = `${node.path}L${i}`;
+      if (!full) innerLeaves.add(path);
       const ld = nodeDraws(seed, path, LEAF_DRAWS);
       const grow = ramp(e, born);
       const a = node.endAngle + (ld[0] * 2 - 1) * 70;
-      const distance = ld[1] * 2.6 * (0.5 + size) * grow;
+      const distance = ld[1] * 2.6 * (0.5 + size) * grow * table.leafScatter;
       pushLeaf({
         x: node.x1 + Math.cos(a * DEG) * distance,
         y: node.y1 + Math.sin(a * DEG) * distance,
         angle: a,
-        size: (0.8 + ld[2] * 0.7) * sp.leafSizeMul * grow,
+        size: (0.8 + ld[2] * 0.7) * sizeMul * grow,
         phase: ld[3],
         hardiness: ld[4],
         depth: node.depth,
@@ -324,7 +348,11 @@ export function generateTree(input: TreeInput): TreeScene {
 
   const trunkBaseLen = (p: number, lenJitter: number) =>
     (GEOMETRY.trunkLenBase + GEOMETRY.trunkLenGrow * sizeAt(form, p)) * sp.trunkLenMul * (0.9 + 0.2 * lenJitter);
-  const trunkBaseWidth = () => (GEOMETRY.trunkWidthBase + GEOMETRY.trunkWidthGrow * size) * sp.trunkWidthMul;
+  // Girth keeps growing past step 20 (maturing), and every width hangs off it.
+  const trunkBaseWidth = () =>
+    (GEOMETRY.trunkWidthBase + GEOMETRY.trunkWidthGrow * widthAt(form, e)) * sp.trunkWidthMul * girthAt(e);
+  /** Leaves reduced to a forked node's inner keep; blossom never lands on them. */
+  const innerLeaves = new Set<string>();
 
   const tD = draws('T');
   const lean = (tD[BIRTH] * 2 - 1) * GEOMETRY.lean * sp.leanMul;
@@ -341,7 +369,10 @@ export function generateTree(input: TreeInput): TreeScene {
       const parent = queue[q];
       const childRel = parent.rel + 1;
       const spine = form === 'conical' && parent.leader;
-      const slots = spine ? [0, 1, 2] : parent.depth === 0 ? [0, 1] : [0, 1, 2];
+      const inTier = parent.tier >= 0;
+      // The trunk forks in two (the house-style Y), a maturing twig forks in
+      // two (fine outer growth), everything else may grow a third, middle child.
+      const slots = spine ? [0, 1, 2] : parent.depth === 0 || parent.twig ? [0, 1] : [0, 1, 2];
       let firstChild = Number.POSITIVE_INFINITY;
       const spread = sp.spreadBase + parent.d[SPREAD] * sp.spreadJitter;
 
@@ -350,20 +381,40 @@ export function generateTree(input: TreeInput): TreeScene {
         const chance = slot === 2 && !spine;
         let base: number;
         let spreadSteps: number;
-        if (twinStep === null) {
-          if (childRel >= table.birth.length) continue;
-          base = table.birth[childRel];
-          spreadSteps = table.birthSpread[childRel];
+        /** A maturing twig: the fork past the depth table, gated by the parent's reserve draw. */
+        let twig = false;
+        if (inTier) {
+          // A conical tier forks on its own clock, from the step the tier was
+          // born, and only as deep as its age allows: the top stays pointed.
+          const t = parent.tier + 1;
+          const deep = parent.tierBirth <= table.tierDeepUntil ? table.tierFork.length : Math.min(1, table.tierFork.length);
+          if (t > deep) continue;
+          base = parent.tierBirth + table.tierFork[t - 1];
+          spreadSteps = table.tierForkSpread;
+        } else if (twinStep === null) {
+          if (childRel > table.birth.length) continue;
+          twig = childRel === table.birth.length;
+          if (twig && form !== 'branching') continue;
+          base = twig ? table.twigFrom : table.birth[childRel];
+          spreadSteps = twig ? 1 : table.birthSpread[childRel];
         } else {
-          if (childRel > GEOMETRY.twinMaxDepth) continue;
-          base = twinStep + childRel * GEOMETRY.twinDepthSteps;
-          spreadSteps = GEOMETRY.twinBirthSpread;
+          if (childRel > GEOMETRY.twinMaxDepth + 1) continue;
+          twig = childRel === GEOMETRY.twinMaxDepth + 1;
+          if (twig && form !== 'branching') continue;
+          base = twig ? table.twigFrom : twinStep + childRel * GEOMETRY.twinDepthSteps;
+          spreadSteps = twig ? 1 : GEOMETRY.twinBirthSpread;
         }
         const delay = chance ? table.thirdDelay : 0;
         if (base + delay > k) continue;
         const path = `${parent.path}${slot}`;
         const cd = draws(path);
-        let appear = Math.max(parent.appear, base + delay + Math.floor(cd[BIRTH] * spreadSteps));
+        let appear = Math.max(parent.appear + GEOMETRY.childDelay, base + delay + Math.floor(cd[BIRTH] * spreadSteps));
+        if (twig) {
+          // The parent's reserve draw decides; the chance only rises with the
+          // step, so a twig that exists keeps existing.
+          const u = parent.d[TWIG];
+          while (appear <= k && !(u < twigChanceAt(form, appear))) appear += 1;
+        }
         if (chance) {
           // The parent's draw decides; the chance only rises with the step, so
           // once a third child exists it keeps existing.
@@ -377,30 +428,42 @@ export function generateTree(input: TreeInput): TreeScene {
         const jitter = (parent.d[JITTER + slot] * 2 - 1) * GEOMETRY.slotJitter;
         const lenJitter = 0.9 + 0.2 * cd[LEN];
         let raw: number;
-        let lenRatio: number;
+        let baseLen: number;
         let widthRatio: number;
         let leader = false;
+        let tier = -1;
+        let tierBirth = 0;
         if (spine) {
           if (slot === 2) {
             // The leader keeps going up; that is the whole cedar silhouette.
-            raw = parent.endAngle + jitter * 0.35;
-            lenRatio = 0.78;
-            widthRatio = 0.72;
+            raw = parent.endAngle + jitter * GEOMETRY.leaderJitter;
+            baseLen = parent.baseLen * table.leaderLen * lenJitter;
+            widthRatio = GEOMETRY.leaderWidth;
             leader = true;
           } else {
-            // Side branches go out nearly flat, longer near the ground.
-            raw = parent.endAngle + offset * (spread + 42) + jitter;
-            lenRatio = 0.62 * (1 - 0.55 * Math.min(1, parent.depth / GEOMETRY.conicalDepth));
-            widthRatio = 0.5;
+            // A tier leaves the spine nearly flat, sized to the trunk and
+            // shorter the higher up the spine it sits.
+            raw = parent.endAngle + offset * spread * GEOMETRY.tierAngle + jitter;
+            baseLen =
+              root.baseLen *
+              sp.childLenRatio *
+              table.tierLen *
+              (1 - table.tierTaper * Math.min(1, parent.rel / GEOMETRY.conicalDepth)) *
+              lenJitter;
+            widthRatio = GEOMETRY.tierWidth;
+            tier = 0;
+            tierBirth = appear;
           }
-        } else if (form === 'conical') {
+        } else if (inTier) {
           // A tier keeps going outward with only a slight fan: layered shelves.
-          raw = parent.endAngle + offset * spread * 0.55 + jitter * 0.6;
-          lenRatio = 0.66;
-          widthRatio = 0.66;
+          raw = parent.endAngle + offset * spread * GEOMETRY.tierChildSpread + jitter * GEOMETRY.tierChildJitter;
+          baseLen = parent.baseLen * GEOMETRY.tierChildLen * lenJitter;
+          widthRatio = GEOMETRY.tierChildWidth;
+          tier = parent.tier + 1;
+          tierBirth = parent.tierBirth;
         } else {
           raw = parent.endAngle + offset * spread + jitter;
-          lenRatio = sp.childLenRatio;
+          baseLen = parent.baseLen * sp.childLenRatio * lenJitter;
           widthRatio = sp.childWidthRatio;
         }
         // Wilt rotates the tip toward straight down, more the further out it
@@ -412,10 +475,13 @@ export function generateTree(input: TreeInput): TreeScene {
           rel: childRel,
           twin: parent.twin,
           leader,
+          tier,
+          tierBirth,
+          twig,
           d: cd,
           appear,
           bi: 0,
-          baseLen: parent.baseLen * lenRatio * lenJitter,
+          baseLen,
           baseWidth: parent.baseWidth * widthRatio,
           x0: parent.x1,
           y0: parent.y1,
@@ -429,17 +495,19 @@ export function generateTree(input: TreeInput): TreeScene {
         queue.push(child);
       }
 
-      // The main stem carries seed leaves and leaf pairs instead of a tip tuft.
-      if (!(parent.path === 'T')) tipLeaves(parent, firstChild);
+      // The main stem carries seed leaves and whorls instead of a tuft. A
+      // leader (the conical spine, a twin's root) carries a tuft only while it
+      // is the top; every other node keeps inner foliage after it forks.
+      if (parent.path !== 'T' && (!parent.leader || firstChild > k)) tipLeaves(parent, firstChild, !parent.leader);
     }
   };
 
-  /** Seed leaves and seedling leaf pairs along the main stem (plan §4.4). */
+  /** Seed leaves and seedling whorls along the main stem (plan §4.4). */
   const growSeedling = (trunk: Node) => {
     if (k < table.cotyledonDeath && table.cotyledons > 0) {
       const at = along(trunk, trunkBaseLen(1, trunk.d[LEN]) / Math.max(1e-6, trunk.len));
       const n = table.cotyledons;
-      const shrink = SEEDLING.cotyledonShrink[Math.min(k, SEEDLING.cotyledonShrink.length) - 1];
+      const shrink = fadeAt(e, table.cotyledonDeath, SEEDLING.cotyledonFadeSteps, SEEDLING.cotyledonFadeMin);
       for (let i = 0; i < n; i += 1) {
         const path = `C${i}`;
         const ld = nodeDraws(seed, path, LEAF_DRAWS);
@@ -460,28 +528,32 @@ export function generateTree(input: TreeInput): TreeScene {
         });
       }
     }
-    if (k < table.pairDeath) {
-      for (let j = 1; j <= table.seedlingPairs && j + 1 <= k; j += 1) {
-        const born = j + 1;
-        const at = along(trunk, (SEEDLING.pairHeight * trunkBaseLen(born, trunk.d[LEN])) / Math.max(1e-6, trunk.len));
-        const grow = ramp(e, born);
-        for (let side = 0; side < 2; side += 1) {
-          const path = `S${j}L${side}`;
-          const ld = nodeDraws(seed, path, LEAF_DRAWS);
-          const a = at.heading + (side === 0 ? -1 : 1) * (SEEDLING.pairAngle + ld[0] * SEEDLING.pairAngleJitter);
-          pushLeaf({
-            x: at.x + Math.cos(a * DEG) * SEEDLING.pairDistance * grow,
-            y: at.y + Math.sin(a * DEG) * SEEDLING.pairDistance * grow,
-            angle: a,
-            size: (SEEDLING.pairSize + ld[2] * SEEDLING.pairSizeJitter) * sp.leafSizeMul * grow,
-            phase: ld[3],
-            hardiness: ld[4],
-            depth: 0,
-            path,
-            birth: born,
-            kind: 'seedling',
-          });
-        }
+    // Whorl j sits where the stem's top was at its birth and stays there as
+    // the stem grows past it; the lowest whorl falls first, shrinking before it goes.
+    for (let j = 1; j <= table.seedlingPairs && j + 1 <= k; j += 1) {
+      const born = j + 1;
+      const death = pairDeath(form, j);
+      if (k >= death) continue;
+      const at = along(trunk, (SEEDLING.pairHeight * trunkBaseLen(born, trunk.d[LEN])) / Math.max(1e-6, trunk.len));
+      const grow = ramp(e, born) * fadeAt(e, death, SEEDLING.pairFadeSteps, SEEDLING.pairFadeMin);
+      const n = table.pairLeaves;
+      for (let side = 0; side < n; side += 1) {
+        const path = `S${j}L${side}`;
+        const ld = nodeDraws(seed, path, LEAF_DRAWS);
+        const fan = n < 2 ? 0 : (2 * side) / (n - 1) - 1;
+        const a = at.heading + fan * SEEDLING.pairAngle + (ld[0] * 2 - 1) * SEEDLING.pairAngleJitter;
+        pushLeaf({
+          x: at.x + Math.cos(a * DEG) * SEEDLING.pairDistance * grow,
+          y: at.y + Math.sin(a * DEG) * SEEDLING.pairDistance * grow,
+          angle: a,
+          size: (SEEDLING.pairSize + ld[2] * SEEDLING.pairSizeJitter) * sp.leafSizeMul * grow,
+          phase: ld[3],
+          hardiness: ld[4],
+          depth: 0,
+          path,
+          birth: born,
+          kind: 'seedling',
+        });
       }
     }
   };
@@ -512,6 +584,9 @@ export function generateTree(input: TreeInput): TreeScene {
         rel: i,
         twin: prefix === 'W',
         leader: true,
+        tier: -1,
+        tierBirth: 0,
+        twig: false,
         d,
         appear,
         bi: 0,
@@ -570,6 +645,9 @@ export function generateTree(input: TreeInput): TreeScene {
       rel: 0,
       twin: false,
       leader: true,
+      tier: -1,
+      tierBirth: 0,
+      twig: false,
       d: tD,
       appear: 1,
       bi: 0,
@@ -606,6 +684,9 @@ export function generateTree(input: TreeInput): TreeScene {
           rel: 0,
           twin: true,
           leader: true,
+          tier: -1,
+          tierBirth: 0,
+          twig: false,
           d: wD,
           appear: twinStep,
           bi: 0,
@@ -651,8 +732,12 @@ export function generateTree(input: TreeInput): TreeScene {
   const blossoms: Ornament[] = [];
   const blossoming = sp.blossom === 'always' || (sp.blossom === 'seasonal' && hasTrait(level, 'blossom'));
   if (blossoming) {
+    // On the outer canopy only (never on a forked node's inner keep); a
+    // species that always blooms flowers on its seedling whorls too.
     const candidates = visible
-      .filter((leaf) => leaf.kind !== 'cotyledon')
+      .filter((leaf) =>
+        leaf.kind === 'leaf' ? !innerLeaves.has(leaf.path) : leaf.kind === 'seedling' && sp.blossom === 'always',
+      )
       .map((leaf) => ({ leaf, h: fnv1a32(`${seed}|B|${leaf.path}`) }))
       .sort((a, b) => {
         if (a.leaf.birth !== b.leaf.birth) return a.leaf.birth - b.leaf.birth;
@@ -662,7 +747,7 @@ export function generateTree(input: TreeInput): TreeScene {
     const cap = Math.min(Math.round(6 + 10 * sizeAtStep(form, k)), Math.ceil(candidates.length / 6));
     for (let i = 0; i < cap && i < candidates.length; i += 1) {
       const { leaf } = candidates[i];
-      blossoms.push({ x: leaf.x, y: leaf.y, size: leaf.size, index: i, path: leaf.path });
+      blossoms.push({ x: leaf.x, y: leaf.y, size: Math.min(leaf.size, GEOMETRY.blossomMaxSize), index: i, path: leaf.path });
     }
   }
 
