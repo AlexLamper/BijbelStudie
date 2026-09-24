@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import TreeCanvas from './TreeCanvas';
 import { buildPalette, seasonForMonth } from '../../lib/levensboom/palette';
@@ -9,6 +9,7 @@ import { maxDepthForLevel } from '../../lib/levensboom/generate';
 import { stageForLevel } from '../../lib/levensboom/stages';
 import { itemsUnlockedAtLevel } from '../../lib/levensboom/catalog';
 import { playLevelUp } from '../../lib/levensboomSound';
+import { track } from '../../lib/analytics';
 
 const TEAL = '#0D9488';
 const GROW_MS = 1200;
@@ -69,6 +70,16 @@ export default function LevelUpDialog({
   // The newest fruit is the last one on the tree, and the scene lists them in
   // unlock order - so its ornament index is simply the count minus one.
   const fruitIndex = fruitCount(level) - 1;
+
+  const reportedRef = useRef(false);
+  // Baseline funnel event (LEVENSBOOM_GROWTH_PLAN.md §13): one impression per
+  // open, not per render - guards the dialog against a strict-mode double
+  // mount the same way UpgradePrompt does for `paywall_hit`.
+  useEffect(() => {
+    if (reportedRef.current) return;
+    reportedRef.current = true;
+    track('tree_levelup_seen', { level: String(level) });
+  }, [level]);
 
   useEffect(() => {
     if (reducedMotion) {

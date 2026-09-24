@@ -1,9 +1,11 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { STAGES } from '../../../lib/levensboom/stages';
 import { allFruits, TRAIT_LABELS, TRAIT_LEVELS } from '../../../lib/levensboom/traits';
 import { CATALOG, unlockLabel } from '../../../lib/levensboom/catalog';
 import { PANEL_DEEP, SCENE_BG, TEAL_DEEP, TEAL_ON_DARK } from '../../scene/tokens';
+import { track } from '../../../lib/analytics';
 
 /**
  * The Groei tab: where the tree is on its way, and what each stage brings.
@@ -33,6 +35,14 @@ export default function GroeiTab({
 }) {
   const fruits = allFruits();
   const gated = CATALOG.filter((item) => item.unlock.kind === 'level');
+
+  const reportedRef = useRef(false);
+  // Baseline funnel event (LEVENSBOOM_GROWTH_PLAN.md §13): once per mount.
+  useEffect(() => {
+    if (reportedRef.current) return;
+    reportedRef.current = true;
+    track('tree_groei_opened', { level: String(level) });
+  }, [level]);
 
   return (
     <div className={`${PANEL_DEEP} space-y-6 p-5`}>

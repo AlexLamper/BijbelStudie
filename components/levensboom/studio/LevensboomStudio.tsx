@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Link2 } from 'lucide-react';
 import { useLevensboom, fracOf } from '../../../hooks/useLevensboom';
@@ -11,6 +11,7 @@ import { ItemGrid, KIND_TITLES, type TilePick } from './StudioTiles';
 import GroeiTab from './GroeiTab';
 import LockedPanel from './LockedPanel';
 import AppShell from '../../shell/AppShell';
+import { track } from '../../../lib/analytics';
 
 const TIME_OF_DAY_OPTIONS: { id: 'auto' | 'dawn' | 'day' | 'dusk' | 'night'; label: string }[] = [
   { id: 'auto', label: 'Automatisch' },
@@ -64,6 +65,14 @@ export default function LevensboomStudio() {
   const [lockedPick, setLockedPick] = useState<CatalogItem | null>(null);
   const [notice, setNotice] = useState<{ text: string; pro?: boolean } | null>(null);
   const [copied, setCopied] = useState(false);
+
+  const reportedStudioRef = useRef(false);
+  // Baseline funnel event (LEVENSBOOM_GROWTH_PLAN.md §13): once per mount.
+  useEffect(() => {
+    if (reportedStudioRef.current) return;
+    reportedStudioRef.current = true;
+    track('tree_studio_opened');
+  }, []);
 
   const tree = data?.levensboom ?? null;
   const unlocked = useMemo(() => new Set(tree?.unlocked ?? []), [tree?.unlocked]);

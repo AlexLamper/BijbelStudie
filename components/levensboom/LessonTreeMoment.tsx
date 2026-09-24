@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useReducedMotion } from 'framer-motion';
 import TreeCanvas from './TreeCanvas';
 import { useLevensboom, fracOf } from '../../hooks/useLevensboom';
 import { maxDepthForLevel } from '../../lib/levensboom/generate';
 import { itemsUnlockedAtLevel } from '../../lib/levensboom/catalog';
 import { ringColors } from '../../lib/levensboom/ring';
+import { track } from '../../lib/analytics';
 
 const GROW_MS = 1200;
 
@@ -52,6 +53,16 @@ export default function LessonTreeMoment({
     frame = requestAnimationFrame(step);
     return () => cancelAnimationFrame(frame);
   }, [animate, from]);
+
+  const reportedRef = useRef(false);
+  // Baseline funnel event (LEVENSBOOM_GROWTH_PLAN.md §13): fires once, only
+  // once the card actually has a tree to show rather than the fallback.
+  useEffect(() => {
+    if (reportedRef.current) return;
+    if (!data || !tree || tree.disabled) return;
+    reportedRef.current = true;
+    track('tree_growth_moment');
+  }, [data, tree]);
 
   if (!data || !tree || tree.disabled) return <>{fallback}</>;
 
