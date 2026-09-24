@@ -107,7 +107,7 @@ export default function AuthTreeBackdrop() {
       >
         <TreeCanvas
           seed="bijbelstudie-auth"
-          level={14}
+          level={20}
           frac={0.7}
           species="eik"
           scene="waterbeken"

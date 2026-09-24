@@ -618,9 +618,9 @@ function demoLesson(): DemoLesson {
     xp: 25,
     nextLesson: { day: 2, title: "\u201cMijn Heer en mijn God\u201d", reference: "Johannes 20:19–31" },
     tree: {
-      svg: renderTreeSvg({ seed: LANDING_SEED, level: 7, frac: 0.7, species: "eik", framing: "portrait", width: 176, height: 176, rootAttributes: 'aria-hidden="true"' }),
+      svg: renderTreeSvg({ seed: LANDING_SEED, level: 12, frac: 0.7, species: "eik", framing: "portrait", width: 176, height: 176, rootAttributes: 'aria-hidden="true"' }),
       seed: LANDING_SEED,
-      level: 7,
+      level: 12,
       species: "eik",
     },
   }

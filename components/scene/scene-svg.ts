@@ -25,13 +25,17 @@ export const SCENE_SEED = "bijbelstudie-levensboom"
  * same at nine in the morning and at midnight, and the live canvas lands on
  * exactly the palette the server already drew.
  *
+ * Level 20: under growth v2 (twenty steps, the landscape stays put) that is the
+ * fully grown tree at the old framing's 84 % of the height. The v1 pick, 14,
+ * is now a young crown at two thirds of it.
+ *
  * Spread this into <SceneShell /> so the canvas upgrade matches the SVG:
  *
  *   <SceneShell svg={sceneSvg()} {...SCENE_TREE}>
  */
 export const SCENE_TREE = {
   seed: SCENE_SEED,
-  level: 14,
+  level: 20,
   frac: 0.7,
   species: "eik",
   scene: "waterbeken",

@@ -2,6 +2,9 @@
 
 import { Check, Lock } from 'lucide-react';
 import TreeCanvas from '../TreeCanvas';
+import { useStableFloor } from '../useStableFloor';
+import { useLevensboom } from '../../../hooks/useLevensboom';
+import type { GrowthFloor } from '../../../lib/levensboom/growth';
 import { ringColors } from '../../../lib/levensboom/ring';
 import { itemKey, unlockLabel, type AvatarChoice, type CatalogItem, type ItemKind } from '../../../lib/levensboom/catalog';
 
@@ -55,6 +58,10 @@ export function ItemGrid({
   seenItems: ReadonlySet<string>;
   onPick: (pick: TilePick) => void;
 }) {
+  // Growth v2: the reader's floor (read-only, from the provider), so a floored
+  // account's tiles show the tree at the size it has everywhere else.
+  const { data } = useLevensboom();
+  const floor = useStableFloor(data?.levensboom?.seed === seed ? data.levensboom.growth?.floor : null);
   return (
     // Two columns, always: the grid lives in a 446 px panel, and a third column
     // there would put 130 px tiles in a gutter.
@@ -77,6 +84,7 @@ export function ItemGrid({
             seed={seed}
             level={level}
             frac={frac}
+            floor={floor}
             health={health}
             avatar={avatar}
             selected={selected}
@@ -104,6 +112,7 @@ function ItemTile({
   seed,
   level,
   frac,
+  floor,
   health,
   avatar,
   selected,
@@ -117,6 +126,7 @@ function ItemTile({
   seed: string;
   level: number;
   frac: number;
+  floor: GrowthFloor | null;
   health: number;
   avatar: AvatarChoice;
   selected: boolean;
@@ -148,7 +158,7 @@ function ItemTile({
       <div className="relative h-[108px] w-full overflow-hidden">
         {/* Locked artwork is drained to grey so the lock reads at a glance. */}
         <div className={`h-full w-full ${locked ? 'opacity-40 grayscale' : ''}`}>
-          <Thumb kind={kind} item={item} seed={seed} level={level} frac={frac} health={health} avatar={avatar} />
+          <Thumb kind={kind} item={item} seed={seed} level={level} frac={frac} floor={floor} health={health} avatar={avatar} />
         </div>
 
         {locked && (
@@ -209,6 +219,7 @@ function Thumb({
   seed,
   level,
   frac,
+  floor,
   health,
   avatar,
 }: {
@@ -217,6 +228,7 @@ function Thumb({
   seed: string;
   level: number;
   frac: number;
+  floor: GrowthFloor | null;
   health: number;
   avatar: AvatarChoice;
 }) {
@@ -247,6 +259,7 @@ function Thumb({
       seed={seed}
       level={shown}
       frac={frac}
+      floor={floor}
       health={health}
       species={draw.species}
       scene={draw.scene}

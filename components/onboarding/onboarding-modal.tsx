@@ -684,7 +684,7 @@ export function OnboardingModal({
                             <span className="block aspect-[4/3] w-full overflow-hidden">
                               <TreeCanvas
                                 seed={levensboom?.levensboom?.seed ?? "levensboom"}
-                                level={7}
+                                level={12}
                                 frac={0.6}
                                 species={o.code}
                                 scene="waterbeken"

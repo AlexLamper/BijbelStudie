@@ -3,6 +3,7 @@ import { measureFrame, type Frame } from './camera';
 import type { GrowthFloor } from './growth';
 import { buildPalette, woodColor, type Season, type TimeOfDay } from './palette';
 import { speciesParams } from './species';
+import { cotyledonColor, cotyledonShape, knotColors, matureDetails, mossColor } from './paint';
 // The ridge and the per-scene land live in backdrop.ts so study artwork can
 // draw the same horizon without importing the tree renderer.
 import { backdrop, f } from './backdrop';
@@ -17,6 +18,10 @@ import { backdrop, f } from './backdrop';
  * Leaves are sampled down to `maxLeaves` so a level-18 tree does not ship a
  * thousand ellipses in the HTML; the remaining ones are drawn a little larger
  * to keep the canopy full.
+ *
+ * Growth v2 paint, shared with the canvas through `paint.ts`: green-to-bark
+ * wood, seed leaves (rounder, lighter, yellowing), and the root flare, knots
+ * and moss of an old tree. Leaf pairs are species leaves.
  */
 
 export type TreeSvgOptions = {
@@ -102,6 +107,10 @@ export function renderSceneSvg(
   const frame = options.frame ?? measureFrame(width, height, scene, framing);
   const { scale, originX, originY, pivotX, pivotY, groundTop } = frame;
   const sp = speciesParams(options.species);
+  const X = (x: number) => f(originX + x * scale);
+  const Y = (y: number) => f(originY + y * scale);
+  // Knots, moss and root flare from step 22 on. A v1 scene has no paths, so no trunk 'T': none.
+  const mature = matureDetails({ branches: scene.branches, position: scene.position, form: sp.form }, options.seed);
   const id = `lb${Math.abs(hash(`${options.seed}${scene.position}${framing}${width}`)).toString(36)}`;
 
   const parts: string[] = [];
@@ -127,10 +136,20 @@ export function renderSceneSvg(
     parts.push(`<ellipse cx="${f(pivotX)}" cy="${f(pivotY + 0.6 * scale)}" rx="${f(Math.max(6, 11 * scale))}" ry="${f(Math.max(1.2, 1.6 * scale))}" fill="${palette.bark}" opacity="0.2"/>`);
   }
 
+  // The root flare sits behind the trunk; flat bark, like the SVG's trunk.
+  for (const foot of mature.roots) {
+    parts.push(
+      `<path d="M${X(foot.top.x)} ${Y(foot.top.y)}Q${X(foot.ctrl.x)} ${Y(foot.ctrl.y)} ${X(foot.toe.x)} ${Y(foot.toe.y)}` +
+        `L${X(foot.toe.x)} ${Y(foot.bottomY)}L${X(foot.baseX)} ${Y(foot.bottomY)}L${X(foot.baseX)} ${Y(foot.top.y)}Z" fill="${palette.bark}"/>`,
+    );
+  }
+
   // Green stems to bark (growth v2 `wood`), bucketed to tenths so a tree
   // is a handful of paths, not one per branch.
   const byWood = new Map<number, TreeScene['branches']>();
   for (const b of scene.branches) {
+    // A newborn twig at the start of a tween has no length yet.
+    if (!(b.w0 > 0)) continue;
     // A v1 scene has no `wood`: all bark.
     const bucket = Math.round((b.wood ?? 1) * 10) / 10;
     const list = byWood.get(bucket);
@@ -141,19 +160,52 @@ export function renderSceneSvg(
     parts.push(`<path d="${branchPath(list, frame)}" fill="${woodColor(palette, wood)}"/>`);
   }
 
+  // Knots and moss on the bark (paint.ts has the numbers).
+  if (mature.knots.length > 0) {
+    const { knot, rim } = knotColors(palette);
+    let rims = '';
+    let knots = '';
+    for (const k of mature.knots) {
+      const rotate = ` transform="rotate(${f(k.angle)} ${X(k.x)} ${Y(k.y)})"`;
+      rims += `<ellipse cx="${X(k.x)}" cy="${Y(k.y)}" rx="${f(k.rx * 1.3 * scale)}" ry="${f(k.ry * 1.4 * scale)}"${rotate}/>`;
+      knots += `<ellipse cx="${X(k.x)}" cy="${Y(k.y)}" rx="${f(k.rx * scale)}" ry="${f(k.ry * scale)}"${rotate}/>`;
+    }
+    parts.push(`<g fill="${rim}" opacity="0.55">${rims}</g><g fill="${knot}" opacity="0.9">${knots}</g>`);
+  }
+  if (mature.moss.length > 0) {
+    let moss = '';
+    for (const tuft of mature.moss) {
+      moss += `<circle cx="${X(tuft.x)}" cy="${Y(tuft.y)}" r="${f(Math.max(0.5, tuft.r * scale))}" fill="${mossColor(palette, tuft.alt)}"/>`;
+    }
+    parts.push(`<g opacity="0.85">${moss}</g>`);
+  }
+
   // Leaves: sampled, larger. A frond keeps its blade shape as a long ellipse.
-  const visible = scene.leaves.filter((leaf) => leaf.visible);
+  const visible = scene.leaves.filter((leaf) => leaf.visible && leaf.size > 0);
   const maxLeaves = options.maxLeaves ?? 320;
   const stride = Math.max(1, Math.ceil(visible.length / maxLeaves));
   const boost = Math.min(1.6, Math.sqrt(stride));
   const leafScale = (1.1 + 0.8 * scene.growth) * scale * boost;
   let leaves = '';
   let alt = '';
+  // Seed leaves: rounder, lighter, yellowing with age; their own two fills.
+  let seed = '';
+  let seedAlt = '';
   for (let i = 0; i < visible.length; i += stride) {
     const leaf = visible[i];
     const x = originX + leaf.x * scale;
     const y = originY + leaf.y * scale;
     const size = leaf.size * leafScale * (leaf.open ? 1 : 0.5);
+    const a = (leaf.angle * Math.PI) / 180;
+    if (leaf.kind === 'cotyledon') {
+      const c = cotyledonShape(sp.form, size);
+      const cx = x + Math.cos(a) * c.cx;
+      const cy = y + Math.sin(a) * c.cx;
+      const el = `<ellipse cx="${f(cx)}" cy="${f(cy)}" rx="${f(c.rx)}" ry="${f(c.ry)}" transform="rotate(${f(leaf.angle)} ${f(cx)} ${f(cy)})"${leaf.open ? '' : ' opacity="0.75"'}/>`;
+      if (leaf.phase > 0.5) seedAlt += el;
+      else seed += el;
+      continue;
+    }
     let rx = size;
     let ry = size * 0.55;
     let ox = size * 0.6;
@@ -206,6 +258,11 @@ export function renderSceneSvg(
     else leaves += el;
   }
   parts.push(`<g fill="${palette.leaf}">${leaves}</g><g fill="${palette.leafAlt}">${alt}</g>`);
+  if (seed || seedAlt) {
+    parts.push(
+      `<g fill="${cotyledonColor(palette, false, scene)}">${seed}</g><g fill="${cotyledonColor(palette, true, scene)}">${seedAlt}</g>`,
+    );
+  }
 
   if (palette.blossom && scene.blossoms.length > 0) {
     let blossoms = '';
@@ -218,6 +275,7 @@ export function renderSceneSvg(
   if (scene.fruits.length > 0) {
     let fruits = '';
     for (const fruit of scene.fruits) {
+      if (!(fruit.size > 0)) continue;
       const size = Math.max(1.4, fruit.size * leafScale * 1.15);
       fruits += `<circle cx="${f(originX + fruit.x * scale)}" cy="${f(originY + fruit.y * scale)}" r="${f(size * 0.8)}"/>`;
     }
