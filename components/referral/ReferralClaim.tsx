@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
+import { SessionContext } from 'next-auth/react';
 import { toast } from '../../hooks/use-toast';
 import { forgetInviteCode, readInviteCode } from '../../lib/inviteStorage';
 
@@ -22,7 +22,12 @@ function formatDay(iso: string): string {
  */
 export default function ReferralClaim() {
   const router = useRouter();
-  const { update } = useSession();
+  // Read directly from context, not `useSession`: this is mounted in the root
+  // layout, which has no SessionProvider (each route layout mounts its own,
+  // below this). There `useSession` throws in development and returns
+  // undefined in production, so destructuring it would take down every page
+  // for every signed-in reader. Same pattern as components/study/SpeakButton.tsx.
+  const update = useContext(SessionContext)?.update;
   const started = useRef(false);
 
   useEffect(() => {
@@ -51,9 +56,13 @@ export default function ReferralClaim() {
               ? `Je hebt Pro tot ${formatDay(data.proUntil)}. Veel studieplezier!`
               : 'Veel studieplezier!',
           });
-          // The session reads Pro from the database, so refetching it is all it
-          // takes for every paywall on the page to open.
-          await update();
+          // The session reads Pro from the database. The refresh re-runs the
+          // server render, so every layout reads the new Pro state; `update`
+          // only exists when a provider sits above this component, which in the
+          // root layout it does not. A route's own SessionProvider keeps the
+          // session it mounted with until the next navigation or load (the Pro
+          // offer dialog already handles a stale session the same way).
+          await update?.();
           router.refresh();
         } else if (data?.message) {
           toast({ title: 'Uitnodiging niet gebruikt', description: data.message });

@@ -28,10 +28,20 @@ function spaced(code: string): string {
 export default function InviteDetails() {
   const params = useSearchParams();
   const code = normaliseReferralCode(params.get("code"));
+  // Needs the SessionProvider that app/uitnodiging/page.tsx mounts: the root
+  // layout has none, and without one this returns undefined in a production
+  // build.
   const { status, update } = useSession();
   const router = useRouter();
   const [claiming, setClaiming] = useState(false);
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
+  // The page is force-static, and a static render gets empty search params, so
+  // the served HTML cannot know the code. Rendering before mount would put
+  // "Deze uitnodiging klopt niet" in the HTML of every valid link and then fail
+  // hydration once the browser read the real code; nothing is drawn until the
+  // browser has it.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     if (code && status === "unauthenticated") rememberInviteCode(code);
@@ -61,6 +71,8 @@ export default function InviteDetails() {
       setClaiming(false);
     }
   }
+
+  if (!mounted) return null;
 
   if (!code) {
     return (
