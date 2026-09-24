@@ -10,6 +10,7 @@ import StudioStage from './StudioStage';
 import { ItemGrid, KIND_TITLES, type TilePick } from './StudioTiles';
 import GroeiTab from './GroeiTab';
 import LockedPanel from './LockedPanel';
+import WholeGrowthDialog from './WholeGrowthDialog';
 import AppShell from '../../shell/AppShell';
 import { track } from '../../../lib/analytics';
 import { growthPill, nextPhaseLabel } from '../../../lib/levensboom/growthCopy';
@@ -66,6 +67,8 @@ export default function LevensboomStudio() {
   const [lockedPick, setLockedPick] = useState<CatalogItem | null>(null);
   const [notice, setNotice] = useState<{ text: string; pro?: boolean } | null>(null);
   const [copied, setCopied] = useState(false);
+  /** "Bekijk de hele groei" is open. Only ever set by its button; the dialog mounts only while this is true. */
+  const [watchingGrowth, setWatchingGrowth] = useState(false);
 
   const reportedStudioRef = useRef(false);
   // Baseline funnel event (LEVENSBOOM_GROWTH_PLAN.md §13): once per mount.
@@ -216,8 +219,11 @@ export default function LevensboomStudio() {
   /* -- The level card -------------------------------------------- */
   const levelCard =
     data && tree ? (
+      // `max-w`: between md and 1020 px the scene beside the 196 px
+      // sidebar and the 446 px panel is narrower than 26 + 352 px, and the card
+      // ran off its right edge, cut off by the scene's overflow-hidden.
       <div
-        className="absolute bottom-[26px] left-[26px] z-10 w-[352px] rounded-panel p-4 max-md:static max-md:w-full"
+        className="absolute bottom-[26px] left-[26px] z-10 w-[352px] max-w-[calc(100%-52px)] rounded-panel p-4 max-md:static max-md:w-full max-md:max-w-none"
         style={{ backgroundColor: 'var(--panel-card)', border: '1px solid var(--panel-border)' }}
       >
         <div className="flex items-center gap-3">
@@ -285,7 +291,9 @@ export default function LevensboomStudio() {
                 health: tree.health,
                 avatar: draw,
                 growth: tree.growth,
-                reducedMotion: tree.reducedMotion,
+                // Still while the growth playback is open: the page's one
+                // animated canvas is the one in that dialog then.
+                reducedMotion: tree.reducedMotion || watchingGrowth,
                 timeOfDay: tree.timeOfDay,
               }
             : null
@@ -476,6 +484,7 @@ export default function LevensboomStudio() {
               seed={tree.seed}
               species={tree.avatar.species}
               scene={tree.avatar.scene}
+              onWatchGrowth={tree.disabled ? undefined : () => setWatchingGrowth(true)}
             />
           </>
         ) : (
@@ -525,6 +534,21 @@ export default function LevensboomStudio() {
           animal={tree.avatar.animal}
           reducedMotion={tree.reducedMotion}
           onClose={() => void dismissCelebration()}
+        />
+      )}
+
+      {watchingGrowth && data && tree && draw && !tree.disabled && (
+        <WholeGrowthDialog
+          seed={tree.seed}
+          species={draw.species}
+          scene={draw.scene}
+          timeOfDay={tree.timeOfDay}
+          level={data.level}
+          frac={frac}
+          step={tree.growth.step}
+          floor={tree.growth.floor}
+          reducedMotion={tree.reducedMotion}
+          onClose={() => setWatchingGrowth(false)}
         />
       )}
     </AppShell>

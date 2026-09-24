@@ -202,6 +202,50 @@ export function maturingNextLine(step: number, floor?: GrowthFloor | null): stri
 }
 
 // ---------------------------------------------------------------------------
+// "Bekijk de hele groei": the studio's playback of steps 1 to 30
+// ---------------------------------------------------------------------------
+
+/** The playback's labels. The step pill under the tree is `growthPill`. */
+export const WHOLE_GROWTH = {
+  open: 'Bekijk de hele groei',
+  play: 'Afspelen',
+  pause: 'Pauzeer',
+  restart: 'Opnieuw',
+  toNow: 'Naar nu',
+  now: 'Nu',
+  close: 'Sluiten',
+} as const;
+
+/**
+ * "Zo groeit je eik". Inside the sentence the species is a common noun, so its
+ * first letter drops to lowercase - only the first, so a place name in it
+ * stays a name: "Zo groeit je ceder van de Libanon".
+ */
+export function wholeGrowthTitle(speciesName: string): string {
+  const name = speciesName.trim();
+  return `Zo groeit je ${name.charAt(0).toLowerCase()}${name.slice(1)}`;
+}
+
+/**
+ * The line under the playback's pill, for the step on screen against the
+ * tree's own step: "Behaald op niveau 7.", "Hier ben je nu." or "Stap 14
+ * bereik je op niveau 14.". The level is the one this account stands on that
+ * step at (`levelForStep`), so a head start reads as it happened: the steps it
+ * skipped were "Behaald op niveau 1.".
+ *
+ * The future line names a step and a level in one sentence, which §9.1 keeps
+ * apart everywhere else. It is the owner's wording for this surface, and the
+ * app mirrors it word for word.
+ */
+export function wholeGrowthLine(step: number, currentStep: number, floor?: GrowthFloor | null): string {
+  const n = Math.max(1, Math.floor(step));
+  const now = Math.max(1, Math.floor(currentStep));
+  if (n === now) return 'Hier ben je nu.';
+  const level = levelForStep(n, floor);
+  return n < now ? `Behaald op niveau ${level}.` : `Stap ${n} bereik je op niveau ${level}.`;
+}
+
+// ---------------------------------------------------------------------------
 // Level-up card (§9.3)
 // ---------------------------------------------------------------------------
 

@@ -163,12 +163,15 @@ function ItemTile({
 
         {locked && (
           <span className="absolute inset-0 flex items-center justify-center bg-black/25" aria-hidden>
+            {/* The ellipsis lives on the text's own span: on the flex chip itself
+                `truncate` can only clip, so a long requirement ("Eerste studie
+                voltooid", in a 196 px tile) would lose letters with no ellipsis. */}
             <span
-              className="inline-flex max-w-[90%] items-center gap-[5px] truncate rounded-full px-[10px] py-[5px] text-[11px] font-bold text-white"
+              className="inline-flex max-w-[90%] items-center gap-[5px] overflow-hidden rounded-full px-[10px] py-[5px] text-[11px] font-bold text-white"
               style={{ backgroundColor: 'rgba(17,24,39,.7)' }}
             >
-              <Lock size={12} />
-              {requirement}
+              <Lock size={12} className="flex-none" />
+              <span className="min-w-0 truncate">{requirement}</span>
             </span>
           </span>
         )}

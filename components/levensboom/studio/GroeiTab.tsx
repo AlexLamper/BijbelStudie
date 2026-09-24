@@ -19,6 +19,7 @@ import {
   ringsLabel,
   showsFloorExplainer,
   stepProgress,
+  WHOLE_GROWTH,
   xpToNextStepText,
 } from '../../../lib/levensboom/growthCopy';
 import { PANEL_DEEP, SCENE_BG, TEAL, TEAL_DEEP, TEAL_ON_DARK } from '../../scene/tokens';
@@ -81,6 +82,7 @@ export default function GroeiTab({
   seed,
   species,
   scene,
+  onWatchGrowth,
 }: {
   level: number;
   xp: number;
@@ -89,6 +91,8 @@ export default function GroeiTab({
   seed: string;
   species: string;
   scene: string;
+  /** Opens "Bekijk de hele groei"; left out, the button is not shown. */
+  onWatchGrowth?: () => void;
 }) {
   const floor = useStableFloor(growth.floor);
   const step = growth.step;
@@ -138,6 +142,17 @@ export default function GroeiTab({
         <p className="mt-1.5 text-xs tabular-nums text-white/70">{xpToNextStepText(step, progress.xpToNextStep)}</p>
         {showsFloorExplainer(step, floor) && (
           <p className="mt-2 text-xs leading-relaxed text-white/70">{FLOOR_EXPLAINER}</p>
+        )}
+        {onWatchGrowth && (
+          <button
+            type="button"
+            onClick={onWatchGrowth}
+            aria-haspopup="dialog"
+            className="mt-3 inline-flex h-9 items-center rounded-btn px-3.5 text-[13px] font-semibold text-white outline-none transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-white max-md:h-10"
+            style={{ border: '1px solid rgba(255,255,255,.22)' }}
+          >
+            {WHOLE_GROWTH.open}
+          </button>
         )}
         <details className="mt-4 border-t border-white/15 pt-4">
           <summary className="cursor-pointer rounded-md text-sm font-semibold text-white outline-none focus-visible:ring-2 focus-visible:ring-white">
