@@ -64,6 +64,8 @@ export const EVENTS = {
       "app_profile", "app_resources", "app_study", "app_ai",
       // A Pro tile in the Levensboom studio (app) - the cosmetics upsell.
       "app_levensboom",
+      // The group limit, the note limit and the app's own paywall screen.
+      "app_groups", "app_notes", "app_funnel",
     ],
     logged_in: ["yes", "no"],
     platform: PLATFORM,
