@@ -10,18 +10,22 @@ import { floorForLegacyXp, type GrowthFloor } from './growth';
  * derived (`floorForLegacyXp`), so a later change to the design table never
  * needs a migration.
  *
+ * The launch is the production deploy of this code: production only ever runs
+ * it from the moment `levensboom` is merged, so nothing needs a launch date.
+ * An account created after launch is read with (almost) no XP and captures
+ * that, which is no floor; `NEW_ACCOUNT_MS` makes that exact for an account
+ * that earned a little XP before its first tree read.
+ *
  * Preview deployments share the production database (CLAUDE.md, "Data
- * safety"). A capture from a branch preview before launch would pin a real
- * account to a smaller head start than it is owed, so writing is gated on
- * `VERCEL_ENV === 'production'` and on `TREE_GROWTH_LAUNCH_AT`. Where nothing
- * is stored the floor falls back to the current XP and nothing is written:
- * a missing env var costs the taper, never a tree.
+ * safety"). A capture from a branch preview would pin a real account before
+ * launch, so writing is gated on `VERCEL_ENV === 'production'` (Vercel sets
+ * it). Where nothing is stored the floor falls back to the current XP and
+ * nothing is written: a preview or a failed write costs the taper, never a tree.
  */
 
-/** `process.env`, or a stand-in for it. Only these two keys are read. */
+/** `process.env`, or a stand-in for it. Only `VERCEL_ENV` is read. */
 export type LegacyEnv = {
   VERCEL_ENV?: string;
-  TREE_GROWTH_LAUNCH_AT?: string;
   [key: string]: string | undefined;
 };
 
@@ -29,6 +33,9 @@ export type LegacyOptions = {
   env?: LegacyEnv;
   now?: Date;
 };
+
+/** An account this young at its first read is new: it captures 0, so no floor and no announcement. */
+export const NEW_ACCOUNT_MS = 24 * 60 * 60 * 1000;
 
 /** The User fields this module reads. Select `xp createdAt levensboom`. */
 export type LegacySource = {
@@ -49,13 +56,6 @@ function validDate(value: Date | string | null | undefined): Date | null {
   return Number.isFinite(date.getTime()) ? date : null;
 }
 
-/** `TREE_GROWTH_LAUNCH_AT` as a date, or null when unset or not an ISO date. */
-export function launchAtFrom(env: LegacyEnv): Date | null {
-  const raw = env.TREE_GROWTH_LAUNCH_AT?.trim();
-  if (!raw || !/^\d{4}-\d{2}-\d{2}/.test(raw)) return null;
-  return validDate(raw);
-}
-
 function storedLegacyXp(user: LegacySource): number | null {
   const value = user.levensboom?.legacyXp;
   return typeof value === 'number' && Number.isFinite(value) ? value : null;
@@ -71,15 +71,13 @@ function storedLegacyXp(user: LegacySource): number | null {
  */
 export function legacyCaptureUpdate(user: LegacySource, opts: { env: LegacyEnv; now: Date }): LegacyCapture | null {
   if (opts.env.VERCEL_ENV !== 'production') return null;
-  const launchAt = launchAtFrom(opts.env);
-  if (!launchAt) return null;
-  const createdAt = validDate(user.createdAt);
-  if (!createdAt || createdAt.getTime() >= launchAt.getTime()) return null;
   if (user.levensboom?.legacyXp !== undefined) return null;
   if (typeof user.xp !== 'number' || !Number.isFinite(user.xp)) return null;
+  const createdAt = validDate(user.createdAt);
+  const isNew = createdAt !== null && opts.now.getTime() - createdAt.getTime() < NEW_ACCOUNT_MS;
   return {
     filter: { _id: user._id, 'levensboom.legacyXp': { $exists: false } },
-    update: { $set: { 'levensboom.legacyXp': user.xp, 'levensboom.legacyAt': opts.now } },
+    update: { $set: { 'levensboom.legacyXp': isNew ? 0 : user.xp, 'levensboom.legacyAt': opts.now } },
   };
 }
 
@@ -117,29 +115,23 @@ export async function ensureLegacyXp<T extends LegacySource>(user: T, opts: Lega
 /**
  * The growth floor for this account. Read-only, so public cards can use it.
  *
- * - `legacyXp` stored: the floor it gives.
- * - Nothing stored and the account is known to be new (created at or after
- *   `TREE_GROWTH_LAUNCH_AT`): no floor.
- * - Nothing stored otherwise (env var missing, a preview, not read since
- *   launch): the floor for the current XP - the tree it had, at worst.
+ * - `legacyXp` stored: the floor it gives (none for a new account, which
+ *   stored 0).
+ * - Nothing stored (a preview, or not read since launch): the floor for the
+ *   current XP - the tree it had, at worst.
  */
-export function floorForUser(user: LegacySource, opts: LegacyOptions = {}): GrowthFloor | null {
+export function floorForUser(user: LegacySource): GrowthFloor | null {
   const stored = storedLegacyXp(user);
-  if (stored !== null) return floorForLegacyXp(stored);
-  const launchAt = launchAtFrom(opts.env ?? process.env);
-  const createdAt = validDate(user.createdAt);
-  if (launchAt && createdAt && createdAt.getTime() >= launchAt.getTime()) return null;
-  return floorForLegacyXp(user.xp ?? 0);
+  return floorForLegacyXp(stored ?? user.xp ?? 0);
 }
 
 /**
  * Whether this account should see the one-time "je boom groeit nu in twintig
- * stappen" card (plan §9.6): it existed before the launch. Fails closed - no
- * launch date (a preview, the env var not set yet) means no card, so nobody
- * dismisses it before it means anything.
+ * stappen" card (plan §9.6): it had a tree before the launch. Fails closed -
+ * nothing captured (a preview) means no card, so nobody dismisses it before it
+ * means anything.
  */
-export function announcesGrowth(user: LegacySource, opts: LegacyOptions = {}): boolean {
-  const launchAt = launchAtFrom(opts.env ?? process.env);
-  const createdAt = validDate(user.createdAt);
-  return Boolean(launchAt && createdAt && createdAt.getTime() < launchAt.getTime());
+export function announcesGrowth(user: LegacySource): boolean {
+  const stored = storedLegacyXp(user);
+  return stored !== null && stored > 0;
 }

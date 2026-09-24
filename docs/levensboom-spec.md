@@ -1039,21 +1039,23 @@ migration.
 **Capture.** `ensureLegacyXp` (`lib/levensboom/legacy.ts`), called by `GET
 /api/v1/gamification` and `GET /api/v1/levensboom` before the payload is built.
 `legacyCaptureUpdate` builds the write only when all of these hold:
-`VERCEL_ENV === 'production'`; `TREE_GROWTH_LAUNCH_AT` is set and starts with an
-ISO date; the account's `createdAt` is valid and before it;
-`levensboom.legacyXp` is undefined; `xp` is a finite number on the document.
-The write is `updateOne({ _id, 'levensboom.legacyXp': { $exists: false } }, {
-$set: { 'levensboom.legacyXp': xp, 'levensboom.legacyAt': now } }, {
-timestamps: false })`: two racing requests write once, and `updatedAt` stays
-put. A failure is logged and swallowed. Previews share the production
-database; the gate keeps a preview from pinning a real account to a smaller
-head start before launch.
+`VERCEL_ENV === 'production'` (set by Vercel); `levensboom.legacyXp` is
+undefined; `xp` is a finite number on the document. There is no launch date:
+production only runs this code from the deploy that launches it. The captured
+value is `xp`, or 0 for an account younger than `NEW_ACCOUNT_MS` (24 h) - a new
+account never gets a floor or the announcement, even if it earned a little XP
+before its first tree read. The write is `updateOne({ _id,
+'levensboom.legacyXp': { $exists: false } }, { $set: { 'levensboom.legacyXp':
+value, 'levensboom.legacyAt': now } }, { timestamps: false })`: two racing
+requests write once, and `updatedAt` stays put. A failure is logged and
+swallowed. Previews share the production database; the gate keeps a preview
+from pinning a real account before launch.
 
 **Reading.** `floorForUser` (read-only, so public cards use it too): a stored
-`legacyXp` gives its floor; nothing stored and the account created at or after
-launch, no floor; nothing stored otherwise (env var missing, a preview, not
-read since launch), the floor for the current XP, and nothing is written. A
-missing env var costs the taper, never a tree.
+`legacyXp` gives its floor (none for 0); nothing stored (a preview, or not read
+since launch) gives the floor for the current XP, and nothing is written.
+`announcesGrowth` is true only for a stored `legacyXp > 0`, so it fails closed
+on previews.
 
 **From XP to a floor** (`growth.ts`):
 
