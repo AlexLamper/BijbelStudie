@@ -12,6 +12,7 @@ import GroeiTab from './GroeiTab';
 import LockedPanel from './LockedPanel';
 import AppShell from '../../shell/AppShell';
 import { track } from '../../../lib/analytics';
+import { growthPill, nextPhaseLabel } from '../../../lib/levensboom/growthCopy';
 
 const TIME_OF_DAY_OPTIONS: { id: 'auto' | 'dawn' | 'day' | 'dusk' | 'night'; label: string }[] = [
   { id: 'auto', label: 'Automatisch' },
@@ -72,6 +73,13 @@ export default function LevensboomStudio() {
     if (reportedStudioRef.current) return;
     reportedStudioRef.current = true;
     track('tree_studio_opened');
+  }, []);
+
+  // `/profiel/boom?tab=groei` opens on the ladder: the dashboard's growth-v2
+  // card links here. Read once from the URL rather than through
+  // useSearchParams, which would need a Suspense boundary around the page.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('tab') === 'groei') setTab('groei');
   }, []);
 
   const tree = data?.levensboom ?? null;
@@ -218,7 +226,9 @@ export default function LevensboomStudio() {
             <span className="text-[22px] font-bold leading-none text-white tabular-nums">{data.level}</span>
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[17px] font-bold text-white">{tree.stage.name}</p>
+            {/* The tree's phase and step, beside the account's level: two labels,
+                never one sentence (plan §9.1). May wrap to a second line. */}
+            <p className="text-[17px] font-bold leading-tight text-white">{growthPill(tree.growth.step)}</p>
             <p className="mt-[2px] text-[13px] text-white/70">
               Nog <span className="font-bold">{Math.max(0, data.xpForNextLevel - data.xpIntoLevel)} XP</span> tot niveau {data.level + 1}
             </p>
@@ -254,9 +264,9 @@ export default function LevensboomStudio() {
             </span>
           </p>
         )}
-        {tree.stage.nextName && tree.stage.nextLevel != null && (
+        {tree.growth.nextPhase && (
           <p className="mt-1 text-[12px] text-white/70">
-            Volgende fase → <span className="font-semibold text-white">{tree.stage.nextName} · niveau {tree.stage.nextLevel}</span>
+            Volgende fase → <span className="font-semibold text-white">{nextPhaseLabel(tree.growth.nextPhase)}</span>
           </p>
         )}
       </div>
@@ -274,7 +284,7 @@ export default function LevensboomStudio() {
                 frac,
                 health: tree.health,
                 avatar: draw,
-                stage: tree.stage,
+                growth: tree.growth,
                 reducedMotion: tree.reducedMotion,
                 timeOfDay: tree.timeOfDay,
               }
@@ -458,7 +468,15 @@ export default function LevensboomStudio() {
                 })}
               </div>
             </div>
-            <GroeiTab level={data.level} xp={data.xp} xpTable={data.xpTable} />
+            <GroeiTab
+              level={data.level}
+              xp={data.xp}
+              xpTable={data.xpTable}
+              growth={tree.growth}
+              seed={tree.seed}
+              species={tree.avatar.species}
+              scene={tree.avatar.scene}
+            />
           </>
         ) : (
           <ItemGrid
@@ -500,6 +518,8 @@ export default function LevensboomStudio() {
         <LevelUpDialog
           seed={tree.seed}
           level={celebrate}
+          lastSeenLevel={tree.lastSeenLevel}
+          floor={tree.growth.floor}
           species={tree.avatar.species}
           scene={tree.avatar.scene}
           animal={tree.avatar.animal}

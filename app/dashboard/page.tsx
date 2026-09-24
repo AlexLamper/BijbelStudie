@@ -17,6 +17,7 @@ import BillingNotices from "../../components/pricing/BillingNotices"
 import DailyVerseCard from "../../components/dashboard/DailyVerseCard"
 import DashboardFeedbackSlot from "../../components/feedback/DashboardFeedbackSlot"
 import { useTreeSummary } from "../../components/dashboard/ProgressTree"
+import GrowthAnnouncementCard from "../../components/dashboard/GrowthAnnouncementCard"
 import AppShell from "../../components/shell/AppShell"
 import StudyArtwork from "../studies/StudyArtwork"
 import { completedStudyIds, splitRecommendations } from "../../lib/studyRecommendations"
@@ -210,6 +211,9 @@ export default function DashboardPage() {
   const level = d.level?.level ?? tree.level
   const pct = Math.min(100, d.level?.progressPercentage ?? tree.progressPercentage)
   const remainingXp = d.level ? Math.max(0, d.level.xpForNextLevel - d.level.xpIntoLevel) : tree.remainingXp
+  // The step strip needs the tree's own state (its floor); until it has that,
+  // or when the tree is off, the card keeps counting levels.
+  const growthStrip = Boolean(tree.hasTree && tree.stageName && tree.stepLine)
 
   const lastRead = d.lastRead
   const readingHref = lastRead
@@ -254,6 +258,11 @@ export default function DashboardPage() {
           </div>
 
           <DailyVerseCard verse={d.verse} loading={d.verseLoading} />
+
+          {/* Once, for accounts from before growth v2: right under the verse
+              card, whose landscape is the reader's own tree. Renders nothing
+              for everyone else. */}
+          <GrowthAnnouncementCard />
 
           {/* At most one feedback card: an unseen answer, a finished-study
               rating or a welcome-back question. Usually nothing. */}
@@ -388,30 +397,34 @@ export default function DashboardPage() {
         <aside className="flex w-[320px] flex-none flex-col gap-4 max-md:w-full">
           {/* Je boom.
               PAGES.md §1 puts "Bekijken →" at the far right of the avatar row,
-              but in a 320 px card that row leaves the title about 110 px:
-              "Jonge boom · niveau 5" needs ~170 px at Inter 700 · 15, so every
-              stage name was being cut down to "Jonge boom · ….". The bar and
-              the link drop to a row of their own, which hands the title the
-              full 205 px - enough for the longest one there is, "Eeuwenoude
-              boom · niveau 16" - and leaves the card the same height whether
-              the title takes one line or two, because the 64 px disc sets it.
-              The whole card is the link now: it has only ever had the one
-              destination, and that is a larger target than four words. */}
+              but in a 320 px card that row leaves the title about 110 px. The
+              bar and the link drop to a row of their own, which hands the
+              title and the strip lines the full 205 px, and leaves the card the
+              same height whether they take one line or two, because the 64 px
+              disc sets it. The whole card is the link now: it has only ever
+              had the one destination, and that is a larger target than four
+              words.
+              Growth v2 (plan §9.5): with a tree, the title is its phase and
+              the lines count its steps - the level is on the disc. Without
+              one (switched off, or not loaded) it is the level, as before. */}
           <Link href="/profiel/boom" className="group block flex-none no-underline">
             <Card className="p-[18px] transition-colors group-hover:border-line-strong">
               <div className="flex items-center gap-[15px]">
                 <TreeAvatar size={64} ring={3} level={level} levelStyle="gold" />
                 <div className="min-w-0 flex-1">
                   <div className="text-[15px] font-bold leading-[1.3] text-ink">
-                    {tree.stageName ? `${tree.stageName} · niveau ${level}` : `Niveau ${level}`}
+                    {growthStrip ? tree.stageName : `Niveau ${level}`}
                   </div>
                   <div className="mt-[3px] text-[12.5px] text-ink-faint">
-                    nog {remainingXp} XP tot niveau {level + 1}
+                    {growthStrip ? tree.stepLine : `nog ${remainingXp} XP tot niveau ${level + 1}`}
                   </div>
+                  {growthStrip && tree.unlockLine && (
+                    <div className="mt-[2px] text-[12.5px] text-ink-faint">{tree.unlockLine}</div>
+                  )}
                 </div>
               </div>
               <div className="mt-[13px] flex items-center gap-3">
-                <ProgressBar value={pct} height={6} className="flex-1" />
+                <ProgressBar value={growthStrip ? tree.stepPercentage : pct} height={6} className="flex-1" />
                 <span className="flex-none whitespace-nowrap text-[13px] font-semibold text-teal dark:text-teal-400 group-hover:text-teal-dark dark:group-hover:text-teal-300">
                   Bekijken →
                 </span>

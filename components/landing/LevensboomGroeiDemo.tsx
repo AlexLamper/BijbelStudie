@@ -2,33 +2,42 @@
 
 import { useEffect, useRef, useState } from 'react';
 import TreeCanvas from '../levensboom/TreeCanvas';
-import { maxDepthForLevel } from '../../lib/levensboom/generate';
-import { STAGES, stageForLevel } from '../../lib/levensboom/stages';
+import { STAGES, phaseForStep } from '../../lib/levensboom/stages';
 import { fruitAtLevel, traitAtLevel, TRAIT_LABELS } from '../../lib/levensboom/traits';
 import { itemsUnlockedAtLevel } from '../../lib/levensboom/catalog';
 
 const TEAL = '#0D9488';
 const MAX_LEVEL = 20;
-const AUTO_MS = 1700;
-const GROW_MS = 900;
+const AUTO_MS = 2200;
+const GROW_MS = 1300;
+
+type Shown = { level: number; from: { level: number; frac: number } | null };
+
+/** Forward moves grow from the previous level; a jump back (the loop, the slider) just shows the tree. */
+function moveTo(current: Shown, next: number, animate: boolean): Shown {
+  return { level: next, from: animate && next > current.level ? { level: current.level, frac: 0 } : null };
+}
 
 /**
- * "Elk niveau een nieuwe boom": one tree, every level from 1 to 20.
+ * "Elk niveau groeit je boom verder": one tree, every level from 1 to 20.
  *
- * It plays by itself once it scrolls into view - a level every 1.7 s, each one
- * growing its new wood in - and hands the controls to the visitor the moment
- * they touch the slider or a stage. What each level brings (a stage, a fruit,
- * an unlock) is written under the stage as it happens. The server's SVG stands
- * in until the block is on screen; reduced motion shows level 8 and no autoplay.
+ * Growth v2 (LEVENSBOOM_GROWTH_PLAN.md §9): it is the same tree all the way -
+ * each level lengthens the wood that is there and grows new wood out of its
+ * tips (TreeCanvas `from`), where it used to reveal a newly drawn tree.
+ *
+ * It plays by itself once it scrolls into view - a level every 2.2 s - and
+ * hands the controls to the visitor the moment they touch the slider or a
+ * phase. What each level brings (a phase, a fruit, an unlock) is written under
+ * the stage as it happens. The server's SVG stands in until the block is on
+ * screen; reduced motion shows level 8 and no autoplay.
  */
 export default function LevensboomGroeiDemo({ seed, initialSvg }: { seed: string; initialSvg: string }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [live, setLive] = useState(false);
-  const [level, setLevel] = useState(6);
+  const [shown, setShown] = useState<Shown>({ level: 6, from: null });
   const [auto, setAuto] = useState(true);
-  const [reveal, setReveal] = useState(1);
   const [still, setStill] = useState(false);
-  const previous = useRef(6);
+  const level = shown.level;
 
   useEffect(() => {
     const node = ref.current;
@@ -37,7 +46,7 @@ export default function LevensboomGroeiDemo({ seed, initialSvg }: { seed: string
     if (reduce) {
       setStill(true);
       setAuto(false);
-      setLevel(8);
+      setShown({ level: 8, from: null });
     }
     if (!('IntersectionObserver' in window)) {
       setLive(true);
@@ -58,32 +67,15 @@ export default function LevensboomGroeiDemo({ seed, initialSvg }: { seed: string
   // Autoplay: one level at a time, looping back to the kiem.
   useEffect(() => {
     if (!live || !auto) return;
-    const id = window.setInterval(() => setLevel((current) => (current >= MAX_LEVEL ? 1 : current + 1)), AUTO_MS);
+    const id = window.setInterval(
+      () => setShown((current) => moveTo(current, current.level >= MAX_LEVEL ? 1 : current.level + 1, true)),
+      AUTO_MS,
+    );
     return () => window.clearInterval(id);
   }, [live, auto]);
 
-  // A level change grows the new wood in from where the previous level ended.
-  useEffect(() => {
-    const from = previous.current;
-    previous.current = level;
-    if (still || level <= from) {
-      setReveal(1);
-      return;
-    }
-    const start = Math.min(0.92, maxDepthForLevel(from) / (maxDepthForLevel(level) + 1));
-    const started = performance.now();
-    let frame = 0;
-    const step = (now: number) => {
-      const t = Math.min(1, (now - started) / GROW_MS);
-      setReveal(start + (1 - start) * (1 - (1 - t) ** 3));
-      if (t < 1) frame = requestAnimationFrame(step);
-    };
-    setReveal(start);
-    frame = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(frame);
-  }, [level, still]);
-
-  const stage = stageForLevel(level);
+  // No floor here, so the step is the level.
+  const stage = phaseForStep(level);
   const fruit = fruitAtLevel(level);
   const trait = traitAtLevel(level);
   const unlocked = itemsUnlockedAtLevel(level);
@@ -97,11 +89,11 @@ export default function LevensboomGroeiDemo({ seed, initialSvg }: { seed: string
           ? TRAIT_LABELS[trait]
           : unlocked.length > 0
             ? `Ontgrendeld: ${unlocked.map((item) => item.name).join(', ')}.`
-            : 'Nieuwe takken, meer blad.';
+            : 'Er is nieuw hout bijgekomen.';
 
   const take = (next: number) => {
     setAuto(false);
-    setLevel(next);
+    setShown((current) => moveTo(current, next, !still));
   };
 
   return (
@@ -111,12 +103,13 @@ export default function LevensboomGroeiDemo({ seed, initialSvg }: { seed: string
           <TreeCanvas
             seed={seed}
             level={level}
-            frac={0.6}
+            frac={0}
+            from={shown.from}
+            tweenMs={GROW_MS}
             species="eik"
             scene="waterbeken"
             animal={level >= 5 ? 'vogel' : 'geen'}
             framing="scene"
-            reveal={reveal}
             reducedMotion={still}
             className="absolute inset-0 block h-full w-full"
             ariaLabel={`Je boom op niveau ${level}: ${stage.name.toLowerCase()}`}

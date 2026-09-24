@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import TreeCanvas from '../TreeCanvas';
+import { useStableFloor } from '../useStableFloor';
 import type { AvatarChoice } from '../../../lib/levensboom/catalog';
-import type { Stage } from '../../../lib/levensboom/stages';
+import type { GrowthInfo } from '../../../lib/levensboom/growth';
+import { growthPill } from '../../../lib/levensboom/growthCopy';
 
 /**
  * The reader's own tree, as the page itself.
@@ -60,7 +62,8 @@ export type StageTree = {
   health: number;
   /** `chosen` merged with whatever tile the reader is previewing. */
   avatar: AvatarChoice;
-  stage: Stage;
+  /** `levensboom.growth`: the step and phase the studio names, and the floor the tree is drawn with. */
+  growth: GrowthInfo;
   /** The reader's stored preference. The OS setting is read here as well. */
   reducedMotion: boolean;
   /** 'auto' follows the device clock; anything else pins the scene's time of day. */
@@ -91,6 +94,7 @@ function useOsReducedMotion(): boolean {
 
 export default function StudioStage({ tree }: { tree: StageTree | null }) {
   const osReducedMotion = useOsReducedMotion();
+  const floor = useStableFloor(tree?.growth.floor);
 
   return (
     // `absolute`, not `fixed`: since the redesign the tree fills the studio's
@@ -105,6 +109,7 @@ export default function StudioStage({ tree }: { tree: StageTree | null }) {
           seed={tree.seed}
           level={tree.level}
           frac={tree.frac}
+          floor={floor}
           health={tree.health}
           species={tree.avatar.species}
           scene={tree.avatar.scene}
@@ -113,7 +118,7 @@ export default function StudioStage({ tree }: { tree: StageTree | null }) {
           reducedMotion={tree.reducedMotion || osReducedMotion}
           timeOfDay={tree.timeOfDay as 'auto' | 'dawn' | 'day' | 'dusk' | 'night' | undefined}
           className="block h-full w-full"
-          ariaLabel={`Je boom: ${tree.stage.name.toLowerCase()} op niveau ${tree.level}`}
+          ariaLabel={`Je boom: ${growthPill(tree.growth.step)}`}
         />
       )}
 

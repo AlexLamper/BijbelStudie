@@ -1,8 +1,9 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { describeLevel, type GamificationSummary, type GrantResult } from '../../lib/levensboom/client';
-import { stageForLevel } from '../../lib/levensboom/stages';
+import { describeLevel, fracOf, type GamificationSummary, type GrantResult } from '../../lib/levensboom/client';
+import { phaseForStep } from '../../lib/levensboom/stages';
+import { growthInfo } from '../../lib/levensboom/growth';
 import type { AvatarChoice } from '../../lib/levensboom/catalog';
 import type { LevensboomPayload } from '../../lib/levensboom/summary';
 
@@ -19,10 +20,21 @@ import type { LevensboomPayload } from '../../lib/levensboom/summary';
  * endpoints already return the `GrantResult`, so the bar can move and leaves
  * can unfurl without a second round trip; a level-up triggers a refresh, since
  * it may have unlocked something only the server can confirm.
+ *
+ * Growth v2 (LEVENSBOOM_GROWTH_PLAN.md §6.1): `levensboom.growth` is where the
+ * tree stands. The floor in it only ever comes from the server; an XP grant
+ * recomputes position, step and phase from that floor with the same
+ * `growthInfo` the server uses, so the two cannot drift. The position before
+ * the grant is kept as [lastGrowth] for the lesson card's growth moment.
  */
 
 const CACHE_TTL_MS = 60_000;
-const CACHE_PREFIX = 'levensboom:v2:';
+// v3: the payload gained `growth`; a session still holding a v2 entry must not
+// hand a component a tree without it.
+const CACHE_PREFIX = 'levensboom:v3:';
+
+/** A tree position the renderer can tween between: level plus the share of it done. */
+export type TreePosition = { level: number; frac: number };
 
 export type SaveResult = { ok: true } | { ok: false; error: string; label?: string };
 
@@ -39,6 +51,12 @@ export type LevensboomContextValue = {
   loading: boolean;
   /** Set when an XP event has just crossed a level and nothing has shown it yet. */
   celebrate: number | null;
+  /**
+   * The last XP grant this page applied, as a move from the position before it
+   * to the one after (plan §9.2). Null until a grant lands; `id` tells two
+   * grants apart.
+   */
+  lastGrowth: { id: number; from: TreePosition; to: TreePosition } | null;
   refresh: () => Promise<void>;
   applyXp: (grant: GrantResult | null | undefined) => void;
   dismissCelebration: () => Promise<void>;
@@ -57,6 +75,7 @@ const IDLE: LevensboomContextValue = {
   data: null,
   loading: false,
   celebrate: null,
+  lastGrowth: null,
   refresh: async () => {},
   applyXp: () => {},
   dismissCelebration: async () => {},
@@ -129,6 +148,8 @@ export function LevensboomProvider({
   const [data, setData] = useState<GamificationSummary | null>(null);
   const [loading, setLoading] = useState(enabled);
   const [celebrate, setCelebrate] = useState<number | null>(null);
+  const [lastGrowth, setLastGrowth] = useState<LevensboomContextValue['lastGrowth']>(null);
+  const growthSeq = useRef(0);
   const mounted = useRef(true);
   const inflight = useRef<Promise<void> | null>(null);
 
@@ -199,11 +220,22 @@ export function LevensboomProvider({
   const applyXp = useCallback(
     (grant: GrantResult | null | undefined) => {
       if (!grant || grant.awarded <= 0) return;
+      // Both ends come from the grant itself, not from what is on screen: the
+      // XP before it is simply `xp - awarded`, and that holds even when a cached
+      // state was a minute behind.
+      const before = describeLevel(Math.max(0, grant.xp - grant.awarded));
+      const after = describeLevel(grant.xp);
+      growthSeq.current += 1;
+      setLastGrowth({
+        id: growthSeq.current,
+        from: { level: before.level, frac: fracOf(before) },
+        to: { level: after.level, frac: fracOf(after) },
+      });
       update((current) => {
-        const level = describeLevel(grant.xp);
+        const growth = growthInfo(after.level, fracOf(after), current.levensboom.growth?.floor ?? null);
         return {
           ...current,
-          ...level,
+          ...after,
           badges: Array.from(new Set([...current.badges, ...grant.newBadges])),
           levensboom: {
             ...current.levensboom,
@@ -211,7 +243,8 @@ export function LevensboomProvider({
             health: 1,
             wilting: false,
             daysSinceActive: 0,
-            stage: stageForLevel(level.level),
+            growth,
+            stage: phaseForStep(growth.step),
           },
         };
       });
@@ -329,6 +362,7 @@ export function LevensboomProvider({
       data,
       loading,
       celebrate,
+      lastGrowth,
       refresh,
       applyXp,
       dismissCelebration,
@@ -339,7 +373,7 @@ export function LevensboomProvider({
       markItemsSeen,
       setPublicProfile,
     }),
-    [enabled, data, loading, celebrate, refresh, applyXp, dismissCelebration, setPrefs, setAvatar, plant, markIntroSeen, markItemsSeen, setPublicProfile],
+    [enabled, data, loading, celebrate, lastGrowth, refresh, applyXp, dismissCelebration, setPrefs, setAvatar, plant, markIntroSeen, markItemsSeen, setPublicProfile],
   );
 
   return <LevensboomContext.Provider value={value}>{children}</LevensboomContext.Provider>;
