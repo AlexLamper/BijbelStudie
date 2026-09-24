@@ -72,6 +72,66 @@ export function cotyledonColor(
   return mix(base, faded, age);
 }
 
+/**
+ * A temporary leaf (seed leaf, seedling whorl) fades as it shrinks: opacity
+ * `fadeAlphaMin + (1 − fadeAlphaMin) · leaf.fade`, times the bud opacity.
+ */
+export const LEAF_FADE = { alphaMin: 0.3 } as const;
+
+export function leafFadeAlpha(fade: number | undefined): number {
+  const f = fade == null ? 1 : Math.min(1, Math.max(0, fade));
+  return LEAF_FADE.alphaMin + (1 - LEAF_FADE.alphaMin) * f;
+}
+
+// ---------------------------------------------------------------------------
+// Ground mound and shadow under the trunk
+// ---------------------------------------------------------------------------
+
+/**
+ * The low mound the trunk stands in, sized to the trunk (growth v2: a kiem
+ * stands on a handful of earth, an old tree on a swell of it). With w the
+ * trunk's base width in tree units (branch 'T', `w0`; 5 for a scene without
+ * one, i.e. a v1 tree):
+ *
+ *   scene     mound rx = clamp(3 + 2.2·w, 4, 17), ry = 0.16·rx, centred 0.2 below the earth band's top edge;
+ *             shadow rx = 0.78·mound rx, ry = 0.115·mound rx, centred 0.6 below the trunk base, bark at 0.2-0.28 alpha
+ *   portrait  disc rx = max(2.4, 1.9 + 1.1·w), ry = min(0.16·rx, 1.6) tree units on the pivot; shadow 0.7·rx, 0.7·ry, 0.4 lower
+ *
+ * All in tree units times the camera scale, never below 3 px (mound) / 2 px
+ * (shadow) so an avatar keeps a foothold.
+ */
+export const MOUND = {
+  base: 3,
+  perWidth: 2.2,
+  min: 4,
+  max: 17,
+  aspect: 0.16,
+  shadowRx: 0.78,
+  shadowAspect: 0.115,
+  portraitBase: 1.9,
+  portraitPerWidth: 1.1,
+  portraitMin: 2.4,
+  portraitMaxRy: 1.6,
+  defaultWidth: 5,
+} as const;
+
+export function trunkWidthOf(scene: Pick<TreeScene, 'branches'>): number {
+  const trunk = scene.branches.find((b) => b.path === 'T');
+  return trunk && trunk.w0 > 0 ? trunk.w0 : MOUND.defaultWidth;
+}
+
+/** Scene mound and shadow radii in tree units. */
+export function moundFor(trunkWidth: number): { rx: number; ry: number; shadowRx: number; shadowRy: number } {
+  const rx = Math.min(MOUND.max, Math.max(MOUND.min, MOUND.base + MOUND.perWidth * trunkWidth));
+  return { rx, ry: rx * MOUND.aspect, shadowRx: rx * MOUND.shadowRx, shadowRy: rx * MOUND.shadowAspect };
+}
+
+/** Portrait disc radii in tree units. */
+export function portraitDiscFor(trunkWidth: number): { rx: number; ry: number } {
+  const rx = Math.max(MOUND.portraitMin, MOUND.portraitBase + MOUND.portraitPerWidth * trunkWidth);
+  return { rx, ry: Math.min(rx * MOUND.aspect, MOUND.portraitMaxRy) };
+}
+
 // ---------------------------------------------------------------------------
 // Maturing: knots, moss, root flare (by position, plan §4.5)
 // ---------------------------------------------------------------------------

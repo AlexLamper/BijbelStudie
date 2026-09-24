@@ -1,8 +1,11 @@
 import { beforeAll, it } from 'vitest';
 import { SPECIES, SPECIES_IDS, type TreeForm } from '../../lib/levensboom/species';
 import { phaseForStep, STAGES, type StageId } from '../../lib/levensboom/stages';
+import { measureFrame } from '../../lib/levensboom/camera';
+import { renderSceneSvg } from '../../lib/levensboom/svg';
+import { lerpScenes, tweenEase, tweenMsFor, TWEEN } from '../../lib/levensboom/tween';
 import { fitScale, writeSheet, type Cell, type Group, type Line, type SheetSpec } from './sheetKit';
-import { counts, DASHBOARD, SEEDS, shortSeed, treeCell, v1Cell } from './sheetTrees';
+import { counts, DASHBOARD, SCENE_ID, sceneAt, SEEDS, shortSeed, treeCell, v1Cell } from './sheetTrees';
 
 /**
  * `npm run tree:sheet` - PNG contact sheets of the tree for the design pass
@@ -305,6 +308,71 @@ function levelupSheet(species: string): SheetSpec {
 }
 
 // ---------------------------------------------------------------------------
+// tween-<species>: the level-up and lesson tween as a filmstrip (CP6)
+// ---------------------------------------------------------------------------
+
+/** Time shares of the tween; the eased progress `tweenEase(u)` is what `lerpScenes` gets, as the canvas does it. */
+const TWEEN_TIMES = [0, 0.1, 0.2, 0.35, 0.5, 0.7, 0.85, 1];
+
+/** [from position, to position, note]: level-ups late in the old level, and two lesson-sized moves. */
+const TWEEN_PAIRS: [number, number, string][] = [
+  [4.9, 5, 'first shoots + blossom'],
+  [6.9, 7, 'crown forms'],
+  [15.9, 16, 'twin trunk'],
+  [19.9, 20, 'finale leaf'],
+  [2.2, 2.35, 'lesson at level 2 (+30 XP)'],
+  [9.2, 9.5, 'lesson-sized move at level 9'],
+];
+
+function tweenSheet(species: string): SheetSpec {
+  const seed = SEEDS[0];
+  const labelWidth = 120;
+  const scale = fitScale(W, TWEEN_TIMES.length, 1, labelWidth);
+  const lines: Line[] = TWEEN_PAIRS.map(([fromPos, toPos, note]) => {
+    const a = sceneAt({ seed, species, position: fromPos });
+    const b = sceneAt({ seed, species, position: toPos });
+    const cells: Cell[] = TWEEN_TIMES.map((u) => {
+      const p = tweenEase(u);
+      const scene = lerpScenes(a, b, p);
+      const frame = measureFrame(W, H, scene, 'scene');
+      const svg = renderSceneSvg(scene, {
+        seed,
+        species,
+        scene: SCENE_ID,
+        season: 'summer',
+        timeOfDay: 'day',
+        health: 1,
+        framing: 'scene',
+        width: W,
+        height: H,
+        maxLeaves: 10_000,
+        frame,
+      });
+      return {
+        svg,
+        width: W,
+        height: H,
+        scale,
+        label: `t ${u.toFixed(2)} · p ${p.toFixed(2)}`,
+        note: `${Math.round(tweenMsFor(a, b) * u)} ms`,
+        accent: u === 1,
+      };
+    });
+    return { groups: [{ label: `${fromPos} → ${toPos}`, sublabel: note, cells }] };
+  });
+  return {
+    name: `tween-${species}`,
+    title: `tween-${species} · lerpScenes(A, B, tweenEase(t)) · seed ${shortSeed(seed)}`,
+    subtitle: [
+      `t = share of the tween's time (${TWEEN.levelUpMs} ms across a step, ${TWEEN.growMs} ms within one); p = eased progress. Teal = the end state.`,
+      `Camera measured on the in-between scene, as the canvas does. ${SCENE_NOTE}`,
+    ],
+    labelWidth,
+    lines,
+  };
+}
+
+// ---------------------------------------------------------------------------
 // The tests: one per sheet
 // ---------------------------------------------------------------------------
 
@@ -351,4 +419,8 @@ it('baseline-v1', async () => {
 
 it('levelup-eik', async () => {
   await writeSheet(() => levelupSheet('eik'));
+});
+
+it('tween-eik', async () => {
+  await writeSheet(() => tweenSheet('eik'));
 });

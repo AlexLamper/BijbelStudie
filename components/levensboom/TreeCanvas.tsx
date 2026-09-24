@@ -15,9 +15,13 @@ import {
   cotyledonColor,
   cotyledonShape,
   knotColors,
+  leafFadeAlpha,
   matureDetails,
   mossColor,
+  moundFor,
+  portraitDiscFor,
   rootColor,
+  trunkWidthOf,
   type MatureDetails,
 } from '../../lib/levensboom/paint';
 
@@ -59,6 +63,8 @@ const FIREFLY_COUNT = 12;
 const STILL_BELOW_PX = 64;
 /** The `seasons` trait (docs/levensboom-spec.md §6) arrives here. */
 const SEASONS_TRAIT_LEVEL = 25;
+/** A blossom's radius as a share of its (capped) leaf size times the leaf scale: smaller than a leaf. */
+const BLOSSOM_RADIUS = 0.7;
 
 export type TreeFraming = 'scene' | 'portrait';
 
@@ -106,7 +112,7 @@ export type TreeCanvasProps = {
    * just shows. `floor` left out means the current `floor`.
    */
   from?: { level: number; frac: number; floor?: GrowthFloor | null } | null;
-  /** Tween length in ms; defaults to 1600 when the step changes, else 1200. */
+  /** Tween length in ms; defaults to `TWEEN.levelUpMs` (1800) when the step changes, else `TWEEN.growMs` (1200). */
   tweenMs?: number;
   /**
    * Called once when the tween has finished - also when it was skipped
@@ -400,9 +406,9 @@ function leafPath(ctx: CanvasRenderingContext2D, shape: LeafShape, size: number,
       break;
     case 'needle': {
       // A tuft of needles. At avatar sizes a single stroke is all that
-      // survives the downsample, so the fan collapses to one.
+      // survives the downsample, so the fan collapses to three, then one.
       const length = size * 1.6;
-      const fan = scale > 1.6 ? [-40, -20, 0, 20, 40] : [0];
+      const fan = scale > 1.6 ? [-40, -20, 0, 20, 40] : scale > 1 ? [-30, 0, 30] : [0];
       for (const a of fan) {
         ctx.moveTo(0, 0);
         ctx.lineTo(Math.cos(a * DEG) * length, Math.sin(a * DEG) * length);
@@ -2074,19 +2080,20 @@ export default function TreeCanvas({
     const drawGround = (t: number) => {
       const { width, height, scale, pivotX, pivotY, groundTop } = frame;
       if (framing === 'portrait') {
-        // A soft shadow and a thin arc of ground: enough to stand on, not a
-        // landscape.
-        const { minX, maxX } = drawn.bounds;
-        const rx = Math.max(6, ((maxX - minX) / 2) * scale * 0.55);
+        // A soft shadow and a thin arc of ground sized to the trunk (paint.ts
+        // MOUND): enough to stand on, not a landscape.
+        const disc = portraitDiscFor(trunkWidthOf(drawn));
+        const rx = Math.max(3, disc.rx * scale);
+        const ry = Math.max(1.2, disc.ry * scale);
         ctx.fillStyle = palette.ground;
         ctx.globalAlpha = 0.9;
         ctx.beginPath();
-        ctx.ellipse(pivotX, pivotY, rx, Math.max(1.5, 1.6 * scale), 0, 0, Math.PI * 2);
+        ctx.ellipse(pivotX, pivotY, rx, ry, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.globalAlpha = 0.25;
         ctx.fillStyle = palette.bark;
         ctx.beginPath();
-        ctx.ellipse(pivotX, pivotY + 0.4 * scale, rx * 0.7, Math.max(1, 1.1 * scale), 0, 0, Math.PI * 2);
+        ctx.ellipse(pivotX, pivotY + 0.4 * scale, rx * 0.7, Math.max(0.8, ry * 0.7), 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.globalAlpha = 1;
         return;
@@ -2103,15 +2110,17 @@ export default function TreeCanvas({
 
       drawFarBackdrop(ctx, palette, decor, frame, t, still);
 
-      // The earth band, with a low mound where the trunk goes in.
+      // The earth band, with a low mound where the trunk goes in - sized to
+      // the trunk (paint.ts MOUND), so a kiem stands on a handful of earth.
       const earth = ctx.createLinearGradient(0, groundTop, 0, height);
       earth.addColorStop(0, palette.ground);
       earth.addColorStop(1, palette.groundDeep);
       ctx.fillStyle = earth;
       ctx.fillRect(0, groundTop, width, height - groundTop);
+      const mound = moundFor(trunkWidthOf(drawn));
       ctx.fillStyle = palette.ground;
       ctx.beginPath();
-      ctx.ellipse(pivotX, groundTop + 0.2 * scale, Math.max(8, 14 * scale), Math.max(2, 2.2 * scale), 0, Math.PI, 0);
+      ctx.ellipse(pivotX, groundTop + 0.2 * scale, Math.max(3, mound.rx * scale), Math.max(1, mound.ry * scale), 0, Math.PI, 0);
       ctx.fill();
 
       drawNearBackdrop(ctx, palette, decor, frame, t, still);
@@ -2120,7 +2129,7 @@ export default function TreeCanvas({
       ctx.globalAlpha = 0.28;
       ctx.fillStyle = mix(palette.groundDeep, palette.bark, 0.5);
       ctx.beginPath();
-      ctx.ellipse(pivotX, pivotY + 0.6 * scale, Math.max(6, 11 * scale), Math.max(1.2, 1.6 * scale), 0, 0, Math.PI * 2);
+      ctx.ellipse(pivotX, pivotY + 0.6 * scale, Math.max(2, mound.shadowRx * scale), Math.max(0.8, mound.shadowRy * scale), 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     };
@@ -2142,7 +2151,7 @@ export default function TreeCanvas({
       const shape = sp.leafShape;
       if (shape === 'needle') {
         ctx.lineCap = 'round';
-        ctx.lineWidth = Math.max(0.8, 0.32 * scale);
+        ctx.lineWidth = Math.max(1, 0.42 * scale);
       }
       // Seed leaves: two colours per frame, yellowing as the seedling ages (paint.ts).
       const seedLeaf = cotyledonColor(palette, false, drawn);
@@ -2163,7 +2172,8 @@ export default function TreeCanvas({
         ctx.save();
         ctx.translate(x, y);
         ctx.rotate(angle * DEG);
-        ctx.globalAlpha = leaf.open ? 1 : 0.75;
+        // A bud is translucent; a seed leaf or whorl fades as it goes.
+        ctx.globalAlpha = (leaf.open ? 1 : 0.75) * leafFadeAlpha(leaf.fade);
         if (leaf.kind === 'cotyledon') {
           // Rounder and fleshier than any species leaf (a conifer's are needles).
           const c = cotyledonShape(drawn.form, size);
@@ -2218,7 +2228,7 @@ export default function TreeCanvas({
         ctx.fillStyle = palette.blossom;
         for (const blossom of drawn.blossoms) {
           if (!(blossom.size > 0)) continue;
-          const size = blossom.size * leafScale * 0.8;
+          const size = blossom.size * leafScale * BLOSSOM_RADIUS;
           ctx.beginPath();
           ctx.arc(originX + blossom.x * scale, originY + blossom.y * scale, size, 0, Math.PI * 2);
           ctx.fill();

@@ -89,6 +89,12 @@ export type Leaf = {
   /** The step this leaf appeared at. */
   birth: number;
   kind: LeafKind;
+  /**
+   * 1 = fresh, 0 = about to fall: seed leaves and seedling whorls run this
+   * down over their last positions (their size shrinks with it; a renderer
+   * fades them too, `leafFadeAlpha` in paint.ts). Always 1 on crown leaves.
+   */
+  fade: number;
 };
 
 export type Ornament = { x: number; y: number; size: number; index: number; path: string };
@@ -266,10 +272,12 @@ export function generateTree(input: TreeInput): TreeScene {
       ? clamp((e - GEOMETRY.woodStart) / GEOMETRY.woodSteps, 0, 1)
       : clamp((e - appear - GEOMETRY.woodDelay) / GEOMETRY.woodSteps, 0, 1);
 
-  const pushLeaf = (leaf: Omit<Leaf, 'bloomOrder' | 'visible' | 'open'>) => {
+  const pushLeaf = (leaf: Omit<Leaf, 'bloomOrder' | 'visible' | 'open' | 'fade'> & { fade?: number }) => {
     if (leaves.length >= MAX_LEAVES) return;
-    leaves.push({ ...leaf, bloomOrder: 0, visible: true, open: true });
+    leaves.push({ fade: 1, ...leaf, bloomOrder: 0, visible: true, open: true });
   };
+  /** A temporary leaf's `fade` from its size factor: 1 while whole, 0 at `fadeMin`. */
+  const fadeShare = (shrink: number, fadeMin: number) => clamp((shrink - fadeMin) / (1 - fadeMin), 0, 1);
 
   /** Lay a node out at the current position and emit its branch. */
   const place = (node: Node, grow: number, w1Ratio: number, trunk: boolean, curveOverride?: number) => {
@@ -525,6 +533,7 @@ export function generateTree(input: TreeInput): TreeScene {
           path,
           birth: 1,
           kind: 'cotyledon',
+          fade: fadeShare(shrink, SEEDLING.cotyledonFadeMin),
         });
       }
     }
@@ -535,7 +544,9 @@ export function generateTree(input: TreeInput): TreeScene {
       const death = pairDeath(form, j);
       if (k >= death) continue;
       const at = along(trunk, (SEEDLING.pairHeight * trunkBaseLen(born, trunk.d[LEN])) / Math.max(1e-6, trunk.len));
-      const grow = ramp(e, born) * fadeAt(e, death, SEEDLING.pairFadeSteps, SEEDLING.pairFadeMin);
+      const shrink = fadeAt(e, death, SEEDLING.pairFadeSteps, SEEDLING.pairFadeMin);
+      const grow = ramp(e, born) * shrink;
+      const fade = fadeShare(shrink, SEEDLING.pairFadeMin);
       const n = table.pairLeaves;
       for (let side = 0; side < n; side += 1) {
         const path = `S${j}L${side}`;
@@ -553,6 +564,7 @@ export function generateTree(input: TreeInput): TreeScene {
           path,
           birth: born,
           kind: 'seedling',
+          fade,
         });
       }
     }
@@ -761,10 +773,11 @@ export function generateTree(input: TreeInput): TreeScene {
       const top = trunk.length > 0 ? trunk[trunk.length - 1] : null;
       if (top) {
         for (let i = 0; i < wanted; i += 1) {
-          const dx = (i % 2 === 0 ? 1 : -1) * (0.5 + 0.45 * Math.floor(i / 2));
-          const dy = 1.1 + 0.35 * (i % 3);
-          // Dates hang under whatever is the crown now; the path names the bunch, not the segment.
-          fruits.push({ x: top.x1 + dx, y: top.y1 + dy, size: MAX_FRUIT_SIZE * 0.85, index: i, path: `PD${i}` });
+          const dx = (i % 2 === 0 ? 1 : -1) * (0.6 + 0.5 * Math.floor(i / 2));
+          const dy = 1.6 + 0.4 * (i % 3);
+          // Dates hang under whatever is the crown now; the path names the
+          // bunch, not the segment. Small: a renderer draws each as a cluster.
+          fruits.push({ x: top.x1 + dx, y: top.y1 + dy, size: GEOMETRY.dateSize, index: i, path: `PD${i}` });
         }
       }
     } else {

@@ -124,7 +124,7 @@ export function v1Cell(input: { seed: string; species: string; level: number; wi
   const v1 = generateTreeV1({ seed: input.seed, level: input.level, frac: 0.5, health: 1, species: input.species });
   const scene = {
     branches: v1.branches.map((b) => ({ ...b, path: '', birth: 1, wood: 1 })),
-    leaves: v1.leaves.map((leaf) => ({ ...leaf, path: '', birth: 1, kind: 'leaf' as const })),
+    leaves: v1.leaves.map((leaf) => ({ ...leaf, path: '', birth: 1, kind: 'leaf' as const, fade: 1 })),
     blossoms: v1.blossoms.map((o) => ({ ...o, path: '' })),
     fruits: v1.fruits.map((o) => ({ ...o, path: '' })),
     bounds: v1.bounds,

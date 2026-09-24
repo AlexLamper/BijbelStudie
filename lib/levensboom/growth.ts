@@ -467,7 +467,9 @@ export const GEOMETRY = {
   matureGirth: 0.015,
   matureGirthSteps: 20,
   /** A blossom never outgrows this leaf size (a seedling's leaves are bigger than a crown's). */
-  blossomMaxSize: 1.2,
+  blossomMaxSize: 0.9,
+  /** A palm's date bunch, as a fruit size (each is drawn as a cluster of three). */
+  dateSize: 0.95,
   /** Twin trunk (trait `twin`): offset, angle, length and width share, and how fast its depths follow. */
   twinOffset: 6,
   twinAngle: 14,

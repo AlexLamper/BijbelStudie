@@ -39,15 +39,17 @@ import type { Branch, Leaf, Ornament, TreeBounds, TreeScene } from './generate';
 /** Timing shape of a tween. Design numbers (CP6). */
 export const TWEEN = {
   /** Newborn wood waits this share of the (eased) tween, then grows out of its parent's tip. */
-  sproutDelay: 0.15,
+  sproutDelay: 0.12,
   /** New leaves, blossom and fruit unfurl after the wood, from this share on. */
-  unfurlDelay: 0.35,
+  unfurlDelay: 0.4,
   /** Leaves and ornaments that leave (seed leaves, inner foliage) are gone by this share. */
-  fallEnd: 0.6,
+  fallEnd: 0.55,
   /** Default length when the step changes (a level-up). */
-  levelUpMs: 1600,
+  levelUpMs: 1800,
   /** Default length for growth within a level (after a lesson or a chapter). */
   growMs: 1200,
+  /** `tweenEase` = smoothstep(u ^ easeBias): below 1 leans the motion earlier. */
+  easeBias: 0.75,
 } as const;
 
 function clamp01(x: number): number {
@@ -63,10 +65,14 @@ function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t;
 }
 
-/** Time to tween progress: ease-out cubic, so the camera settles instead of stopping. */
+/**
+ * Time to tween progress: a short wake-up, the growth through the middle, a
+ * long settle - `smoothstep(u^0.75)`, so nothing jolts at either end and the
+ * tree is still visibly growing past the halfway mark (0.30 at a quarter,
+ * 0.65 at half, 0.90 at three quarters).
+ */
 export function tweenEase(u: number): number {
-  const v = 1 - clamp01(u);
-  return 1 - v * v * v;
+  return smoothstep(Math.pow(clamp01(u), TWEEN.easeBias));
 }
 
 /** How far newborn wood has grown at tween progress t. */
@@ -253,7 +259,7 @@ export function lerpScenes(a: TreeScene, b: TreeScene, t: number): TreeScene {
       if (ib.leaves.has(la.path)) continue;
       const owner = leafOwner(la.path, la.kind, ia);
       const at = ride(la, tipOf(ia, owner), owner ? tips.get(owner) : undefined, 1);
-      const leaf: Leaf = { ...la, x: at.x, y: at.y, size: la.size * leave };
+      const leaf: Leaf = { ...la, x: at.x, y: at.y, size: la.size * leave, fade: (la.fade ?? 1) * leave };
       leaves.push(leaf);
       leafAt.set(la.path, leaf);
     }
@@ -275,7 +281,7 @@ export function lerpScenes(a: TreeScene, b: TreeScene, t: number): TreeScene {
         x = lerp(la.x, lb.x, p);
         y = lerp(la.y, lb.y, p);
       }
-      leaf = { ...lb, x, y, size: lerp(la.size, lb.size, p), angle: lerp(la.angle, lb.angle, p) };
+      leaf = { ...lb, x, y, size: lerp(la.size, lb.size, p), angle: lerp(la.angle, lb.angle, p), fade: lerp(la.fade ?? 1, lb.fade ?? 1, p) };
     } else {
       const at = ride(lb, tipB, tip, open);
       leaf = { ...lb, x: at.x, y: at.y, size: lb.size * open };

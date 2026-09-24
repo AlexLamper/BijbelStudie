@@ -3,7 +3,20 @@ import { measureFrame, type Frame } from './camera';
 import type { GrowthFloor } from './growth';
 import { buildPalette, woodColor, type Season, type TimeOfDay } from './palette';
 import { speciesParams } from './species';
-import { cotyledonColor, cotyledonShape, knotColors, matureDetails, mossColor } from './paint';
+import {
+  cotyledonColor,
+  cotyledonShape,
+  knotColors,
+  leafFadeAlpha,
+  matureDetails,
+  mossColor,
+  moundFor,
+  portraitDiscFor,
+  trunkWidthOf,
+} from './paint';
+
+/** A blossom's radius as a share of its (capped) leaf size times the leaf scale; the canvas uses the same. */
+const BLOSSOM_RADIUS = 0.7;
 // The ridge and the per-scene land live in backdrop.ts so study artwork can
 // draw the same horizon without importing the tree renderer.
 import { backdrop, f } from './backdrop';
@@ -123,17 +136,26 @@ export function renderSceneSvg(
       `<linearGradient id="${id}g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${palette.ground}"/><stop offset="1" stop-color="${palette.groundDeep}"/></linearGradient></defs>`,
   );
 
+  // The mound and shadow are sized to the trunk (paint.ts MOUND).
+  const trunkWidth = trunkWidthOf(scene);
   if (framing === 'portrait') {
     parts.push(`<rect width="${width}" height="${height}" fill="url(#${id}d)"/>`);
-    const rx = Math.max(6, ((scene.bounds.maxX - scene.bounds.minX) / 2) * scale * 0.55);
-    parts.push(`<ellipse cx="${f(pivotX)}" cy="${f(pivotY)}" rx="${f(rx)}" ry="${f(Math.max(1.5, 1.6 * scale))}" fill="${palette.ground}" opacity="0.9"/>`);
-    parts.push(`<ellipse cx="${f(pivotX)}" cy="${f(pivotY + 0.4 * scale)}" rx="${f(rx * 0.7)}" ry="${f(Math.max(1, 1.1 * scale))}" fill="${palette.bark}" opacity="0.25"/>`);
+    const disc = portraitDiscFor(trunkWidth);
+    const rx = Math.max(3, disc.rx * scale);
+    const ry = Math.max(1.2, disc.ry * scale);
+    parts.push(`<ellipse cx="${f(pivotX)}" cy="${f(pivotY)}" rx="${f(rx)}" ry="${f(ry)}" fill="${palette.ground}" opacity="0.9"/>`);
+    parts.push(`<ellipse cx="${f(pivotX)}" cy="${f(pivotY + 0.4 * scale)}" rx="${f(rx * 0.7)}" ry="${f(Math.max(0.8, ry * 0.7))}" fill="${palette.bark}" opacity="0.25"/>`);
   } else {
     parts.push(`<rect width="${width}" height="${height}" fill="url(#${id}s)"/>`);
     parts.push(backdrop(palette, width, height, groundTop));
     parts.push(`<rect x="0" y="${f(groundTop)}" width="${width}" height="${f(height - groundTop)}" fill="url(#${id}g)"/>`);
-    parts.push(`<ellipse cx="${f(pivotX)}" cy="${f(groundTop + 0.2 * scale)}" rx="${f(Math.max(8, 14 * scale))}" ry="${f(Math.max(2, 2.2 * scale))}" fill="${palette.ground}"/>`);
-    parts.push(`<ellipse cx="${f(pivotX)}" cy="${f(pivotY + 0.6 * scale)}" rx="${f(Math.max(6, 11 * scale))}" ry="${f(Math.max(1.2, 1.6 * scale))}" fill="${palette.bark}" opacity="0.2"/>`);
+    const mound = moundFor(trunkWidth);
+    parts.push(
+      `<ellipse cx="${f(pivotX)}" cy="${f(groundTop + 0.2 * scale)}" rx="${f(Math.max(3, mound.rx * scale))}" ry="${f(Math.max(1, mound.ry * scale))}" fill="${palette.ground}"/>`,
+    );
+    parts.push(
+      `<ellipse cx="${f(pivotX)}" cy="${f(pivotY + 0.6 * scale)}" rx="${f(Math.max(2, mound.shadowRx * scale))}" ry="${f(Math.max(0.8, mound.shadowRy * scale))}" fill="${palette.bark}" opacity="0.2"/>`,
+    );
   }
 
   // The root flare sits behind the trunk; flat bark, like the SVG's trunk.
@@ -197,11 +219,14 @@ export function renderSceneSvg(
     const y = originY + leaf.y * scale;
     const size = leaf.size * leafScale * (leaf.open ? 1 : 0.5);
     const a = (leaf.angle * Math.PI) / 180;
+    // A bud is translucent; a seed leaf or whorl fades as it goes.
+    const alpha = (leaf.open ? 1 : 0.75) * leafFadeAlpha(leaf.fade);
+    const opacity = alpha < 1 ? ` opacity="${f(alpha)}"` : '';
     if (leaf.kind === 'cotyledon') {
       const c = cotyledonShape(sp.form, size);
       const cx = x + Math.cos(a) * c.cx;
       const cy = y + Math.sin(a) * c.cx;
-      const el = `<ellipse cx="${f(cx)}" cy="${f(cy)}" rx="${f(c.rx)}" ry="${f(c.ry)}" transform="rotate(${f(leaf.angle)} ${f(cx)} ${f(cy)})"${leaf.open ? '' : ' opacity="0.75"'}/>`;
+      const el = `<ellipse cx="${f(cx)}" cy="${f(cy)}" rx="${f(c.rx)}" ry="${f(c.ry)}" transform="rotate(${f(leaf.angle)} ${f(cx)} ${f(cy)})"${opacity}/>`;
       if (leaf.phase > 0.5) seedAlt += el;
       else seed += el;
       continue;
@@ -227,7 +252,7 @@ export function renderSceneSvg(
         break;
       case 'needle':
         rx = size * 0.9;
-        ry = size * 0.25;
+        ry = size * 0.3;
         ox = size * 0.5;
         break;
       case 'frond':
@@ -253,7 +278,7 @@ export function renderSceneSvg(
       default:
         break;
     }
-    const el = `<ellipse cx="${f(x + Math.cos((leaf.angle * Math.PI) / 180) * ox)}" cy="${f(y + Math.sin((leaf.angle * Math.PI) / 180) * ox)}" rx="${f(rx)}" ry="${f(ry)}" transform="rotate(${f(leaf.angle)} ${f(x + Math.cos((leaf.angle * Math.PI) / 180) * ox)} ${f(y + Math.sin((leaf.angle * Math.PI) / 180) * ox)})"${leaf.open ? '' : ' opacity="0.75"'}/>`;
+    const el = `<ellipse cx="${f(x + Math.cos((leaf.angle * Math.PI) / 180) * ox)}" cy="${f(y + Math.sin((leaf.angle * Math.PI) / 180) * ox)}" rx="${f(rx)}" ry="${f(ry)}" transform="rotate(${f(leaf.angle)} ${f(x + Math.cos((leaf.angle * Math.PI) / 180) * ox)} ${f(y + Math.sin((leaf.angle * Math.PI) / 180) * ox)})"${opacity}/>`;
     if (leaf.phase > 0.5) alt += el;
     else leaves += el;
   }
@@ -267,7 +292,7 @@ export function renderSceneSvg(
   if (palette.blossom && scene.blossoms.length > 0) {
     let blossoms = '';
     for (const b of scene.blossoms) {
-      blossoms += `<circle cx="${f(originX + b.x * scale)}" cy="${f(originY + b.y * scale)}" r="${f(b.size * leafScale * 0.8)}"/>`;
+      blossoms += `<circle cx="${f(originX + b.x * scale)}" cy="${f(originY + b.y * scale)}" r="${f(b.size * leafScale * BLOSSOM_RADIUS)}"/>`;
     }
     parts.push(`<g fill="${palette.blossom}">${blossoms}</g>`);
   }
@@ -277,7 +302,20 @@ export function renderSceneSvg(
     for (const fruit of scene.fruits) {
       if (!(fruit.size > 0)) continue;
       const size = Math.max(1.4, fruit.size * leafScale * 1.15);
-      fruits += `<circle cx="${f(originX + fruit.x * scale)}" cy="${f(originY + fruit.y * scale)}" r="${f(size * 0.8)}"/>`;
+      const x = originX + fruit.x * scale;
+      const y = originY + fruit.y * scale;
+      if (sp.fruitStyle === 'dates') {
+        // A bunch of three, as the canvas draws it.
+        for (const [ox, oy] of [
+          [-0.5, 0.1],
+          [0.5, 0.1],
+          [0, 0.75],
+        ]) {
+          fruits += `<ellipse cx="${f(x + ox * size)}" cy="${f(y + oy * size)}" rx="${f(size * 0.42)}" ry="${f(size * 0.6)}"/>`;
+        }
+        continue;
+      }
+      fruits += `<circle cx="${f(x)}" cy="${f(y)}" r="${f(size * 0.8)}"/>`;
     }
     parts.push(`<g fill="${palette.fruit}">${fruits}</g>`);
   }

@@ -82,7 +82,7 @@ export default function TreeLab() {
   const [framingId, setFramingId] = useState<FramingId>('dashboard');
   const [reducedMotion, setReducedMotion] = useState(false);
   const [lessonXp, setLessonXp] = useState(LESSON_XP);
-  /** Empty = TreeCanvas's own default (1600 ms across a step, 1200 within one). */
+  /** Empty = TreeCanvas's own default (1800 ms across a step, 1200 within one). */
   const [tweenMs, setTweenMs] = useState('');
   /** A tween in flight; `key` remounts the canvas so every press replays from `from`. */
   const [tween, setTween] = useState<{ from: { level: number; frac: number }; label: string } | null>(null);
@@ -272,7 +272,7 @@ export default function TreeLab() {
                 className={inputClass}
                 min={0}
                 step={100}
-                placeholder="1600 / 1200"
+                placeholder="1800 / 1200"
                 value={tweenMs}
                 onChange={(e) => setTweenMs(e.target.value)}
               />
