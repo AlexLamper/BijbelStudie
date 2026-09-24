@@ -2,7 +2,7 @@ import { requireUser } from '../../../../lib/apiAuth';
 import { corsPreflight, handleV1Error, jsonV1 } from '../../../../lib/apiV1';
 import connectMongoDB from '../../../../lib/mongodb';
 import User from '../../../../models/User';
-import { levelForXp } from '../../../../lib/gamification';
+import { describeLevel, levelForXp } from '../../../../lib/gamification';
 import {
   catalogItem,
   ITEM_KINDS,
@@ -12,6 +12,8 @@ import {
   type ItemKind,
 } from '../../../../lib/levensboom/catalog';
 import { buildLevensboomPayload, type LevensboomPrefs } from '../../../../lib/levensboom/summary';
+import { ensureLegacyXp, floorForUser } from '../../../../lib/levensboom/legacy';
+import { fracOf } from '../../../../lib/levensboom/client';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,7 +22,9 @@ export async function OPTIONS() {
 }
 
 type UserRow = {
+  _id: unknown;
   xp?: number | null;
+  createdAt?: Date | null;
   badges?: string[] | null;
   streak?: number | null;
   longestStreak?: number | null;
@@ -28,12 +32,14 @@ type UserRow = {
   levensboom?: LevensboomPrefs | null;
 };
 
-const SELECT = 'xp badges streak longestStreak lastStreakDate levensboom';
+const SELECT = 'xp createdAt badges streak longestStreak lastStreakDate levensboom';
 
 async function payloadFor(userId: string, isPro: boolean, row: UserRow) {
   return buildLevensboomPayload({
     userId,
     level: levelForXp(row.xp ?? 0),
+    frac: fracOf(describeLevel(row.xp ?? 0)),
+    floor: floorForUser(row),
     lastStreakDate: row.lastStreakDate ?? null,
     prefs: row.levensboom ?? null,
     badges: badgesFor(row, isPro),
@@ -61,7 +67,8 @@ export async function GET(req: Request) {
     await connectMongoDB();
     const row = await User.findById(auth.id).select(SELECT).lean<UserRow | null>();
     if (!row) return jsonV1({ error: 'NOT_FOUND' }, { status: 404 });
-    return jsonV1({ levensboom: await payloadFor(auth.id, auth.isPro, row) });
+    // Growth v2's one-time head start, captured before the payload reads it.
+    return jsonV1({ levensboom: await payloadFor(auth.id, auth.isPro, await ensureLegacyXp(row)) });
   } catch (error) {
     return handleV1Error(error);
   }

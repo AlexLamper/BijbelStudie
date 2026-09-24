@@ -69,6 +69,12 @@ const UserSchema = new mongoose.Schema(
       publicProfile: { type: Boolean, default: false },
       // Catalog keys whose "Nieuw" dot the reader has already seen.
       seenItems: { type: [String], default: [] },
+      // Growth v2's never-shrink floor (lib/levensboom/legacy.ts): the XP an
+      // account had when it was first read after the launch, written once by a
+      // conditional `$set` and never again. No defaults on purpose: `$exists`
+      // is the "captured yet?" test, and a default would answer it wrongly.
+      legacyXp: { type: Number },
+      legacyAt: { type: Date },
     },
     subscribed: { type: Boolean, default: false },
     // An admin-granted Pro period that ends by itself. `subscribed` is the flag

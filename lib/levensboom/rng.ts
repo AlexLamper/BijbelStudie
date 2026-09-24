@@ -48,3 +48,22 @@ export function mulberry32(seed: number): Rng {
 export function seededRng(seed: string): Rng {
   return mulberry32(fnv1a32(seed));
 }
+
+/**
+ * Growth v2: one stream per node of the tree, keyed by its path ("T", "T01",
+ * "T01L2", "C0", "PF3" ...). Adding a branch, a leaf or a whole subtree can
+ * never shift another node's numbers, which is what lets a tree grow instead
+ * of being redrawn at every level-up. Paths are plain ASCII, so the Dart
+ * mirror hashes exactly the same code units.
+ */
+export function nodeRng(seed: string, path: string): Rng {
+  return mulberry32(fnv1a32(`${seed}|${path}`));
+}
+
+/** The first `count` values of a node's stream. */
+export function nodeDraws(seed: string, path: string, count: number): number[] {
+  const rand = nodeRng(seed, path);
+  const out = new Array<number>(count);
+  for (let i = 0; i < count; i += 1) out[i] = rand();
+  return out;
+}

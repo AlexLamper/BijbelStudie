@@ -21,7 +21,9 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "tree:calibrate": "vitest run -c vitest.tools.config.ts calibrate",
+    "tree:fixtures": "vitest run -c vitest.tools.config.ts fixtures"
   },
   "dependencies": {
     "@google/genai": "^2.16.0",

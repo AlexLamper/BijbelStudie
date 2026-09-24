@@ -1,5 +1,7 @@
-import { generateTree, GROUND_Y, MIN_SCENE_HEIGHT, MIN_SCENE_WIDTH, TRUNK_X, type TreeScene } from './generate';
-import { buildPalette, type Season, type TimeOfDay } from './palette';
+import { generateTree, type TreeScene } from './generate';
+import { measureFrame, type Frame } from './camera';
+import type { GrowthFloor } from './growth';
+import { buildPalette, woodColor, type Season, type TimeOfDay } from './palette';
 import { speciesParams } from './species';
 // The ridge and the per-scene land live in backdrop.ts so study artwork can
 // draw the same horizon without importing the tree renderer.
@@ -23,6 +25,10 @@ export type TreeSvgOptions = {
   frac?: number;
   health?: number;
   species?: string;
+  /** A legacy account's growth floor, from the API (plan §5). */
+  floor?: GrowthFloor | null;
+  /** Render at this position instead of level/frac (ladder thumbnails, design sheets). */
+  at?: { position: number; step?: number } | null;
   scene?: string;
   framing?: 'scene' | 'portrait';
   width: number;
@@ -34,41 +40,15 @@ export type TreeSvgOptions = {
   rootAttributes?: string;
 };
 
-type Frame = { scale: number; originX: number; originY: number; pivotX: number; pivotY: number; groundTop: number };
-
-function measure(width: number, height: number, scene: TreeScene, framing: 'scene' | 'portrait'): Frame {
-  const { minX, maxX, minY } = scene.bounds;
-  const contentW = Math.max(1, maxX - minX);
-  const treeH = Math.max(1, GROUND_Y - minY);
-  if (framing === 'portrait') {
-    const padX = width * 0.1;
-    const padY = height * 0.1;
-    const scale = Math.min((width - 2 * padX) / contentW, (height - 2 * padY) / treeH);
-    const originX = width / 2 - ((minX + maxX) / 2) * scale;
-    const pivotY = height - padY * 1.15;
-    const originY = pivotY - GROUND_Y * scale;
-    return { scale, originX, originY, pivotX: originX + TRUNK_X * scale, pivotY, groundTop: pivotY };
-  }
-  const band = height * 0.12;
-  const sceneW = Math.max(contentW, MIN_SCENE_WIDTH);
-  const sceneH = Math.max(treeH, MIN_SCENE_HEIGHT);
-  const scale = Math.min((width * 0.9) / sceneW, ((height - band) * 0.84) / sceneH);
-  const groundTop = height - band;
-  const pivotY = groundTop + 0.6 * scale;
-  const originX = width / 2 - ((minX + maxX) / 2) * scale;
-  const originY = pivotY - GROUND_Y * scale;
-  return { scale, originX, originY, pivotX: originX + TRUNK_X * scale, pivotY, groundTop };
-}
-
 function normal(dx: number, dy: number): [number, number] {
   const length = Math.hypot(dx, dy) || 1;
   return [-dy / length, dx / length];
 }
 
-function branchPath(scene: TreeScene, frame: Frame): string {
+function branchPath(branches: TreeScene['branches'], frame: Frame): string {
   const { scale, originX, originY } = frame;
   let d = '';
-  for (const b of scene.branches) {
+  for (const b of branches) {
     const x0 = originX + b.x0 * scale;
     const y0 = originY + b.y0 * scale;
     const cx = originX + b.cx * scale;
@@ -99,15 +79,17 @@ export function renderTreeSvg(options: TreeSvgOptions): string {
     frac: options.frac ?? 0.5,
     health: options.health ?? 1,
     species: options.species,
+    floor: options.floor,
+    at: options.at,
   });
   const palette = buildPalette(options.season ?? 'summer', options.timeOfDay ?? 'day', options.health ?? 1, {
     scene: options.scene,
     species: options.species,
   });
-  const frame = measure(width, height, scene, framing);
+  const frame = measureFrame(width, height, scene, framing);
   const { scale, originX, originY, pivotX, pivotY, groundTop } = frame;
   const sp = speciesParams(options.species);
-  const id = `lb${Math.abs(hash(`${options.seed}${options.level}${framing}${width}`)).toString(36)}`;
+  const id = `lb${Math.abs(hash(`${options.seed}${scene.position}${framing}${width}`)).toString(36)}`;
 
   const parts: string[] = [];
   parts.push(
@@ -132,7 +114,18 @@ export function renderTreeSvg(options: TreeSvgOptions): string {
     parts.push(`<ellipse cx="${f(pivotX)}" cy="${f(pivotY + 0.6 * scale)}" rx="${f(Math.max(6, 11 * scale))}" ry="${f(Math.max(1.2, 1.6 * scale))}" fill="${palette.bark}" opacity="0.2"/>`);
   }
 
-  parts.push(`<path d="${branchPath(scene, frame)}" fill="${palette.bark}"/>`);
+  // Green stems to bark (growth v2 `wood`), bucketed to tenths so a tree
+  // is a handful of paths, not one per branch.
+  const byWood = new Map<number, TreeScene['branches']>();
+  for (const b of scene.branches) {
+    const bucket = Math.round(b.wood * 10) / 10;
+    const list = byWood.get(bucket);
+    if (list) list.push(b);
+    else byWood.set(bucket, [b]);
+  }
+  for (const [wood, list] of [...byWood.entries()].sort((a, b) => b[0] - a[0])) {
+    parts.push(`<path d="${branchPath(list, frame)}" fill="${woodColor(palette, wood)}"/>`);
+  }
 
   // Leaves: sampled, larger. A frond keeps its blade shape as a long ellipse.
   const visible = scene.leaves.filter((leaf) => leaf.visible);
