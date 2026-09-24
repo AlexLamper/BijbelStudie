@@ -8,6 +8,7 @@ import { seededRng } from '../../lib/levensboom/rng';
 import { speciesParams, type LeafShape, type SpeciesId } from '../../lib/levensboom/species';
 import { sceneSpec, type SceneId } from '../../lib/levensboom/scenes';
 import { type AnimalId } from '../../lib/levensboom/catalog';
+import type { GrowthFloor } from '../../lib/levensboom/growth';
 
 /**
  * The Levensboom, drawn to a canvas.
@@ -69,6 +70,20 @@ export type TreeCanvasProps = {
   /** Index of a fruit to swell with a soft bloom, when a level-up unlocked one. */
   bloomFruit?: number | null;
   ariaLabel?: string;
+  /** Growth v2: a legacy account's growth floor, from `levensboom.growth.floor`. */
+  floor?: GrowthFloor | null;
+  /**
+   * Growth v2: tween from this earlier position to the current one (plan §9.2,
+   * §9.3) - the level-up and the in-level lesson growth. Paths that exist in
+   * both scenes lengthen in place, newborn wood grows out of its parent's tip,
+   * the camera eases. Under reduced motion the end state shows at once.
+   */
+  from?: { level: number; frac: number; floor?: GrowthFloor | null } | null;
+  /** Tween length in ms; defaults to 1600 when the step changes, else 1200. */
+  tweenMs?: number;
+  onTweenEnd?: () => void;
+  /** Growth v2: render at this position instead of level/frac (ladder thumbnails, the dev page). */
+  at?: { position: number; step?: number } | null;
 };
 
 type Mote = { x: number; y: number; r: number; speed: number; phase: number };

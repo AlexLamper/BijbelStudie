@@ -12,7 +12,7 @@ import {
   type ItemKind,
 } from '../../../../lib/levensboom/catalog';
 import { buildLevensboomPayload, type LevensboomPrefs } from '../../../../lib/levensboom/summary';
-import { ensureLegacyXp, floorForUser } from '../../../../lib/levensboom/legacy';
+import { announcesGrowth, ensureLegacyXp, floorForUser } from '../../../../lib/levensboom/legacy';
 import { fracOf } from '../../../../lib/levensboom/client';
 
 export const dynamic = 'force-dynamic';
@@ -40,6 +40,7 @@ async function payloadFor(userId: string, isPro: boolean, row: UserRow) {
     level: levelForXp(row.xp ?? 0),
     frac: fracOf(describeLevel(row.xp ?? 0)),
     floor: floorForUser(row),
+    announceGrowth: announcesGrowth(row),
     lastStreakDate: row.lastStreakDate ?? null,
     prefs: row.levensboom ?? null,
     badges: badgesFor(row, isPro),

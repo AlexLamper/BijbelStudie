@@ -131,3 +131,15 @@ export function floorForUser(user: LegacySource, opts: LegacyOptions = {}): Grow
   if (launchAt && createdAt && createdAt.getTime() >= launchAt.getTime()) return null;
   return floorForLegacyXp(user.xp ?? 0);
 }
+
+/**
+ * Whether this account should see the one-time "je boom groeit nu in twintig
+ * stappen" card (plan §9.6): it existed before the launch. Fails closed - no
+ * launch date (a preview, the env var not set yet) means no card, so nobody
+ * dismisses it before it means anything.
+ */
+export function announcesGrowth(user: LegacySource, opts: LegacyOptions = {}): boolean {
+  const launchAt = launchAtFrom(opts.env ?? process.env);
+  const createdAt = validDate(user.createdAt);
+  return Boolean(launchAt && createdAt && createdAt.getTime() < launchAt.getTime());
+}

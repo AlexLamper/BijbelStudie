@@ -71,8 +71,6 @@ function branchPath(branches: TreeScene['branches'], frame: Frame): string {
 }
 
 export function renderTreeSvg(options: TreeSvgOptions): string {
-  const { width, height } = options;
-  const framing = options.framing ?? 'scene';
   const scene = generateTree({
     seed: options.seed,
     level: options.level,
@@ -82,11 +80,26 @@ export function renderTreeSvg(options: TreeSvgOptions): string {
     floor: options.floor,
     at: options.at,
   });
+  return renderSceneSvg(scene, options);
+}
+
+/**
+ * The same drawing from a scene graph already in hand: the design tooling
+ * renders tweened, v1 or otherwise prepared scenes through here. `frame`
+ * overrides the camera (the v1 baseline sheet fits the old way).
+ */
+export function renderSceneSvg(
+  scene: Pick<TreeScene, 'branches' | 'leaves' | 'blossoms' | 'fruits' | 'bounds' | 'growth' | 'position'> &
+    Partial<Pick<TreeScene, 'step'>>,
+  options: Omit<TreeSvgOptions, 'level'> & { frame?: Frame },
+): string {
+  const { width, height } = options;
+  const framing = options.framing ?? 'scene';
   const palette = buildPalette(options.season ?? 'summer', options.timeOfDay ?? 'day', options.health ?? 1, {
     scene: options.scene,
     species: options.species,
   });
-  const frame = measureFrame(width, height, scene, framing);
+  const frame = options.frame ?? measureFrame(width, height, scene, framing);
   const { scale, originX, originY, pivotX, pivotY, groundTop } = frame;
   const sp = speciesParams(options.species);
   const id = `lb${Math.abs(hash(`${options.seed}${scene.position}${framing}${width}`)).toString(36)}`;
@@ -118,7 +131,8 @@ export function renderTreeSvg(options: TreeSvgOptions): string {
   // is a handful of paths, not one per branch.
   const byWood = new Map<number, TreeScene['branches']>();
   for (const b of scene.branches) {
-    const bucket = Math.round(b.wood * 10) / 10;
+    // A v1 scene has no `wood`: all bark.
+    const bucket = Math.round((b.wood ?? 1) * 10) / 10;
     const list = byWood.get(bucket);
     if (list) list.push(b);
     else byWood.set(bucket, [b]);
