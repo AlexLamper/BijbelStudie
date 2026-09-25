@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
+import { START_BOOK } from '../../lib/book-mapping';
 
 /** Routes where the Bible reader is the likely next screen. */
 const READER_ROUTES = ['/dashboard', '/studie', '/lezen', '/studies'];
@@ -11,7 +12,7 @@ const READER_ROUTES = ['/dashboard', '/studie', '/lezen', '/studies'];
  *
  * It used to run on every page in the app, so an anonymous visitor landing on
  * the marketing page fired four requests - including a full chapter of
- * Genesis - that competed with that page's own resources and invoked four
+ * the Bible - that competed with that page's own resources and invoked four
  * serverless functions per visit. Now it only runs where the reader is
  * plausibly next, and only once the browser is idle, so it can never sit in
  * front of a Largest Contentful Paint.
@@ -32,7 +33,7 @@ export function PrefetchProvider({ children }: { children: React.ReactNode }) {
       Promise.all([
         fetch('/api/bible/versions'),
         fetch('/api/bible/books?version=statenvertaling'),
-        fetch('/api/bible/chapter?version=statenvertaling&book=Genesis&chapter=1'),
+        fetch(`/api/bible/chapter?version=statenvertaling&book=${START_BOOK}&chapter=1`),
       ]).catch(() => {
         // Warming the cache is best-effort; a failure changes nothing.
       });

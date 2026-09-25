@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { bookNameMap, normalizeBookName, BIBLE_BOOKS_ORDER, resolveBookInList } from '../lib/book-mapping';
+import { bookNameMap, normalizeBookName, BIBLE_BOOKS_ORDER, resolveBookInList, START_BOOK } from '../lib/book-mapping';
 import { rememberReaderVersion } from '../lib/dailyVerseStore';
 
 /* ─── Static data - never changes ───────────────────────────── */
@@ -166,7 +166,7 @@ export function useBibleData(lng: string, options: UseBibleDataOptions = {}): Us
       // an OSIS code) and is resolved against the chosen translation's own
       // folder names. `chapter` defaults to 1 and `version` is optional: links
       // from BijbelQuiz used to carry only book + chapter, and requiring all
-      // three silently opened the last-read chapter or Genesis 1 instead.
+      // three silently opened the last-read chapter or the start chapter instead.
       const linkChapter =
         initialChapter && Number.isFinite(initialChapter) && initialChapter > 0
           ? Math.floor(initialChapter)
@@ -257,7 +257,8 @@ export function useBibleData(lng: string, options: UseBibleDataOptions = {}): Us
         book = linkedBook;
         restoredChapter = linkChapter;
       } else if (!book) {
-        book = bookList.includes('Genesis') ? 'Genesis' : (bookList[0] ?? '');
+        // Never read anything yet: start at START_BOOK 1, in this list's spelling.
+        book = resolveBookInList(START_BOOK, bookList) ?? bookList[0] ?? '';
         restoredChapter = 1;
       }
 
@@ -318,7 +319,7 @@ export function useBibleData(lng: string, options: UseBibleDataOptions = {}): Us
       if (!nextBook) {
         nextBook = prevIdx >= 0 && prevIdx < bookList.length
           ? bookList[prevIdx]
-          : (bookList.includes('Genesis') ? 'Genesis' : (bookList[0] ?? ''));
+          : (resolveBookInList(START_BOOK, bookList) ?? bookList[0] ?? '');
       }
 
       if (nextBook !== selectedBook) setSelectedBook(nextBook);

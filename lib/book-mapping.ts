@@ -308,3 +308,11 @@ export function resolveBookInList(name: string | null | undefined, bookList: rea
   if (!target) return null;
   return bookList.find(book => canonicalBookName(book) === target) ?? null;
 }
+
+/**
+ * Where a reader who has never opened a chapter starts: Johannes 1, not
+ * Genesis 1. Reading guides steer beginners to a gospel first (Genesis runs
+ * into Leviticus within weeks), and Johannes opens with "In den beginne" - a
+ * beginning that reads easily. The app mirrors this in `BibleBooks.startBook`.
+ */
+export const START_BOOK = 'Johannes';
