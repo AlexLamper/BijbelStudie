@@ -5,8 +5,10 @@ import { generatePageMetadata } from "../../lib/pageMetadata";
 import { APP_STORE_URL, PLAY_STORE_URL } from "../../lib/appStore";
 
 /**
- * /app - a bare bio-link landing page for TikTok/Instagram: "link in bio"
- * traffic that just wants the two store links, nothing else. Deliberately not
+ * /app - the bio link for TikTok/Instagram. Phones and desktops never see this
+ * page: middleware.ts redirects them (lib/mobilePlatform.ts appLinkTarget). It
+ * is what link-preview bots, `?toon=1` and an empty user agent get, so shared
+ * links keep a proper "Download de app" card. Deliberately not
  * wrapped in PublicFrame (nav + marketing footer) or the immersive scene shell
  * - either would bury the two buttons a phone visitor came here for.
  *

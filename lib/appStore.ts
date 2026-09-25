@@ -15,7 +15,10 @@ export const APP_STORE_URL =
   'https://apps.apple.com/us/app/bijbelstudie-lees-leer/id6800668187';
 
 /**
- * Android is not shipped yet. When it is, add the Play URL here and give the
- * sidebar link a platform check - not a second hardcoded string.
+ * Android is not shipped yet. At launch, replace `null` with the Play URL in
+ * the `https://play.google.com/store/apps/details?id=<package>` form
+ * (lib/storeReviews.ts reads the `id` param). That one change turns on the /app
+ * redirect, the Android promo banner, the /beoordelingen Play button and
+ * Android reviews. Launch checklist: APP_LINK_PLAN.md §8.
  */
 export const PLAY_STORE_URL: string | null = null;
