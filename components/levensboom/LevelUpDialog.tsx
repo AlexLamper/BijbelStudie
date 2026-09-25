@@ -1,40 +1,42 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import TreeCanvas from './TreeCanvas';
+import { useStableFloor } from './useStableFloor';
 import { buildPalette, seasonForMonth } from '../../lib/levensboom/palette';
-import { fruitAtLevel, fruitCount, TRAIT_LABELS, traitAtLevel } from '../../lib/levensboom/traits';
-import { maxDepthForLevel } from '../../lib/levensboom/generate';
-import { stageForLevel } from '../../lib/levensboom/stages';
-import { itemsUnlockedAtLevel } from '../../lib/levensboom/catalog';
+import { fruitCount } from '../../lib/levensboom/traits';
+import { itemsUnlockedAtLevel, type CatalogItem } from '../../lib/levensboom/catalog';
+import { phaseForStep } from '../../lib/levensboom/stages';
+import type { GrowthFloor } from '../../lib/levensboom/growth';
+import { levelUpCopy } from '../../lib/levensboom/growthCopy';
 import { playLevelUp } from '../../lib/levensboomSound';
+import { track } from '../../lib/analytics';
 
 const TEAL = '#0D9488';
-const GROW_MS = 1200;
 
 /**
  * The level-up moment. Kept for level-ups and fruit unlocks only - the whole
  * point is that it stays rare enough to feel like something.
  *
- * No reward to collect and no "claim" button: one line about what grew, the
- * items the level just unlocked, and a way out. The mirror of the app's
+ * No reward to collect and no "claim" button: what grew (the copy rules of
+ * LEVENSBOOM_GROWTH_PLAN.md §9.3, in `lib/levensboom/growthCopy.ts`), the items
+ * the level unlocked, and a way out. The mirror of the app's
  * `levensboom_celebration.dart`.
+ *
+ * Growth v2: the tree is the reader's own tree growing from where it stood to
+ * where it stands now - branches that were there lengthen, new wood grows out
+ * of their tips and the camera eases out with it (TreeCanvas `from`). That
+ * replaces the depth reveal and the CSS camera push, which replayed a newly
+ * generated tree. A jump of several levels is one card, tweened from the
+ * level the reader last saw.
  */
-
-function encouragement(level: number): string {
-  const lines = [
-    'Je boom staat er sterker bij dan gisteren.',
-    'Elke keer dat je leest, groeit er iets.',
-    'Rustig doorgaan is wat een boom groot maakt.',
-    'Een nieuwe tak - gegroeid uit wat je gelezen hebt.',
-  ];
-  return lines[level % lines.length];
-}
 
 export default function LevelUpDialog({
   seed,
   level,
+  lastSeenLevel,
+  floor: floorProp = null,
   species = 'eik',
   scene = 'waterbeken',
   animal = 'geen',
@@ -43,15 +45,17 @@ export default function LevelUpDialog({
 }: {
   seed: string;
   level: number;
+  /** The level the reader last saw celebrated; below `level - 1` this is a jump. */
+  lastSeenLevel?: number | null;
+  /** `levensboom.growth.floor`: the account's head start, if it has one. */
+  floor?: GrowthFloor | null;
   species?: string;
   scene?: string;
   animal?: string;
   reducedMotion?: boolean;
   onClose: () => void;
 }) {
-  const [reveal, setReveal] = useState(reducedMotion ? 1 : 0);
-  /** Drives the slow camera push: the tree eases in and scales up a hair. */
-  const [pushed, setPushed] = useState(reducedMotion);
+  const floor = useStableFloor(floorProp);
 
   // Night, always: the sequence dims to a night sky so the new growth and the
   // rising motes read against something quiet. The reader's own scene keeps
@@ -61,46 +65,46 @@ export default function LevelUpDialog({
     [scene, species],
   );
 
-  const fruit = fruitAtLevel(level);
-  const trait = traitAtLevel(level);
-  const stage = stageForLevel(level);
-  const newStage = stage.from === level ? stage : null;
-  const unlocked = itemsUnlockedAtLevel(level);
+  const fromLevel = Math.max(1, Math.min(level - 1, Math.floor(lastSeenLevel ?? level - 1)));
+  const copy = levelUpCopy({ level, fromLevel, floor });
+  const phase = phaseForStep(copy.step);
+
+  // One level: from the very end of the previous one, so what grows is this
+  // level's new wood. A jump: from where the reader last saw it.
+  const from = useMemo(
+    () => ({ level: fromLevel, frac: fromLevel === level - 1 ? 0.999 : 0, floor }),
+    [fromLevel, level, floor],
+  );
+
+  // Everything the levels since the last card unlocked, not only the last one.
+  const unlocked = useMemo(() => {
+    const items: CatalogItem[] = [];
+    for (let at = fromLevel + 1; at <= level; at += 1) items.push(...itemsUnlockedAtLevel(at));
+    return items;
+  }, [fromLevel, level]);
+
   // The newest fruit is the last one on the tree, and the scene lists them in
   // unlock order - so its ornament index is simply the count minus one.
   const fruitIndex = fruitCount(level) - 1;
 
+  const reportedRef = useRef(false);
+  // One impression per open, not per render - guards the dialog against a
+  // strict-mode double mount the same way UpgradePrompt does for `paywall_hit`.
   useEffect(() => {
-    if (reducedMotion) {
-      setReveal(1);
-      setPushed(true);
-      return;
-    }
+    if (reportedRef.current) return;
+    reportedRef.current = true;
+    track('tree_levelup_seen', {
+      level: String(level),
+      step: String(copy.step),
+      phase: phase.id,
+      floored: String(Boolean(floor)),
+    });
+  }, [level, copy.step, phase.id, floor]);
 
-    // Sound and the camera push are the two things that make this read as a
-    // moment rather than a dialog. Both are skipped above under reduced motion.
-    playLevelUp();
-    // Next frame, so the transition has an initial value to move away from.
-    const push = requestAnimationFrame(() => setPushed(true));
-
-    // Start from where the previous level's silhouette ended, so what the user
-    // watches grow is the new wood rather than the whole tree replaying.
-    const from = Math.min(0.92, maxDepthForLevel(level - 1) / (maxDepthForLevel(level) + 1));
-    const started = performance.now();
-    let frame = 0;
-
-    const step = (now: number) => {
-      const t = Math.min(1, (now - started) / GROW_MS);
-      const eased = 1 - (1 - t) ** 3;
-      setReveal(from + (1 - from) * eased);
-      if (t < 1) frame = requestAnimationFrame(step);
-    };
-    setReveal(from);
-    frame = requestAnimationFrame(step);
-    return () => {
-      cancelAnimationFrame(frame);
-      cancelAnimationFrame(push);
-    };
+  useEffect(() => {
+    // The sound is what makes this read as a moment rather than a dialog; the
+    // growth itself is TreeCanvas's tween. Both are off under reduced motion.
+    if (!reducedMotion) playLevelUp();
   }, [level, reducedMotion]);
 
   useEffect(() => {
@@ -110,14 +114,6 @@ export default function LevelUpDialog({
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
-
-  const line = fruit
-    ? `De ${fruit.name.toLowerCase()} hangt nu aan je boom - een vrucht van de Geest, ${fruit.reference}.`
-    : newStage
-      ? `${newStage.blurb} Je boom is nu een ${newStage.name.toLowerCase()}.`
-      : trait
-        ? TRAIT_LABELS[trait]
-        : encouragement(level);
 
   return (
     <div
@@ -129,36 +125,30 @@ export default function LevelUpDialog({
     >
       <div className="w-full max-w-md overflow-hidden rounded-3xl bg-[#0B1027] shadow-2xl">
         <div className="relative h-64 overflow-hidden">
-          <div
-            className="h-full w-full transition-transform duration-[1600ms] ease-out"
-            style={{ transform: `scale(${pushed ? 1.08 : 1})` }}
-          >
-            <TreeCanvas
-              seed={seed}
-              level={level}
-              frac={0}
-              species={species}
-              scene={scene}
-              animal={animal}
-              reveal={reveal}
-              palette={palette}
-              reducedMotion={reducedMotion}
-              celebration
-              bloomFruit={fruit ? fruitIndex : null}
-              className="block h-full w-full"
-            />
-          </div>
+          <TreeCanvas
+            seed={seed}
+            level={level}
+            frac={0}
+            floor={floor}
+            from={from}
+            species={species}
+            scene={scene}
+            animal={animal}
+            palette={palette}
+            reducedMotion={reducedMotion}
+            celebration
+            bloomFruit={copy.fruit ? fruitIndex : null}
+            className="block h-full w-full"
+            ariaLabel={`Je boom: ${phase.name.toLowerCase()}`}
+          />
         </div>
 
         <div className="p-6 text-center">
-          <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: '#8FD694' }}>
-            {newStage ? `Je boom is nu een ${newStage.name.toLowerCase()}` : 'Je boom is gegroeid'}
+          <h2 className="text-2xl font-bold text-white">{copy.title}</h2>
+          <p className="mt-2 text-xs font-semibold uppercase tracking-widest tabular-nums" style={{ color: '#8FD694' }}>
+            {copy.subtitle}
           </p>
-          <h2 className="mt-2 text-2xl font-bold text-white">
-            Niveau {level}
-            {fruit ? ` - ${fruit.name}` : ''}
-          </h2>
-          <p className="mt-2 text-sm leading-relaxed text-white/70">{line}</p>
+          {copy.line && <p className="mt-3 text-sm leading-relaxed text-white/70">{copy.line}</p>}
 
           {unlocked.length > 0 && (
             <div className="mt-4 rounded-2xl bg-white/5 p-3 text-left">

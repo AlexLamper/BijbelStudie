@@ -8,6 +8,7 @@ import { buildMetadata, robotsFor } from '../../../lib/pageMetadata';
 import { badgeDescription, badgeLabel } from '../../../lib/badgeCatalog';
 import { PUBLIC_CARD_FIELDS, publicLevensboomCard, type PublicCardSource } from '../../../lib/levensboom/publicCard';
 import { catalogItem } from '../../../lib/levensboom/catalog';
+import { growthPill } from '../../../lib/levensboom/growthCopy';
 import TreeCanvas from '../../../components/levensboom/TreeCanvas';
 import { Card, Pill } from '../../../components/kit/primitives';
 
@@ -32,7 +33,9 @@ import { Card, Pill } from '../../../components/kit/primitives';
  * account yet.
  *
  * The picture is the existing renderer (RULES.md §4), driven straight from the
- * public card. `components/kit/TreeAvatar` cannot stand in for it here: that
+ * public card - its `growth` (the fraction into the level and the account's
+ * floor), so a visitor sees the tree its owner sees rather than one drawn
+ * halfway into the level. `components/kit/TreeAvatar` cannot stand in for it here: that
  * one draws *the viewer's* tree through `useLevensboom`, which on this page is
  * either nobody's or the wrong person's.
  */
@@ -118,14 +121,15 @@ export default async function PublicProfilePage({ params }: Params) {
             <TreeCanvas
               seed={card.seed}
               level={card.level}
-              frac={0.5}
+              frac={card.growth.frac}
+              floor={card.growth.floor}
               health={card.health}
               species={card.avatar.species}
               scene={card.avatar.scene}
               animal={card.avatar.animal}
               framing="scene"
               className="block h-full w-full"
-              ariaLabel={`De boom van ${name}: ${card.stage.name.toLowerCase()} op niveau ${card.level}`}
+              ariaLabel={`De boom van ${name}: ${card.growth.phase.name.toLowerCase()} op niveau ${card.level}`}
             />
           </div>
 
@@ -149,7 +153,7 @@ export default async function PublicProfilePage({ params }: Params) {
               De boom van {name}
             </h1>
             <p className="mt-[5px] text-[13.5px] text-ink-muted">
-              {card.stage.name} · niveau {card.level}
+              {growthPill(card.growth.step)} · niveau {card.level}
             </p>
             <p className="mt-3 text-[13.5px] leading-[1.75] text-ink-body">
               Deze boom groeit mee met alles wat {name} leest en bestudeert in de Bijbel.

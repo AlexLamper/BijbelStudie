@@ -1,13 +1,29 @@
 'use client';
 
 import { useEffect, useMemo, useRef } from 'react';
-import { GROUND_Y, MIN_SCENE_HEIGHT, MIN_SCENE_WIDTH, TRUNK_X, type TreeScene } from '../../lib/levensboom/generate';
-import { cachedTree } from '../../lib/levensboom/sceneCache';
-import { mix, paletteForNow, type Palette, type TimeOfDay } from '../../lib/levensboom/palette';
+import { GROUND_Y, type TreeScene } from '../../lib/levensboom/generate';
+import { cachedTree, POSITION_BUCKET } from '../../lib/levensboom/sceneCache';
+import { mix, paletteForNow, woodColor, type Palette, type TimeOfDay } from '../../lib/levensboom/palette';
 import { seededRng } from '../../lib/levensboom/rng';
 import { speciesParams, type LeafShape, type SpeciesId } from '../../lib/levensboom/species';
 import { sceneSpec, type SceneId } from '../../lib/levensboom/scenes';
 import { type AnimalId } from '../../lib/levensboom/catalog';
+import type { GrowthFloor } from '../../lib/levensboom/growth';
+import { measureFrame, type Frame as CameraFrame, type FrameExtents } from '../../lib/levensboom/camera';
+import { lerpScenes, tweenEase, tweenMsFor } from '../../lib/levensboom/tween';
+import {
+  cotyledonColor,
+  cotyledonShape,
+  knotColors,
+  leafFadeAlpha,
+  matureDetails,
+  mossColor,
+  moundFor,
+  portraitDiscFor,
+  rootColor,
+  trunkWidthOf,
+  type MatureDetails,
+} from '../../lib/levensboom/paint';
 
 /**
  * The Levensboom, drawn to a canvas.
@@ -22,8 +38,15 @@ import { type AnimalId } from '../../lib/levensboom/catalog';
  *
  * Two framings. `scene` is the landscape: sky, backdrop, a band of earth the
  * trunk stands *in*, animals. `portrait` is the avatar: the tree alone on a
- * sky disc, cropped to its own bounds, for the navbar and every other place a
- * 28 px face has to read.
+ * sky disc, for the navbar and every other place a 28 px face has to read.
+ * Both come from `lib/levensboom/camera.ts` (growth v2): the landscape stays
+ * put and the tree takes a designed share of it, so growth shows as size.
+ *
+ * Growth v2 tween: with `from`, the canvas plays the tree growing from that
+ * position to the current one - `lerpScenes` from `lib/levensboom/tween.ts`
+ * each frame, with the camera measured on the in-between scene so it eases
+ * along. The branch layer is rebuilt every frame while that runs, and only
+ * then.
  *
  * The loop stops when the tab is hidden or the canvas scrolls out of view,
  * never starts at all under reduced motion or at avatar sizes, and species,
@@ -40,6 +63,8 @@ const FIREFLY_COUNT = 12;
 const STILL_BELOW_PX = 64;
 /** The `seasons` trait (docs/levensboom-spec.md §6) arrives here. */
 const SEASONS_TRAIT_LEVEL = 25;
+/** A blossom's radius as a share of its (capped) leaf size times the leaf scale: smaller than a leaf. */
+const BLOSSOM_RADIUS = 0.7;
 
 export type TreeFraming = 'scene' | 'portrait';
 
@@ -54,7 +79,11 @@ export type TreeCanvasProps = {
   scene?: SceneId | string | null;
   animal?: AnimalId | string | null;
   framing?: TreeFraming;
-  /** 0..1. Below 1 the tree is mid grow-in; the level-up sequence drives this. */
+  /**
+   * 0..1. Below 1 the tree is mid grow-in, by depth.
+   * @deprecated Growth v2 grows the tree with `from` instead; kept working
+   * until every caller has moved over.
+   */
   reveal?: number;
   reducedMotion?: boolean;
   /** Never animate, whatever the size. Tiles and thumbnails. */
@@ -69,6 +98,30 @@ export type TreeCanvasProps = {
   /** Index of a fruit to swell with a soft bloom, when a level-up unlocked one. */
   bloomFruit?: number | null;
   ariaLabel?: string;
+  /** Growth v2: a legacy account's growth floor, from `levensboom.growth.floor`. */
+  floor?: GrowthFloor | null;
+  /**
+   * Growth v2: tween from this earlier position to the current one (plan §9.2,
+   * §9.3) - the level-up and the in-level lesson growth. Paths that exist in
+   * both scenes lengthen in place, newborn wood grows out of its parent's tip,
+   * the camera eases. Under reduced motion the end state shows at once.
+   *
+   * The tween plays once per distinct `from` (by value, so an inline object
+   * is fine) and starts at the first paint. If only the target moves while it
+   * runs, it retargets without restarting; once it has ended, a new target
+   * just shows. `floor` left out means the current `floor`.
+   */
+  from?: { level: number; frac: number; floor?: GrowthFloor | null } | null;
+  /** Tween length in ms; defaults to `TWEEN.levelUpMs` (1800) when the step changes, else `TWEEN.growMs` (1200). */
+  tweenMs?: number;
+  /**
+   * Called once when the tween has finished - also when it was skipped
+   * (reduced motion, `still`, avatar size) and when the canvas was off
+   * screen for its whole length.
+   */
+  onTweenEnd?: () => void;
+  /** Growth v2: render at this position instead of level/frac (ladder thumbnails, the dev page). */
+  at?: { position: number; step?: number } | null;
 };
 
 type Mote = { x: number; y: number; r: number; speed: number; phase: number };
@@ -97,19 +150,26 @@ type Decor = {
   donkey: number;
   stork: number;
   lion: number;
+  /**
+   * Growth v2: where a perching bird waits while the tree has no twig that can
+   * hold it (`scene.perch` null) - beside the trunk on the ground, or on a
+   * small stone. Tree units; drawn last from the scene stream.
+   */
+  groundBird: { side: -1 | 1; distance: number; stone: boolean };
 };
 
-type Frame = {
-  width: number;
-  height: number;
-  scale: number;
-  originX: number;
-  originY: number;
-  pivotX: number;
-  pivotY: number;
-  /** Top edge of the earth band (scene) or of the shadow (portrait). */
-  groundTop: number;
-};
+/** The camera plus the box it was measured for. */
+type Frame = CameraFrame & { width: number; height: number };
+
+/**
+ * Bees and butterflies orbit the tree's bounds, but never tighter than this
+ * (tree units), so they visit a seedling instead of swarming its bare stem.
+ * The orbit's centre rises when the minimum applies, so it never dips into
+ * the ground: centreY = min(boundsMidY, GROUND_Y − ry).
+ */
+const ORBIT_MIN = { rx: 9, ry: 7 };
+
+const PERCHING = new Set(['vogel', 'duif', 'raaf', 'uil']);
 
 function prefersReducedMotion(): boolean {
   if (typeof window === 'undefined' || !window.matchMedia) return false;
@@ -193,21 +253,69 @@ function buildDecor(seed: string): Decor {
   const donkey = 14 + scene() * 6;
   const stork = 12 + scene() * 5;
   const lion = 15 + scene() * 5;
+  // Growth v2, appended so nothing above moved: a bird on a tree too young to
+  // perch on stands 6-11 units beside the trunk, on the ground or a stone.
+  const groundBird = {
+    side: (scene() < 0.5 ? -1 : 1) as -1 | 1,
+    distance: 6 + scene() * 5,
+    stone: scene() < 0.5,
+  };
 
-  return { motes, stars, drifters, fireflies, butterflies, bees, eaglePhase, dots, sheep, deer, fox, donkey, stork, lion };
+  return { motes, stars, drifters, fireflies, butterflies, bees, eaglePhase, dots, sheep, deer, fox, donkey, stork, lion, groundBird };
 }
 
+/**
+ * The branch layer: root flare behind the trunk, the wood, then knots and moss
+ * on the bark (`lib/levensboom/paint.ts` has their numbers). Each branch is lit
+ * from the upper left, from its `wood` colour's lit tone to its own: bark
+ * (barkLit → bark) for old wood, the green-stem mix for young wood.
+ */
 function drawBranches(
   ctx: CanvasRenderingContext2D,
   scene: TreeScene,
   palette: Palette,
   frame: Frame,
   reveal: number,
+  mature: MatureDetails,
 ) {
   const { scale, originX, originY } = frame;
+  const X = (x: number) => originX + x * scale;
+  const Y = (y: number) => originY + y * scale;
+  // Old details show once the trunk has grown in, never half-drawn.
+  const trunkShown = revealAt(reveal, 0, scene.maxDepth) >= 1;
+
+  if (trunkShown) {
+    for (const foot of mature.roots) {
+      ctx.fillStyle = rootColor(palette, foot.side);
+      ctx.beginPath();
+      ctx.moveTo(X(foot.top.x), Y(foot.top.y));
+      ctx.quadraticCurveTo(X(foot.ctrl.x), Y(foot.ctrl.y), X(foot.toe.x), Y(foot.toe.y));
+      ctx.lineTo(X(foot.toe.x), Y(foot.bottomY));
+      ctx.lineTo(X(foot.baseX), Y(foot.bottomY));
+      ctx.lineTo(X(foot.baseX), Y(foot.top.y));
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
+
+  // Wood colours per twentieth: a tree is a handful of distinct mixes.
+  const lit = { leaf: palette.leafAlt, bark: palette.barkLit };
+  const tones = new Map<number, [string, string]>();
+  const toneOf = (wood: number): [string, string] => {
+    const key = Math.round(Math.min(1, Math.max(0, wood)) * 20);
+    let tone = tones.get(key);
+    if (!tone) {
+      tone = [woodColor(lit, key / 20), woodColor(palette, key / 20)];
+      tones.set(key, tone);
+    }
+    return tone;
+  };
+
   for (const branch of scene.branches) {
     const t = revealAt(reveal, branch.depth, scene.maxDepth);
     if (t <= 0) continue;
+    // A newborn twig at the start of a tween has no length yet.
+    if (branch.w0 <= 0 && branch.x1 === branch.x0 && branch.y1 === branch.y0) continue;
 
     const x0 = originX + branch.x0 * scale;
     const y0 = originY + branch.y0 * scale;
@@ -232,11 +340,41 @@ function drawBranches(
     ctx.closePath();
 
     // Lit from the upper left, like the glow behind the canopy.
+    const [light, base] = toneOf(branch.wood ?? 1);
     const gradient = ctx.createLinearGradient(x0 - w0, y0, x0 + w0, y0);
-    gradient.addColorStop(0, palette.barkLit);
-    gradient.addColorStop(1, palette.bark);
+    gradient.addColorStop(0, light);
+    gradient.addColorStop(1, base);
     ctx.fillStyle = gradient;
     ctx.fill();
+  }
+
+  if (!trunkShown) return;
+  if (mature.knots.length > 0) {
+    const { knot, rim } = knotColors(palette);
+    for (const k of mature.knots) {
+      const angle = k.angle * DEG;
+      ctx.globalAlpha = 0.55;
+      ctx.fillStyle = rim;
+      ctx.beginPath();
+      ctx.ellipse(X(k.x), Y(k.y), k.rx * 1.3 * scale, k.ry * 1.4 * scale, angle, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 0.9;
+      ctx.fillStyle = knot;
+      ctx.beginPath();
+      ctx.ellipse(X(k.x), Y(k.y), k.rx * scale, k.ry * scale, angle, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+  if (mature.moss.length > 0) {
+    ctx.globalAlpha = 0.85;
+    for (const tuft of mature.moss) {
+      ctx.fillStyle = mossColor(palette, tuft.alt);
+      ctx.beginPath();
+      ctx.arc(X(tuft.x), Y(tuft.y), Math.max(0.5, tuft.r * scale), 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
   }
 }
 
@@ -268,9 +406,9 @@ function leafPath(ctx: CanvasRenderingContext2D, shape: LeafShape, size: number,
       break;
     case 'needle': {
       // A tuft of needles. At avatar sizes a single stroke is all that
-      // survives the downsample, so the fan collapses to one.
+      // survives the downsample, so the fan collapses to three, then one.
       const length = size * 1.6;
-      const fan = scale > 1.6 ? [-40, -20, 0, 20, 40] : [0];
+      const fan = scale > 1.6 ? [-40, -20, 0, 20, 40] : scale > 1 ? [-30, 0, 30] : [0];
       for (const a of fan) {
         ctx.moveTo(0, 0);
         ctx.lineTo(Math.cos(a * DEG) * length, Math.sin(a * DEG) * length);
@@ -1094,6 +1232,64 @@ function drawPerchBird(ctx: CanvasRenderingContext2D, x: number, y: number, scal
   ctx.fill();
 }
 
+/**
+ * A perching bird on the ground beside a tree too young to hold it (growth v2,
+ * plan §4.7): feet on the earth line or on a small stone, facing the trunk.
+ * The `vogel` is drawn as a small songbird here - its flying "v" belongs in a
+ * crown, not on the ground.
+ *
+ * Stone: an upper half-ellipse, radii (1.4, 0.8) tree units (at least 2 × 1.2
+ * px), in mix(farAlt, groundDeep, 0.35) with a lit cap mix(stone, light, 0.25)
+ * of radii (0.8, 0.35) at its top; the bird stands on its crown. Songbird: the
+ * dove/raven body at 0.75 of their size, coat body mix(barkLit, light, 0.3),
+ * wing bark, the dove's beak and eye.
+ */
+function drawGroundBird(
+  ctx: CanvasRenderingContext2D,
+  animal: string,
+  decor: Decor,
+  frame: Frame,
+  groundY: number,
+  t: number,
+  still: boolean,
+  palette: Palette,
+) {
+  const { scale, pivotX } = frame;
+  const spot = decor.groundBird;
+  const x = pivotX + spot.side * spot.distance * scale;
+  let y = groundY;
+  if (spot.stone) {
+    const rx = Math.max(2, 1.4 * scale);
+    const ry = Math.max(1.2, 0.8 * scale);
+    const stone = mix(palette.farAlt, palette.groundDeep, 0.35);
+    ctx.fillStyle = stone;
+    ctx.beginPath();
+    ctx.ellipse(x, groundY, rx, ry, 0, Math.PI, Math.PI * 2);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = mix(stone, palette.light, 0.25);
+    ctx.beginPath();
+    ctx.ellipse(x - rx * 0.15, groundY - ry * 0.72, Math.max(1, 0.8 * scale), Math.max(0.5, 0.35 * scale), 0, 0, Math.PI * 2);
+    ctx.fill();
+    y = groundY - ry;
+  }
+  ctx.save();
+  ctx.translate(x, y);
+  // Every bird is drawn facing right; turn the one on the right to face the trunk.
+  if (spot.side > 0) ctx.scale(-1, 1);
+  if (animal === 'duif') drawPerchBird(ctx, 0, 0, scale, t, still, DOVE);
+  else if (animal === 'raaf') drawPerchBird(ctx, 0, 0, scale, t, still, RAVEN);
+  else if (animal === 'uil') drawOwl(ctx, 0, 0, scale, t, still, palette.night);
+  else
+    drawPerchBird(ctx, 0, 0, scale * 0.75, t, still, {
+      body: mix(palette.barkLit, palette.light, 0.3),
+      wing: palette.bark,
+      beak: DOVE.beak,
+      eye: DOVE.eye,
+    });
+  ctx.restore();
+}
+
 /** Asleep by day, eyes open at night - with the odd blink. */
 function drawOwl(ctx: CanvasRenderingContext2D, x: number, y: number, scale: number, t: number, still: boolean, night: boolean) {
   const s = Math.max(2.5, 2.2 * scale);
@@ -1396,13 +1592,19 @@ function drawLion(ctx: CanvasRenderingContext2D, x: number, y: number, scale: nu
   }
 }
 
-function drawBees(ctx: CanvasRenderingContext2D, decor: Decor, scene: TreeScene, frame: Frame, t: number, still: boolean) {
+/** The ellipse bees and butterflies fly on, in pixels: the bounds, or `ORBIT_MIN` round a small tree. */
+function orbitOf(scene: TreeScene, frame: Frame) {
   const { scale, originX, originY } = frame;
   const b = scene.bounds;
-  const cx = originX + ((b.minX + b.maxX) / 2) * scale;
-  const cy = originY + ((b.minY + GROUND_Y) / 2) * scale;
-  const rx = ((b.maxX - b.minX) / 2) * scale;
-  const ry = ((GROUND_Y - b.minY) / 2) * scale;
+  const rx = Math.max((b.maxX - b.minX) / 2, ORBIT_MIN.rx);
+  const ry = Math.max((GROUND_Y - b.minY) / 2, ORBIT_MIN.ry);
+  const cy = Math.min((b.minY + GROUND_Y) / 2, GROUND_Y - ry);
+  return { cx: originX + ((b.minX + b.maxX) / 2) * scale, cy: originY + cy * scale, rx: rx * scale, ry: ry * scale };
+}
+
+function drawBees(ctx: CanvasRenderingContext2D, decor: Decor, scene: TreeScene, frame: Frame, t: number, still: boolean) {
+  const { scale } = frame;
+  const { cx, cy, rx, ry } = orbitOf(scene, frame);
   const size = Math.max(1.2, 0.6 * scale);
   for (const bee of decor.bees) {
     const p = bee.phase * Math.PI * 2;
@@ -1569,12 +1771,8 @@ function drawButterflies(
   t: number,
   still: boolean,
 ) {
-  const { scale, originX, originY } = frame;
-  const b = scene.bounds;
-  const cx = originX + ((b.minX + b.maxX) / 2) * scale;
-  const cy = originY + ((b.minY + GROUND_Y) / 2) * scale;
-  const rx = ((b.maxX - b.minX) / 2) * scale;
-  const ry = ((GROUND_Y - b.minY) / 2) * scale;
+  const { scale } = frame;
+  const { cx, cy, rx, ry } = orbitOf(scene, frame);
   const colours = ['#F6C453', '#F28CB1', '#7EC8E3'];
   const size = Math.max(2, 1.1 * scale);
   for (const fly of decor.butterflies) {
@@ -1600,51 +1798,37 @@ function drawButterflies(
 
 /* ------------------------------------------------------------------ frame */
 
-/** Ground animals stand beside the trunk; the frame has to hold them too. */
-function extentWithAnimals(scene: TreeScene, animal: string, decor: Decor): { minX: number; maxX: number } {
-  let { minX, maxX } = scene.bounds;
-  if (animal === 'schaap') {
-    minX = Math.min(minX, TRUNK_X + decor.sheep[0] - 5);
-    maxX = Math.max(maxX, TRUNK_X + decor.sheep[1] + 5);
+/**
+ * What a ground animal needs in frame, in tree units beside the trunk and above
+ * the ground, for the camera's guard (`camera.ts` `extents`). Widths are the
+ * old frame margins; heights are each animal's drawn height at world size.
+ * A perching bird counts only while it waits on the ground.
+ */
+function animalExtents(animal: string, decor: Decor, perched: boolean): FrameExtents | undefined {
+  switch (animal) {
+    case 'schaap':
+      return { left: -decor.sheep[0] + 5, right: decor.sheep[1] + 5, top: 4 };
+    case 'hert':
+      return { right: decor.deer + 6, top: 10 };
+    case 'vos':
+      return { left: -decor.fox + 5, top: 6 };
+    case 'ezel':
+      return { right: decor.donkey + 7, top: 8 };
+    case 'ooievaar':
+      return { right: decor.stork + 4, top: 8 };
+    case 'leeuw':
+      return { right: decor.lion + 8, top: 5 };
+    default: {
+      if (!PERCHING.has(animal) || perched) return undefined;
+      const reach = decor.groundBird.distance + 4;
+      return decor.groundBird.side < 0 ? { left: reach, top: 7 } : { right: reach, top: 7 };
+    }
   }
-  if (animal === 'hert') maxX = Math.max(maxX, TRUNK_X + decor.deer + 6);
-  if (animal === 'vos') minX = Math.min(minX, TRUNK_X + decor.fox - 5);
-  if (animal === 'ezel') maxX = Math.max(maxX, TRUNK_X + decor.donkey + 7);
-  if (animal === 'ooievaar') maxX = Math.max(maxX, TRUNK_X + decor.stork + 4);
-  if (animal === 'leeuw') maxX = Math.max(maxX, TRUNK_X + decor.lion + 8);
-  return { minX, maxX };
 }
 
-function measureFrame(width: number, height: number, scene: TreeScene, framing: TreeFraming, animal: string, decor: Decor): Frame {
-  const { minX, maxX } = extentWithAnimals(scene, animal, decor);
-  const { minY } = scene.bounds;
-  const contentW = Math.max(1, maxX - minX);
-  const treeH = Math.max(1, GROUND_Y - minY);
-
-  if (framing === 'portrait') {
-    // The tree alone, centred, standing on a soft shadow near the bottom.
-    const padX = width * 0.1;
-    const padY = height * 0.1;
-    const scale = Math.min((width - 2 * padX) / contentW, (height - 2 * padY) / treeH);
-    const originX = width / 2 - ((minX + maxX) / 2) * scale;
-    const pivotY = height - padY * 1.15;
-    const originY = pivotY - GROUND_Y * scale;
-    return { width, height, scale, originX, originY, pivotX: originX + TRUNK_X * scale, pivotY, groundTop: pivotY };
-  }
-
-  // The scene: a fixed earth band (never scaled from the tree, which for a
-  // kiem swallowed the whole frame), a minimum framed extent so a small tree
-  // stands small in a real landscape, and the trunk base just below the band's
-  // top edge so the tree stands in the ground rather than on a line above it.
-  const band = height * 0.12;
-  const sceneW = Math.max(contentW, MIN_SCENE_WIDTH);
-  const sceneH = Math.max(treeH, MIN_SCENE_HEIGHT);
-  const scale = Math.min((width * 0.9) / sceneW, ((height - band) * 0.84) / sceneH);
-  const groundTop = height - band;
-  const pivotY = groundTop + 0.6 * scale;
-  const originX = width / 2 - ((minX + maxX) / 2) * scale;
-  const originY = pivotY - GROUND_Y * scale;
-  return { width, height, scale, originX, originY, pivotX: originX + TRUNK_X * scale, pivotY, groundTop };
+function frameFor(width: number, height: number, scene: TreeScene, framing: TreeFraming, animal: string, decor: Decor): Frame {
+  const extents = framing === 'scene' ? animalExtents(animal, decor, scene.perch !== null) : undefined;
+  return { width, height, ...measureFrame(width, height, scene, framing, extents) };
 }
 
 /* --------------------------------------------------------------- component */
@@ -1667,13 +1851,64 @@ export default function TreeCanvas({
   celebration = false,
   bloomFruit = null,
   ariaLabel,
+  floor = null,
+  from = null,
+  tweenMs,
+  onTweenEnd,
+  at = null,
 }: TreeCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
+  // Portraits tell 20 positions per step apart, scenes 50 (sceneCache.ts):
+  // an XP tick never regenerates a tree nobody could see change.
+  const bucket = framing === 'portrait' ? 20 : POSITION_BUCKET;
+  // Objects arrive inline from callers; the memos key on their values.
+  const floorFrom = floor?.from;
+  const floorTo = floor?.to;
+  const atPosition = at?.position;
+  const atStep = at?.step;
   const scene = useMemo(
-    () => cachedTree({ seed, level, frac, health, species }, framing === 'portrait' ? 20 : 0),
-    [seed, level, frac, health, species, framing],
+    () =>
+      cachedTree(
+        {
+          seed,
+          level,
+          frac,
+          health,
+          species,
+          floor: floorFrom != null && floorTo != null ? { from: floorFrom, to: floorTo } : null,
+          at: atPosition != null ? { position: atPosition, step: atStep } : null,
+        },
+        bucket,
+      ),
+    [seed, level, frac, health, species, floorFrom, floorTo, atPosition, atStep, bucket],
   );
+
+  // Scene A of the growth tween. `from.floor` left out means the current floor.
+  const fromLevel = from?.level;
+  const fromFrac = from?.frac;
+  const fromFloor = from ? (from.floor === undefined ? floor : from.floor) : null;
+  const fromFloorFrom = fromFloor?.from;
+  const fromFloorTo = fromFloor?.to;
+  const fromScene = useMemo(
+    () =>
+      fromLevel == null
+        ? null
+        : cachedTree(
+            {
+              seed,
+              level: fromLevel,
+              frac: fromFrac ?? 0,
+              health,
+              species,
+              floor: fromFloorFrom != null && fromFloorTo != null ? { from: fromFloorFrom, to: fromFloorTo } : null,
+            },
+            bucket,
+          ),
+    [seed, fromLevel, fromFrac, health, species, fromFloorFrom, fromFloorTo, bucket],
+  );
+  /** One tween per distinct start: the same `from` again only retargets. */
+  const fromKey = fromScene ? `${seed}|${species}|${fromLevel}|${fromFrac}|${fromFloorFrom ?? '-'},${fromFloorTo ?? '-'}` : null;
 
   // The device clock only ever touches colour, so it is read once per mount
   // rather than being threaded through the generator.
@@ -1700,6 +1935,13 @@ export default function TreeCanvas({
   bloomRef.current = bloomFruit;
   /** Repaints a still canvas; set by the effect below, called when a ref changes. */
   const repaintRef = useRef<(() => void) | null>(null);
+  /**
+   * The running growth tween. A ref, so a palette or animal change mid-tween
+   * (which rebuilds the drawing effect) carries on instead of starting over.
+   */
+  const tweenRef = useRef<{ fromKey: string; from: TreeScene; start: number; ms: number; ended: boolean } | null>(null);
+  const onTweenEndRef = useRef(onTweenEnd);
+  onTweenEndRef.current = onTweenEnd;
 
   useEffect(() => {
     repaintRef.current?.();
@@ -1711,26 +1953,74 @@ export default function TreeCanvas({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let frame: Frame = { width: 1, height: 1, scale: 1, originX: 0, originY: 0, pivotX: 0, pivotY: 0, groundTop: 0 };
+    let frame: Frame = {
+      width: 1,
+      height: 1,
+      scale: 1,
+      originX: 0,
+      originY: 0,
+      pivotX: 0,
+      pivotY: 0,
+      groundTop: 0,
+      guarded: false,
+    };
     let raf = 0;
     let visible = true;
     let running = false;
     let still = stillProp || (reducedMotion ?? prefersReducedMotion());
     let dpr = 1;
 
-    // The branch layer, rebuilt only when the geometry, the box or the reveal
-    // changes.
+    // --- the growth tween (plan §9.2, §9.3) ------------------------------
+    let tween = tweenRef.current;
+    if (fromScene && fromKey) {
+      const ms = Math.max(0, tweenMs ?? tweenMsFor(fromScene, scene));
+      tween =
+        tween && tween.fromKey === fromKey
+          ? // Same start, new target: keep the clock (an ended tween stays ended).
+            { ...tween, from: fromScene, ms }
+          : { fromKey, from: fromScene, start: performance.now(), ms, ended: false };
+    } else {
+      tween = null;
+    }
+    tweenRef.current = tween;
+    let tweenEnded = false;
+
+    /** The scene to draw now: B, or A→B while the tween runs. Ends the tween once its time is up. */
+    const sceneNow = (now: number): TreeScene => {
+      const tw = tweenRef.current;
+      if (!tw || tw.ended) return scene;
+      const u = still || tw.ms <= 0 ? 1 : (now - tw.start) / tw.ms;
+      if (u >= 1) {
+        tw.ended = true;
+        tweenEnded = true;
+        return scene;
+      }
+      return lerpScenes(tw.from, scene, tweenEase(u));
+    };
+    let drawn = sceneNow(performance.now());
+    const matureOf = (s: TreeScene) => matureDetails(s, seed);
+    let mature = matureOf(drawn);
+
+    // The branch layer, rebuilt only when the drawn geometry, the box or the
+    // reveal changes - every frame of a tween, otherwise almost never.
     const layer = document.createElement('canvas');
     const layerCtx = layer.getContext('2d');
     let layerReveal = -1;
+    let layerScene: TreeScene | null = null;
 
     const ensureLayer = () => {
       const reveal = revealRef.current;
-      if (!layerCtx || layerReveal === reveal) return;
+      if (!layerCtx || (layerReveal === reveal && layerScene === drawn)) return;
       layerCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
       layerCtx.clearRect(0, 0, frame.width, frame.height);
-      drawBranches(layerCtx, scene, palette, frame, reveal);
+      drawBranches(layerCtx, drawn, palette, frame, reveal, mature);
       layerReveal = reveal;
+      layerScene = drawn;
+    };
+
+    /** Point the camera at the drawn scene: during a tween it eases with the tree. */
+    const reframe = () => {
+      frame = frameFor(frame.width, frame.height, drawn, framing, animalId, decor);
     };
 
     const measure = () => {
@@ -1746,11 +2036,12 @@ export default function TreeCanvas({
       // loop would only be heating the phone.
       if (width <= STILL_BELOW_PX && height <= STILL_BELOW_PX) still = true;
 
-      frame = measureFrame(width, height, scene, framing, animalId, decor);
+      frame = frameFor(width, height, drawn, framing, animalId, decor);
 
       layer.width = canvas.width;
       layer.height = canvas.height;
       layerReveal = -1;
+      layerScene = null;
       ensureLayer();
     };
 
@@ -1789,27 +2080,28 @@ export default function TreeCanvas({
     const drawGround = (t: number) => {
       const { width, height, scale, pivotX, pivotY, groundTop } = frame;
       if (framing === 'portrait') {
-        // A soft shadow and a thin arc of ground: enough to stand on, not a
-        // landscape.
-        const { minX, maxX } = extentWithAnimals(scene, animalId, decor);
-        const rx = Math.max(6, ((maxX - minX) / 2) * scale * 0.55);
+        // A soft shadow and a thin arc of ground sized to the trunk (paint.ts
+        // MOUND): enough to stand on, not a landscape.
+        const disc = portraitDiscFor(trunkWidthOf(drawn));
+        const rx = Math.max(3, disc.rx * scale);
+        const ry = Math.max(1.2, disc.ry * scale);
         ctx.fillStyle = palette.ground;
         ctx.globalAlpha = 0.9;
         ctx.beginPath();
-        ctx.ellipse(pivotX, pivotY, rx, Math.max(1.5, 1.6 * scale), 0, 0, Math.PI * 2);
+        ctx.ellipse(pivotX, pivotY, rx, ry, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.globalAlpha = 0.25;
         ctx.fillStyle = palette.bark;
         ctx.beginPath();
-        ctx.ellipse(pivotX, pivotY + 0.4 * scale, rx * 0.7, Math.max(1, 1.1 * scale), 0, 0, Math.PI * 2);
+        ctx.ellipse(pivotX, pivotY + 0.4 * scale, rx * 0.7, Math.max(0.8, ry * 0.7), 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.globalAlpha = 1;
         return;
       }
 
       // The glow, centred on the canopy wherever it happens to be for this level.
-      const glowY = frame.originY + ((scene.bounds.minY + GROUND_Y) / 2) * scale;
-      const glowR = Math.max(30, (GROUND_Y - scene.bounds.minY) * 0.7) * scale;
+      const glowY = frame.originY + ((drawn.bounds.minY + GROUND_Y) / 2) * scale;
+      const glowR = Math.max(30, (GROUND_Y - drawn.bounds.minY) * 0.7) * scale;
       const glow = ctx.createRadialGradient(pivotX, glowY, 0, pivotX, glowY, glowR);
       glow.addColorStop(0, `${palette.glow}66`);
       glow.addColorStop(1, `${palette.glow}00`);
@@ -1818,15 +2110,17 @@ export default function TreeCanvas({
 
       drawFarBackdrop(ctx, palette, decor, frame, t, still);
 
-      // The earth band, with a low mound where the trunk goes in.
+      // The earth band, with a low mound where the trunk goes in - sized to
+      // the trunk (paint.ts MOUND), so a kiem stands on a handful of earth.
       const earth = ctx.createLinearGradient(0, groundTop, 0, height);
       earth.addColorStop(0, palette.ground);
       earth.addColorStop(1, palette.groundDeep);
       ctx.fillStyle = earth;
       ctx.fillRect(0, groundTop, width, height - groundTop);
+      const mound = moundFor(trunkWidthOf(drawn));
       ctx.fillStyle = palette.ground;
       ctx.beginPath();
-      ctx.ellipse(pivotX, groundTop + 0.2 * scale, Math.max(8, 14 * scale), Math.max(2, 2.2 * scale), 0, Math.PI, 0);
+      ctx.ellipse(pivotX, groundTop + 0.2 * scale, Math.max(3, mound.rx * scale), Math.max(1, mound.ry * scale), 0, Math.PI, 0);
       ctx.fill();
 
       drawNearBackdrop(ctx, palette, decor, frame, t, still);
@@ -1835,7 +2129,7 @@ export default function TreeCanvas({
       ctx.globalAlpha = 0.28;
       ctx.fillStyle = mix(palette.groundDeep, palette.bark, 0.5);
       ctx.beginPath();
-      ctx.ellipse(pivotX, pivotY + 0.6 * scale, Math.max(6, 11 * scale), Math.max(1.2, 1.6 * scale), 0, 0, Math.PI * 2);
+      ctx.ellipse(pivotX, pivotY + 0.6 * scale, Math.max(2, mound.shadowRx * scale), Math.max(0.8, mound.shadowRy * scale), 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     };
@@ -1853,15 +2147,18 @@ export default function TreeCanvas({
       ctx.translate(-pivotX, -pivotY);
       ctx.drawImage(layer, 0, 0, width, height);
 
-      const leafScale = (1.1 + 0.8 * scene.growth) * scale;
+      const leafScale = (1.1 + 0.8 * drawn.growth) * scale;
       const shape = sp.leafShape;
       if (shape === 'needle') {
         ctx.lineCap = 'round';
-        ctx.lineWidth = Math.max(0.8, 0.32 * scale);
+        ctx.lineWidth = Math.max(1, 0.42 * scale);
       }
-      for (const leaf of scene.leaves) {
-        if (!leaf.visible) continue;
-        const grown = revealAt(reveal, leaf.depth, scene.maxDepth);
+      // Seed leaves: two colours per frame, yellowing as the seedling ages (paint.ts).
+      const seedLeaf = cotyledonColor(palette, false, drawn);
+      const seedLeafAlt = cotyledonColor(palette, true, drawn);
+      for (const leaf of drawn.leaves) {
+        if (!leaf.visible || !(leaf.size > 0)) continue;
+        const grown = revealAt(reveal, leaf.depth, drawn.maxDepth);
         if (grown <= 0) continue;
 
         const shimmer = still ? 0 : Math.sin(t * 0.0021 + leaf.phase * 6.283);
@@ -1875,8 +2172,19 @@ export default function TreeCanvas({
         ctx.save();
         ctx.translate(x, y);
         ctx.rotate(angle * DEG);
+        // A bud is translucent; a seed leaf or whorl fades as it goes.
+        ctx.globalAlpha = (leaf.open ? 1 : 0.75) * leafFadeAlpha(leaf.fade);
+        if (leaf.kind === 'cotyledon') {
+          // Rounder and fleshier than any species leaf (a conifer's are needles).
+          const c = cotyledonShape(drawn.form, size);
+          ctx.fillStyle = leaf.phase > 0.5 ? seedLeafAlt : seedLeaf;
+          ctx.beginPath();
+          ctx.ellipse(c.cx, 0, c.rx, c.ry, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+          continue;
+        }
         const colour = leaf.phase > 0.5 ? palette.leafAlt : palette.leaf;
-        ctx.globalAlpha = leaf.open ? 1 : 0.75;
         // World-down in this leaf's frame, for the frond's droop.
         const down: [number, number] = [Math.cos((90 - angle) * DEG), Math.sin((90 - angle) * DEG)];
         leafPath(ctx, shape, size, scale, down);
@@ -1918,15 +2226,18 @@ export default function TreeCanvas({
 
       if (palette.blossom) {
         ctx.fillStyle = palette.blossom;
-        for (const blossom of scene.blossoms) {
-          const size = blossom.size * leafScale * 0.8;
+        for (const blossom of drawn.blossoms) {
+          if (!(blossom.size > 0)) continue;
+          const size = blossom.size * leafScale * BLOSSOM_RADIUS;
           ctx.beginPath();
           ctx.arc(originX + blossom.x * scale, originY + blossom.y * scale, size, 0, Math.PI * 2);
           ctx.fill();
         }
       }
 
-      for (const fruit of scene.fruits) {
+      for (const fruit of drawn.fruits) {
+        // A fruit arriving in a tween swells in; the 1.4 px floor must not pop it.
+        if (!(fruit.size > 0)) continue;
         const x = originX + fruit.x * scale;
         const y = originY + fruit.y * scale;
         // The fruit a level-up just unlocked swells and carries a soft bloom,
@@ -1952,9 +2263,9 @@ export default function TreeCanvas({
       if (level >= SEASONS_TRAIT_LEVEL && palette.season === 'winter') {
         ctx.fillStyle = '#F2F6FA';
         ctx.globalAlpha = 0.9;
-        for (const branch of scene.branches) {
-          if (branch.depth < scene.maxDepth - 2) continue;
-          if (revealAt(reveal, branch.depth, scene.maxDepth) <= 0) continue;
+        for (const branch of drawn.branches) {
+          if (branch.depth < drawn.maxDepth - 2 || !(branch.w0 > 0)) continue;
+          if (revealAt(reveal, branch.depth, drawn.maxDepth) <= 0) continue;
           const [nx, ny] = normal(branch.x1 - branch.cx, branch.y1 - branch.cy);
           // Only the upward-facing side carries snow.
           const side = ny < 0 ? 1 : -1;
@@ -1966,9 +2277,11 @@ export default function TreeCanvas({
         ctx.globalAlpha = 1;
       }
 
-      if (scene.perch && (animalId === 'vogel' || animalId === 'duif' || animalId === 'raaf' || animalId === 'uil')) {
-        const x = originX + scene.perch.x * scale;
-        const y = originY + scene.perch.y * scale;
+      // In the crown once it has a twig that holds a bird; until then the bird
+      // waits on the ground (drawForeground).
+      if (drawn.perch && PERCHING.has(animalId)) {
+        const x = originX + drawn.perch.x * scale;
+        const y = originY + drawn.perch.y * scale;
         if (animalId === 'vogel') drawBird(ctx, x, y, scale, palette.bark);
         else if (animalId === 'duif') drawPerchBird(ctx, x, y, scale, t, still, DOVE);
         else if (animalId === 'raaf') drawPerchBird(ctx, x, y, scale, t, still, RAVEN);
@@ -1991,13 +2304,18 @@ export default function TreeCanvas({
       if (animalId === 'ezel') drawDonkey(ctx, pivotX + decor.donkey * scale, groundY, scale, t, still);
       if (animalId === 'ooievaar') drawStork(ctx, pivotX + decor.stork * scale, groundY, scale, t, still);
       if (animalId === 'leeuw') drawLion(ctx, pivotX + decor.lion * scale, groundY, scale, t, still);
-      if (animalId === 'vlinders') drawButterflies(ctx, decor, scene, frame, t, still);
-      if (animalId === 'bijen') drawBees(ctx, decor, scene, frame, t, still);
+      if (animalId === 'vlinders') drawButterflies(ctx, decor, drawn, frame, t, still);
+      if (animalId === 'bijen') drawBees(ctx, decor, drawn, frame, t, still);
       // The eagle needs a sky: it circles in the scene framing only.
       if (animalId === 'adelaar' && framing === 'scene') drawEagle(ctx, decor, frame, t, still, palette.bark);
+      // A bird with no twig to sit on yet waits beside the tree. Scene only:
+      // an avatar is about the tree, and its disc would cut the bird in half.
+      if (!drawn.perch && PERCHING.has(animalId) && framing === 'scene') {
+        drawGroundBird(ctx, animalId, decor, frame, groundY, t, still, palette);
+      }
 
       if (animalId === 'vuurvliegjes' && palette.night) {
-        const b = scene.bounds;
+        const b = drawn.bounds;
         for (const fly of decor.fireflies) {
           const pulse = 0.25 + 0.75 * Math.abs(Math.sin(t * 0.0013 + fly.phase * 6.283));
           const drift = still ? 0 : Math.sin(t * 0.0005 + fly.phase * 6.283) * 1.6;
@@ -2077,11 +2395,22 @@ export default function TreeCanvas({
     };
 
     const draw = (time: number) => {
+      const next = sceneNow(performance.now());
+      if (next !== drawn) {
+        drawn = next;
+        mature = matureOf(drawn);
+        reframe();
+      }
       const t = still ? 0 : time;
       drawSky(t);
       drawGround(t);
       drawTree(t);
       drawForeground(t);
+      if (tweenEnded) {
+        // After the paint, so the caller's next step never races the end state.
+        tweenEnded = false;
+        onTweenEndRef.current?.();
+      }
     };
 
     const loop = (time: number) => {
@@ -2129,14 +2458,26 @@ export default function TreeCanvas({
     const onVisibility = () => (document.hidden ? stop() : start());
     document.addEventListener('visibilitychange', onVisibility);
 
+    // A tween that runs while nobody is looking (scrolled away, tab hidden)
+    // still ends on time: paint the end state and tell the caller.
+    let endTimer = 0;
+    const running0 = tweenRef.current;
+    if (running0 && !running0.ended) {
+      const remaining = Math.max(0, running0.start + running0.ms - performance.now());
+      endTimer = window.setTimeout(() => {
+        if (!running) draw(0);
+      }, remaining + 50);
+    }
+
     return () => {
       stop();
+      window.clearTimeout(endTimer);
       repaintRef.current = null;
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
       document.removeEventListener('visibilitychange', onVisibility);
     };
-  }, [scene, palette, decor, reducedMotion, stillProp, level, framing, animalId, sp]);
+  }, [scene, fromScene, fromKey, tweenMs, seed, palette, decor, reducedMotion, stillProp, level, framing, animalId, sp]);
 
   return (
     <canvas

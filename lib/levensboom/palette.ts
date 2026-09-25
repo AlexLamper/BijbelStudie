@@ -85,6 +85,16 @@ export function mix(a: string, b: string, amount: number): string {
   ]);
 }
 
+/**
+ * Growth v2: a branch's colour from green stem (wood 0) to bark (wood 1). The
+ * green is the canopy's own leaf colour a third of the way to bark, so a
+ * seedling's stem belongs to its leaves; no new colour token.
+ */
+export function woodColor(palette: Pick<Palette, 'leaf' | 'bark'>, wood: number): string {
+  if (wood >= 1) return palette.bark;
+  return mix(mix(palette.leaf, palette.bark, 0.35), palette.bark, wood);
+}
+
 export function seasonForMonth(month: number): Season {
   // `month` is 0-based, as `Date#getMonth` gives it.
   if (month <= 1 || month === 11) return 'winter';

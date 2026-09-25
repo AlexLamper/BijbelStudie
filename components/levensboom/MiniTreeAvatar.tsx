@@ -46,12 +46,15 @@ export default function MiniTreeAvatar({
   const gold = card.avatar.ring === 'goud';
   const ring = ringColors(card.avatar.ring);
   const badge = Math.max(12, Math.round(size * 0.44));
+  // Growth v2: the card carries where the tree stands (with its owner's
+  // floor), so this draws the tree its owner sees. Older cards fall back.
+  const phaseName = (card.growth?.phase?.name ?? card.stage.name).toLowerCase();
 
   return (
     <span
       className={`relative inline-block flex-shrink-0 ${className ?? ''}`}
       style={{ width: size, height: size }}
-      aria-label={`Boom van ${name}, ${card.stage.name.toLowerCase()} op niveau ${card.level}`}
+      aria-label={`Boom van ${name}, ${phaseName} op niveau ${card.level}`}
     >
       <span
         className="absolute inset-0 overflow-hidden rounded-full"
@@ -60,7 +63,8 @@ export default function MiniTreeAvatar({
         <TreeCanvas
           seed={card.seed}
           level={card.level}
-          frac={0.5}
+          frac={card.growth?.frac ?? 0.5}
+          floor={card.growth?.floor}
           health={card.health}
           species={card.avatar.species}
           scene={card.avatar.scene}

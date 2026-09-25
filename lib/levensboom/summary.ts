@@ -1,6 +1,7 @@
 import { readTreeHealth } from './health';
 import { fruitAtLevel, fruitsForLevel, nextTrait, traitsForLevel, TRAIT_LABELS, type TreeTrait } from './traits';
-import { stageForLevel, type Stage } from './stages';
+import { phaseForStep, type Stage } from './stages';
+import { growthInfo, type GrowthFloor, type GrowthInfo } from './growth';
 import {
   CATALOG_VERSION,
   nextLevelUnlock,
@@ -16,14 +17,15 @@ import {
  *
  * Everything here is derived - from `xp`, `level`, `lastStreakDate`, badges,
  * the longest streak, Pro and the stored studio choice, all of which every
- * account already has. Nothing about the tree's shape is stored, so an
- * existing account sees a grown, level-appropriate tree with no migration.
+ * account already has. The one stored growth input is `legacyXp`, from which
+ * the caller derives the never-shrink floor (`lib/levensboom/legacy.ts`).
  *
  * `avatar` is what a client draws: the stored `chosen` after the unlock check
  * (`resolveAvatar`), so a lapsed Pro item falls back to the default without
  * the stored choice being touched. `unlocked` is served so a tile can show its
- * lock state without the client re-implementing the rules, and `stage` so an
- * older build still shows the right stage name when the bands move.
+ * lock state without the client re-implementing the rules. `growth` is where
+ * the tree stands (position, step, phase, floor); `stage` is its phase in the
+ * v1 shape, kept so an older build still shows the right name.
  */
 
 export type LevensboomPrefs = {
@@ -40,6 +42,9 @@ export type LevensboomPrefs = {
   introSeen?: boolean | null;
   publicProfile?: boolean | null;
   seenItems?: string[] | null;
+  /** XP at the first read after the growth-v2 launch; written once. */
+  legacyXp?: number | null;
+  legacyAt?: Date | null;
 };
 
 export type LevensboomPayload = {
@@ -57,7 +62,11 @@ export type LevensboomPayload = {
   disabled: boolean;
   /** 'auto' follows the device clock; any other value pins the scene's time of day. */
   timeOfDay: 'auto' | 'dawn' | 'day' | 'dusk' | 'night';
+  /** `growth.phase` in the v1 stage shape; `nextLevel` is a step. */
   stage: Stage;
+  growth: GrowthInfo;
+  /** Show the one-time growth-v2 card (seen key `growth-v2` in `seenItems`); true only for accounts from before the launch. */
+  announceGrowth: boolean;
   /** What is stored. May name items the account is not entitled to right now. */
   chosen: AvatarChoice;
   /** What to draw: `chosen` after the unlock check. */
@@ -77,6 +86,12 @@ export type LevensboomPayload = {
 export function buildLevensboomPayload(input: {
   userId: string;
   level: number;
+  /** How far into `level`, 0..1 (`fracOf`). */
+  frac?: number | null;
+  /** From `floorForUser`; null for an account without a head start. */
+  floor?: GrowthFloor | null;
+  /** From `announcesGrowth`. */
+  announceGrowth?: boolean;
   lastStreakDate?: Date | null;
   prefs?: LevensboomPrefs | null;
   now?: Date;
@@ -86,6 +101,7 @@ export function buildLevensboomPayload(input: {
   isPro?: boolean | null;
 }): LevensboomPayload {
   const level = Math.max(1, Math.floor(input.level));
+  const growth = growthInfo(level, input.frac ?? 0, input.floor ?? null);
   const { health, wilting, daysSinceActive } = readTreeHealth(input.lastStreakDate, input.now);
   const next = nextTrait(level);
   const prefs = input.prefs ?? null;
@@ -120,7 +136,9 @@ export function buildLevensboomPayload(input: {
     timeOfDay: (['dawn', 'day', 'dusk', 'night'] as const).includes(prefs?.timeOfDay as 'dawn' | 'day' | 'dusk' | 'night')
       ? (prefs!.timeOfDay as 'dawn' | 'day' | 'dusk' | 'night')
       : 'auto',
-    stage: stageForLevel(level),
+    stage: phaseForStep(growth.step),
+    growth,
+    announceGrowth: Boolean(input.announceGrowth),
     chosen,
     avatar: resolveAvatar(chosen, unlocked),
     unlocked,

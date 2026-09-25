@@ -59,6 +59,7 @@ export default function NavTreeAvatar({
           level={data.level}
           frac={fracOf(data)}
           health={levensboom.health}
+          floor={levensboom.growth?.floor}
           species={levensboom.avatar.species}
           scene={levensboom.avatar.scene}
           animal={levensboom.avatar.animal}

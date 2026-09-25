@@ -4,6 +4,8 @@ import connectMongoDB from '../../../../lib/mongodb';
 import User from '../../../../models/User';
 import { XP_LABELS, XP_VALUES, readProgressSummary } from '../../../../lib/gamification';
 import { buildLevensboomPayload, type LevensboomPrefs } from '../../../../lib/levensboom/summary';
+import { announcesGrowth, ensureLegacyXp, floorForUser } from '../../../../lib/levensboom/legacy';
+import { fracOf } from '../../../../lib/levensboom/client';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,9 +18,10 @@ export async function OPTIONS() {
  * show "wat levert het op?" without hardcoding numbers that then drift.
  *
  * The `levensboom` block is additive: it is derived on every request from xp,
- * level, lastStreakDate, badges, the longest streak, Pro and the stored studio
- * choice, so the tree needs no stored shape and the existing consumers of this
- * route keep the shape they already parse.
+ * level, lastStreakDate, badges, the longest streak, Pro, the stored studio
+ * choice and the one-time `legacyXp` (lib/levensboom/legacy.ts), so the tree
+ * needs no stored shape and the existing consumers of this route keep the
+ * shape they already parse.
  */
 export async function GET(req: Request) {
   try {
@@ -27,19 +30,27 @@ export async function GET(req: Request) {
     if (!summary) return jsonV1({ error: 'NOT_FOUND' }, { status: 404 });
 
     await connectMongoDB();
-    const user = await User.findById(auth.id)
-      .select('lastStreakDate longestStreak levensboom')
+    const row = await User.findById(auth.id)
+      .select('xp createdAt lastStreakDate longestStreak levensboom')
       .lean<{
+        _id: unknown;
+        xp?: number | null;
+        createdAt?: Date | null;
         lastStreakDate?: Date | null;
         longestStreak?: number | null;
         levensboom?: LevensboomPrefs | null;
       } | null>();
+    // Growth v2's one-time head start, captured before the payload reads it.
+    const user = row ? await ensureLegacyXp(row) : null;
 
     return jsonV1({
       ...summary,
       levensboom: buildLevensboomPayload({
         userId: auth.id,
         level: summary.level,
+        frac: fracOf(summary),
+        floor: user ? floorForUser(user) : null,
+        announceGrowth: user ? announcesGrowth(user) : false,
         lastStreakDate: user?.lastStreakDate ?? null,
         prefs: user?.levensboom ?? null,
         badges: summary.badges,

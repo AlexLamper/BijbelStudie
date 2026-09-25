@@ -3,6 +3,7 @@ import { getToken } from "next-auth/jwt";
 import type { NextRequest } from "next/server";
 import { fallbackLng, cookieName } from "./app/i18n/settings";
 import { memberRedirectFor } from "./lib/memberRedirects";
+import { appLinkTarget } from "./lib/mobilePlatform";
 
 export const config = {
   matcher: [
@@ -51,6 +52,22 @@ export async function middleware(req: NextRequest) {
     response.headers.set("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
     response.headers.set("Access-Control-Allow-Headers", "Content-Type");
     return response;
+  }
+
+  // /app is the one link for bios and posts: phones go to their store, desktop
+  // to "/". It runs here because the page is force-static and would serve one
+  // cached answer to every device. 307 + no-store: the target changes when
+  // PLAY_STORE_URL is filled in, and a browser must not remember the old one.
+  if (pathname === "/app") {
+    const target = appLinkTarget(
+      req.headers.get("user-agent") ?? "",
+      req.nextUrl.searchParams.get("toon") === "1",
+    );
+    if (target) {
+      const res = NextResponse.redirect(new URL(target, req.url), 307);
+      res.headers.set("Cache-Control", "no-store");
+      return res;
+    }
   }
 
   // Always set Dutch

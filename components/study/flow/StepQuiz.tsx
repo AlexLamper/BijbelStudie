@@ -86,6 +86,54 @@ const calmVariants = { enter: { opacity: 0 }, center: { opacity: 1 }, exit: { op
  * Answering is required to finish; answering CORRECTLY is not. A wrong answer
  * blocking someone from completing a devotional would be a product failure.
  */
+/**
+ * The quiz question bank is generated per lesson on first load and can take a
+ * few seconds - not a bug, but silent for that long reads as one. A plain
+ * skeleton says "content is coming"; it does not say "this is normal, keep
+ * waiting". So the copy itself carries that reassurance, and only appears
+ * once the wait is long enough to need it - a flash of "Nog even" on a
+ * quiz that loads in 300ms would be worse than nothing.
+ */
+function QuizLoading() {
+  const reduceMotion = useReducedMotion();
+  const [patient, setPatient] = useState(false);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setPatient(true), 1800);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  return (
+    <div className="mt-8 flex flex-col items-center py-10 text-center" role="status" aria-live="polite">
+      <div className="relative h-10 w-10" aria-hidden>
+        <span
+          className="absolute inset-0 rounded-full border-2 border-les-card-line"
+        />
+        <span
+          className={`absolute inset-0 rounded-full border-2 border-transparent border-t-current ${INK}`}
+          style={{
+            color: 'var(--teal)',
+            animation: reduceMotion ? undefined : 'quiz-spin 0.9s linear infinite',
+          }}
+        />
+      </div>
+      <p className={`mt-5 text-[13.5px] font-medium ${INK_MUTED}`}>
+        {patient ? 'Nog even, de vragen worden gemaakt' : 'Vragen worden klaargezet'}
+      </p>
+      {patient && (
+        <p className={`mt-1.5 text-[12px] ${INK_FAINT}`}>Dit duurt soms een paar seconden</p>
+      )}
+      <style jsx>{`
+        @keyframes quiz-spin {
+          to {
+            transform: rotate(360deg);
+          }
+        }
+      `}</style>
+    </div>
+  );
+}
+
 export default function StepQuiz({
   studyId,
   lessonDay,
@@ -411,10 +459,7 @@ export default function StepQuiz({
   if (questions === null) {
     return (
       <LessonLayout eyebrow={eyebrow ?? 'Toetsing'} heading="Wat bleef er hangen?" aside={aside}>
-        <div className="mt-6 space-y-3" role="status" aria-label="Quiz laden">
-          <div className="skeleton-pulse h-6 w-32 rounded-lg bg-les-card" />
-          <div className="skeleton-pulse h-40 rounded-2xl bg-les-card" />
-        </div>
+        <QuizLoading />
       </LessonLayout>
     );
   }

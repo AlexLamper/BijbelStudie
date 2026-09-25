@@ -4,6 +4,7 @@ import connectMongoDB from '../../../lib/mongodb';
 import { appEnv, checkDatabaseSafety, PRODUCTION_DATABASE } from '../../../lib/appEnv';
 import { XP_VALUES } from '../../../lib/gamification';
 import { TRAIT_LEVELS } from '../../../lib/levensboom/traits';
+import { GROWTH_MODEL } from '../../../lib/levensboom/growth';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -58,6 +59,7 @@ export async function GET() {
       levensboom: true,
       noteXp: 'note_written' in XP_VALUES,
       seasonsTraitLevel: TRAIT_LEVELS.seasons,
+      treeGrowthModel: GROWTH_MODEL,
     },
     time: new Date().toISOString(),
   };

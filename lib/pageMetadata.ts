@@ -274,6 +274,17 @@ const pageConfigs: Record<string, PageMetadataConfig> = {
 
   /* ─── Standalone utility pages ──────────────────────────────── */
 
+  invite: {
+    title: 'Je bent uitgenodigd',
+    description: 'Maak een gratis BijbelStudie-account aan via een uitnodiging en krijg een week Pro cadeau.',
+    path: '/uitnodiging',
+    type: 'website',
+    // Reached only through someone's personal link, and the page is the same
+    // for every code. Nothing here a searcher would look for; keep it out of
+    // the index and out of app/sitemap.ts.
+    indexable: false,
+  },
+
   appDownload: {
     title: 'Download de app',
     description: 'Download de BijbelStudie-app voor iOS. Bijbelstudie, commentaren en de grondtekst in je zak.',

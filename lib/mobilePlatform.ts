@@ -3,8 +3,10 @@
  *
  * Pure and framework-free so the rules are testable (tests/mobilePlatform.test.ts)
  * and the banner component only has to feed in `navigator` values after mount.
- * Nothing here runs on the server: a user agent read during SSR would render a
- * banner the client may disagree with.
+ * Only `appLinkTarget` runs on the server (middleware): its result is a
+ * redirect, not rendered HTML the client could disagree with. Everything else
+ * stays client-side: a user agent read during SSR would render a banner the
+ * client may disagree with.
  *
  * Store URLs come from lib/appStore.ts. Android shows nothing while
  * PLAY_STORE_URL is null; filling that constant in is the whole Android rollout.
@@ -127,6 +129,23 @@ export function appPromoStoreUrl({
 
   if (os === 'ios' && browser === 'safari' && hasSmartAppBanner) return null;
   return url;
+}
+
+/** Crawlers that fetch a link for a preview card or an index, never a person. */
+const LINK_PREVIEW_BOT =
+  /facebookexternalhit|Facebot|WhatsApp|Twitterbot|TelegramBot|Slackbot|Discordbot|LinkedInBot|Googlebot|bingbot|Applebot|Pinterestbot|redditbot|SkypeUriPreview|vkShare|Embedly/i;
+
+/**
+ * Where /app sends this visitor, or null to render the /app page itself
+ * (bots, `?toon=1`, empty UA). Android falls back to "/" until PLAY_STORE_URL
+ * is set. No maxTouchPoints server-side, so an iPad in desktop mode gets "/".
+ */
+export function appLinkTarget(userAgent: string, show = false): string | null {
+  if (show || !userAgent || LINK_PREVIEW_BOT.test(userAgent)) return null;
+  const { os } = detectMobilePlatform(userAgent);
+  if (os === 'ios') return APP_STORE_URL;
+  if (os === 'android' && PLAY_STORE_URL) return PLAY_STORE_URL;
+  return '/';
 }
 
 /** App Store id from APP_STORE_URL, for the apple-itunes-app meta tag. */

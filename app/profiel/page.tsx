@@ -16,6 +16,7 @@ import { INTENT_EVENT, PROFIEL_ACTIES, consumeIntent, readIntent } from "../../l
 import AccountAvatar from "../../components/kit/AccountAvatar"
 import TreeAvatar from "../../components/kit/TreeAvatar"
 import { FreeMembershipPanel, ProMembershipPanel, type BillingInfo } from "../../components/profile/MembershipPanel"
+import InviteCard from "../../components/profile/InviteCard"
 
 interface UserData {
   _id: string
@@ -423,6 +424,8 @@ export default function ProfilePage() {
             ) : (
               <FreeMembershipPanel memberSince={memberSince} />
             )}
+
+            <InviteCard />
 
             <Card className="flex-none p-[15px]">
               <div className="text-[14.5px] font-bold text-ink">Account</div>

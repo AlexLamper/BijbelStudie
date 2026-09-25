@@ -112,3 +112,6 @@ scripts/.cache/
 
 # Search Console exports (URL lists from GSC) - local working files, never committed.
 /seo-exports/
+
+# Tree design contact sheets (npm run tree:sheet) - regenerated on demand.
+design/levensboom/sheets/

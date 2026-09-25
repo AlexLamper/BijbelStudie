@@ -2,6 +2,7 @@ import connectMongoDB from './mongodb';
 import User from '../models/User';
 import StudyProgress from '../models/StudyProgress.js';
 import PlanEnrollment from '../models/PlanEnrollment.js';
+import { creditReferrerIfActivated } from './referral';
 
 /**
  * XP, levels and badges.
@@ -168,7 +169,10 @@ export async function grantXp(
   const updated = await User.findByIdAndUpdate(
     userId,
     { $inc: { xp: amount } },
-    { new: true, select: 'xp level badges image createdAt streak' },
+    {
+      new: true,
+      select: 'xp level badges image createdAt streak referredBy referralClaimedAt referralCreditedAt',
+    },
   );
   if (!updated) {
     return { xp: 0, level: 1, levelledUp: false, awarded: 0, newBadges: [] };
@@ -204,6 +208,14 @@ export async function grantXp(
       $set: { level },
       ...(newBadges.length > 0 ? { $addToSet: { badges: { $each: newBadges } } } : {}),
     });
+  }
+
+  // An invited friend who has now really used the app earns their inviter a
+  // week of Pro. A failure here must never cost the reader the XP they earned.
+  try {
+    await creditReferrerIfActivated(updated, lessonsCompleted);
+  } catch (error) {
+    console.error('[referral] crediting the inviter failed', error);
   }
 
   return { xp, level, levelledUp: level > levelBefore, awarded: amount, newBadges };

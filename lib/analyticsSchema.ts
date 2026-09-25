@@ -18,6 +18,26 @@ import { CLICK_TARGETS, ROUTE_KEYS } from "./analyticsRoutes";
  */
 const PLATFORM = ["web", "ios", "android"] as const;
 
+/**
+ * Every prop above is a closed set of strings. The tree events below need a
+ * couple of real numbers (a level, a step) and one boolean, so this adds two
+ * more prop shapes alongside the plain-array enum. Both stay closed in spirit:
+ * a value only ever survives `sanitizeProps` when it is finite/exactly
+ * true-or-false and inside the declared range - dropped otherwise, never
+ * clamped into range and never stored as attacker-chosen text. That keeps the
+ * security story from the top of this file intact for an endpoint that is
+ * reachable while logged out.
+ */
+type NumberProp = { kind: "number"; min: number; max: number; integer?: boolean };
+type BooleanProp = { kind: "boolean" };
+type PropSpec = readonly string[] | NumberProp | BooleanProp;
+
+/** A whole number in range. Use `integer: false` for a continuous value. */
+function num(min: number, max: number, integer = true): NumberProp {
+  return { kind: "number", min, max, integer };
+}
+const BOOL: BooleanProp = { kind: "boolean" };
+
 export const EVENTS = {
   /**
    * A page was opened. `path` is a ROUTE KEY, not a pathname - the client sends
@@ -44,6 +64,8 @@ export const EVENTS = {
       "app_profile", "app_resources", "app_study", "app_ai",
       // A Pro tile in the Levensboom studio (app) - the cosmetics upsell.
       "app_levensboom",
+      // The group limit, the note limit and the app's own paywall screen.
+      "app_groups", "app_notes", "app_funnel",
     ],
     logged_in: ["yes", "no"],
     platform: PLATFORM,
@@ -139,6 +161,37 @@ export const EVENTS = {
     testament: ["ot_ot", "ot_nt", "nt_ot", "nt_nt"],
     platform: PLATFORM,
   },
+  /**
+   * The tree's own funnel (LEVENSBOOM_GROWTH_PLAN.md §13). There is no
+   * redesign shipped yet and no events existed before this - these are the
+   * baseline, so retention can be compared before and after the growth-v2
+   * launch. `step`, `phase` and `floored` are the v2 growth model's own
+   * numbers (§4.1) and nothing sends them yet; the call sites today only fill
+   * `level`, which already exists.
+   */
+  tree_levelup_seen: {
+    level: num(1, 1000),
+    step: num(1, 200),
+    phase: ["kiem", "zaailing", "jonge_boom", "volwassen_boom", "eeuwenoude_boom"],
+    floored: BOOL,
+  },
+  /** The lesson-complete card that shows what the lesson's XP did to the tree. */
+  tree_growth_moment: {
+    // `position` = level + fraction into the level (§4.1) - not sent yet.
+    fromPos: num(0, 1000, false),
+    toPos: num(0, 1000, false),
+  },
+  /** The Groei tab in the studio (the step ladder), opened. */
+  tree_groei_opened: {
+    step: num(1, 200),
+    level: num(1, 1000),
+  },
+  /** The studio itself (/profiel/boom), opened. */
+  tree_studio_opened: {},
+  /** The one-time announcement card for existing accounts - not built yet. */
+  tree_announcement_seen: {
+    action: ["open", "close"],
+  },
 } as const;
 
 export type EventName = keyof typeof EVENTS;
@@ -154,19 +207,42 @@ export function isEventName(value: unknown): value is EventName {
 export function sanitizeProps(
   name: EventName,
   props: unknown
-): Record<string, string> {
-  const allowed = EVENTS[name] as Record<string, readonly string[]>;
-  const out: Record<string, string> = {};
+): Record<string, string | number | boolean> {
+  const allowed = EVENTS[name] as Record<string, PropSpec>;
+  const out: Record<string, string | number | boolean> = {};
 
   if (typeof props !== "object" || props === null || Array.isArray(props)) {
     return out;
   }
 
-  for (const [key, permitted] of Object.entries(allowed)) {
+  for (const [key, spec] of Object.entries(allowed)) {
     const raw = (props as Record<string, unknown>)[key];
-    if (typeof raw !== "string") continue;
-    if (!permitted.includes(raw)) continue;
-    out[key] = raw;
+
+    if (Array.isArray(spec)) {
+      if (typeof raw === "string" && spec.includes(raw)) out[key] = raw;
+      continue;
+    }
+
+    // Not an array, so by construction of PropSpec this is a number or
+    // boolean spec - `Array.isArray` narrows a readonly-array union member
+    // less precisely than a plain cast here.
+    const scalar = spec as NumberProp | BooleanProp;
+
+    if (scalar.kind === "number") {
+      // Accepts a real number (a native client) or its string form (the web
+      // beacon, which only ever carries strings) - never anything else.
+      const value =
+        typeof raw === "number" ? raw : typeof raw === "string" && raw.trim() !== "" ? Number(raw) : NaN;
+      if (!Number.isFinite(value)) continue;
+      const rounded = scalar.integer === false ? value : Math.round(value);
+      if (rounded < scalar.min || rounded > scalar.max) continue;
+      out[key] = rounded;
+      continue;
+    }
+
+    // scalar.kind === "boolean"
+    if (raw === true || raw === "true") out[key] = true;
+    else if (raw === false || raw === "false") out[key] = false;
   }
 
   return out;
