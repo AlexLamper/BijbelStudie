@@ -35,6 +35,8 @@ import {
 import { getBibleAttribution } from "../../lib/bible-attribution"
 
 const TEAL = "#0D9488"
+/** The liked heart: red-600, the same red as the app's heart. Unliked it stays a white outline. */
+const HEART_RED = "#DC2626"
 
 /**
  * Half of the heart's beat: it swells for this long and settles back over the
@@ -385,7 +387,11 @@ export default function DailyVerseCard({
               className={`block ${beating ? "motion-safe:scale-[1.32]" : "motion-safe:scale-100"}`}
               style={{ transition: `transform ${BEAT_MS}ms cubic-bezier(0.16, 1, 0.3, 1)` }}
             >
-              <Heart size={19} fill={liked ? "currentColor" : "none"} />
+              <Heart
+                size={19}
+                color={liked ? HEART_RED : "currentColor"}
+                fill={liked ? HEART_RED : "none"}
+              />
             </span>
           </RoundAction>
 
