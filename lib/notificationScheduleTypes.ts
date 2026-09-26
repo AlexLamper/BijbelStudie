@@ -1,5 +1,8 @@
 /**
- * GET /api/v1/notifications/schedule?days=14&tz=Europe/Amsterdam
+ * GET /api/v1/notifications/schedule?days=14&tz=Europe/Amsterdam[&exclude=bibleYear,study,verse]
+ *
+ * `exclude` mirrors the app's content toggles: a switched-off kind falls
+ * through to the next priority, and `verse` leaves the verse out entirely.
  *
  * Content for the app's locally scheduled morning and evening notifications.
  * The server only supplies text and deep links; the app owns timing, the

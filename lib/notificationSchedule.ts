@@ -547,23 +547,50 @@ function studyTaskFor(
 }
 
 /** The whole answer for one user. Verses are fetched per date, in parallel, never written. */
+/** Kinds the app's content toggles can switch off (`?exclude=bibleYear,study,verse`). */
+export type ExcludableKind = 'bibleYear' | 'study' | 'verse';
+
+export function parseExclude(raw: string | null | undefined): Set<ExcludableKind> {
+  const out = new Set<ExcludableKind>();
+  for (const part of (raw ?? '').split(',')) {
+    const key = part.trim();
+    if (key === 'bibleYear' || key === 'study' || key === 'verse') out.add(key);
+  }
+  return out;
+}
+
 export async function buildNotificationSchedule(
   userId: string,
-  options: { days: number; timeZone: string; now?: Date; bibleYear?: BibleYearNotificationProvider },
+  options: {
+    days: number;
+    timeZone: string;
+    now?: Date;
+    bibleYear?: BibleYearNotificationProvider;
+    exclude?: Set<ExcludableKind>;
+  },
 ): Promise<NotificationScheduleResponse> {
   const now = options.now ?? new Date();
+  const exclude = options.exclude ?? new Set<ExcludableKind>();
   const dates = localDates(options.timeZone, options.days, now);
   const { fetchDayTextForDate } = await import('./mobileDayText');
 
-  const [ctx, verses] = await Promise.all([
+  const [loaded, verses] = await Promise.all([
     loadScheduleContext(userId, dates, options.bibleYear, now),
-    Promise.all(
-      dates.map(async (date): Promise<ScheduleVerse | null> => {
-        const v = await fetchDayTextForDate(date);
-        return v ? { text: v.text, reference: v.reference, translation: v.version || 'Statenvertaling' } : null;
-      }),
-    ),
+    exclude.has('verse')
+      ? Promise.resolve(dates.map(() => null))
+      : Promise.all(
+          dates.map(async (date): Promise<ScheduleVerse | null> => {
+            const v = await fetchDayTextForDate(date);
+            return v ? { text: v.text, reference: v.reference, translation: v.version || 'Statenvertaling' } : null;
+          }),
+        ),
   ]);
+  // A switched-off kind falls through to the next priority (taskForDate).
+  const ctx: ScheduleContext = {
+    ...loaded,
+    bibleYear: exclude.has('bibleYear') ? null : loaded.bibleYear,
+    study: exclude.has('study') ? null : loaded.study,
+  };
 
   return buildScheduleResponse({ dates, timeZone: options.timeZone, ctx, verses, now });
 }

@@ -3,6 +3,7 @@ import { corsPreflight, handleV1Error, jsonV1 } from '../../../../../lib/apiV1';
 import {
   buildNotificationSchedule,
   clampScheduleDays,
+  parseExclude,
   resolveTimeZone,
 } from '../../../../../lib/notificationSchedule';
 
@@ -13,7 +14,7 @@ export async function OPTIONS() {
 }
 
 /**
- * GET /api/v1/notifications/schedule?days=14&tz=Europe/Amsterdam
+ * GET /api/v1/notifications/schedule?days=14&tz=Europe/Amsterdam&exclude=bibleYear,study,verse
  *
  * Morning + evening notification content per local date, for the app to
  * schedule on the device (DAILY_HABIT_PLAN.md §2). Shape:
@@ -32,7 +33,9 @@ export async function GET(req: Request) {
     const days = clampScheduleDays(url.searchParams.get('days'));
     const timeZone = resolveTimeZone(url.searchParams.get('tz'));
 
-    const payload = await buildNotificationSchedule(auth.id, { days, timeZone });
+    const exclude = parseExclude(url.searchParams.get('exclude'));
+
+    const payload = await buildNotificationSchedule(auth.id, { days, timeZone, exclude });
 
     return jsonV1(payload, {
       // Per user: never a shared/CDN copy.
