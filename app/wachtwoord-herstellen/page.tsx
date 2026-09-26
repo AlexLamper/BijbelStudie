@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { BrandIcon } from "../../components/ui/BrandIcon";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import AuthTreeBackdrop from "../../components/auth/AuthTreeBackdrop";
@@ -69,7 +69,7 @@ function AuthFrame({ children }: { children: React.ReactNode }) {
 
         <div className="mx-auto mt-14 w-full max-w-md sm:mt-20">
           <div className="mb-6 flex items-center gap-2.5">
-            <Image src="/images/icon-192.png" alt="BijbelStudie" width={28} height={28} className="rounded-md" priority />
+            <BrandIcon src="/images/icon-192.png" alt="BijbelStudie" size={28} className="rounded-md" priority alwaysDark />
             <span className="text-lg font-bold text-white">
               Bijbel<span style={{ color: "#0D9488" }}>Studie</span>
             </span>

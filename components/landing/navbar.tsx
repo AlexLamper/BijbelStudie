@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Button } from "../../components/ui/button"
 import Link from "next/link"
 import { Menu, X } from "lucide-react"
-import Image from "next/image"
+import { BrandIcon } from "../ui/BrandIcon"
 import { ModeToggle } from "../dark-mode-toggle"
 
 /**
@@ -43,11 +43,10 @@ export function Header({ frame }: { frame?: string } = {}) {
         <div className="relative flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5">
-            <Image
+            <BrandIcon
               src="/images/icon-192.png"
               alt="BijbelStudie"
-              width={28}
-              height={28}
+              size={28}
               className="rounded-md"
               priority
             />

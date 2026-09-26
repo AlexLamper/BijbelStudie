@@ -10,7 +10,7 @@ import { ModeToggle } from "../dark-mode-toggle"
 import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar"
 import { SubscriptionBadge } from "../subscription-badge"
 import Link from "next/link"
-import Image from "next/image"
+import { BrandIcon } from "../ui/BrandIcon"
 import NavTreeAvatar from "../levensboom/NavTreeAvatar"
 import { MobileMenuButton } from "../shell/MobileNav"
 
@@ -36,11 +36,9 @@ function Wordmark() {
       aria-label="BijbelStudie"
       className="flex items-center gap-2 no-underline"
     >
-      <Image
+      <BrandIcon
         src="/images/icon-192.png"
-        alt=""
-        width={24}
-        height={24}
+        size={24}
         className="rounded-md flex-shrink-0"
         priority
       />

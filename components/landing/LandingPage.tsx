@@ -2,6 +2,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { ArrowRight, Check, Menu, X, ChevronDown } from "lucide-react"
 import { Footer } from "./footer"
+import { BrandIcon } from "../ui/BrandIcon"
 import { FAQItem } from "./FAQItem"
 import { ScrollEffects } from "./ScrollEffects"
 import { LandingSeenMarker } from "./LandingSeenMarker"
@@ -190,7 +191,7 @@ function Navbar() {
       <div className={`${SHELL} h-16 flex items-center justify-between gap-3 md:grid md:grid-cols-3`}>
         {/* Logo - links uitgelijnd */}
         <Link href="/" className="flex items-center gap-2 flex-shrink-0 md:justify-self-start">
-          <Image src="/images/icon-192.png" alt="" width={26} height={26} className="rounded-md" priority />
+          <BrandIcon src="/images/icon-192.png" size={26} className="rounded-md" priority />
           <span className="font-bold text-base tracking-tight" style={{ color: T.text }}>
             Bijbel<span style={{ color: "#0D9488" }}>Studie</span>
           </span>
