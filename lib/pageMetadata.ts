@@ -279,6 +279,13 @@ const pageConfigs: Record<string, PageMetadataConfig> = {
     type: 'article',
     ogEyebrow: 'Gids',
   },
+  bronnen: {
+    title: 'Belijdenisgeschriften en catechismus',
+    description: 'De Heidelbergse Catechismus, de Nederlandse Geloofsbelijdenis, de Dordtse Leerregels, de formulieren en de catechismusboekjes, met de Schriftplaatsen uit de Statenvertaling.',
+    path: '/bronnen',
+    type: 'website',
+    ogEyebrow: 'Bronnen',
+  },
   bibleBooks: {
     title: 'De 66 bijbelboeken op een rij',
     description: 'Alle 66 boeken van de Bijbel met schrijver, ontstaanstijd, genre, kernthema en hoofdlijn. Het overzicht om snel je weg te vinden in de Schrift.',

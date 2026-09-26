@@ -1,0 +1,5024 @@
+{
+  "slug": "hellenbroek",
+  "title": "Voorbeeld der Goddelijke Waarheden",
+  "author": "Abraham Hellenbroek",
+  "year": "1706",
+  "sectionNoun": "Hoofdstuk",
+  "source": {
+    "name": "Delpher (KB), OCR van A. Hellenbroek, Voorbeeld der Goddelijke Waarheden voor eenvoudigen, die zich bereiden tot de belijdenis des geloofs, 28e druk, G.F. Callenbach, Nijkerk, 1937 ('volgens de beste uitgave van het origineel')",
+    "url": "https://resolver.kb.nl/resolve?urn=MMUBVU02:000010152",
+    "edition": "Callenbach-druk 1937 in spelling-De Vries-Te Winkel; hoofdstuk I-XX met vragen en antwoorden zoals gedrukt, inclusief de korte Schriftcitaten die in deze uitgave in de antwoorden staan; de nummering begint opnieuw bij elk tussenkopje, zoals gedrukt.",
+    "retrieved": "2026-09-27",
+    "note": "Tweede bron voor de OCR-controle: 18e druk, G.F. Callenbach, Nijkerk, 1892 (Delpher https://resolver.kb.nl/resolve?urn=MMUBVU02:000005720; die druk heeft de Bijbelplaatsen volledig uitgeschreven en is daarom niet als hoofdbron gebruikt). Structuur en woordkeus verder vergeleken met de latere De Banier-uitgave (theologienet.nl/bestanden/hellenbroek-catechisatieboekje.pdf, moderne spelling; alleen ter vergelijking gelezen, niets overgenomen). Circa 110 OCR-fouten verbeterd, telkens alleen waar de druk van 1892 en/of de De Banier-tekst de lezing bevestigt (o.a. 'zeiven' -> 'zelven', 'bü/Hy' -> 'bij/Hij', ontbrekende punten bij Schriftverwijzingen). Inhoudelijk opvallend: H3 IIIe kopje v.38 'Jer. 29 : 6, 7' -> 'Jer. 10 : 6, 7'; H2 v.18 en H16 v.4 'Matth. 15 : 19' -> '15 : 9' en 'eer en' -> 'eeren'; H11 v.12 slot 'Rom. 5 : 5' -> '5 : 6'; H19 Avondmaal v.11 'Christus' beeld' -> 'Christus' bloed'; H13 v.10 'Elisa' -> 'Elia'; H12 v.20 'aanraking' -> 'aanrading'; H6 v.16 'tegen wij bedacht' -> 'tegen mij gedacht'; 'Mare.' -> 'Marc.' (2x). Weggelaten (latere toevoegingen, niet van Hellenbroek): de toespraak 'Geliefde leerling', het gedicht 'Het wachtwoord der Hervormers', het hoofdstuk 'Van den raad des vredes', het 'Kort begrip van de voornaamste dwalingen' en het register van de Bijbelboeken. Verwijzingen die achter een antwoord staan zijn naar refs verplaatst (genormaliseerd als 'Rom. 1:19'); verwijzingen midden in een antwoord blijven, met de korte Schriftcitaten van deze druk, ook in de tekst staan. Tussenkopjes (I. In het algemeen, A. Van zijn Profetisch Ambt enz.) zijn heading-blokken; de vraagnummers beginnen daarna opnieuw bij 1, zoals gedrukt."
+  },
+  "rights": "Tekst van Abraham Hellenbroek (1658-1731), voor het eerst uitgegeven in 1706, hier naar een ongewijzigde herdruk uit 1937 zonder bewerker; publiek domein.",
+  "sections": [
+    {
+      "id": "hoofdstuk-1",
+      "number": 1,
+      "label": "Hoofdstuk 1",
+      "title": "Van de kennis van God",
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Waaruit weet men, dat er een God is?",
+          "answer": "Uit de natuur en uit de Heilige Schrift."
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Hoe velerlei is de kennis van God uit de natuur?",
+          "answer": "Tweeërlei: 1. eene inwendige of ingeschapen kennis; 2. eene uitwendige of verkregen kennis."
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Welke is de inwendige of ingeschapen kennis?",
+          "answer": "Die allen menschen van nature in hun hart is aangeboren. Rom. 1 : 19. Overmits hetgeen van God kennelijk is, in hen openbaar is.",
+          "refs": [
+            "Rom. 1:19"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Hoe kan er zulk eene ingeschapen kennis zijn, daar er dwazen zijn, die in hun hart zeggen: daar is geen God. Ps. 14 : 1?",
+          "answer": "Dat is meer een wenschen, dan een dadelijk gelooven, dat er geen God is.",
+          "refs": [
+            "Ps. 14:1"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Welke is de uitwendige of verkregene kennis?",
+          "answer": "Die men haalt uit de schepselen buiten ons. Ps. 19 : 2. De hemelen vertellen Gods eer, en het uitspansel verkondigt zijner handen werk.",
+          "refs": [
+            "Ps. 19:2"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Hoe kan men uit de schepselen besluiten, dat er een God moet zijn?",
+          "answer": "Omdat zij door zichzelven niet zijn, noch blijven kunnen, maar noodzakelijk van God moeten geschapen zijn en nog onderhouden worden. Job 12 : 9. Wie weet niet uit alle dezen, dat de hand des Heeren dit doet?",
+          "refs": [
+            "Job 12:9"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Is de kennis uit de natuur genoeg om zalig te worden?",
+          "answer": "Neen."
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Waarom niet?",
+          "answer": "Omdat men er Christus niet uit kennen kan."
+        },
+        {
+          "type": "qa",
+          "number": 9,
+          "question": "Is Christus te kennen juist noodig tot zaligheid?",
+          "answer": "Ja. Joh. 17 : 3. En dit is het eeuwige leven, dat zij U kennen, den eenigen waarachtigen God, en Jezus Christus, dien Gij gezonden hebt.",
+          "refs": [
+            "Joh. 17:3"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 10,
+          "question": "Waaruit moet men de zaligmakende kennis halen?",
+          "answer": "Uit de Heilige Schrift.",
+          "refs": [
+            "2 Petr. 1:19"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hoofdstuk-2",
+      "number": 2,
+      "label": "Hoofdstuk 2",
+      "title": "Van de Heilige Schrift",
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Wat verstaat gij door de H. Schrift?",
+          "answer": "Het beschreven Woord van God.",
+          "refs": [
+            "Joh. 5:39",
+            "2 Tim. 3:15"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Is er altijd een beschreven Woord geweest?",
+          "answer": "Neen; voor Mozes' tijd was er geen beschreven Woord."
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Hoe maakte God dan toen zijn Woord bekend?",
+          "answer": "Door mondelijke aanspraak en openbaring aan de vaderen.",
+          "refs": [
+            "Gen. 18:1",
+            "Gen. 28:12"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Hoe bewaarden zij dat onder elkander?",
+          "answer": "Door overlevering van de vaderen tot de kinderen.",
+          "refs": [
+            "Gen. 18:19"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Waarom kon dat toen zoo beter geschieden?",
+          "answer": "Omdat de menschen toen langer leefden en minder in getal waren, God zich meermalen openbaarde en satans listen minder waren."
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Wie heeft de H. Schrift laten beschrijven?",
+          "answer": "God. 2 Tim. 3 : 16. Al de Schrift is van God ingegeven.",
+          "refs": [
+            "2 Tim. 3:16"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Door wien heeft Hij ze laten beschrijven?",
+          "answer": "Het Oude Testament door de profeten en het Nieuwe Testament door de Evangelisten en Apostelen.",
+          "refs": [
+            "Exod. 17:14",
+            "Openb. 1:19"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Door wien zijn die in dat schrijven gedreven geweest?",
+          "answer": "Door den H. Geest. 2 Petr. 1 : 21. De heilige menschen Gods, van den Heiligen Geest gedreven zijnde, hebben ze gesproken.",
+          "refs": [
+            "2 Petr. 1:21"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 9,
+          "question": "Hebben die dan in dat schrijven niet kunnen dwalen?",
+          "answer": "Neen; de Heilige Geest heeft hen in alle waarheid geleid.",
+          "refs": [
+            "Joh. 16:13"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 10,
+          "question": "Hoeveel Testamenten zijn er in de Heilige Schrift?",
+          "answer": "Twee: het Oude en het Nieuwe Testament.",
+          "refs": [
+            "2 Cor. 3:14",
+            "Hebr. 9:15"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 11,
+          "question": "In welke taal is het Oude Testament beschreven?",
+          "answer": "In de Hebreeuwsche, en een weinig in de Chaldeeuwsche taal."
+        },
+        {
+          "type": "qa",
+          "number": 12,
+          "question": "In welke taal is het Nieuwe Testament beschreven?",
+          "answer": "In de Grieksche taal."
+        },
+        {
+          "type": "qa",
+          "number": 13,
+          "question": "Is de gansche H. Schrift een Goddelijk Boek?",
+          "answer": "Ja; omdat er dingen in zijn, die van niemand dan van God kunnen zijn."
+        },
+        {
+          "type": "qa",
+          "number": 14,
+          "question": "Welke dingen zijn dat?",
+          "answer": "Verborgenheden: als, dat God drieëenig is; de schepping uit niet in zes dagen; dat Jezus God en mensch is, de Middelaar enz. en Profetieën: dat zijn voorzeggingen van toekomende zaken op hun tijd en plaats net vervuld."
+        },
+        {
+          "type": "qa",
+          "number": 15,
+          "question": "Zijn de Apokryfe boeken Gods Woord niet?",
+          "answer": "Neen; omdat er dingen in zijn, die verdicht en met Gods Woord strijdig zijn; waarom zij van de Joodsche kerk ook nooit voor Goddelijk erkend zijn, aan welke kerk nochtans de woorden Gods waren toebetrouwd Rom. 3 : 2.",
+          "refs": [
+            "Rom. 3:2"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 16,
+          "question": "Is de Heilige Schrift volmaakt of onvolmaakt?",
+          "answer": "Volmaakt. Psalm 19 : 8. De wet des Heeren is volmaakt.",
+          "refs": [
+            "Psalm 19:8"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 17,
+          "question": "Is er dan van de Heilige Schrift niets verloren of vervalscht?",
+          "answer": "Neen; zij is nog zoo geheel en zuiver, als zij ooit geweest is.",
+          "refs": [
+            "Matth. 5:18"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 18,
+          "question": "Moet men niet nog overleveringen van menschen bij de H. Schrift hebben?",
+          "answer": "Neen; de H. Schrift alleen is genoeg. Matth. 15 : 9. Tevergeefs eeren zij Mij, leerende leeringen (die) geboden van menschen zijn.",
+          "refs": [
+            "Matth. 15:9"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 19,
+          "question": "Is de H. Schrift klaar of duister?",
+          "answer": "Klaar, in die dingen, die ter zaligheid noodig zijn. Psalm 119 : 105. Uw woord is een lamp voor mijnen voet, en een licht voor mijn pad.",
+          "refs": [
+            "Psalm 119:105"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 20,
+          "question": "Nochtans zegt Petrus, dat er in de brieven van Paulus sommige dingen zijn, zwaar om te verstaan. 2 Petr. 3 : 16?",
+          "answer": "De waarheid van eene zaak kan wel klaar geopenbaard zijn, schoon de zaak in zich zelve zwaar om te verstaan blijkt, gelijk het is met alle verborgenheden: als Gods Drieëenheid enz.",
+          "refs": [
+            "2 Petr. 3:16"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 21,
+          "question": "Mag en moet men ook de H. Schrift lezen?",
+          "answer": "Ja; Joh. 5 : 39. Onderzoekt de Schriften, want gij meent in dezelve het eeuwige leven te hebben; en die zijn het, die van Mij getuigen.",
+          "refs": [
+            "Joh. 5:39"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 22,
+          "question": "Hoe moet dat onderzoek geschieden?",
+          "answer": "1. In Gods vreeze. Ps. 111 : 10. II. Met een biddend hart. Ps. 119 : 18. III. Eerbiedig. Jes. 66 : 5 en IV. Aandachtig en met een geestelijk oordeel.",
+          "refs": [
+            "Ps. 111:10",
+            "Ps. 119:18",
+            "Jes. 66:5",
+            "1 Cor. 2:13"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hoofdstuk-3",
+      "number": 3,
+      "label": "Hoofdstuk 3",
+      "title": "Van God",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "I. In het algemeen"
+        },
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Wat is God?",
+          "answer": "Een volmaakte en oneindige Geest. Joh. 4 : 24. God is een Geest, en die Hem aanbidden, moeten Hem aanbidden in geest en waarheid.",
+          "refs": [
+            "Joh. 4:24"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Hoe kan dat zijn, dewijl Hem oogen, ooren, handen en andere lichaamsdeelen worden toegeschreven in de H. Schrift?",
+          "answer": "Dat moet alles oneigenlijk verstaan worden van hoedanigheden in God, die met het gebruik der menschelijke deelen eenige overeenkomst hebben."
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Waarin moet God al gekend worden?",
+          "answer": "I. In zijn Wezen. II. In zijne Namen. III. In zijne Eigenschappen. IV. In zijne Personen."
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Mag men God ook een Wezen toeschrijven?",
+          "answer": "Ja, doch niet in een lichamelijken zin. Spr. 8 : 14. Raad en het Wezen zijn mijne.",
+          "refs": [
+            "Spr. 8:14"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Hoeveel Goden zijn er?",
+          "answer": "Eén God. 1 Tim. 2 : 5. Want daar is één God, daar is ook één Middelaar Gods en der menschen, de mensch Christus Jezus.",
+          "refs": [
+            "1 Tim. 2:5"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Nochtans spreekt God in het eerste gebod zelf van andere goden. Ex. 20 : 3?",
+          "answer": "Niet die het inderdaad zijn, maar die er van menschen toe gemaakt en voor gehouden worden. 1 Cor. 8 : 5, 6. Want hoewel daar ook zijn, die goden genaamd worden, nochtans hebben wij maar eenen God.",
+          "refs": [
+            "Ex. 20:3",
+            "1 Cor. 8:5, 6"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "II. Van Gods namen"
+        },
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Heeft God ook namen noodig, gelijk de menschen?",
+          "answer": "Neen; want Hij heeft niemand Hem gelijk.",
+          "refs": [
+            "Gen. 32:29",
+            "Richt. 13:18"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Waarom dragen dan de menschen eigenlijk namen?",
+          "answer": "Om hen van anderen, die hun gelijk zijn, te onderscheiden."
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Waarom worden God dan namen toegeschreven?",
+          "answer": "I. Om Hem van de afgoden te onderscheiden. II. Om daardoor ook iets van Hem aan ons bekend te maken."
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Hebben dan al de namen Gods eenige beteekenis?",
+          "answer": "Ja."
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Welke zijn zijne twee gewoonste namen?",
+          "answer": "De naam God en de naam Heere."
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Is de naam God niet maar een naam van een ambt of bediening?",
+          "answer": "Neen; maar een naam van het Wezen Gods zelf. Hij is van nature God, in tegenstelling van de afgoden.",
+          "refs": [
+            "Gal. 4:8"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Nochtans wordt de naam van God ook aan engelen en overheden gegeven?",
+          "answer": "Dan wordt die buiten zijn eigenlijke beteekenis oneigenlijk overgebracht."
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Welke is Gods allergrootste naam?",
+          "answer": "De naam Jehova of HEERE."
+        },
+        {
+          "type": "qa",
+          "number": 9,
+          "question": "Kan die wel aan eenig schepsel gegeven worden?",
+          "answer": "Neen. Jes. 42 : 8. Ik ben de Heere, dat is mijn naam, en mijne eer zal Ik geenen anderen geven, noch mijnen lof den gesneden beelden.",
+          "refs": [
+            "Jes. 42:8"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 10,
+          "question": "Is die naam dan zoo groot van beteekenis?",
+          "answer": "Ja, hij beteekent het zelf-zijn, de onveranderlijkheid en getrouwheid van God. Ex. 3 : 14. Ik zal zijn die Ik zijn zal.",
+          "refs": [
+            "Ex. 3:14",
+            "Ex. 6:2"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 11,
+          "question": "Mag men Christus wel Jehova noemen?",
+          "answer": "Ja; omdat Hij ook waarachtig God is.",
+          "refs": [
+            "Jer. 23:6"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "III. Van Gods eigenschappen"
+        },
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Zijn Gods eigenschappen iets van God onderscheiden?",
+          "answer": "Neen, zij zijn God zelf; daarom wordt Hij genoemd het Licht, 1 Joh. 1 : 5; het Leven, de Waarheid, de Liefde, 1 Joh. 4 : 8; de Heiligheid zelve; zweren bij zijne heiligheid en zweren bij zich zelven is één. Amos 4 : 2, vergel. met Hebr. 6 : 13.",
+          "refs": [
+            "1 Joh. 1:5",
+            "1 Joh. 4:8",
+            "Amos 4:2",
+            "Hebr. 6:13"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Zijn Gods eigenschappen ook verscheiden, en onderscheiden van elkander?",
+          "answer": "Niet in God; want in Hem is alles maar ééne oneindige volmaaktheid; maar alleen naar onze manier van bevatten en naar de verscheidene uitlatingen van Gods volmaaktheid omtrent de schepselen."
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Hoe worden dus Gods eigenschappen gewoonlijk onderscheiden?",
+          "answer": "In onmededeelbare en mededeelbare eigenschappen.",
+          "refs": [
+            "Gen. 1:26",
+            "1 Joh. 3:2",
+            "2 Petr. 1:4"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Welke zijn de onmededeelbare?",
+          "answer": "De onafhankelijkheid, de eenvoudigheid, de eeuwigheid, de overaltegenwoordigheid en de onveranderlijkheid Gods."
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Waarom noemt gij die onmededeelbaar?",
+          "answer": "Omdat er geene de minste gelijkheid van is in eenig schepsel."
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Wat is de onafhankelijkheid Gods?",
+          "answer": "Dat Hij is van zich zelven; en bestaat door zich zelven.",
+          "refs": [
+            "Gen. 17:1"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Wat is de eenvoudigheid Gods?",
+          "answer": "Dat alles in God één is, zonder samenstelling van verscheidene deelen of zaken.",
+          "refs": [
+            "Deut. 6:4"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Wat is de eeuwigheid Gods?",
+          "answer": "Dat Hij is 1. Zonder eenig begin. 2. Zonder eenig vervolg of onderscheid van tijd. 3. Zonder einde. Psalm 90 : 2. Van eeuwigheid tot eeuwigheid zijt gij God.",
+          "refs": [
+            "Psalm 90:2"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 9,
+          "question": "Behoort tot Gods eeuwigheid ook, dat er bij Hem geen vervolg van tijd is?",
+          "answer": "Ja; want één dag is bij den Heere als duizend jaren, en duizend jaren als één dag.",
+          "refs": [
+            "2 Petr. 3:8"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 10,
+          "question": "Waar is God?",
+          "answer": "Overaltegenwoordig. Jer. 23 : 23, 24. Ben Ik een God van nabij, spreekt de Heere, en niet een God van verre? vervul Ik niet den hemel en de aarde, spreekt de Heere?",
+          "refs": [
+            "Jer. 23:23, 24"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 11,
+          "question": "Moet men dat alleen van zijne werkingen, of ook van zijn Wezen verstaan?",
+          "answer": "Ook van zijn Wezen, dat van zijne werkingen niet kan worden afgescheiden, dewijl Hij werkt door zijn Wezen."
+        },
+        {
+          "type": "qa",
+          "number": 12,
+          "question": "Waarom wordt God dan zoo bijzonder gezegd in den hemel te zijn?",
+          "answer": "Omdat Hij dáár zijne heerlijkheid meer vertoont dan elders.",
+          "refs": [
+            "Jes. 66:1"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 13,
+          "question": "Is God veranderlijk of onveranderlijk?",
+          "answer": "Onveranderlijk. Mal. 3:6. Ik de Heere word niet veranderd.",
+          "refs": [
+            "Mal. 3:6"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 14,
+          "question": "Nochtans wordt aan God berouw toegeschreven Gen. 6 : 6.",
+          "answer": "Dat berouw is in God maar eene verandering in zijn werk; niet in zijn wil en Wezen zelf.",
+          "refs": [
+            "Gen. 6:6",
+            "Num. 23:19"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 15,
+          "question": "Hem wordt ook verandering van plaats toegeschreven, dat Hij nederdaalt, ergens komt en weder weg gaat. Gen. 11 : 5?",
+          "answer": "Dat is maar eene verandering in de meerdere of mindere vertooning van zijne tegenwoordigheid, niet in zijne wezenlijke tegenwoordigheid zelve.",
+          "refs": [
+            "Gen. 11:5"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 16,
+          "question": "Welke zijn de mededeelbare eigenschappen?",
+          "answer": "Die worden gewoonlijk genoemd: Gods wetenschap, wil en macht, zijne goedheid, genade, barmhartigheid en lankmoedigheid."
+        },
+        {
+          "type": "qa",
+          "number": 17,
+          "question": "Waarom worden die mededeelbaar genoemd?",
+          "answer": "Omdat er eenige verre gelijkheid van dezelve is in de schepselen, hoewel ze ook, zooals zij in God zijn, oneindig en onmededeelbaar zijn."
+        },
+        {
+          "type": "qa",
+          "number": 18,
+          "question": "Wat is de wetenschap Gods?",
+          "answer": "Die volmaaktheid Gods, waardoor Hij op de volmaaktste wijze van eeuwigheid in zich alles weet. Hand. 15 : 18. Gode zijn alle zijne werken van eeuwigheid bekend.",
+          "refs": [
+            "Hand. 15:18"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 19,
+          "question": "Waarover gaat Gods wetenschap?",
+          "answer": "Over alle dingen: en zoo is Hij alwetend. 1 Joh. 3 : 20. God is meerder dan ons hart en Hij kent alle dingen.",
+          "refs": [
+            "1 Joh. 3:20",
+            "Ps. 147:4"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 20,
+          "question": "Weet God alle toekomende en gebeurlijke dingen?",
+          "answer": "Ja. Ps. 139 : 2. Gij weet mijn zitten en mijn opstaan. Gij verstaat van verre mijne gedachten.",
+          "refs": [
+            "Ps. 139:2"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 21,
+          "question": "Voorweet God die uit kracht van een voorgaand besluit of door eene zoogenaamde middelkennis?",
+          "answer": "Uit kracht van zijn besluit, en onder eene zekerheid van hare toekomendheid."
+        },
+        {
+          "type": "qa",
+          "number": 22,
+          "question": "Hoe wordt Gods wil onderscheiden?",
+          "answer": "In eenen wil van Gods besluit en eenen wil des gebods, of anders eenen verborgen en geopenbaarden wil."
+        },
+        {
+          "type": "qa",
+          "number": 23,
+          "question": "Wat is de wil van Gods besluit?",
+          "answer": "Gods eeuwig voornemen, naar hetwelk Hijzelf alles doet in den tijd. Eph. 1 : 11. Hij werkt alle dingen naar den raad zijns willens.",
+          "refs": [
+            "Eph. 1:11"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 24,
+          "question": "Wat is de wil van Gods gebod, of zijn geopenbaarde wil?",
+          "answer": "Dien Hij ons tot een regel voorschrijft in zijn Woord, en dien Hij van ons wil gedaan hebben. Rom. 12 : 2. Opdat gij moogt beproeven, welke de goede, en welbehaaglijke en volmaakte wille Gods zij.",
+          "refs": [
+            "Rom. 12:2"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 25,
+          "question": "Naar welke van die twee moeten wij ons gedragen?",
+          "answer": "Naar den wil des bevels; want de wil des besluits is ons onbekend. Deut. 29 : 29. De verborgene dingen zijn voor den HEERE onzen God, maar de geopenbaarde zijn voor ons en voor onze kinderen tot in eeuwigheid om te doen al de woorden dezer Wet.",
+          "refs": [
+            "Deut. 29:29"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 26,
+          "question": "Wat is Gods rechtvaardigheid?",
+          "answer": "Die volmaaktheid Gods, waardoor Hij alle zonden haat en straft."
+        },
+        {
+          "type": "qa",
+          "number": 27,
+          "question": "Moet God alle zonden noodzakelijk straffen?",
+          "answer": "Ja. Rom. 1 : 32. Dewelke, daar zij het recht Gods weten (namelijk, dat degenen, die zulke dingen doen, des doods waardig zijn).",
+          "refs": [
+            "Rom. 1:32"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 28,
+          "question": "Ligt dan God onder dwang?",
+          "answer": "Neen, dat moeten is in God een allergenegenst willen.",
+          "refs": [
+            "Hab. 1:13"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 29,
+          "question": "Kan God van dat recht niet wat afstaan?",
+          "answer": "Neen; dan zou Hij zichzelven verloochenen, want zijne rechtvaardigheid is ook God zelf. Exod. 34 : 6 en 7. Heere, Heere, God! die (den schuldige) geenszins onschuldig houdt.",
+          "refs": [
+            "Exod. 34:6 en 7"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 30,
+          "question": "Wel, immers vergeeft God de schuld en straf der zonde aan de geloovigen?",
+          "answer": "Dan is Gods rechtvaardigheid al in Christus voldaan; die heeft voor hen de straf gedragen.",
+          "refs": [
+            "Eph. 1:7"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 31,
+          "question": "Hoedanig is Gods macht?",
+          "answer": "Eene almacht. Matth. 19 : 26. Bij God zijn alle dingen mogelijk.",
+          "refs": [
+            "Matth. 19:26"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 32,
+          "question": "Kan God dan ook wel sterven, zondigen enz.?",
+          "answer": "Neen, dat zou eene onmacht zijn, en geenszins eene macht."
+        },
+        {
+          "type": "qa",
+          "number": 33,
+          "question": "Wat is Gods goedheid?",
+          "answer": "In het algemeen: zijne beminnelijkheid omtrent zijne schepselen. Ps. 4 : 7, 8. Bijzonder de uitlatingen zijner weldadigheid en liefde omtrent de menschen, bovenal zijne gunstgenooten.",
+          "refs": [
+            "Ps. 4:7, 8",
+            "Ps. 36:7",
+            "Joh. 3:16"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 34,
+          "question": "Wat is Gods genade?",
+          "answer": "Die goedheid Gods, waardoor Hij zonder inzicht van des menschen waardigheid hem weldoet."
+        },
+        {
+          "type": "qa",
+          "number": 35,
+          "question": "Hoe velerlei genade is er?",
+          "answer": "Zij is of algemeen omtrent allen. Matth. 5 : 45. Of bijzonder en zaligmakend omtrent de uitverkorenen alleen. Rom. 3 : 24. En die wederom voorkomende, inwerkende en achtervolgende genade.",
+          "refs": [
+            "Matth. 5:45",
+            "Rom. 3:24"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 36,
+          "question": "Wat is Gods barmhartigheid?",
+          "answer": "Die goedheid Gods omtrent den ellendigen, uitverkoren zondaar, waardoor Hij hem dagelijks weder herstelt in den genadestaat door den Middelaar Jezus.",
+          "refs": [
+            "Exod. 34:6",
+            "Eph. 2:4"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 37,
+          "question": "Wat is Gods lankmoedigheid?",
+          "answer": "Die goedheid Gods, waardoor Hij de welverdiende straf uitstelt, om de uitverkorenen tot bekeering te brengen, en de verworpenen te overtuigen.",
+          "refs": [
+            "Rom. 2:4"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 38,
+          "question": "Wat is Gods hoogheid?",
+          "answer": "Gods oppergezag boven alle schepselen.",
+          "refs": [
+            "Jer. 10:6, 7",
+            "Jer. 18:6",
+            "Rom. 8:18, 20"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "IV. Van de drie Personen"
+        },
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Hoeveel personen zijn er in het Goddelijk Wezen?",
+          "answer": "Drie: de Vader, de Zoon en de Heilige Geest."
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Mag men het Woord „Drieëenheid\" wel gebruiken?",
+          "answer": "Ja; het is schriftuurlijk. 1 Joh. 5 : 7. Deze drie zijn één.",
+          "refs": [
+            "1 Joh. 5:7"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Mag men ook het woord „personen\" hier gebruiken?",
+          "answer": "Ja; dat beteekent hier hetzelfde met het woord zelfstandigheid. Hebr. 1 : 3. Het uitgedrukte beeld zijner zelfstandigheid.",
+          "refs": [
+            "Hebr. 1:3"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Kan de Heilige Drieëenheid wel bewezen worden uit de natuur?",
+          "answer": "Neen; maar alleen uit de Heilige Schrift, want zij is eene verborgenheid, wel niet tegen, maar nochtans boven de natuur."
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Hoe bewijst men de Drieëenheid uit de H. Schrift?",
+          "answer": "I. Uit het Oude Testament. II. Uit het Nieuwe Testament."
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Hoe uit het Oude Testament?",
+          "answer": "1. Uit teksten, waar God van zichzelven in het meerder getal spreekt. Gen. 1 : 26. 2. Uit teksten, waar God en God, Heere en Heere worden onderscheiden. Ps. 45 : 8. Daarom heeft U, o God! uw God gezalfd. Ps. 110 : 1. De Heere heeft tot mijnen Heer gesproken. 3. Uit teksten, waar de drie Personen uitdrukkelijk genoemd en onderscheiden worden. Ps. 33 : 6. Door het Woord des Heeren zijn de hemelen gemaakt, en door den Geest zijns monds al hun heir.",
+          "refs": [
+            "Gen. 1:26",
+            "Ps. 45:8",
+            "Ps. 110:1",
+            "Ps. 33:6"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Hoe bewijst gij de Drieëenheid uit het Nieuwe Testament?",
+          "answer": "1 Joh. 5 : 7. Drie zijn er die getuigen in den hemel, de Vader, het Woord en de H. Geest; en deze drie zijn één. Ook in onzen doop. Matth. 28 : 19. Gaat dan henen, onderwijst alle volkeren, dezelve doopende in den naam des Vaders, en des Zoons, en des H. Geestes. Ook toen Christus gedoopt werd. Matth. 3. De Zoon werd gedoopt, de Vader sprak uit den hemel en de Geest Gods kwam nederdalen gelijk een duif.",
+          "refs": [
+            "1 Joh. 5:7",
+            "Matth. 28:19",
+            "Matth. 3"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Waarin zijn de drie Personen dan één?",
+          "answer": "In wezen."
+        },
+        {
+          "type": "qa",
+          "number": 9,
+          "question": "Waarin zijn zij drie?",
+          "answer": "In Personen."
+        },
+        {
+          "type": "qa",
+          "number": 10,
+          "question": "Zijn zij dan als Personen onderscheiden?",
+          "answer": "Ja, door hunne personeele eigenschappen of wijze van bestaan."
+        },
+        {
+          "type": "qa",
+          "number": 11,
+          "question": "Welke is de personeele eigenschap van den Vader?",
+          "answer": "Dat Hij als Vader is van zichzelven."
+        },
+        {
+          "type": "qa",
+          "number": 12,
+          "question": "Welke is de personeele eigenschap van den Zoon?",
+          "answer": "Dat Hij gegenereerd is van den Vader. Ps. 2 : 7. Gij zijt mijn Zoon, heden heb Ik U gegenereerd.",
+          "refs": [
+            "Ps. 2:7"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 13,
+          "question": "Welke is de personeele eigenschap van den H. Geest?",
+          "answer": "Dat Hij uitgaat van den Vader en van den Zoon. Joh. 15 : 26. De Geest der waarheid, die van den Vader uitgaat.",
+          "refs": [
+            "Joh. 15:26"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 14,
+          "question": "Waarom noemt gij dat personeele eigenschappen en niet wezenlijke?",
+          "answer": "Omdat zij niet aan het geheele Wezen, maar elk alleen aan één persoon eigen zijn."
+        },
+        {
+          "type": "qa",
+          "number": 15,
+          "question": "Wanneer is de Zoon van den Vader gegenereerd?",
+          "answer": "Van eeuwigheid. Spr. 8 : 24. Ik was geboren, als de afgronden nog niet waren.",
+          "refs": [
+            "Spr. 8:24"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 16,
+          "question": "Hoe staat er dan Ps. 2 : 7: Heden heb ik U gegenereerd?",
+          "answer": "In God is niet dan een eeuwig en onveranderlijk heden.",
+          "refs": [
+            "Ps. 2:7"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 17,
+          "question": "Is dan de Zoon de eigen en natuurlijke Zoon van God?",
+          "answer": "Ja. Joh. 1 : 18. De eeniggeboren Zoon, die in den schoot des Vaders is.",
+          "refs": [
+            "Joh. 1:18"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 18,
+          "question": "Waarom wordt de tweede Persoon dan eigenlijk Gods Zoon genaamd?",
+          "answer": "Omdat de Vader van eeuwigheid tot eeuwigheid hetzelfde Goddelijk Wezen aan den Zoon mededeelt.",
+          "refs": [
+            "Joh. 5:26",
+            "Col. 1:15",
+            "Hebr. 1:3",
+            "Col. 2:9"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 19,
+          "question": "Is Hij dan niet eerst Gods Zoon geworden door zijne geboorte uit Maria of door zijn Middelaarsambt?",
+          "answer": "Neen; Hij was al vooraf Gods Zoon. Gal. 4 : 4. Maar wanneer de volheid des tijds gekomen is, heeft God zijnen Zoon uitgezonden, geworden uit eene vrouw, geworden onder de wet.",
+          "refs": [
+            "Gal. 4:4"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 20,
+          "question": "Gaat de H. Geest alleen uit van den Vader?",
+          "answer": "Neen; maar ook van den Zoon. Daarom wordt hij genoemd de Geest van Christus, Rom. 8 : 9, en de Geest des Zoons.",
+          "refs": [
+            "Rom. 8:9",
+            "Gal. 4:6"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 21,
+          "question": "Is de H. Geest niet maar eene kracht of eigenschap Gods?",
+          "answer": "Neen; Hij is een dadelijk Persoon, hebbende verstand en wil. Want de geest onderzoekt alle dingen. 1 Cor. 2 : 10 en 12 : 11. Deelende een iegelijk in het bijzonder, gelijkerwijs Hij wil. Hij is ook verschenen in den doop van Christus.",
+          "refs": [
+            "1 Cor. 2:10",
+            "1 Cor. 12:11",
+            "Matth. 3:16"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 22,
+          "question": "Is Hij ook een onderscheiden persoon?",
+          "answer": "Ja; Hij wordt uitdrukkelijk een ander genoemd. Joh. 14 : 16. Ik zal den Vader bidden en Hij zal u eenen anderen Trooster geven.",
+          "refs": [
+            "Joh. 14:16"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 23,
+          "question": "Waaruit bewijst men, dat de Zoon en de H. Geest zoowel God zijn als de Vader?",
+          "answer": "1. Uit hunne goddelijke namen. 2. Uit hunne goddelijke eigenschappen. 3. Uit hunne goddelijke werken. 4. Uit hunne goddelijke eer."
+        },
+        {
+          "type": "qa",
+          "number": 24,
+          "question": "Bewijs eens dat er goddelijke namen gegeven worden aan den Zoon?",
+          "answer": "1. De naam Heere of Jehova. Jer. 23 : 6. De Heere onze gerechtigheid. 2. De naam God. 1 Joh. 5 : 20. Deze is de waarachtige God en het eeuwige leven.",
+          "refs": [
+            "Jer. 23:6",
+            "1 Joh. 5:20"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 25,
+          "question": "Bewijs eens dat de naam van God gegeven wordt aan den H. Geest.",
+          "answer": "Hand. 5 : 3, 4. Waarom heeft de satan uw hart vervuld, dat gij den H. Geest liegen zoudt? Gij hebt den menschen niet gelogen, maar Gode.",
+          "refs": [
+            "Hand. 5:3, 4"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 26,
+          "question": "Bewijs eens een Goddelijke eigenschap van den Zoon?",
+          "answer": "De eeuwigheid. Micha 5:1. Wiens uitgangen zijn van ouds, van de dagen der eeuwigheid.",
+          "refs": [
+            "Micha 5:1"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 27,
+          "question": "Bewijs eens eene goddelijke eigenschap van den H. Geest?",
+          "answer": "De overaltegenwoordigheid. Ps. 139 : 7. Waar zoude ik henengaan voor uwen Geest?",
+          "refs": [
+            "Ps. 139:7"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 28,
+          "question": "Welke Goddelijke werken worden hun toegeschreven?",
+          "answer": "De schepping en onderhouding van alles. Ps. 33 : 6. Door het Woord des HEEREN zijn de hemelen gemaakt en door den Geest zijns monds al hun heir.",
+          "refs": [
+            "Ps. 33:6"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 29,
+          "question": "Welke Goddelijke eer komt hun toe?",
+          "answer": "In hunnen naam gedoopt te worden, in hen te gelooven, en hen te aanbidden. 2 Cor. 13 : 13. De genade van den Heere Jezus Christus, en de liefde Gods en de gemeenschap des H. Geestes, zij met u allen, Amen.",
+          "refs": [
+            "2 Cor. 13:13"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 30,
+          "question": "Is deze leer noodig tot zaligheid?",
+          "answer": "Ja; omdat men daardoor God recht leert kennen en verzoening zoeken met den Vader als rechter in de voldoening van den Zoon, door de werking van den H. Geest.",
+          "refs": [
+            "Joh. 6:44"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hoofdstuk-4",
+      "number": 4,
+      "label": "Hoofdstuk 4",
+      "title": "Van Gods besluiten",
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Zijn Gods besluiten iets onderscheiden van God?",
+          "answer": "Neen; zij zijn de besluitende God zelf, zooals zijn verstand en wil zich uitlaten tot het bepalen der dingen buiten Hem."
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Wanneer heeft God zijne besluiten genomen?",
+          "answer": "Van eeuwigheid. Hand. 15:18. Gode zijn al zijne werken van eeuwigheid bekend.",
+          "refs": [
+            "Hand. 15:18"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Zijn het vrije besluiten?",
+          "answer": "Ja. Matth. 11 : 26. Ja, Vader! want alzoo is geweest het welbehagen voor U.",
+          "refs": [
+            "Matth. 11:26"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Zijn het ook wijze besluiten?",
+          "answer": "Ja. Rom. 11 : 33. O, diepte des rijkdoms, beide der wijsheid en der kennisse Gods! hoe ondoorzoekelijk zijn zijne oordeelen, en onnaspeurlijk zijne wegen.",
+          "refs": [
+            "Rom. 11:33"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Zijn zijne besluiten ook veranderlijk?",
+          "answer": "Neen; onveranderlijk. Jes. 46 : 10. Mijn raad zal bestaan en Ik zal al mijn welbehagen doen.",
+          "refs": [
+            "Jes. 46:10"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Waarover gaan Gods besluiten?",
+          "answer": "Over alle dingen. Eph. 1 : 11. Die alle dingen werkt naar den raad zijns willens.",
+          "refs": [
+            "Eph. 1:11"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Zijn er ook nog besluiten onder eene voorwaarde, die afhangt van des menschen vrijen wil?",
+          "answer": "Neen; maar wel onder eene voorwaarde, die God mede besloten heeft, en die Hij zelf zekerlijk werkt. Dus had God besloten Petrus zalig te maken, onder voorwaarde van geloof en bekeering, maar te gelijk had God besloten, geloof en bekeering in der tijd in hem te werken, en heeft ze ook dadelijk gewrocht."
+        },
+        {
+          "type": "heading",
+          "text": "Van de Predestinatie"
+        },
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Heeft God ook besloten wie er zalig zal worden en wie niet?",
+          "answer": "Ja."
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Hoe noemt men dat besluit?",
+          "answer": "Predestinatie of voorverordineering. Rom. 8 : 30. Die hij te voren verordineerd heeft, deze heeft hij ook geroepen.",
+          "refs": [
+            "Rom. 8:30"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Hoeveel deelen of daden Gods moet men daarin onderscheiden?",
+          "answer": "Twee: de verkiezing en de verwerping. 1 Thess. 5 : 9. Want God heeft ons niet gesteld tot toorn, maar tot verkrijging der zaligheid.",
+          "refs": [
+            "1 Thess. 5:9"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Wanneer is de verkiezing geschied?",
+          "answer": "Van eeuwigheid. Eph. 1 : 4. Gelijk hij ons uitverkoren heeft in Hem voor de grondlegging der wereld.",
+          "refs": [
+            "Eph. 1:4"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Is zij algemeen, zijn alle menschen verkoren?",
+          "answer": "Neen; het minste getal. Matth. 20 : 16b. Velen zijn geroepen, maar weinigen uitverkoren.",
+          "refs": [
+            "Matth. 20:16b"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Gaat zij ook over zekere met name bij God bekende personen?",
+          "answer": "Ja. Rom. 9 : 13. Jacob heb Ik liefgehad en Ezau heb Ik gehaat.",
+          "refs": [
+            "Rom. 9:13"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Wat is de reden, dat God den eenen verkoren heeft en den anderen niet?",
+          "answer": "Alleen Gods vrij en souverein welbehagen. Rom. 9 : 18. Zoo ontfermt Hij zich dan, diens Hij wil, en verhardt dien Hij wil.",
+          "refs": [
+            "Rom. 9:18"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Is het dan niet om een voorgezien geloof, of goede werken?",
+          "answer": "Neen. Rom. 9 : 16. Het is niet desgenen die wil, noch desgenen, die loopt, maar des ontfermenden Gods.",
+          "refs": [
+            "Rom. 9:16"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 9,
+          "question": "Is daar geene hardheid of onrechtvaardigheid in?",
+          "answer": "Neen; want God had rechtvaardig alle menschen kunnen laten verloren gaan."
+        },
+        {
+          "type": "qa",
+          "number": 10,
+          "question": "Is die verkiezing veranderlijk?",
+          "answer": "Neen; onveranderlijk. Rom. 9 : 11. Opdat het voornemen Gods, dat naar de verkiezing is, vast bleve.",
+          "refs": [
+            "Rom. 9:11"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 11,
+          "question": "Vloeit daar uit niet, dat het dan evenveel is hoe men leeft?",
+          "answer": "Neen; want God heeft de middelen tot het einde meteen besloten.",
+          "refs": [
+            "Rom. 8:29, 30"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 12,
+          "question": "Zoo eens een uitverkorene weigerde de middelen te gebruiken, wat dan?",
+          "answer": "God geeft hem hart en lust om te willen.",
+          "refs": [
+            "Phil. 2:13"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 13,
+          "question": "Welke zijn de teekenen der verkiezing?",
+          "answer": "Geloof, hoop en liefde.",
+          "refs": [
+            "1 Thess. 1:3 en 4"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 14,
+          "question": "Waartoe dient dit leerstuk der voorverordineering?",
+          "answer": "Het dient om God te verheerlijken in zijn oppermacht, onafhankelijkheid, wijsheid, genade, rechtvaardigheid en waarheid. Rom. 11 : 33. En om den mensch te vernederen.",
+          "refs": [
+            "Rom. 11:33",
+            "Rom. 9:20",
+            "1 Cor. 4:7"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hoofdstuk-5",
+      "number": 5,
+      "label": "Hoofdstuk 5",
+      "title": "Van de schepping",
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Voert God zijne besluiten ook uit?",
+          "answer": "Ja Hij, in der tijd, door zijne werken."
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Hoe velerlei zijn Gods werken in der tijd?",
+          "answer": "Tweeërlei; zijne werken in de natuur en zijne werken in de genade."
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Hoe velerlei zijn zijne werken in de natuur?",
+          "answer": "Ook tweeërlei: het werk der schepping en het werk der voorzienigheid."
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Wat is scheppen?",
+          "answer": "Door de almachtige daad van eenen enkelen wil iets voortbrengen. Openb. 4:11. Door uwen wil zijn ze en zijn ze geschapen.",
+          "refs": [
+            "Openb. 4:11"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Wie is de Schepper van alles?",
+          "answer": "De Drieëenige God. Gen. 1:1. In den beginne schiep God den hemel en de aarde.",
+          "refs": [
+            "Gen. 1:1"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Wanneer heeft Hij alles geschapen?",
+          "answer": "In den beginne."
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Waaruit is alles geschapen?",
+          "answer": "Uit niets. Rom. 4 : 17. En roept de dingen, die niet zijn alsof ze waren.",
+          "refs": [
+            "Rom. 4:17"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Waar leest men de geschiedenis van de schepping?",
+          "answer": "Genesis 1.",
+          "refs": [
+            "Genesis 1"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 9,
+          "question": "In hoeveel tijd schiep God alles?",
+          "answer": "Ten opzichte van de stof in één oogenblik, en ten opzichte van de verdere schikking in zes dagen."
+        },
+        {
+          "type": "qa",
+          "number": 10,
+          "question": "Zijn ook de engelen geschapen?",
+          "answer": "Ja. Ps. 104 : 4. Hij maakt zijne engelen geesten.",
+          "refs": [
+            "Ps. 104:4"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 11,
+          "question": "Wat zijn engelen?",
+          "answer": "Gedienstige geesten, die tot dienst uitgezonden worden om dergenen wil, die de zaligheid beërven zullen.",
+          "refs": [
+            "Hebr. 1:14"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 12,
+          "question": "Wanneer zijn zij geschapen?",
+          "answer": "Waarschijnlijk op den eersten dag, want toen de aarde nederzonk op hare grondvesten, toen zongen de morgensterren al te zamen vroolijk, en de kinderen Gods juichten.",
+          "refs": [
+            "Job 38:6, 7"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 13,
+          "question": "Hoe schiep God de engelen, goed of kwaad?",
+          "answer": "Goed, want God zag al wat Hij gemaakt had, en ziet het was zeer goed.",
+          "refs": [
+            "Gen. 1:31"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 14,
+          "question": "Zijn zij allen goed gebleven?",
+          "answer": "Neen; daar is een deel afgevallen, en zijn duivelen in de hel geworden.",
+          "refs": [
+            "Judas vs. 6"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 15,
+          "question": "Wie waren de eerste menschen?",
+          "answer": "Adam en Eva."
+        },
+        {
+          "type": "qa",
+          "number": 16,
+          "question": "Waaruit schiep God Adam?",
+          "answer": "Uit het stof der aarde.",
+          "refs": [
+            "Gen. 2:7"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 17,
+          "question": "Waaruit Eva?",
+          "answer": "Uit een rib van Adams lijf.",
+          "refs": [
+            "Gen. 2"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 18,
+          "question": "Uit hoeveel deelen bestaat de mensch?",
+          "answer": "Uit twee: uit ziel en lichaam."
+        },
+        {
+          "type": "qa",
+          "number": 19,
+          "question": "Werd dan hunne ziel daaruit ook geschapen?",
+          "answer": "Neen; die kwam onmiddellijk van God, die blies er een levende ziel in.",
+          "refs": [
+            "Gen. 2"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 20,
+          "question": "Wat is de ziel?",
+          "answer": "Een onsterfelijke geest, waardoor wij leven en rede gebruiken."
+        },
+        {
+          "type": "qa",
+          "number": 21,
+          "question": "Wat deed God op den zevenden dag?",
+          "answer": "Hij rustte en heiligde denzelven.",
+          "refs": [
+            "Gen. 2"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 22,
+          "question": "Was God dan vermoeid van scheppen?",
+          "answer": "Neen. De Schepper van de einden der aarde wordt noch moede noch mat.",
+          "refs": [
+            "Jes. 40:28"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 23,
+          "question": "Wat is het dan te zeggen, dat Hij rustte?",
+          "answer": "Dat Hij ophield met scheppen."
+        },
+        {
+          "type": "qa",
+          "number": 24,
+          "question": "Waartoe heeft God de wereld geschapen?",
+          "answer": "De Heere heeft alles gewrocht om zijns zelfs wil; dat is, tot zijne heerlijkheid.",
+          "refs": [
+            "Spreuk. 16:4"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hoofdstuk-6",
+      "number": 6,
+      "label": "Hoofdstuk 6",
+      "title": "Van de voorzienigheid",
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Houdt dan nu God op van alle werk omtrent de schepselen?",
+          "answer": "Neen; daar is nog een gedurig werk der Goddelijke voorzienigheid. Joh. 5 : 17. Mijn Vader werkt tot nu toe, en Ik werk ook.",
+          "refs": [
+            "Joh. 5:17"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "In hoeveel daden bestaat Gods voorzienigheid?",
+          "answer": "In drie: in onderhouding, medewerking en regeering."
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Wat is de onderhouding?",
+          "answer": "Die almachtige kracht Gods, waardoor Hij alles doet blijven in zijn wezen. Hebr. 1 : 3. Die alle dingen draagt door het woord zijner kracht.",
+          "refs": [
+            "Hebr. 1:3"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Wat is Gods medewerking?",
+          "answer": "Die almachtige kracht Gods, waardoor Hij medewerkende invloeit in alle bewegingen en werkingen der schepselen. 1 Cor. 12 : 6. Het is dezelfde God, die alles in allen werkt.",
+          "refs": [
+            "1 Cor. 12:6"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Wat is de regeering Gods?",
+          "answer": "Die almachtige kracht Gods, waardoor Hij alles bestuurt tot een zeker bepaald einde. Ps. 93 : 1. De HEERE regeert.",
+          "refs": [
+            "Ps. 93:1"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Waarover gaat de voorzienigheid Gods?",
+          "answer": "Over alle dingen. Eph. 1 : 11. Die alle dingen werkt naar den raad van zijnen wil.",
+          "refs": [
+            "Eph. 1:11"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Ook over kleine dingen?",
+          "answer": "Ja. Matth. 10 : 30. En ook de haren uws hoofds zijn alle geteld.",
+          "refs": [
+            "Matth. 10:30"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Strekt dat niet tot oneer van God, zich met zulke kleine dingen te bemoeien?",
+          "answer": "Neen; 1. dewijl het Hem geen oneer is, die te hebben geschapen, 2. omdat Hij er ook geen grooter dingen om behoeft te verzuimen, 3. en Hij er ook dikwijls groote zaken door uitvoert."
+        },
+        {
+          "type": "qa",
+          "number": 9,
+          "question": "Gaat Gods voorzienigheid ook over dingen, die bij geval gebeuren?",
+          "answer": "Ja. Spreuk. 16 : 33. Het lot wordt in den schoot geworpen, maar het geheele beleid daarvan is van den Heere.",
+          "refs": [
+            "Spreuk. 16:33"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 10,
+          "question": "Geschiedt er dan niets bij geval?",
+          "answer": "Niet ten opzichte van God, maar wel ten opzichte van ons."
+        },
+        {
+          "type": "qa",
+          "number": 11,
+          "question": "Gaat Gods voorzienigheid ook omtrent onzen dood en ons leven?",
+          "answer": "Ja; de tijd daarvan is ook bij God bepaald. Job 14 : 5. Dewijl zijne dagen bestemd zijn, het getal zijner maanden bij U is, en Gij zijne bepalingen gemaakt hebt die hij niet overgaan zal.",
+          "refs": [
+            "Job 14:5"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 12,
+          "question": "Kan dan een mensch zijn leven niet verlengen of verkorten?",
+          "answer": "Niet ten opzichte van God, maar wel naar den mensch."
+        },
+        {
+          "type": "qa",
+          "number": 13,
+          "question": "Is dan het gebruik van alle middelen om te leven niet onnut?",
+          "answer": "Neen; die heeft God mede besloten als middel tot dat einde; en Hij geeft ook den mensch den wil om ze te gebruiken."
+        },
+        {
+          "type": "qa",
+          "number": 14,
+          "question": "Gaat Gods voorzienigheid ook over de allervrijste dingen?",
+          "answer": "Ja, zelfs over de gedachten. Spreuk. 21 : 1. Des konings hart is in de hand des Heeren als waterbeken. Hij neigt het tot al wat Hij wil.",
+          "refs": [
+            "Spreuk. 21:1"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 15,
+          "question": "Neemt dat des menschen vrijheid niet weg?",
+          "answer": "Neen; die besturing is geen dwang, maar eene gewillige neiging."
+        },
+        {
+          "type": "qa",
+          "number": 16,
+          "question": "Gaat Gods voorzienigheid ook omtrent de zonde?",
+          "answer": "Ja; Hij laat die toe, bepaalt en bestuurt ze tot een zeker einde. Gen. 50 : 20. Gijlieden wel, gij hebt kwaad tegen mij gedacht; doch God heeft dat ten goede gedacht.",
+          "refs": [
+            "Gen. 50:20"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 17,
+          "question": "Werkt God de zonde zelve niet?",
+          "answer": "Neen; een heilig God kan geen oorzaak zijn van iets zondigs. Hij haat en straft de zonde."
+        },
+        {
+          "type": "qa",
+          "number": 18,
+          "question": "Werkt God dan het goede?",
+          "answer": "Ja. 2 Cor. 3 : 5. Niet dat wij van ons zelven bekwaam zijn iets te denken als uit ons zelven; maar onze bekwaamheid is uit God.",
+          "refs": [
+            "2 Cor. 3:5"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 19,
+          "question": "Geeft God daartoe maar eens en voor altijd krachten, of moet Hij invloeien tot elke bijzondere daad?",
+          "answer": "Hij moet invloeien tot elke bijzondere daad, daartoe opwekkende en medewerkende. Phil. 2 : 13. Het is God die in u werkt beide het willen en het werken, naar zijn welbehagen.",
+          "refs": [
+            "Phil. 2:13"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 20,
+          "question": "Waartoe is de leer der voorzienigheid nuttig?",
+          "answer": "Zij leert Gods volk in tegenspoed geduldig, in voorspoed dankbaar, en voor het toekomende vertrouwend te zijn.",
+          "refs": [
+            "Gen. 32:10",
+            "Job 1:21, 22",
+            "Job 13:15"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hoofdstuk-7",
+      "number": 7,
+      "label": "Hoofdstuk 7",
+      "title": "Van het verbond der werken",
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Heeft God nog een bijzonder bestuur omtrent den mensch?",
+          "answer": "Ja; dien regeert God verbondsgewijze."
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Hoe vele verbonden zijn er?",
+          "answer": "Twee: een verbond der werken en een verbond der genade."
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Wanneer was het verbond der werken?",
+          "answer": "Vóór den val."
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Met wien heeft God dat opgericht?",
+          "answer": "Met Adam, en in hem, als het hoofd, met al zijne nakomelingen."
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Wat eischte God in dat verbond der werken?",
+          "answer": "Volmaakte gehoorzaamheid aan de wet."
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Aan welke wet?",
+          "answer": "Aan de wet der liefde: God lief te hebben met al zijne kracht, en zijne naasten als zich zelven."
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Hoe kwam Adam aan de kennis van die wet?",
+          "answer": "God had die ingeschapen in zijn hart."
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Wat beloofde God in dat verbond der werken?",
+          "answer": "Het eeuwige leven."
+        },
+        {
+          "type": "qa",
+          "number": 9,
+          "question": "Werd die belofte ook door eenig sacrament bevestigd?",
+          "answer": "Ja; door den boom des levens."
+        },
+        {
+          "type": "qa",
+          "number": 10,
+          "question": "Wat dreigde God in dat verbond?",
+          "answer": "Den dood."
+        },
+        {
+          "type": "qa",
+          "number": 11,
+          "question": "Voegde God er ook nog een proefgebod bij?",
+          "answer": "Ja; niet te eten van den boom der kennis des goeds en des kwaads.",
+          "refs": [
+            "Gen. 2:17"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hoofdstuk-8",
+      "number": 8,
+      "label": "Hoofdstuk 8",
+      "title": "Van het beeld Gods",
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Kon de mensch dat verbond onderhouden?",
+          "answer": "Ja; God had den mensch zoo geschapen, dat hij dat kon doen."
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Hoe schiep God den mensch?",
+          "answer": "Goed en oprecht."
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Is hij dan niet in een blooten natuurstaat, tusschen goed en kwaad geschapen?",
+          "answer": "Neen; maar in een dadelijke, zedelijke rechtheid. Pred. 7 : 29. Dit heb ik gevonden, dat God den mensch recht gemaakt heeft, maar zij hebben vele vonden gezocht.",
+          "refs": [
+            "Pred. 7:29"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Waarnaar schiep God den mensch?",
+          "answer": "Naar zijn beeld.",
+          "refs": [
+            "Gen. 1:27"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Waarin bestond dat beeld?",
+          "answer": "In kennis, gerechtigheid en heiligheid."
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Niet in de uiterlijke gestalte des lichaams?",
+          "answer": "Neen; want God heeft geen lichaam."
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Niet in de heerschappij over de dieren?",
+          "answer": "Neen; die is maar een gevolg van het beeld en zal in den hemel niet zijn, waar nochtans Gods beeld op het allervolmaaktst zal wezen."
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Bewijs eens dat het beeld Gods bestond in kennis?",
+          "answer": "Col. 3 : 10. En aangedaan hebt den nieuwen mensch, die vernieuwd wordt tot kennis, naar het evenbeeld desgenen, die hem geschapen heeft.",
+          "refs": [
+            "Col. 3:10"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 9,
+          "question": "Bewijs eens dat het ook bestond in gerechtigheid en heiligheid?",
+          "answer": "Eph. 4 : 24. En den nieuwen mensch aandoen, die naar God geschapen is, in ware rechtvaardigheid en heiligheid.",
+          "refs": [
+            "Eph. 4:24"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 10,
+          "question": "Was Adam met dat beeld sterfelijk?",
+          "answer": "Neen, onsterfelijk; want de dood is eerst op de zonde bedreigd. Gen. 2 : 17. Ten dage, als gij daarvan eet, zult gij den dood sterven.",
+          "refs": [
+            "Gen. 2:17"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hoofdstuk-9",
+      "number": 9,
+      "label": "Hoofdstuk 9",
+      "title": "Van de zonde",
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Heeft de mensch dat beeld nog?",
+          "answer": "Neen, hij heeft het verloren door de zonde."
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Wat was de eerste zonde des menschen?",
+          "answer": "Het eten van den boom der kennis des goeds en des kwaads."
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Waar stond die boom?",
+          "answer": "In het Paradijs."
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Welke vrucht groeide daaraan?",
+          "answer": "Dat is onbekend."
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Wie at daar eerst van, Adam of Eva?",
+          "answer": "Eva."
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Van wien werd zij verleid?",
+          "answer": "Van den duivel, door middel van eene slang.",
+          "refs": [
+            "Gen. 3:1-7"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Wat maakte die haar wijs?",
+          "answer": "Dat zij niet zou sterven, maar als God zijn, kennende goed en kwaad."
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Door wien werd Adam verlokt?",
+          "answer": "Door zijne vrouw; die gaf hem en hij at."
+        },
+        {
+          "type": "qa",
+          "number": 9,
+          "question": "Waar leest men de geschiedenis van den val?",
+          "answer": "Genesis 3.",
+          "refs": [
+            "Genesis 3"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 10,
+          "question": "Welke gevolgen had die zonde voor Adam en Eva?",
+          "answer": "1. Het verliezen van Gods beeld. 2. Het gevoel dat zij naakt waren. 3. Schrik in het geweten. 4. Uitwerping uit het Paradijs. 5. Den dood."
+        },
+        {
+          "type": "heading",
+          "text": "2. Van de erfzonde"
+        },
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Raakt Adams zonde ons ook?",
+          "answer": "Ja; zij wordt ons toegerekend."
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Waarom?",
+          "answer": "Omdat Adam het hoofd des verbonds was, en daarin aangemerkt werd, als vertegenwoordigende al zijne nakomelingen. Rom. 5 : 12. Daarom, gelijk door één mensch de zonde in de wereld ingekomen is, en door de zonde de dood; en alzoo de dood tot alle menschen doorgegaan is, in welken allen gezondigd hebben.",
+          "refs": [
+            "Rom. 5:12"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Welke zonde hebben wij dan door Adam?",
+          "answer": "De erfzonde. Ps. 51 : 7. Zie, ik ben in ongerechtigheid geboren en in zonde heeft mij mijne moeder ontvangen.",
+          "refs": [
+            "Ps. 51:7"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Hoe velerlei zonde is er dan?",
+          "answer": "Tweeërlei: erfzonde en dadelijke zonde."
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Hoe wordt de erfzonde de onze?",
+          "answer": "Door toerekening en overerving."
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Wie rekent ons Adams zonde toe?",
+          "answer": "God."
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Wat rekent Hij ons toe?",
+          "answer": "De schuld der zonde. Rom. 5 : 19. Gelijk door de ongehoorzaamheid van dien éénen mensch velen tot zondaars gesteld zijn geworden, alzoo zullen ook door de gehoorzaamheid van Eénen velen tot rechtvaardigen gesteld worden.",
+          "refs": [
+            "Rom. 5:19"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Wat erven wij over?",
+          "answer": "De smet der zonde. Job 14 : 4. Wie zal eenen reine geven uit den onreine? niet één.",
+          "refs": [
+            "Job 14:4"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 9,
+          "question": "Van wien?",
+          "answer": "Van onze ouders."
+        },
+        {
+          "type": "qa",
+          "number": 10,
+          "question": "Wat is de schuld der zonde?",
+          "answer": "De verbintenis tot straf om Adams zonde.",
+          "refs": [
+            "Rom. 5:18"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 11,
+          "question": "Wat is de smet der zonde?",
+          "answer": "Die inklevende verdorvenheid, welke zich verspreid heeft over den geheelen mensch."
+        },
+        {
+          "type": "qa",
+          "number": 12,
+          "question": "Hebben alle menschen erfzonde?",
+          "answer": "Ja, uitgezonderd Christus. Joh. 3 : 6. Hetgeen uit het vleesch geboren is, dat is vleesch.",
+          "refs": [
+            "Joh. 3:6"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 13,
+          "question": "Waarom had Christus geen erfzonde?",
+          "answer": "Omdat Hij ontvangen is van den H. Geest."
+        },
+        {
+          "type": "heading",
+          "text": "3. Van de dadelijke zonde en hare straf"
+        },
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Hebben alle menschen ook dadelijke zonden?",
+          "answer": "Ja. Jac. 3 : 2. Wij struikelen allen in vele.",
+          "refs": [
+            "Jac. 3:2"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Waarmee begaan we die?",
+          "answer": "Met gedachten, met woorden en met werken."
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Liggen dan alle menschen van nature in eenen staat van ellende?",
+          "answer": "Ja."
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "In hoeveel stukken bestaat des menschen ellende?",
+          "answer": "In drie: in zonde, onmacht daaronder, en in straf."
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Is dan de mensch ook onder zijne zonden geestelijk onmachtig?",
+          "answer": "Ja; tot alle geestelijk goed. Rom. 8 : 7. Het bedenken des vleesches is vijandschap tegen God, want het onderwerpt zich der wet Gods niet, want het kan ook niet.",
+          "refs": [
+            "Rom. 8:7"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Heeft de mensch dan geen vrijen wil of eigen natuurkrachten tot geestelijk goed?",
+          "answer": "Neen. Eph. 2:1. En u heeft Hij mede levend gemaakt, daar gij dood waart door de misdaden en de zonde.",
+          "refs": [
+            "Eph. 2:1"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Zijn dan alle geboden, bedreigingen en beloften van God niet tevergeefs?",
+          "answer": "Neen, dat zijn middelen, waardoor God den mensch, als een redelijk schepsel, bewerken wil tot zijnen plicht."
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Wat is de straf der zonde?",
+          "answer": "De dood. Rom. 6 : 23. De bezoldiging der zonde is de dood.",
+          "refs": [
+            "Rom. 6:23"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 9,
+          "question": "Hoe velerlei dood is er?",
+          "answer": "Drieërlei: een lichamelijke, geestelijke en eeuwige dood."
+        },
+        {
+          "type": "qa",
+          "number": 10,
+          "question": "Wat is de lichamelijke dood?",
+          "answer": "Eene scheiding van ziel en lichaam."
+        },
+        {
+          "type": "qa",
+          "number": 11,
+          "question": "Wat is de geestelijke dood?",
+          "answer": "1. Eene scheiding van Gods gunst, en 2. eene onmacht in de zonde."
+        },
+        {
+          "type": "qa",
+          "number": 12,
+          "question": "Wat is de eeuwige dood?",
+          "answer": "Een eeuwig straflijden in de hel."
+        },
+        {
+          "type": "qa",
+          "number": 13,
+          "question": "Verdienen alle zonden die straf?",
+          "answer": "Ja, tot de kleinste toe. Gal. 3 : 10. Vervloekt is een iegelijk, die niet blijft in al hetgeen geschreven is in het boek der wet om dat te doen.",
+          "refs": [
+            "Gal. 3:10"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 14,
+          "question": "Zijn er dan geene vergeeflijke zonden?",
+          "answer": "Wel in Christus; de zonde tegen den H. Geest alleen uitgezonderd; doch geene vergeeflijke in zichzelve.",
+          "refs": [
+            "Jac. 2:10"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 15,
+          "question": "Is door de zonde het verbond der werken vernietigd?",
+          "answer": "Ja, ten opzichte van deszelfs macht om iemand te rechtvaardigen."
+        },
+        {
+          "type": "qa",
+          "number": 16,
+          "question": "Welk gevolg trekt gij uit 's menschen ellende?",
+          "answer": "Dat er behalve de satan geen ongelukkiger schepsel is dan de natuurlijke mensch."
+        }
+      ]
+    },
+    {
+      "id": "hoofdstuk-10",
+      "number": 10,
+      "label": "Hoofdstuk 10",
+      "title": "Van het verbond der genade",
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Is er in deszelfs plaats weer een ander verbond opgericht?",
+          "answer": "Ja, het verbond der genade."
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Wanneer is dat opgericht?",
+          "answer": "Terstond na den val. Gen. 3 : 15. Ik zal vijandschap zetten tusschen u en tusschen deze vrouw, en tusschen uw zaad en tusschen haar zaad, datzelve zal u den kop vermorzelen en gij zult het de verzenen vermorzelen.",
+          "refs": [
+            "Gen. 3:15"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Wat is het genade-verbond?",
+          "answer": "Het genade-verbond is die weg, langs welken God door Christus het eigendom wordt van den zondaar, en hij een eigendom Gods.",
+          "refs": [
+            "Jer. 31:33"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Met wien wordt dat opgericht?",
+          "answer": "Alleen met de uitverkorenen."
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Wat eischt God in dat verbond?",
+          "answer": "Hetgeen Hij daarin eischt, is tevens eene belofte des verbonds, namelijk: het geloof in Jezus Christus."
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Wat belooft Hij in hetzelve?",
+          "answer": "Genade hier, en het eeuwige leven hiernamaals. Hand. 16 : 31. Geloof in den Heere Jezus Christus, en gij zult zalig worden.",
+          "refs": [
+            "Hand. 16:31"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Is dat verbond door alle tijden wezenlijk hetzelfde?",
+          "answer": "Ja."
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Hebben dan de geloovigen van het Oude Testament ook aan alle wezenlijke goederen van het genadeverbond deel gehad?",
+          "answer": "Ja. Hebr. 13 : 8. Jezus Christus is gisteren en heden dezelfde, en in der eeuwigheid.",
+          "refs": [
+            "Hebr. 13:8"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 9,
+          "question": "Hoe gaat de zondaar over in dit verbond?",
+          "answer": "God nadert eerst tot hem, als Hij den zondaar vriendelijk noodigt en bidt. 2 Cor. 5 : 20. Met veel ernst en oprechtheid. Ezech. 33 : 11, en al zijne zwarigheden oplost.",
+          "refs": [
+            "2 Cor. 5:20",
+            "Ezech. 33:11",
+            "Jes. 55:2"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 10,
+          "question": "Wat is het gevolg van zulk een noodiging?",
+          "answer": "Ik trok ze met menschenzeelen, met touwen der liefde.",
+          "refs": [
+            "Hoz. 11:4"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 11,
+          "question": "Wat doet de geroepen zondaar aan zijn kant?",
+          "answer": "Hij neemt den Heere aan tot zijn God en geeft zich aan Hem over ten eigendom.",
+          "refs": [
+            "Hoogl. 2:16"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 12,
+          "question": "Welke zijn de eigenschappen van deze toestemming?",
+          "answer": "De zondaar doet dit bedaard, vrijwillig, armoedig, geloovig, oprecht, met eene geheele toestemming aan de eischen, zoowel als aan de beloften des verbonds.",
+          "refs": [
+            "Ps. 51:8"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 13,
+          "question": "Wat zijn de gevolgen van deze toestemming?",
+          "answer": "God gedenkt aan zijn verbond tot in eeuwigheid. Ps. 105 : 8. En de bondgenooten hebben recht om te eischen alles wat tot het leven en de gelukzaligheid noodig is.",
+          "refs": [
+            "Ps. 105:8",
+            "Ps. 74:19-21"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hoofdstuk-11",
+      "number": 11,
+      "label": "Hoofdstuk 11",
+      "title": "Van den Middelaar des verbonds",
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Wie is de Middelaar van dit verbond?",
+          "answer": "De Heere Jezus Christus. 1 Tim. 2 : 5. Daar is één God, daar is ook één Middelaar Gods en der menschen de mensch Christus Jezus.",
+          "refs": [
+            "1 Tim. 2:5"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Is Hij een Middelaar alleen van tusschenspraak of ook van verzoening?",
+          "answer": "Ook van verzoening; want, zoo volgt er in dienzelfden tekst: Die zichzelven gegeven heeft tot een rantsoen voor allen.",
+          "refs": [
+            "1 Tim. 2:6"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Is onze Jezus de ware Middelaar of Messias, die komen moest?",
+          "answer": "Ja; omdat in Hem alles vervuld is, wat van den Messias voorzegd was."
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Is Hij op den rechten tijd gekomen?",
+          "answer": "Ja. 1. Eer de schepter van Juda nog was geweken, en de wetgever van tusschen zijne voeten, volgens Gen. 49 : 10. Terwijl de tweede tempel nog stond, volgens Hag. 2 : 10. En toen de zeventig weken ten einde liepen, volgens Dan. 9 : 24.",
+          "refs": [
+            "Gen. 49:10",
+            "Hag. 2:10",
+            "Dan. 9:24"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Waarin moet de Middelaar al gekend worden?",
+          "answer": "1. In zijne namen. 2. In zijne ambten. 3. In zijne naturen. 4. In zijne staten en 5. In zijne weldaden."
+        },
+        {
+          "type": "heading",
+          "text": "I. Van den naam Jezus"
+        },
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Welke zijn zijne meest gewone namen?",
+          "answer": "Die zijn twee: Jezus en Christus, de eerste een Hebreeuwsche, de tweede een Grieksche naam."
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Wat is Jezus te zeggen?",
+          "answer": "Zaligmaker. Matth. 1 : 21. Gij zult zijnen naam heeten Jezus, want Hij zal zijn volk zalig maken van hunne zonden.",
+          "refs": [
+            "Matth. 1:21"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Wat is zalig maken?",
+          "answer": "Iemand te verlossen van het hoogste kwaad en te brengen tot het hoogste goed."
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Waardoor doet Hij dat?",
+          "answer": "Door verdienste en toepassing."
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Heeft Christus de zaligheid verdiend?",
+          "answer": "Ja. Hij is ons eene oorzaak der eeuwige zaligheid geworden.",
+          "refs": [
+            "Hebr. 5:9"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Past Hij ze ook den zijnen metterdaad toe?",
+          "answer": "Ja. Joh. 10 : 28. Ik geef hun het eeuwige leven.",
+          "refs": [
+            "Joh. 10:28"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Kan dit verdienen en toepassen niet van elkander gescheiden worden?",
+          "answer": "Neen; alleen voor wie Hij de zaligheid verdient, dien past Hij ze ook zekerlijk toe. Jes. 53 : 11. Door zijne kennis zal mijn knecht, de rechtvaardige, velen rechtvaardig maken, want Hij zal hunne ongerechtigheden dragen.",
+          "refs": [
+            "Jes. 53:11"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Hangt die toepassing niet af van ons zelven?",
+          "answer": "Neen; maar van die krachtdadige bewerking der goddelijke genade."
+        },
+        {
+          "type": "heading",
+          "text": "II. Van den naam Christus"
+        },
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Wat is Christus te zeggen?",
+          "answer": "Gezalfde."
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Hoe is die naam in het Hebreeuwsch?",
+          "answer": "Messias. Joh. 1 : 42. Wij hebben gevonden den Messias, hetwelk is, overgezet zijnde, de Christus.",
+          "refs": [
+            "Joh. 1:42"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "In hoeveel dingen bestaat zijne zalving?",
+          "answer": "In twee: in zijne verordineering en in zijne bekwaammaking tot zijn Middelaarsambt."
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Wie heeft Hem verordineerd en bekwaam gemaakt?",
+          "answer": "God de Vader."
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Wanneer is die verordineering geschied?",
+          "answer": "Van eeuwigheid. Spr. 8 : 23. Ik ben van eeuwigheid af gezalfd.",
+          "refs": [
+            "Spr. 8:23"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Naar welke natuur is Hij verordineerd?",
+          "answer": "En naar zijne Godheid, èn naar zijne menschheid."
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Wanneer is Hij bekwaam gemaakt?",
+          "answer": "In de volheid des tijds."
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Naar welke natuur?",
+          "answer": "Naar zijne menschelijke, want in de Goddelijke natuur kan geen bekwaammaking plaats hebben."
+        },
+        {
+          "type": "qa",
+          "number": 9,
+          "question": "Waarom wordt zijn verordineering eene zalving genoemd?",
+          "answer": "Omdat onder het Oude Testament menschen door zalving tot zekere ambten werden ingehuldigd en verordineerd."
+        },
+        {
+          "type": "qa",
+          "number": 10,
+          "question": "Waarom wordt ook zijne bekwaammaking eene zalving genoemd?",
+          "answer": "Omdat God bij die zalvingen ook wel aan de zoodanigen bekwaamheden instortte tot die ambten."
+        },
+        {
+          "type": "qa",
+          "number": 11,
+          "question": "Waarmede is Christus gezalfd of bekwaam gemaakt?",
+          "answer": "Met den H. Geest. Hand. 10 : 38. Belangende Jezus van Nazareth, hoe Hem God gezalfd heeft met den H. Geest en met kracht.",
+          "refs": [
+            "Hand. 10:38"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 12,
+          "question": "Welke gaven van dien Geest zijn Hem bijzonder medegedeeld?",
+          "answer": "Wijsheid, macht en heiligheid."
+        },
+        {
+          "type": "qa",
+          "number": 13,
+          "question": "Waarin betoonde Hij zijne wijsheid?",
+          "answer": "In zijn leeren.",
+          "refs": [
+            "Matth. 7:28, 29"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 14,
+          "question": "Waarin zijne macht?",
+          "answer": "In zijne wonderwerken. Luc. 24 : 19. Een profeet, krachtig in werken en woorden.",
+          "refs": [
+            "Luc. 24:19"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 15,
+          "question": "Waarin bestond zijne heiligheid?",
+          "answer": "Daarin, dat Hij geene zonde had."
+        },
+        {
+          "type": "qa",
+          "number": 16,
+          "question": "Had Hij geene erfzonde?",
+          "answer": "Neen. Luk. 1 : 35. Dat Heilige, dat uit u geboren zal worden.",
+          "refs": [
+            "Luk. 1:35"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 17,
+          "question": "Had Hij ook geene dadelijke zonden?",
+          "answer": "Neen. Joh. 8 : 46. Wie van u overtuigt Mij van zonde?",
+          "refs": [
+            "Joh. 8:46"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 18,
+          "question": "Moest Hij geene zonden hebben?",
+          "answer": "Neen; want die zelf een zondaar was, kon niet voor anderen betalen. Hebr. 7 : 26. Zoodanig een Hoogepriester betaamde ons, heilig, onnoozel, onbesmet, afgescheiden van de zondaren.",
+          "refs": [
+            "Hebr. 7:26"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "III. Van zijne Ambten"
+        },
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Tot hoeveel ambten is Hij gezalfd?",
+          "answer": "Tot drie: tot Profeet, tot Priester en tot Koning."
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Was Hij in die ambten in het Oude Testament ook reeds afgebeeld?",
+          "answer": "Ja, door gezalfde profeten, priesters en koningen."
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Waren alle drie die ambten in Hem noodzakelijk?",
+          "answer": "Ja."
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Waarom moest Hij Profeet zijn?",
+          "answer": "Om onze onwetendheid te verlichten."
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Waarom Priester?",
+          "answer": "Om onze schuld te verzoenen."
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Waarom Koning?",
+          "answer": "Om ons uit de dienstbaarheid des duivels en der zonde te verlossen."
+        },
+        {
+          "type": "heading",
+          "text": "A. Van zijn Profetisch Ambt"
+        },
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Was Hij ook als Profeet beloofd?",
+          "answer": "Ja. Deut. 18 : 15. Een profeet, uit het midden van u, uit uwe broederen als mij, zal u de Heere, uw God, verwekken; naar Hem zult gij hooren.",
+          "refs": [
+            "Deut. 18:15"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Wat doet Hij als Profeet?",
+          "answer": "Hij leert ons."
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Wat leert Hij ons?",
+          "answer": "Den weg der zaligheid.",
+          "refs": [
+            "Jes. 61:1-3"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Waardoor leert Hij ons?",
+          "answer": "Uitwendig door zijn Woord en inwendig door zijnen Geest.",
+          "refs": [
+            "Hand. 16:14"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Was Christus al Profeet onder het O. Testament?",
+          "answer": "Ja; de profeten in dien tijd hebben ook gesproken door den Geest van Christus, die in hen was.",
+          "refs": [
+            "1 Petri 1:11"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Heeft Hij ook in eigen persoon geleerd?",
+          "answer": "Ja, toen Hij in het vleesch hier op aarde was.",
+          "refs": [
+            "Joh. 17:6",
+            "Hand. 1:3"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Is Hij nu nog Profeet na zijne hemelvaart?",
+          "answer": "Ja, nu leert Hij door herders en leeraars, die Hij gegeven heeft.",
+          "refs": [
+            "Eph. 4:11"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Houdt Hij dan nu op zelf te leeren?",
+          "answer": "Door zijnen Geest heeft Hij zelf altijd en alleen geleerd, en zoo doet Hij nog.",
+          "refs": [
+            "Jes. 59:21"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "B. Van zijn Priesterambt"
+        },
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Was Hij ook als Priester beloofd?",
+          "answer": "Ja. Ps. 110 : 4. Gij zijt Priester in eeuwigheid naar de ordening van Melchizedek.",
+          "refs": [
+            "Ps. 110:4"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Wat wil dat zeggen?",
+          "answer": "1. Dat Hij is alleen Priester; 2. dat Hij is eeuwig Priester."
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Wat doet Hij als Priester?",
+          "answer": "Offeren en bidden."
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Wat heeft Hij geofferd?",
+          "answer": "Zich zelven. Hebr. 9 : 14. Die door den eeuwigen Geest zich zelven Gode onstraffelijk opgeofferd heeft.",
+          "refs": [
+            "Hebr. 9:14"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Wanneer is die offerande geschied?",
+          "answer": "In zijn gansche lijden, doch bijzonder aan het kruis. 1 Petr. 2 : 24. Die zelf onze zonden in zijn lichaam gedragen heeft op het hout.",
+          "refs": [
+            "1 Petr. 2:24"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Aan wien heeft Hij zich opgeofferd?",
+          "answer": "Aan zijnen Vader."
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Voor wie heeft Hij zich opgeofferd?",
+          "answer": "Voor alle uitverkorenen."
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Is zijne offerande een ware offerande van verzoening geweest?",
+          "answer": "Ja. Hebr. 10 : 14. Want met ééne offerande heeft Hij in eeuwigheid volmaakt degenen, die geheiligd worden.",
+          "refs": [
+            "Hebr. 10:14"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 9,
+          "question": "Wat is zijne voorbidding?",
+          "answer": "Dat Hij zijne verdiensten gedurig voordraagt aan den Vader, en daarop eischt de zaligheid van de zijnen. Joh. 17 : 24. Vader! Ik wil, dat waar Ik ben, ook die bij Mij zijn, die Gij mij gegeven hebt.",
+          "refs": [
+            "Joh. 17:24"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 10,
+          "question": "Waar bidt Hij dus?",
+          "answer": "In den hemel. Rom. 8 : 34. Die ook ter rechterhand Gods is, die ook voor ons bidt.",
+          "refs": [
+            "Rom. 8:34"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 11,
+          "question": "Voor wie?",
+          "answer": "Alleen voor de uitverkorenen. Joh. 17 : 9. Ik bid niet voor de wereld, maar voor degenen, die Gij Mij gegeven hebt.",
+          "refs": [
+            "Joh. 17:9"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 12,
+          "question": "Is er meer dan één Middelaar van voorbidding?",
+          "answer": "Neen. 1 Joh. 2:1, 2a. Wij hebben éénen voorspraak bij den Vader, Jezus Christus, den Rechtvaardige, en Hij is eene verzoening voor onze zonden.",
+          "refs": [
+            "1 Joh. 2:1, 2a"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 13,
+          "question": "Zijn dan de engelen of heiligen ook niet onze voorbidders in den hemel?",
+          "answer": "Neen; want die kennen onze nooden niet; kunnen onze gebeden niet hooren, en hebben ook voor ons niet voldaan, waarop zij zouden kunnen eischen."
+        },
+        {
+          "type": "heading",
+          "text": "C. Van zijn Koninklijk Ambt"
+        },
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Was Christus ook als Koning beloofd?",
+          "answer": "Ja. Ps. 2:6. Ik toch heb mijnen Koning gezalfd over Sion, den berg mijner heiligheid.",
+          "refs": [
+            "Ps. 2:6"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Wat doet Hij als Koning?",
+          "answer": "Zijn volk regeeren en beschermen."
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Waardoor regeert Hij hen?",
+          "answer": "Door zijn Woord en Geest."
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Tegen wie beschermt Hij hen?",
+          "answer": "Tegen hunne geestelijke en lichamelijke vijanden.",
+          "refs": [
+            "Joh. 10:28, 29"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Is Hij een aardsch Koning?",
+          "answer": "Neen; een geestelijk en hemelsch Koning. Joh. 18 : 36. Mijn koninkrijk is niet van deze wereld.",
+          "refs": [
+            "Joh. 18:36"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Was Hij ook reeds Koning onder het Oude Testament?",
+          "answer": "Ja; toen heeft Hij als Koning zijne kerk ook al wetten gegeven en beschermd."
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Voor hoelang is Hij Koning?",
+          "answer": "Tot in eeuwigheid. Luk. 1 : 33. Hij zal over het huis Jakobs Koning zijn tot in eeuwigheid, en zijns Koninkrijks zal geen einde zijn.",
+          "refs": [
+            "Luk. 1:33"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Waarom worden de geloovigen Christenen genaamd?",
+          "answer": "Omdat zij Christus' zalving deelachtig zijn.",
+          "refs": [
+            "1 Joh. 2:20, 27",
+            "1 Petr. 2:9"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "IV. Van zijne naturen"
+        },
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Hoeveel naturen heeft Christus?",
+          "answer": "Twee naturen: eene goddelijke en eene menschelijke natuur. 1 Tim. 3 : 16. God is geopenbaard in het vleesch.",
+          "refs": [
+            "1 Tim. 3:16"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Was dat ook voorzegd?",
+          "answer": "Ja. Jes. 9 : 5. Een Kind is ons geboren, een Zoon is ons gegeven, en men noemt zijnen naam Wonderlijk, Raad, sterke God, Vader der eeuwigheid, Vredevorst.",
+          "refs": [
+            "Jes. 9:5"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Is Hij waarachtig God?",
+          "answer": "Ja. 1 Joh. 5 : 20. Deze is de waarachtige God en het eeuwige leven.",
+          "refs": [
+            "1 Joh. 5:20",
+            "Rom. 9:5"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Welke van de drie personen is Hij dan naar zijne Godheid?",
+          "answer": "De tweede persoon, de Zoon. Gal. 4 : 4. Wanneer de volheid des tijds gekomen is, heeft God zijnen Zoon uitgezonden, geworden uit eene vrouw.",
+          "refs": [
+            "Gal. 4:4"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Is Hij ook waarachtig mensch?",
+          "answer": "Ja. 1 Tim. 2:5. De mensch Christus Jezus.",
+          "refs": [
+            "1 Tim. 2:5"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Uit hoeveel deelen bestaat zijne menschheid?",
+          "answer": "Uit twee: uit ziel en lichaam."
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Is zijne Godheid niet in de plaats van zijne ziel geweest?",
+          "answer": "Neen; want Hij heeft in zijne ziel geleden. Matth. 26 : 38. Mijne ziel is geheel bedroefd tot den dood toe.",
+          "refs": [
+            "Matth. 26:38"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Waarom moest hij God wezen?",
+          "answer": "Om de menschelijke natuur tot het doordragen van Gods oneindigen toorn te ondersteunen, en eene oneindige waardij aan zijne verdiensten toe te brengen.",
+          "refs": [
+            "Jes. 63:1-3"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 9,
+          "question": "Waarom moest Hij mensch wezen?",
+          "answer": "Om te kunnen lijden en sterven."
+        },
+        {
+          "type": "qa",
+          "number": 10,
+          "question": "Zijn die twee naturen in Christus vereenigd?",
+          "answer": "Ja, tot eenigheid des persoons."
+        },
+        {
+          "type": "qa",
+          "number": 11,
+          "question": "Hoe is die vereeniging geschied?",
+          "answer": "Door aanneming van de menschelijke natuur tot den goddelijken persoon. Phil. 2 : 7. Hij heeft de gestaltenis eens dienstknechts aangenomen.",
+          "refs": [
+            "Phil. 2:7"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 12,
+          "question": "Is dan de Godheid niet veranderd in de menschheid?",
+          "answer": "Neen; Hij bleef God."
+        },
+        {
+          "type": "qa",
+          "number": 13,
+          "question": "Nochtans staat er Joh. 1 : 14: Het woord is vleesch geworden?",
+          "answer": "Alle worden sluit geene wezenlijke verandering in. Gal. 3 : 13. Christus is een vloek geworden, zonder nochtans in een vloek te veranderen.",
+          "refs": [
+            "Joh. 1:14",
+            "Gal. 3:13"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 14,
+          "question": "Zijn die twee naturen niet vermengd tot een?",
+          "answer": "Neen; het blijven twee naturen ook na de vereeniging."
+        },
+        {
+          "type": "qa",
+          "number": 15,
+          "question": "Zijn dan de twee naturen ook twee personen?",
+          "answer": "Neen, maar één persoon."
+        },
+        {
+          "type": "qa",
+          "number": 16,
+          "question": "Zijn er geene eigenschappen van de Godheid overgegaan in de menschheid?",
+          "answer": "Neen; iedere natuur behoudt hare onderscheidene eigenschappen."
+        },
+        {
+          "type": "heading",
+          "text": "V. Van zijne staten"
+        },
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Hoeveel staten moet men in Christus onderscheiden?",
+          "answer": "Twee; een staat van vernedering en een staat van verhooging. Ps. 110 : 7. Hij zal op den weg uit de beek drinken; daarom zal Hij het hoofd omhoog heffen. Verg. Phil. 2 : 5—11.",
+          "refs": [
+            "Ps. 110:7",
+            "Phil. 2:5-11"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Waren die beide noodzakelijk?",
+          "answer": "Ja; in den staat der vernedering moest Hij de zaligheid verdienen en in den staat der verhooging moest Hij ze toepassen."
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Welke zijn de trappen van zijne vernedering?",
+          "answer": "1. Zijne nederige geboorte. 2. Zijn lijden. 3. Zijn dood. 4. Zijne begraving. 5. Zijne nederdaling ter hel."
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Welke zijn de trappen van zijne verhooging?",
+          "answer": "1. Zijne opstanding. 2. Zijne hemelvaart. 3. Zijne zitting ter rechterhand Gods. 4. Zijne wederkomst ten oordeel."
+        },
+        {
+          "type": "heading",
+          "text": "Van de trappen der vernedering"
+        },
+        {
+          "type": "heading",
+          "text": "A. Zijne nederige geboorte"
+        },
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Uit wie is Hij geboren?",
+          "answer": "Uit de maagd Maria. Jes. 7 : 14. Ziet eene maagd zal zwanger worden en zij zal eenen Zoon baren, en gij zult zijnen naam IMMANUEL heeten.",
+          "refs": [
+            "Jes. 7:14"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Van wien is Hij ontvangen?",
+          "answer": "Door de kracht des H. Geestes. Luc. 1 : 35. De Heilige Geest zal over u komen, en de kracht des Allerhoogsten zal u overschaduwen, daarom ook, dat Heilige, dat uit u geboren zal worden, zal Gods Zoon genaamd worden.",
+          "refs": [
+            "Luc. 1:35"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Is Hij ook uit haar vleesch en bloed geboren?",
+          "answer": "Ja. Gal. 4 : 4. Geworden uit eene vrouw.",
+          "refs": [
+            "Gal. 4:4"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Heeft Hij zijne menschelijke zelfstandigheid of vleesch en bloed niet medegebracht uit den hemel?",
+          "answer": "Neen; hij heeft haar hier eerst uit Maria aangenomen."
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Nochtans staat er, dat dezelfde, die opgevaren is, eerst is nedergedaald. Efeze 4 : 9, 10?",
+          "answer": "Dezelfde persoon, doch niet naar dezelfde natuur; naar zijne menschheid is Hij opgevaren, maar naar zijne Godheid is Hij nedergedaald, zich openbarende in het vleesch.",
+          "refs": [
+            "Efeze 4:9, 10"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Waar is Hij geboren?",
+          "answer": "Te Bethlehem. Micha 5 : 1. Gij Bethlehem Efrata! zijt gij klein om te wezen onder de duizenden van Juda? uit u zal Mij voortkomen, die een Heerscher zal zijn in Israël. De vervulling van deze voorzegging leest men in de geschiedenis van zijne geboorte.",
+          "refs": [
+            "Micha 5:1",
+            "Luk. 2"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "B. Zijn lijden"
+        },
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Moest ook Christus lijden?",
+          "answer": "Ja; dat was voorzegd.",
+          "refs": [
+            "Ps. 8",
+            "Ps. 22",
+            "Jes. 53",
+            "Dan. 9"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Hoe lang heeft dat lijden geduurd?",
+          "answer": "Van het begin zijns levens tot aan zijnen dood toe.",
+          "refs": [
+            "2 Cor. 8:9",
+            "Fil. 2:8"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Waarin heeft Hij geleden?",
+          "answer": "In ziel en lichaam.",
+          "refs": [
+            "Matth. 26:38",
+            "1 Petr. 2:24"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Heeft Hij al terstond na zijne geboorte geleden?",
+          "answer": "Ja: de smartelijke besnijdenis op den achtsten dag."
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Waarom is Christus besneden?",
+          "answer": "Onder anderen, opdat Hij het teeken van Abrahams zaad zou hebben."
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Is er nog meer lijden gevolgd?",
+          "answer": "Ja; eene arme en geringe opvoeding, en eindelijk een leven vol haat, smaad en vervolging zijner vijanden."
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Wanneer is zijn lijden meest verzwaard?",
+          "answer": "Op het einde van zijn leven; men kan de omstandigheden lezen Matth. 26 en 27.",
+          "refs": [
+            "Matth. 26",
+            "Matth. 27"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Onder welken rechter heeft Hij toen geleden?",
+          "answer": "Onder Pontius Pilatus."
+        },
+        {
+          "type": "heading",
+          "text": "C. Zijn dood"
+        },
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Welken dood is Hij gestorven?",
+          "answer": "Den dood des kruises. Fil. 2:8. Hij is gehoorzaam geworden tot den dood, ja, den dood des kruises. Zie Matth. 27 : 31—50 en de andere Evangelisten.",
+          "refs": [
+            "Fil. 2:8",
+            "Matth. 27:31-50"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Was zijn kruisdood ook voorzegd?",
+          "answer": "Ja. Ps. 22 : 17. Zij hebben mijne handen en voeten doorgraven. Verg. Joh. 3 : 14, 15.",
+          "refs": [
+            "Ps. 22:17",
+            "Joh. 3:14, 15"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Had die dood ook eenige verzwarende omstandigheden?",
+          "answer": "Ja; het was 1. een smadelijke, 2. een smartelijke, 3. een vervloekte dood."
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Waarom is hij zulk een vervloekten dood gestorven?",
+          "answer": "Om ons van den vloek te verlossen. Gal. 3 : 13. Christus heeft ons verlost van den vloek der Wet, een vloek geworden zijnde voor ons, want daar is geschreven: vervloekt is een iegelijk die aan het hout hangt.",
+          "refs": [
+            "Gal. 3:13"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Waar is Christus gekruist?",
+          "answer": "Op den berg Golgotha, tusschen twee moordenaars."
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Was zijn dood ook een noodzakelijk gedeelte van zijn lijden?",
+          "answer": "Ja; dewijl de dood als een straf op de zonde gedreigd was, en Hij alle straf moest wegnemen."
+        },
+        {
+          "type": "heading",
+          "text": "D. Zijne begraving"
+        },
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Wie hebben Christus begraven?",
+          "answer": "Jozef van Arimathéa en Nicodemus."
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Waar?",
+          "answer": "In een nieuw graf, dat in een rotssteen uitgehouwen was."
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Waarom is Hij begraven?",
+          "answer": "Om ons te verzekeren, dat Hij waarlijk gestorven was."
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Was ook zijne begraving voorzegd?",
+          "answer": "Ja. Jes. 53 : 9. Men heeft zijn graf bij de goddeloozen gesteld, en Hij is bij de rijken in zijnen dood geweest.",
+          "refs": [
+            "Jes. 53:9"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "E. Zijne nederdaling ter hel"
+        },
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Wat is zijne nederdaling ter hel?",
+          "answer": "Dat Hij helsche angsten in zijne ziel geleden heeft."
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Wanneer heeft Hij die geleden?",
+          "answer": "Bijzonder in den hof Gethsémané en aan het kruis."
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Wat klaagde Hij in Gethsémané?",
+          "answer": "Mijne ziel is geheel bedroefd tot den dood toe.",
+          "refs": [
+            "Matth. 26:38"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Wat aan het kruis?",
+          "answer": "Mijn God, mijn God! waarom hebt Gij mij verlaten!",
+          "refs": [
+            "Matth. 27:46"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Is Hij dan in de hel zelve niet geweest?",
+          "answer": "Neen; want terwijl Hij dood was, was zijn lichaam in het graf, en zijne ziel in den hemel. Luc. 23 : 43. Heden zult gij met Mij in het Paradijs zijn.",
+          "refs": [
+            "Luc. 23:43"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Is dan zijn nederdaling ter hel al geschied vóór zijn dood?",
+          "answer": "Ja; onder het lijden van zijn lichaam."
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Was dat lijden van zijne ziel ook noodzakelijk?",
+          "answer": "Ja; omdat wij ook in onze ziel gezondigd hebben."
+        },
+        {
+          "type": "heading",
+          "text": "F. Van het oogmerk zijner vernedering. Zijne voldoening"
+        },
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Heeft Christus in dien staat van vernedering ook voldaan aan de Goddelijke rechtvaardigheid?",
+          "answer": "Ja.",
+          "refs": [
+            "Jes. 53:4"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Waarin bestaat zijne voldoening?",
+          "answer": "In twee deelen: 1. In het doen van de wet. 2. In het lijden van de straf."
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Behoort het doen of gehoorzamen van de wet mede tot de voldoening?",
+          "answer": "Ja. Rom. 5 : 19. Door de gehoorzaamheid van éénen zijn velen tot rechtvaardigen gesteld.",
+          "refs": [
+            "Rom. 5:19"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Behoort het lijden van de straf ook tot de voldoening?",
+          "answer": "Ja. Jes. 53 : 5. De straf, die ons den vrede aanbrengt, was op Hem.",
+          "refs": [
+            "Jes. 53:5"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Was het lijden van de straf alleen niet genoeg, om voor ons te verdienen of te voldoen?",
+          "answer": "Neen; het lijden van de straf kon wel bevrijden van straf, maar geen recht geven tot het eeuwige leven; dat was alleen beloofd op het doen van de wet: doet dat en gij zult leven.",
+          "refs": [
+            "Luc. 10:28"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Was er eene voldoening noodzakelijk?",
+          "answer": "Ja. 1. Uit kracht van Gods rechtvaardigheid, die geene zonde ongestraft of onvoldaan vergeven kan. 2. Uit kracht van zijn waarheid, die zich alleszins zoo verklaard had."
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Is door de voldoening eene volstrekte verzoening teweeggebracht, of maar alleen eene mogelijkheid om zalig te worden verdiend?",
+          "answer": "Daarin is eene dadelijke, volstrekte en personeele verzoening geschied. 1 Joh. 2 : 2a. En Hij is eene verzoening voor onze zonden. Verg. Luc. 18 : 12b.",
+          "refs": [
+            "1 Joh. 2:2a",
+            "Luc. 18:12b"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Voor wie heeft Christus voldaan?",
+          "answer": "Alleen voor de uitverkorenen."
+        },
+        {
+          "type": "qa",
+          "number": 9,
+          "question": "Is Hij dan niet gestorven voor alle menschen?",
+          "answer": "Neen; maar alleen voor zijn volk. Matth. 1 : 21. Voor zijne schapen. Joh. 10 : 11. Voor zijne gemeente.",
+          "refs": [
+            "Matth. 1:21",
+            "Joh. 10:11",
+            "Hand. 20:28"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 10,
+          "question": "Hoe moet men het dan verstaan als Christus meermalen gezegd wordt, gestorven te zijn voor de wereld, en voor alle menschen?",
+          "answer": "Daardoor moet men verstaan, of al de uitverkorenen in de wereld, of de wereld der heidenen, benevens de Joden, nu onder het Nieuwe Testament, of allerlei soort van menschen."
+        },
+        {
+          "type": "qa",
+          "number": 11,
+          "question": "Wat heeft deze voldoening uitgewrocht?",
+          "answer": "1. God is nu verzoend met den uitverkoren zondaar. 2. En hij ontvangt het recht ten leven.",
+          "refs": [
+            "Gal. 4:4, 5"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 12,
+          "question": "Heeft een ieder grond om te gelooven, dat Jezus voor Hem voldaan heeft?",
+          "answer": "Neen; maar die alleen, die Hem aannemen als de verdienende, werkende, bewegende en voorbeeldige oorzaak van hun geestelijk leven.",
+          "refs": [
+            "Tit. 2:14",
+            "Joh. 12:24",
+            "2 Cor. 5:14, 15",
+            "Rom. 5:6"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "Van den staat en de trappen der verhooging"
+        },
+        {
+          "type": "heading",
+          "text": "A. Zijne opstanding"
+        },
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Moest Christus ook uit den dood opstaan?",
+          "answer": "Ja. Ps. 16 : 10. Gij zult mijne ziel in de hel niet verlaten. Gij zult niet toelaten, dat uw Heilige de verderving zie. Vergel. Hand. 2 : 25—31.",
+          "refs": [
+            "Ps. 16:10",
+            "Hand. 2:25-31"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Welke zekerheid hebben wij dat Hij is opgestaan?",
+          "answer": "1. Het getuigenis van de Engelen en wachters. 2. Velerlei verschijningen van den Heere Jezus aan de vrouwen en discipelen."
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Ligt er ook in zijne opstanding nuttigheid?",
+          "answer": "Ja, onze geestelijke en lichamelijke opstanding en eene verzekering, dat Hij in alles voldaan heeft. Rom. 4 : 25. Hij is overgeleverd om onze zonden, en opgewekt om onze rechtvaardigmaking.",
+          "refs": [
+            "Rom. 4:25"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Door Wiens kracht is Hij opgestaan?",
+          "answer": "Door zijns Vaders en door zijne eigene goddelijke kracht, zijnde door Zijnen Vader opgewekt en door zich zelven opgestaan.",
+          "refs": [
+            "Hand. 2:24",
+            "Joh. 2:19"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Op den hoeveelsten dag is Hij opgewekt?",
+          "answer": "Ten derden dage na zijnen dood."
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Door wien was dat afgebeeld?",
+          "answer": "Door Jona, die drie dagen en drie nachten was in den buik van den walvisch; alzoo zou ook de Zoon des menschen drie dagen en drie nachten zijn in het hart der aarde.",
+          "refs": [
+            "Matth. 12:40"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Op welken dag is Hij begraven, en op welken dag opgestaan?",
+          "answer": "Op Vrijdagavond begraven en Zondagmorgen opgestaan."
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Dit zijn immers geen drie geheele dagen en nachten?",
+          "answer": "De gedeelten der dagen moeten voor het geheel genomen worden. Vergel. Luc. 24 : 21b.",
+          "refs": [
+            "Luc. 24:21b"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 9,
+          "question": "Wie hebben deel aan Christus' opstanding?",
+          "answer": "Die de kracht van Christus' opstanding kennen Phil. 3 : 10.",
+          "refs": [
+            "Phil. 3:10"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "B. Zijne hemelvaart"
+        },
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Hoeveel dagen bleef Christus na zijne opstanding nog op aarde?",
+          "answer": "Nog veertig dagen.",
+          "refs": [
+            "Hand. 1:3"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Waartoe dat?",
+          "answer": "1. Om de zekerheid van zijne opstanding zoo veel te meer te doen blijken. 2. Om zijne discipelen nog van eenige dingen nader te onderwijzen."
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Welke trap van verhooging volgde toen?",
+          "answer": "Zijn hemelvaart."
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Was die ook voorzegd?",
+          "answer": "Ja. Ps. 68 : 19. Gij zijt opgevaren in de hoogte.",
+          "refs": [
+            "Ps. 68:19"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Zijn daar ook getuigen van geweest?",
+          "answer": "Ja; de engelen en de discipelen van den Zaligmaker.",
+          "refs": [
+            "Hand. 1"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Was die hemelvaart ook noodig?",
+          "answer": "Ja. 1. Om als Koning te gaan heerschen. 2. Om als Voorbidder te gaan bidden. 3. Om ook de zijnen daar eens tot zich te nemen."
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Van waar is Christus opgevaren?",
+          "answer": "Van den Olijfberg buiten Jeruzalem."
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Waar naar toe is Christus opgevaren?",
+          "answer": "Naar den derden hemel. Eph. 4 : 10. Hij is opgevaren boven alle hemelen.",
+          "refs": [
+            "Eph. 4:10"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 9,
+          "question": "Op wat wijze is Hij opgevaren?",
+          "answer": "Waarlijk, zichtbaar en plaatselijk.",
+          "refs": [
+            "Joh. 16:28",
+            "Hand. 3:21"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 10,
+          "question": "Is dan zijne menschheid door zijne hemelvaart niet overalomtegenwoordig geworden?",
+          "answer": "Neen. Matth. 26 : 11. De armen hebt gij altijd met u, maar Mij hebt gij niet altijd.",
+          "refs": [
+            "Matth. 26:11"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 11,
+          "question": "Wie kunnen zich met Christus' hemelvaart troosten?",
+          "answer": "Die met Christus zijn opgewekt, enz.",
+          "refs": [
+            "Col. 3:1"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "C. Zijne zitting ter rechterhand Gods"
+        },
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Was het ook voorzegd, dat Christus aan de rechterhand Gods zou zitten?",
+          "answer": "Ja. Ps. 110 : 1. De HEERE heeft tot mijnen Heere gesproken: Zit aan mijne rechterhand.",
+          "refs": [
+            "Ps. 110:1"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Is dat ook in Jezus vervuld?",
+          "answer": "Ja; Stefanus zag Hem staande ter rechterhand Gods.",
+          "refs": [
+            "Hand. 7:56"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Wat is zijn zitten aan Gods rechterhand?",
+          "answer": "Dat Hij verhoogd is tot alle macht en heerlijkheid. Hebr. 1 : 3. Hij is gezeten aan de rechterhand der Majesteit in de hoogste hemelen.",
+          "refs": [
+            "Hebr. 1:3"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Moet men dat dan niet eigenlijk verstaan?",
+          "answer": "Neen; want God, die een Geest is, heeft eigenlijk geen rechterhand."
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Welke nuttigheid is er in deze verheerlijking?",
+          "answer": "Ps. 68 : 19. Gij zijt opgevaren in de hoogte; Gij hebt de gevangenis gevankelijk gevoerd; Gij hebt gaven genomen om uit te deelen onder de menschen; ja ook de wederhoorigen om bij U te wonen, o Heere God!",
+          "refs": [
+            "Ps. 68:19"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hoofdstuk-12",
+      "number": 12,
+      "label": "Hoofdstuk 12",
+      "title": "Van de roeping",
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Waartoe is Christus zoo verhoogd?",
+          "answer": "Om ons zijne weldaden toe te passen."
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Hoe kunnen Christus' weldaden onderscheiden worden?",
+          "answer": "In 1. Weldaden in dit leven. 2. Weldaden na dit leven."
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Welke zijn die in dit leven?",
+          "answer": "De voornaamste zijn: de roeping, de rechtvaardigmaking en de heiligmaking."
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Welke zijn die na dit leven?",
+          "answer": "De opstanding, het laatste oordeel en het eeuwige leven."
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Hoe velerlei roeping is er?",
+          "answer": "Tweeërlei: eene uitwendige en eene inwendige roeping."
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Waardoor geschiedt de uitwendige roeping?",
+          "answer": "Door Gods Woord.",
+          "refs": [
+            "Spr. 9:3-6"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Waardoor geschiedt de inwendige roeping?",
+          "answer": "Door Gods Geest.",
+          "refs": [
+            "Jer. 31:33"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Wie worden er uitwendig geroepen?",
+          "answer": "Allerlei soort van menschen; ook wel die niet uitverkoren zijn. Matth. 20 : 16. Velen zijn geroepen, maar weinigen uitverkoren.",
+          "refs": [
+            "Matth. 20:16"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 9,
+          "question": "Is dan de uitwendige roeping algemeen?",
+          "answer": "Wel onder het Christendom, maar niet door de geheele wereld."
+        },
+        {
+          "type": "qa",
+          "number": 10,
+          "question": "Is zij nochtans nu niet algemeener dan onder het Oude Testament?",
+          "answer": "Ja; toen ging zij alleen over de Joden; nu ook over de Heidenen."
+        },
+        {
+          "type": "qa",
+          "number": 11,
+          "question": "Is er geene zaligmakende roeping in de natuur?",
+          "answer": "Neen; de natuur weet van Christus niet, en buiten Hem is er geene zaligheid."
+        },
+        {
+          "type": "qa",
+          "number": 12,
+          "question": "Is de uitwendige roeping alleen niet genoeg tot bekeering?",
+          "answer": "Neen. 1 Cor. 3 : 7. Zoo is dan noch hij, die plant iets, noch hij die nat maakt, maar God, die den wasdom geeft.",
+          "refs": [
+            "1 Cor. 3:7"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 13,
+          "question": "Wat moet er dan nog bijkomen?",
+          "answer": "De inwendige roeping, gelijk in Lydia. Hand. 16 : 14. Welker hart de Heere heeft geopend, dat zij acht nam op hetgeen van Paulus gesproken werd.",
+          "refs": [
+            "Hand. 16:14"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 14,
+          "question": "Wie worden dan inwendig geroepen?",
+          "answer": "Alleen de uitverkorenen. Rom. 8 : 30. Die Hij te voren verordineerd heeft, deze heeft Hij ook geroepen.",
+          "refs": [
+            "Rom. 8:30"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 15,
+          "question": "Wat is de inwendige roeping?",
+          "answer": "Eene krachtige verandering van den mensch."
+        },
+        {
+          "type": "qa",
+          "number": 16,
+          "question": "Is er dan in den mensch iets te veranderen?",
+          "answer": "Ja; verstand, wil, hartstochten en wandel."
+        },
+        {
+          "type": "qa",
+          "number": 17,
+          "question": "Hoe zijn die van nature?",
+          "answer": "Het verstand is verduisterd, de wil is verkeerd, de hartstochten zijn ongeregeld, de wandel is zondig.",
+          "refs": [
+            "Eph. 4:8",
+            "Rom. 8:7"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 18,
+          "question": "Hoe worden die dan door de inwendige roeping?",
+          "answer": "Het verstand wordt verlicht, om God te kennen in zijne algenoegzaamheid, Jezus in zijne dierbaarheid en zichzelven in zijne vloekwaardigheid. 1 Cor. 2 : 12, 13. De wil om God te dienen en te verheerlijken. Rom. 7 : 15. De hartstochten gezuiverd, om de zonde te haten, daarentegen God te beminnen als het hoogste goed, en een lust tot heiligheid, enz. Rom. 6 : 19. En de wandel geheiligd.",
+          "refs": [
+            "1 Cor. 2:12, 13",
+            "Rom. 7:15",
+            "Rom. 6:19"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 19,
+          "question": "Is die inwendige roeping krachtdadig?",
+          "answer": "Ja; die heeft eene onweerstaanbare kracht.",
+          "refs": [
+            "Eph. 1:19, 20"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 20,
+          "question": "Geschiedt er dan meer dan alleen een uiterlijke aanrading?",
+          "answer": "Ja; eene inwendige neiging van den wil.",
+          "refs": [
+            "Phil. 2:13"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 21,
+          "question": "Dwingt God dan den mensch?",
+          "answer": "Neen; Hij maakt hem gewillig.",
+          "refs": [
+            "Hoogl. 1:4"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 22,
+          "question": "Hoe wordt die krachtdadigheid van de inwendige roeping in de H. Schrift wel uitgedrukt?",
+          "answer": "Het wordt genoemd een scheppen. Eph. 2 : 10. Wij zijn Zijn maaksel, geschapen in Christus Jezus, tot goede werken. Ook wel een trekken. Joh. 6 : 44. Niemand kan tot Mij komen, tenzij dat de Vader, die Mij gezonden heeft, hem trekke.",
+          "refs": [
+            "Eph. 2:10",
+            "Joh. 6:44"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hoofdstuk-13",
+      "number": 13,
+      "label": "Hoofdstuk 13",
+      "title": "Van de Kerk",
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Vergadert Christus door de roeping ook eene kerk?",
+          "answer": "Ja."
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Waar is de kerk?",
+          "answer": "Hier op aarde en in den hemel."
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Hoe wordt de kerk op aarde genoemd?",
+          "answer": "De strijdende kerk, omdat zij hier gedurig te strijden heeft.",
+          "refs": [
+            "Rom. 7:23"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Met wie?",
+          "answer": "Met de wereld, den duivel en ons vleesch."
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Hoe wordt de kerk in den hemel genoemd?",
+          "answer": "De triomfeerende kerk, omdat zij daar alles overwonnen heeft.",
+          "refs": [
+            "Openb. 7:9"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Zijn dat dan twee onderscheidene kerken?",
+          "answer": "Neen; het zijn maar twee onderscheidene gedeelten van ééne en dezelfde kerk.",
+          "refs": [
+            "Eph. 1:10"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Is er meer dan ééne kerk?",
+          "answer": "Neen. Hoogl. 6 : 9. Eéne eenige is mijn duive, mijne volmaakte. De kerk van alle tijden, en overal, is eene en dezelfde kerk. Vergelijk Joh. 10 : 16.",
+          "refs": [
+            "Hoogl. 6:9",
+            "Joh. 10:16"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Is er altijd eene kerk?",
+          "answer": "Ja. Matth. 16 : 18. De poorten der hel zullen dezelve niet overweldigen.",
+          "refs": [
+            "Matth. 16:18"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 9,
+          "question": "Is zij altijd even zichtbaar?",
+          "answer": "Neen; zij kan uiterlijk onder de vervolgingen wel onzichtbaar zijn."
+        },
+        {
+          "type": "qa",
+          "number": 10,
+          "question": "Is zij er dan evenwel?",
+          "answer": "Ja; gelijk in de tijden van Elia, toen hij meende, dat hij alleen was overgebleven, en nochtans waren er wel zeven duizend, die hunne knieën voor den Baal niet gebogen hadden.",
+          "refs": [
+            "1 Kon. 19:14-18"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 11,
+          "question": "Wie is het hoofd van de kerk?",
+          "answer": "Jezus Christus. Eph. 5 : 23. Christus is het Hoofd der gemeente.",
+          "refs": [
+            "Eph. 5:23"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 12,
+          "question": "Is dat de paus van Rome niet?",
+          "answer": "Neen; die is de antichrist."
+        },
+        {
+          "type": "qa",
+          "number": 13,
+          "question": "Waarom?",
+          "answer": "Omdat alles in hem vervuld is, wat van den antichrist voorzegd is."
+        },
+        {
+          "type": "qa",
+          "number": 14,
+          "question": "Wat zijn de kenteekenen van de ware kerk?",
+          "answer": "De zuivere prediking van Gods woord en de rechte bediening der sacramenten."
+        },
+        {
+          "type": "qa",
+          "number": 15,
+          "question": "Is de oudheid niet een kenteeken van de kerk?",
+          "answer": "Neen; want des satans rijk is ook oud."
+        },
+        {
+          "type": "qa",
+          "number": 16,
+          "question": "Is veelheid van menschen niet een kenteeken?",
+          "answer": "Neen; Christus' kerk is een klein kuddeke.",
+          "refs": [
+            "Luc. 12:32"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 17,
+          "question": "Is voorspoed naar de wereld niet een kenteeken?",
+          "answer": "Neen. Joh. 16 : 33. In de wereld zult gij verdrukking hebben.",
+          "refs": [
+            "Joh. 16:33"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 18,
+          "question": "Waarin bestaat de macht van de kerk?",
+          "answer": "In het gebruik van de sleutelen des hemelrijks."
+        },
+        {
+          "type": "qa",
+          "number": 19,
+          "question": "Hoevele zijn die?",
+          "answer": "Twee: de prediking des evangeliums en de Christelijke ban."
+        },
+        {
+          "type": "qa",
+          "number": 20,
+          "question": "Is het genoeg een uiterlijk lid der kerk te zijn?",
+          "answer": "Neen; men moet onderzoeken of men een levend lid daarvan zij."
+        }
+      ]
+    },
+    {
+      "id": "hoofdstuk-14",
+      "number": 14,
+      "label": "Hoofdstuk 14",
+      "title": "Van de rechtvaardigmaking",
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Die inwendig geroepen worden, worden die ook gerechtvaardigd?",
+          "answer": "Ja. Rom. 8 : 30. Die Hij geroepen heeft, heeft Hij ook gerechtvaardigd.",
+          "refs": [
+            "Rom. 8:30"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Wat is de rechtvaardigmaking?",
+          "answer": "Eene vrijspreking van schuld en straf en een rechtgeven tot het eeuwige leven."
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Is er onderscheid tusschen de rechtvaardigmaking en de heiligmaking?",
+          "answer": "Ja. 1. De rechtvaardigmaking geschiedt buiten den mensch, de heiligmaking binnen ons. 2. De rechtvaardigmaking neemt de schuld weg, de heiligmaking de smet der zonde. 3. De rechtvaardigmaking geschiedt volmaakt, de heiligmaking hier in dit leven maar ten deele."
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Wordt men dan door de rechtvaardigmaking niet inwendig veranderd?",
+          "answer": "Neen; dat geschiedt in de heiligmaking."
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Is dan rechtvaardigmaking niet eene inwendige rechtvaardigheid instorten?",
+          "answer": "Neen; het is maar een vonnissen of vrijspreken van den mensch, gelijk de rechters in de vierschaar doen."
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Wordt het ook zoo gebruikt in de H. Schrift?",
+          "answer": "Ja; zoo wordt het tegen verdoemen gesteld. Spr. 17 : 15. Wie den goddelooze rechtvaardigt, en den rechtvaardige verdoemt, is den Heere een gruwel.",
+          "refs": [
+            "Spr. 17:15"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Wordt het ook in het stuk van de rechtvaardigmaking zoo gebruikt?",
+          "answer": "Ja. Rom. 8 : 33, 34. God is het, die rechtvaardig maakt. Wie is het, die verdoemt?",
+          "refs": [
+            "Rom. 8:33, 34"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Wie is het dan, die ons rechtvaardigt of vrijspreekt?",
+          "answer": "God de Vader, die hier den persoon van Rechter vertoont."
+        },
+        {
+          "type": "qa",
+          "number": 9,
+          "question": "Hoe komt dan hier de Zoon voor?",
+          "answer": "Als Voorspraak en Middelaar, om wiens wil wij gerechtvaardigd worden."
+        },
+        {
+          "type": "qa",
+          "number": 10,
+          "question": "Hoe de H. Geest?",
+          "answer": "Als Verzegelaar, die ons kennis geeft en verzekert van de rechtvaardigmaking."
+        },
+        {
+          "type": "qa",
+          "number": 11,
+          "question": "Kan men dan ook van zijne rechtvaardigmaking verzekerd worden?",
+          "answer": "Ja. Rom. 5:1. Wij dan, gerechtvaardigd zijnde uit den geloove, hebben vrede bij God door onzen Heere Jezus Christus.",
+          "refs": [
+            "Rom. 5:1"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 12,
+          "question": "Waarvan wordt men gerechtvaardigd?",
+          "answer": "Van alle zonden, zonder onderscheid."
+        },
+        {
+          "type": "qa",
+          "number": 13,
+          "question": "Om wiens wil worden wij gerechtvaardigd?",
+          "answer": "Alleen om Christus' wil. Rom. 3 : 24. En worden om niet gerechtvaardigd uit zijne genade, door de verlossing, die in Christus Jezus is.",
+          "refs": [
+            "Rom. 3:24"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 14,
+          "question": "Worden wij niet gerechtvaardigd om onze eigene werken?",
+          "answer": "Neen. Rom. 3 : 28. Wij besluiten dan dat de mensch door het geloof gerechtvaardigd wordt zonder de werken der wet.",
+          "refs": [
+            "Rom. 3:28"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 15,
+          "question": "Waarom kunnen wij niet om onze eigene werken gerechtvaardigd worden?",
+          "answer": "Omdat de beste van die onvolmaakt zijn, en daarom aan Gods gerechtigheid niet voldoen kunnen.",
+          "refs": [
+            "Jac. 3:2",
+            "Jes. 64:6"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 16,
+          "question": "Maar als wij door Christus' verdiensten zullen gerechtvaardigd worden, moeten die dan ook niet de onze worden?",
+          "answer": "Gewisselijk ja."
+        },
+        {
+          "type": "qa",
+          "number": 17,
+          "question": "Hoe worden die de onze?",
+          "answer": "Door toerekening en aanneming."
+        },
+        {
+          "type": "qa",
+          "number": 18,
+          "question": "Wie rekent ons dezelve toe?",
+          "answer": "God, door eene genadige schenking."
+        },
+        {
+          "type": "qa",
+          "number": 19,
+          "question": "Waardoor nemen wij die aan?",
+          "answer": "Door het geloof."
+        },
+        {
+          "type": "qa",
+          "number": 20,
+          "question": "Worden wij dan gerechtvaardigd om het geloof?",
+          "answer": "Neen; de H. Schrift zegt wel uit het geloof, en door het geloof, maar nooit om het geloof."
+        },
+        {
+          "type": "qa",
+          "number": 21,
+          "question": "Hoe komt dan hier het geloof te pas?",
+          "answer": "Als eene hand of een instrument, waardoor men de verdienste van Christus aanneemt."
+        }
+      ]
+    },
+    {
+      "id": "hoofdstuk-15",
+      "number": 15,
+      "label": "Hoofdstuk 15",
+      "title": "Van het geloof",
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Hoe velerlei geloof is er?",
+          "answer": "Vierderlei: een historisch geloof, een tijdgeloof, een geloof der wonderen en een waar zaligmakend geloof."
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Wat is een historisch geloof?",
+          "answer": "Eene bloote toestemming aan eene gekende waarheid."
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Is dat geen goed geloof?",
+          "answer": "Ja; het is noodzakelijk, doch niet genoeg. Jac. 2 : 19. Gij gelooft, dat God een eenig God is; gij doet wel: de duivelen gelooven het ook, en zij sidderen.",
+          "refs": [
+            "Jac. 2:19"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Wat is het tijdgeloof?",
+          "answer": "Een toestemmen en belijden van de waarheid voor een tijd, met eenig uiterlijk genoegen. Matth. 13 : 20, 21. Die het Woord hoort en dat terstond met vreugde ontvangt; doch hij heeft geenen wortel in zichzelven, maar is voor een tijd; en als verdrukking of vervolging komt om des woords wil, zoo wordt hij terstond geërgerd.",
+          "refs": [
+            "Matth. 13:20, 21"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Wat is het geloof der wonderen?",
+          "answer": "Die sterke vaststelling bij zichzelven, dat er óf door ons, óf aan ons eenig wonder zal gedaan worden."
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Wanneer heeft dat plaats?",
+          "answer": "Als het doen van wonderen plaats heeft."
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Is dat ook niet zaligmakend?",
+          "answer": "Neen. 1 Cor. 13 : 2b. Indien ik al het geloof had, zoodat ik bergen verzette, en de liefde niet had, zoo ware ik niets.",
+          "refs": [
+            "1 Cor. 13:2b"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "In hoeveel zaken bestaat het zaligmakend geloof?",
+          "answer": "In drie; in kennis, toestemmen en vertrouwen."
+        },
+        {
+          "type": "qa",
+          "number": 9,
+          "question": "Is een blind geloof zonder kennis niet genoeg?",
+          "answer": "Neen. Joh. 17 : 3. Dit is het eeuwige leven, dat zij U kennen.",
+          "refs": [
+            "Joh. 17:3"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 10,
+          "question": "Welke is de voornaamste en eigenlijke rechtvaardigmakende daad des geloofs?",
+          "answer": "Het is die daad der ziel, waardoor zij hartelijk wil en wenscht, niet alleen dat de beloften des Evangeliums in zich zelve waar mogen zijn, maar waardoor zij ook met overgegevene genegenheid den Heere Jezus als de eenige oorzaak van hare zaligheid, met verloochening van zichzelve en alle andere dingen of personen, begeert en dadelijk aangrijpt."
+        },
+        {
+          "type": "qa",
+          "number": 11,
+          "question": "Wat is het gevolg van de rechtvaardigmakende daad des geloofs?",
+          "answer": "De bijzondere en zekere toepassing van de beloften des Evangeliums en den Heere Jezus tot den eigen persoon van elk geloovige, welke geenszins altijd tegenwoordig is in alle geloovigen, door de aanvechtingen des satans, de beschuldigingen van de Wet, en de verleidingen des vleesches; doch naar welke echter allen staan moeten, die Jezus oprecht aannemen."
+        },
+        {
+          "type": "qa",
+          "number": 12,
+          "question": "Kunnen en moeten de geloovigen verzekerd zijn van de oprechtheid huns geloofs?",
+          "answer": "Zij kunnen. 2 Tim. 1 : 12b. Want ik weet, wien ik geloofd heb. En moeten daarnaar staan. 2 Cor. 13 : 5. Onderzoekt u zelven of gij in het geloof zijt, beproeft u zelven.",
+          "refs": [
+            "2 Tim. 1:12b",
+            "2 Cor. 13:5"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 13,
+          "question": "Wie werkt dat geloof in ons?",
+          "answer": "De H. Geest. 1 Cor. 12 : 3b. Niemand kan zeggen Jezus den Heere te zijn, dan door den H. Geest. Vergel Phil. 1 : 29.",
+          "refs": [
+            "1 Cor. 12:3b",
+            "Phil. 1:29"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 14,
+          "question": "Waardoor werkt die het geloof?",
+          "answer": "Door het Woord. Rom. 10 : 17. Het geloof is uit het gehoor, en het gehoor door het Woord Gods.",
+          "refs": [
+            "Rom. 10:17"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 15,
+          "question": "Kunnen wij dan uit ons zelven niet gelooven?",
+          "answer": "Neen. Eph. 2 : 8. Uit genade zijt gij zalig geworden door het geloof; en dat niet uit u, het is Gods gave.",
+          "refs": [
+            "Eph. 2:8"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hoofdstuk-16",
+      "number": 16,
+      "label": "Hoofdstuk 16",
+      "title": "Van de heiligmaking",
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Die gerechtvaardigd worden, worden die ook geheiligd?",
+          "answer": "Ja; beide gaan te zamen. 1 Cor. 1 : 30. Die ons geworden is wijsheid van God en rechtvaardigheid, en heiligmaking en verlossing. Verg. Ps. 130 : 4.",
+          "refs": [
+            "1 Cor. 1:30",
+            "Ps. 130:4"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Wat is heiligmaking?",
+          "answer": "Eene vernieuwing van den geheelen mensch."
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Is zij dan niet maar eene verandering van de uiterlijke daden?",
+          "answer": "Neen; maar ook van den inwendigen mensch. Rom. 12 : 2. Wordt veranderd door de vernieuwing uws gemoeds.",
+          "refs": [
+            "Rom. 12:2"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Vloeit daaruit ook eene uitwendige verandering voort?",
+          "answer": "Ja: in den wandel. 1 Thess. 5 : 23. De God des vredes zelf heilige u geheel en al, en uw geheel oprechte geest, en ziel, en lichaam worde onberispelijk bewaard.",
+          "refs": [
+            "1 Thess. 5:23"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Wie werkt die heiligmaking in ons?",
+          "answer": "God, door zijnen Geest.",
+          "refs": [
+            "1 Cor. 6:11"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Is de heiligmaking noodzakelijk?",
+          "answer": "Ja. Hebr. 12 : 14. Zonder heiligmaking zal niemand den Heere zien.",
+          "refs": [
+            "Hebr. 12:14"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Is de heiligmaking hier in dit leven volkomen?",
+          "answer": "Neen; maar ten deele en onvolmaakt. Phil. 3 : 12. Niet dat ik alreede volmaakt ben.",
+          "refs": [
+            "Phil. 3:12"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Is zij in alle geloovigen even groot?",
+          "answer": "Neen, in den een meerder, in den ander minder; zij heeft hare verscheidene trappen."
+        },
+        {
+          "type": "qa",
+          "number": 9,
+          "question": "Is zij ook veranderlijk?",
+          "answer": "Ja; zij is haar aanwas en afnemen in een en denzelfden mensch onderworpen."
+        },
+        {
+          "type": "qa",
+          "number": 10,
+          "question": "Kan men ze dan wel weder geheel verliezen?",
+          "answer": "Neen; daar de genade Gods eens is, daar blijft zij."
+        },
+        {
+          "type": "qa",
+          "number": 11,
+          "question": "Is er dan geen afval der heiligen?",
+          "answer": "Neen; wel vallen, maar geen afvallen. 1 Petr. 1 : 5. Die in de kracht Gods bewaard wordt door het geloof, tot de zaligheid, die bereid is om geopenbaard te worden in den laatsten tijd.",
+          "refs": [
+            "1 Petr. 1:5"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 12,
+          "question": "Hoe vordert Gods volk tot heiligmaking?",
+          "answer": "Als men alle in- en uitwendige hinderpalen wegdoet, door de genade des Geestes, en afhangende van Jezus' kracht, alle middelen ter voortgang in het werk stelt."
+        },
+        {
+          "type": "heading",
+          "text": "Van de goede werken"
+        },
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Wat zijn de vruchten van geloof en heiligmaking?",
+          "answer": "Goede werken. Jac. 2 : 18. Toon mij uw geloof uit uwe werken.",
+          "refs": [
+            "Jac. 2:18"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Wat zijn goede werken?",
+          "answer": "Daden, die geschieden: 1. Uit het geloof. 2. Naar Gods wet. 3. Tot Gods eer."
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Toon eens, dat zij moeten geschieden uit het geloof?",
+          "answer": "Hebr. 11 : 6. Zonder geloof is het onmogelijk Gode te behagen.",
+          "refs": [
+            "Hebr. 11:6"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Bewijs eens, dat zij moeten geschieden naar Gods wet?",
+          "answer": "Matth. 15 : 9. Tevergeefs eeren zij Mij, leerende leeringen, die geboden van menschen zijn.",
+          "refs": [
+            "Matth. 15:9"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Bewijs eens, dat zij moeten geschieden tot Gods eer?",
+          "answer": "1 Cor. 10 : 31. Hetzij dan, dat gijlieden eet, hetzij dat gij drinkt, hetzij dat gij iets anders doet, doet het al ter eere Gods.",
+          "refs": [
+            "1 Cor. 10:31"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Moet men ook goede werken doen?",
+          "answer": "Ja. Matth. 5 : 16. Laat uw licht alzoo schijnen voor de menschen, dat zij uwe goede werken mogen zien, en uwen Vader, die in de hemelen is, verheerlijken.",
+          "refs": [
+            "Matth. 5:16"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Kunnen zulke goede werken den hemel wel verdienen?",
+          "answer": "Neen; Christus alleen heeft dien voor ons verdiend."
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Waarom niet?",
+          "answer": "Omdat zij onvolmaakt zijn. Jes. 64 : 6. Al onze gerechtigheden zijn als een wegwerpelijk kleed.",
+          "refs": [
+            "Jes. 64:6"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 9,
+          "question": "Waartoe moeten wij dan nog goede werken doen?",
+          "answer": "I. Om er God door te verheerlijken. II. Om er onze naasten door te stichten. III. Om er ons van ons geloof door te verzekeren."
+        }
+      ]
+    },
+    {
+      "id": "hoofdstuk-17",
+      "number": 17,
+      "label": "Hoofdstuk 17",
+      "title": "Van de wet Gods",
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Hoe velerlei wetten gaf God aan Israël?",
+          "answer": "Drieërlei: I. De wet der zeden. II. De wet der politie of de burgerlijke wet. III. De wet der ceremoniën of der plechtigheden."
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Welke van die drie duurt nu nog?",
+          "answer": "De wet der zeden, die eene eeuwigdurende wet is."
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Wanneer zijn de andere dan afgeschaft?",
+          "answer": "Met den tijd van het Nieuwe Testament."
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Hoeveel geboden zijn er in de wet der zeden?",
+          "answer": "Tien geboden."
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Hoeveel tafelen?",
+          "answer": "Twee tafelen."
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Wat eischt de eerste tafel?",
+          "answer": "God lief te hebben boven alles."
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Wat eischt de tweede tafel?",
+          "answer": "Onze naaste lief te hebben als ons zelven."
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Hoeveel geboden zijn er in de eerste tafel?",
+          "answer": "Vier."
+        },
+        {
+          "type": "qa",
+          "number": 9,
+          "question": "Hoeveel in de tweede?",
+          "answer": "Zes."
+        },
+        {
+          "type": "qa",
+          "number": 10,
+          "question": "Waar is de wet gegeven?",
+          "answer": "Op den berg Sinaï.",
+          "refs": [
+            "Gal. 4:25"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 11,
+          "question": "Wanneer?",
+          "answer": "Even na den uittocht der kinderen Israëls uit Egypte."
+        },
+        {
+          "type": "qa",
+          "number": 12,
+          "question": "Is die wet onder het Nieuwe Testament door Christus niet vermeerderd?",
+          "answer": "Neen; die is zoo volmaakt, dat haar niets kan worden toegedaan."
+        },
+        {
+          "type": "qa",
+          "number": 13,
+          "question": "Kan men de wet volmaakt onderhouden?",
+          "answer": "Neen; Jac. 3 : 2. Wij struikelen allen in vele.",
+          "refs": [
+            "Jac. 3:2"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 14,
+          "question": "Hoe luidt die wet?",
+          "answer": "Ik ben de Heere uw God enz. Zie Exod. 20 : 2.",
+          "refs": [
+            "Exod. 20:2"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 15,
+          "question": "Als men zijne onmacht uit de wet ziet, waartoe moet ons dat aanzetten?",
+          "answer": "Tot bidden. Ps. 119 : 4, 5. HEERE! Gij hebt geboden dat men uwe bevelen zeer bewaren zal. Och, dat mijne wegen gericht werden, om uwe inzettingen te bewaren!",
+          "refs": [
+            "Ps. 119:4, 5"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hoofdstuk-18",
+      "number": 18,
+      "label": "Hoofdstuk 18",
+      "title": "Van het gebed",
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Is het gebed noodzakelijk?",
+          "answer": "Ja; het is een middel tot verkrijging van hetgeen God geboden heeft. Ps. 50 : 15. Roept mij aan in den dag der benauwdheid; Ik zal er u uithelpen.",
+          "refs": [
+            "Ps. 50:15"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Wien moet men aanbidden?",
+          "answer": "God alleen. Matth. 4 : 10. Den Heere, uwen God, zult gij aanbidden en Hem alleen dienen.",
+          "refs": [
+            "Matth. 4:10"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Mag men geen Engelen of heiligen aanbidden?",
+          "answer": "Neen; hun komt die eer niet toe, en zij weten van ons niet.",
+          "refs": [
+            "Jes. 42:8",
+            "Col. 2:18"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Hoe moet men bidden?",
+          "answer": "Onder eene heilige gestalte van het hart en zedige gebaren van het lichaam."
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Waarom moet men bidden?",
+          "answer": "Om geestelijke en lichamelijke nooddruft."
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Heeft Christus ons daarvan een voorschrift gegeven?",
+          "answer": "Ja; in het gebed des Heeren.",
+          "refs": [
+            "Matth. 6"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Hoe luidt dat gebed?",
+          "answer": "Onze Vader, die in de hemelen zijt, enz. Zie Matth. 6 : 9—13.",
+          "refs": [
+            "Matth. 6:9-13"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hoofdstuk-19",
+      "number": 19,
+      "label": "Hoofdstuk 19",
+      "title": "Van de Sacramenten",
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Welke middelen heeft God verordineerd, om de heiligmaking gedurig voort te zetten?",
+          "answer": "Het Woord en de sacramenten."
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Wat zijn sacramenten?",
+          "answer": "Teekenen en zegelen van Gods genade. Rom. 4 : 11. Hij heeft het teeken der besnijdenis ontvangen tot een zegel der rechtvaardigheid des geloofs.",
+          "refs": [
+            "Rom. 4:11"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Welke waren de voornaamste sacramenten van het Oude Testament?",
+          "answer": "De besnijdenis en het pascha."
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Op den hoeveelsten dag werden de kinderen besneden?",
+          "answer": "Op den achtsten dag."
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "In wiens tijd is de besnijdenis ingesteld?",
+          "answer": "In Abrahams tijd.",
+          "refs": [
+            "Gen. 17"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "In wiens tijd is het pascha ingesteld?",
+          "answer": "In Mozes' tijd, in den nacht, toen Israël uit Egypte trok.",
+          "refs": [
+            "Exod. 12"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Wat at men in het pascha?",
+          "answer": "Een lam."
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Op wien zag dat?",
+          "answer": "Op Christus. 1 Cor. 5 : 7. Want ook ons Pascha is voor ons geslacht, namelijk Christus.",
+          "refs": [
+            "1 Cor. 5:7"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 9,
+          "question": "Hoelang hebben die sacramenten geduurd?",
+          "answer": "Tot op den tijd van het Nieuwe Testament."
+        },
+        {
+          "type": "qa",
+          "number": 10,
+          "question": "Hoeveel sacramenten zijn er onder het Nieuwe Testament?",
+          "answer": "Twee: De H. Doop en het H. Avondmaal."
+        },
+        {
+          "type": "qa",
+          "number": 11,
+          "question": "Wie heeft die ingesteld?",
+          "answer": "Christus."
+        },
+        {
+          "type": "heading",
+          "text": "I. Van den H. Doop"
+        },
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Waarmede doopt men?",
+          "answer": "Met water."
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Moet dat water niet ergens mede gemengd worden?",
+          "answer": "Neen; het moet maar enkel en eenvoudig water zijn."
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Wat beteekent dat water?",
+          "answer": "Het bloed en den Geest van Christus."
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Wat doet men met dat water?",
+          "answer": "Men dompelt er in, of men besprengt er mede."
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Wat beteekent die indompeling of besprenging met water?",
+          "answer": "De afwassching der zonden door Christus' bloed en Geest."
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Hoeveel weldaden worden er dan in den Doop verzegeld?",
+          "answer": "Twee; de rechtvaardiging door Christus' bloed, en de heiligmaking door zijnen Geest."
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Kan het water zelf de zonde afwasschen?",
+          "answer": "Neen. 1 Joh. 1 : 7b. Het bloed van Jezus Christus, zijnen Zoon, reinigt ons van alle zonden.",
+          "refs": [
+            "1 Joh. 1:7b"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "In wiens naam wordt men dan gedoopt?",
+          "answer": "In den naam des Vaders, en des Zoons, en des Heiligen Geestes.",
+          "refs": [
+            "Matth. 28:19"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 9,
+          "question": "Mag elkeen doopen in tijd van nood?",
+          "answer": "Neen; alleen die gezonden zijn om te leeren. Matth. 28 : 19. Gaat dan henen, onderwijst alle volken, dezelve doopende.",
+          "refs": [
+            "Matth. 28:19"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 10,
+          "question": "Mag men dan ook kinderen doopen?",
+          "answer": "Ja. Hand. 2 : 39. U komt de belofte toe, en uwen kinderen.",
+          "refs": [
+            "Hand. 2:39"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 11,
+          "question": "Is de Doop noodzakelijk?",
+          "answer": "Ja; uit kracht van Christus' bevel."
+        },
+        {
+          "type": "qa",
+          "number": 12,
+          "question": "Hangt er de zaligheid volstrekt van af?",
+          "answer": "Neen; God bindt nooit zijne genade aan het sacrament."
+        },
+        {
+          "type": "qa",
+          "number": 13,
+          "question": "Hoe menigmaal moet men gedoopt worden?",
+          "answer": "Maar eens, gelijk men maar eens geboren wordt; want de Doop is een sacrament van geboorte en inlijving in de kerk, die maar eens geschieden kan."
+        },
+        {
+          "type": "heading",
+          "text": "II. Van het H. Avondmaal"
+        },
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Waarom gaat men dan dikwijls ten Avondmaal?",
+          "answer": "Omdat het een sacrament is van gedurige opvoeding in het geloof."
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Waarom wordt het een Avondmaal of Nachtmaal genoemd?",
+          "answer": "Omdat Christus het in den avond of nacht heeft ingesteld."
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Wanneer heeft Hij dat ingesteld?",
+          "answer": "In den nacht, toen Hij verraden werd.",
+          "refs": [
+            "Matth. 26"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Wat zijn de uiterlijke teekenen in het Avondmaal?",
+          "answer": "Brood en wijn."
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Wat voor brood?",
+          "answer": "Gewoon en voedzaam brood."
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Mag men geen ouwels in het Avondmaal gebruiken?",
+          "answer": "Neen; die beelden niet genoeg de geestelijke voeding af."
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Wat beteekent het brood in het Avondmaal?",
+          "answer": "Christus' lichaam. 1 Cor. 11 : 24. Neemt, eet; dat is mijn lichaam, dat voor u gebroken wordt; doet dat tot mijne gedachtenis.",
+          "refs": [
+            "1 Cor. 11:24"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Moet dat brood ook juist gebroken worden?",
+          "answer": "Ja; om af te beelden, dat Christus' lichaam voor ons gebroken is."
+        },
+        {
+          "type": "qa",
+          "number": 9,
+          "question": "Wat voor wijn moet men in het Avondmaal gebruiken?",
+          "answer": "Dat is evenveel."
+        },
+        {
+          "type": "qa",
+          "number": 10,
+          "question": "Moet die niet met water gemengd worden?",
+          "answer": "Neen; daarvan is nergens bevel."
+        },
+        {
+          "type": "qa",
+          "number": 11,
+          "question": "Wat beteekent de wijn?",
+          "answer": "Christus' bloed. 1 Cor. 11 : 25. Deze drinkbeker is het Nieuwe Testament in mijn bloed.",
+          "refs": [
+            "1 Cor. 11:25"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 12,
+          "question": "Wat beduidt het uitgieten van den wijn?",
+          "answer": "Dat Christus' bloed voor ons vergoten is."
+        },
+        {
+          "type": "qa",
+          "number": 13,
+          "question": "Is het brood alleen niet genoeg in het Avondmaal?",
+          "answer": "Neen; Christus zegt ook Matth. 26 : 27: Drinkt allen daaruit.",
+          "refs": [
+            "Matth. 26:27"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 14,
+          "question": "Is dat ook te verstaan van alle gemeene geloovigen?",
+          "answer": "Ja. 1 Cor. 11 : 28. De mensch beproeve zichzelven en ete alzoo van het brood en drinke van den drinkbeker.",
+          "refs": [
+            "1 Cor. 11:28"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 15,
+          "question": "Is Christus ook lichamelijk onder de teekenen des Avondmaals tegenwoordig?",
+          "answer": "Neen; zijne menschelijke natuur is alleen in den hemel. Hand. 3 : 21. Welke de hemel moet ontvangen tot de tijden der wederoprichting aller dingen.",
+          "refs": [
+            "Hand. 3:21"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 16,
+          "question": "Verandert dan brood en wijn niet in zijn vleesch en bloed?",
+          "answer": "Neen; het blijft brood en wijn, ook nadat er de zegen over gesproken is."
+        },
+        {
+          "type": "qa",
+          "number": 17,
+          "question": "Hoe kan dan Christus zeggen: dat is mijn lichaam?",
+          "answer": "Dat is te zeggen: dat beteekent mijn lichaam."
+        },
+        {
+          "type": "qa",
+          "number": 18,
+          "question": "Spreekt de H. Schrift wel meer zoo?",
+          "answer": "Dikwijls. 1 Cor. 10 : 4. De steenrots was Christus. Dat is te zeggen: zij beteekende Christus.",
+          "refs": [
+            "1 Cor. 10:4"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 19,
+          "question": "Kan men Christus zelven daar dan niet eten of drinken?",
+          "answer": "Niet lichamelijk, maar geestelijk."
+        },
+        {
+          "type": "qa",
+          "number": 20,
+          "question": "Wat is dat, Christus geestelijk te eten?",
+          "answer": "Hem door het geloof aan te nemen."
+        },
+        {
+          "type": "qa",
+          "number": 21,
+          "question": "Voor wie is het Avondmaal ingesteld?",
+          "answer": "Alleen voor de geloovigen."
+        },
+        {
+          "type": "qa",
+          "number": 22,
+          "question": "Niet voor kinderen?",
+          "answer": "Neen; omdat die zichzelven niet beproeven kunnen."
+        },
+        {
+          "type": "qa",
+          "number": 23,
+          "question": "Waaromtrent moet men zich beproeven?",
+          "answer": "I. Of ons onze zonden van harte leed zijn. II. Of wij in Christus gelooven. III. Of wij dat geloof uitdrukken in een heiligen wandel."
+        }
+      ]
+    },
+    {
+      "id": "hoofdstuk-20",
+      "number": 20,
+      "label": "Hoofdstuk 20",
+      "title": "Van des menschen uiterste",
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Zal de mensch altijd leven?",
+          "answer": "Neen. Hebr. 9 : 27. Het is den mensch gezet eenmaal te sterven en daarna het oordeel.",
+          "refs": [
+            "Hebr. 9:27"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Sterft dan al wat aan den mensch is?",
+          "answer": "Neen; de ziel is onsterfelijk. Matth. 10 : 28. Vreest niet voor degenen, die het lichaam dooden, en de ziel niet kunnen dooden.",
+          "refs": [
+            "Matth. 10:28"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Hoeveel wegen zijn er voor de zielen na den dood?",
+          "answer": "Maar twee: hel of hemel. Matth. 7 : 13, 14. Wijd is de poort, en breed is de weg, die tot het verderf leidt, en velen zijn er, die door dezelve ingaan; want de poort is eng, en de weg is nauw, die tot het leven leidt, en weinigen zijn er, die denzelven vinden.",
+          "refs": [
+            "Matth. 7:13, 14"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Gaan de zielen daar aanstonds heen na den dood?",
+          "answer": "Ja; gelijk blijkt in Lazarus en den rijken man. De rijke man hief zijne oogen op in de hel, en Lazarus werd gedragen in Abrahams schoot.",
+          "refs": [
+            "Luc. 16:22, 23"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Is er geen vagevuur?",
+          "answer": "Neen. Openb. 14 : 13. Zalig zijn de dooden, die in den Heere sterven, van nu aan. De moordenaar ging zonder vagevuur aanstonds naar den hemel. Luc. 23 : 43. Heden zult gij met Mij in het Paradijs zijn.",
+          "refs": [
+            "Openb. 14:13",
+            "Luc. 23:43"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "I. Van de opstanding"
+        },
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Zal er eene wederopstanding zijn?",
+          "answer": "Ja: beide der rechtvaardigen en der onrechtvaardigen.",
+          "refs": [
+            "Hand. 24:15"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Wanneer?",
+          "answer": "Ten jongsten dage."
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Wie zal ze opwekken?",
+          "answer": "God."
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Zullen ook de goddeloozen opstaan?",
+          "answer": "Ja; de ure komt, in welke allen, die in de graven zijn, zijne stem zullen hooren, en zullen uitgaan, die het goede gedaan hebben, tot de opstanding des levens, en die het kwade gedaan hebben, tot de opstanding der verdoemenis.",
+          "refs": [
+            "Joh. 5:28, 29"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Met welke lichamen zullen de menschen opstaan?",
+          "answer": "Met dezelfde lichamen; anders was het geene opstanding, maar een nieuwe schepping. Zoo verwachtte Job ook. Ik weet, mijn Verlosser leeft, en Hij zal de laatste over het stof opstaan: en als zij na mijne huid dit doorknaagd zullen hebben, zal ik uit mijn vleesch God aanschouwen; denwelken ik voor mij aanschouwen zal, en mijne oogen zien zullen, en niet een vreemde.",
+          "refs": [
+            "Job 19:25-27"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Is dat wel mogelijk?",
+          "answer": "Ja; bij God zijn alle dingen mogelijk; het scheen nog veel onmogelijker de wereld uit niet te scheppen."
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Zullen de lichamen dan niet veranderd zijn?",
+          "answer": "Niet in hun wezen, maar alleen in hoedanigheden."
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "In welke hoedanigheden?",
+          "answer": "Dit verderfelijke moet onverderfelijkheid aandoen, en dit sterfelijke moet onsterfelijkheid aandoen.",
+          "refs": [
+            "1 Cor. 15:53"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "II. Van het laatste oordeel"
+        },
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Wat zal er op de opstanding volgen?",
+          "answer": "Het laatste oordeel."
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Zal er een laatste oordeel wezen?",
+          "answer": "Ja. Hand. 17 : 31. Daarom dat Hij (God) eenen dag gesteld heeft, op welken Hij den aardbodem rechtvaardig zal oordeelen, door eenen Man, dien Hij daartoe verordineerd heeft.",
+          "refs": [
+            "Hand. 17:31"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Wie zal dan rechter zijn?",
+          "answer": "Christus, onze Zaligmaker, die daar zichtbaar in zijne menschelijke natuur verschijnen zal."
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Waar zal dat oordeel wezen?",
+          "answer": "Op de wolken des hemels. Matth. 26 : 64b. Van nu aan zult gij zien den Zoon des menschen, zittende ter rechterhand der kracht Gods en komende op de wolken des hemels.",
+          "refs": [
+            "Matth. 26:64b"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Wanneer?",
+          "answer": "Van dien dag en die ure weet niemand.",
+          "refs": [
+            "Marc. 13:32"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Wie zullen daar geoordeeld worden?",
+          "answer": "Alle menschen. 2 Cor. 5 : 10. Want wij allen moeten geopenbaard worden voor den rechterstoel van Christus, opdat een iegelijk wegdrage, hetgeen door het lichaam geschiedt, naardat hij gedaan heeft, hetzij goed, hetzij kwaad.",
+          "refs": [
+            "2 Cor. 5:10"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "In hoeveel hoopen zullen daar de menschen worden afgedeeld?",
+          "answer": "In twee hoopen, in goddeloozen en rechtvaardigen."
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Waar zal Christus die zetten?",
+          "answer": "De goddeloozen aan zijne linker- en de rechtvaardigen aan zijne rechterhand."
+        },
+        {
+          "type": "qa",
+          "number": 9,
+          "question": "Wat zal Hij tot de goddeloozen zeggen?",
+          "answer": "Gaat weg van Mij, gij vervloekten, in het eeuwige vuur, hetwelk den duivel en zijnen engelen bereid is.",
+          "refs": [
+            "Matth. 25:41"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 10,
+          "question": "Wat zal Hij tot de rechtvaardigen zeggen?",
+          "answer": "Komt, gij gezegenden mijns Vaders, beërft dat Koninkrijk, hetwelk u bereid is van de grondlegging der wereld.",
+          "refs": [
+            "Matth. 25:34"
+          ]
+        },
+        {
+          "type": "heading",
+          "text": "III. Van het eeuwige leven"
+        },
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Wat zal er op dat oordeel volgen?",
+          "answer": "Het eeuwige leven of de eeuwige verdoemenis."
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Waar zal de verdoemenis zijn?",
+          "answer": "In de hel. Luc. 16 : 23. En de rijke stierf ook, en werd begraven. En als hij in de hel zijne oogen ophief, zijnde in de pijn, zag hij Abraham van verre en Lazarus in zijnen schoot.",
+          "refs": [
+            "Luc. 16:23"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Hoe lang?",
+          "answer": "Eeuwig. Matth. 25 : 46. En dezen zullen gaan in de eeuwige pijn.",
+          "refs": [
+            "Matth. 25:46"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Zal dan de verdoemenis niet maar eene vernietiging zijn van den geheelen mensch, of met den tijd eindigen?",
+          "answer": "Neen; het zal een straf zijn van gevoel en zonder einde. Marc. 9 : 44. Waar hun worm niet sterft, en het vuur niet uitgebluscht wordt.",
+          "refs": [
+            "Marc. 9:44"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Waar zal het eeuwige leven zijn?",
+          "answer": "In den hemel. Luc. 6 : 23. Uw loon is groot in den hemel.",
+          "refs": [
+            "Luc. 6:23"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Hoe lang?",
+          "answer": "Ook eeuwig. Matth. 25 : 46. De rechtvaardigen zullen gaan in het eeuwige leven.",
+          "refs": [
+            "Matth. 25:46"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Waarin zal dat bestaan?",
+          "answer": "In een eeuwig genieten van God met volmaaktheid en vreugde. Ps. 16 : 11. Gij zult mij het pad des levens bekend maken; verzadiging der vreugde is bij uw aangezicht; liefelijkheden zijn in uwe rechterhand, eeuwiglijk.",
+          "refs": [
+            "Ps. 16:11"
+          ]
+        }
+      ]
+    }
+  ]
+}

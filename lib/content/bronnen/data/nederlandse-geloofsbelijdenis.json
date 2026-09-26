@@ -1,0 +1,461 @@
+{
+  "slug": "nederlandse-geloofsbelijdenis",
+  "title": "Nederlandse Geloofsbelijdenis",
+  "author": "Guido de Brès",
+  "year": "1561",
+  "sectionNoun": "Artikel",
+  "source": {
+    "name": "A. Kuyper (ed.), De Drie Formulieren van Eenigheid, gelijk die voor de Gereformeerde Kerken dezer landen zijn vastgesteld op de Nationale Synode van Dordrecht, 11e uitgave (Amsterdam: Höveker & Wormser, 1898); scan Internet Archive (Princeton Theological Seminary Library)",
+    "url": "https://archive.org/details/dedrieformuliere1898kuyp",
+    "edition": "Tekst van de Dordtse Synode 1618-1619 zoals uitgegeven door A. Kuyper (1898), spelling De Vries-Te Winkel; de artikelopschriften (in de uitgave tussen vierkante haken) staan als title",
+    "retrieved": "2026-09-26",
+    "note": "OCR-tekst van de scan gecorrigeerd door stemming met twee andere drukken van dezelfde tekst (De berijmde Psalmen ... met de Formulieren van Eenigheid, Middelharnis 1897, archive.org/details/deberijmdepsalme00gere; idem 1913, met medewerking van Bavinck en Kuyper, archive.org/details/deberijmdepsal00gere) en controle van twijfelgevallen op de paginascans. Kuypers eigen voetnoten en de voetnootcijfers zijn weggelaten. Twee drukfouten van 1898 verbeterd volgens de beide andere drukken: art. 24 \"alof\" wordt \"alsof\"; art. 15 ontbrekende punt na \"navolging\". Schriftplaatsen staan zoals gedrukt in de lopende tekst (geen aparte refs)."
+  },
+  "rights": "Tekst van de Nationale Synode van Dordrecht (1618-1619) in de uitgave van A. Kuyper uit 1898 (Kuyper overleden 1920); publiek domein.",
+  "sections": [
+    {
+      "id": "artikel-1",
+      "number": 1,
+      "label": "Artikel 1",
+      "title": "Dat er een eenig God is",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Wij gelooven allen met het hart en belijden met den mond, dat er is een eenig en eenvoudig geestelijk wezen, hetwelk wij God noemen: eeuwig, onbegrijpelijk, onzienlijk, onveranderlijk, oneindig, almachtig; volkomen wijs, rechtvaardig, goed, en eene zeer overvloedige fontein aller goeden."
+        }
+      ]
+    },
+    {
+      "id": "artikel-2",
+      "number": 2,
+      "label": "Artikel 2",
+      "title": "Door wat middel God van ons gekend wordt",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Wij kennen Hem door twee middelen. Ten eerste, door de schepping, onderhouding, en regeering der geheele wereld: overmits deze voor onze oogen is als een schoon boek, in hetwelk alle schepselen, groote en kleine, gelijk als letteren zijn, die ons de onzienlijke dingen Gods geven te aanschouwen, namelijk, zijne eeuwige kracht en Goddelijkheid, als de Apostel Paulus zegt, Rom. I: 20; welke dingen alle genoegzaam zijn om de menschen te overtuigen, en hun alle onschuld te benemen. Ten tweede, geeft Hij zichzelven ons nog klaarder en volkomener te kennen door zijn heilig en Goddelijk woord, te weten, zoo veel als ons van noode is in dit leven, tot zijne eer, en de zaligheid der zijnen."
+        }
+      ]
+    },
+    {
+      "id": "artikel-3",
+      "number": 3,
+      "label": "Artikel 3",
+      "title": "Van het geschreven woord Gods",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Wij belijden, dat dit woord Gods niet is gezonden noch voortgebracht door den wil eens menschen, maar de heilige menschen Gods, van den Heiligen Geest gedreven zijnde, hebben [het] gesproken, gelijk de H. Petrus zegt. Daarna heeft God, door eene bijzondere zorg, die Hij voor ons en onze zaligheid draagt, zijnen knechten den Profeten en Apostelen geboden, zijn geopenbaarde woord bij geschrift te stellen; en Hijzelf heeft met zijnen vinger de twee Tafelen der Wet geschreven. Hierom noemen wij zulke schriften: Heilige en Goddelijke Schrifturen."
+        }
+      ]
+    },
+    {
+      "id": "artikel-4",
+      "number": 4,
+      "label": "Artikel 4",
+      "title": "Kanonieke boeken der H. Schrifture",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Wij vervatten de H. Schrifture in twee boeken, des Ouden en des Nieuwen Testaments, welke zijn Kanonieke boeken, waar niets tegen valt te zeggen. Deze worden aldus geteld in de Kerke Gods. De boeken des Ouden Testaments: de vijf boeken van Mozes, te weten, Genesis, Exodus, Leviticus, Numeri, Deuteronomium; het boek van Jozua, der Richteren, Ruth, twee boeken van Samuël, en twee boeken der Koningen, twee boeken der Kronieken, genaamd Paralipomenon, het eerste van Ezra, Nehemia, Esther, Job, de Psalmen van David, drie boeken van Salomo, namelijk, de Spreuken, de Prediker, en het Hooglied; de vier groote Profeten, Jesaja, Jeremia, Ezechiël en Daniël, en voorts de andere twaalf kleine Profeten, namelijk, Hosea, Joël, Amos, Obadja, Jona, Micha, Nahum, Habakuk, Zephanja, Haggaï, Zacharia, Maleachi. Het Nieuwe Testament: de vier Evangelisten, Mattheüs, Marcus, Lucas, Johannes; de Handelingen der Apostelen, de veertien brieven van den Apostel Paulus, te weten, aan de Romeinen, twee aan de Corinthiërs, aan de Galaten, aan de Epheziërs, aan de Philippensen, aan de Colossensen, twee aan de Thessalonicensen, twee aan Timotheüs, aan Titus, aan Philémon, aan de Hebreën; de zeven brieven der andere Apostelen, te weten, de brief van Jacobus, twee brieven van Petrus, drie van Johannes, de brief van Judas; en de Openbaring van den Apostel Johannes."
+        }
+      ]
+    },
+    {
+      "id": "artikel-5",
+      "number": 5,
+      "label": "Artikel 5",
+      "title": "Waarvan de H. Schrifture haar aanzien en autoriteit heeft",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Alle deze boeken alleen ontvangen wij voor heilig en kanoniek, om ons geloof daarnaar te reguleeren, daarop te gronden en daarmede te bevestigen. En wij gelooven zonder eenige twijfeling al wat daarin begrepen is; en dat niet zoozeer, omdat ze de Kerk aanneemt en voor zoodanige houdt; maar inzonderheid, omdat ons de H. Geest getuigenis geeft in onze harten, dat zij van God zijn; en dewijl zij ook het bewijs van dien bij zichzelven hebben: gemerkt de blinden zelven tasten kunnen, dat de dingen, die daarin voorzegd zijn, geschieden."
+        }
+      ]
+    },
+    {
+      "id": "artikel-6",
+      "number": 6,
+      "label": "Artikel 6",
+      "title": "Onderscheid tusschen de Kanonieke en Apocriefe boeken",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Wij onderscheiden deze Heilige boeken van de Apocriefe, als daar zijn: het derde en vierde boek van Ezra, het boek van Tobias, Judith, het boek der Wijsheid, Jezus Sirach, Baruch, hetgene bijgevoegd is tot de historie van Esther, het gebed der drie mannen in het vuur, de historie van Susanna, van het beeld Bel en van den Draak, het gebed van Manasse, en de twee boeken der Makkabeën. Dewelke de Kerk wel lezen kan, en daaruit ook onderwijzingen nemen, voor zooveel als zij overeenkomen met de Kanonieke boeken; maar zij hebben zulk eene kracht en vermogen niet, dat men door eenig getuigenis van deze eenig stuk des geloofs of der Christelijke religie zoude kunnen bevestigen: zoo ver is het van daar, dat zij de autoriteit van de andere, heilige, boeken zouden vermogen te verminderen."
+        }
+      ]
+    },
+    {
+      "id": "artikel-7",
+      "number": 7,
+      "label": "Artikel 7",
+      "title": "Volkomenheid der H. Schrifture om alleen te zijn een regel des geloofs",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Wij gelooven dat deze Heilige Schrifture den wille Gods volkomenlijk vervat, en dat al hetgene de mensch schuldig is te gelooven om zalig te worden, daarin genoegzaam geleerd wordt. Want overmits de geheele wijze des dienstes, dien God van ons eischt, aldaar in het lange beschreven is, zoo is het den menschen, al waren het zelfs Apostelen, niet geoorloofd anders te leeren, dan ons nu geleerd is door de Heilige Schrifturen; ja al ware het ook een engel uit den hemel, gelijk de Apostel Paulus zegt. Want dewijl het verboden is den Woorde Gods iets toe of iets af te doen, zoo blijkt daaruit wel, dat de leere daarvan zeer volmaakt en in alle manieren volkomen is. Men mag ook geener menschen schriften, hoe heilig zij geweest zijn, gelijkstellen met de Goddelijke Schrifturen, noch de gewoonte met de waarheid Gods (want de waarheid is boven alles), noch de groote menigte, noch de oudheid, noch de successie van tijden of personen, noch de conciliën, decreten of besluiten; want alle menschen zijn uit zichzelven leugenaars en ijdeler dan de ijdelheid zelve. Daarom verwerpen wij van ganscher harte al wat met dezen onfeilbaren regel niet overeenkomt, gelijk ons de Apostelen geleerd hebben, zeggende: Beproeft de geesten, of zij uit God zijn. Insgelijks: Indien iemand tot ulieden komt, en deze leere niet brengt, ontvangt hem niet in huis."
+        }
+      ]
+    },
+    {
+      "id": "artikel-8",
+      "number": 8,
+      "label": "Artikel 8",
+      "title": "Dat God eenig is in wezen en nochtans in drie personen onderscheiden",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Volgens deze waarheid en dit Woord Gods, zoo gelooven wij in een eenigen God; die een eenig wezen is, in hetwelk zijn drie personen, in der daad en waarheid en van eeuwigheid onderscheiden naar hunne onmededeelbare eigenschappen: namelijk de Vader, en de Zoon, en de Heilige Geest. De Vader is de oorzaak, oorsprong en begin aller dingen, zoowel zienlijke als onzienlijke. De Zoon is het Woord, de Wijsheid en het Beeld des Vaders. De H. Geest, de eeuwige Kracht en Mogendheid, uitgaande van den Vader en den Zoon. Alzoo nochtans, dat dit onderscheid niet maakt, dat God in drieën gedeeld zij, aangezien dat de H. Schrifture ons leert, dat de Vader, en de Zoon, en de Heilige Geest, elk zijne zelfstandigheid heeft, onderscheiden door hare eigenschappen; doch alzoo, dat deze drie Personen maar een eenig God zijn. Zoo is het dan openbaar, dat de Vader niet is de Zoon, en dat de Zoon niet is de Vader, dat ook insgelijks de Heilige Geest niet is de Vader, noch de Zoon. Intusschen deze Personen, zóó onderscheiden, zijn niet gedeeld, noch ook ondereen vermengd. Want de Vader heeft het vleesch niet aangenomen, noch ook de Heilige Geest, maar alleen de Zoon. De Vader is nooit zonder zijnen Zoon, noch zonder zijnen H. Geest geweest; want zij zijn alle drie van gelijke eeuwigheid in één zelfde wezen. Daar is noch eerste, noch laatste; want zij zijn alle drie één in waarheid, in mogendheid, in goedheid en barmhartigheid."
+        }
+      ]
+    },
+    {
+      "id": "artikel-9",
+      "number": 9,
+      "label": "Artikel 9",
+      "title": "Bewijs des voorgaanden Artikels van de drieheid der Personen in éénen God",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Dit alles weten wij, zoo uit de getuigenissen der H. Schrifture, als ook uit hunne werkingen, en voornamelijk uit degene, die wij in ons gevoelen. De getuigenissen der H. Schrifturen, die ons leeren deze H. Drievuldigheid te gelooven, zijn in vele plaatsen des Ouden Testaments beschreven; welke niet van noode is te tellen, maar alleen met onderscheid of oordeel uit te kiezen. In Genesis, Kap. I: 26, 27, zegt God: Laat ons menschen maken, naar onzen beelde, naar onze gelijkenisse, enz. En God schiep den mensch naar zijnen beelde; man en vrouw schiep Hij ze. Insgelijks Gen. III: 22: Zie, de mensch is geworden als onzer één. Daaruit blijkt, dat er meer dan één persoon in de Godheid is, als Hij zegt: Laat ons menschen maken naar onzen beelde; en Hij wijst daarna de eenigheid aan, als Hij zegt: God schiep. Het is wel waar, dat Hij niet zegt, hoeveel personen dat er zijn; maar hetgene voor ons wat duister is in het Oude Testament, dat is zeer klaar in het Nieuwe. Want als onze Heere gedoopt werd in den Jordaan, zoo is de stemme des Vaders gehoord geweest, zeggende: Deze is mijn geliefde Zoon; de Zoon werd gezien in het water; en de Heilige Geest openbaarde zich in de gedaante van eene duive. Ook mede is in den Doop aller geloovigen deze forme ingesteld door Christus: Doopt alle de volkeren in den naam des Vaders, en des Zoons, en des Heiligen Geestes. In het Evangelie van Lucas spreekt de engel Gabriël tot Maria, de moeder des Heeren, aldus: De Heilige Geest zal over u komen, en de kracht des Allerhoogsten zal u overschaduwen; daarom ook, dat Heilige, dat uit u geboren zal worden, zal Gods Zoon genaamd worden. Insgelijks: De genade van den Heere Jezus Christus, en de liefde Gods, en de gemeenschap des H. Geestes zij met u. Drie zijn er, die getuigen in den hemel, de Vader, het Woord, en de Heilige Geest; en deze drie zijn één. In alle deze plaatsen wordt ons ten volle geleerd, dat er drie personen zijn in een eenig Goddelijk wezen. En hoewel deze leere de menschelijke verstanden verre te boven gaat, nochtans gelooven wij die nu door het Woord, verwachtende totdat wij de volkomene kennisse en vrucht daarvan genieten zullen in den hemel. Voorts staan ook aan te merken de bijzondere ambten en werkingen dezer drie Personen te onswaarts: de Vader is genaamd onze Schepper door zijne kracht; de Zoon is onze Zaligmaker en Verlosser door zijn bloed; de H. Geest is onze Heiligmaker door zijne woning in onze harten. Deze leer van de Heilige Drievuldigheid is altijd beweerd en onderhouden geweest bij de ware Kerk, van de tijden der Apostelen af tot nu toe, tegen de Joden, Mohammedanen, en eenige valsche Christenen en ketteren, als Marcion, Mani, Praxeas, Sabellius, Samosatenus, Arius, en andere diergelijken, die met goed recht door de Heilige Vaders zijn veroordeeld geweest. Overzulks nemen wij in dit stuk gaarne aan de drie geloofssommen, namelijk der Apostelen, van Nicea, en van Athanasius, insgelijks hetgene daarvan door de Ouden in gelijkvormigheid met deze besloten is."
+        }
+      ]
+    },
+    {
+      "id": "artikel-10",
+      "number": 10,
+      "label": "Artikel 10",
+      "title": "Dat Jezus Christus waarachtig en eeuwig God is",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Wij gelooven, dat Jezus Christus naar zijne Goddelijke natuur de eeniggeboren Zone Gods is, van eeuwigheid geboren; niet gemaakt, noch geschapen (want alzoo zoude Hij een schepsel zijn), maar ééns-wezens met den Vader, mede-eeuwig, het uitgedrukte beeld der zelfstandigheid des Vaders en het afschijnsel zijner heerlijkheid, Hem in alles gelijk zijnde. Dewelke is Gods Zoon, niet alleen van dien tijd af dat Hij onze natuur heeft aangenomen, maar van alle eeuwigheid; gelijk ons deze getuigenissen leeren, wanneer zij met malkanderen vergeleken worden: Mozes zegt, dat God de wereld heeft geschapen, en de H. Johannes zegt, dat alle dingen zijn geschapen door dat Woord, hetwelk hij God noemt; de Apostel zegt, dat God de wereld door zijnen Zoon gemaakt heeft; insgelijks, dat God alle dingen door Jezus Christus geschapen heeft; zoo moet dan degene, die genaamd wordt God, het Woord, de Zoon en Jezus Christus, toen al geweest zijn, toen alle dingen door Hem geschapen werden. En daarom zegt de Profeet Micha: Zijne uitgangen zijn van ouds, van de dagen der eeuwigheid. En de Apostel: Hij is zonder beginsel der dagen, en zonder einde des levens. Zoo is Hij dan de ware, eeuwige God, die Almachtige, denwelken wij aanroepen, aanbidden en dienen."
+        }
+      ]
+    },
+    {
+      "id": "artikel-11",
+      "number": 11,
+      "label": "Artikel 11",
+      "title": "Dat de Heilige Geest waarachtig en eeuwig God is",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Wij gelooven en belijden ook, dat de H. Geest van eeuwigheid van den Vader en den Zoon uitgaat; niet zijnde gemaakt noch geschapen, noch ook geboren, maar alleen van beiden uitgaande; welke in orde is de derde Persoon der Drievuldigheid, van éénzelfde wezen, majesteit en heerlijkheid met den Vader en den Zoon; zijnde waarachtig en eeuwig God, gelijk ons de H. Schriften leeren."
+        }
+      ]
+    },
+    {
+      "id": "artikel-12",
+      "number": 12,
+      "label": "Artikel 12",
+      "title": "Van de schepping aller dingen en met name der engelen",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Wij gelooven, dat de Vader, door zijn Woord, dat is door zijnen Zoon, den hemel, de aarde en alle schepselen uit niet heeft geschapen, wanneer het Hem heeft goed gedacht, aan een iegelijk schepsel zijn wezen, gestalte en gedaante, en onderscheidene ambten gevende, om zijnen Schepper te dienen. Dat Hij ze ook nu alle onderhoudt en regeert naar zijne eeuwige voorzienigheid en door zijne oneindige kracht, om den mensch te dienen, ten einde dat de mensch zijnen God diene. Hij heeft ook de engelen goed geschapen, om zijne zendboden te zijn, en zijne uitverkorenen te dienen; van welke sommigen van die uitnemendheid, in dewelke hen God geschapen had, in het eeuwig verderf vervallen zijn, en de anderen door de genade Gods in hunnen eersten staat volhard hebben en staande gebleven zijn. De duivelen en booze geesten zijn alzoo verdorven, dat zij vijanden Gods en alles goeds zijn; naar al hun vermogen als moordenaars loerende op de Kerk en een ieder lidmaat van die, om alles te verderven en te verwoesten door hunne bedriegerijen; en zijn daarom door hunne eigene boosheid veroordeeld tot de eeuwige verdoemenis, dagelijks verwachtende hunne schrikkelijke pijnigingen. Zoo verwerpen en verfoeien wij dan hierin de dwaling der Sadduceën, welke loochenen dat er geesten en engelen zijn; en ook de dwaling der Manicheën, die zeggen, dat de duivelen hunnen oorsprong uit zichzelven hebben, zijnde uit hunne eigene natuur kwaad, zonder dat zij verdorven zijn geworden."
+        }
+      ]
+    },
+    {
+      "id": "artikel-13",
+      "number": 13,
+      "label": "Artikel 13",
+      "title": "Van de Voorzienigheid Gods en regeering aller dingen",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Wij gelooven, dat die goede God, nadat Hij alle dingen geschapen had, deze niet heeft laten varen, noch aan het geval of de fortuin overgegeven, maar ze naar zijnen heiligen wil alzoo stiert en regeert, dat in deze wereld niets geschiedt zonder zijne ordinantie; hoewel nochtans God noch auteur is, noch schuld heeft, van de zonde, die er geschiedt. Want zijne macht en goedheid is zoo groot en onbegrijpelijk, dat Hij zeer wel en rechtvaardiglijk zijn werk beschikt en doet, ook wanneer de duivelen en goddeloozen onrechtvaardiglijk handelen. En aangaande hetgene Hij doet boven het begrip des menschelijken verstands, datzelve willen wij niet curieuselijk onderzoeken, meer dan ons begrip verdragen kan; maar wij aanbidden met alle ootmoedigheid en eerbied de rechtvaardige oordeelen Gods, die ons verborgen zijn; ons tevreden houdende, dat wij leerjongeren van Christus zijn, om alleen te leeren hetgene Hij ons aanwijst in zijn Woord, zonder deze palen te overtreden. Deze leering geeft ons eenen onuitsprekelijken troost, als wij door haar geleerd worden, dat ons niets bij geval overkomen kan, maar door de beschikking onzes goedertierenen hemelschen Vaders, die voor ons waakt met eene vaderlijke zorg, houdende alle schepselen onder zijne heerschappij, alzoo dat niet één haar van ons hoofd (want die zijn alle geteld), ook niet één muschken op de aarde vallen kan, zonder den wil onzes Vaders. Waarop wij ons verlaten, wetende dat Hij de duivelen in den toom houdt en alle onze vijanden, die ons zonder zijne toelating en wil niet schaden kunnen. En hierin verwerpen wij de verdoemelijke dwaling der Epicureën, dewelke zeggen, dat zich God nergens mede bemoeit en alle dingen bij geval laat geschieden."
+        }
+      ]
+    },
+    {
+      "id": "artikel-14",
+      "number": 14,
+      "label": "Artikel 14",
+      "title": "Van de schepping en val des menschen en zijn onvermogen tot het ware goed",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Wij gelooven, dat God den mensch geschapen heeft van het stof der aarde, en heeft hem gemaakt en geformeerd naar zijn beeld en gelijkenis, goed, rechtvaardig en heilig; kunnende met zijnen wil in alles overeenkomen met den wille Gods. Maar als hij in eere was, zoo heeft hij het niet verstaan, noch zijne uitnemendheid erkend; maar heeft zichzelven willens der zonde onderworpen, en overzulks den dood en vervloeking, het oor biedende aan het woord des duivels. Want het gebod des levens, dat hij ontvangen had, heeft hij overtreden, en heeft zich van God, die zijn ware leven was, door de zonde afgescheiden; hebbende zijne geheele natuur verdorven; waardoor hij zich schuldig gemaakt heeft des lichamelijken en geestelijken doods. En in alle zijne wegen goddeloos, verkeerd, en verdorven geworden zijnde, heeft hij verloren alle zijne uitnemende gaven, die hij van God ontvangen had, en heeft niet anders overig behouden dan kleine overblijfselen daarvan, dewelke genoegzaam zijn om den mensch alle onschuld te benemen; overmits al het licht, dat in ons is, in duisternis veranderd is, gelijk de Schrift ons leert, zeggende: Het licht schijnt in de duisternis, en de duisternis heeft het niet begrepen; alwaar de Heilige Johannes de menschen duisternis noemt. Daarom verwerpen wij al wat men hiertegen leert van den vrijen wil des menschen, aangezien de mensch niet dan een slaaf der zonde is, en geen ding kan aannemen, zoo het hem uit den hemel niet gegeven zij. Want wie is er, die zich beroemen zal iets goeds te kunnen doen als uit zichzelven, daar toch Christus zegt: Niemand kan tot Mij komen, tenzij dat de Vader, die Mij gezonden heeft, hem trekke? Wie zal met zijnen wil voorkomen, die daar verstaat, dat het bedenken des vleesches vijandschap is tegen God? Wie zal van zijne wetenschap spreken, ziende, dat de natuurlijke mensch niet begrijpt de dingen die des Geestes Gods zijn? Kortelijk, wie zal eenige gedachte voorstellen, dewijl hij verstaat, dat wij niet bekwaam zijn van onszelven iets te denken, als uit onszelven, maar dat onze bekwaamheid uit God is? En daarom hetgene de Apostel zegt, behoort met recht vast en zeker gehouden te worden, dat God in ons werkt beide het willen en het werken, naar zijn welbehagen. Want er is noch verstand, noch wil, den verstande en wille Gods gelijkvormig, of Christus heeft ze in den mensch gewrocht; hetwelk Hij ons leert, zeggende: Zonder Mij kunt gij niets doen."
+        }
+      ]
+    },
+    {
+      "id": "artikel-15",
+      "number": 15,
+      "label": "Artikel 15",
+      "title": "Van de erfzonde",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Wij gelooven, dat door de ongehoorzaamheid van Adam de erfzonde uitgebreid is geworden over het gansche menschelijke geslacht; welke is eene verdorvenheid der geheele natuur en een erfelijk gebrek, waarmede de kleine kinderen zelfs besmet zijn in hunner moeders lichaam, en die in den mensch allerlei zonden voortbrengt, zijnde in hem als een wortel daarvan; en zij is daarom zoo leelijk en gruwelijk voor God, dat zij genoegzaam is om het menschelijk geslacht te verdoemen. Zij is ook zelfs door den Doop niet ganschelijk te niete gedaan, noch geheel uitgeroeid, aangezien de zonde daaruit altijd als opwellend water uitspringt, gelijk uit eene onzalige fontein; hoewel zij nochtans den kinderen Gods tot verdoemenis niet toegerekend, maar door zijne genade en barmhartigheid vergeven wordt; niet om in de zonde gerust te slapen, maar opdat het gevoel van deze verdorvenheid de geloovigen dikwijls zoude doen zuchten, verlangende om van dit lichaam des doods verlost te worden. En hierin verwerpen wij de dwaling der Pelagianen, die zeggen, dat deze zonde niet anders is dan uit navolging."
+        }
+      ]
+    },
+    {
+      "id": "artikel-16",
+      "number": 16,
+      "label": "Artikel 16",
+      "title": "Van de eeuwige verkiezing Gods",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Wij gelooven, dat, het geheele geslacht van Adam door de zonde des eersten menschen in verderfenis en ondergang zijnde, God zichzelven zoodanig bewezen heeft als Hij is, te weten: Barmhartig en Rechtvaardig. Barmhartig: doordien dat Hij uit deze verderfenis trekt en verlost degenen die Hij in zijnen eeuwigen en onveranderlijken raad, uit enkele goedertierenheid, uitverkoren heeft in Jezus Christus, onzen Heere, zonder eenige aanmerking hunner werken. Rechtvaardig: doordien Hij de anderen laat in hunnen val en verderf, waar zij zichzelven in geworpen hebben."
+        }
+      ]
+    },
+    {
+      "id": "artikel-17",
+      "number": 17,
+      "label": "Artikel 17",
+      "title": "Van de wederoprichting des gevallen menschen",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Wij gelooven, dat onze goede God, door zijne wonderlijke wijsheid en goedheid, ziende dat zich de mensch alzoo in den lichamelijken en geestelijken dood geworpen, en geheel ellendig gemaakt had, zichzelven begeven heeft om hem te zoeken, toen hij al bevende voor Hem vlood, en heeft hem getroost, belovende hem zijnen Zoon te geven, die worden zoude uit eene vrouw, om den kop der slang te vermorzelen, en hem gelukzalig te maken."
+        }
+      ]
+    },
+    {
+      "id": "artikel-18",
+      "number": 18,
+      "label": "Artikel 18",
+      "title": "Van de menschwording van Jezus Christus",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Wij belijden dan, dat God de belofte, die Hij den Oudvaderen gedaan had door den mond zijner Heilige Profeten, volbracht heeft, zendende zijnen eigen eeniggeboren en eeuwigen Zoon in de wereld, ten tijde door Hem bestemd. Dewelke eens dienstknechts gestaltenisse aangenomen heeft, en den mensche gelijk geworden is, waarachtiglijk aannemende eene ware menschelijke natuur, met alle hare zwakheden (uitgenomen de zonde), ontvangen zijnde in het lichaam der gelukzalige maagd Maria, door de kracht des H. Geestes, zonder mans toedoen. En heeft niet alleen de menschelijke natuur aangenomen, zooveel het lichaam aangaat, maar ook eene ware menschelijke ziele, opdat hij een waar mensch zoude zijn. Want aangezien de ziele zoowel verloren was als het lichaam, zoo was het van noode dat Hij ze beide aanname, om ze beide zalig te maken. Daarom belijden wij (tegen de ketterij der Wederdooperen, die loochenen dat Christus, menschelijk vleesch van zijne moeder aangenomen heeft), dat Christus is deelachtig geworden des vleesches en bloeds der kinderen; dat Hij eene vrucht der lendenen Davids is, zooveel het vleesch aangaat; geworden uit het zaad Davids naar het vleesch; eene vrucht des buiks van Maria; geworden uit eene vrouw; eene spruite Davids; eene scheut uit de wortelen van Isaï; gesproten uit het geslacht van Juda; afkomstig van de Joden, zooveel het vleesch aangaat, uit den zade Abrahams, aangezien Hij aangenomen heeft het zaad Abrahams, en is zijnen broederen in alles gelijk geworden, uitgenomen de zonde; alzoo dat Hij in der waarheid onze Immanuël is, dat is, God met ons."
+        }
+      ]
+    },
+    {
+      "id": "artikel-19",
+      "number": 19,
+      "label": "Artikel 19",
+      "title": "Van de vereeniging en het onderscheid der twee naturen van Christus in één persoon",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Wij gelooven, dat door deze ontvangenis de Persoon des Zoons onafscheidelijk vereenigd en te zamen gevoegd is met de menschelijke natuur; zoodat er niet zijn twee Zonen Gods, noch twee personen, maar twee naturen in eenen eenigen persoon vereenigd; doch elke natuur hare onderscheidene eigenschappen behoudende. Gelijk dan de Goddelijke natuur altijd ongeschapen gebleven is, zonder beginsel der dagen of einde des levens, vervullende hemel en aarde, alzoo heeft de menschelijke natuur hare eigenschappen niet verloren, maar is een schepsel gebleven, hebbende beginsel der dagen, zijnde eene eindige natuur, en behoudende al hetgene dat een waar lichaam toebehoort. En hoewel Hij haar door zijne verrijzenis onsterfelijkheid gegeven heeft, nochtans heeft Hij de waarheid zijner menschelijke natuur niet veranderd, dewijl onze zaligheid en verrijzenis mede hangen aan de waarheid zijns lichaams. Doch deze twee naturen zijn alzoo te zamen vereenigd in één persoon, dat zij ook zelfs door zijnen dood niet gescheiden zijn geweest. Zoo was dan hetgene Hij stervende in de handen zijns Vaders bevolen heeft, een ware menschelijke geest, die uit zijn lichaam scheidde; maar intusschen bleef de Goddelijke natuur altijd vereenigd met de menschelijke, ook zelfs toen Hij in het graf lag; en de Godheid hield niet op in Hem te zijn, gelijk zij in Hem was toen Hij een klein kind was, hoewel zij zich voor eenen kleinen tijd zoo niet openbaarde. Hierom bekennen wij, dat Hij waar God en waar mensch is: waar God, om door zijne kracht den dood te overwinnen, en waar mensch, opdat Hij voor ons zoude kunnen sterven uit de zwakheid zijns vleesches."
+        }
+      ]
+    },
+    {
+      "id": "artikel-20",
+      "number": 20,
+      "label": "Artikel 20",
+      "title": "God heeft zijne rechtvaardigheid en barmhartigheid bewezen in Christus",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Wij gelooven, dat God, die volkomen barmhartig en rechtvaardig is, zijnen Zoon gezonden heeft om aan te nemen de natuur, in dewelke de ongehoorzaamheid begaan was, om in haar te voldoen en te dragen de straf der zonden door zijn zeer bitter lijden en sterven. Zoo heeft dan God zijne rechtvaardigheid bewezen tegen zijnen Zoon, als Hij onze zonden op hem gelegd heeft; en heeft uitgestort zijne goedheid en barmhartigheid over ons, die schuldig en der verdoemenis waardig waren, voor ons gevende zijnen Zoon in den dood door eene zeer volkomene liefde, en Hem opwekkende tot onze rechtvaardigmaking, opdat wij door Hem zouden hebben de onsterfelijkheid en het eeuwige leven."
+        }
+      ]
+    },
+    {
+      "id": "artikel-21",
+      "number": 21,
+      "label": "Artikel 21",
+      "title": "Van de voldoening van Christus, onzen eenigen Hoogepriester, voor ons",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Wij gelooven, dat Jezus Christus een eeuwige Hoogepriester is, met eede, naar de ordening van Melchizedek, en zichzelven in onzen naam voor zijnen Vader gesteld heeft, om zijnen toorn te stillen met volle genoegdoening, zichzelven opofferende aan het hout des kruises, en vergietende zijn dierbaar bloed tot reiniging onzer zonden, gelijk de Profeten hadden voorzegd. Want er is geschreven, dat de straffe, die ons den vrede aanbrengt, op den Zone Gods was, en dat door zijne striemen ons genezing is geworden; Hij ter slachting geleid is als een lam; met de misdadigen gerekend; en als een kwaaddoener veroordeeld door Pontius Pilatus, hoewel hij Hem onschuldig verklaard had. Zoo heeft Hij dan wedergegeven, wat Hij niet geroofd had, en heeft geleden, Hij rechtvaardig voor de onrechtvaardigen; en dat zoowel in zijn lichaam als in zijne ziele, gevoelende de schrikkelijke straf, die onze zonden verdiend hadden, zoodat zijn zweet werd gelijk druppelen bloeds, op de aarde afloopende; Hij heeft geroepen: Mijn God, mijn God, waarom hebt Gij Mij verlaten? en heeft zulks alles geleden tot vergeving onzer zonden. Daarom zeggen wij wel terecht met Paulus, dat wij niet anders weten, dan Christus en dien gekruisigd; wij achten alle dingen voor drek, om de uitnemendheid der kennisse van onzen Heere Jezus Christus; wij vinden allerlei vertroosting in zijne wonden, en hebben niet van noode eenig ander middel te zoeken of uit te denken, om ons met God te verzoenen, dan alleen deze eenige offerande, eenmaal geschied, door welke de geloovigen in eeuwigheid volmaakt worden. Dit is ook de oorzaak, waarom Hij door den engel Gods genaamd is Jezus, dat is, Zaligmaker, vermits Hij zijn volk zoude zalig maken, van hunne zonden."
+        }
+      ]
+    },
+    {
+      "id": "artikel-22",
+      "number": 22,
+      "label": "Artikel 22",
+      "title": "Van onze rechtvaardigmaking door het geloof in Jezus Christus",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Wij gelooven, dat, om ware kennis dezer groote verborgenheid te bekomen, de H. Geest in onze harten ontsteekt een oprecht geloof, hetwelk Jezus Christus met alle zijne verdiensten omhelst, Hem eigen maakt, en niets anders meer buiten Hem zoekt. Want het moet noodzakelijk volgen, of dat niet al wat tot onze zaligheid van noode is, in Jezus Christus zij; of, zoo het alles in Hem is, dat degene die Jezus Christus door het geloof bezit, zijne geheele zaligheid heeft. Nu, dat men zeggen zoude, dat Christus niet genoegzaam is, maar dat er nog benevens Hem iets meer toe behoeft, ware eene al te ongeschikte godslastering; want daaruit zoude volgen, dat Christus maar een halve Zaligmaker ware. Daarom zeggen wij terecht, met Paulus, dat wij door het geloof alleen, of door het geloof zonder de werken gerechtvaardigd worden. Doch wij verstaan niet, dat het, om eigenlijk te spreken, het geloof zelf is, dat ons rechtvaardigt; want het is maar een instrument, waarmede wij Christus, onze rechtvaardigheid, omhelzen. Maar Jezus Christus, ons toerekenende alle zijne verdiensten en zoo vele heilige werken, die Hij voor ons en in onze plaats heeft gedaan, is onze rechtvaardigheid; en het geloof is een instrument, dat ons met Hem in de gemeenschap aller zijner goederen houdt; dewelke, de onze geworden zijnde, ons meer dan genoegzaam zijn tot onze vrijspreking van onze zonden."
+        }
+      ]
+    },
+    {
+      "id": "artikel-23",
+      "number": 23,
+      "label": "Artikel 23",
+      "title": "Dat onze rechtvaardigmaking bestaat in de vergeving der zonden en toerekening der gehoorzaamheid van Christus",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Wij gelooven, dat onze gelukzaligheid gelegen is in de vergeving onzer zonden om Jezus Christus' wille, en dat daarin onze rechtvaardigheid voor God begrepen is; gelijk David en Paulus ons leeren, verklarende de gelukzaligheid des menschen te zijn, dat God hem de rechtvaardigheid zonder werken toerekent. En dezelfde Apostel zegt, dat wij om niet, of uit genade gerechtvaardigd zijn, door de verlossing, die in Jezus Christus is. En daarom houden wij dit fondament altijd vast, Gode alle de eere gevende, ons vernederende en bekennende zoodanigen als wij zijn, zonder iets van onszelven of van onze verdiensten te vermeten, steunende en rustende op de gehoorzaamheid des gekruisigden Christus alleen, dewelke onze is, wanneer wij in Hem gelooven. Die is genoegzaam, om alle onze ongerechtigheden te bedekken, en ons vrijmoedigheid te geven, de consciëntie vrij makende van vreeze, verbaasdheid en verschrikking om tot God te gaan, zonder te doen gelijk onze eerste vader Adam, dewelke al bevende zich met vijgebladeren bedekken wilde. En voorwaar, indien wij voor God verschijnen moesten, steunende op onszelven of op eenige andere schepselen, hoe weinig het ook ware, wij moesten (helaas) verslonden worden. En daarom moet een iegelijk zeggen met David: Heere, ga niet in het gericht met uwen knecht, want niemand, die leeft, zal voor uw aangezichte rechtvaardig zijn."
+        }
+      ]
+    },
+    {
+      "id": "artikel-24",
+      "number": 24,
+      "label": "Artikel 24",
+      "title": "Van de heiligmaking des menschen en de goede werken",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Wij gelooven, dat dit waarachtig geloof, in den mensch gewrocht zijnde door het gehoor des Woords Gods en de werking des Heiligen Geestes, hem wederbaart en maakt tot eenen nieuwen mensch, en doet hem leven in een nieuw leven, en maakt hem vrij van de slavernij der zonde. Daarom is het zoo verre van daar, dat dit rechtvaardigmakend geloof de menschen zoude doen verkouden in een vroom en heilig leven, dat zij daarentegen zonder ditzelve nimmermeer iets doen zullen uit liefde tot God, maar alleen uit liefde tot zichzelven, en uit vreeze van verdoemd te worden. Zoo is het dan onmogelijk, dat dit heilig geloof ledig zij in den mensch; aangezien wij niet spreken van een ijdel geloof, maar van zulk een, hetwelk de Schrifture noemt een geloof, dat door de liefde werkt, dat den mensch beweegt, om zich te oefenen in de werken, die God in zijn Woord geboden heeft; welke werken, als zij voortkomen uit den goeden wortel des geloofs, goed en bij God aangenaam zijn, overmits zij alle door zijne genade geheiligd zijn. Intusschen komen zij niet in rekening om ons te rechtvaardigen; want het is door het geloof in Christus, dat wij gerechtvaardigd worden, ook eer wij goede werken doen; anderszins zouden zij niet kunnen goed zijn, evenmin als eene vrucht des booms goed zijn kan, voordat de boom goed is. Zoo doen wij dan goede werken; maar niet om te verdienen (want wat zouden wij verdienen?); ja wij zijn in God gehouden voor de goede werken die wij doen, en niet Hij in ons: aangezien Hij het is, die in ons werkt beide het willen en het werken, naar zijn welbehagen. Laat ons dan letten op hetgene dat er geschreven staat: Wanneer gij zult gedaan hebben al hetgene u bevolen is, zoo zegt: wij zijn onnutte dienstknechten, want wij hebben maar gedaan hetgene wij schuldig waren te doen. Intusschen willen wij niet loochenen, dat God de goede werken beloont; maar het is door zijne genade, dat Hij zijne gaven kroont. Voorts, al is het dat wij goede werken doen, zoo gronden wij toch onze zaligheid niet daarop; want wij kunnen geen werk doen, of het is besmet door ons vleesch en ook strafwaardig; en al konden wij er één voorbrengen, zoo is toch de gedachtenis van ééne zonde genoeg, dat het van God zoude verworpen worden. Alzoo dan zouden wij altijd in twijfel staan, herwaarts en derwaarts drijvende zonder eenige zekerheid, en onze arme consciëntiën zouden altijd gekweld worden, indien zij niet steunden op de verdiensten van het lijden en sterven onzes Zaligmakers."
+        }
+      ]
+    },
+    {
+      "id": "artikel-25",
+      "number": 25,
+      "label": "Artikel 25",
+      "title": "Van het afdoen der ceremoniëele wet",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Wij gelooven, dat de ceremoniën en figuren der Wet opgehouden hebben met de komst van Christus, en dat alle schaduwen een einde genomen hebben; alzoo dat het gebruik daarvan onder de Christenen weggenomen moet worden; nochtans blijft ons de waarheid en substantie daarvan in Christus Jezus, in denwelken zij hare vervulling hebben. Intusschen gebruiken wij nog de getuigenissen, genomen uit de Wet en de Profeten, om ons in het Evangelie te bevestigen, en ook om ons leven te reguleeren; in alle eerbaarheid, tot Gods eere, volgens zijnen wil."
+        }
+      ]
+    },
+    {
+      "id": "artikel-26",
+      "number": 26,
+      "label": "Artikel 26",
+      "title": "Van de eenige voorbidding van Christus",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Wij gelooven, dat wij geenen toegang hebben tot God dan alleen door den eenigen Middelaar en Voorspraak, Jezus Christus, den rechtvaardige; dewelke hierom mensch geworden is, vereenigende te zamen de Goddelijke en de menschelijke natuur, opdat wij menschen eenen toegang zouden hebben tot de Goddelijke Majesteit; anderszins ware ons de toegang gesloten. Maar deze Middelaar, dien de Vader ons heeft gegeven tusschen zich en ons, moet ons door zijne grootheid niet verschrikken, om ons een ander, naar ons goeddunken, te doen zoeken. Want er is niemand, noch in den hemel, noch op de aarde, onder de schepselen, die ons liever heeft dan Jezus Christus, dewelke, hoewel Hij in de gestaltenisse Gods was, nochtans zichzelven vernietigd heeft, aannemende de gestaltenisse eens menschen en eens dienstknechts voor ons, en is in alles zijnen broederen gelijk geworden. Indien wij nu eenen anderen Middelaar zoeken moesten, die ons goedgunstig ware, wien zouden wij kunnen vinden, die ons meer beminde dan Hij, die zijn leven voor ons gelaten heeft, ook toen wij zijne vijanden waren? En zoo wij eenen zoeken, die macht en aanzien heeft, wie is er, die daarvan zoo veel heeft als degene, die gezeten is ter rechterhand zijns Vaders, en die alle macht heeft in den hemel en op de aarde? En wie zal eer verhoord worden, dan de eigen welbeminde Zone Gods? Zoo is dan alleen door een mistrouwen dit gebruik ingevoerd, dat men de heiligen onteert, in plaats van die te eeren, doende hetgene zij nooit gedaan noch begeerd hebben, maar hebben het volstandiglijk en volgens hunnen schuldigen plicht verworpen, als blijkt uit hunne schriften. En hier moet men niet voorbrengen, dat wij het niet waardig zijn; want het heeft hier de meening niet, dat wij onze gebeden op onze waardigheid zouden voordragen, maar alleen op de uitnemendheid en waardigheid onzes Heeren Jezus Christus, wiens rechtvaardigheid de onze is door het geloof. Daarom, de Apostel, willende deze zotte vreeze, of veelmeer dat mistrouwen, van ons nemen, zegt ons, dat Jezus Christus zijnen broederen in alles gelijk geworden is, opdat Hij een barmhartig en een getrouw Hoogepriester zoude zijn, om de zonden des volks te verzoenen; want in hetgene Hij zelf, verzocht zijnde, geleden heeft, kan Hij dengenen, die verzocht worden, te hulpe komen. En daarna, om ons nog meer moed te geven om tot Hem te gaan, zegt hij: Dewijl wij dan eenen grooten Hoogepriester hebben, die door de hemelen doorgegaan is, namelijk Jezus, den Zone Gods, zoo laat ons deze belijdenis vasthouden. Want wij hebben geenen Hoogepriester, die niet kan medelijden hebben met onze zwakheden, maar die in alle dingen, gelijk als wij, is verzocht geweest, doch zonder zonde. Laat ons dan met vrijmoedigheid toegaan tot den troon der genade, opdat wij barmhartigheid mogen verkrijgen, en genade vinden om geholpen te worden ter bekwamer tijd. Dezelfde Apostel zegt, dat wij vrijmoedigheid hebben om in te gaan in het heiligdom door het bloed van Jezus; laat ons dan toegaan, zegt hij, in volle verzekerdheid des geloofs, enz. Insgelijks: Christus heeft een onvergankelijk priesterschap; waarom Hij ook volkomenlijk kan zalig maken degenen die door Hem tot God gaan, alzoo Hij altijd leeft, om voor hen te bidden. Wat ontbreekt er meer, dewijl Christus zelf deze uitspraak doet: Ik ben de weg, en de waarheid, en het leven; niemand komt tot den Vader dan door Mij? Waartoe zouden wij eenen anderen Advocaat zoeken, aangezien het God beliefd heeft ons zijnen Zoon tot eenen Advocaat te geven? Laat ons Hem niet verlaten, om eenen anderen te nemen; of veel meer, eenen anderen te zoeken, zonder hem immermeer te vinden; want toen God Hem ons gegeven heeft, zoo wist Hij wel dat wij zondaars waren. Daarom, volgens het bevel van Christus, zoo roepen wij den hemelschen Vader aan door Christus, onzen eenigen Middelaar, gelijk wij in het Gebed des Heeren geleerd zijn; verzekerd zijnde, dat al wat wij den Vader zullen bidden in zijnen naam, ons zal gegeven worden."
+        }
+      ]
+    },
+    {
+      "id": "artikel-27",
+      "number": 27,
+      "label": "Artikel 27",
+      "title": "Van de algemeene Christelijke Kerk",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Wij gelooven en belijden eene eenige Katholieke of algemeene Kerk, dewelke is eene heilige vergadering der ware Christ-geloovigen, alle hunne zaligheid verwachtende in Jezus Christus, gewasschen zijnde door zijn bloed, geheiligd en verzegeld door den H. Geest. Deze Kerk is geweest van den beginne der wereld af, en zal zijn tot den einde toe; gelijk daaruit blijkt, dat Christus een eeuwig Koning is, dewelke zonder onderdanen niet zijn kan. En deze heilige Kerk wordt van God bewaard, of staande gehouden, tegen het woeden der geheele wereld; hoewel zij somwijlen een tijd lang zeer klein en als tot niet schijnt gekomen te zijn in de oogen der menschen; gelijk zich de Heere gedurende den gevaarlijken tijd onder Achab zeven duizend menschen behouden heeft, die hunne knieën voor Baäl niet gebogen hadden. Ook mede is deze H. Kerke niet gelegen, gebonden, of bepaald in eene zekere plaats, of aan zekere personen, maar zij is verspreid en verstrooid door de geheele wereld; nochtans te zamen gevoegd en vereenigd zijnde met hart en wil in éénen zelfden Geest, door de kracht des geloofs."
+        }
+      ]
+    },
+    {
+      "id": "artikel-28",
+      "number": 28,
+      "label": "Artikel 28",
+      "title": "Dat een iegelijk schuldig is zich bij de ware Kerk te voegen",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Wij gelooven, aangezien deze heilige vergadering is eene verzameling dergenen die zalig worden, en dat buiten haar geene zaligheid is, dat niemand, van wat staat of qualiteit hij zij, zich behoort op zichzelven te houden, om op zijn eigen persoon te staan; maar dat zij allen schuldig zijn zichzelven daar bij te voegen en daarmede te vereenigen; onderhoudende de eenigheid der Kerk, zich onderwerpende aan hare onderwijzing en tucht, den hals buigende onder het juk van Jezus Christus, en dienende de opbouwing der broederen, naar de gaven die hun God verleend heeft, als onderlinge lidmaten eenszelfden lichaams. En opdat dit te beter kunne onderhouden worden, zoo is het ambt aller geloovigen, volgens het Woord Gods, zich af te scheiden van degenen die niet van de Kerk zijn, en zich te voegen tot deze vergadering, het zij op wat plaats dat God ze gesteld heeft; ook ofschoon het zoo ware, dat de Magistraten en plakkaten der Prinsen daar tegen waren, en dat de dood of eenige lichamelijke straf daaraan hing. Daarom, alle degenen die zich van haar afscheiden of niet daar bijvoegen, die doen tegen de ordonnantie Gods."
+        }
+      ]
+    },
+    {
+      "id": "artikel-29",
+      "number": 29,
+      "label": "Artikel 29",
+      "title": "Van het onderscheid en de merkteekenen der ware en valsche Kerk",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Wij gelooven, dat men wel naarstiglijk en met goede voorzichtigheid, uit den Woorde Gods, behoort te onderscheiden, welke de ware Kerk zij; aangezien dat alle sekten, die heden ten dage in de wereld zijn, zich met den naam der Kerk bedekken. Wij spreken hier niet van het gezelschap der hypocrieten, welke in de Kerk onder de goeden vermengd zijn, en intusschen van de Kerk niet zijn, hoewel zij naar het lichaam in haar zijn; maar wij zeggen, dat men het lichaam en de gemeenschap der ware Kerk onderscheiden zal van alle sekten, welke zeggen dat zij de Kerk zijn. De merkteekenen, om de ware Kerk te kennen, zijn deze: zoo de Kerk de reine predikatie des Evangelies oefent; indien zij gebruikt de reine bediening der Sacramenten, gelijk ze Christus ingesteld heeft; zoo de kerkelijke tucht gebruikt wordt, om de zonden te straffen. Kortelijk, zoo men zich aanstelt naar het zuivere Woord Gods, verwerpende alle dingen die daar tegen zijn, houdende Jezus Christus voor het eenige Hoofd. Hierdoor kan men zekerlijk de ware Kerk kennen, en het komt niemand toe, zich daarvan te scheiden. En aangaande degenen die van de Kerk zijn, die kan men kennen uit de merkteekenen der Christenen; te weten, uit het geloof, en wanneer zij, aangenomen hebbende den eenigen Zaligmaker Jezus Christus, de zonde vlieden en de gerechtigheid najagen, den waren God en hunnen naaste liefhebben, niet afwijken noch ter rechter- noch ter linkerhand, en hun vleesch kruisigen met zijne werken. Alzoo nochtans niet, alsof er nog geen groote zwakheid in hen zij; maar zij strijden daartegen door den Geest alle de dagen huns levens, nemende gestadiglijk hunne toevlucht tot het bloed, den dood, het lijden en de gehoorzaamheid des Heeren Jezus, in denwelken zij vergeving hunner zonden hebben, door het geloof in Hem. Aangaande de valsche kerk, die schrijft zich en haren ordinantiën meer macht en autoriteit toe dan den Woorde Gods, en wil zich aan het juk van Christus niet onderwerpen; zij bedient de Sacramenten niet, gelijk Christus in zijn Woord verordend heeft, maar zij doet daar af en toe, gelijk als het haar goed dunkt; zij grondt zich meer op de menschen, dan op Christus; zij vervolgt degenen die heiliglijk leven naar het Woord Gods, en die haar bestraffen over hare gebreken, gierigheid en afgoderijen. Deze twee kerken zijn lichtelijk te kennen en van malkanderen te onderscheiden."
+        }
+      ]
+    },
+    {
+      "id": "artikel-30",
+      "number": 30,
+      "label": "Artikel 30",
+      "title": "Van de regeering der Kerk door kerkelijke ambten",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Wij gelooven, dat deze ware Kerk geregeerd moet worden naar de geestelijke politie, die ons onze Heere heeft geleerd in zijn Woord; namelijk dat er Dienaars of Herders moeten zijn, om Gods Woord te prediken en de Sacramenten te bedienen; dat er ook Opzieners en Diakenen zijn, om met de Herders te zijn als de Raad der Kerk; en door dit middel de ware religie te onderhouden, en te maken, dat de ware leer haren loop hebbe, dat ook de overtreders op geestelijke wijze gestraft worden en in den toom gehouden, opdat ook de armen en bedrukten geholpen en getroost worden, naar dat zij van noode hebben. Door dit middel zullen alle dingen in de Kerk wel en ordelijk toegaan, wanneer zulke personen verkoren worden, die getrouw zijn, en naar den regel, dien S. Paulus daarvan geeft in den Brief aan Timotheüs."
+        }
+      ]
+    },
+    {
+      "id": "artikel-31",
+      "number": 31,
+      "label": "Artikel 31",
+      "title": "Van de Dienaren, Ouderlingen en Diakenen",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Wij gelooven, dat de Dienaars des Woords Gods, Ouderlingen en Diakenen tot hunne ambten behooren verkoren te worden door wettige verkiezing der Kerk, met aanroeping van den naam Gods en goede orde, gelijk het Woord Gods leert. Zoo moet zich dan een iegelijk wel wachten door onbehoorlijke middelen zich in te dringen, maar is schuldig den tijd te verwachten dat hij van God beroepen wordt, opdat hij getuigenis hebbe van zijne beroeping, om van haar verzekerd en gewis te zijn, dat zij van den Heere is. En aangaande de Dienaars des Woords, in wat plaats dat zij zijn, zoo hebben zij eene zelfde macht en autoriteit, zijnde altegader Dienaars van Jezus Christus, den eenigen algemeenen Bisschop en het eenige Hoofd der Kerk. Daarenboven, opdat de H. ordinantie Gods niet geschonden worde of in verachting kome, zoo zeggen wij, dat een ieder de Dienaars des Woords en de Ouderlingen der Kerk in bijzondere achting behoort te hebben, om des werks wille dat zij doen, en in vrede met hen te zijn, zonder murmureering, twist of tweedracht, zoo veel mogelijk is."
+        }
+      ]
+    },
+    {
+      "id": "artikel-32",
+      "number": 32,
+      "label": "Artikel 32",
+      "title": "Van de orde en discipline of tucht der Kerk",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Intusschen gelooven wij, hoewel het nuttig en goed is, dat die Regeerders der Kerk zijn onder zich zekere ordinantie instellen en bevestigen tot onderhouding van het lichaam der Kerk, dat zij nochtans zich wel moeten wachten af te wijken van hetgene ons Christus, onze eenige Meester, geordineerd heeft. En daarom verwerpen wij alle menschelijke vonden, en alle wetten, die men zoude willen invoeren, om God te dienen, en door deze de consciëntiën te binden en te dwingen, in wat manier het zoude mogen zijn. Zoo nemen wij dan alleen aan, hetgene dienstig is om eendrachtigheid en eenigheid te voeden en te bewaren, en alles te onderhouden in de gehoorzaamheid Gods; waartoe geëischt wordt de excommunicatie of de ban, die daar geschiedt naar den Woorde Gods, met hetgene daaraan hangt."
+        }
+      ]
+    },
+    {
+      "id": "artikel-33",
+      "number": 33,
+      "label": "Artikel 33",
+      "title": "Van de Sacramenten",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Wij gelooven, dat onze goede God, acht hebbende op onze grovigheid en zwakheid, ons heeft verordend de Sacramenten, om aan ons zijne beloften te verzegelen, en om panden te zijn der goedwilligheid en genade Gods te onswaarts, en ook om ons geloof te voeden en te onderhouden; dewelke Hij gevoegd heeft bij het woord des Evangelies, om te beter aan onze uiterlijke zinnen voor te stellen, zoowel hetgene Hij ons te verstaan geeft door zijn Woord, als hetgene Hij inwendig doet in onze harten, bondig en vast makende in ons de zaligheid, die Hij ons mededeelt. Want het zijn zichtbare waarteekenen en zegelen van eene inwendige en onzienlijke zaak, door middel waarvan God in ons werkt door de kracht des H. Geestes. Zoo zijn dan de teekenen niet ijdel noch ledig, om ons te bedriegen; want Jezus Christus is hunne waarheid, zonder wien zij niet met al zijn zouden. Voorts zijn wij tevreden met het getal der Sacramenten, die Christus, onze Meester, ons heeft verordend, welke niet meer dan twee zijn; te weten, het Sacrament des Doops, en des Heiligen Avondmaals van Jezus Christus."
+        }
+      ]
+    },
+    {
+      "id": "artikel-34",
+      "number": 34,
+      "label": "Artikel 34",
+      "title": "Van den Heiligen Doop",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Wij gelooven en belijden, dat Jezus Christus, die het einde der wet is, door zijn vergoten bloed een einde gemaakt heeft aan alle andere bloedstortingen, die men zoude kunnen of willen doen tot verzoening en voldoening der zonden; en dat Hij, afgedaan hebbende de Besnijding, die met bloed geschiedde, in de plaats daarvan heeft verordend het Sacrament des Doops, door hetwelk wij in de Kerke Gods ontvangen en van alle andere volken en vreemde religiën afgezonderd worden, om geheellijk Hem toegeëigend te zijn, zijn merk en veldteeken dragende; en het dient ons tot een getuigenis, dat Hij in eeuwigheid onze God zijn zal, ons zijnde een genadig Vader. Zoo heeft Hij dan bevolen te doopen alle degenen die de zijnen zijn, in den naam des Vaders, en des Zoons, en des H. Geestes, alleen met rein water; ons daarmede te verstaan gevende, dat, gelijk het water de vuiligheid des lichaams afwascht, wanneer wij daarmede begoten worden, hetwelk op het lichaam desgenen die den Doop ontvangt gezien wordt, en hem besprengt, alzoo het bloed van Christus hetzelfde van binnen in de ziele doet, door den Heiligen Geest, haar besprengende en zuiverende van hare zonden, en ons wederbarende uit kinderen des toorns tot kinderen Gods. Niet dat zulks door het uiterlijke water geschiedt, maar door de besprenging des dierbaren bloeds des Zoons Gods; die onze Roode Zee is, door welke wij moeten doorgaan, om te ontgaan de tirannieën van Pharaö, welke is de duivel, en in te gaan in het geestelijke land Kanaän. Alzoo geven ons de Dienaars van hunne zijde het Sacrament, en hetgene dat zichtbaar is; maar onze Heere geeft hetgene door het Sacrament beduid wordt, te weten, de gaven en onzienlijke genaden, wasschende, zuiverende en reinigende onze zielen van alle vuiligheden en ongerechtigheden, en onze harten vernieuwende en die vervullende met alle vertroosting, ons gevende eene ware verzekerdheid zijner vaderlijke goedheid, ons den nieuwen mensch aandoende, en den ouden uittrekkende met alle zijne werken. Hierom gelooven wij, dat, zoo wiens voornemen is in het eeuwige leven te komen, die moet maar eens gedoopt worden met den eenigen Doop, zonder dien immermeer te herhalen; want wij kunnen ook niet tweemaal geboren worden. Doch deze Doop is niet alleen nut, zoolang het water op ons is, en dat wij het water ontvangen, maar ook al den tijd onzes levens. Hierom verwerpen wij de dwaling der Wederdooperen, die niet tevreden zijn met een eenig doopsel, dat zij eens ontvangen hebben; en daarenboven verdoemen den doop der kinderkens der geloovigen; dewelke wij gelooven dat men behoort te doopen en met het merkteeken des verbonds te verzegelen, gelijk de kinderkens in Israël besneden werden, op dezelfde beloften, die onzen kinderen gedaan zijn. En voorwaar, Christus heeft zijn bloed niet minder vergoten om de kinderkens der geloovigen te wasschen, dan Hij gedaan heeft om de volwassenen. En daarom behooren zij het teeken te ontvangen en het Sacrament van hetgene dat Christus voor hen gedaan heeft; gelijk de Heere in de wet beval, hun mede te deelen het Sacrament des lijdens en stervens van Christus, kort nadat zij geboren waren, offerende voor hen een lammeken, hetwelk was een Sacrament van Jezus Christus. Daarenboven, hetgene de Besnijdenis deed aan het Joodsche volk, hetzelfde doet de Doop aan onze kinderen; welke de oorzaak is, waarom de Heilige Paulus den Doop noemt de Besnijdenis van Christus."
+        }
+      ]
+    },
+    {
+      "id": "artikel-35",
+      "number": 35,
+      "label": "Artikel 35",
+      "title": "Van het Heilig Avondmaal onzes Heeren Jezus Christus",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Wij gelooven en belijden, dat onze Zaligmaker Jezus Christus het Sacrament des Heiligen Avondmaals verordend en ingesteld heeft, om te voeden en te onderhouden degenen, die hij alreede wedergeboren, en in zijn huisgezin, hetwelk is zijne Kerk, ingelijfd heeft. Nu hebben degenen, die wedergeboren zijn, in zich tweeërlei leven: het ééne lichamelijk en tijdelijk, hetwelk zij van hunne eerste geboorte medegebracht hebben, en allen menschen gemeen is; het andere is geestelijk en hemelsch, hetwelk hun gegeven wordt in de tweede geboorte, dewelke geschiedt door het Woord des Evangelies, in de gemeenschap des lichaams van Christus; en dit leven is niet gemeen, dan alleen den uitverkorenen Gods. Alzoo heeft ons God, tot onderhouding des lichamelijken en aardschen levens, aardsch en gemeen brood verordend, hetwelk daartoe dienstig is, en allen gemeen is, zoowel als het leven. Maar om het geestelijk en hemelsch leven te onderhouden, hetwelk de geloovigen hebben, heeft Hij hun gezonden een levend brood, dat van den hemel nedergedaald is, te weten, Jezus Christus, dewelke het geestelijk leven der geloovigen voedt en onderhoudt, als Hij gegeten, dat is, toegeëigend en ontvangen wordt door het geloof in den geest. Om ons dit geestelijk en hemelsch brood af te beelden, heeft Christus verordend een aardsch en zienlijk brood, hetwelk een Sacrament is van zijn lichaam, en den wijn tot een Sacrament zijns bloeds; om ons te betuigen, dat wij, zoo waarachtiglijk als wij het Sacrament ontvangen en houden in onze handen en het eten en drinken met onzen mond, waarmede ons leven daarna onderhouden wordt, ook zoo waarachtiglijk door het geloof (hetwelk de hand en mond onzer ziele is) het ware lichaam en het ware bloed van Christus, onzen eenigen Zaligmaker, ontvangen in onze zielen tot ons geestelijk leven. Nu, zoo is het zeker en ongetwijfeld, dat ons Jezus Christus zijne Sacramenten niet tevergeefs heeft bevolen. Zoo werkt Hij dan in ons al wat Hij door deze heilige teekenen ons voor oogen stelt; hoewel de wijze ons verstand te boven gaat, en ons onbegrijpelijk is, gelijk de werking des H. Geestes verborgen en onbegrijpelijk is. Intusschen zoo feilen wij niet, als wij zeggen, dat hetgene door ons gegeten en gedronken wordt, het eigen en natuurlijk lichaam en het eigen bloed van Christus is; maar de wijze op welke wij dit nuttigen, is niet de mond, maar de geest door het geloof. Alzoo dan blijft Jezus Christus altijd zittende ter rechterhand Gods Zijns Vaders in de hemelen, en laat toch daarom niet na, ons zijns deelachtig te maken door het geloof. Deze maaltijd is eene geestelijke tafel, aan dewelke Christus zichzelven ons mededeelt met alle zijne goederen, en doet ons aan haar genieten, zoowel zichzelven, als de verdiensten zijns lijdens en stervens; voedende, sterkende, en vertroostende onze arme troostelooze ziele door het eten zijns vleesches, en haar verkwikkende en vermakende door den drank zijns bloeds. Voorts, hoewel de Sacramenten met de beteekende zaken te zamen gevoegd zijn, zoo worden zij nochtans met deze twee zaken door allen niet ontvangen. De goddelooze ontvangt wel het Sacrament tot zijne verdoemenis, maar hij ontvangt niet de waarheid des Sacraments; gelijk als Judas en Simon de toovenaar beiden wel het Sacrament ontvingen, maar niet Christus, die door datzelve beteekend wordt, welke den geloovigen alleen medegedeeld wordt. Ten laatste, wij ontvangen het H. Sacrament in de verzameling des volks Gods met ootmoedigheid en eerbied, onder ons houdende eene heilige gedachtenis des doods van Christus, onzen Zaligmaker, met dankzegging, en doen aldaar belijdenis van ons geloof en van de Christelijke religie. Daarom behoort zich niemand daartoe te begeven, zonder zichzelven eerst wel beproefd te hebben; opdat hij, etende van dit brood en drinkende uit dezen drinkbeker, niet ete en drinke zichzelven een oordeel. Kortelijk, wij zijn door het gebruik van dit H. Sacrament bewogen tot eene vurige liefde jegens God en onzen naaste. Daarom verwerpen wij alle inmengselen en verdoemelijke vonden, die de menschen bij de Sacramenten gedaan en gemengd hebben, als ontheiligingen daarvan, en zeggen dat men zich moet laten vergenoegen met de ordening, die Christus en zijne Apostelen ons geleerd hebben, en spreken, gelijk zij daarvan gesproken hebben."
+        }
+      ]
+    },
+    {
+      "id": "artikel-36",
+      "number": 36,
+      "label": "Artikel 36",
+      "title": "Van het ambt der Overheid",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Wij gelooven, dat onze goede God, uit oorzaak der verdorvenheid des menschelijken geslachts, Koningen, Prinsen en Overheden verordend heeft; willende dat de wereld geregeerd worde door wetten en politiën, opdat de ongebondenheid der menschen bedwongen worde en het alles met goede ordinantie onder de menschen toega. Tot dat einde heeft Hij de Overheid het zwaard in handen gegeven tot straffe der boozen en bescherming der vromen. En hun ambt is, niet alleen acht te nemen en te waken over de Politie, maar ook de hand te houden aan den Heiligen Kerkedienst; om te weren en uit te roeien alle afgoderij en valschen godsdienst, om het rijk des antichrists te gronde te werpen, en het Koninkrijk van Jezus Christus te doen vorderen, het woord des Evangelies overal te doen prediken, opdat God van een iegelijk geëerd en gediend worde, gelijk Hij in zijn Woord gebiedt. Voorts, een ieder, van wat qualiteit, conditie of staat hij zij, is schuldig, zich den Overheden te onderwerpen, schattingen te betalen, hun eere en eerbied toe te dragen, en hun gehoorzaam te zijn in alle dingen, die niet strijden tegen Gods Woord; voor hen biddende in hunne gebeden, opdat hen de Heere stieren wille in alle hunne wegen, en dat wij een gerust en stil leven leiden in alle Godzaligheid en eerbaarheid. En hierin verwerpen wij de Wederdoopers en andere oproerige menschen, en in het gemeen alle degenen, die de Overheden en Magistraten verwerpen en de Justitie omstooten willen, invoerende de gemeenschap der goederen, en verwarren de eerbaarheid, die God onder de menschen gesteld heeft."
+        }
+      ]
+    },
+    {
+      "id": "artikel-37",
+      "number": 37,
+      "label": "Artikel 37",
+      "title": "Van het laatste oordeel",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Ten laatste gelooven wij, volgens het Woord Gods, dat, als de tijd, van den Heere verordend (die allen creaturen onbekend is), gekomen, en het getal der uitverkorenen vervuld zal zijn, onze Heere Jezus Christus uit den hemel zal komen, lichamelijk en zienlijk, gelijk Hij opgevaren is, met groote heerlijkheid en majesteit, om zich te verklaren een Rechter te zijn over levenden en dooden; deze oude wereld in vuur en vlam stellende om haar te zuiveren. En alsdan zullen persoonlijk voor dezen grooten Rechter verschijnen alle menschen, zoowel mannen als vrouwen en kinderen, die van den aanbeginne der wereld af tot den einde toe geweest zullen zijn, verdagvaard zijnde door de stemme des archangels en door het geklank der Goddelijke bazuin. Want alle degenen die gestorven zullen wezen, zullen uit de aarde verrijzen, de zielen te zamen gevoegd en vereenigd zijnde met haar eigen lichaam, in hetwelk zij zullen geleefd hebben. En aangaande degenen die alsdan nog leven zullen, die zullen niet sterven gelijk de anderen, maar zullen in een oogenblik veranderd en uit verderfelijk onverderfelijk worden. Alsdan zullen de boeken (dat is, de consciëntiën) geopend, en de dooden geoordeeld worden, naar hetgene zij in deze wereld gedaan zullen hebben, hetzij goed of kwaad. Ja de menschen zullen rekenschap geven van alle ijdele woorden, die zij gesproken zullen hebben, die de wereld niet dan voor kinderspel en voor tijdverdrijf acht; en dan zullen de verborgenheden en geveinsdheden der menschen openbaarlijk voor allen ontdekt worden. En daarom is de gedachtenis van dit oordeel met recht schrikkelijk en vervaarlijk voor de boozen en goddeloozen, en zeer wenschelijk en troostelijk voor de vromen en uitverkorenen; dewijl alsdan hunne volle verlossing volbracht zal worden, en zij aldaar zullen ontvangen de vruchten des arbeids en der moeite, die zij zullen gedragen hebben; hunne onnoozelheid zal door allen bekend worden; en zij zullen de schrikkelijke wrake zien, die God tegen de goddeloozen doen zal, die hen getiranniseerd, verdrukt en gekweld zullen hebben in deze wereld. Dewelke overwonnen zullen worden door het getuigenis hunner eigene consciëntiën, en zullen onsterfelijk worden, doch in zulker voege, dat het zal zijn om gepijnigd te worden in het eeuwige vuur, hetwelk den duivel en zijnen engelen bereid is. En daarentegen, de geloovigen en uitverkorenen zullen gekroond worden met heerlijkheid en eere. De Zone Gods zal hunnen naam belijden voor God zijnen Vader en zijne uitverkorene engelen; alle tranen zullen van hunne oogen afgewischt worden; hunne zake, die nu tegenwoordiglijk door vele Rechteren en Overheden als kettersch en goddeloos verdoemd wordt, zal bekend worden de zake des Zoons Gods te zijn. En tot eene genadige vergelding zal hen de Heere zulk eene heerlijkheid doen bezitten, als het hart eens menschen nimmermeer zoude kunnen bedenken. Daarom verwachten wij dien grooten dag met een groot verlangen, om ten volle te genieten de beloften Gods, in Jezus Christus onzen Heere."
+        }
+      ]
+    }
+  ]
+}

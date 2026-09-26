@@ -1,0 +1,325 @@
+{
+  "slug": "drie-algemene-belijdenissen",
+  "title": "De drie algemene belijdenissen",
+  "author": null,
+  "year": "4e-6e eeuw",
+  "sectionNoun": "Belijdenis",
+  "source": {
+    "name": "A. Kuyper (ed.), De Drie Formulieren van Eenigheid, 11e uitgave (Amsterdam: Höveker & Wormser, 1898), bijlagen \"De Apostolische Geloofsbelijdenis\", \"De Geloofsbelijdenis van Nicea\" en \"De Geloofsbelijdenis van Athanasius\" (aangehaald in art. 9 der Belijdenis); scan Internet Archive",
+    "url": "https://archive.org/details/dedrieformuliere1898kuyp",
+    "edition": "Nederlandse tekst zoals afgedrukt achter de Formulieren van Eenigheid in de uitgave-Kuyper 1898 (gelijk aan De berijmde Psalmen ... met de drie oude Geloofsbelijdenissen, 1897 en 1913), spelling De Vries-Te Winkel; artikelnummers [1.]-[12.] en [1.]-[44.] zoals gedrukt",
+    "retrieved": "2026-09-26",
+    "note": "OCR gecorrigeerd door stemming met de psalmboekuitgaven 1897 (archive.org/details/deberijmdepsalme00gere) en 1913 (archive.org/details/deberijmdepsal00gere); daarna de hele tekst op de paginascans nagelezen (blz. 114-117; blz. 117 is in de scan beschadigd, de lezingen daar zijn bevestigd door beide psalmboekuitgaven). De ondertitel \"Aangehaald in Art. 9 der Belijdenis\" en Kuypers voetnoten zijn weggelaten. Let op: de Nicea- en Athanasiustekst van deze uitgave is de door Kuyper herziene vertaling (o.a. \"substantie\", \"gevoelen\"), die afwijkt van de oudere kerkboektekst (\"zelfstandigheid\") in hedendaagse psalmboeken. Apostolicum artikel 5 staat in de druk als \"[5]\" zonder punt."
+  },
+  "rights": "Oude kerkelijke belijdenissen in de Nederlandse tekst van de uitgave van A. Kuyper uit 1898 (Kuyper overleden 1920); publiek domein.",
+  "sections": [
+    {
+      "id": "apostolische-geloofsbelijdenis",
+      "number": 1,
+      "label": "Apostolische Geloofsbelijdenis",
+      "title": "De Apostolische Geloofsbelijdenis",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "number": 1,
+          "text": "Ik geloof in God den Vader, den Almachtige, Schepper des hemels en der aarde."
+        },
+        {
+          "type": "paragraph",
+          "number": 2,
+          "text": "En in Jezus Christus, zijnen eeniggeborenen Zoon, onzen Heere;"
+        },
+        {
+          "type": "paragraph",
+          "number": 3,
+          "text": "die ontvangen is van den Heiligen Geest, geboren uit de Maagd Maria;"
+        },
+        {
+          "type": "paragraph",
+          "number": 4,
+          "text": "die geleden heeft onder Pontius Pilatus, is gekruisigd, gestorven en begraven, nedergedaald ter helle;"
+        },
+        {
+          "type": "paragraph",
+          "number": 5,
+          "text": "ten derden dage wederom opgestaan van de dooden;"
+        },
+        {
+          "type": "paragraph",
+          "number": 6,
+          "text": "opgevaren ten hemel, zittende ter rechterhand Gods des almachtigen Vaders;"
+        },
+        {
+          "type": "paragraph",
+          "number": 7,
+          "text": "van waar Hij komen zal om te oordeelen de levenden en de dooden."
+        },
+        {
+          "type": "paragraph",
+          "number": 8,
+          "text": "Ik geloof in den Heiligen Geest."
+        },
+        {
+          "type": "paragraph",
+          "number": 9,
+          "text": "Ik geloof eene heilige, algemeene, Christelijke Kerk, de gemeenschap der heiligen;"
+        },
+        {
+          "type": "paragraph",
+          "number": 10,
+          "text": "vergeving der zonden;"
+        },
+        {
+          "type": "paragraph",
+          "number": 11,
+          "text": "wederopstanding des vleesches;"
+        },
+        {
+          "type": "paragraph",
+          "number": 12,
+          "text": "en een eeuwig leven."
+        }
+      ]
+    },
+    {
+      "id": "geloofsbelijdenis-van-nicea",
+      "number": 2,
+      "label": "Geloofsbelijdenis van Nicea",
+      "title": "De Geloofsbelijdenis van Nicea",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Ik geloof in éénen God, den almachtigen Vader, Schepper des hemels en der aarde, aller zienlijke en onzienlijke dingen. En in éénen Heere Jezus Christus, den eeniggeborenen Zone Gods, geboren uit den Vader vóór alle eeuwen; God uit God, licht uit licht, waarachtig God uit waarachtig God, geboren, niet gemaakt, van hetzelfde wezen met den Vader, door welken alle dingen gemaakt zijn. Die om ons menschen en om onze zaligheid is nedergekomen uit den hemel, en vleesch geworden is van den Heiligen Geest uit de maagd Maria, en een mensch is geworden; ook voor ons gekruisigd is onder Pontius Pilatus, geleden heeft, en begraven is; en ten derden dage opgestaan is naar de Schriften, en opgevaren is ten hemel; zit ter rechterhand des Vaders, en zal wederkomen met heerlijkheid om te oordeelen de levenden en de dooden; wiens rijk geen einde zal hebben. En in den Heiligen Geest, die Heere is en levend maakt, die van den Vader en den Zoon uitgaat, die te zamen met den Vader en den Zoon aangebeden en verheerlijkt wordt, die gesproken heeft door de Profeten. En ééne, heilige, algemeene en Apostolische Kerk. Ik belijd éénen Doop tot vergeving der zonden, en ik verwacht de opstanding der dooden, en het leven der toekomende eeuw. Amen."
+        }
+      ]
+    },
+    {
+      "id": "geloofsbelijdenis-van-athanasius",
+      "number": 3,
+      "label": "Geloofsbelijdenis van Athanasius",
+      "title": "De Geloofsbelijdenis van Athanasius",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "number": 1,
+          "text": "Zoo wie wil zalig zijn, dien is vóór alle ding noodig, dat hij het algemeen geloof houde;"
+        },
+        {
+          "type": "paragraph",
+          "number": 2,
+          "text": "en zoo wie dit niet geheel en ongeschonden bewaart, die zal zonder twijfel eeuwiglijk verderven."
+        },
+        {
+          "type": "paragraph",
+          "number": 3,
+          "text": "Het algemeen geloof nu is dit: Dat wij den eenigen God in de Drieheid, en de Drieheid in de Eenheid eeren;"
+        },
+        {
+          "type": "paragraph",
+          "number": 4,
+          "text": "zonder de personen te vermengen, of het wezen, de substantie, te deelen."
+        },
+        {
+          "type": "paragraph",
+          "number": 5,
+          "text": "Want het is een andere persoon des Vaders, een andere des Zoons, een andere des Heiligen Geestes;"
+        },
+        {
+          "type": "paragraph",
+          "number": 6,
+          "text": "maar de Vader, de Zoon en de Heilige Geest hebben ééne Godheid, gelijke eere, en gelijke eeuwige heerlijkheid."
+        },
+        {
+          "type": "paragraph",
+          "number": 7,
+          "text": "Hoedanig de Vader is, zoodanig is ook de Zoon, zoodanig is ook de Heilige Geest."
+        },
+        {
+          "type": "paragraph",
+          "number": 8,
+          "text": "De Vader is ongeschapen, de Zoon is ongeschapen, de Heilige Geest is ongeschapen;"
+        },
+        {
+          "type": "paragraph",
+          "number": 9,
+          "text": "onmetelijk is de Vader, onmetelijk is de Zoon, onmetelijk is de Heilige Geest;"
+        },
+        {
+          "type": "paragraph",
+          "number": 10,
+          "text": "de Vader is eeuwig, de Zoon is eeuwig, de Heilige Geest is eeuwig;"
+        },
+        {
+          "type": "paragraph",
+          "number": 11,
+          "text": "nochtans zijn het niet drie eeuwige, maar één eeuwige;"
+        },
+        {
+          "type": "paragraph",
+          "number": 12,
+          "text": "gelijk ook niet drie ongeschapene, noch drie onmetelijke, maar één ongeschapene, en één onmetelijke."
+        },
+        {
+          "type": "paragraph",
+          "number": 13,
+          "text": "Desgelijks is de Vader almachtig, de Zoon almachtig, de Heilige Geest almachtig;"
+        },
+        {
+          "type": "paragraph",
+          "number": 14,
+          "text": "en nochtans zijn het niet drie almachtige maar één almachtige."
+        },
+        {
+          "type": "paragraph",
+          "number": 15,
+          "text": "Alzoo ook is de Vader God, de Zoon God, de Heilige Geest God;"
+        },
+        {
+          "type": "paragraph",
+          "number": 16,
+          "text": "en nochtans zijn het niet drie Goden, maar het is één God;"
+        },
+        {
+          "type": "paragraph",
+          "number": 17,
+          "text": "alzoo is de Vader Heere, de Zoon Heere, de Heilige Geest Heere;"
+        },
+        {
+          "type": "paragraph",
+          "number": 18,
+          "text": "en nochtans zijn het niet drie Heeren, maar het is één Heere;"
+        },
+        {
+          "type": "paragraph",
+          "number": 19,
+          "text": "want gelijk wij door de Christelijke waarheid gedwongen worden, eenen iegelijken persoon in het bijzonder God en Heere, te noemen"
+        },
+        {
+          "type": "paragraph",
+          "number": 20,
+          "text": "alzoo is ons ook door het algemeen geloof verboden, drie Goden of Heeren te belijden."
+        },
+        {
+          "type": "paragraph",
+          "number": 21,
+          "text": "De Vader is van niemand gemaakt, noch geschapen, noch gegenereerd;"
+        },
+        {
+          "type": "paragraph",
+          "number": 22,
+          "text": "de Zoon is van den Vader alleen, niet gemaakt, noch geschapen, maar gegenereerd;"
+        },
+        {
+          "type": "paragraph",
+          "number": 23,
+          "text": "de Heilige Geest is van den Vader en den Zoon, niet gemaakt, noch geschapen, noch gegenereerd, maar uitgaande."
+        },
+        {
+          "type": "paragraph",
+          "number": 24,
+          "text": "Zoo is er dan één Vader, niet drie Vaders; één Zoon, niet drie Zonen; één Heilige Geest, niet drie Heilige Geesten."
+        },
+        {
+          "type": "paragraph",
+          "number": 25,
+          "text": "En in deze Drieheid is niets eerst, noch laatst; niets meest, noch minst;"
+        },
+        {
+          "type": "paragraph",
+          "number": 26,
+          "text": "maar de gansche drie personen hebben gelijke eeuwigheid, en zijn malkanderen alleszins gelijk;"
+        },
+        {
+          "type": "paragraph",
+          "number": 27,
+          "text": "zoodat in alle opzichten, gelijk nu gezegd is, de Eenheid in de Drieheid, en de Drieheid in de Eenheid is te eeren."
+        },
+        {
+          "type": "paragraph",
+          "number": 28,
+          "text": "Daarom zoo wie wil zalig zijn, die moet aldus van de Drievuldigheid gevoelen."
+        },
+        {
+          "type": "paragraph",
+          "number": 29,
+          "text": "Maar het is tot de eeuwige zaligheid noodig, dat hij ook de menschwording van onzen Heere Jezus Christus trouwelijk geloove."
+        },
+        {
+          "type": "paragraph",
+          "number": 30,
+          "text": "Zoo is dan het rechte geloof, dat wij gelooven en belijden, dat onze Heere Jezus Christus, Gods Zoon, God is en mensch."
+        },
+        {
+          "type": "paragraph",
+          "number": 31,
+          "text": "Hij is God uit de substantie des Vaders, vóór alle tijden gegenereerd, en mensch uit de substantie zijner moeder, in den tijd geboren;"
+        },
+        {
+          "type": "paragraph",
+          "number": 32,
+          "text": "volkomen God, volkomen mensch, hebbende eene verstandige ziele en menschelijk vleesch;"
+        },
+        {
+          "type": "paragraph",
+          "number": 33,
+          "text": "den Vader gelijk naar de Godheid, minder dan de Vader naar de menschheid."
+        },
+        {
+          "type": "paragraph",
+          "number": 34,
+          "text": "En hoewel Hij God is en mensch, zoo is Hij nochtans niet twee, maar één Christus;"
+        },
+        {
+          "type": "paragraph",
+          "number": 35,
+          "text": "Hij is één, niet door verandering van de Godheid in het vleesch, maar door de aanneming der menschheid in God;"
+        },
+        {
+          "type": "paragraph",
+          "number": 36,
+          "text": "Hij is één, niet door de vermenging der substantie, maar door de eenheid des persoons;"
+        },
+        {
+          "type": "paragraph",
+          "number": 37,
+          "text": "want gelijk de verstandige ziele en het vleesch één mensch zijn, alzoo is God en de mensch één Christus."
+        },
+        {
+          "type": "paragraph",
+          "number": 38,
+          "text": "Dewelke geleden heeft om onzer zaligheid wille, nedergedaald is ter helle, ten derden dage wederopgestaan van de dooden;"
+        },
+        {
+          "type": "paragraph",
+          "number": 39,
+          "text": "opgeklommen ten hemel, zit ter rechterhand Gods des almachtigen Vaders;"
+        },
+        {
+          "type": "paragraph",
+          "number": 40,
+          "text": "en zal van daar komen oordeelen de levenden en de dooden;"
+        },
+        {
+          "type": "paragraph",
+          "number": 41,
+          "text": "bij wiens komst alle menschen zullen wederopstaan met hunne lichamen;"
+        },
+        {
+          "type": "paragraph",
+          "number": 42,
+          "text": "en zullen van hunne eigene werken rekenschap geven;"
+        },
+        {
+          "type": "paragraph",
+          "number": 43,
+          "text": "en die goed gedaan hebben, zullen in het eeuwige leven gaan; maar die kwaad gedaan hebben, in het eeuwige vuur."
+        },
+        {
+          "type": "paragraph",
+          "number": 44,
+          "text": "Dit is het algemeen geloof; en zoo wie dit niet trouwelijk en vast gelooft, die zal niet kunnen zalig zijn."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,777 @@
+{
+  "slug": "liturgische-formulieren",
+  "title": "Liturgische formulieren",
+  "author": null,
+  "year": "16e-17e eeuw",
+  "sectionNoun": "Formulier",
+  "source": {
+    "name": "De berijmde Psalmen ... alsmede hare Formulieren van eenigheid ... en hare Liturgie (uitg. onder medewerking van H. Bavinck en A. Kuyper), Middelharnis 1898; Internet Archive (Princeton Theological Seminary Library)",
+    "url": "https://archive.org/details/deberijmdepsalme00gere_0",
+    "edition": "Liturgie der Gereformeerde Kerken in Nederland, 'naar den door die Kerken vastgestelden tekst' (officiele Dordtse tekst 1619), spelling De Vries-Te Winkel; zetting 1898, herdrukt 1913 (https://archive.org/details/deberijmdepsal00gere)",
+    "retrieved": "2026-09-26",
+    "note": "Tekst genomen uit de uitgave Middelharnis 1898 (Flakkeesche Boekdrukkerij), dezelfde zetting als de herdruk van 1913; beide scans zijn per woord tegen elkaar gestemd (OCR-tekstlaag archive.org) en gecontroleerd tegen een onafhankelijke zetting: de uitgave 1897 (twee scans: archive.org deberijmdepsalme00gere en deberie00gere). Twijfelgevallen zijn nagekeken op de paginabeelden van de 1913-scan. Deze uitgave volgt bewust de officiele tekst van de Dordtse Revisoren (1619, naar de Zeeuwse uitgave 1611), niet de sinds 1737 gangbare redactie; de redactionele voetnoten en inleidingen van de uitgevers zijn weggelaten, de kleingedrukte liturgische aanwijzingen (rubrieken) zijn opgenomen als alinea's. Stukken die de uitgave tussen vierkante haken plaatst (niet tot de officiele tekst behorend) staan ook hier tussen haken. Stippellijnen voor in te vullen namen zijn weergegeven als puntjes. Kort Avondmaalsformulier en een formulier voor openbare geloofsbelijdenis komen in deze uitgave niet voor; de rubriek 'Van het Heilig Avondmaal des Heeren' (onderzoek en belijdenis vóór toelating) staat aan het begin van het avondmaalsformulier."
+  },
+  "rights": "Synodale liturgische teksten van de Nationale Synode van Dordrecht (1618-1619), hier naar een gedrukte uitgave uit 1898 waarvan de bezorgers (o.a. H. Bavinck, overl. 1921, en A. Kuyper, overl. 1920) al meer dan 70 jaar overleden zijn; publiek domein.",
+  "sections": [
+    {
+      "id": "doop-kinderen",
+      "number": 1,
+      "label": "Doop van kinderen",
+      "title": "Formulier om den Heiligen Doop aan de kinderen te bedienen",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "De hoofdsom van de leer des Heiligen Doops is in deze drie stukken begrepen:"
+        },
+        {
+          "type": "paragraph",
+          "text": "Eerstelijk, dat wij met onze kinderen in zonden ontvangen en geboren, en daarom kinderen des toorns zijn, zoodat wij in het rijk Gods niet kunnen komen, tenzij wij vannieuws geboren worden. Dit leert ons de ondergang en besprenging met het water, waardoor ons de onreinigheid onzer zielen wordt aangewezen; opdat wij vermaand worden, een mishagen aan onszelven te hebben, ons voor God te verootmoedigen, en onze reinigmaking en zaligheid buiten onszelven te zoeken."
+        },
+        {
+          "type": "paragraph",
+          "text": "Ten tweede, betuigt en verzegelt ons de Heilige Doop de afwassching der zonden door Jezus Christus. Daarom worden wij gedoopt in den naam Gods, des Vaders, en des Zoons, en des Heiligen Geestes. Want als wij gedoopt worden in den naam des Vaders, zoo betuigt en verzegelt ons God de Vader, dat Hij met ons een eeuwig verbond der genade opricht, ons tot zijne kinderen en erfgenamen aanneemt, en daarom van alle goed ons verzorgen, en alle kwaad van ons weren, of ten onzen beste keeren wil. En als wij in den naam des Zoons gedoopt worden, zoo verzegelt ons de Zoon, dat Hij ons wascht in zijn bloed van alle onze zonden, ons in de gemeenschap zijns doods en zijner wederopstanding inlijvende, alzoo dat wij van onze zonden bevrijd, en rechtvaardig voor God gerekend worden. Desgelijks als wij gedoopt worden in den naam des Heiligen Geestes, zoo verzekert ons de Heilige Geest door dit Heilig Sacrament, dat Hij in ons wonen, en ons tot lidmaten van Christus heiligen wil, ons toeëigenende hetgene wij in Christus hebben, namelijk, de afwassching onzer zonden, en de dagelijksche vernieuwing onzes levens, totdat wij eindelijk onder de gemeente der uitverkorenen in het eeuwige leven onbevlekt zullen gesteld worden."
+        },
+        {
+          "type": "paragraph",
+          "text": "Ten derde, overmits in alle verbonden twee deelen begrepen zijn, zoo worden wij ook weder van God door den Doop vermaand en verplicht tot eene nieuwe gehoorzaamheid, namelijk, dat wij dezen eenigen God, Vader, Zoon en Heiligen Geest, aanhangen, betrouwen en liefhebben van ganscher harte, van ganscher ziele, van ganschen gemoede en met alle krachten, de wereld verlaten, onze oude natuur dooden, en in een Godzalig leven wandelen. En als wij somtijds uit zwakheid in zonden vallen, zoo moeten wij aan Gods genade niet vertwijfelen, noch in de zonden blijven liggen, overmits de Doop een zegel en ontwijfelbaar getuigenis is, dat wij een eeuwig verbond met God hebben."
+        },
+        {
+          "type": "paragraph",
+          "text": "En hoewel onze kinderen deze dingen niet verstaan, zoo mag men ze nochtans daarom van den Doop niet uitsluiten, aangezien zij ook zonder hun weten der verdoemenis in Adam deelachtig zijn, en alzoo ook weder in Christus tot genade aangenomen worden; gelijk God spreekt tot Abraham, den vader aller geloovigen, en overzulks mede tot ons en onze kinderen, zeggende [Gen. XVII: 7]: Ik zal mijn verbond oprichten tusschen Mij en tusschen u, en tusschen uwen zade na u in hunne geslachten, tot een eeuwig verbond, om u te zijn tot eenen God, en uwen zade na u. Dit betuigt ook Petrus, Hand. II: 39, met deze woorden: Want u komt de belofte toe, en uwen kinderen, en allen die daar verre zijn, zoovelen als er de Heere onze God toe roepen zal. Daarom heeft God voormaals bevolen hen te besnijden, hetwelk een zegel des verbonds en der gerechtigheid des geloofs was; gelijk ook Christus hen omhelsd, de handen opgelegd en gezegend heeft; Marc. X: 16. Dewijl dan nu de Doop in de plaats der Besnijdenis gekomen is, zoo zal men de kinderen, als erfgenamen van het rijk Gods en van zijn verbond, doopen. En de ouders zullen gehouden zijn hunne kinderen, in het opwassen, hiervan breeder te onderwijzen."
+        },
+        {
+          "type": "paragraph",
+          "text": "Opdat wij dan deze heilige ordening Gods, tot zijne eere, tot onzen troost, en tot stichting der gemeente uitrichten mogen, zoo laat ons zijnen heiligen naam aldus aanroepen:"
+        },
+        {
+          "type": "paragraph",
+          "text": "O almachtige, eeuwige God; Gij die naar uw streng oordeel de ongeloovige en onboetvaardige wereld met den zondvloed gestraft hebt, en den geloovigen Noach zijne acht zielen uit uwe groote barmhartigheid behouden en bewaard; Gij, die den verstokten Pharaö met al zijn volk in de Roode Zee verdronken hebt, en uw volk Israël droogvoets daardoor geleid, door hetwelk de Doop beduid werd; wij bidden U, bij uwe grondelooze barmhartigheid, dat Gij dit uw kind genadiglijk wilt aanzien, en door uwen Heiligen Geest uwen Zoon Jezus Christus inlijven; opdat het met Hem in zijnen dood begraven worde, en met Hem moge opstaan in een nieuw leven; opdat het zijn kruis, Hem dagelijks navolgende, vroolijk dragen moge, Hem aanhangende met waarachtig geloof, vaste hope en vurige liefde; opdat het dit leven (hetwelk toch niet anders is dan een gestadige dood) om uwentwille getroost, verlate, en ten laatsten dage voor den rechterstoel van Christus, uwen Zoon, zonder verschrikken moge verschijnen, door Hem, onzen Heere Jezus Christus, uwen Zoon, die met U en den Heiligen Geest, één eenig God, leeft en regeert in eeuwigheid. Amen."
+        },
+        {
+          "type": "heading",
+          "text": "Vermaning aan de Ouders, en die mede ten Doop komen"
+        },
+        {
+          "type": "paragraph",
+          "text": "Geliefden in den Heere Christus, gij hebt gehoord, dat de Doop eene ordening Gods is, om ons en onzen zade zijn verbond te verzegelen; daarom moeten wij hem tot dat einde, en niet uit gewoonte of bijgeloovigheid gebruiken. Opdat het dan openbaar worde, dat gij alzoo gezind zijt, zult gij van uwentwege hierop ongeveinsdelijk antwoorden:"
+        },
+        {
+          "type": "paragraph",
+          "text": "Eerstelijk, hoewel onze kinderen in zonden ontvangen en geboren zijn, en daarom aan allerhande ellendigheid, ja aan de verdoemenis zelve onderworpen, of gij niet bekent, dat zij in Christus geheiligd zijn, en daarom als lidmaten zijner gemeente behooren gedoopt te wezen?"
+        },
+        {
+          "type": "paragraph",
+          "text": "Ten andere, of gij de leer, die in het Oude en Nieuwe Testament, en in de Artikelen des Christelijken geloofs begrepen is, en in de Christelijke Kerk alhier geleerd wordt, niet bekent, de waarachtige en volkomene leer der zaligheid te wezen?"
+        },
+        {
+          "type": "paragraph",
+          "text": "Ten derde, of gij niet belooft en u voorneemt, dit kind, als het tot zijn verstand zal gekomen zijn, waarvan gij vader of getuige zijt (of: deze kinderen, als zij tot hun verstand zullen gekomen zijn, een iegelijk het zijne, waarvan hij vader of getuige is), in de voorzeide leer naar uw vermogen te onderwijzen, of te doen en te helpen onderwijzen?"
+        },
+        {
+          "type": "paragraph",
+          "text": "Antwoord: Ja."
+        },
+        {
+          "type": "paragraph",
+          "text": "Daarna bij het doopen spreekt de Kerkedienaar aldus:"
+        },
+        {
+          "type": "paragraph",
+          "text": "N. Ik doop u in den naam des Vaders, en des Zoons, en des Heiligen Geestes."
+        },
+        {
+          "type": "heading",
+          "text": "Dankzegging"
+        },
+        {
+          "type": "paragraph",
+          "text": "Almachtige, barmhartige God en Vader, wij danken en loven U, dat Gij ons en onzen kinderen, door het bloed van uwen lieven Zoon Jezus Christus, alle onze zonden vergeven, en ons door uwen Heiligen Geest tot lidmaten van uwen eeniggeborenen Zoon, en alzoo tot uwe kinderen aangenomen hebt, en ons dit met den Heiligen Doop bezegelt en bekrachtigt. Wij bidden U ook, door Hem, uwen lieven Zoon, dat Gij dit kind met uwen Heiligen Geest altijd wilt regeeren, opdat het Christelijk en Godzaliglijk opgevoed worde, en in den Heere Jezus Christus wasse en toeneme, opdat het uwe vaderlijke goedheid en barmhartigheid, die Gij hem en ons allen bewezen hebt, moge bekennen, en in alle gerechtigheid, onder onzen eenigen Leeraar, Koning en Hoogepriester, Jezus Christus, leve, en vromelijk tegen de zonde, den duivel en zijn gansche rijk strijden en overwinnen moge, om U, en uwen Zoon Jezus Christus, mitsgaders den Heiligen Geest, den eenigen en waarachtigen God, eeuwiglijk te loven en te prijzen. Amen."
+        }
+      ]
+    },
+    {
+      "id": "doop-volwassenen",
+      "number": 2,
+      "label": "Doop van volwassenen",
+      "title": "Formulier om den Heiligen Doop aan de volwassenen te bedienen",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Als degenen, die in hunne jonkheid (hetzij door nalatigheid of door dwaling hunner ouders) niet gedoopt zijn, tot de jaren huns verstands gekomen zijnde, begeeren den Christelijken Doop te ontvangen, zoo zal men ze eerst wèl onderwijzen in de gronden der Christelijke religie. En als zij daarvan (hetzij in den Kerkeraad, of voor zijne daartoe gedeputeerden, of openlijk, naardat in elke Kerk geoordeeld wordt het stichtelijkst te zijn) eene goede belijdenis hebben gedaan, zal men ze tot den Heiligen Doop toelaten, en in het bedienen daarvan dit navolgende formulier gebruiken."
+        },
+        {
+          "type": "paragraph",
+          "text": "De hoofdsom van de leer des Heiligen Doops is in deze drie stukken begrepen:"
+        },
+        {
+          "type": "paragraph",
+          "text": "Eerstelijk, dat wij met onze kinderen in zonden ontvangen en geboren, en daarom kinderen des toorns zijn, zoodat wij in het rijk Gods niet kunnen komen, tenzij wij van nieuws geboren worden. Dit leert ons de ondergang en besprenging met het water, waardoor ons de onreinigheid onzer zielen wordt aangewezen; opdat wij vermaand worden, een mishagen aan onszelven te hebben, ons voor God te verootmoedigen, en onze reinigmaking en zaligheid buiten onszelven te zoeken."
+        },
+        {
+          "type": "paragraph",
+          "text": "Ten tweede, betuigt en verzegelt ons de Heilige Doop de afwassching der zonden door Jezus Christus. Daarom worden wij gedoopt in den naam Gods, des Vaders, en des Zoons, en des Heiligen Geestes. Want als wij gedoopt worden in den naam des Vaders, zoo betuigt en verzegelt ons God de Vader, dat Hij met ons een eeuwig verbond der genade opricht, ons tot zijne kinderen en erfgenamen aanneemt, en daarom van alle goed ons verzorgen, en alle kwaad van ons weren, of ten onzen beste keeren wil. En als wij in den naam des Zoons gedoopt worden, zoo verzegelt ons de Zoon, dat Hij ons wascht in zijn bloed van alle onze zonden, ons in de gemeenschap zijns doods en zijner wederopstanding inlijvende, alzoo dat wij van onze zonden bevrijd, en rechtvaardig voor God gerekend worden. Desgelijks als wij gedoopt worden in den naam des Heiligen Geestes, zoo verzekert ons de Heilige Geest door dit Heilig Sacrament, dat Hij in ons wonen, en ons tot lidmaten van Christus heiligen wil, ons toeëigenende hetgene wij in Christus hebben, namelijk, de afwassching onzer zonden, en de dagelijksche vernieuwing onzes levens, totdat wij eindelijk onder de gemeente der uitverkorenen in het eeuwige leven onbevlekt zullen gesteld worden."
+        },
+        {
+          "type": "paragraph",
+          "text": "Ten derde, overmits in alle verbonden twee deelen begrepen zijn, zoo worden wij ook weder van God door den Doop vermaand en verplicht tot eene nieuwe gehoorzaamheid, namelijk, dat wij dezen eenigen God, Vader, Zoon en Heiligen Geest, aanhangen, betrouwen en liefhebben van ganscher harte, van ganscher ziele, van ganschen gemoede en met alle krachten, de wereld verlaten, onze oude natuur dooden, en in een nieuw Godzalig leven wandelen. En als wij somtijds uit zwakheid in zonden vallen, zoo moeten wij aan Gods genade niet vertwijfelen, noch in de zonden blijven liggen, overmits de Doop een zegel en ontwijfelbaar getuigenis is, dat wij een eeuwig verbond met God hebben. En hoewel de kinderen der Christenen, niettegenstaande zij deze dingen niet verstaan, uit kracht des Verbonds moeten gedoopt worden, zoo is het nochtans niet geoorloofd de volwassenen te doopen, tenzij die tevoren, hunne zonden gevoelende, belijdenis doen van hunne boetvaardigheid en van hun geloof in Christus. Want om deze oorzaak heeft niet alleen Johannes de Dooper, predikende naar het gebod Gods den Doop der bekeering, tot vergeving der zonden, diegenen, die hunne zonden beleden, gedoopt (Marc. I: 4, 5, en Luc. III: 3), maar heeft ook onze Heere Jezus Christus zijnen Apostelen bevolen, alle volkeren te onderwijzen, en hen te doopen in den naam des Vaders, en des Zoons, en des Heiligen Geestes (Matth. XXVIII: 19), deze belofte daarbij voegende, dat die geloofd zal hebben, en gedoopt zal zijn, zal zalig worden (Marc. XVI: 16); gelijk ook de Apostelen (zooals blijkt uit de Handelingen der Apostelen Kap. II: 38, en VIII: 36, 37, en X: 47, 48, en XVI: 14, 15, 31, 32, 33), volgens dezen regel, geene andere volwassenen gedoopt hebben, dan die belijdenis deden van hun boetvaardigheid en geloof. Daarom is het ook heden ten dage niet geoorloofd eenige andere volwassenen te doopen, dan die de verborgenheden des Heiligen Doops uit de prediking van het Heilig Evangelie geleerd hebben en verstaan, en daarvan, mitsgaders van hun geloof, door belijdenis des monds weten rekenschap te geven."
+        },
+        {
+          "type": "paragraph",
+          "text": "Opdat wij dan deze heilige ordening Gods, tot zijne eere, tot onzen troost, en tot stichting der gemeente uitrichten mogen, zoo laat ons zijnen heiligen naam aldus aanroepen:"
+        },
+        {
+          "type": "paragraph",
+          "text": "O almachtige, eeuwige God; Gij die naar uw streng oordeel de ongeloovige en onboetvaardige wereld met den zondvloed gestraft hebt, en den geloovigen Noach zijne acht zielen uit uwe groote barmhartigheid behouden en bewaard; Gij die den verstokten Pharaö met al zijn volk in de Roode Zee verdronken hebt, en uw volk Israël droogvoets daardoor geleid, door hetwelk de Doop beduid werd; wij bidden U, bij uwe grondelooze barmhartigheid, dat Gij dezen persoon genadiglijk wilt aanzien, en door uwen Heiligen Geest uwen Zoon Jezus Christus inlijven; opdat hij met Hem in zijnen dood begraven worde, en met Hem moge opstaan in een nieuw leven; opdat hij zijn kruis, Hem dagelijks navolgende, vroolijk dragen moge, hem aanhangende met waarachtig geloof, vaste hope en vurige liefde; opdat hij dit leven (hetwelk toch niet anders is dan een gestadige dood) om uwentwille getroost, verlate, en ten laatsten dage voor den rechterstoel van Christus, uwen Zoon, zonder verschrikken moge verschijnen, door Hem, onzen Heere Jezus Christus, uwen Zoon, die met U en den Heiligen Geest, één eenig God, leeft en regeert in eeuwigheid. Amen."
+        },
+        {
+          "type": "heading",
+          "text": "Aanspraak tot den volwassene, die gedoopt zal worden"
+        },
+        {
+          "type": "paragraph",
+          "text": "Aangezien gij N. dan ook begeert met het Heilig Doopsel gedoopt te worden, ten einde het u zij een zegel uwer inlijving in de Kerke Gods, opdat blijke, dat gij niet alleen de Christelijke religie aanneemt, waarin gij privatelijk door ons zijt onderwezen, en waarvan gij voor ons belijdenis gedaan hebt, maar ook uw leven daarnaar, door Gods genade, wilt aanstellen; zoo zult gij voor God en zijne gemeente hierop ongeveinsdelijk antwoorden:"
+        },
+        {
+          "type": "paragraph",
+          "text": "Ten eerste: of gij gelooft in den eenigen waarachtigen God, onderscheiden in drie personen, Vader, Zoon en Heiligen Geest, die hemel en aarde, en alles wat daarin is, uit niet geschapen heeft, en nog onderhoudt en regeert, alzoo dat er niets geschiedt, noch in den hemel, noch op de aarde, zonder zijnen Goddelijken wil?"
+        },
+        {
+          "type": "paragraph",
+          "text": "Antwoord: Ja."
+        },
+        {
+          "type": "paragraph",
+          "text": "Ten tweede: of gij gelooft, dat gij in zonden ontvangen en geboren zijt, en daarom een kind des toorns zijt, van nature ten goede gansch onbekwaam en geneigd tot alle kwaad; en dat gij met gedachten, woorden en werken de geboden des Heeren menigmaal hebt overtreden; en of deze uwe zonden u van harte leed zijn?"
+        },
+        {
+          "type": "paragraph",
+          "text": "Antwoord: Ja."
+        },
+        {
+          "type": "paragraph",
+          "text": "Ten derde: of gij gelooft, dat Jezus Christus, die tegelijk waarachtig en eeuwig God is en waarachtig mensch, die zijne menschelijke natuur uit het vleesch en bloed der maagd Maria heeft aangenomen, u tot eenen Zaligmaker van God geschonken is; en dat gij door dit geloof ontvangt vergeving der zonden in zijn bloed, en dat gij een lidmaat van Jezus Christus en van zijne Kerk door de kracht des Heiligen Geestes zijt geworden?"
+        },
+        {
+          "type": "paragraph",
+          "text": "Antwoord: Ja."
+        },
+        {
+          "type": "paragraph",
+          "text": "Ten vierde: of gij verder alle de Artikelen der Christelijke religie, gelijk die hier in de Christelijke Kerk uit den Woorde Gods geleerd worden, toestemt; en van voornemen zijt, in dezelfde leer tot het einde uws levens standvastiglijk te volharden; en tevens verzaakt alle ketterijen en dwalingen, met deze leer strijdende; en belooft, dat gij in de gemeenschap dezer Christelijke Kerk, niet alleen in het gehoor des Goddelijken Woords, maar ook in het gebruik des Heiligen Avondmaals, zult volharden?"
+        },
+        {
+          "type": "paragraph",
+          "text": "Antwoord: Ja."
+        },
+        {
+          "type": "paragraph",
+          "text": "Ten vijfde: of gij u van harte voorgenomen hebt, altijd Christelijk te wandelen, en de wereld en hare kwade begeerlijkheden te verzaken, gelijk het lidmaten van Christus en van zijne gemeente betaamt; en of gij u aan alle Christelijke vermaningen gaarne wilt onderwerpen?"
+        },
+        {
+          "type": "paragraph",
+          "text": "Antwoord: Ja."
+        },
+        {
+          "type": "paragraph",
+          "text": "De goede en groote God verleene goedertierenlijk tot dit uw heilig voornemen zijne Goddelijke genade en zegen, door onzen Heere Jezus Christus. Amen."
+        },
+        {
+          "type": "paragraph",
+          "text": "Daarna bij het doopen spreekt de Kerkedienaar aldus:"
+        },
+        {
+          "type": "paragraph",
+          "text": "N. Ik doop u in den naam des Vaders, en des Zoons, en des Heiligen Geestes."
+        },
+        {
+          "type": "heading",
+          "text": "Dankzegging"
+        },
+        {
+          "type": "paragraph",
+          "text": "Almachtige, barmhartige God en Vader, wij danken en loven U, dat Gij ons en onzen kinderen, door het bloed van uwen lieven Zoon Jezus Christus, alle onze zonden vergeven, en ons door uwen Heiligen Geest tot lidmaten van uwen eeniggeborenen Zoon, en alzoo tot uwe kinderen aangenomen hebt, en ons dit met den Heiligen Doop bezegelt en bekrachtigt. Wij bidden U ook, door Hem, uwen lieven Zoon, dat Gij dezen persoon met uwen Heiligen Geest altijd wilt regeeren, opdat hij Christelijk en Godzaliglijk wandele, en in den Heere Jezus wasse en toeneme, opdat hij uwe vaderlijke goedheid en barmhartigheid, die Gij hem en ons allen bewezen hebt, moge bekennen, en in alle gerechtigheid, onder onzen eenigen Leeraar, Koning en Hoogepriester, Jezus Christus, leve, en vromelijk tegen de zonde, den duivel en zijn gansche rijk strijden en overwinnen moge, om U, en uwen Zoon Jezus Christus, mitsgaders den Heiligen Geest, den eenigen en waarachtigen God, eeuwiglijk te loven en te prijzen. Amen."
+        }
+      ]
+    },
+    {
+      "id": "avondmaal",
+      "number": 3,
+      "label": "Heilig Avondmaal",
+      "title": "Formulier om het Heilig Avondmaal te houden",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Van het Heilig Avondmaal des Heeren"
+        },
+        {
+          "type": "paragraph",
+          "text": "Alle degenen, die zich tot de Gemeente Gods eerst begeven en tot het gebruik van des Heeren Avondmaal begeeren toegelaten te worden, moeten eerst in de hoofdstukken der Christelijke leer, uit den Woorde Gods, onderwezen zijn; waarvan in de Kerken zulke vorm of manier van onderwijzen gehouden wordt, als men acht het stichtelijkst te zijn."
+        },
+        {
+          "type": "paragraph",
+          "text": "En wanneer zij dan die hoofdstukken der leer in den grond bekend en beleden hebben, zoo vraagt men hun, of zij op eenig punt (aangaande de leer) eenigen twijfel hebben, opdat men hun moge genoegdoen. En indien zij zeggen: ja; zoo zoekt men hun uit de Heilige Schrift te voldoen."
+        },
+        {
+          "type": "paragraph",
+          "text": "Maar is het dat zij gerust zijn, zoo vraagt men hun, of zij voorgenomen hebben, bij de voorzeide leering te blijven, de wereld te verzaken, en een nieuw Christelijk leven te leiden."
+        },
+        {
+          "type": "paragraph",
+          "text": "Eindelijk vraagt men hun ook, of zij zich aan de Christelijke straf gewilliglijk onderwerpen willen."
+        },
+        {
+          "type": "paragraph",
+          "text": "En als zij dit beloofd hebben, zoo vermaant men hen tot vrede, liefde en eendrachtigheid met alle menschen, en tot vredemaking, zoo zij met iemand iets uitstaande hebben."
+        },
+        {
+          "type": "paragraph",
+          "text": "Geliefden in den Heere Jezus Christus, hoort aan de woorden der inzetting van het Heilig Avondmaal van onzen Heere Jezus Christus, welke ons beschrijft de Heilige Apostel Paulus, 1 Kor. XI: 23—29."
+        },
+        {
+          "type": "paragraph",
+          "text": "Ik heb van den Heere ontvangen, hetgene ik u ook overgegeven heb, dat de Heere Jezus, in den nacht in welken Hij verraden werd, het brood nam; en als Hij gedankt had, brak Hij het, en zeide: Neemt, eet; dat is mijn lichaam, dat voor u gebroken wordt; doet dat tot mijne gedachtenis. Desgelijks nam Hij ook den drinkbeker na het eten des Avondmaals, en zeide: Deze drinkbeker is het nieuwe Testament in mijn bloed; doet dat, zoo dikwijls als gij dien zult drinken, tot mijne gedachtenis. Want zoo dikwijls als gij dit brood zult eten, en dezen drinkbeker zult drinken, zoo verkondigt den dood des Heeren, totdat Hij komt. Zoo dan, wie onwaardiglijk dit brood eet, of den drinkbeker des Heeren drinkt, die zal schuldig zijn aan het lichaam en bloed des Heeren. Maar de mensch beproeve zichzelven, en ete alzoo van het brood, en drinke van den drinkbeker. Want die onwaardiglijk eet en drinkt, die eet en drinkt zichzelven een oordeel, niet onderscheidende het lichaam des Heeren."
+        },
+        {
+          "type": "paragraph",
+          "text": "Opdat wij nu tot onzen troost des Heeren Avondmaal mogen houden, is ons vóór alle dingen noodig, dat wij ons tevoren recht beproeven; ten andere, dat wij het tot dat einde richten, waartoe het de Heere Christus verordineerd en ingesteld heeft, namelijk, tot zijne gedachtenis."
+        },
+        {
+          "type": "paragraph",
+          "text": "De waarachtige beproeving van onszelven bestaat in deze drie stukken:"
+        },
+        {
+          "type": "paragraph",
+          "text": "Ten eerste, bedenke een iegelijk bij zichzelven zijne zonden en vervloeking, opdat hij zichzelven mishage, en zich voor God verootmoedige; aangezien de toorn Gods tegen de zonde zóó groot is, dat Hij die (eer Hij ze ongestraft liet blijven) aan zijnen lieven Zoon Jezus Christus, met den bitteren en smadelijken dood des kruises gestraft heeft."
+        },
+        {
+          "type": "paragraph",
+          "text": "Ten andere, onderzoeke een iegelijk zijn hart, of hij ook deze gewisse belofte Gods gelooft, dat hem alle zijne zonden, alleen om het lijden en sterven van Jezus Christus, vergeven zijn, en de volkomene gerechtigheid van Christus hem als zijne eigene toegerekend en geschonken is, ja zoo volkomen, als of hij zelf in eigen persoon voor alle zijne zonden betaald, en alle gerechtigheid volbracht had."
+        },
+        {
+          "type": "paragraph",
+          "text": "Ten derde, onderzoeke een iegelijk zijne consciëntie, of hij ook gezind is, voortaan met zijn gansche leven waarachtige dankbaarheid jegens God den Heere te bewijzen, en voor het aangezichte Gods oprechtelijk te wandelen; insgelijks, of hij zonder eenige geveinsdheid (alle vijandschap, haat en nijd van harte afleggende) een ernstig voornemen heeft, om van nu voortaan in waarachtige liefde en eenigheid met zijne naasten te leven."
+        },
+        {
+          "type": "paragraph",
+          "text": "Allen dan die alzoo gezind zijn, die wil God gewisselijk in genade aannemen, en voor waardige medegenooten van de tafel zijns Zoons Jezus Christus houden. Daarentegen die dit getuigenis in hunne harten niet gevoelen, die eten en drinken zichzelven een oordeel. Waarom wij ook, naar het bevel van Christus en van den Apostel Paulus, allen die zich met deze navolgende ergerlijke zonden besmet weten, vermanen, van de tafel des Heeren zich te onthouden, en hun verkondigen, dat zij geen deel in het rijk van Christus hebben; als daar zijn: alle afgodendienaars; allen, die verstorvene heiligen, engelen of andere schepselen aanroepen; allen, die den beelden eere aandoen; alle toovenaars en waarzeggers, die vee of menschen, mitsgaders andere dingen, zegenen, en die aan zulke zegening geloof hechten; alle verachters van God, van zijn Woord, en van de Heilige Sacramenten; alle Godslasteraars; allen, die tweedracht, sekten en muiterij in kerken en wereldrijke regeeringen begeeren aan te richten; alle meineedigen; allen, die hunnen ouderen en overheden ongehoorzaam zijn; alle doodslagers, kijvers, en die in haat en nijd tegen hunne naasten leven; alle echtbrekers, hoereerders, dronkaards, dieven, woekeraars, roovers, spelers, gierigaards, en alle degenen, die een ergerlijk leven leiden. Deze allen, zoo lang zij in zulke zonden blijven, zullen zich van deze spijze (welke Christus alleen voor zijne geloovigen verordineerd heeft) onthouden, opdat hun gericht en verdoemenis niet des te zwaarder worde."
+        },
+        {
+          "type": "paragraph",
+          "text": "Maar dit wordt ons, geliefde Broeders en Zusters, niet voorgehouden, om de verslagene harten der geloovigen kleinmoedig te maken, alsof niemand tot het Avondmaal des Heeren gaan mocht, dan die zonder eenige zonde ware. Want wij komen niet tot dit Avondmaal, om daarmede te betuigen, dat wij in onszelven volkomen en rechtvaardig zijn; maar integendeel, aangezien wij ons leven buiten onszelven in Jezus Christus zoeken, zoo bekennen wij daarmede, dat wij midden in den dood liggen. Daarom, al is het dat wij nog vele gebreken en ellendigheid in ons bevinden, als namelijk: dat wij geen volkomen geloof hebben, dat wij ons ook met zulken ijver om God te dienen niet begeven, als wij schuldig zijn; maar dagelijks met de zwakheid onzes geloofs, en de booze lusten onzes vleesches te strijden hebben; nochtans, desniettegenstaande, overmits ons (door de genade des Heiligen Geestes) zulke gebreken van harte leed zijn, en wij begeeren tegen ons ongeloof te strijden, en naar alle geboden Gods te leven; zoo zullen wij gewis en zeker zijn, dat geene zonde noch zwakheid, die nog (tegen onzen wil) in ons overgebleven is, ons kan hinderen, dat ons God niet in genade zoude aannemen, en alzoo dezer hemelsche spijze en drank waardig en deelachtig maken."
+        },
+        {
+          "type": "paragraph",
+          "text": "Ten andere, laat ons nu ook overdenken, waartoe ons de Heere zijn Avondmaal heeft ingezet: namelijk, dat wij zulks doen zouden tot zijne gedachtenis. Maar aldus zullen wij Zijner daarbij gedenken:"
+        },
+        {
+          "type": "paragraph",
+          "text": "Eerstelijk, dat wij ganschelijk in onze harten vertrouwen, dat onze Heere Jezus Christus (naar luid van de beloften, die den voorvaderen in het oude Testament van den beginne af geschied zijn) van den Vader in deze wereld gezonden is, ons vleesch en bloed heeft aangenomen, den toorn Gods (onder welken wij eeuwiglijk hadden moeten verzinken) van het begin zijner menschwording tot het einde zijns levens op aarde voor ons heeft gedragen, en alle gehoorzaamheid en gerechtigheid der Goddelijke wet voor ons heeft vervuld; voornamelijk, toen Hem de last van onze zonden, en van den toorn Gods, het bloedige zweet in den Hof uitgedrukt heeft; waar Hij gebonden werd, opdat Hij ons zoude ontbinden; daarna ontallijke smaadheden geleden heeft, opdat wij nimmermeer te schande zouden worden; onschuldig ter dood veroordeeld is, opdat wij voor het gerichte Gods zouden vrijgesproken worden; ja zijn gezegend lichaam aan het kruis heeft laten nagelen, opdat Hij het handschrift onzer zonden daaraan zoude hechten; en heeft alzoo de vervloeking van ons op Zich geladen, opdat Hij ons met zijne zegening vervullen zoude; en heeft Zich vernederd tot in de allerdiepste versmaadheid en angst der helle, met lichaam en ziele, aan het hout des kruises, toen Hij riep met luider stemme: Mijn God, mijn God, waarom hebt Gij Mij verlaten? opdat wij tot God zouden genomen, en nimmermeer van Hem verlaten worden; en heeft eindelijk met zijnen dood en bloedstorting het nieuwe en eeuwige Testament, het verbond der genade en der verzoening, besloten, toen Hij zeide: Het is volbracht."
+        },
+        {
+          "type": "paragraph",
+          "text": "En opdat wij vastelijk zouden gelooven, dat wij tot dit genadeverbond behooren, nam de Heere Jezus in zijn laatste Avondmaal het brood, en als Hij gedankt had, brak Hij het, en gaf het zijnen discipelen, en zeide: Neemt, eet, dat is mijn lichaam, hetwelk voor u gegeven wordt; doet dat tot mijne gedachtenis. Desgelijks, na het Avondmaal, nam Hij den drinkbeker, en gedankt hebbende gaf hun dien, zeggende: Drinkt allen daaruit; deze drinkbeker is het nieuwe Testament in mijn bloed, hetwelk voor u en voor velen vergoten wordt, tot vergeving der zonden; doet dat, zoo dikwijls als gij dien zult drinken, tot mijne gedachtenis; dat is: zoo dikwijls als gij van dit brood eet, en van dezen beker drinkt, zult gij daardoor, als door eene gewisse gedachtenis en pand, vermaand en verzekerd worden van deze mijne hartelijke liefde en trouw jegens u, dat Ik voor u (daar gij anders den eeuwigen dood hadt moeten sterven) mijn lichaam aan het hout des kruises in den dood geve, en mijn bloed vergiete, en uwe hongerige en dorstige zielen met dit mijn gekruisigde lichaam en vergoten bloed tot het eeuwige leven spijze en lave, even zekerlijk, als eenen iegelijk dit brood voor zijne oogen gebroken, en deze beker hem gegeven wordt, en gij die tot mijne gedachtenis met uwen mond eet en drinkt."
+        },
+        {
+          "type": "paragraph",
+          "text": "Uit deze inzetting des Heiligen Avondmaals van onzen Heere Jezus Christus zien wij, dat Hij ons geloof en betrouwen op zijne volkomene offerande (die eenmaal aan het kruis geschied is) als op den eenigen grond en fondament onzer zaligheid wijst, waar Hij onzen hongerigen en dorstigen zielen tot eene waarachtige spijze en drank des eeuwigen levens geworden is. Want door zijnen dood heeft Hij de oorzaak van onzen eeuwigen honger en kommer, namelijk, de zonde, weggenomen, en ons den levendmakenden Geest verworven; opdat wij door dien Geest (die in Christus, als in het Hoofd, en in ons als zijne lidmaten woont) met Hem waarachtige gemeenschap zouden hebben, en alle zijne goederen, het eeuwige leven, de gerechtigheid en de heerlijkheid, deelachtig worden."
+        },
+        {
+          "type": "paragraph",
+          "text": "Daarbenevens, dat wij ook door denzelfden Geest onder malkanderen, als lidmaten van één lichaam, in waarachtige broederlijke liefde verbonden worden; gelijk de Heilige Apostel spreekt: Eén brood is het, zoo zijn wij velen één lichaam, dewijl wij allen ééns broods deelachtig zijn. Want gelijk uit vele graankorrels één meel gemalen, en één brood gebakken wordt, en uit vele bezien, samengeperst zijnde, één wijn en drank vliet, en zich ondereen vermengt; alzoo zullen wij allen, die door het waarachtig geloof Christus ingelijfd zijn, door broederlijke liefde, om Christus onzes lieven Zaligmakers wille, die ons tevoren zoo uitnemend heeft liefgehad, allen te zamen één lichaam zijn, en zulks niet alleen met woorden, maar ook met de daad jegens malkanderen bewijzen."
+        },
+        {
+          "type": "paragraph",
+          "text": "Daartoe helpe ons de almachtige, barmhartige God en Vader van onzen Heere Jezus Christus, door zijnen Heiligen Geest. Amen."
+        },
+        {
+          "type": "paragraph",
+          "text": "Opdat wij dan dit alles mogen verkrijgen, laat ons onszelven voor God verootmoedigen, en Hem met waarachtig geloof om zijne genade aanroepen:"
+        },
+        {
+          "type": "paragraph",
+          "text": "Barmhartige God en Vader, wij bidden U, dat Gij in dit Avondmaal (waarin wij oefenen de heerlijke gedachtenis van den bitteren dood van uwen lieven Zoon Jezus Christus) door uwen Heiligen Geest in onze harten wilt bewerken, dat wij ons met waarachtig vertrouwen aan uwen Zoon Jezus Christus hoe langer hoe meer overgeven, opdat onze bezwaarde en verslagene harten met zijn waarachtig lichaam en bloed, ja met Hem, waarachtig God en mensch, het eenige hemelsche brood, door de kracht des Heiligen Geestes gespijzigd en gelaafd worden; en dat wij niet meer in onze zonden, maar Hij in ons, en wij in Hem leven, en zóó waarachtiglijk het nieuwe en eeuwige Testament en Verbond der genade deelachtig zijn mogen, dat wij niet twijfelen of Gij zult eeuwiglijk onze genadige Vader zijn, ons onze zonden nimmermeer toerekenende, en met alle dingen aan lichaam en ziele verzorgende, als uwe lieve kinderen en erfgenamen.\n\nVerleen ons ook uwe genade, dat wij, getroost ons kruis op ons nemende, onszelven verloochenen, onzen Heiland belijden, en in alle droefenis met een opgeheven hoofd onzen Heere Jezus Christus uit den hemel verwachten, waar Hij onze sterfelijke lichamen aan zijn verheerlijkt lichaam gelijk maken, en ons tot Zich nemen zal in eeuwigheid.\n\nVerhoor ons, o God en barmhartige Vader, door Jezus Christus, die ons aldus heeft leeren bidden:\n\nOnze Vader, die in de hemelen zijt;\n\nUw naam worde geheiligd.\n\nUw koninkrijk kome.\n\nUw wil geschiede, gelijk in den alzoo ook op de aarde.\n\nGeef ons heden ons dagelijksch brood.\n\nEn vergeef ons onze schulden, gelijk ook wij vergeven onzen schuldenaren.\n\nEn leid ons niet in verzoeking, maar verlos ons van den booze.\n\nWant uw is het koninkrijk, en de kracht, en de heerlijkheid in der eeuwigheid.\n\nWil ons ook door dit Heilig Avondmaal sterken in het algemeen ongetwijfeld Christelijk geloof, waarvan wij belijdenis doen met mond en hart, sprekende:\n\nIk geloof in God den Vader, den Almachtige, Schepper des hemels en der aarde.\n\nEn in Jezus Christus, zijnen eeniggeborenen Zoon, onzen Heere; die ontvangen is van den Heiligen Geest, geboren uit de maagd Maria; die geleden heeft onder Pontius Pilatus, is gekruisigd, gestorven en begraven, nedergedaald ter helle; ten derden dage wederom opgestaan van de dooden; opgevaren ten hemel, zittende ter rechterhand Gods des almachtigen Vaders; van waar Hij komen zal om te oordeelen de levenden en de dooden.\n\nIk geloof in den Heiligen Geest. Ik geloof eene heilige, algemeene, Christelijke Kerk, de gemeenschap der heiligen; vergeving der zonden; wederopstanding des vleesches; en een eeuwig leven. Amen."
+        },
+        {
+          "type": "paragraph",
+          "text": "Opdat wij dan met het waarachtige hemelsche brood Christus gespijzigd mogen worden, zoo laat ons met onze harten niet aan het uiterlijke brood en wijn blijven hangen; maar onze harten opwaarts in den hemel verheffen, waar Jezus Christus is, onze Voorspraak, ter rechterhand zijns hemelschen Vaders, waarheen ons ook de Artikelen van ons Christelijk geloof wijzen; niet twijfelende, of wij zullen zoo waarachtiglijk door de werking des Heiligen Geestes met zijn lichaam en bloed aan onze zielen gespijzigd en gelaafd worden, als wij het heilige brood en drank tot zijne gedachtenis ontvangen."
+        },
+        {
+          "type": "paragraph",
+          "text": "Bij het breken en uitdeelen des Broods spreekt de Dienaar:"
+        },
+        {
+          "type": "paragraph",
+          "text": "Het brood, dat wij breken, is de gemeenschap des lichaams van Christus. Neemt, eet, gedenkt en gelooft, dat het lichaam onzes Heeren Jezus Christus gebroken is tot eene volkomene verzoening van alle onze zonden."
+        },
+        {
+          "type": "paragraph",
+          "text": "En als hij den Drinkbeker geeft:"
+        },
+        {
+          "type": "paragraph",
+          "text": "De drinkbeker der dankzegging, dien wij dankzeggende zegenen, is de gemeenschap des bloeds van Christus. Neemt, drinkt allen daaruit, gedenkt en gelooft, dat het dierbaar bloed onzes Heeren Jezus Christus vergoten is tot eene volkomene verzoening van alle onze zonden."
+        },
+        {
+          "type": "paragraph",
+          "text": "Terwijl men communieert, zal men stichtelijk zingen, of sommige kapittelen lezen, ter gedachtenis des lijdens van Christus dienende, als Jes. LIII. Joh. VI, XIII, XIV, XV, XVI, XVII, XVIII, of dergelijke."
+        },
+        {
+          "type": "paragraph",
+          "text": "De bediening geëindigd zijnde, zal de Dienaar spreken:"
+        },
+        {
+          "type": "paragraph",
+          "text": "Geliefden in den Heere, dewijl de Heere nu aan zijne tafel onze zielen gespijzigd heeft, zoo laat ons altezamen zijnen naam met dankzegging prijzen; en een iegelijk spreke in zijn hart aldus [Ps. CIII]:"
+        },
+        {
+          "type": "paragraph",
+          "text": "1. Loof den HEERE, mijne ziele, en al wat binnen in mij is, zijnen heiligen naam.\n\n2. Loof den HEERE, mijne ziele, en vergeet geene van zijne weldaden.\n\n3. Die al uwe ongerechtigheid vergeeft; die alle uwe krankheden geneest;\n\n4. Die uw leven verlost van het verderf; die u kroont met goedertierenheid en barmhartigheden.\n\n8. Barmhartig en genadig is de HEERE, lankmoedig en groot van goedertierenheid.\n\n9. Hij zal niet altoos twisten, noch eeuwiglijk den toorn behouden.\n\n10. Hij doet ons niet naar onze zonden, en vergeldt ons niet naar onze ongerechtigheden.\n\n11. Want zoo hoog de hemel is boven de aarde, is zijne goedertierenheid geweldig over degenen, die Hem vreezen.\n\n12. Zoo verre het oosten is van het westen, zoo verre doet Hij onze overtredingen van ons.\n\n13. Gelijk zich een vader ontfermt over de kinderen, ontfermt zich de HEERE over degenen, die Hem vreezen."
+        },
+        {
+          "type": "paragraph",
+          "text": "Die ook zijnen eigenen Zoon niet gespaard heeft, maar heeft Hem voor ons allen overgegeven, en ons alles met Hem geschonken. Daarom, bevestigt God daarmede zijne liefde jegens ons, dat Christus voor ons gestorven is, als wij nog zondaars waren, zoo zullen wij ook veel meer door Hem behouden worden van zijnen toorn, nadat wij door zijn bloed gerechtvaardigd zijn. Want indien wij met God verzoend zijn door den dood zijns Zoons, toen wij nog vijanden waren, veel meer zullen wij behouden worden door zijn leven, nadat wij met Hem verzoend zijn. Daarom zal mijn mond en hart des Heeren lof verkondigen, van nu aan tot in der eeuwigheid. Amen."
+        },
+        {
+          "type": "paragraph",
+          "text": "O barmhartige God en Vader, wij danken U van ganscher harte, dat Gij uit grondelooze barmhartigheid ons uwen eeniggeborenen Zoon tot eenen Middelaar en offer voor onze zonden, en tot eene spijze en drank des eeuwigen levens geschonken hebt; en dat Gij ons geeft een waarachtig geloof, waardoor wij zulke uwe weldaden deelachtig worden. Gij hebt ons ook, tot sterking daarvan, door uwen lieven Zoon Jezus Christus het Heilig Avondmaal laten instellen en verordenen. Wij bidden U, o getrouwe God en Vader, dat Gij door de werking uws Heiligen Geestes de gedachtenis van onzen Heere Jezus Christus, en de verkondiging van zijnen dood, ons tot dagelijksch toenemen in het rechte geloof, en in de zalige gemeenschap van Christus wilt laten gedijen; door Hem, uwen lieven Zoon Jezus Christus; in wiens naam wij onze gebeden besluiten, gelijk Hij ons geleerd heeft, zeggende:\n\nOnze Vader, die in de hemelen zijt,\n\nUw naam worde geheiligd.\n\nUw koninkrijk kome.\n\nUw wil geschiede, gelijk in den hemel, alzoo ook op de aarde.\n\nGeef ons heden ons dagelijksch brood.\n\nEn vergeef ons onze schulden, gelijk ook wij vergeven onzen schuldenaren.\n\nEn leid ons niet in verzoeking, maar verlos ons van den booze.\n\nWant uw is het koninkrijk, en de kracht, en de heerlijkheid in der eeuwigheid. Amen."
+        }
+      ]
+    },
+    {
+      "id": "afsnijding",
+      "number": 4,
+      "label": "Afsnijding (ban)",
+      "title": "Formulier des Bans of der afsnijding van de Gemeente",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Geliefden in den Heere Jezus Christus, het is u bekend, dat wij nu op onderscheidene tijden bij zekere trappen u voorgehouden hebben, welk eene groote zonde en zware ergernis onze medelidmaat N. gedaan en gegeven heeft; ten einde hij, door uwe Christelijke vermaningen en gebeden, tot God zich mocht bekeeren, en uit den strik des duivels (die hem gevangen houdt tot zijnen wil) los geworden zijnde, ontwaken mocht tot den wil des Heeren. Maar wij kunnen u met groote droefheid niet verbergen, dat ons tot nog toe niemand is verschenen, die in het minste te verstaan gegeven heeft, dat hij, door de menigvuldige vermaningen aan hem gedaan (zoo in het bijzonder, als voor getuigen, en in tegenwoordigheid van velen), gekomen zoude zijn tot eenig berouw over zijne zonde, of eenig teeken van ware boetvaardigheid aan zich heeft laten merken. Dewijl hij dan zijne overtreding, op zichzelve niet klein zijnde, door zijne hardnekkigheid dagelijks nog grooter maakt, en wij u laatstmaal aangezegd hebben, dat wij, in geval hij, na zoo lang geduld dat de Kerk met hem gehad heeft, zich niet bekeerde, gedwongen zouden zijn ons verder over hem te bedroeven, en tot de uiterste remedie te komen; zoo zijn wij genoodzaakt nu tegen woordiglijk voort te varen tot zijne afsnijding, volgens het bevel en den last, ons gegeven in Gods Heilig Woord, ten einde hij hierdoor (zoo het mogelijk is) tot schaamte over zijne zonden gebracht worde; opdat men ook door dit verrottende en tot nog toe ongeneeselijke lid het geheele lichaam der Gemeente niet in gevaar stelle, en de naam Gods niet gelasterd worde."
+        },
+        {
+          "type": "paragraph",
+          "text": "Daarom wij, Dienaars en Voorstanders der gemeente Gods alhier, vergaderd zijnde in den naam en de macht van onzen Heere Jezus Christus, verklaren voor u allen, dat N., om de voorzeide oorzaken, uitgesloten is, en wordt uitgesloten mits dezen, buiten de Gemeente des Heeren, en vreemd is aan de gemeenschap van Christus, van de Heilige Sacramenten, en van alle geestelijke zegeningen en weldaden Gods, die Hij aan zijne Gemeente belooft en bewijst, zoo lang hij hardnekkigen onboetvaardig blijft in zijne zonden, en is daarom door ulieden te houden als de heiden en tollenaar, naar het bevel van Christus, die zegt, in den hemel gebonden te zijn, al wat zijne Dienaars binden op de aarde."
+        },
+        {
+          "type": "paragraph",
+          "text": "Voorts vermanen wij u, geliefde Christenen, dat gij u niet vermengt met hem, opdat hij beschaamd worde; nochtans hem niet houdende als vijand, maar bij wijlen vermanende, gelijk men eenen broeder doet."
+        },
+        {
+          "type": "paragraph",
+          "text": "Intusschen spiegele zich een iegelijk aan dit en dergelijke voorbeelden, om den Heere te vreezen, en naarstiglijk voor zich toe te zien, indien hij meent te staan, dat hij niet valle, maar ware gemeenschap hebbende met den Vader en zijnen Zoon Christus, mitsgaders met alle geloovige Christenen, daarin volstandig blijve tot den einde toe, en alzoo de eeuwige zaligheid verkrijge. Gij hebt gezien, lieve broeders en zusters, op welke wijze deze onze afgesneden broeder heeft begonnen te vervallen, en allengskens meer en meer gekomen is tot den val. Merkt dan aan hem, hoe listig de satan is om den mensch te brengen tot het verderf, en af te trekken van alle heilzame middelen ter zaligheid. Zoo wacht u dan mede voor de minste beginselen des kwaads, en, naar de vermaning des Apostels, afleggende allen last, en de zonde die ons lichtelijk omringt, loopt met lijdzaamheid de loopbaan, die ons is voorgesteld, ziende op den oversten Leidsman en Voleinder des geloofs, Jezus. Zijt nuchteren, waakt en bidt, opdat gij niet in verzoeking valt. Heden, zoo gij de stemme des Heeren hoort, verhardt uw hart niet; maar werkt uws zelfs zaligheid met vreeze en beven; en een iegelijk hebbe berouw van zijne zonde; opdat onze God ons niet wederom vernedere, en dat wij rouwe zouden moeten hebben over iemand van ulieden; maar dat gij, eendrachtiglijk in Godzaligheid levende, onze kroon en blijdschap moogt wezen in den Heere."
+        },
+        {
+          "type": "paragraph",
+          "text": "Doch aangezien het God is, die in ons werkt, beide het willen en het werken, naar zijn welbehagen, zoo laat ons zijnen heiligen naam, met belijdenis onzer zonden, aldus aanroepen:"
+        },
+        {
+          "type": "paragraph",
+          "text": "O rechtvaardige God, barmhartige Vader, wij klagen onszelven aan vanwege onze zonden voor uwe hooge majesteit, en bekennen wel verdiend te hebben de droefheid en smart, die ons is aangedaan in de afsnijding van dezen onzen gewezen medelidmaat, ja wij zijn allen waardig, om van U afgesneden en verbannen te worden, om onzer groote overtreding wille, zoo Gij met ons in het gericht wilt treden. Maar, o Heere, wees ons genadig om Christus wille, vergeef ons onze misdaden, want zij zijn ons van harte leed, en werk in onze harten hoe langer hoe meer leedwezen daarover, opdat wij, uwe oordeelen vreezende, die Gij laat gaan over de hardnekkigen, ons mogen benaarstigen, om U te behagen. Geef, dat wij ons wachten voor alle besmetting der wereld, en dergenen, die van de gemeenschap der Kerk zijn afgesneden; opdat wij ons hunner zonden niet deelachtig maken, en dat de afgesnedene beschaamd worde over zijne zonden. En aangezien Gij geenen lust hebt in den dood des zondaars, maar daarin dat hij zich bekeere en leve; en de schoot uwer Kerk altijd open staat voor degenen die wederkeeren; zoo ontsteek ons toch met eenen goeden ijver, dat wij met goede Christelijke vermaningen en voorbeelden zoeken wederom te recht te brengen dezen afgesneden persoon, mitsgaders alle degenen, die door ongeloof of roekeloosheid des levens afwijken. Geef uwen zegen tot onze vermaningen, ten einde wij daardoor oorzaak mogen hebben, ons weder te verblijden in degenen, waarover wij nu rouwe moeten dragen, en dat alzoo uw heilige naam geprezen worde, door onzen Heere Jezus Christus, die ons aldus heeft leeren bidden:\n\nOnze Vader, die in de hemelen zijt;\n\nUw naam worde geheiligd.\n\nUw koninkrijk kome.\n\nUw wil geschiede, gelijk in den hemel, alzoo ook op de aarde.\n\nGeef ons heden ons dagelijksch brood.\n\nEn vergeef ons onze schulden, gelijk ook wij vergeven onzen schuldenaren.\n\nEn leid ons niet in verzoeking, maar verlos ons van den booze.\n\nWant uw is het koninkrijk, en de kracht, en de heerlijkheid in der eeuwigheid. Amen."
+        }
+      ]
+    },
+    {
+      "id": "wederopneming",
+      "number": 5,
+      "label": "Wederopneming",
+      "title": "Formulier van wederopneming des afgesnedenen in de Gemeente van Christus",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Geliefden in den Heere, ulieden is bekend, dat eenen zekeren tijd geleden, onze medelidmaat N. van de Gemeente van Christus afgesneden is geweest. Nu kunnen wij u niet verbergen, hoe hij door de voornoemde remedie, mitsgaders door het middel van goede vermaningen, en uwe Christelijke gebeden, zoo verre is gekomen, dat hij zich over zijne zonde schaamt, begeerende van ons, tot de gemeenschap der Kerk weder opgenomen te worden. Alzoo wij dan van wege het bevel Gods schuldig zijn, de zoodanigen met blijdschap te ontvangen, en het toch noodig is dat goede orde daarin gebruikt worde; zoo geven wij u mits dezen te verstaan, dat wij den voorschreven afgesneden persoon ter naaste reize, door Gods genade, wanneer men des Heeren Avondmaal zal houden, van den band der afsnijding wederom ontbinden, en tot de gemeenschap der Kerk ontvangen zullen, ten ware iemand van u middelerwijl iets wettigs had, waarom zulks niet zoude behooren te geschieden, hetwelk gijlieden ons intijds aanzeggen zult. Intusschen zal een iegelijk den Heere danken voor de weldaad, aan dezen armen zondaar bewezen, Hem biddende, dat Hij zijn werk aan hem wille uitvoeren tot zijne eeuwige zaligheid. Amen."
+        },
+        {
+          "type": "paragraph",
+          "text": "Daarna, indien geene verhindering voorkomt, zal de Dienaar des Woords tot wederopneming van den afgesnedenen zondaar voortgaan op de navolgende wijze:"
+        },
+        {
+          "type": "paragraph",
+          "text": "Geliefde Christenen, wij hebben u laatstmaal voorgehouden van de bekeering van onzen medebroeder (of, van onze medezuster) N., om met uw voorweten wederom tot de Gemeente van Christus opgenomen te worden. Alzoo dan niemand iets voorgebracht heeft, waarom de voorzeide wederopneming niet zoude behooren te geschieden, zoo willen wij nu tegen woordiglijk daartoe voortvaren."
+        },
+        {
+          "type": "paragraph",
+          "text": "De Heere Christus, Matth. XVIII bevestigd hebbende het vonnis zijner Kerk in de afsnijding der onboetvaardige zondaren, verklaart terstond daarbij, dat al wat zijne Dienaars ontbinden zouden op de aarde, ontbonden zoude zijn in den hemel. Waarmede Hij te kennen geeft, dat, wanneer iemand van zijne Kerk afgesneden is, hem alsdan alle hope der zaligheid niet ontnomen is, maar dat hij van de banden der verdoemenis weder ontslagen kan worden. Daarom, aangezien God in zijn Woord verklaart, geenen lust te hebben in den dood des zondaars, maar daarin dat hij zich bekeere en leve; zoo heeft ook de Kerk nog altijd hoop op de bekeering des afgewekenen zondaars, en houdt haren schoot open, om den bekeerde wederom te ontvangen. Dienvolgens heeft de Heilige Paulus den Corinthiër (dien hij verklaard had, dat van de Kerk afgedaan behoorde te worden) wederom bevolen op te helpen en te vertroosten, nadat hij, van velen bestraft zijnde, tot inzicht was gekomen; opdat hij door eene al te overvloedige droefheid niet zoude verslonden worden. Ten andere leert Christus in de voorzeide uitspraak, dat het vonnis der ontbinding, hetwelk uitgesproken wordt over zulk eenen bekeerden zondaar, volgens Gods Woord, voor bondig en vast gehouden wordt door den Heere; waarom niemand, die zich oprechtelijk bekeert, eenigszins behoort te twijfelen, of hij is gewisselijk van God in genade aangenomen, gelijk Christus elders zegt: Zoo gij iemands zonden vergeeft, dien worden zij vergeven."
+        },
+        {
+          "type": "paragraph",
+          "text": "Om nu tot de voorgenomene handeling te komen, zoo vraag ik u, N.:"
+        },
+        {
+          "type": "paragraph",
+          "text": "Of gij voor God en zijne Gemeente alhier van ganscher harte verklaart, dat gij oprecht berouw hebt van de zonde en hardnekkigheid, om welke gij rechtvaardiglijk van de Gemeente afgesneden zijt geweest; of gij ook waarachtiglijk gelooft, dat u de Heere uwe zonden vergeven heeft en vergeeft om Christus wille, en mitsdien begeert tot de Gemeente van Christus alhier weder opgenomen te worden, belovende van nu voortaan u in alle Godzaligheid te gedragen naar het gebod des Heeren?"
+        },
+        {
+          "type": "paragraph",
+          "text": "Antwoord: Ja ik."
+        },
+        {
+          "type": "paragraph",
+          "text": "Hierop zal de Dienaar verder aldus spreken:"
+        },
+        {
+          "type": "paragraph",
+          "text": "Wij dan, alhier vergaderd in den naam en de macht des Heeren Christus, verklaren u, N., ontbonden te zijn van de banden der afsnijding; ontvangen u wederom in de Gemeente des Heeren; en verkondigen u, dat gij staat in de gemeenschap van Christus, van de Heilige Sacramenten, en van alle geestelijke zegeningen en weldaden Gods, die Hij aan zijne Gemeente belooft en bewijst; waarin u de eeuwige God tot den einde toe behouden wille door zijnen eeniggeborenen Zoon Jezus Christus, Amen."
+        },
+        {
+          "type": "paragraph",
+          "text": "Zoo wees dan verzekerd, mijn lieve Broeder, in uw hart, dat u de Heere heeft opgenomen in genade; wees naarstig, om u voortaan te wachten voor de listigheid des satans en de boosheid der wereld, ten einde gij niet weder vervalt in de zonde; heb Christus zeer lief, want u zijn vele zonden vergeven."
+        },
+        {
+          "type": "paragraph",
+          "text": "En gij, geliefde Christenen, ontvangt dezen uwen broeder met toegenegenheid des harten; zijt vroolijk, dat hij dood was en weder levend is geworden, verloren was en gevonden is; verheugt u met de engelen des hemels over dezen zondaar, die zich bekeert; houdt hem niet langer voor eenen die vreemd is, maar voor eenen medeburger der heiligen en huisgenoot Gods."
+        },
+        {
+          "type": "paragraph",
+          "text": "En alzoo wij niets goeds kunnen hebben van onszelven, zoo laat ons, den Heere almachtig lovende en dankende, Hem om zijne genade aldus aanroepen:"
+        },
+        {
+          "type": "paragraph",
+          "text": "Goedertieren God en Vader, wij danken U door Jezus Christus, dat Gij dezen onzen medebroeder bekeering hebt gegeven ten leven, en ons oorzaak verleent om in zijne wederkeering verheugd te zijn. Wij bidden U, bewijs hem uwe genade, om van de vergeving zijner zonden meer en meer verzekerd te zijn in zijn gemoed, en daaruit te scheppen eene onuitsprekelijke blijdschap en lust om U te dienen. En gelijkerwijs hij tevoren vele menschen heeft geërgerd door zijne zonde, wil hem alzoo wederom verleenen, vele menschen door zijne bekeering te stichten. Geef hem tot den einde toe volstandiglijk te wandelen in uwe wegen; en laat ons leeren uit dit voorbeeld, dat bij U is genade, opdat Gij gevreesd wordt; ten einde wij, hem houdende voor onzen medebroeder en medeërfgenaam des eeuwigen levens, U te zamen mogen dienen met eene kinderlijke vreeze en gehoorzaamheid alle de dagen onzes levens, door onzen Heere Jezus Christus; in wiens naam wij ons gebed besluiten:\n\nOnze Vader, die in de hemelen zijt;\n\nUw naam worde geheiligd.\n\nUw koninkrijk kome.\n\nUw wil geschiede, gelijk in den hemel, alzoo ook op de aarde.\n\nGeef ons heden ons dagelijksch brood.\n\nEn vergeef ons onze schulden, gelijk ook wij vergeven onzen schuldenaren.\n\nEn leid ons niet in verzoeking, maar verlos ons van den booze.\n\nWant uw is het koninkrijk, en de kracht, en de heerlijkheid in der eeuwigheid. Amen."
+        }
+      ]
+    },
+    {
+      "id": "bevestiging-dienaren",
+      "number": 6,
+      "label": "Bevestiging van Dienaars des Woords",
+      "title": "Formulier om te bevestigen de Dienaars des Woords",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Na de voleinding van de predikatie en van het gewone Gebed zal de Dienaar aldus spreken tot het volk:"
+        },
+        {
+          "type": "paragraph",
+          "text": "Geliefde Broeders, het is u bekend, hoe wij nu, tot drie onderscheidene reizen, den naam van onzen medebroeder N. hier tegenwoordig, openlijk voorgesteld hebben, om te vernemen, of iemand wat had, hetzij zijne leer of zijn leven aangaande, waarom hij niet zoude mogen bevestigd worden in den dienst des Woords. Het is nu alzoo, dat ons niemand is verschenen, die iets wettigs voorgebracht heeft tegen zijnen persoon; waarom wij thans in den naam des Heeren zullen voortvaren tot zijne bevestiging."
+        },
+        {
+          "type": "paragraph",
+          "text": "Daartoe zult gij, N., en allen die hier tegenwoordig zijt, vóór alle dingen aanhooren uit den Woorde Gods eene korte verklaring van de inzetting en het ambt der Herders of Dienaren des Woords."
+        },
+        {
+          "type": "paragraph",
+          "text": "Alwaar eerstelijk valt op te merken, dat God, onze hemelsche Vader, willende uit het verdorven menschelijk geslacht eene gemeente roepen en vergaderen ten eeuwigen leven, door eene bijzondere genade daartoe gebruikt den dienst van menschen. Hierom zegt Paulus, Eph. IV, dat de Heere Christus gegeven heeft sommigen tot apostelen, en sommigen tot profeten, en sommigen tot evangelisten, en sommigen tot herders en leeraars, tot de volmaking der heiligen, tot het werk der bediening, tot opbouwing des lichaams van Christus. Daar zien wij, dat de Heilige Apostel onder anderen zegt, dat het Herdersambt eene instelling van Jezus Christus is."
+        },
+        {
+          "type": "paragraph",
+          "text": "Wat nu dit heilig ambt medebrengt, kunnen wij lichtelijk uit den naam zelven afleiden. Want gelijkerwijs het werk van eenen gewonen herder is, de kudde (die hem bevolen is) te weiden, te leiden, voor te staan en te regeeren; alzoo gaat het ook toe met deze geestelijke herders, die gesteld zijn over de gemeente, die God roept tot de zaligheid, en houdt ze als voor schapen zijner weide. Nu is de weide, waarmede deze schapen geweid worden, anders dan de verkondiging des Goddelijken Woords, met de aanklevende bediening der gebeden en der Heilige Sacramenten. Hetzelfde Woord Gods is ook de staf waarmede deze kudde geleid en geregeerd wordt."
+        },
+        {
+          "type": "paragraph",
+          "text": "Dienvolgens is het openbaar, dat het ambt der Herders of der Dienaren des Woords is:"
+        },
+        {
+          "type": "paragraph",
+          "text": "Eerstelijk, dat zij des Heeren Woord, door de Schriften der Profeten en Apostelen geopenbaard, grondig en oprechtelijk aan hun volk zullen voordragen, en het toeëigenen, zoo in het gemeen als in het bijzonder, tot nuttigheid der toehoorders, met onderwijzen, vermanen, vertroosten en bestraffen, naar eens iegelijks behoefte, verkondigende de bekeering tot God, en de verzoening met Hem door het geloof in Jezus Christus, en wederleggende met de Heilige Schrift alle dwalingen en ketterijen, die tegen deze zuivere leer strijden. Dit alles wordt ons klaarlijk te kennen gegeven in de Heilige Schrift; want de Apostel Paulus zegt, dat deze arbeiden in het Woord; en elders leert hij, dat zulks moet geschieden naar de mate of regel des geloofs. Hij schrijft ook, dat een herder aan het getrouwe of oprechte woord, dat naar de leere is, moet vasthouden, en dat recht snijden; insgelijks: die profeteert (dat is, Gods Woord predikt), spreekt den menschen stichting, en vermaning, en vertroosting. Op eene andere plaats stelt hij zichzelven aan de Herders voor tot een voorbeeld, verklarende dat hij, in het openbaar en bij de huizen, geleerd en betuigd heeft de bekeering tot God en het geloof in Jezus Christus. Maar inzonderheid hebben wij eene zuivere beschrijving van het ambt van eenen Dienaar des Evangelies 2 Cor. V: 18, waar de Apostel aldus spreekt: Alle deze dingen zijn uit God, die ons met zichzelven verzoend heeft door Jezus Christus, en ons (namelijk den Apostelen en Herders) de bediening der verzoening gegeven heeft; want God was in Christus de wereld met zichzelven verzoenende, hunne zonden hun niet toerekenende, en heeft het woord der verzoening in ons gelegd. Zoo zijn wij dan gezanten (of, ambassadeurs) van Christus' wege, alsof God door ons bade; wij bidden van Christus' wege: laat u met God verzoenen. Belangende de wederlegging der onzuivere leer, zegt dezelfde Apostel, Tit. I: 9, dat een Dienaar aan het Woord Gods moet vasthouden, om de tegensprekers te wederleggen, en den mond te stoppen."
+        },
+        {
+          "type": "paragraph",
+          "text": "Ten tweede, is het ambt der Herders, de openbare aanroeping van Gods naam te doen van wege de geheele gemeente. Want hetgene de Apostelen zeggen, Hand. VI: 4: Wij zullen volharden in het gebed, en in de bediening des Woords, dan hebben deze Herders met de Apostelen gemeen. Waarop de Heilige Paulus ziende, tot Timótheüs aldus spreekt: Ik vermaan dan vóór alle dingen, dat gedaan worden smeekingen, gebeden, voorbiddingen, dankzeggingen, voor alle menschen; voor koningen, en allen die in hoogheid zijn; enz."
+        },
+        {
+          "type": "paragraph",
+          "text": "Ten derde, is hun ambt, de Sacramenten te bedienen, die de Heere heeft ingesteld tot zegelen zijner genade; gelijk blijkt uit het bevel, den Apostelen door Christus gegeven, en den Herders ook aangaande, Matth. XXVIII: 19: Doopt hen in den naam des Vaders, en des Zoons, en des Heiligen Geestes. Insgelijks 1 Cor. XI: 23: Want ik heb van den Heere ontvangen, hetgene ik ook u overgegeven heb, dat de Heere Jezus, in den nacht in welken Hij verraden werd, het brood nam; enz."
+        },
+        {
+          "type": "paragraph",
+          "text": "Ten laatste, is het werk van de Dienaren des Woords, de gemeente Gods in goede tucht en orde te houden en te regeeren, op zulke manier als de Heere geordineerd heeft. Want Christus, Matth. XVIII: 18, gesproken hebbende van de Christelijke straf, zegt tot zijne Apostelen aldus: Al wat gij op de aarde binden zult, zal in den hemel gebonden wezen. En Paulus wil, dat de Dienaars hun eigen huis wel weten te regeeren, dewijl zij anders niet voor de gemeente Gods zouden kunnen zorg dragen, noch die regeeren. Dit is de oorzaak, waarom de Herders in de Schrift ook genoemd worden Huisverzorgers Gods, en Bisschoppen, dat is, Opzieners en Wachters; want zij hebben opzicht over het Huis Gods, waarin zij verkeeren; ten einde aldaar alles met goede orde en betamelijkheid moge toegaan, en dat met de Sleutelen des hemelrijks, die hun bevolen zijn, ontsluiting en toesluiting gedaan worde, volgens den last, hun van God gegeven."
+        },
+        {
+          "type": "paragraph",
+          "text": "Uit deze dingen kan men zien, welk een heerlijk werk het Herdersambt is, nademaal zoo groote dingen daardoor uitgericht worden; ja hoe gansch noodzakelijk het is, om de menschen ter zaligheid te brengen. Hetwelk ook de oorzaak is, waarom de Heere wil, dat zulk een ambt altijd zal blijven. Want aldus spreekt Christus, zijne Apostelen uitzendende om deze heilige bediening te doen: Ziet, ik ben met ulieden tot de voleinding der wereld; alwaar men ziet dat het zijn wil is, dat deze heilige dienst (want de personen, die Hij daar aanspreekt, konden niet leven tot de voleinding der wereld) ten allen tijde op aarde onderhouden worde. En hierom vermaant Paulus Timótheüs, hetgene hij van hem gehoord had, aan getrouwe menschen te betrouwen, welke bekwaam zijn om anderen te leeren; gelijk hij ook dienvolgens, Titus geordineerd hebbende tot eenen Herder, hem voorts beveelt, van stad tot stad Ouderlingen en Opzieners te stellen."
+        },
+        {
+          "type": "paragraph",
+          "text": "Dewijl dan ook wij, om dezen dienst in de Kerke Gods te onderhouden, nu eenen nieuwen Dienaar des Woords in den dienst instellen, en tot nog toe genoeg van het ambt der zoodanigen gesproken hebben; zoo zult gij, N., antwoorden op hetgene u voorgehouden zal worden, ten einde een iegelijk moge hooren, dat gij gezind zijt den voorzeiden dienst, zooals het behoorlijk is, aan te nemen."
+        },
+        {
+          "type": "paragraph",
+          "text": "En eerstelijk vraag ik u, of gij gevoelt in uw hart, dat gij wettiglijk van Gods gemeente, en mitsdien van God zelven, tot dezen heiligen dienst geroepen zijt?"
+        },
+        {
+          "type": "paragraph",
+          "text": "Ten tweede, of gij de Schriften des Ouden en Nieuwen Testaments voor het eenige Woord Gods en de volkomene leere der zaligheid houdt, en alle leeringen verwerpt, die daartegen strijden?"
+        },
+        {
+          "type": "paragraph",
+          "text": "Ten derde, of gij belooft uw ambt, gelijk dit voorhenen beschreven is, naar deze leer getrouwelijk te bedienen, en uwe leering te versieren met een Godzalig leven; mede u onderwerpende aan de kerkelijke vermaning, volgens de gemeene ordening der Kerken, indien gij in leer of leven u kwaamt te ontgaan?"
+        },
+        {
+          "type": "paragraph",
+          "text": "Hierop zal hij antwoorden:"
+        },
+        {
+          "type": "paragraph",
+          "text": "Ja ik, van ganscher harte."
+        },
+        {
+          "type": "paragraph",
+          "text": "En daarna zal de Dienaar, die hem dit afgevraagd heeft (of een ander Dienaar, zoo er meer Dienaars zijn), hem de hand op het hoofd leggen (Nota: deze ceremonie zal men niet gebruiken bij de bevestiging dergenen die tevoren gediend hebben), en aldus spreken:"
+        },
+        {
+          "type": "paragraph",
+          "text": "God, onze hemelsche Vader, die u geroepen heeft tot dezen heiligen dienst, verlichte u door zijnen Geest, versterke u door zijne hand, en regeere u zóó in uwe bediening, dat gij daarin behoorlijk en vruchtbaar moogt wandelen, tot grootmaking zijns naams, en tot uitbreiding van het Rijk zijns Zoons Jezus Christus, Amen."
+        },
+        {
+          "type": "paragraph",
+          "text": "Daarna zal de Dienaar van den Stoel den bevestigden Dienaar, en vervolgens de gansche Gemeente, aldus vermanen:"
+        },
+        {
+          "type": "paragraph",
+          "text": "Zoo heb dan nu, geliefde Broeder en mededienaar in Christus, acht op uzelven en op de geheele kudde, over dewelke u de Heilige Geest tot een opziener gesteld heeft, om de gemeente Gods te weiden, welke Hij verkregen heeft door zijn eigen bloed. Heb Christus lief, en weid zijne schapen, hebbende opzicht daarover, niet uit bedwang, maar gewilliglijk; noch om vuil gewin, maar met een volvaardig gemoed; noch als heerschappij voerende over het erfdeel des Heeren, maar als een voorbeeld der kudde geworden zijnde. Wees een voorbeeld der geloovigen, in het woord, in wandel, in liefde, in den Geest, in geloof, in reinigheid. Houd aan in het lezen, in het vermanen, in het leeren; en verzuim de gave niet, die u gegeven is. Bedenk deze dingen, en wees hierin bezig, opdat uw toenemen openbaar zij in alles. Heb acht op de leer, en volhard daarin. Lijd geduldiglijk alle lijden en verdrukking, als een goed krijgsknecht van Christus. Deze dingen doende, zult gij èn uzelven behouden, èn die u hooren. En als de overste Herder verschenen zal zijn, zoo zult gij de onverwelkelijke kroon der heerlijkheid behalen."
+        },
+        {
+          "type": "paragraph",
+          "text": "En gijlieden ook, geliefde Christenen, ontvangt dezen uwen Dienaar in den Heere met alle blijdschap, en houdt de zoodanigen in groote waarde. Gedenkt, dat God zelf u door hem aanspreekt en bidt. Neemt dan het woord aan, hetwelk hij u volgens de Heilige Schrift zal verkondigen, niet als der menschen woord, maar (gelijk het waarlijk is) als Gods woord. Laat u liefelijk en aangenaam zijn de voeten dergenen, die vrede verkondigen, die het goede verkondigen. Zijt uwen voorgangeren gehoorzaam; want zij waken voor uwe zielen, als die rekenschap geven zullen; opdat zij dat doen mogen met vreugde, en niet al zuchtende; want dat is u niet nuttig. Dit doende, zal het geschieden, dat de vrede Gods zal komen in uwe huizen, en dat gijlieden, die dezen aanneemt in den naam eens profeten, eens profeten loon zult ontvangen, en door zijn woord in Christus geloovende, door Christus zult beërven het eeuwige leven."
+        },
+        {
+          "type": "paragraph",
+          "text": "Doch aangezien niemand tot iets van alle deze dingen van zichzelven bekwaam is, zoo laat ons God aldus met dankzegging bidden:"
+        },
+        {
+          "type": "paragraph",
+          "text": "Barmhartige Vader, wij danken U, dat het U belieft, uit het verloren menschelijk geslacht door den dienst der menschen U eene gemeente te vergaderen ten eeuwigen leven; en dat Gij de Kerk hier ter plaatse nog zoo genadiglijk voorzien hebt met eenen getrouwen Dienaar. Wij bidden U, wil hem door uwen Geest hoe langer hoe bekwamer maken tot den dienst, waartoe Gij hem bereid en geroepen hebt, hem openende het verstand, om uwe Heilige Schrift te verstaan, en hem sprake gevende tot opening zijns monds, om met vrijmoedigheid de verborgenheden des Evangelies te kennen te geven, en te bedienen. Begaaf hem met wijsheid en kloekheid, om het volk, waarover hij gesteld is, recht te regeeren, en in Christelijken vrede te onderhouden, ten einde uwe Kerk onder zijne bediening, en door zijnen goeden voorgang, toeneme in menigte en in deugden. Verleen hem kloekmoedigheid in alle voorvallende moeiten en zwarigheden, die hem in zijnen dienst zullen ontmoeten; opdat hij, door den troost uws Geestes gesterkt zijnde, en ten einde toe standvastig blijvende, met de getrouwe dienstknechten ontvangen worde in de vreugde zijns Heeren. Wil ook aan dit volk en deze gemeente uwe genade verleenen, dat zij zich behoorlijk gedragen jegens dezen hunnen Herder, hem erkennende als van U gezonden, zijne leer aannemende met allen eerbied, en aan zijne vermaning zich onderwerpende; teneinde zij, door zijn woord in Christus geloovende, des eeuwigen levens deelachtig mogen worden. Verhoor ons, o Vader, door uwen lieven Zoon, die ons aldus heeft leeren bidden:\n\nOnze Vader, die in de hemelen zijt;\n\nUw naam worde geheiligd.\n\nUw koninkrijk kome.\n\nUw wil geschiede, gelijk in den hemel, alzoo ook op de aarde.\n\nGeef ons heden ons dagelijksch brood.\n\nEn vergeef ons onze schulden, gelijk ook wij vergeven onzen schuldenaren.\n\nEn leid ons niet in verzoeking, maar verlos ons van den booze.\n\nWant uw is het koninkrijk, en de kracht, en de heerlijkheid in der eeuwigheid. Amen."
+        }
+      ]
+    },
+    {
+      "id": "bevestiging-ouderlingen-diakenen",
+      "number": 7,
+      "label": "Bevestiging van Ouderlingen en Diakenen",
+      "title": "Formulier van bevestiging der Ouderlingen en Diakenen; hetzij beide tegelijk, of elk afzonderlijk, naar gelegenheid",
+      "blocks": [
+        {
+          "type": "paragraph",
+          "text": "Geliefde Christenen, gijlieden weet, hoe wij nu tot onderscheidene reizen u voorgedragen hebben de namen van onze tegenwoordige medebroeders, die tot den dienst van het ouderlingschap en van het diakenschap dezer gemeente verkoren zijn, om te vernemen, of iemand wat had, waarom zij in hun ambt niet zouden behooren bevestigd te worden. Het is nu alzoo, dat voor ons niemand is verschenen, die iets wettigs tegen hen voorgebracht heeft; waarom wij thans in den naam des Heeren tot de bevestiging zullen voortvaren."
+        },
+        {
+          "type": "paragraph",
+          "text": "Om hiertoe te komen, zult gij, Broeders die men bevestigen zal, en voorts allen die hier tegenwoordig zijt, vooreerst aanhooren, uit den Woorde Gods, eene korte verklaring van de instelling en het ambt der Ouderlingen en Diakenen."
+        },
+        {
+          "type": "paragraph",
+          "text": "Belangende de Ouderlingen, is aan te merken, dat het woord ouderling of oudste (hetwelk uit het Oude Testament is genomen, en een persoon beteekent, die in een aanzienlijk ambt van regeering over anderen gesteld is) toegeschreven wordt aan tweeërlei personen, die in de Kerk van Jezus Christus dienen; want de Apostel zegt: De ouderlingen, die wèl regeeren, zullen dubbele eere waardig geacht worden, voornamelijk die arbeiden in het Woord en de leere. Daar ziet men, dat in de Apostolische Kerk twee soorten van ouderlingen zijn geweest, waarvan de eersten hebben gearbeid in het Woord en de leer, en de anderen niet. De eersten waren de Dienaars des Woords en Herders, die het Evangelie verkondigden en de Sacramenten bedienden; maar de anderen, die niet in het Woord arbeidden, en nochtans mede in de gemeente dienden, droegen een bijzonder ambt; dat zij namelijk over de Kerk opzicht hadden, en die regeerden, met de Dienaren des Woords; want Paulus, Rom. XII: 8, gesproken hebbende van het leerambt, en ook van het ambt der uitdeeling of diakenschap, spreekt daarna van dezen dienst afzonderlijk, zeggende: die een voorstander is, dat hij zulks doe in naarstigheid. Insgelijks op eene andere plaats vermeldt hij onder de gaven en ambten, die God in de gemeente gesteld heeft: de regeering."
+        },
+        {
+          "type": "paragraph",
+          "text": "Zoo is dan deze soort van dienaren den anderen, die het Evangelie prediken, tot hulp en bijstand, gelijk in het oude Testament de gemeene Levieten in den dienst des Tabernakels den Priesters bijgevoegd waren, als medehelpers in hetgene de Priesters alleen niet hadden kunnen doen; blijvende nochtans die ambten altijd onderscheiden. Bovendien is het goed, dat bij de Dienaren des Woords zoodanige mannen tot mederegeerders gevoegd worden, ten einde daardoor uit de gemeente Gods te meer geweerd worde alle tirannie en heerschappij, die lichter kan inbreken, wanneer bij één alleen, of bij zeer weinigen, de regeering staat. En alzoo maken de Dienaren des Woords en de Ouderlingen te zamen een college of gezelschap, zijnde als een Raad der Kerke, en vertoonende de geheele gemeente; waarop de Heere Christus ziet, wanneer Hij zegt: zeg het der gemeente; hetwelk geenszins verstaan kan worden van alle lidmaten der gemeente ieder in het bijzonder, maar zeer bekwamelijk van degenen, die de gemeente, waarvan zij verkoren zijn, regeeren."
+        },
+        {
+          "type": "paragraph",
+          "text": "Zoo is dan ten eerste het ambt der Ouderlingen, met de Dienaren des Woords, opzicht te hebben over de gemeente, die hun bevolen is; naarstiglijk toe te zien, of een iegelijk zich behoorlijk gedraagt in belijdenis en in wandel; die zich onstichtelijk gedragen, te vermanen, en te verhoeden dat de Sacramenten niet ontheiligd worden, zooveel mogelijk is; ook mede tegen de onboetvaardigen, volgens de Christelijke discipline of kerkelijke tucht, te handelen, en de boetvaardigen weder in den schoot der Kerk te ontvangen; gelijk niet alleen blijkt uit de voormelde uitspraak van Christus, maar ook uit meer andere uitspraken der Schrift, dat deze dingen niet staan bij één of twee personen alleen, maar bij velen die daartoe gesteld zijn."
+        },
+        {
+          "type": "paragraph",
+          "text": "Ten tweede, naardien de Apostel beveelt, dat onder de Christenen alles betamelijk en ordelijk zal toegaan, en niemand anders dan door wettige beroeping in de Kerk van Christus behoort te dienen, volgens de Christelijke ordinantie daarvan zijnde; zoo is mede het werk der Ouderlingen daarop acht te nemen, en in alle voorvallende zaken, die den welstand en de goede orde der Kerk betreffen, met goeden raad den Dienaren des Woords behulpzaam te zijn; ja ook met raad en troost alle gemeene Christenen te dienen."
+        },
+        {
+          "type": "paragraph",
+          "text": "Ten derde is hun ambt, inzonderheid mede toezicht te nemen op de leering en den wandel der Dienaren des Woords, ten einde alles tot stichting der Kerk gericht moge worden, en dat geene vreemde leer worde voorgesteld, volgens hetgene wij lezen Hand. XX: 28, waar de Apostel vermaant, naarstige wacht te houden tegen de wolven, die in de schaapskooi van Christus mochten komen. Om hetwelk te doen, de Ouderlingen schuldig zijn, Gods Woord naarstig te doorzoeken, en zichzelven geduriglijk te oefenen in de overlegging van de verborgenheden des geloofs."
+        },
+        {
+          "type": "paragraph",
+          "text": "Aangaande de Diakenen kunnen wij van hunnen oorsprong en instelling lezen in de Handelingen der Apostelen. Aldaar vinden wij, dat in het begin de Apostelen zelven de bediening der armen gehad hebben; aan wier voeten gelegd werd de prijs der verkochte goederen; en aan een iegelijk werd uitgedeeld, naar dat elk van noode had. Maar alzoo daarna eene murmureering ontstond, omdat de weduwen der Griekschen in de dagelijksche bediening overgeslagen werden; zoo zijn door de vermaning der Apostelen mannen gekoren geworden, die eigenlijk hun werk van de bediening der armen maken zouden, opdat de Apostelen in het gebed en in de bediening des Woords te beter mochten volharden. En dit is van dien tijd af onderhouden geweest in de Kerk, gelijk blijkt uit Rom. XII: 8, alwaar de Apostel, van dezen dienst sprekende, zegt: dat degenen, die uitdeelen, zulks doen zullen in eenvoudigheid. En elders sprekende van de behulpsels, bedoelt hij degenen, die in de gemeente gesteld zijn, om de armen en ellendigen te helpen in den nood."
+        },
+        {
+          "type": "paragraph",
+          "text": "Uit welke plaatsen genoeg te zien is, welk het ambt is der Diakenen; namelijk, ten eerste, dat zij in alle getrouwigheid en naarstigheid de aalmoezen en goederen, die den armen gegeven worden, verzamelen en bewaren; ja ook vlijtig zijn, om te helpen toezien, dat tot hulp der armen vele goede middelen gevonden mogen worden. Het tweede deel van hun ambt bestaat in de uitdeeling, waartoe vereischt wordt, niet alleen gave van onderscheiding en voorzichtigheid, om de aalmoezen niet te besteden dan waar het noodig is, maar ook blijmoedigheid en eenvoudigheid om met een bewogen hart en toegenegen gemoed de armen te helpen, gelijk de Apostel eischt, Rom. XII: 8, en 2 Cor. IX: 7. Waartoe zeer goed is, dat zij niet alleen met de uiterlijke gifte, maar ook met troostelijke reden uit het Woord Gods, aan de armen en ellendigen hulp bewijzen."
+        },
+        {
+          "type": "paragraph",
+          "text": "Ten einde dan, geliefde Broeders N. N., een iegelijk moge hooren, dat gij gezind zijt den voorzeiden dienst (of, de voorzeide diensten, elk in het zijne) aan te nemen, zoo zult gij antwoorden op hetgene u voorgehouden zal worden."
+        },
+        {
+          "type": "paragraph",
+          "text": "En eerstelijk vraag ik u, Ouderlingen en Diakenen, of gij niet gevoelt in uwe harten, dat gij wettiglijk van Gods gemeente, en mitsdien van God zelven, tot dezen heiligen dienst (of, tot deze heilige diensten, elk in het zijne) beroepen zijt?"
+        },
+        {
+          "type": "paragraph",
+          "text": "Ten tweede, of gij de Schriften des Ouden en Nieuwen Testaments houdt voor het eenige Woord Gods en de volkomene leere der zaligheid, en alle leeringen verwerpt, die daartegen strijden?"
+        },
+        {
+          "type": "paragraph",
+          "text": "Ten derde, of gij belooft, uw ambt, gelijk dit hiervoor beschreven is, volgens deze leer getrouwelijk naar uw vermogen te bedienen; gij Ouderlingen N. N., in de Kerkregeering nevens de Dienaren des Woords, en gij Diakenen N. N., in de bediening der armen; en ook gezamenlijk belooft, u in alle Godzaligheid te gedragen; mede u onderwerpende aan de kerkelijke vermaningen, indien gij u kwaamt te ontgaan?"
+        },
+        {
+          "type": "paragraph",
+          "text": "Hierop zullen zij antwoorden:"
+        },
+        {
+          "type": "paragraph",
+          "text": "Ja wij."
+        },
+        {
+          "type": "paragraph",
+          "text": "En daarop zal de Dienaar zeggen:"
+        },
+        {
+          "type": "paragraph",
+          "text": "De almogende God en Vader geve u allen te zamen zijne genade, dat gij in dezen uwen dienst (of, in deze uwe diensten) getrouwelijk en vruchtbaar moogt verkeeren, Amen."
+        },
+        {
+          "type": "paragraph",
+          "text": "En voorts zal hij hen vermanen (mitsgaders ook de geheele gemeente) op de volgende wijze:"
+        },
+        {
+          "type": "paragraph",
+          "text": "Zoo weest dan, gij Ouderlingen, naarstig in de regeering der Kerk, die u nevens de Dienaren des Woords bevolen is. Zijt mede als wachters over het huis en de stad Gods, om een ieder getrouwelijk te vermanen, en te waarschuwen voor zijn verderf. Hebt acht op de onderhouding van de zuiverheid der leer en de vroomheid des levens in de gemeente des Heeren."
+        },
+        {
+          "type": "paragraph",
+          "text": "En gij Diakenen, zijt vlijtig in de verzameling der aalmoezen, voorzichtig en blijmoedig in het uitreiken daarvan. Komt den bedrukten te hulp; verzorgt de rechte weduwen en weezen; bewijst weldadigheid aan alle menschen, maar inzonderheid aan de huisgenooten des geloofs."
+        },
+        {
+          "type": "paragraph",
+          "text": "Zijt allen gezamenlijk in uwen dienst getrouw, en behoudt de verborgenheid des geloofs in eene reine consciëntie, goede voorgangers zijnde voor geheel het volk. Alzoo zult gij uzelven eenen goeden opgang verkrijgen en veel vrijmoedigheid in het geloof hetwelk is in Christus Jezus, en hiernamaals ingaan in de vreugde uws Heeren."
+        },
+        {
+          "type": "paragraph",
+          "text": "Aan de andere zijde, geliefde Christenen, ontvangt deze mannen als dienstknechten Gods. Wilt de Ouderlingen, die wèl regeeren, dubbele eere waardig achten; begeeft u gewilliglijk onder hun opzicht en regeering. Voorziet de Diakenen met goede middelen tot hulpe der armen. Zijt weldadig, gij rijken, geeft mildelijk, en deelt gaarne mede. En gij armen, zijt arm van geest, en gedraagt u jegens uwe verzorgers in allen eerbied; weest dankbaar jegens hen, en murmureert niet. Volgt Christus om de spijze der ziele, en niet om het brood. Die gestolen heeft, stele niet meer, maar arbeide liever, werkende wat goed is met de handen, opdat hij hebbe mede te deelen dengene die nood heeft. Dit doende, elk in het zijne, zult gij van den Heere ontvangen het loon der gerechtigheid."
+        },
+        {
+          "type": "paragraph",
+          "text": "Doch alzoo wij van onszelven hiertoe onbekwaam zijn, zoo laat ons den almachtigen God aldus aanroepen:"
+        },
+        {
+          "type": "paragraph",
+          "text": "Heere God, hemelsche Vader, wij danken U, dat het U beliefd heeft, tot meerderen wasdom uwer Kerk, daarin te verordenen, nevens de Dienaren des Woords, regeerders en helpers, waardoor uwe gemeente in goeden vrede en welstand zoude kunnen bewaard worden, en de arme menschen onderhouden; en dat Gij ons thans in deze plaats verleend hebt mannen van goede getuigenis, en die begaafd zijn met uwen Geest. Wij bidden U, verleen hun meer en meer zoodanige gaven, als hun in hunne bediening noodig zijn; de gave der wijsheid, der kloekheid, der onderscheiding en der weldadigheid; ten einde een ieder zich behoorlijk kwijte in zijn ambt: de Ouderlingen, in vlijtig opzicht te nemen op de leer en den wandel, in het weren der wolven uit de schaapskooi van uwen lieven Zoon, en in het vermanen en bestraffen der ongeregelde menschen; insgelijks de Diakenen, in het naarstig ontvangen en mild en voorzichtig uitdeelen der aalmoezen aan de armen, ook mede in het liefelijk vertroosten van deze met uw heilig Woord. Schenk aan beiden, de Ouderlingen en de Diakenen, uwe genade, dat zij in hunnen getrouwen arbeid volstandiglijk voortgaan, zonder door eenige moeite, verdriet, of vervolging der wereld, immermeer te vertragen. Verleen ook inzonderheid uwen Goddelijken zegen aan dit volk, waarover zij gesteld zijn, opdat zij zichzelven aan de goede vermaning der Ouderlingen gaarne onderwerpen, hen in eere houdende om huns ambts wille; geef den rijken milde harten tot de armen, en den armen een dankbaar gemoed jegens degenen, die hen helpen en bedienen; ten einde alzoo, een iegelijk zich kwijtende in zijn ambt, uw heilige naam daardoor groot gemaakt, en het Rijk uws Zoons Christus bevorderd moge worden; in wiens naam wij ons gebed besluiten, zeggende:\n\nOnze Vader, die in de hemelen zijt;\n\nUw naam worde geheiligd.\n\nUw koninkrijk kome.\n\nUw wil geschiede, gelijk in den hemel, alzoo ook op de aarde.\n\nGeef ons heden ons dagelijksch brood.\n\nEn vergeef ons onze schulden, gelijk ook wij vergeven onzen schuldenaren.\n\nEn leid ons niet in verzoeking, maar verlos ons van den booze.\n\nWant uw is het koninkrijk, en de kracht, en de heerlijkheid in der eeuwigheid. Amen."
+        }
+      ]
+    },
+    {
+      "id": "huwelijk",
+      "number": 8,
+      "label": "Bevestiging van het huwelijk",
+      "title": "Formulier om den huwelijken staat voor de Gemeente van Christus te bevestigen",
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "En eerstelijk, hoe men de verloofden tevoren zal afkondigen"
+        },
+        {
+          "type": "paragraph",
+          "text": "N. en N. willen zich naar Gods ordening tot den heiligen huwelijken staat begeven; daartoe begeeren zij een Christelijk gebed der geheele gemeente, opdat zij dezen Christelijken staat in Gods naam beginnen, en zaliglijk tot zijnen lof voleinden mogen."
+        },
+        {
+          "type": "paragraph",
+          "text": "En zoo iemand daartoe iets te spreken had, waardoor zulks verhinderd of opgehouden mocht worden, die brenge zulks ordelijk en bijtijds aan, of zwijge daarna, en wachte zich eenige verhindering daartegen voor te nemen,"
+        },
+        {
+          "type": "paragraph",
+          "text": "Zoo daar geene wettige beletselen zijn, zoo vaart men na de voleinding der afkondiging voort. En de Dienaar spreekt aldus:"
+        },
+        {
+          "type": "paragraph",
+          "text": "Overmits den getrouwden gemeenlijk velerhande tegenspoed en kruis vanwege de zonde overkomt; opdat gij, N. en N. (die uwe echtelijke verbinding in Gods naam openlijk alhier in de Kerk wilt laten bevestigen), in uwe harten ook verzekerd zijn moogt van de gewisse hulpe Gods in uw kruis; zoo hoort uit den Woorde Gods, hoe eerbaar de huwelijke staat is, en dat hij eene inzetting Gods is, die Hem behaagt; waarom Hij ook de getrouwden wil zegenen, en hen bijstaan, gelijk Hij beloofd heeft; daarentegen de hoereerders en overspelers wil Hij oordeelen en straffen."
+        },
+        {
+          "type": "paragraph",
+          "text": "En eerstelijk zult gij weten, dat God, onze Vader, nadat Hij hemel en aarde, en alles wat daarin is, geschapen had, den mensch schiep, naar zijnen beelde en zijne gelijkenisse, opdat hij heerschappij zoude hebben over de dieren der aarde, over de visschen der zee, en over het gevogelte des hemels; en nadat Hij den mensch geschapen had, sprak Hij: Het is niet goed, dat de mensch alleen zij; Ik zal hem eene hulpe maken, die als tegen hem over zij. Toen deed de HEERE God eenen diepen slaap op Adam vallen, en hij sliep. En Hij nam ééne van zijne ribben, en sloot hare plaatse toe met vleesch. En de HEERE God bouwde de ribbe, die Hij van Adam genomen had, tot eene vrouw; en Hij bracht ze tot Adam. Toen zeide Adam: Deze is ditmaal been van mijne beenen, en vleesch van mijn vleesch; men zal ze Manninne heeten, omdat zij uit den man genomen is. Daarom zal de man zijnen vader en zijne moeder verlaten, en zijne vrouwe aanhangen, en die twee zullen tot één vleesch zijn."
+        },
+        {
+          "type": "paragraph",
+          "text": "Daarom zult gij ook niet twijfelen, of de huwelijke staat behaagt aan God den Heere; overmits Hij Adam zijne huisvrouwe geschapen, zelf toegebracht, en hem tot eene huisvrouwe gegeven heeft; daarmede betuigende, dat Hij nog heden ten dage aan een iegelijk zijne huisvrouwe gelijk als met zijne hand toebrengt. Daarom heeft ook de Heere Jezus Christus dien zoo hoog geëerd, met zijne tegenwoordigheid, giften en wonderteekenen te Kana in Galiléa, om daarmede te betuigen, dat de huwelijke staat behoort eerbaar gehouden te worden bij allen, en dat Hij den getrouwden zijne hulpe en bijstand altijd wil bewijzen, ook wanneer men zulks allerminst verwacht."
+        },
+        {
+          "type": "paragraph",
+          "text": "Maar opdat gij in dezen staat Godzaliglijk leven moogt, zoo zult gij, ten andere, weten de oorzaken, waarom God den huwelijken staat heeft ingezet."
+        },
+        {
+          "type": "paragraph",
+          "text": "De eerste oorzaak is, opdat de een den ander trouwelijk helpe en bijsta in alle dingen, die tot het tijdelijke en eeuwige leven behooren. De andere, opdat zij hunne kinderen, die zij krijgen zullen, in de waarachtige kennisse en vreeze Gods, Hem ter eere, en tot hunne zaligheid opbrengen. De derde, opdat een iegelijk, alle onkuischheid en booze lusten vermijdende, met eene goede en geruste consciëntie moge leven. Want om hoererij te vermijden, zal een iegelijk man zijne eigene vrouwe hebben, en eene iegelijke vrouwe haren eigenen man; alzoo dat allen, die tot hunne jaren gekomen zijn, en de gave der onthouding niet hebben, naar het bevel Gods, verbonden en schuldig zijn, zich tot den huwelijken staat, naar Christelijke ordening, met weten en wil hunner ouders, of voogden en vrienden, te begeven; opdat de tempel Gods, dat is, ons lichaam, niet verontreinigd worde; want zoo iemand den tempel Gods schendt, dien zal God schenden."
+        },
+        {
+          "type": "paragraph",
+          "text": "Daarna zult gij, ten derde, ook weten, hoe zich de een jegens den ander naar Gods Woord schuldig is te houden."
+        },
+        {
+          "type": "paragraph",
+          "text": "Eerstelijk, zult gij, Man, weten, dat God u gezet heeft tot een hoofd der vrouwe, opdat gij haar naar uw vermogen verstandiglijk leidende, zoudt onderwijzen, troosten en beschermen, gelijk het hoofd het lichaam regeert, ja gelijk Christus het Hoofd, de wijsheid, de troost en de bijstand zijner gemeente is. Bovendien zult gij uwe huisvrouwe liefhebben als uw eigen lichaam, gelijk Christus zijne gemeente liefgehad heeft. Gij zult niet verbitterd tegen haar worden, maar bij haar wonen met verstand, en aan het vrouwelijk vat, als het zwakste, eere geven, als die ook medeërfgenaam der genade des levens met haar zijt; opdat uwe gebeden niet verhinderd worden. En naardien het Gods bevel is, dat de man in het zweet zijns aanschijns brood zal eten, zoo zult gij ook getrouwelijk en naarstiglijk in uw Goddelijk beroep arbeiden, opdat gij uw huisgezin met God en met eere moogt onderhouden, en ook daarenboven iets hebt om den nooddruftigen mede te deelen."
+        },
+        {
+          "type": "paragraph",
+          "text": "Desgelijks zult gij, Vrouwe, weten, hoe gij u naar het Woord Gods houden zult jegens uwen man. Gij zult uwen wettigen man liefhebben, eeren en vreezen, ook hem gehoorzaam zijn in alle dingen die recht en billijk zijn, als uwen heere; gelijkerwijs het lichaam aan het hoofd, en de gemeente aan Christus onderdanig is. Gij zult geene heerschappij gebruiken over uwen man, maar stille zijn. Want Adam is eerst gemaakt, daarna Eva, Adam tot hulpe. En na den val heeft God tot Eva, en in haar persoon tot het gansche vrouwelijk geslacht gesproken: tot uwen man zal uwe begeerte zijn, en hij zal over u heerschappij hebben. Deze ordinantie Gods zult gij niet tegenstaan, maar veel meer het gebod Gods gehoorzaam zijn, en het voorbeeld der heilige vrouwen navolgen, welke op God hoopten, en haren eigenen mannen onderdanig waren; gelijkerwijs Sara haren man Abraham gehoorzaam geweest is, hem noemende heere. Gij zult ook uwen man in alle goede en oprechte dingen behulpzaam zijn, op uwe huishouding goede acht hebben, en in alle ingetogenheid en eerbaarheid, zonder wereldlijke pracht, wandelen, opdat gij anderen een goed voorbeeld van zedigheid moogt geven."
+        },
+        {
+          "type": "paragraph",
+          "text": "Daarom, gij N. en N., nadat gij verstaan hebt, dat God den huwelijken staat ingezet heeft, en wat u daarin van Hem bevolen is; zijt gij des zins en willens, in dezen heiligen staat alzoo te leven, gelijk gij hier betuigt voor de Christelijke gemeente; en begeert gij, dat deze uw huwelijke staat bevestigd worde?"
+        },
+        {
+          "type": "paragraph",
+          "text": "Antwoord: Ja."
+        },
+        {
+          "type": "paragraph",
+          "text": "Daarna spreekt de Dienaar tot de gemeente."
+        },
+        {
+          "type": "paragraph",
+          "text": "Ik neem u allen, die hier nu vergaderd zijt, tot getuigen, dat er geene wettige verhindering tegen dit huwelijk voorgekomen is."
+        },
+        {
+          "type": "paragraph",
+          "text": "Voorts tot de trouwenden:"
+        },
+        {
+          "type": "paragraph",
+          "text": "Naardien het dan recht en behoorlijk is, dat uwe zaak voortgang hebbe, zoo wille onze Heere God uw voornemen, hetwelk Hij u gegeven heeft, bevestigen, en uw beginsel zij in den name des Heeren, die hemel en aarde geschapen heeft."
+        },
+        {
+          "type": "paragraph",
+          "text": "Daarna zullen zij malkanderen de hand geven; en de Dienaar spreekt eerstelijk tot den Bruidegom:"
+        },
+        {
+          "type": "paragraph",
+          "text": "N. Bekent gij hier voor God en zijne heilige gemeente, dat gij genomen hebt, en neemt, tot uwe wettige huisvrouwe N. hier tegenwoordig; haar belovende, dat gij haar nimmermeer zult verlaten; dat gij haar zult liefhebben, en trouwelijk onderhouden, gelijk een getrouw en Godvreezend man aan zijne wettige vrouwe schuldig is; dat gij ook heiliglijk met haar leven wilt, haar trouw en geloof houdende in alle dingen, naar uitwijzen van het heilig Evangelie?"
+        },
+        {
+          "type": "paragraph",
+          "text": "Antwoord: Ja."
+        },
+        {
+          "type": "paragraph",
+          "text": "Daarna tot de Bruid:"
+        },
+        {
+          "type": "paragraph",
+          "text": "N. Bekent gij hier voor God en zijne heilige gemeente, dat gij genomen hebt, en neemt, tot uwen wettigen man N. hier tegenwoordig; en belooft gij, hem gehoorzaam te zijn, hem te dienen en te helpen, hem nimmermeer te verlaten, heiliglijk met hem te leven, hem trouw en geloof in alle dingen te houden, gelijk eene vrome en getrouwe huisvrouwe haren wettigen man schuldig is, naar uitwijzen van het heilig Evangelie?"
+        },
+        {
+          "type": "paragraph",
+          "text": "Antwoord: Ja."
+        },
+        {
+          "type": "paragraph",
+          "text": "Zoo spreekt de Dienaar:"
+        },
+        {
+          "type": "paragraph",
+          "text": "De Vader der barmhartigheid, die u door zijne genade tot dezen heiligen staat des huwelijks geroepen heeft, verbinde u met rechte liefde en trouwe, en geve u zijnen zegen, Amen."
+        },
+        {
+          "type": "paragraph",
+          "text": "Hoort nu uit het Evangelie, hoe sterk de band des huwelijks is, gelijk Mattheüs beschrijft, Kap. XIX: 3—9:"
+        },
+        {
+          "type": "paragraph",
+          "text": "En de Pharizeën kwamen tot Hem, verzoekende Hem, en zeggende tot Hem: Is het een mensch geoorloofd zijne vrouwe van zich te laten, om allerlei oorzaak? Doch Hij, antwoordende, zeide tot hen: Hebt gij niet gelezen, die van den beginne den mensch gemaakt heeft, dat Hij ze gemaakt heeft man en vrouw, en gezegd heeft: Daarom zal een mensch vader en moeder verlaten, en zal zijne vrouwe aanhangen, en die twee zullen tot één vleesch zijn? Alzoo dat zij niet meer twee zijn, maar één vleesch. Hetgene dan God samengevoegd heeft, scheide de mensch niet. Zij zeiden tot Hem: Waarom heeft dan Mozes geboden eenen scheidbrief te geven, en haar van zich te laten? Hij zeide tot hen: Mozes heeft vanwege de hardigheid uwer harten u toegelaten uwe vrouwen van u te laten; maar van den beginne is het alzoo niet geweest. Maar Ik zeg u, dat zoo wie zijne vrouwe van zich laat, anders dan om hoererij, en eene andere trouwt, die doet overspel, en die de verstootene trouwt, doet ook overspel."
+        },
+        {
+          "type": "paragraph",
+          "text": "Gelooft deze woorden van den Heere Christus, en zijt daarvan verzekerd, dat onze Heere God u samengevoegd heeft tot dezen heiligen staat. En daarom zult gij ook alles wat u daarin overkomt, met geduld en dankzegging aannemen, als van de hand des Heeren; zoo zal het u ook alles ten beste en ter zaligheid gedijen."
+        },
+        {
+          "type": "paragraph",
+          "text": "Maar overmits wij van onszelven niets goeds hebben, en dat alle goede gaven van boven komen; zoo vermaant de Dienaar de getrouwden, dat zij nederknielen, en vermaant ook de gemeente voor hen te bidden."
+        },
+        {
+          "type": "paragraph",
+          "text": "O almachtige God, Gij die uwe goedheid en wijsheid in alle uwe werken en ordeningen bewijst, en van den beginne gesproken hebt, dat het niet goed is, dat de mensch alleen zij, en daarom hem eene hulpe, die als tegenover hem zoude zijn, geschapen hebt, en verordineerd hebt, dat die twee waren, één zouden zijn, en ook alle onreinigheid straft; wij bidden U (aangezien Gij deze personen tot den heiligen staat des huwelijks geroepen, en samen verbonden hebt), dat Gij hun uwen Heiligen Geest wilt geven, opdat zij in een waarachtig en vast geloof heiliglijk leven, naar uwen Goddelijken wil, en alle boosheid tegenstaan. Wil ze alsdan ook zegenen, gelijk Gij de geloovige vaderen, uwe vrienden en getrouwe dienaars. Abraham, Izak en Jakob, gezegend hebt, opdat zij, als medeërfgenamen des verbonds (hetwelk Gij met die vaderen opgericht hebt), de kinderen, die het U belieft hun te geven, Godzaliglijk opbrengen mogen, ter eere uws heiligen naams, tot stichting uwer gemeente, en tot verbreiding uws heiligen Evangelies. Wil ons verhooren, o Vader van alle barmhartigheid, door Jezus Christus, uwen lieven Zoon, onzen Heere, die met U en den Heiligen Geest leeft en regeert, één waarachtig eeuwig God, altijd geprezen. Amen."
+        },
+        {
+          "type": "paragraph",
+          "text": "Onze lieve Heere God vervulle u met zijne genade, en geve u, dat gij in alle Godzaligheid, liefde en eenigheid, lang en heiliglijk, samen leven moogt. Amen."
+        }
+      ]
+    }
+  ]
+}

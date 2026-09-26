@@ -4,6 +4,7 @@ import {
   GraduationCap,
   BookMarked,
   NotebookPen,
+  Library,
   User,
   Settings,
   MessageSquare,
@@ -27,6 +28,8 @@ export type NavItem = {
   /** Click-tracking id, registered in CLICK_TARGETS (lib/analyticsRoutes.ts). */
   trackId?: string;
   badge?: string;
+  /** Sidebar only: the phone tab bar has room for five tabs and no more. */
+  noTab?: boolean;
 };
 
 export const NAV_GROUPS: { label: string; items: NavItem[]; adminOnly?: boolean }[] = [
@@ -37,6 +40,7 @@ export const NAV_GROUPS: { label: string; items: NavItem[]; adminOnly?: boolean 
       { title: "Studies", url: "/studies", icon: GraduationCap, trackId: "sidebar_studies" },
       { title: "Lezen", url: "/lezen", icon: BookMarked, trackId: "sidebar_lezen" },
       { title: "Notities", url: "/notities", icon: NotebookPen, trackId: "sidebar_notities" },
+      { title: "Bronnen", url: "/bronnen", icon: Library, trackId: "sidebar_bronnen", noTab: true },
     ],
   },
   {

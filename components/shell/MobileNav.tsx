@@ -167,7 +167,7 @@ export function MobileMenuButton({ className = "" }: { className?: string }) {
 
 /** Dashboard, Studies, Lezen, Notities - then Profiel. */
 const TAB_ITEMS: NavItem[] = [
-  ...NAV_GROUPS[0].items,
+  ...NAV_GROUPS[0].items.filter((i) => !i.noTab),
   ...NAV_GROUPS.flatMap((g) => g.items).filter((i) => i.url === "/profiel"),
 ];
 

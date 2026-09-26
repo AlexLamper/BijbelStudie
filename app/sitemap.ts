@@ -5,6 +5,7 @@ import { BIBLE_BOOKS } from "../lib/content/bibleBooks";
 import { curatedStudies } from "../lib/data/curated-studies";
 import { chapterSitemapEntries } from "../lib/chapterPages";
 import { topicSitemapEntries } from "../lib/content/topics";
+import { bronnenSitemapEntries } from "../lib/content/bronnen/published";
 
 /**
  * Only publicly reachable, indexable Dutch routes belong here. Anything behind
@@ -131,5 +132,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...chapterSitemapEntries(BASE_URL),
     // "Wat zegt de Bijbel over ..." - the hub and every topic page.
     ...topicSitemapEntries(BASE_URL),
+    // Bronnen: the confessions, forms and catechism booklets. Dates in
+    // lib/content/bronnen/published.ts; a work without a data file is absent.
+    ...bronnenSitemapEntries(BASE_URL),
   ];
 }

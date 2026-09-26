@@ -53,6 +53,22 @@ export const PAGE_COMMANDS: CommandItem[] = [
     showWhenEmpty: true,
   },
   {
+    id: "pagina-bronnen",
+    group: "pagina",
+    title: "Bronnen",
+    subtitle: "Belijdenisgeschriften, catechismus en formulieren",
+    keywords: [
+      "heidelbergse catechismus", "catechismus", "zondag", "nederlandse geloofsbelijdenis", "geloofsbelijdenis",
+      "dordtse leerregels", "drie formulieren van enigheid", "belijdenis", "apostolische geloofsbelijdenis",
+      "formulieren", "doopformulier", "avondmaalsformulier", "kort begrip", "hellenbroek", "ledeboer",
+      "ziekentroost", "gebeden",
+    ],
+    icon: "document",
+    visibility: "iedereen",
+    target: { type: "link", href: "/bronnen" },
+    pageKey: "bronnen",
+  },
+  {
     id: "pagina-notities",
     group: "pagina",
     title: "Notities",

@@ -186,6 +186,7 @@ export const CLICK_TARGETS = [
   'sidebar_studies',
   'sidebar_groepen',
   'sidebar_notities',
+  'sidebar_bronnen',
   'sidebar_profiel',
   'sidebar_instellingen',
   'sidebar_feedback',
