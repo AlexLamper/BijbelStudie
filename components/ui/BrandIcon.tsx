@@ -21,8 +21,16 @@ import { cn } from "../../lib/utils"
  * `alwaysDark` is for pages drawn on the night scene whatever the theme
  * (/inloggen, /registreren, the password pages): there the outlined tile is
  * the right one in both themes, so it renders alone.
+ *
+ * The dark copy always gets `rounded-none`. Callers pass `rounded-md`,
+ * `rounded-[8px]`, `rounded-xl` … for the light PNGs, and a border-radius on an
+ * <img> clips its pixels. The SVG draws its own rounded outline (corner radius
+ * 1/6 of the tile, e.g. 4px at 24px) edge to edge, so any caller radius larger
+ * than that sliced the white outline off at the corners. tailwind-merge lets
+ * `rounded-none` beat whatever radius the caller passed.
  */
 export const DARK_BRAND_ICON = "/images/logo-icon-dark.svg"
+const DARK_NO_CLIP = "rounded-none"
 
 export function BrandIcon({
   src,
@@ -41,7 +49,14 @@ export function BrandIcon({
 }) {
   if (alwaysDark) {
     return (
-      <Image src={DARK_BRAND_ICON} alt={alt} width={size} height={size} className={className} priority={priority} />
+      <Image
+        src={DARK_BRAND_ICON}
+        alt={alt}
+        width={size}
+        height={size}
+        className={cn(className, DARK_NO_CLIP)}
+        priority={priority}
+      />
     )
   }
   return (
@@ -59,7 +74,7 @@ export function BrandIcon({
         alt={alt}
         width={size}
         height={size}
-        className={cn(className, "hidden dark:block")}
+        className={cn(className, DARK_NO_CLIP, "hidden dark:block")}
         loading="lazy"
       />
     </>

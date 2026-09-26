@@ -1,5 +1,5 @@
 import Link from "next/link"
-import Image from "next/image"
+import { BrandIcon, DARK_BRAND_ICON } from "../ui/BrandIcon"
 import CookieSettingsButton from "../ui/CookieSettingsButton"
 
 /**
@@ -40,32 +40,22 @@ export function Footer({ frame }: { frame?: string } = {}) {
 
           {/* Brand column */}
           <div className="space-y-4">
-            {/* `/images/logo.svg` is a #262626 tile (near-black) with a
-                #F9F9F9 cross - drawn for a light page, where it reads fine.
-                On this #1F2937 footer the tile sits within a hair of the
-                background (contrast ~1.1:1) and all but disappears, leaving
-                a faint cross floating with no visible tile around it - not
-                legible, not professional.
-
-                Rather than shipping a second logo asset to keep in sync with
-                the real one, `invert(1)` flips it at render time: the tile
-                becomes a light ~#D9D9D9 (9.5:1 on this background) and the
-                cross becomes near-black - the same "light tile, dark cross"
-                treatment this footer used to use as a dedicated dark-mode
-                svg, without a second file to maintain. Scoped to this one
-                <Image>, so the mark is unaffected everywhere else it renders
-                (navbar, header, sidebar - all on light grounds).
+            {/* The footer is #1F2937 in both themes, so it draws the
+                white-outlined tile (logo-icon-dark.svg, via BrandIcon's
+                `alwaysDark`) - the same dark-ground mark as the header,
+                sidebar and auth pages in dark mode. No radius class here:
+                the SVG carries its own rounded outline, and BrandIcon forces
+                `rounded-none` on it so the corners are never clipped.
 
                 The wordmark is not part of that asset - it is plain text
                 here, so it just stays white, same as the header splits it. */}
             <Link href="/" className="inline-flex items-center gap-2" aria-label="BijbelStudie">
-              <Image
-                src="/images/logo.svg"
+              <BrandIcon
+                src={DARK_BRAND_ICON}
                 alt="BijbelStudie"
-                width={26}
-                height={26}
+                size={26}
                 className="h-[26px] w-[26px]"
-                style={{ filter: "invert(1)" }}
+                alwaysDark
               />
               <span className="text-base font-bold tracking-tight text-white">
                 Bijbel<span style={{ color: "#0D9488" }}>Studie</span>
