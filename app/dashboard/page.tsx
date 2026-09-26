@@ -37,13 +37,13 @@ import {
  * The dashboard (design_handoff_web/PAGES.md §1).
  *
  * Two columns: the work at `flex-1` and a 320 px rail, 20 px apart. The work
- * column is the one thing to carry on with (ResumeCard), the verse, and four
+ * column is the verse, the one thing to carry on with (ResumeCard), and four
  * recommended studies; the rail is the tree, the week and the 66 books.
  *
  * Every number on this screen comes from the hooks that were already here -
  * `useDashboardData` and `useTreeSummary` are untouched. The one addition is
  * `useDashboardResume` below: the server-built `DashboardResume`, so "Verder
- * waar je gebleven was" names the running lesson and step.
+ * waar je was" names the running lesson or the last chapter.
  *
  * THE READING HEATMAP is the one derived value RULES.md §3 asks for: a 0-4 step
  * per book, computed here from `bookReadRatio`, which the hook already returns.
@@ -215,14 +215,9 @@ export default function DashboardPage() {
             <BillingNotices />
           </div>
 
-          {/* Verder waar je gebleven was - first, above the verse, so on a phone
-              the one thing to carry on with is above the fold
-              (DAILY_HABIT_PLAN.md §3). */}
-          {resumeLoading ? <ResumeCardSkeleton /> : <ResumeCard resume={resume} />}
-
-          {/* Bijbel in een jaar "Vandaag", directly under the resume card and
-              above the verse (DAILY_HABIT_PLAN.md §3/§4). A sibling of
-              ResumeCard, not part of it. Seeded from the resume response's
+          {/* Bijbel in een jaar "Vandaag", above the verse
+              (DAILY_HABIT_PLAN.md §3/§4). Not part of ResumeCard. Seeded from
+              the resume response's
               `bibleYearState`, so no extra request; renders nothing for a
               guest or without a running plan. Mounted after the resume call
               so it never starts a fetch of its own that the seed would make
@@ -245,6 +240,10 @@ export default function DashboardPage() {
           {/* At most one feedback card: an unseen answer, a finished-study
               rating or a welcome-back question. Usually nothing. */}
           <DashboardFeedbackSlot />
+
+          {/* Verder waar je was: the original minimal one-row card (eyebrow,
+              title, slim bar, one teal button), fed by the server's resume. */}
+          {resumeLoading ? <ResumeCardSkeleton /> : <ResumeCard resume={resume} />}
 
           <SectionHeading
             title="Aanbevolen voor jou"

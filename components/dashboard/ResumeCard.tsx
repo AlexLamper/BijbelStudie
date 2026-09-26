@@ -1,201 +1,127 @@
 "use client"
 
 import Link from "next/link"
+import { ArrowRight } from "lucide-react"
 import { Card, ProgressBar } from "../kit/primitives"
-import type { DashboardResume, ResumeItem, ResumeSchedule } from "../../lib/resumeTypes"
+import type { DashboardResume, ResumeItem } from "../../lib/resumeTypes"
 
 /**
- * "Verder waar je gebleven was" - the dashboard's one thing to carry on with.
+ * "Verder waar je was" - the dashboard's one thing to carry on with.
  *
- * Renders the server's `DashboardResume` (lib/resumeTypes.ts, built by
- * lib/dashboardResume.ts) and nothing else: the app renders the very same
- * object, so the two cannot disagree about the lesson, the step or the
- * schedule. No logic here beyond wording.
+ * Deliberately the original minimal card: one row, the text block at `flex-1`
+ * (eyebrow, title, a slim bar with "les 6 van 50" beside it) and a single teal
+ * button on the right. The row wraps, so in a narrow work column the button
+ * drops under the text instead of squeezing the title. No step bar, schedule
+ * chip, "Vandaag gedaan" line or list of other studies - the owner wants this
+ * card simple.
  *
- * Layout: eyebrow, title, subtitle; for a study the step bar ("Stap 3 van 6 ·
- * Verdieping"), a thin lesson bar and the schedule chip; one full-width teal
- * button; a "Vandaag gedaan" line when today's lesson is finished; and the
- * other running studies as small rows under "Ook bezig met".
+ * The data is the server's `DashboardResume.primary` (lib/dashboardResume.ts),
+ * so web and app agree on which lesson or chapter it names; only the wording
+ * below is local. Three states: a running study lesson, the last chapter read,
+ * or a start.
  */
 
 const TEAL = "#0D9488"
 
-/** What a guest (or a failed request) sees: the start prompt. */
-const START: ResumeItem = {
-  kind: "start",
-  title: "Kies een studie of begin met lezen",
-  subtitle: "Je laatste les of hoofdstuk verschijnt hier",
-  studyId: null,
-  lessonDay: null,
-  step: null,
-  progress: null,
-  schedule: null,
-  doneToday: false,
-  nextLabel: null,
-  cta: "Kies een studie",
-  href: "/studies",
-  imageUrl: null,
+/** "Les 6 van 50 · Gerechtvaardigd door geloof" -> 6, 50, the lesson name. */
+function parseLesson(item: ResumeItem): { day: number; total: number; name: string } | null {
+  const m = item.subtitle?.match(/^Les (\d+) van (\d+)(?: · (.+))?$/)
+  if (m) return { day: Number(m[1]), total: Number(m[2]), name: m[3] ?? "" }
+  if (item.lessonDay && item.progress) return { day: item.lessonDay, total: item.progress.total, name: "" }
+  return null
 }
 
-function scheduleText(schedule: ResumeSchedule): string {
-  if (schedule.status === "op-schema" || schedule.lessons <= 0) return "Op schema"
-  const noun = schedule.lessons === 1 ? "les" : "lessen"
-  return schedule.status === "achter"
-    ? `${schedule.lessons} ${noun} achter`
-    : `${schedule.lessons} ${noun} vooruit`
-}
-
-/** Never red: behind is information, not a warning (DAILY_HABIT_PLAN.md §4). */
-function ScheduleChip({ schedule }: { schedule: ResumeSchedule }) {
-  const behind = schedule.status === "achter" && schedule.lessons > 0
-  return (
-    <span
-      className={
-        behind
-          ? "inline-flex h-6 flex-none items-center rounded-full bg-slate-100 px-[10px] text-[12px] font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300"
-          : "inline-flex h-6 flex-none items-center rounded-full bg-teal-50 px-[10px] text-[12px] font-semibold text-teal-700 dark:bg-teal-900/40 dark:text-teal-300"
-      }
-    >
-      {scheduleText(schedule)}
-    </span>
-  )
-}
-
-/** One segment per step of this lesson (six, or five without a context step). */
-function StepBar({ index, count, label }: { index: number; count: number; label: string }) {
-  return (
-    <div className="mt-[14px]">
-      <div className="flex gap-[4px]" aria-hidden="true">
-        {Array.from({ length: count }, (_, i) => (
-          <span
-            key={i}
-            className={`h-[6px] flex-1 rounded-full ${i + 1 < index ? "" : i + 1 === index ? "opacity-45" : "bg-line"}`}
-            style={i + 1 <= index ? { backgroundColor: TEAL } : undefined}
-          />
-        ))}
-      </div>
-      <div className="mt-[7px] text-[13px] text-ink-muted">
-        Stap {index} van {count} · <span className="font-semibold text-ink-body">{label}</span>
-      </div>
-    </div>
-  )
-}
-
-function OtherRow({ item }: { item: ResumeItem }) {
-  const pct = item.progress && item.progress.total > 0 ? (item.progress.done / item.progress.total) * 100 : 0
-  return (
-    <li>
-      <Link
-        href={item.href}
-        data-track="study_resume_other"
-        className="group flex items-center gap-3 rounded-btn py-[9px] no-underline"
-      >
-        <div className="min-w-0 flex-1">
-          <div className="truncate text-[14px] font-semibold text-ink transition-colors group-hover:text-teal dark:group-hover:text-teal-400">
-            {item.title}
-          </div>
-          {item.subtitle && <div className="truncate text-[12.5px] text-ink-muted">{item.subtitle}</div>}
-        </div>
-        {item.progress && <ProgressBar value={pct} height={4} className="w-[72px] flex-none" />}
-        <span className="flex-none text-[13px] font-semibold text-teal dark:text-teal-400" aria-hidden="true">
-          →
-        </span>
-      </Link>
-    </li>
-  )
-}
+const CARD = "flex flex-none flex-wrap items-center gap-x-8 gap-y-4 px-6 py-5 max-md:px-5"
 
 export function ResumeCardSkeleton() {
   return (
-    <Card className="flex-none px-6 py-5 max-md:px-5">
-      <div aria-busy="true">
-        <div className="h-[11px] w-[170px] animate-pulse rounded bg-line-soft" />
-        <div className="mt-[10px] h-[24px] w-[min(100%,320px)] animate-pulse rounded bg-line-soft" />
-        <div className="mt-[8px] h-[14px] w-[min(100%,220px)] animate-pulse rounded bg-line-soft" />
-        <div className="mt-[16px] h-[6px] animate-pulse rounded-full bg-line-soft" />
-        <div className="mt-[18px] h-12 animate-pulse rounded-[12px] bg-line-soft" />
+    <Card className={CARD}>
+      <div className="min-w-[min(100%,240px)] flex-1" aria-busy="true">
+        <div className="h-[11px] w-[130px] animate-pulse rounded bg-line-soft" />
+        <div className="mt-[10px] h-[24px] w-[min(100%,300px)] animate-pulse rounded bg-line-soft" />
+        <div className="mt-[14px] h-[6px] max-w-[340px] animate-pulse rounded-full bg-line-soft" />
       </div>
+      <div className="h-12 w-[180px] flex-none animate-pulse rounded-btn bg-line-soft" />
     </Card>
   )
 }
 
 export default function ResumeCard({ resume }: { resume: DashboardResume | null }) {
-  const item = resume?.primary ?? START
-  const others = resume?.others ?? []
-  const lessonPct =
-    item.progress && item.progress.total > 0 ? (item.progress.done / item.progress.total) * 100 : 0
+  const item = resume?.primary ?? null
+  const study = item?.kind === "study" ? item : null
+  const chapter = item?.kind === "chapter" ? item : null
+  const lesson = study ? parseLesson(study) : null
+
+  const title = study
+    ? `${study.title}${lesson ? ` · les ${lesson.day}${lesson.name ? ` - ${lesson.name}` : ""}` : ""}`
+    : chapter
+      ? chapter.title
+      : "Kies een hoofdstuk of een studie"
+
+  const progress = (study ?? chapter)?.progress ?? null
+  const pct = progress && progress.total > 0 ? Math.round((progress.done / progress.total) * 100) : 0
+  const progressText = study
+    ? lesson
+      ? `les ${lesson.day} van ${lesson.total}`
+      : null
+    : progress
+      ? `${progress.done} van ${progress.total} hoofdstukken`
+      : null
+
+  const href = study ? study.href : chapter ? chapter.href : "/lezen"
+  const cta = study
+    ? lesson
+      ? `Verder met les ${lesson.day}`
+      : "Verder met de studie"
+    : chapter
+      ? "Verder lezen"
+      : "Beginnen met lezen"
 
   return (
-    <Card className="flex-none px-6 py-5 max-md:px-5">
-      {/* Wraps rather than squeezes: at 360 px the eyebrow and the chip do not
-          fit on one line, and the chip then drops under the eyebrow instead of
-          folding it in two. */}
-      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5">
-        <div className="min-w-0 text-[11px] font-semibold uppercase tracking-[1.4px] text-teal dark:text-teal-400">
-          {item.kind === "start" ? "Begin waar je wilt" : "Verder waar je gebleven was"}
+    <Card className={CARD}>
+      <div className="min-w-[min(100%,240px)] flex-1">
+        <div className="text-[11px] font-semibold uppercase tracking-[1.4px] text-teal dark:text-teal-400">
+          {study || chapter ? "Verder waar je was" : "Begin waar je wilt"}
         </div>
-        {item.schedule && !item.doneToday && <ScheduleChip schedule={item.schedule} />}
+        <div className="mt-[6px] text-[22px] font-bold leading-[1.25] tracking-[-0.3px] text-ink [overflow-wrap:anywhere] max-md:text-[19px]">
+          {title}
+        </div>
+
+        {study || chapter ? (
+          progressText && (
+            <div className="mt-[14px] flex items-center gap-[14px]">
+              <ProgressBar value={pct} height={6} className="max-w-[340px] flex-1" />
+              <span className="flex-none whitespace-nowrap text-[13px] text-ink-muted tabular-nums">
+                {progressText}
+              </span>
+            </div>
+          )
+        ) : (
+          <div className="mt-[6px] text-[13px] text-ink-muted">Je laatst gelezen hoofdstuk verschijnt hier</div>
+        )}
       </div>
 
-      <div className="mt-[6px] text-[22px] font-bold leading-[1.25] tracking-[-0.3px] text-ink [overflow-wrap:anywhere] max-md:text-[19px]">
-        {item.title}
-      </div>
-      {item.subtitle && (
-        <div className="mt-[3px] text-[14px] text-ink-muted [overflow-wrap:anywhere]">{item.subtitle}</div>
-      )}
-
-      {item.doneToday ? (
-        <div className="mt-[14px] text-[14px] text-ink-body">
-          <span className="font-semibold" style={{ color: TEAL }}>
-            Vandaag gedaan
-          </span>
-          {item.nextLabel && <span className="text-ink-muted"> · {item.nextLabel}</span>}
-        </div>
-      ) : (
-        item.step && <StepBar index={item.step.index} count={item.step.count} label={item.step.label} />
-      )}
-
-      {item.kind !== "start" && item.progress && (
-        <div className="mt-[12px] flex items-center gap-3">
-          <ProgressBar value={lessonPct} height={4} className="flex-1" />
-          <span className="flex-none whitespace-nowrap text-[12.5px] text-ink-faint tabular-nums">
-            {item.kind === "study"
-              ? `${item.progress.done} van ${item.progress.total} lessen`
-              : `${item.progress.done} van ${item.progress.total} gelezen`}
-          </span>
-        </div>
-      )}
-
-      <Link
-        href={item.href}
-        data-track={item.kind === "study" ? "study_resume" : item.kind === "chapter" ? "reading_resume" : undefined}
-        className="mt-[18px] flex h-12 w-full items-center justify-center rounded-[12px] px-[22px] text-[15px] font-semibold text-white no-underline transition-opacity hover:opacity-90"
-        style={{ backgroundColor: TEAL }}
-      >
-        {item.cta}
-      </Link>
-
-      {item.kind === "start" && (
-        <div className="mt-[10px] text-center">
+      <div className="flex flex-none flex-wrap items-center gap-x-5 gap-y-2 max-md:w-full">
+        {/* The second door to /studie stays wherever the card is not already
+            about a study. */}
+        {!study && (
           <Link
-            href="/lezen"
-            className="text-[13.5px] font-semibold text-ink-body no-underline transition-colors hover:text-teal dark:hover:text-teal-400"
+            href="/studie"
+            className="text-[14px] font-semibold text-ink-body no-underline transition-colors hover:text-teal dark:hover:text-teal-400"
           >
-            Of begin met lezen
+            Studie openen
           </Link>
-        </div>
-      )}
-
-      {others.length > 0 && (
-        <div className="mt-[18px] border-t border-line pt-[12px]">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.9px] text-ink-faint">Ook bezig met</div>
-          <ul className="mt-[2px] divide-y divide-line">
-            {others.map(other => (
-              <OtherRow key={other.studyId ?? other.href} item={other} />
-            ))}
-          </ul>
-        </div>
-      )}
+        )}
+        <Link
+          href={href}
+          data-track={study ? "study_resume" : chapter ? "reading_resume" : undefined}
+          className="inline-flex h-12 items-center gap-[10px] rounded-[12px] px-[22px] text-[15px] font-semibold text-white no-underline transition-opacity hover:opacity-90 max-md:flex-1 max-md:justify-center"
+          style={{ backgroundColor: TEAL }}
+        >
+          {cta}
+          <ArrowRight size={17} strokeWidth={2.2} />
+        </Link>
+      </div>
     </Card>
   )
 }
