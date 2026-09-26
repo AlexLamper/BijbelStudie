@@ -31,6 +31,8 @@ const PAGE_DATES = {
   // every authored study (2026-09-23), shorter description the same day.
   "/":                     "2026-09-23",
   "/studies":              "2026-09-23",
+  // Bijbel in een jaar: explanation and the first days of the schedule.
+  "/studies/bijbel-in-een-jaar": "2026-09-26",
   "/abonnement":           "2026-09-20",
   // The FAQ text itself lives in lib/content/helpFaq.ts.
   "/help":                 "2026-09-23",
@@ -67,6 +69,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const staticRoutes: MetadataRoute.Sitemap = [
     page("/",                     "weekly",  1.0),
     page("/studies",              "weekly",  0.8),
+    page("/studies/bijbel-in-een-jaar", "monthly", 0.8),
     page("/abonnement",           "monthly", 0.7),
     page("/help",                 "monthly", 0.6),
     // Its content is the review wall itself, which changes whenever a reader

@@ -37,23 +37,58 @@ export function dayKeyNL(date = new Date()): string {
 }
 
 /**
- * Files today's verse in the shared archive, once per day.
+ * Upstream's verse with the canonical Dutch book name and reference.
+ *
+ * Upstream sends English book names ("Ecclesiastes"); the archive and the
+ * notification copy are read by Dutch-only clients that link straight to
+ * /lezen - the same normalisation `/api/bible/daytext` does inline.
+ */
+async function toDutchDayText(verse: DayText): Promise<DayText> {
+  const { CANONICAL_NL } = await import('./book-mapping');
+  const book = CANONICAL_NL[verse.book] ?? verse.book;
+  return {
+    ...verse,
+    book,
+    reference: dayTextReference(book, verse.chapter, verse.verse, verse.verseEnd),
+  };
+}
+
+/**
+ * Days this instance has already filed (or is filing). The archive holds one
+ * document per day and `$setOnInsert` never changes it again, so every upsert
+ * after the first of the day was a database round trip that could not change
+ * anything - on the dashboard's and the daytext's read path, for every
+ * request. Per instance on purpose: a cold instance files the day once more,
+ * which is a harmless no-op, and nothing has to be shared.
+ */
+const recordedDays = new Set<string>();
+
+/** Test hook: forget which days this instance has filed. */
+export function resetRecordedDayTextMemo(): void {
+  recordedDays.clear();
+}
+
+/**
+ * Files today's verse in the shared archive, at most once per day per
+ * instance.
  *
  * Best effort on purpose: this runs on the read path of a public endpoint, and
  * a database that is slow or down must not turn "today's verse" into an error.
+ * A failed write forgets the day again, so the next request retries.
  */
 export async function recordDayText(verse: DayText, date = dayKeyNL()): Promise<void> {
+  if (recordedDays.has(date)) return;
+  // Claimed before the await, so concurrent requests on one instance do not
+  // all race to the same upsert.
+  recordedDays.add(date);
+  // A long-lived instance would otherwise keep one key per day forever.
+  if (recordedDays.size > 7) {
+    for (const key of recordedDays) {
+      if (key !== date) recordedDays.delete(key);
+    }
+  }
   try {
-    // Upstream sends English book names ("Ecclesiastes"); the archive is read
-    // by Dutch-only clients that link straight to /lezen, so it is stored
-    // canonical - the same normalisation `/api/bible/daytext` does inline.
-    const { CANONICAL_NL } = await import('./book-mapping');
-    const book = CANONICAL_NL[verse.book] ?? verse.book;
-    const entry: DayText = {
-      ...verse,
-      book,
-      reference: dayTextReference(book, verse.chapter, verse.verse, verse.verseEnd),
-    };
+    const entry = await toDutchDayText(verse);
     const [{ default: connectMongoDB }, { default: DayTextEntry }] = await Promise.all([
       import('./mongodb'),
       import('../models/DayTextEntry'),
@@ -65,7 +100,8 @@ export async function recordDayText(verse: DayText, date = dayKeyNL()): Promise<
       { upsert: true },
     );
   } catch {
-    // No archive entry for today. The card still renders.
+    // No archive entry for today. The card still renders; try again next time.
+    recordedDays.delete(date);
   }
 }
 
@@ -159,6 +195,28 @@ export async function fetchUpstreamDayText(date = dayKeyNL()): Promise<DayText |
   return parseUpstreamDayText(await res.json());
 }
 
+/**
+ * The verse for any Amsterdam-style `yyyy-mm-dd` day - past, today or future -
+ * with Dutch book names. NEVER writes to the archive: a future day is not a
+ * day that has been served, and "Voorgaande dagen" must only ever show verses
+ * people actually saw. Used by the notification endpoints, which schedule a
+ * fortnight ahead. Never throws; null when upstream fails or the date is not a
+ * calendar day.
+ */
+export async function fetchDayTextForDate(date: string): Promise<DayText | null> {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
+  try {
+    const verse = await fetchUpstreamDayText(date);
+    return verse ? await toDutchDayText(verse) : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Today's verse (English book names, as upstream sends them), filed in the
+ * archive on this instance's first fetch of the day.
+ */
 export async function fetchDayText(): Promise<DayText | null> {
   const verse = await fetchUpstreamDayText();
   if (!verse) return null;

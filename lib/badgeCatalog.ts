@@ -26,6 +26,7 @@ export const BADGE_META: Record<string, BadgeMeta> = {
   completed1: { label: 'Eerste studie af', description: '1 studie voltooid' },
   completed5: { label: 'Vijf studies af', description: '5 studies voltooid' },
   completed10: { label: 'Tien studies af', description: '10 studies voltooid' },
+  bibleyear: { label: 'Hele Bijbel gelezen', description: 'Bijbel in een jaar voltooid' },
   points100: { label: '100 XP', description: '100 XP verdiend' },
   points500: { label: '500 XP', description: '500 XP verdiend' },
   points1000: { label: '1000 XP', description: '1000 XP verdiend' },

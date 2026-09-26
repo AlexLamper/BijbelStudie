@@ -1,3 +1,4 @@
+import { after } from 'next/server';
 import { requireUser } from '../../../../lib/apiAuth';
 import { isSafeBookKey, isSafeChapter } from '../../../../lib/readingProgress';
 import {
@@ -10,6 +11,7 @@ import connectMongoDB from '../../../../lib/mongodb';
 import User from '../../../../models/User';
 import ReadingSession from '../../../../models/ReadingSession';
 import { grantXp } from '../../../../lib/gamification';
+import { recordBibleYearChapter } from '../../../../lib/bibleYear/service';
 
 export const dynamic = 'force-dynamic';
 
@@ -91,6 +93,11 @@ export async function POST(req: Request) {
       { new: true },
     );
     if (!user) return errorV1('NOT_FOUND', 404);
+
+    // Bijbel in een jaar auto-tick: one indexed update, a no-op without a
+    // running plan. After the response (`after`), so it never delays the read;
+    // it catches and logs its own errors - never fails the read.
+    after(() => recordBibleYearChapter(auth.id, progressKey, chapter, { isPro: auth.isPro }));
 
     const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
     const recent = await ReadingSession.findOne({

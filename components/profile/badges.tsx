@@ -83,6 +83,7 @@ const badges: BadgeInfo[] = [
   { id: "completed1", icon: BookOpen, tone: "teal" },
   { id: "completed5", icon: BookOpen, tone: "teal" },
   { id: "completed10", icon: BookOpen, tone: "teal" },
+  { id: "bibleyear", icon: BookOpen, tone: "teal" },
   { id: "points100", icon: Trophy, tone: "violet" },
   { id: "points500", icon: Trophy, tone: "violet" },
   { id: "points1000", icon: Trophy, tone: "violet" },

@@ -32,6 +32,14 @@ interface PageMetadataConfig {
  * /help and /contact used to get folded into the homepage and dropped from the
  * index - so every public route needs an entry.
  */
+/**
+ * /studies/bijbel-in-een-jaar's description: the meta tag here, and the page's
+ * JSON-LD WebPage node and lead paragraph, all read this one string. At most
+ * 155 characters, so a search result shows it whole.
+ */
+export const BIBLE_YEAR_DESCRIPTION =
+  "Lees de hele Bijbel in een jaar (zo'n 15 minuten per dag) of in twee jaar (zo'n 8). Gemengd of van Genesis tot Openbaring, gratis en zonder deadline.";
+
 const pageConfigs: Record<string, PageMetadataConfig> = {
   home: {
     title: 'Bijbelstudie online',
@@ -68,6 +76,13 @@ const pageConfigs: Record<string, PageMetadataConfig> = {
     description: 'Tien begeleide bijbelstudies over personen, themas, gebeurtenissen en bijbelboeken. Stap voor stap door de Schrift, gratis te volgen.',
     path: '/studies',
     type: 'website'
+  },
+  bibleYear: {
+    title: 'Bijbel in een jaar: leesplan voor de hele Bijbel',
+    description: BIBLE_YEAR_DESCRIPTION,
+    path: '/studies/bijbel-in-een-jaar',
+    type: 'website',
+    ogEyebrow: 'Leesplan',
   },
   groups: {
     title: 'Groepen',

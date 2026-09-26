@@ -8,6 +8,7 @@ import StudyProgress from '../models/StudyProgress';
 import StudyLessonState from '../models/StudyLessonState';
 import StudyEnrollment from '../models/StudyEnrollment';
 import PlanEnrollment from '../models/PlanEnrollment';
+import BibleYearEnrollment from '../models/BibleYearEnrollment';
 import AiUsage from '../models/AiUsage';
 import GroupMessage from '../models/GroupMessage';
 import DeletedAccount from '../models/DeletedAccount';
@@ -71,6 +72,7 @@ const defaultDeps: ArchiveDeps = {
     studylessonstate: StudyLessonState,
     studyenrollments: StudyEnrollment,
     planenrollments: PlanEnrollment,
+    bibleyearenrollments: BibleYearEnrollment,
     aiusages: AiUsage,
     groupmessages: GroupMessage,
   },

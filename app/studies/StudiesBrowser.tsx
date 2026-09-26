@@ -8,6 +8,7 @@ import { CATALOGUE_ENTRIES, isBookStudyId } from '../../lib/bookStudies'
 import { Card, Chip } from '../../components/kit/primitives'
 import StudyArtwork from './StudyArtwork'
 import ChapterStudyPicker from '../../components/study/ChapterStudyPicker'
+import BibleYearStudiesBlock from '../../components/bibleYear/BibleYearStudiesBlock'
 
 const COMPLETED_KEY = 'bijbelstudie_completed_studies'
 
@@ -339,6 +340,12 @@ export default function StudiesBrowser() {
               />
             ))}
           </div>
+        </div>
+
+        {/* Bijbel in een jaar: hidden rather than unmounted while searching, so
+            its fetch does not repeat on every keystroke that clears the box. */}
+        <div hidden={searchResults !== null} className="flex-none">
+          <BibleYearStudiesBlock />
         </div>
 
         {searchResults === null && bezigMet.length > 0 && (

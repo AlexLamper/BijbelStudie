@@ -3,7 +3,9 @@ import { corsPreflight, errorV1, handleV1Error, jsonV1 } from '../../../../../li
 import connectMongoDB from '../../../../../lib/mongodb';
 import User from '../../../../../models/User';
 import { CHAPTER_COUNTS } from '../../../../../lib/data/bible-chapter-counts';
-import { fetchDayText } from '../../../../../lib/mobileDayText';
+import { toCanonicalDutchBook } from '../../../../../lib/readChaptersCanon';
+import { fetchDayTextForDate } from '../../../../../lib/mobileDayText';
+import { DEFAULT_TIME_ZONE, localDates, notificationReference } from '../../../../../lib/notificationSchedule';
 import { levelForXp } from '../../../../../lib/gamification';
 import {
   firstNameOf,
@@ -77,7 +79,10 @@ export async function GET(req: Request) {
       } | null>();
     if (!user) return errorV1('NOT_FOUND', 404);
 
-    const book = user.lastReadChapter?.book ?? undefined;
+    // `lastReadChapter.book` keeps the translation's own spelling; the copy is
+    // Dutch and CHAPTER_COUNTS is keyed on the canonical Dutch name.
+    const storedBook = user.lastReadChapter?.book || undefined;
+    const book = storedBook ? toCanonicalDutchBook(storedBook) ?? storedBook : undefined;
     const chapter = user.lastReadChapter?.chapter ?? undefined;
 
     // The next chapter, clamped to the book's real length - offering
@@ -89,12 +94,19 @@ export async function GET(req: Request) {
         ? chapter + 1
         : undefined;
 
-    // The day text is the one token needing a network call. It is optional by
-    // design: if it fails, the variants that use it drop out of the pool and
-    // the other fourteen still work.
-    const dayText = await fetchDayText().catch(() => null);
+    // The day text is the one token needing a network call - one per day, so
+    // day N quotes day N's verse rather than fourteen copies of today's. Each
+    // date is its own shared upstream cache entry and nothing is written to the
+    // archive (these are mostly future days). Optional by design: a day whose
+    // fetch fails just loses the verse variants for that day.
+    // Only the daily-reading pool quotes the verse; the other types skip the
+    // fetches entirely.
+    const dayTexts =
+      typeParam === 'daily_reading'
+        ? await Promise.all(localDates(DEFAULT_TIME_ZONE, days).map((date) => fetchDayTextForDate(date)))
+        : [];
 
-    const tokens: CopyTokens = {
+    const baseTokens: CopyTokens = {
       voornaam: firstNameOf(user.name),
       boek: book,
       hoofdstuk: chapter,
@@ -105,16 +117,23 @@ export async function GET(req: Request) {
       // resolved entitlement (Stripe, App Store / RevenueCat, admin); the
       // `subscribed` flag alone told App Store subscribers they had none.
       vriesdagen: auth.isPro ? (user.freezeCount ?? 0) : 0,
-      vers: dayText?.text ?? undefined,
-      versverwijzing: dayText?.reference ?? undefined,
       niveau: levelForXp(user.xp ?? 0),
+    };
+    const tokensForDay = (day: number): CopyTokens => {
+      // "Psalm 23:1", not "Psalmen 23:1" (lib/notificationSchedule.ts).
+      const reference = dayTexts[day]?.reference;
+      return {
+        ...baseTokens,
+        vers: dayTexts[day]?.text ?? undefined,
+        versverwijzing: reference ? notificationReference(reference) : undefined,
+      };
     };
 
     // Seeded on the account and the day this batch was built, so two devices
     // fetching on the same day schedule the same run, and a refetch after a
     // reinstall does not restart the rotation from the same variant.
     const seed = `${auth.id}:${new Date().toISOString().slice(0, 10)}`;
-    const variants = pickSeries(typeParam, tokens, { seed, count: days });
+    const variants = pickSeries(typeParam, tokensForDay, { seed, count: days });
 
     return jsonV1({
       type: typeParam,
