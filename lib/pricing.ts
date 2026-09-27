@@ -11,7 +11,7 @@
  * is why every plan below carries an explicit `billedLabel`.
  */
 
-import { FREE_AI_DAILY_CAP, PRO_AI_DAILY_CAP } from "./entitlements";
+import { FREE_AI_DAILY_CAP, FREE_CROSS_REFS, PRO_AI_DAILY_CAP } from "./entitlements";
 
 export type BillingInterval = "monthly" | "annual";
 
@@ -122,6 +122,7 @@ export function freeMonthsOnAnnual(): number {
  *  - grondtekst: lib/proContent.ts (`FREE_ORIGINAL_VERSES`) and the per-verse
  *    grondtekst in the lesson, which is Pro only (components/study/flow/PassageReader)
  *  - AI, notes, groups: lib/entitlements.ts, enforced by the web AND app routes
+ *  - kruisverwijzingen: lib/proContent.ts (`gateCrossRefs`, `FREE_CROSS_REFS`)
  *  - voorlezen: app/api/tts refuses the cloud voices without Pro
  *  - streak protection: lib/streak.ts spends a freeze only for a Pro reader
  *  - tree items: lib/levensboom/catalog.ts, the `pro` unlocks
@@ -135,6 +136,7 @@ export const PRO_FEATURES = [
   "Grondtekst: Hebreeuws en Grieks bij elk vers",
   `${PRO_AI_DAILY_CAP} AI-vragen per dag, i.p.v. ${FREE_AI_DAILY_CAP}`,
   "Onbeperkt notities, op de website en in de app",
+  `Alle kruisverwijzingen bij elk vers, i.p.v. ${FREE_CROSS_REFS}`,
   "Zoveel studiegroepen leiden als je wilt",
   "Voorlezen met natuurlijke stemmen",
   "Streakbescherming als je een dag mist",
