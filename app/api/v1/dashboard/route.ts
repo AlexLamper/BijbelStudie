@@ -4,7 +4,7 @@ import connectMongoDB from '../../../../lib/mongodb';
 import User from '../../../../models/User';
 import Note from '../../../../models/Note';
 import ReadingSession from '../../../../models/ReadingSession';
-import { fetchDayText } from '../../../../lib/mobileDayText';
+import { fetchDayTextFor } from '../../../../lib/mobileDayText';
 import { getActivePlanCard } from '../../../../lib/planService';
 import { describeLevel } from '../../../../lib/gamification';
 import { suggestPlans } from '../../../../lib/planGenerator';
@@ -84,7 +84,10 @@ export async function GET(req: Request) {
         .select('createdAt')
         .lean(),
       getActivePlanCard(String(user._id)),
-      fetchDayText().catch(() => null),
+      // `?version=` is the translation the app's reader is in (app 1.1.x and
+      // later); the verse comes back in it, with its licence notice. Without
+      // it, the Statenvertaling payload older builds render as they always did.
+      fetchDayTextFor(new URL(req.url).searchParams.get('version')).catch(() => null),
       // "Verder waar je gebleven was" (lib/resumeTypes.ts). One indexed read
       // of the running enrolments, plus one more only on a day a study was
       // touched. Never fails the dashboard: without the enrolments it still

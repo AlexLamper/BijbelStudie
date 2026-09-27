@@ -196,7 +196,7 @@ export function previousDays(
     .slice(0, Math.max(0, limit));
 }
 
-const READER_VERSION_KEY = 'bijbelstudie_reader_version';
+export const READER_VERSION_KEY = 'bijbelstudie_reader_version';
 
 /**
  * The translation last picked in the reader on this device, and when.

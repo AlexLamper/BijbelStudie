@@ -6,7 +6,7 @@ import { CHAPTER_COUNTS } from "../lib/data/bible-chapter-counts"
 import type { DailyVerse } from "../components/dashboard/DailyVerseCard"
 import { pendingStreakLoss, type StreakLoss } from "../lib/streak"
 import { DAYTEXT_DEFAULT_VERSION, pickDashboardVersion } from "../lib/dailyVerseTranslation"
-import { readReaderVersion } from "../lib/dailyVerseStore"
+import { READER_VERSION_KEY, readReaderVersion } from "../lib/dailyVerseStore"
 
 /**
  * Everything the dashboard shows, fetched once and derived in one place.
@@ -158,7 +158,8 @@ export function useDashboardData() {
     // the page), so a translation switched in /lezen shows up on the way back
     // without a refresh. Each translation is its own URL, and so its own
     // shared CDN copy; the Statenvertaling keeps the plain URL it always had.
-    lastReadRequest
+    let shownVersion: string | null = null
+    const loadVerse = (lastRead: typeof lastReadRequest) => lastRead
       .then(async (ld) => {
         const lr = ld?.book ? ld : ld?.lastReadChapter
         const local = readReaderVersion()
@@ -168,14 +169,32 @@ export function useDashboardData() {
           ? (await fetch("/api/user/preferences").then(toJson).catch(() => null))?.preferences?.translation
           : null
         const readerVersion = pickDashboardVersion({ local, lastRead: lr, preferred })
+        if (readerVersion === shownVersion) return
         const query = readerVersion === DAYTEXT_DEFAULT_VERSION
           ? ""
           : `?version=${encodeURIComponent(readerVersion)}`
         const d = await fetch(`/api/bible/daytext${query}`).then(toJson)
-        if (!cancelled && d?.text) setVerse({ ...d, readerVersion })
+        if (!cancelled && d?.text) {
+          shownVersion = readerVersion
+          setVerse({ ...d, readerVersion })
+        }
       })
       .catch(() => {})
       .finally(() => { if (!cancelled) setVerseLoading(false) })
+    loadVerse(lastReadRequest)
+
+    // A dashboard that stays open - another tab, or one restored from the
+    // back/forward cache without remounting - would otherwise keep the verse
+    // in the translation it first showed. A switch in the reader writes the
+    // device's stamp (`rememberReaderVersion`), so that is what to listen for.
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === READER_VERSION_KEY) loadVerse(lastReadRequest)
+    }
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) loadVerse(fetch("/api/user/last-read").then(toJson).catch(() => null))
+    }
+    window.addEventListener("storage", onStorage)
+    window.addEventListener("pageshow", onPageShow)
 
     Promise.all([
       fetch("/api/user").then(toJson),
@@ -224,7 +243,11 @@ export function useDashboardData() {
       .catch(() => {})
       .finally(() => setLoading(false))
 
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+      window.removeEventListener("storage", onStorage)
+      window.removeEventListener("pageshow", onPageShow)
+    }
   }, [])
 
   const derived = useMemo(() => {

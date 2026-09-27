@@ -1,6 +1,6 @@
 import { corsPreflight, errorV1, handleV1Error, jsonV1 } from '../../../../lib/apiV1';
 import { dayTextCacheControl } from '../../../../lib/httpCache';
-import { dayTextInVersion, fetchDayText } from '../../../../lib/mobileDayText';
+import { fetchDayTextFor } from '../../../../lib/mobileDayText';
 
 export async function OPTIONS() {
   return corsPreflight();
@@ -19,11 +19,9 @@ export async function OPTIONS() {
  */
 export async function GET(req: Request) {
   try {
-    const verse = await fetchDayText();
-    if (!verse) return errorV1('UPSTREAM_UNAVAILABLE', 502, 'Externe API niet bereikbaar');
-
     const requested = new URL(req.url).searchParams.get('version');
-    const payload = requested ? await dayTextInVersion(verse, requested) : verse;
+    const payload = await fetchDayTextFor(requested);
+    if (!payload) return errorV1('UPSTREAM_UNAVAILABLE', 502, 'Externe API niet bereikbaar');
 
     return jsonV1(payload, {
       // The query string is part of the cache key, so translations do not bleed.

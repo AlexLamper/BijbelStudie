@@ -224,3 +224,20 @@ export async function fetchDayText(): Promise<DayText | null> {
   await recordDayText(verse);
   return verse;
 }
+
+/**
+ * Today's verse for the app: `/api/v1/daytext` and the `dailyVerse` of
+ * `/api/v1/dashboard`.
+ *
+ * With `requested` (the reader's translation id, `?version=`) the text is
+ * swapped and `versionId` + `attribution` added; without it the payload is the
+ * plain Statenvertaling one that builds from before the swap expect - they
+ * print no licence notice, so they must never be handed NBG51 text.
+ */
+export async function fetchDayTextFor(
+  requested: string | null | undefined,
+): Promise<DayText | DayTextInVersion | null> {
+  const verse = await fetchDayText();
+  if (!verse) return null;
+  return requested ? dayTextInVersion(verse, requested) : verse;
+}
