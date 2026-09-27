@@ -17,7 +17,8 @@ import { useBibleYear } from './useBibleYear'
  * guest, or still loading: one plain row into the plan page (which holds the
  * 1-jaar and 2-jaar options), so the server-rendered HTML already carries the
  * link. Started: a compact "Vandaag" row into the same page. Deliberately
- * modest - the plan has its own sidebar row and is not the front of /studies.
+ * modest - the rail beside the catalogue links it too; it is not the front
+ * of /studies.
  *
  * A guest never fetches: the state is only requested once the session (from
  * the /studies layout's SessionProvider) says the visitor is signed in.

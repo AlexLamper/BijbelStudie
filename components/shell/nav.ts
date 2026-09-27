@@ -9,11 +9,7 @@ import {
   Settings,
   MessageSquare,
   Shield,
-  CalendarDays,
 } from "lucide-react";
-
-/** The reading plan's page. It sits under /studies but has its own row. */
-const BIBLE_YEAR_URL = "/studies/bijbel-in-een-jaar";
 
 /**
  * The app's navigation, once.
@@ -42,15 +38,6 @@ export const NAV_GROUPS: { label: string; items: NavItem[]; adminOnly?: boolean 
     items: [
       { title: "Dashboard", url: "/dashboard", icon: House, trackId: "sidebar_dashboard" },
       { title: "Studies", url: "/studies", icon: GraduationCap, trackId: "sidebar_studies" },
-      // Its own row rather than a card on the dashboard or a hero on /studies:
-      // the reading plan is one feature among several, not the front page.
-      {
-        title: "Bijbel in een jaar",
-        url: BIBLE_YEAR_URL,
-        icon: CalendarDays,
-        trackId: "sidebar_bijbel_in_een_jaar",
-        noTab: true,
-      },
       { title: "Lezen", url: "/lezen", icon: BookMarked, trackId: "sidebar_lezen" },
       { title: "Notities", url: "/notities", icon: NotebookPen, trackId: "sidebar_notities" },
       { title: "Bronnen", url: "/bronnen", icon: Library, trackId: "sidebar_bronnen", noTab: true },
@@ -78,10 +65,6 @@ export function isNavActive(pathname: string | null, url: string, forced?: strin
   // /profiel must not light up while the reader is on /profiel/boom - that
   // subroute has its own row underneath.
   if (url === "/profiel") return pathname === "/profiel";
-  // Likewise /studies stays dark on the reading plan, which has its own row.
-  if (url === "/studies" && (pathname === BIBLE_YEAR_URL || pathname.startsWith(BIBLE_YEAR_URL + "/"))) {
-    return false;
-  }
   return pathname === url || pathname.startsWith(url + "/");
 }
 

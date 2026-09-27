@@ -9,6 +9,7 @@ import { Card, Chip } from '../../components/kit/primitives'
 import StudyArtwork from './StudyArtwork'
 import ChapterStudyPicker from '../../components/study/ChapterStudyPicker'
 import BibleYearStudiesBlock from '../../components/bibleYear/BibleYearStudiesBlock'
+import { BIBLE_YEAR_PATH } from '../../lib/bibleYear/display'
 
 const COMPLETED_KEY = 'bijbelstudie_completed_studies'
 
@@ -297,6 +298,20 @@ export default function StudiesBrowser() {
               </div>
             </div>
           ))}
+          {/* Bijbel in een jaar: deliberately low-key - one rail-styled row
+              under the filters, no sidebar entry and no hero. A link, not a
+              filter, so it sits apart from the groups above. Inside the sticky
+              nav for the same reason as the paragraph below. */}
+          <div className="border-t border-line pt-3">
+            <Link
+              href={BIBLE_YEAR_PATH}
+              data-track="studies_rail_bible_year"
+              className="flex flex-col rounded-btn px-[10px] py-[7px] text-left no-underline transition-colors hover:bg-line-soft"
+            >
+              <span className="truncate text-[13.5px] text-ink-body">Bijbel in een jaar</span>
+              <span className="truncate text-[12px] text-ink-faint">De hele Bijbel in een of twee jaar</span>
+            </Link>
+          </div>
           {/* Lives inside the sticky nav, not after it: this rail is pinned in
               place for most of the page's scroll (the aside stretches to the
               height of the card grid beside it), so a sibling paragraph placed
@@ -462,7 +477,7 @@ export default function StudiesBrowser() {
         )}
 
         {/* Bijbel in een jaar: one modest row under the catalogue, not a hero
-            above it - the plan has its own sidebar row. Hidden rather than
+            above it (the rail links it too). Hidden rather than
             unmounted while searching, so its fetch does not repeat on every
             keystroke that clears the box. */}
         <div hidden={searchResults !== null} className="flex-none pt-1">

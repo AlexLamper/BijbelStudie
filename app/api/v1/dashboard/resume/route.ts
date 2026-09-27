@@ -32,8 +32,8 @@ export async function OPTIONS() {
  *
  * `{ resume: DashboardResume, completedStudyIds: string[] }`
  *
- * No Bijbel-in-een-jaar state: that card left the dashboard for its own
- * sidebar page (/studies/bijbel-in-een-jaar). The app never calls this route.
+ * No Bijbel-in-een-jaar state: that card left the dashboard; the plan page
+ * (/studies/bijbel-in-een-jaar) is linked from /studies. The app never calls this route.
  */
 export async function GET(req: Request) {
   try {
