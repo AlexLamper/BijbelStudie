@@ -5,7 +5,6 @@ import User from '../../../../../models/User';
 import { listEnrollments } from '../../../../../lib/studyEnrollmentService';
 import { loadDashboardResume } from '../../../../../lib/dashboardResumeService';
 import { completedStudyIds } from '../../../../../lib/studyRecommendations';
-import { getState } from '../../../../../lib/bibleYear/service';
 import {
   canonicaliseReadChapters,
   readChaptersFrom,
@@ -31,8 +30,10 @@ export async function OPTIONS() {
  * built by the same function GET /api/v1/dashboard uses, so web and app never
  * disagree about where the reader is.
  *
- * `{ resume: DashboardResume, completedStudyIds: string[],
- *    bibleYear: BibleYearToday | null, bibleYearState: BibleYearStateResponse | null }`
+ * `{ resume: DashboardResume, completedStudyIds: string[] }`
+ *
+ * No Bijbel-in-een-jaar state: that card left the dashboard for its own
+ * sidebar page (/studies/bijbel-in-een-jaar). The app never calls this route.
  */
 export async function GET(req: Request) {
   try {
@@ -41,7 +42,7 @@ export async function GET(req: Request) {
 
     // `.lean()`: see lib/readChaptersCanon `readChaptersFrom` - a hydrated
     // document loses `readChapters` entirely when one key will not cast.
-    const [user, enrollments, bibleYearState] = await Promise.all([
+    const [user, enrollments] = await Promise.all([
       User.findById(auth.id)
         .select('lastReadChapter readChapters preferences.reminderTimezone')
         .lean<{
@@ -55,13 +56,6 @@ export async function GET(req: Request) {
           preferences?: { reminderTimezone?: string | null } | null;
         } | null>(),
       listEnrollments(auth.id),
-      // The Bijbel-in-een-jaar card under the resume card seeds itself from
-      // this, so the dashboard makes no separate GET /api/v1/bible-year.
-      // Null on failure: the card then fetches on its own.
-      getState(auth.id).catch((error) => {
-        console.error('[v1/dashboard/resume] bible-year failed:', error);
-        return null;
-      }),
     ]);
 
     const resume = await loadDashboardResume({
@@ -75,8 +69,6 @@ export async function GET(req: Request) {
     return jsonV1({
       resume,
       completedStudyIds: [...completedStudyIds(enrollments)],
-      bibleYear: bibleYearState?.today ?? null,
-      bibleYearState,
     });
   } catch (error) {
     return handleV1Error(error);

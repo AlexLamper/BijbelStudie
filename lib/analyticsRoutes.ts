@@ -184,6 +184,7 @@ export const CLICK_TARGETS = [
   'sidebar_dashboard',
   'sidebar_lezen',
   'sidebar_studies',
+  'sidebar_bijbel_in_een_jaar',
   'sidebar_groepen',
   'sidebar_notities',
   'sidebar_bronnen',

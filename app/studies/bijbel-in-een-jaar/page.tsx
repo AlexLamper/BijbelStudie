@@ -75,7 +75,7 @@ export default async function BibleYearPage({
   )
 
   return (
-    <AppShell title={TITLE} active="/studies" ownHeading>
+    <AppShell title={TITLE} active={BIBLE_YEAR_PATH} ownHeading>
       <JsonLd data={pageGraph} />
       <div className="flex min-h-full flex-col gap-4">
         <Link

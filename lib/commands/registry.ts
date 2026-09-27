@@ -53,6 +53,17 @@ export const PAGE_COMMANDS: CommandItem[] = [
     showWhenEmpty: true,
   },
   {
+    id: "pagina-bijbel-in-een-jaar",
+    group: "pagina",
+    title: "Bijbel in een jaar",
+    subtitle: "Leesplan voor de hele Bijbel, in een of twee jaar",
+    keywords: ["leesplan", "bijbel in twee jaar", "hele bijbel", "bijbelleesrooster", "rooster", "elke dag lezen", "dagelijks lezen"],
+    icon: "study",
+    visibility: "iedereen",
+    target: { type: "link", href: "/studies/bijbel-in-een-jaar" },
+    pageKey: "bibleYear",
+  },
+  {
     id: "pagina-bronnen",
     group: "pagina",
     title: "Bronnen",

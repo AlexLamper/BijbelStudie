@@ -6,7 +6,6 @@ import { useSession } from 'next-auth/react'
 import {
   BIBLE_YEAR_PATH,
   behindLabel,
-  DEFAULT_CATALOGUE,
   dayOfPlanLabel,
   formatPercent,
 } from '../../lib/bibleYear/display'
@@ -14,10 +13,11 @@ import { TEAL } from './parts'
 import { useBibleYear } from './useBibleYear'
 
 /**
- * The "Bijbel in een jaar" block at the top of /studies. Not started, a guest,
- * or still loading: two option cards, 1 jaar and 2 jaar, into the plan page -
- * so the server-rendered HTML already carries the real links. Started: a
- * compact "Vandaag" row into the same page.
+ * The "Bijbel in een jaar" row under the /studies catalogue. Not started, a
+ * guest, or still loading: one plain row into the plan page (which holds the
+ * 1-jaar and 2-jaar options), so the server-rendered HTML already carries the
+ * link. Started: a compact "Vandaag" row into the same page. Deliberately
+ * modest - the plan has its own sidebar row and is not the front of /studies.
  *
  * A guest never fetches: the state is only requested once the session (from
  * the /studies layout's SessionProvider) says the visitor is signed in.
@@ -71,34 +71,23 @@ export default function BibleYearStudiesBlock() {
     )
   }
 
-  const plans = data?.catalogue?.length ? data.catalogue : DEFAULT_CATALOGUE
-
+  // Not started (or finished): one normal-sized row into the plan page, where
+  // the 1-jaar and 2-jaar options live - never two big option cards here.
   return (
-    <div className="flex flex-none flex-col gap-[10px]">
-      <div className="flex items-baseline gap-3">
-        <span className="text-[13px] font-semibold text-ink">Bijbel in een jaar</span>
-        <span className="text-[12.5px] text-ink-faint">
-          {enrollment?.status === 'completed' ? 'Je hebt de hele Bijbel gelezen' : 'De hele Bijbel, elke dag een stuk'}
-        </span>
+    <Link
+      href={BIBLE_YEAR_PATH}
+      data-track="bible_year_option"
+      className="flex flex-none items-center gap-3 rounded-card border border-line bg-surface px-[15px] py-[13px] no-underline transition-colors hover:border-line-strong"
+    >
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-[14px] font-bold text-ink">Bijbel in een jaar</div>
+        <div className="mt-[2px] truncate text-[12px] text-ink-faint">
+          {enrollment?.status === 'completed'
+            ? 'Je hebt de hele Bijbel gelezen'
+            : 'Leesplan voor de hele Bijbel, in een of twee jaar'}
+        </div>
       </div>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {plans.map(plan => (
-          <Link
-            key={plan.planKey}
-            href={`${BIBLE_YEAR_PATH}?plan=${plan.planKey}`}
-            data-track="bible_year_option"
-            className="flex items-center gap-3 rounded-card border border-line bg-surface px-[15px] py-[13px] no-underline transition-colors hover:border-line-strong"
-          >
-            <div className="min-w-0 flex-1">
-              <div className="text-[14px] font-bold text-ink">De Bijbel in {plan.label}</div>
-              <div className="mt-[2px] text-[12px] text-ink-faint">
-                {plan.totalDays} dagen &middot; ongeveer {plan.minutesPerDay} min per dag
-              </div>
-            </div>
-            <span className="flex-none text-[13px] font-semibold text-teal-dark dark:text-teal-400">Start ›</span>
-          </Link>
-        ))}
-      </div>
-    </div>
+      <span className="flex-none text-[13px] font-semibold text-teal-dark dark:text-teal-400">Bekijk ›</span>
+    </Link>
   )
 }

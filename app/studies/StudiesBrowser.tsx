@@ -342,12 +342,6 @@ export default function StudiesBrowser() {
           </div>
         </div>
 
-        {/* Bijbel in een jaar: hidden rather than unmounted while searching, so
-            its fetch does not repeat on every keystroke that clears the box. */}
-        <div hidden={searchResults !== null} className="flex-none">
-          <BibleYearStudiesBlock />
-        </div>
-
         {searchResults === null && bezigMet.length > 0 && (
           <div className="flex flex-none flex-col gap-[10px]">
             <div className="flex items-baseline gap-3">
@@ -466,6 +460,14 @@ export default function StudiesBrowser() {
             </ul>
           </div>
         )}
+
+        {/* Bijbel in een jaar: one modest row under the catalogue, not a hero
+            above it - the plan has its own sidebar row. Hidden rather than
+            unmounted while searching, so its fetch does not repeat on every
+            keystroke that clears the box. */}
+        <div hidden={searchResults !== null} className="flex-none pt-1">
+          <BibleYearStudiesBlock />
+        </div>
 
         {/* Most of this catalogue is one study per bible book; the book's
             own introduction is the natural step before starting one. */}

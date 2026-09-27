@@ -12,8 +12,6 @@ import {
 } from "../../hooks/useDashboardData"
 import type { DashboardResume } from "../../lib/resumeTypes"
 import ResumeCard, { ResumeCardSkeleton } from "../../components/dashboard/ResumeCard"
-import BibleYearTodayContainer from "../../components/bibleYear/BibleYearTodayContainer"
-import type { BibleYearStateResponse } from "../../lib/bibleYear/types"
 import BillingNotices from "../../components/pricing/BillingNotices"
 import DailyVerseCard from "../../components/dashboard/DailyVerseCard"
 import DashboardFeedbackSlot from "../../components/feedback/DashboardFeedbackSlot"
@@ -76,7 +74,6 @@ const EMPTY_IDS: Set<string> = new Set()
 function useDashboardResume() {
   const [resume, setResume] = useState<DashboardResume | null>(null)
   const [completed, setCompleted] = useState<Set<string>>(EMPTY_IDS)
-  const [bibleYear, setBibleYear] = useState<BibleYearStateResponse | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -87,14 +84,13 @@ function useDashboardResume() {
         if (cancelled) return
         setResume((data?.resume as DashboardResume | undefined) ?? null)
         setCompleted(new Set<string>(Array.isArray(data?.completedStudyIds) ? data.completedStudyIds : []))
-        setBibleYear((data?.bibleYearState as BibleYearStateResponse | null | undefined) ?? null)
       })
       .catch(() => {})
       .finally(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true }
   }, [])
 
-  return { resume, completed, bibleYear, loading }
+  return { resume, completed, loading }
 }
 
 /** The recommended-row cards; "Meer om te ontdekken" renders the very same card. */
@@ -172,7 +168,7 @@ export default function DashboardPage() {
   const isGuest = status !== "authenticated"
   const d = useDashboardData()
   const tree = useTreeSummary()
-  const { resume, completed, bibleYear, loading: resumeLoading } = useDashboardResume()
+  const { resume, completed, loading: resumeLoading } = useDashboardResume()
 
   const level = d.level?.level ?? tree.level
   const pct = Math.min(100, d.level?.progressPercentage ?? tree.progressPercentage)
@@ -214,21 +210,6 @@ export default function DashboardPage() {
           <div className="empty:hidden">
             <BillingNotices />
           </div>
-
-          {/* Bijbel in een jaar "Vandaag", above the verse
-              (DAILY_HABIT_PLAN.md §3/§4). Not part of ResumeCard. Seeded from
-              the resume response's
-              `bibleYearState`, so no extra request; renders nothing for a
-              guest or without a running plan. Mounted after the resume call
-              so it never starts a fetch of its own that the seed would make
-              redundant (it only fetches when the seed is missing). Both cards
-              come out of the same `resumeLoading` flip, so the column settles
-              once; no skeleton of its own, because while the resume call runs
-              nobody knows whether a plan exists, and on the fallback fetch a
-              skeleton that collapses to nothing would be a second jump. */}
-          {!resumeLoading && !isGuest && (
-            <BibleYearTodayContainer variant="compact" initial={bibleYear} skeleton={false} />
-          )}
 
           <DailyVerseCard verse={d.verse} loading={d.verseLoading} />
 
