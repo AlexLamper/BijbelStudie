@@ -17,7 +17,7 @@ const DATA_DIR = path.join(process.cwd(), "lib", "content", "bronnen", "data");
  * The date the Bronnen text last materially changed. Bump it when a data file
  * or the pages' copy changes (see the note at the top of app/sitemap.ts).
  */
-export const BRONNEN_DATE = "2026-09-26";
+export const BRONNEN_DATE = "2026-09-27";
 
 /**
  * Bump when the RESOLVED payload changes without a data file changing - a

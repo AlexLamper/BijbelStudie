@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
 import AppShell from "../../../../components/shell/AppShell";
 import { PrevNextNav } from "../../../../components/content/ContentShell";
 import { JsonLd } from "../../../../components/seo/JsonLd";
 import { BronBlocks } from "../../../../components/bronnen/BronBlocks";
-import { RefToggle } from "../../../../components/bronnen/RefToggle";
+import { ReaderHeader } from "../../../../components/bronnen/ReaderHeader";
+import { ReaderRail } from "../../../../components/bronnen/ReaderRail";
+import { ReaderTracker } from "../../../../components/bronnen/ReaderTracker";
+import { BackLink } from "../../../../components/bronnen/parts";
 import { buildMetadata } from "../../../../lib/pageMetadata";
 import { absoluteUrl } from "../../../../lib/seo/constants";
 import { graph, webPageNode, breadcrumbNode } from "../../../../lib/seo/structuredData";
@@ -14,10 +15,13 @@ import { BRONNEN_PATH, sectionPath, workPath } from "../../../../lib/content/bro
 import { loadWork } from "../../../../lib/content/bronnen/load";
 import { publishedWorks } from "../../../../lib/content/bronnen/published";
 import { pluralNoun, sectionPreview } from "../../../../lib/content/bronnen/labels";
+import { nounTitle, sectionTitle } from "../../../../lib/content/bronnen/themes";
+import { workCard } from "../../../../lib/content/bronnen/view";
 
 /**
  * /bronnen/<werk>/<deel> - the reader: one zondag, artikel, hoofdstuk or
- * formulier, with the Scripture references under each answer. Prerendered for
+ * formulier, its Scripture references as numbered labels in the text, and a
+ * rail with every section and the reader's progress. Prerendered for
  * every section of every published work.
  */
 export const dynamic = "force-static";
@@ -76,107 +80,57 @@ export default async function SectionPage({ params }: PageProps) {
 
   const prev = work.sections[index - 1];
   const next = work.sections[index + 1];
-  const hasRefText = section.blocks.some(
-    b => b.type !== "heading" && b.refs?.some(r => "text" in r && r.text && r.text.length > 0),
-  );
-  // Numbered sections (zondagen, artikelen, hoofdstukken) index as a grid of
-  // numbers; named ones (formulieren, creeds) as a list of names.
-  const numbered = work.sections.every(s => s.number != null) && work.sections.length > 8;
+  const hasRefs = section.blocks.some(b => b.type !== "heading" && (b.refs?.length ?? 0) > 0);
+  const card = workCard(work, false);
+  const navLabel = (i: number) => {
+    const s = card.sections[i];
+    return s.title ? `${s.kicker} · ${s.title}` : s.kicker;
+  };
+  const total = work.sections.length;
+  const kicker =
+    total > 1 ? `${work.shortTitle} · ${nounTitle(work.sectionNoun)} ${index + 1} van ${total}` : work.shortTitle;
+  const prevHref = prev ? sectionPath(work.slug, prev.id) : undefined;
+  const nextHref = next ? sectionPath(work.slug, next.id) : undefined;
 
   return (
     <AppShell title="Bronnen" ownHeading>
       <JsonLd data={pageGraph} />
-      <div className="mx-auto grid w-full max-w-[72rem] gap-6 lg:grid-cols-[minmax(0,1fr)_17rem]">
-        <div className="min-w-0">
-          <Link
-            href={workPath(work.slug)}
-            className="mb-5 inline-flex items-center gap-1.5 text-[13px] font-medium text-ink-muted no-underline hover:text-ink"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
-            {work.title}
-          </Link>
-
-          <article className="rounded-card border border-line bg-surface px-5 py-6 sm:px-9 sm:py-9">
-            <header className="mb-8 flex flex-col gap-4 border-b border-line-soft pb-6 sm:flex-row sm:items-end sm:justify-between">
-              <div className="min-w-0">
-                <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[1.4px] text-teal-dark dark:text-teal-400">
-                  {work.title}
-                </p>
-                <h1 className="text-[24px] font-bold leading-tight tracking-[-0.4px] text-ink sm:text-[28px]">
-                  {section.label}
-                </h1>
-                {section.title && (
-                  <p className="mt-1.5 font-serif text-[17px] italic leading-snug text-ink-muted">{section.title}</p>
-                )}
+      <div className="w-full">
+        <BackLink href={workPath(work.slug)} label={work.title} />
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
+          <div className="min-w-0">
+            <article className="rounded-card border border-line bg-surface px-5 py-6 sm:px-9 sm:py-9">
+              <ReaderHeader
+                slug={work.slug}
+                sectionId={section.id}
+                kicker={kicker}
+                title={section.label}
+                subtitle={sectionTitle(work.slug, section)}
+                shareTitle={`${work.title} · ${section.label}`}
+                hasRefs={hasRefs}
+              />
+              <div className="max-w-[46rem]">
+                <BronBlocks blocks={section.blocks} />
               </div>
-              {hasRefText && <RefToggle />}
-            </header>
+              <ReaderTracker slug={work.slug} sectionId={section.id} prevHref={prevHref} nextHref={nextHref} />
+            </article>
 
-            <div className="max-w-[44rem]">
-              <BronBlocks blocks={section.blocks} />
+            <div className="mt-6">
+              <PrevNextNav
+                label={`Andere ${pluralNoun(work.sectionNoun)}`}
+                previous={prevHref ? { href: prevHref, label: navLabel(index - 1) } : undefined}
+                next={nextHref ? { href: nextHref, label: navLabel(index + 1) } : undefined}
+              />
             </div>
-          </article>
-
-          <div className="mt-6">
-            <PrevNextNav
-              label={`Andere ${pluralNoun(work.sectionNoun)}`}
-              previous={prev ? { href: sectionPath(work.slug, prev.id), label: prev.label } : undefined}
-              next={next ? { href: sectionPath(work.slug, next.id), label: next.label } : undefined}
-            />
           </div>
+
+          <ReaderRail
+            slug={work.slug}
+            sections={card.sections}
+            current={index}
+            credit={`${work.rights} Tekst via ${work.source.name}. Schriftteksten uit de Statenvertaling.`}
+          />
         </div>
-
-        <aside aria-label="Inhoud" className="lg:sticky lg:top-0 lg:self-start">
-          <div className="rounded-card border border-line bg-surface p-4">
-            <p className="mb-3 text-[11px] font-semibold uppercase tracking-[1.2px] text-ink-faint">Inhoud</p>
-            {numbered ? (
-              <ol className="grid grid-cols-6 gap-1.5">
-                {work.sections.map(s => {
-                  const current = s.id === section.id;
-                  return (
-                    <li key={s.id}>
-                      <Link
-                        href={sectionPath(work.slug, s.id)}
-                        aria-current={current ? "page" : undefined}
-                        title={s.title ? `${s.label} · ${s.title}` : s.label}
-                        className={`flex h-8 items-center justify-center rounded-[8px] text-[12.5px] font-semibold tabular-nums no-underline transition-colors ${
-                          current ? "text-white" : "text-ink-muted hover:bg-line-soft hover:text-ink"
-                        }`}
-                        style={current ? { backgroundColor: "#0D9488" } : undefined}
-                      >
-                        {s.number}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ol>
-            ) : (
-              <ol className="max-h-[60vh] space-y-0.5 overflow-auto">
-                {work.sections.map(s => {
-                  const current = s.id === section.id;
-                  return (
-                    <li key={s.id}>
-                      <Link
-                        href={sectionPath(work.slug, s.id)}
-                        aria-current={current ? "page" : undefined}
-                        className={`block rounded-[8px] px-2.5 py-2 text-[13px] leading-snug no-underline transition-colors ${
-                          current
-                            ? "bg-teal-faint font-semibold text-teal-dark dark:text-teal-400"
-                            : "text-ink-muted hover:bg-line-soft hover:text-ink"
-                        }`}
-                      >
-                        {s.title ?? s.label}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ol>
-            )}
-          </div>
-          <p className="mt-3 px-1 text-[11.5px] leading-[1.55] text-ink-faint">
-            {work.rights} Schriftteksten uit de Statenvertaling.
-          </p>
-        </aside>
       </div>
     </AppShell>
   );

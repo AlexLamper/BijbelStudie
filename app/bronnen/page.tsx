@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import AppShell from "../../components/shell/AppShell";
 import { JsonLd } from "../../components/seo/JsonLd";
 import { generatePageMetadata } from "../../lib/pageMetadata";
@@ -7,7 +6,10 @@ import { absoluteUrl } from "../../lib/seo/constants";
 import { graph, webPageNode, itemListNode } from "../../lib/seo/structuredData";
 import { BRON_GROUPS, BRONNEN_PATH, workPath } from "../../lib/content/bronnen/catalog";
 import { loadWorks } from "../../lib/content/bronnen/load";
-import { workCountLabel } from "../../lib/content/bronnen/labels";
+import type { BronGroup } from "../../lib/content/bronnen/types";
+import { workCard, zondagCards } from "../../lib/content/bronnen/view";
+import { BronnenOverview } from "../../components/bronnen/BronnenOverview";
+import { BronnenSide } from "../../components/bronnen/BronnenSide";
 
 /**
  * /bronnen - the confessions, forms and catechism booklets.
@@ -20,6 +22,13 @@ import { workCountLabel } from "../../lib/content/bronnen/labels";
 export const dynamic = "force-static";
 
 export const metadata: Metadata = generatePageMetadata("bronnen");
+
+/** The filter chips' short names for the catalogue groups. */
+const CHIP_LABEL: Record<BronGroup, string> = {
+  belijdenis: "Belijdenissen",
+  catechese: "Catechese",
+  liturgie: "Formulieren en gebeden",
+};
 
 export default async function BronnenPage() {
   const works = await loadWorks();
@@ -39,70 +48,38 @@ export default async function BronnenPage() {
     }),
   );
 
+  const hc = works.find(work => work.slug === "heidelbergse-catechismus");
+  const cards = works.map(work => workCard(work, false));
+  const groups = BRON_GROUPS.map(group => ({ ...group, chip: CHIP_LABEL[group.id] }));
+
   return (
     <AppShell title="Bronnen" ownHeading>
       <JsonLd data={pageGraph} />
-      <div className="mx-auto w-full max-w-[72rem]">
-        <header className="mb-8 max-w-[46rem]">
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[1.4px] text-teal-dark dark:text-teal-400">
-            Bronnen
-          </p>
-          <h1 className="text-[26px] font-bold leading-tight tracking-[-0.5px] text-ink sm:text-[30px]">
-            Belijdenis, catechismus en formulieren
-          </h1>
-          <p className="mt-3 text-[15px] leading-[1.7] text-ink-muted">
-            De teksten waarin de kerk door de eeuwen heen onder woorden bracht wat zij uit de Schrift gelooft. Bij
-            elke verwijzing lees je de tekst uit de Statenvertaling er direct bij.
-          </p>
-        </header>
+      <div className="grid w-full gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="min-w-0">
+          <header className="mb-6">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[1.4px] text-teal-dark dark:text-teal-400">
+              Bronnen
+            </p>
+            <h1 className="text-[26px] font-bold leading-tight tracking-[-0.5px] text-ink sm:text-[30px]">
+              Belijdenis, catechismus en formulieren
+            </h1>
+            <p className="mt-2 max-w-[46rem] text-[15px] leading-[1.65] text-ink-muted">
+              Wat de kerk door de eeuwen heen uit de Schrift beleden heeft, met bij elke verwijzing de tekst uit de
+              Statenvertaling.
+            </p>
+          </header>
 
-        {works.length === 0 ? (
-          <p className="rounded-card border border-line bg-surface p-6 text-[14px] text-ink-muted">
-            De bronnen worden op dit moment toegevoegd.
-          </p>
-        ) : (
-          <div className="space-y-10">
-            {BRON_GROUPS.map(group => {
-              const inGroup = works.filter(work => work.group === group.id);
-              if (inGroup.length === 0) return null;
-              return (
-                <section key={group.id} aria-labelledby={`groep-${group.id}`}>
-                  <div className="mb-4">
-                    <h2
-                      id={`groep-${group.id}`}
-                      className="text-[18px] font-bold tracking-[-0.2px] text-ink sm:text-[19px]"
-                    >
-                      {group.label}
-                    </h2>
-                    <p className="mt-1 text-[13.5px] text-ink-muted">{group.description}</p>
-                  </div>
-                  <div className="grid gap-3 grid-cols-[repeat(auto-fill,minmax(min(100%,19rem),1fr))]">
-                    {inGroup.map(work => (
-                      <Link
-                        key={work.slug}
-                        href={workPath(work.slug)}
-                        className="group flex flex-col rounded-card border border-line bg-surface p-5 no-underline transition-colors hover:border-line-strong"
-                      >
-                        <span className="text-[16px] font-semibold leading-snug text-ink group-hover:text-teal-dark dark:group-hover:text-teal-400">
-                          {work.title}
-                        </span>
-                        <span className="mt-1 text-[12.5px] text-ink-faint">
-                          {[work.author, work.year].filter(Boolean).join(" · ")}
-                        </span>
-                        <span className="mt-3 line-clamp-3 flex-1 text-[13.5px] leading-[1.6] text-ink-muted">
-                          {work.description}
-                        </span>
-                        <span className="mt-4 text-[12.5px] font-medium text-teal-dark dark:text-teal-400">
-                          {workCountLabel(work)}
-                        </span>
-                      </Link>
-                    ))}
-                  </div>
-                </section>
-              );
-            })}
-          </div>
-        )}
+          {works.length === 0 ? (
+            <p className="rounded-card border border-line bg-surface p-6 text-[14px] text-ink-muted">
+              De bronnen worden op dit moment toegevoegd.
+            </p>
+          ) : (
+            <BronnenOverview groups={groups} works={cards} />
+          )}
+        </div>
+
+        {works.length > 0 && <BronnenSide works={cards} zondagen={hc ? zondagCards(hc) : []} />}
       </div>
     </AppShell>
   );
