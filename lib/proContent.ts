@@ -25,6 +25,8 @@
  * what may be shipped at all; this one is about who has paid.
  */
 
+import { FREE_CROSS_REFS } from './entitlements';
+
 /**
  * Characters of commentary a free reader gets.
  *
@@ -117,4 +119,62 @@ export function gateOriginal<T>(verses: T[], options: { isPro: boolean }): Gated
   if (options.isPro) return { items: verses, locked: false };
   if (verses.length <= FREE_ORIGINAL_VERSES) return { items: verses, locked: false };
   return { items: verses.slice(0, FREE_ORIGINAL_VERSES), locked: true };
+}
+
+export type GatedCrossRefs<T> = Gated<T> & {
+  /** How many references the verse has in total, before gating. */
+  total: number;
+  /** How many were withheld; 0 when nothing was. */
+  lockedCount: number;
+};
+
+/**
+ * Trims one verse's cross-references to the free allowance.
+ *
+ * The list arrives sorted by votes, so the free slice is the strongest
+ * material, not a random sample. A verse with `FREE_CROSS_REFS` or fewer is
+ * returned untouched and unlocked - there is nothing to sell there.
+ */
+export function gateCrossRefs<T>(refs: T[], options: { isPro: boolean }): GatedCrossRefs<T> {
+  const total = refs.length;
+  if (options.isPro || total <= FREE_CROSS_REFS) {
+    return { items: refs, locked: false, total, lockedCount: 0 };
+  }
+  return {
+    items: refs.slice(0, FREE_CROSS_REFS),
+    locked: true,
+    total,
+    lockedCount: total - FREE_CROSS_REFS,
+  };
+}
+
+/**
+ * Gates a whole `/api/v1/crossrefs` chapter envelope.
+ *
+ * Only ADDS fields, so installed app builds keep parsing it: each verse gains
+ * `total` and `lockedCount`, the envelope gains `locked`, `lockedCount` and
+ * `freeLimit`. An old build simply sees a shorter `refs` list.
+ */
+export function gateCrossRefChapter<R, V extends { n: number; refs: R[] }, E extends { verses: V[] }>(
+  envelope: E,
+  options: { isPro: boolean },
+): Omit<E, 'verses'> & {
+  verses: Array<V & { total: number; lockedCount: number }>;
+  locked: boolean;
+  lockedCount: number;
+  freeLimit: number;
+} {
+  let lockedCount = 0;
+  const verses = envelope.verses.map((verse) => {
+    const gated = gateCrossRefs(verse.refs, options);
+    lockedCount += gated.lockedCount;
+    return { ...verse, refs: gated.items, total: gated.total, lockedCount: gated.lockedCount };
+  });
+  return {
+    ...envelope,
+    verses,
+    locked: lockedCount > 0,
+    lockedCount,
+    freeLimit: FREE_CROSS_REFS,
+  };
 }

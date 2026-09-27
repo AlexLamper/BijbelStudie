@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import { BrandIcon } from "../ui/BrandIcon";
 import { Footer } from "../landing/footer";
 
 /**
@@ -34,7 +34,7 @@ export function PublicFrame({
             href="/"
             className="flex min-w-0 items-center gap-2 text-[15px] font-bold tracking-[-0.2px] text-ink no-underline"
           >
-            <Image src="/images/icon-192.png" alt="" width={26} height={26} className="flex-none rounded-[7px]" priority />
+            <BrandIcon src="/images/icon-192.png" size={26} className="flex-none rounded-[7px]" priority />
             <span className="truncate">
               Bijbel<span style={{ color: "#0D9488" }}>Studie</span>
             </span>

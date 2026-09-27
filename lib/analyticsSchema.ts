@@ -102,11 +102,11 @@ export const EVENTS = {
   },
   /** Fired the moment a gated surface refuses the user. `surface` ranks them. */
   paywall_hit: {
-    surface: ["commentary", "ai_limit", "original_text", "plan_limit", "offline", "resources"],
+    surface: ["commentary", "ai_limit", "original_text", "plan_limit", "offline", "resources", "crossrefs"],
     platform: PLATFORM,
   },
   paywall_cta_clicked: {
-    surface: ["commentary", "ai_limit", "original_text", "plan_limit", "offline", "resources"],
+    surface: ["commentary", "ai_limit", "original_text", "plan_limit", "offline", "resources", "crossrefs"],
     platform: PLATFORM,
   },
   /** Signup that was started in order to buy, so the resume flow can be measured. */

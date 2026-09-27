@@ -1,12 +1,18 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { ChevronLeft, ChevronRight, GraduationCap, NotebookPen, Volume2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, GraduationCap, MoreVertical, NotebookPen, Pause, Play, Square, Volume2 } from 'lucide-react';
 import ChapterViewer from './ChapterViewer';
 import BibleSelector from './BibleSelector';
 import EmptyState from './EmptyState';
-import SpeakButton from './SpeakButton';
+import SpeakButton, { type SpeakButtonHandle, type SpeakStatus } from './SpeakButton';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu';
 import { SpokenTextScope } from './SpokenText';
 import { ReadingPreferencesMenu } from './ReadingPreferencesMenu';
 import { ReadingPreferences } from '../../hooks/useReadingPreferences';
@@ -54,6 +60,10 @@ interface BibleViewerSectionProps {
 /** A 36 px square control in the toolbar: white, hairline border, radius 9. */
 const TOOL_BTN =
   'flex h-9 w-9 flex-none items-center justify-center rounded-[9px] border border-line bg-surface text-ink-body transition-colors hover:bg-line-soft disabled:cursor-not-allowed disabled:opacity-40 max-md:h-10 max-md:w-10';
+
+/** One row in the "Meer opties" menu: 40 px tall, so it is a real tap target. */
+const MENU_ITEM =
+  'min-h-10 cursor-pointer gap-2.5 rounded-lg px-3 text-[13.5px] font-medium text-ink-body no-underline dark:text-foreground [&_svg]:text-teal dark:[&_svg]:text-teal-400';
 
 export default function BibleViewerSection({
   selectedBook,
@@ -110,6 +120,17 @@ export default function BibleViewerSection({
    * share one store and the read-along highlight still lands on the right word.
    */
   const [chapterText, setChapterText] = useState('');
+
+  /**
+   * Read-aloud lives in the "Meer opties" menu now, but the voice itself still
+   * belongs to one SpeakButton in the toolbar: the menu drives it through this
+   * handle and words its row from `speakStatus`. While the voice is busy that
+   * button shows beside the menu, so pause/resume stays one tap away.
+   */
+  const speakRef = useRef<SpeakButtonHandle>(null);
+  const [speakStatus, setSpeakStatus] = useState<SpeakStatus>('idle');
+  const speakActive = speakStatus === 'playing' || speakStatus === 'paused';
+  const canSpeak = speakStatus !== 'unsupported';
 
   /**
    * "Bestudeer dit hoofdstuk": the open chapter as a single-chapter study
@@ -183,28 +204,66 @@ export default function BibleViewerSection({
           {/* The spacer; below md, the line break between the two rows. */}
           <div className="flex-1 max-md:order-4 max-md:h-2 max-md:basis-full" />
 
-          {studyHref && (
-            <Link
-              href={studyHref}
-              data-track="chapter_study_reader_toolbar"
-              title="Bestudeer dit hoofdstuk"
-              aria-label="Bestudeer dit hoofdstuk"
-              className="flex h-8 w-8 flex-none items-center justify-center rounded-lg text-teal no-underline transition-colors hover:bg-line-soft dark:text-teal-400 max-md:order-3 max-md:h-10 max-md:w-10"
-            >
-              <GraduationCap size={17} strokeWidth={1.9} />
-            </Link>
-          )}
-
-          {/* An icon button, never a labelled one: the toolbar is already five
-              controls wide and the glyph says it. */}
+          {/* The read-aloud control while the voice is busy (loading, playing,
+              paused, failed); nothing while idle. It also carries the
+              sign-in dialog and the error toast, so it is always mounted. */}
           <SpeakButton
             compact
             showSettings={false}
+            hideWhenIdle
+            controlRef={speakRef}
+            onStatusChange={setSpeakStatus}
             getText={() => chapterText}
             label="Lees hoofdstuk voor"
-            className="h-8 w-8 flex-none rounded-lg text-teal dark:text-teal-400 hover:bg-line-soft max-md:order-3 max-md:h-10 max-md:w-10"
+            className="h-9 w-9 flex-none rounded-lg text-teal dark:text-teal-400 hover:bg-line-soft max-md:order-3 max-md:h-10 max-md:w-10"
             icon={<Volume2 size={17} strokeWidth={1.9} />}
           />
+
+          {/* Voorlezen and "Bestudeer dit hoofdstuk" behind one kebab: the
+              toolbar is already five controls wide. */}
+          {(canSpeak || studyHref) && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  title="Meer opties"
+                  aria-label="Meer opties"
+                  className="flex h-9 w-9 flex-none items-center justify-center rounded-lg text-ink-body transition-colors hover:bg-line-soft focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0D9488] data-[state=open]:bg-line-soft dark:text-foreground max-md:order-3 max-md:h-10 max-md:w-10"
+                >
+                  <MoreVertical size={18} strokeWidth={1.9} aria-hidden />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-[220px] rounded-xl p-1.5 dark:border-border">
+                {canSpeak && (
+                  <DropdownMenuItem
+                    className={MENU_ITEM}
+                    disabled={speakStatus === 'loading'}
+                    onSelect={() => speakRef.current?.toggle()}
+                  >
+                    {speakStatus === 'playing' ? (
+                      <><Pause aria-hidden /> Pauzeer voorlezen</>
+                    ) : speakStatus === 'paused' ? (
+                      <><Play aria-hidden /> Hervat voorlezen</>
+                    ) : (
+                      <><Volume2 aria-hidden /> Lees hoofdstuk voor</>
+                    )}
+                  </DropdownMenuItem>
+                )}
+                {canSpeak && speakActive && (
+                  <DropdownMenuItem className={MENU_ITEM} onSelect={() => speakRef.current?.stop()}>
+                    <Square aria-hidden /> Stop voorlezen
+                  </DropdownMenuItem>
+                )}
+                {studyHref && (
+                  <DropdownMenuItem asChild className={MENU_ITEM}>
+                    <Link href={studyHref} data-track="chapter_study_reader_toolbar">
+                      <GraduationCap aria-hidden /> Bestudeer dit hoofdstuk
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
 
         {/* The chapter line. It sits ABOVE the scroller, so it stays put while

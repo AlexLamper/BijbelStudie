@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import { BrandIcon } from "../../components/ui/BrandIcon";
 import Link from "next/link";
 import { generatePageMetadata } from "../../lib/pageMetadata";
 import { APP_STORE_URL, PLAY_STORE_URL } from "../../lib/appStore";
@@ -34,12 +34,10 @@ export default function AppDownloadPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-line-soft px-5 py-16 dark:bg-background">
       <div className="w-full max-w-sm text-center">
-        <Image
+        <BrandIcon
           src="/images/logo.svg"
-          alt=""
-          width={44}
-          height={44}
-          className="mx-auto"
+          size={44}
+          className="mx-auto block"
           priority
         />
 

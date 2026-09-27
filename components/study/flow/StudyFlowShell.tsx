@@ -51,6 +51,7 @@ import {
 import { guestLessonKey, readGuestLesson, writeGuestLesson } from '../../../lib/guestLessons';
 import type { ChapterStudyContext } from '../../../lib/chapterStudy';
 import { track } from '../../../lib/analytics';
+import { rememberReaderVersion } from '../../../lib/dailyVerseStore';
 
 /**
  * The brand, in the roles design_handoff_web/TOKENS-LES.md gives it.
@@ -431,17 +432,23 @@ export default function StudyFlowShell({
     //
     // `awardXp: false` because the lesson already grants `study_lesson` on
     // completion - the chapter must not be paid for twice.
+    //
+    // `version` is the translation on screen, not the enrollment's: last-read
+    // is what the reader and the dashboard's verse of the day restore, and
+    // stamping the study's default over it moved an NBG51 reader back to the
+    // Statenvertaling on every lesson opened. Sent once per lesson (the key
+    // above), so a later switch does not re-post.
     fetch('/api/user/last-read', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         book: lesson.passage.book,
         chapter: lesson.passage.chapter,
-        version: lesson.translation,
+        version,
         awardXp: false,
       }),
     }).catch(() => {});
-  }, [guest, lesson]);
+  }, [guest, lesson, version]);
 
   // Full screen is offered rather than imposed: the whole point of the flow is
   // one lesson and nothing else on the glass, and the browser will only grant it
@@ -541,6 +548,9 @@ export default function StudyFlowShell({
     (next: string) => {
       setVersion(next);
       void patch({ viewTranslation: next });
+      // The dashboard's verse of the day follows the translation last picked,
+      // here as in /lezen (see `pickDashboardVersion`).
+      rememberReaderVersion(next);
     },
     [patch],
   );

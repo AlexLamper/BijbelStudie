@@ -61,8 +61,14 @@ export function inviteUrl(code: string): string {
   return `${BASE_URL}/uitnodiging?code=${encodeURIComponent(code)}`;
 }
 
-export function inviteShareText(code: string): string {
-  return `Ik gebruik BijbelStudie voor mijn bijbelstudie. Maak via deze link een gratis account, dan krijgen we allebei een week Pro: ${inviteUrl(code)}`;
+/**
+ * The message the share sheet sends. "We allebei" only when the inviter can
+ * actually earn a week (`youEarn`): a paying or trialling Pro member never
+ * does, so their message offers the friend's week alone.
+ */
+export function inviteShareText(code: string, inviterEarns = true): string {
+  const reward = inviterEarns ? 'dan krijgen we allebei een week Pro' : 'dan krijg je meteen een week Pro';
+  return `Ik gebruik BijbelStudie voor mijn bijbelstudie. Maak via deze link een gratis account, ${reward}: ${inviteUrl(code)}`;
 }
 
 /** The billing fields that decide whether a comp week may be written. */

@@ -16,13 +16,18 @@
  *   2. Scans every collection keyed on `userId` for documents whose user no
  *      longer exists ("orphans"): readinghistories, readingsessions,
  *      studyprogress, studylessonstate, studyenrollments, planenrollments,
- *      notes, bookmarks, aiusages, groupmessages, analyticsevents.
+ *      notes, bookmarks, aiusages, groupmessages, analyticsevents,
+ *      bibleyearenrollments.
  *   3. Rebuilds what it can for the target id: readChapters (from the archive
  *      if there is one, else from readinghistories + studyprogress + notes +
  *      analytics events), active days, longest run of consecutive days.
  *   4. Prints a proposed patch. With --write and --into it applies it
  *      ADDITIVELY to the new document ($addToSet / $max only - nothing is ever
- *      removed) and re-points the orphaned documents to the new id.
+ *      removed) and re-points the orphaned documents to the new id. An
+ *      orphaned ACTIVE bible-year run is first set to 'abandoned' when the new
+ *      id already runs one (userId_active_unique allows one active run per
+ *      user). A collection that still refuses (a unique index) is reported and
+ *      skipped; the others are still re-pointed.
  */
 import mongoose from 'mongoose';
 
@@ -65,6 +70,9 @@ const ORPHAN_COLLECTIONS = [
   'aiusages',
   'groupmessages',
   'analyticsevents',
+  // Last: its partial unique index (one active run per user) is the one most
+  // likely to refuse a re-point, see the apply step.
+  'bibleyearenrollments',
 ];
 
 const oid = (v) => (mongoose.isValidObjectId(v) ? new mongoose.Types.ObjectId(String(v)) : null);
@@ -250,11 +258,29 @@ if (Object.keys(update).length) {
   const r = await users.updateOne({ _id: newId }, update);
   console.log(`\nusers.updateOne(${newId}) matched=${r.matchedCount} modified=${r.modifiedCount}`);
 }
+const failed = [];
 for (const name of ORPHAN_COLLECTIONS) {
   const cols = await db.listCollections({ name }).toArray();
   if (cols.length === 0) continue;
-  const r = await db.collection(name).updateMany({ userId: targetId }, { $set: { userId: newId } });
-  if (r.matchedCount) console.log(`${name}: re-pointed ${r.modifiedCount}/${r.matchedCount} documents to ${newId}`);
+  try {
+    if (name === 'bibleyearenrollments') {
+      const c = db.collection(name);
+      const targetActive = await c.countDocuments({ userId: newId, status: 'active' }, { limit: 1 });
+      if (targetActive) {
+        const a = await c.updateMany(
+          { userId: targetId, status: 'active' },
+          { $set: { status: 'abandoned', lastActivityAt: new Date() } },
+        );
+        if (a.modifiedCount) console.log(`${name}: ${a.modifiedCount} orphaned active run(s) set to abandoned (${newId} already runs a plan)`);
+      }
+    }
+    const r = await db.collection(name).updateMany({ userId: targetId }, { $set: { userId: newId } });
+    if (r.matchedCount) console.log(`${name}: re-pointed ${r.modifiedCount}/${r.matchedCount} documents to ${newId}`);
+  } catch (error) {
+    failed.push(name);
+    console.error(`${name}: re-point FAILED, left on ${targetId}: ${error?.message ?? error}`);
+  }
 }
+if (failed.length) console.log(`\nnot re-pointed (re-run after resolving): ${failed.join(', ')}`);
 console.log('\ndone. Nothing was deleted.');
 await mongoose.disconnect();

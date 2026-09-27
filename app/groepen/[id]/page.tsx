@@ -121,7 +121,7 @@ function AssignmentCard({
               <p className="mt-0.5 text-[12px] text-ink-faint">Deadline: {formatDate(assignment.dueDate)}</p>
             )}
             <Link
-              href={`/lezen?book=${encodeURIComponent(assignment.book)}&chapter=${assignment.chapter}&version=statenvertaling`}
+              href={`/lezen?book=${encodeURIComponent(assignment.book)}&chapter=${assignment.chapter}`}
               className={`${BTN_PRIMARY} mt-3 h-9 px-3.5 text-[13px] max-md:h-10 max-md:px-4 max-md:text-sm`}>
               Lees nu
             </Link>

@@ -9,6 +9,7 @@ import StudyProgress from '../models/StudyProgress';
 import StudyLessonState from '../models/StudyLessonState';
 import StudyEnrollment from '../models/StudyEnrollment';
 import PlanEnrollment from '../models/PlanEnrollment';
+import BibleYearEnrollment from '../models/BibleYearEnrollment';
 import AiUsage from '../models/AiUsage';
 import GroupMessage from '../models/GroupMessage';
 import StudyGroup from '../models/StudyGroup';
@@ -45,6 +46,7 @@ export async function deleteAccountData(userId: mongoose.Types.ObjectId): Promis
     await StudyLessonState.deleteMany({ userId }, opts);
     await StudyEnrollment.deleteMany({ userId }, opts);
     await PlanEnrollment.deleteMany({ userId }, opts);
+    await BibleYearEnrollment.deleteMany({ userId }, opts);
     await AiUsage.deleteMany({ userId }, opts);
     await GroupMessage.deleteMany({ userId }, opts);
     await FeedbackState.deleteMany({ userId }, opts);

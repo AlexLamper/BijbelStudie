@@ -31,9 +31,15 @@ export function readerBookName(book: BibleBook): string {
   return book.appBook ?? book.name;
 }
 
-/** Deep link into the reader at chapter 1 of this book. */
+/**
+ * Deep link into the reader at chapter 1 of this book.
+ *
+ * No `version`, so a signed-in reader keeps their own translation (and the
+ * last-read translation the dashboard's verse of the day follows is not reset
+ * to the Statenvertaling); a visitor without one gets the reader's default.
+ */
 export function readerHref(book: BibleBook, chapter = 1): string {
-  return `/lezen?book=${encodeURIComponent(readerBookName(book))}&chapter=${chapter}&version=statenvertaling`;
+  return `/lezen?book=${encodeURIComponent(readerBookName(book))}&chapter=${chapter}`;
 }
 
 /** Previous/next in canonical order, for prev/next navigation links. */

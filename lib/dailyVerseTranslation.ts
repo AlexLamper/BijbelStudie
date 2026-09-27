@@ -165,6 +165,26 @@ export function withDayTextVersion(
 }
 
 /**
+ * A stored translation preference as a translation id.
+ *
+ * The same match the reader makes when it restores a preference
+ * (hooks/useBibleData.ts): the id, or the display name exactly, or a display
+ * name containing it - all lower-cased. Without the name match a preference
+ * saved as "NBG-vertaling 1951" opened the reader in the NBG while the
+ * dashboard asked for the Statenvertaling.
+ */
+export function preferenceToVersionId(preferred: string): string {
+  const pref = preferred.trim().toLowerCase();
+  if (!pref) return pref;
+  if (VERSION_NAMES[pref]) return pref;
+  const entries = Object.entries(VERSION_NAMES);
+  const exact = entries.find(([, name]) => name.toLowerCase() === pref);
+  if (exact) return exact[0];
+  const partial = entries.find(([, name]) => name.toLowerCase().includes(pref));
+  return partial ? partial[0] : pref;
+}
+
+/**
  * Which translation the website's dashboard should ask for.
  *
  * Follows the reader's own restore order (hooks/useBibleData.ts): the
@@ -183,8 +203,7 @@ export function pickDashboardVersion(input: {
     typeof input.lastRead?.version === 'string' && input.lastRead.version
       ? input.lastRead.version
       : typeof input.preferred === 'string' && input.preferred
-        ? // The reader lower-cases the stored preference before matching it.
-          input.preferred.trim().toLowerCase()
+        ? preferenceToVersionId(input.preferred)
         : null;
 
   const localId = typeof input.local?.id === 'string' && input.local.id ? input.local.id : null;

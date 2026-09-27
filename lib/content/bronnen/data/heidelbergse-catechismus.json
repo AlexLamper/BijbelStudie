@@ -1,0 +1,2433 @@
+{
+  "slug": "heidelbergse-catechismus",
+  "title": "Heidelbergse Catechismus",
+  "author": "Zacharias Ursinus en Caspar Olevianus",
+  "year": "1563",
+  "sectionNoun": "Zondag",
+  "source": {
+    "name": "De berijmde Psalmen met eenige gezangen in gebruik bij de Gereformeerde Kerken in Nederland, alsmede hare Formulieren van eenigheid ... met het Kort Begrip en den Ziekentroost (Maassluis: Biblia, 1913), scan Princeton Theological Seminary Library via Internet Archive",
+    "url": "https://archive.org/details/deberijmdepsal00gere",
+    "edition": "Tekst van de Catechismus zoals vastgesteld door de Gereformeerde Kerken in Nederland en afgedrukt in hun kerkboek (zetsel van de uitgave Middelharnis 1898, herdrukt 1913); spelling De Vries-Te Winkel; bewijsteksten zoals in de voetnoten gedrukt",
+    "retrieved": "2026-09-26",
+    "note": "Tekst verkregen door de OCR-tekstlagen van vier onafhankelijke scans te vergelijken en per teken te laten stemmen: 1913 (archive.org/details/deberijmdepsal00gere), 1898 (archive.org/details/deberijmdepsalme00gere_0, zelfde zetsel) en twee exemplaren van de eerste druk Middelharnis 1897 (archive.org/details/deberie00gere en archive.org/details/deberijmdepsalme00gere, ander zetsel). Alle ca. 300 plaatsen waar de scans verschilden zijn één voor één gecontroleerd op de paginabeelden van 1913/1898. Aanvullend woord-voor-woord vergeleken met de gemoderniseerde spelling van dezelfde tekst in github.com/biblecomputer/public-domain (nl/reformatie/catechismus.md); alle niet-spellingsverschillen zijn op de scan nagekeken. Weggelaten: de redactionele inleiding en de genummerde voetnoten van de uitgevers (toelichtingen op tekstwijzigingen) en de voetnootletters (a), (b)... in de antwoorden. Drie zetfouten van 1898/1913 zijn verbeterd naar de eerste druk van 1897: 'Hemalleen' (vr. 94) -> 'Hem alleen', 'niets lasteren' (vr. 99) -> 'niet lasteren', 'onseigen' (vr. 127) -> 'ons eigen'. In refs zijn boekafkortingen gelijkgetrokken (punt na de afkorting, 'Marc.' en 'Philipp.'), spaties rond ':' en ',' genormaliseerd en een losstaand drukfoutcijfer '1' voor '1 Joh. 3:2' (vr. 57) weggelaten; overige drukeigenaardigheden in refs zijn behouden (bijv. 'Hebr. 7; 26, 27', '1 Tim. 2 6', 'Rom. 7. 7'). Kopjes van de delen en onderdelen staan als heading-blok aan het begin van de Zondag waar ze gedrukt staan; deze uitgave drukt 'Het andere deel' (niet 'tweede')."
+  },
+  "rights": "Nederlandse tekst van de Heidelbergse Catechismus (1563) zoals uitgegeven door de Gereformeerde Kerken in Nederland in hun kerkboek van 1898/1913, een kerkelijke uitgave van meer dan honderd jaar oud; publiek domein.",
+  "sections": [
+    {
+      "id": "zondag-1",
+      "number": 1,
+      "label": "Zondag 1",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Wat is uw eenige troost, beide in het leven en sterven?",
+          "answer": "Dat ik met lichaam en ziele, beide in het leven en sterven, niet mijn, maar mijns getrouwen Zaligmakers Jezus Christus eigen ben, die met zijn dierbaar bloed voor alle mijne zonden volkomenlijk betaald en mij uit alle heerschappij des duivels verlost heeft, en alzoo bewaart, dat zonder den wil mijns hemelschen Vaders geen haar van mijn hoofd vallen kan, ja ook, dat mij alle ding tot mijne zaligheid dienen moet; waarom Hij mij ook door zijnen Heiligen Geest van het eeuwige leven verzekert, en Hem voortaan te leven van harte willig en bereid maakt.",
+          "refs": [
+            "Rom. 14:8",
+            "1 Cor. 6:19",
+            "1 Cor. 3:23",
+            "Tit. 2:14",
+            "1 Petr. 1:18, 19",
+            "1 Joh. 1:7 en 2:2, 12",
+            "Hebr. 2:14",
+            "1 Joh. 3:8",
+            "Joh. 8:34, 35, 36",
+            "Joh. 6:39 en 10:28",
+            "2 Thess. 3:3",
+            "1 Petr. 1:5",
+            "Matth. 10:30",
+            "Luc. 21:18",
+            "Rom. 8:28",
+            "2 Cor. 1:22 en 5:5",
+            "Eph. 1:14",
+            "Rom. 8:16",
+            "Rom. 8:14",
+            "1 Joh. 3:3"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Hoe vele stukken zijn u noodig te weten, opdat gij in dezen troost zaliglijk leven en sterven moogt?",
+          "answer": "Drie stukken. Ten eerste: hoe groot mijne zonden en ellende zijn. Ten andere: hoe ik van alle mijne zonden en ellende verlost worde. En ten derde: hoe ik Gode voor zulke verlossing zal dankbaar zijn.",
+          "refs": [
+            "Matth. 11:28, 29, 30",
+            "Eph. 5:8",
+            "Joh. 9:41",
+            "Matth. 9:12",
+            "Rom. 3:10",
+            "1 Joh. 1:9, 10",
+            "Joh. 17:3",
+            "Hand. 4:12 en 10:43",
+            "Eph. 5:10",
+            "Ps. 50:14",
+            "Matth. 5:16",
+            "1 Petr. 2:12",
+            "Rom. 6:13",
+            "2 Tim. 2; 15"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-2",
+      "number": 2,
+      "label": "Zondag 2",
+      "title": null,
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Het eerste deel. Van des menschen ellende."
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Waaruit kent gij uwe ellende?",
+          "answer": "Uit de wet Gods.",
+          "refs": [
+            "Rom. 3:20"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Wat eischt de wet Gods van ons?",
+          "answer": "Dat leert ons Christus in eene hoofdsom, Matth. 22:37—40: Gij zult liefhebben den Heere uwen God met geheel uw hart, en met geheel uwe ziel, en met geheel uw verstand, en met geheel uwe kracht. Dit is het eerste en het groot gebod. En het tweede, aan dit gelijk, is: Gij zult uwen naaste liefhebben als uzelven. Aan deze twee geboden hangt de gansche wet en de profeten.",
+          "refs": [
+            "Deut. 6:5",
+            "Lev. 19:18",
+            "Marc. 12:30",
+            "Luc. 10:27"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Kunt gij dit alles volkomenlijk houden?",
+          "answer": "Neen ik; want ik ben van nature geneigd, God en mijnen naaste te haten.",
+          "refs": [
+            "Rom. 3:10, 20, 23",
+            "1 Joh. 1:8, 10",
+            "Rom. 8:7",
+            "Eph. 2:3",
+            "Tit. 3:3",
+            "Gen. 6:5 en 8:21",
+            "Jer. 17:9",
+            "Rom. 7:23"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-3",
+      "number": 3,
+      "label": "Zondag 3",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Heeft dan God den mensch alzoo boos en verkeerd geschapen?",
+          "answer": "Neen Hij; maar God heeft den mensch goed en naar zijn evenbeeld geschapen, dat is, in ware rechtvaardigheid en heiligheid, opdat Hij God zijnen Schepper recht kennen, Hem van harte liefhebben, en met Hem in de eeuwige zaligheid leven zoude, om Hem te loven en te prijzen.",
+          "refs": [
+            "Gen. 1:31",
+            "Gen. 1:26, 27",
+            "Eph. 4:24",
+            "Col. 3:10",
+            "2 Cor. 3:18"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Vanwaar komt dan zulke verdorven aard des menschen?",
+          "answer": "Uit den val en de ongehoorzaamheid onzer eerste voorouderen, Adam en Eva, in het Paradijs, waar onze natuur alzoo is verdorven geworden, dat wij allen in zonden ontvangen en geboren worden.",
+          "refs": [
+            "Gen. 3",
+            "Rom. 5:12, 18, 19",
+            "Ps. 51:7",
+            "Gen. 5:3"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Maar zijn wij alzoo verdorven, dat wij ganschelijk onbekwaam zijn tot eenig goed en geneigd tot alle kwaad?",
+          "answer": "Ja wij; tenzij dan dat wij door den Geest Gods wedergeboren worden.",
+          "refs": [
+            "Gen. 8:21 en 6:5",
+            "Job 14:4 en 15:14, 16, 35",
+            "Joh. 3:6",
+            "Jes. 53:6",
+            "Joh. 3:3, 5",
+            "1 Cor. 12:3",
+            "2 Cor. 3:5"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-4",
+      "number": 4,
+      "label": "Zondag 4",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 9,
+          "question": "Doet dan God den mensch niet onrecht, dat Hij in zijne wet van hem eischt, wat hij niet doen kan?",
+          "answer": "Neen Hij; want God heeft den mensch alzoo geschapen, dat hij dat konde doen; maar de mensch heeft zichzelven en alle zijne nakomelingen, door het ingeven des duivels en door moedwillige ongehoorzaamheid, van deze gaven beroofd.",
+          "refs": [
+            "Eph. 4:24",
+            "Gen. 3:13",
+            "1 Tim. 2:13, 14",
+            "Gen. 3:6",
+            "Rom. 5:12"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 10,
+          "question": "Wil God zulke ongehoorzaamheid en afval ongestraft laten?",
+          "answer": "Neen Hij, geenszins; maar Hij vertoornt zich schrikkelijk beide over de aangeborene en werkelijke zonden, en wil die door een rechtvaardig oordeel tijdelijk en eeuwiglijk straffen; gelijk Hij gesproken heeft: Vervloekt is een iegelijk, die niet blijft in al hetgene geschreven is in het boek der wet, om dat te doen.",
+          "refs": [
+            "Gen. 2:17",
+            "Rom. 5:12",
+            "Ps. 50:21 en 5:6",
+            "Nah. 1:2",
+            "Ex. 20:5 en 34:7",
+            "Rom. 1:18",
+            "Eph. 5:6",
+            "Deut. 27:26",
+            "Gal. 3:10"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 11,
+          "question": "Is dan God ook niet barmhartig?",
+          "answer": "God is wel barmhartig, maar Hij is ook rechtvaardig; daarom zoo eischt zijne gerechtigheid, dat de zonde, welke tegen de allerhoogste majesteit Gods gedaan is, ook met de hoogste, dat is, met de eeuwige straf aan lichaam en ziele gestraft worde.",
+          "refs": [
+            "Ex. 34:6, 7 en 20:6",
+            "Ps. 7:10",
+            "Ex. 20:5 en 23:7 en 34:7",
+            "Ps. 5:5, 6",
+            "Nah. 1:2, 3"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-5",
+      "number": 5,
+      "label": "Zondag 5",
+      "title": null,
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Het andere deel. Van des menschen verlossing."
+        },
+        {
+          "type": "qa",
+          "number": 12,
+          "question": "Aangezien wij dan naar het rechtvaardig oordeel Gods tijdelijke en eeuwige straf verdiend hebben, is er eenig middel, waardoor wij deze straf zouden kunnen ontgaan en wederom tot genade komen?",
+          "answer": "God wil dat aan zijne gerechtigheid genoeg geschiede; daarom moeten wij aan haar, óf door onszelven, óf door eenen anderen, volkomenlijk betalen.",
+          "refs": [
+            "Gen. 2:17",
+            "Ex. 23:7",
+            "Ezech. 18:4",
+            "Matth. 5:26",
+            "2 Thess. 1:6",
+            "Luc. 16:2",
+            "Rom. 8:4"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 13,
+          "question": "Maar kunnen wij door onszelven betalen?",
+          "answer": "In geenerlei wijze, maar wij maken ook de schuld nog dagelijks meerder.",
+          "refs": [
+            "Job 9:2 en 15:15, 16 en 4:18, 19",
+            "Ps. 130:3",
+            "Matth. 6:12 en 18:25 en 16:26"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 14,
+          "question": "Kan ook ergens een bloot schepsel gevonden worden, dat voor ons betale?",
+          "answer": "Neen; want ten eerste wil God aan geen ander schepsel de schuld straffen, die de mensch gemaakt heeft; ten andere zoo kan ook geen bloot schepsel den last van den eeuwigen toorn Gods tegen de zonde dragen en andere schepselen daarvan verlossen.",
+          "refs": [
+            "Ezech. 18:4",
+            "Gen. 3:17",
+            "Nah. 1:6",
+            "Ps. 130:3"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 15,
+          "question": "Wat moeten wij dan voor eenen middelaar en verlosser zoeken?",
+          "answer": "Zulk eenen, die een waarachtig en rechtvaardig mensch is, en nochtans ook sterker dan alle schepselen, dat is, die ook tegelijk waarachtig God is.",
+          "refs": [
+            "1 Cor. 15:21",
+            "Hebr. 7:26",
+            "Jes. 7:14 en 9:5",
+            "Jer. 23:6",
+            "Luc. 11:22"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-6",
+      "number": 6,
+      "label": "Zondag 6",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 16,
+          "question": "Waarom moet hij een waarachtig en rechtvaardig mensch zijn?",
+          "answer": "Omdat de rechtvaardigheid Gods vorderde, dat de menschelijke natuur, die gezondigd had, voor de zonde betaalde; en dat een mensch, zelf zondaar zijnde, niet konde voor anderen betalen.",
+          "refs": [
+            "Ezech. 18:4, 20",
+            "Rom. 5:18",
+            "1 Cor. 15:21",
+            "Hebr. 2:14, 15, 16",
+            "Hebr. 7; 26, 27",
+            "Ps. 49:8",
+            "1 Petr. 3:18"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 17,
+          "question": "Waarom moet hij tegelijk waarachtig God zijn?",
+          "answer": "Opdat hij, uit kracht zijner Godheid, den last van den toorn Gods aan zijne menschheid zoude kunnen dragen, en ons de gerechtigheid en het leven zoude kunnen verwerven en wedergeven.",
+          "refs": [
+            "Jes. 9:5 en 63:3",
+            "Deut. 4:24",
+            "Nah. 1:6",
+            "Ps. 130:3",
+            "Jes. 53:4, 11",
+            "Jes. 53:5, 11"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 18,
+          "question": "Maar wie is deze middelaar, die tegelijk waarachtig God en een waarachtig rechtvaardig mensch is?",
+          "answer": "Onze Heere Jezus Christus, die ons van God tot wijsheid, rechtvaardigheid, heiligmaking, en tot eene volkomene verlossing geschonken is.",
+          "refs": [
+            "1 Joh. 5:20",
+            "Rom. 9:5 en 8:3",
+            "Gal. 4:4",
+            "Jes. 9:6",
+            "Jer. 23:6",
+            "Mal. 3:1",
+            "Luc. 1:42 en 2:6, 7",
+            "Rom. 1:3 en 9:5",
+            "Phil. 2:7",
+            "Hebr. 2:14. 16, 17 en 4:15",
+            "Jes. 53:9, 11",
+            "Jer. 23:5",
+            "Luc. 1:35",
+            "Joh. 8:46",
+            "Hebr. 4:15 en 7:26",
+            "1 Petr. 1:19 en 2:22 en 3:18",
+            "1 Tim. 2:5",
+            "Matth. 1:23",
+            "1 Tim. 3:16",
+            "Luc. 2:11",
+            "Hebr. 2:9",
+            "1 Cor. 1:30"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 19,
+          "question": "Waaruit weet gij dat?",
+          "answer": "Uit het heilig Evangelie, hetwelk God zelf eerstelijk in het Paradijs heeft geopenbaard, en daarna door de heilige Patriarchen en Profeten laten verkondigen, en door de offeranden en andere ceremoniën der Wet laten voorbeelden, en ten laatste door zijnen eeniggeboren Zoon vervuld.",
+          "refs": [
+            "Gen. 3:15",
+            "Gen. 22:18 en 12:3 en 49:10",
+            "Jes. 53 en 42:1, 2, 3, 4 en 43:25 en 49:5, 6, 22, 23",
+            "Jer. 23:5, 6, en 31:32, 33 en 32:39, 40, 41",
+            "Mich. 7:18, 19, 20",
+            "Hand. 10:43 en 3:22, 23, 24",
+            "Rom. 1:2",
+            "Hebr. 1:1",
+            "Hebr. 10:1, 7",
+            "Col. 2:7",
+            "Joh. 5:46",
+            "Rom. 10:4",
+            "Gal. 4:4 en 3:24",
+            "Col. 2:17"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-7",
+      "number": 7,
+      "label": "Zondag 7",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 20,
+          "question": "Worden dan alle menschen wederom door Christus zalig, gelijk zij door Adam zijn verdoemd geworden?",
+          "answer": "Neen zij, maar alleen degenen, die Hem door een waar geloof worden ingelijfd en alle zijne weldaden aannemen.",
+          "refs": [
+            "Matth. 7:14 en 22:14",
+            "Marc. 16:16",
+            "Joh. 1:12 en 3:16, 18, 36",
+            "Jes. 53:11",
+            "Ps. 2:12",
+            "Rom. 11:20",
+            "Rom. 3:22",
+            "Hebr. 4:3 en 5:9 en 10:39 en 11:6"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 21,
+          "question": "Wat is een waar geloof?",
+          "answer": "Een waar geloof is niet alleen een stellig weten of kennis, waardoor ik alles voor waarachtig houde, dat ons God in zijn Woord geopenbaard heeft, maar ook een vast vertrouwen, hetwelk de Heilige Geest door het Evangelie in mijn harte werkt, dat niet alleen anderen, maar ook mij vergeving der zonden, eeuwige gerechtigheid en zaligheid van God geschonken is, uit louter genade, alleen om der verdienste van Christus wille.",
+          "refs": [
+            "Jac. 2:19",
+            "Hebr. 11:1, 7",
+            "Rom. 4:18, 19, 20, 21 en 10:10",
+            "Eph. 3:12",
+            "Hebr. 4:16",
+            "Jac. 1:6",
+            "Gal. 5:22",
+            "Matth. 16:17",
+            "2 Cor. 4:13",
+            "Joh. 6:29",
+            "Eph. 2:8",
+            "Philipp. 1:19",
+            "Hand. 16:14",
+            "Rom. 1:16 en 10:17",
+            "1 Cor. 1:21",
+            "Hand. 10:44 en 16:14",
+            "Rom. 1:17",
+            "Gal. 3:11",
+            "Hebr. 10:10, 38",
+            "Gal. 2:16",
+            "Eph. 2:8",
+            "Rom. 3:24 en 5:19",
+            "Luc. 1:77, 78"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 22,
+          "question": "Wat is dan eenen Christen noodig te gelooven?",
+          "answer": "Al wat ons in het Evangelie beloofd wordt, hetwelk ons de Artikelen onzes algemeenen en ongetwijfelden Christelijken geloofs in eene hoofdsom leeren.",
+          "refs": [
+            "Joh. 20:31",
+            "Matth. 28:19",
+            "Marc. 1:15"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 23,
+          "question": "Hoe luiden die Artikelen?",
+          "answer": "1. Ik geloof in God den Vader, den Almachtige, Schepper des hemels en der aarde.\n\n2. En in Jezus Christus, zijnen eeniggeborenen Zoon, onzen Heere; 3. die ontvangen is van den Heiligen Geest, geboren uit de maagd Maria; 4. die geleden heeft onder Pontius Pilatus, is gekruisigd, gestorven en begraven, nedergedaald ter helle; 5. ten derden dage wederom opgestaan van de dooden; 6. opgevaren ten hemel, zittende ter rechterhand Gods des almachtigen Vaders; 7. van waar Hij komen zal om te oordeelen de levenden en de dooden.\n\n8. Ik geloof in den Heiligen Geest. 9. Ik geloof eene heilige, algemeene, Christelijke Kerk, de gemeenschap der heiligen; 10. vergeving der zonden; 11. wederopstanding des vleesches; 12. en een eeuwig leven."
+        }
+      ]
+    },
+    {
+      "id": "zondag-8",
+      "number": 8,
+      "label": "Zondag 8",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 24,
+          "question": "Hoe worden deze Artikelen gedeeld?",
+          "answer": "In drie deelen. Het eerste is van God den Vader en onze schepping. Het andere, van God den Zoon en onze verlossing. Het derde, van God den Heiligen Geest en onze heiligmaking."
+        },
+        {
+          "type": "qa",
+          "number": 25,
+          "question": "Aangezien er maar een eenig Goddelijk wezen is, waarom noemt gij den Vader, den Zoon en den Heiligen Geest?",
+          "answer": "Omdat God zich alzoo in zijn Woord geopenbaard heeft, dat deze drie onderscheidene Personen de eenige, waarachtige en eeuwige God zijn.",
+          "refs": [
+            "Deut. 6:4",
+            "Eph. 4:6",
+            "Jes. 44:6 en 45:5",
+            "1 Cor. 8:4, 6",
+            "Jes. 61:1",
+            "Luc. 4:18",
+            "Gen. 1:2, 3",
+            "Ps. 33:6",
+            "Jes. 48:16",
+            "Matth. 3:16, 17 en 28:19",
+            "1 Joh. 5:7",
+            "Jes. 6:1, 3",
+            "Joh. 14:26 en 15:26",
+            "2 Cor. 13:13",
+            "Gal. 4:6",
+            "Eph. 2:18",
+            "Tit. 3:5, 6"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-9",
+      "number": 9,
+      "label": "Zondag 9",
+      "title": null,
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Van God den Vader en onze schepping."
+        },
+        {
+          "type": "qa",
+          "number": 26,
+          "question": "Wat gelooft gij met deze woorden: Ik geloof in God den Vader, den Almachtige, Schepper des hemels en der aarde?",
+          "answer": "Dat de eeuwige Vader onzes Heeren Jezus Christus, die hemel en aarde, met al wat er in is, uit niet geschapen heeft, die ook door zijnen eeuwigen raad en voorzienigheid ze nog onderhoudt en regeert, om zijns Zoons Christus wille mijn God en mijn Vader is; op welken ik alzoo vertrouw, dat ik niet twijfel, of Hij zal mij met alle nooddruft des lichaams en der ziele verzorgen, en ook al het kwaad, dat Hij mij in dit jammerdal toeschikt, mij ten beste keeren; dewijl Hij zulks doen kan als een almachtig God, en ook doen wil als een getrouw Vader.",
+          "refs": [
+            "Gen. 1 en 2",
+            "Ex. 20:11",
+            "Job 33:4",
+            "Job 38 en 39",
+            "Hand. 4:24 en 14:15",
+            "Ps. 33:6",
+            "Jes. 45:7",
+            "Hebr. 1:3",
+            "Ps. 104:27, 28, 29, 30 en 115:3",
+            "Matth. 10:29",
+            "Eph. 1:11",
+            "Joh. 1:12",
+            "Rom. 8:15",
+            "Gal. 4:5, 6, 7",
+            "Eph. 1:5",
+            "Ps. 55:23",
+            "Matth. 6:25, 26",
+            "Luc. 12:22",
+            "Rom. 8:28",
+            "Jes. 46:4",
+            "Rom. 10:12",
+            "Matth. 6:32, 33 en 7:9, 10, 11"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-10",
+      "number": 10,
+      "label": "Zondag 10",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 27,
+          "question": "Wat verstaat gij door de voorzienigheid Gods?",
+          "answer": "De almachtige en alom tegenwoordige kracht Gods, door welke Hij hemel en aarde, mitsgaders alle schepselen, gelijk als met zijne hand nog onderhoudt, en alzoo regeert, dat loof en gras, regen en droogte, vruchtbare en onvruchtbare jaren, spijze en drank, gezondheid en krankheid, rijkdom en armoede, en alle dingen, niet bij geval, maar van zijne vaderlijke hand ons toekomen.",
+          "refs": [
+            "Hand. 17:25, 27, 28",
+            "Jer. 23:23, 24",
+            "Jes. 29:15, 16",
+            "Ezech. 8:12",
+            "Hebr. 1:3",
+            "Jer. 5:24",
+            "Hand. 14:17",
+            "Joh. 9:3",
+            "Spr. 22:2",
+            "Matth. 10:29",
+            "Spr. 16:33"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 28,
+          "question": "Waartoe dient ons dat wij weten, dat God alles geschapen heeft en nog door zijne voorzienigheid onderhoudt?",
+          "answer": "Dat wij in allen tegenspoed geduldig, in voorspoed dankbaar zijn mogen, en in alles, dat ons nog toekomen kan, een goed toevoorzicht hebben op onzen getrouwen God en Vader, dat ons geen schepsel van zijne liefde scheiden zal, aangezien alle schepselen alzoo in zijne hand zijn, dat zij tegen zijnen wil zich noch roeren, noch bewegen kunnen.",
+          "refs": [
+            "Rom. 5:3",
+            "Jac. 1:3",
+            "Ps. 39:10",
+            "Job 1:21, 22",
+            "1 Thess. 5:18",
+            "Deut. 8:10",
+            "Ps. 55:23",
+            "Rom. 5:4",
+            "Rom. 8:38. 39",
+            "Job 1:12 en 2:6",
+            "Spr. 21:1",
+            "Hand. 17:25"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-11",
+      "number": 11,
+      "label": "Zondag 11",
+      "title": null,
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Van God den Zoon en onze verlossing."
+        },
+        {
+          "type": "qa",
+          "number": 29,
+          "question": "Waarom wordt de Zone Gods Jezus, dat is, Zaligmaker, genoemd?",
+          "answer": "Omdat Hij ons zalig maakt en van alle onze zonden verlost; daarbenevens, dat bij niemand anders eenige zaligheid te zoeken of te vinden is.",
+          "refs": [
+            "Matth. 1:21",
+            "Hebr. 7:25",
+            "Hand. 4:12",
+            "Joh. 15:4. 5",
+            "1 Tim. 2:5",
+            "Jes. 43:11",
+            "1 Joh. 5:11"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 30,
+          "question": "Gelooven dan die ook aan den eenigen Zaligmaker Jezus, die hunne zaligheid en welvaart bij de heiligen, bij zichzelven, of ergens elders zoeken?",
+          "answer": "Neen zij; maar zij verloochenen met de daad den eenigen Heiland Jezus, ofschoon zij met den mond in Hem roemen; want van tweeën één: óf Jezus moet geen volkomen Zaligmaker zijn, óf die dezen Zaligmaker met waar geloof aannemen, moeten alles in Hem hebben, dat tot hunne zaligheid van noode is.",
+          "refs": [
+            "1 Cor. 1:13, 30, 31",
+            "Gal. 5:4",
+            "Hebr. 12:2",
+            "Jes. 9:6",
+            "Col. 1:19, 20 en 2:10",
+            "1 Joh. 1:7"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-12",
+      "number": 12,
+      "label": "Zondag 12",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 31,
+          "question": "Waarom is Hij Christus, dat is, een Gezalfde, genaamd?",
+          "answer": "Omdat Hij van God den Vader verordineerd is, en met den Heiligen Geest gezalfd, tot onzen hoogsten Profeet en Leeraar, die ons den verborgen raad en wille Gods van onze verlossing volkomenlijk geopenbaard heeft; en tot onzen eenigen Hoogepriester, die ons met de eenige offerande zijns lichaams verlost heeft, en voor ons met zijne voorbidding steeds tusschentreedt bij den Vader; en tot onzen eeuwigen Koning, die ons met zijn Woord en Geest regeert, en ons bij de verworvene verlossing beschut en behoudt.",
+          "refs": [
+            "Ps. 45:8",
+            "Hebr. 1:9",
+            "Jes. 61:1",
+            "Luc. 4:18",
+            "Deut. 18:15",
+            "Hand. 3:22 en 7:37",
+            "Jes. 55:4",
+            "Joh. 1:18 en 15:15",
+            "Ps. 110:4",
+            "Hebr. 10:12, 14 en 9:12, 14, 28",
+            "Rom. 8:34",
+            "Hebr. 9:24",
+            "1 Joh. 2:1",
+            "Rom. 5:9, 10",
+            "Ps. 2:6",
+            "Zach. 9:9",
+            "Matth. 21:5",
+            "Luc. 1:33",
+            "Matth. 28:18",
+            "Joh. 10:28",
+            "Openb. 12:10, 11"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 32,
+          "question": "Maar waarom wordt gij een Christen genaamd?",
+          "answer": "Omdat ik door het geloof een lidmaat van Christus en alzoo zijner zalving deelachtig ben, opdat ik zijnen naam belijde, en mijzelven tot een levend dankoffer Hem offere, en met eene vrije en goede consciëntie in dit leven tegen de zonde en den duivel strijde, en hiernamaals in eeuwigheid met Hem over alle schepselen regeere.",
+          "refs": [
+            "Hand. 11:26",
+            "1 Cor. 6:15",
+            "1 Joh. 2:27",
+            "Hand. 2:17",
+            "Matth. 10:32",
+            "Rom. 10:10",
+            "Rom. 12:1",
+            "1 Petr. 2:5, 9",
+            "Openb. 1:6 en 5:8, 10",
+            "1 Petr. 2:11",
+            "Rom. 6:12, 13",
+            "Gal. 5:16, 17",
+            "Eph. 6:11",
+            "1 Tim. 1:18 19",
+            "2 Tim. 2:12",
+            "Matth. 25:34"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-13",
+      "number": 13,
+      "label": "Zondag 13",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 33,
+          "question": "Waarom is Hij Gods eeniggeboren Zoon genaamd, zoo wij toch ook Gods kinderen zijn?",
+          "answer": "Daarom dat Christus alleen de eeuwige natuurlijke Zone Gods is, maar wij zijn om zijnentwil uit genade tot kinderen Gods aangenomen.",
+          "refs": [
+            "Joh. 1:14",
+            "Hebr. 1:1, 2",
+            "Joh. 3:16",
+            "1 Joh. 4:9",
+            "Rom. 8:32",
+            "Rom. 8:16",
+            "Joh. 1:12",
+            "Gal. 4:6",
+            "Eph. 1:5, 6"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 34,
+          "question": "Waarom noemt gij Hem onzen Heere?",
+          "answer": "Omdat Hij ons met lichaam en ziele van alle onze zonden, niet met goud of met zilver, maar met zijn dierbaar bloed gekocht, en van alle heerschappij des duivels verlost heeft, en ons alzoo zich tot een eigendom gemaakt.",
+          "refs": [
+            "1 Petr. 1:18, 19 en 2:9",
+            "1 Cor. 6:20",
+            "1 Tim. 2 6",
+            "Joh. 20:28"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-14",
+      "number": 14,
+      "label": "Zondag 14",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 35,
+          "question": "Wat is dat gezegd: Die ontvangen is van den Heiligen Geest, geboren uit de maagd Maria?",
+          "answer": "Dat de eeuwige Zone Gods, die waarachtig en eeuwig God is en blijft, ware menschelijke natuur, uit het vleesch en bloed der maagd Maria, door de werking des Heiligen Geestes, aangenomen heeft, opdat Hij ook het ware zaad Davids zij, zijnen broederen in alles gelijk, uitgenomen de zonde.",
+          "refs": [
+            "1 Joh. 5:20",
+            "Joh. 1:1 en 17:3",
+            "Rom. 1:3",
+            "Col. 1:15",
+            "Rom. 9:5",
+            "Gal. 4:4",
+            "Luc. 1:31, 42, 43",
+            "Matth. 1:20",
+            "Luc. 1:35",
+            "Rom. 1:3",
+            "Ps. 132:11",
+            "2 Sam. 7:12",
+            "Luc. 1:32",
+            "Hand. 2:30",
+            "Philipp. 2:7",
+            "Hebr. 2:14, 17",
+            "Hebr. 4:15"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 36,
+          "question": "Wat nuttigheid verkrijgt gij door de heilige ontvangenis en geboorte van Christus?",
+          "answer": "Dat Hij onze Middelaar is, en met zijne onschuld en volkomene heiligheid mijne zonde, waarin ik ontvangen en geboren ben, voor Gods aangezicht bedekt.",
+          "refs": [
+            "Hebr. 7:26, 27",
+            "1 Petr. 1:18. 19 en 3:18",
+            "1 Cor. 1:30, 31",
+            "Rom. 8:3, 4",
+            "Jes. 53:11",
+            "Ps. 32:1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-15",
+      "number": 15,
+      "label": "Zondag 15",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 37,
+          "question": "Wat verstaat gij door het woordeken: Geleden?",
+          "answer": "Dat Hij aan lichaam en ziele, den ganschen tijd zijns levens op de aarde, maar inzonderheid aan het einde zijns levens, den toorn Gods tegen de zonde des ganschen menschelijken geslachts gedragen heeft, opdat Hij met zijn lijden, als met het eenige zoenoffer, ons lichaam en onze ziele van de eeuwige verdoemenis verloste, en ons Gods genade, gerechtigheid en het eeuwige leven verwierve.",
+          "refs": [
+            "Jes. 53:4",
+            "1 Petr. 2:24 en 3:18",
+            "1 Tim. 2:6",
+            "Jes. 53:10",
+            "Eph. 5:2",
+            "1 Cor. 5:7",
+            "1 Joh. 2:2",
+            "Rom. 3:25",
+            "Hebr. 9:28 en 10:14",
+            "Gal. 3:13",
+            "Col. 1:13",
+            "Hebr. 9:12",
+            "1 Petr. 1:18, 19",
+            "Rom. 3:25",
+            "2 Cor. 5:21",
+            "Joh. 3:16 en 6:51",
+            "Hebr. 9:15 en 10:19"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 38,
+          "question": "Waarom heeft Hij onder den rechter Pontius Pilatus geleden?",
+          "answer": "Opdat Hij, onschuldig onder den wereldlijken rechter veroordeeld zijnde, ons daarmede van het strenge oordeel Gods, dat over ons gaan zoude, bevrijdde.",
+          "refs": [
+            "Joh. 18:38",
+            "Matth. 27:24",
+            "Luc. 23:14. 15",
+            "Joh. 19:4",
+            "Ps. 69:5",
+            "Jes. 53:4, 5",
+            "2 Cor. 5:21",
+            "Gal. 3:13"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 39,
+          "question": "Heeft dat iets meer in, dat Hij gekruisigd is geweest, dan of Hij met eenen anderen dood gestorven ware?",
+          "answer": "Ja het; want daardoor ben ik zeker, dat Hij de vervloeking, die op mij lag, op zich geladen heeft; dewijl de dood des kruises van God vervloekt was.",
+          "refs": [
+            "Gal. 3:13",
+            "Deut. 21:23"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-16",
+      "number": 16,
+      "label": "Zondag 16",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 40,
+          "question": "Waarom heeft Christus zich tot in den dood moeten vernederen?",
+          "answer": "Daarom dat vanwege de gerechtigheid en waarheid Gods niet anders voor onze zonden konde betaald worden, dan door den dood des Zoons Gods.",
+          "refs": [
+            "Gen. 2:17",
+            "Rom. 8:3, 4",
+            "Hebr. 2:14, 15"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 41,
+          "question": "Waarom is Hij begraven geworden?",
+          "answer": "Om daarmede te betuigen, dat Hij waarachtiglijk gestorven was.",
+          "refs": [
+            "Hand. 13:29",
+            "Matth. 27:59, 60",
+            "Luc. 23:53",
+            "Joh. 19:38"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 42,
+          "question": "Zoo dan Christus voor ons gestorven is, hoe komt het, dat wij ook moeten sterven?",
+          "answer": "Onze dood is geene betaling voor onze zonden, maar alleen eene afsterving van de zonden en een doorgang tot het eeuwige leven.",
+          "refs": [
+            "Marc. 8:37",
+            "Ps. 49:8",
+            "Philipp. 1:23",
+            "Joh. 5:24",
+            "Rom. 7:24"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 43,
+          "question": "Wat verkrijgen wij meer voor nuttigheid uit de offerande en den dood van Christus aan het kruis?",
+          "answer": "Dat door zijne kracht onze oude mensch met Hem gekruisigd, gedood en begraven wordt, opdat de booze lusten des vleesches in ons niet meer regeeren, maar dat wij onszelven Hem tot eene offerande der dankbaarheid opofferen.",
+          "refs": [
+            "Rom. 6:6",
+            "Rom. 6:6, 12",
+            "Rom. 12:1"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 44,
+          "question": "Waarom volgt daar: Nedergedaald ter helle?",
+          "answer": "Opdat ik in mijne hoogste aanvechtingen verzekerd zij en mij ganschelijk vertrooste, dat mijn Heere Jezus Christus door zijne onuitsprekelijke benauwdheid, smarten, verschrikking en helsche kwelling, in welke Hij in zijn gansche lijden (maar inzonderheid aan het kruis) gezonken was, mij van de helsche benauwdheid en pijn verlost heeft.",
+          "refs": [
+            "Ps. 18:5, 6 en 116:3",
+            "Matth. 26:38 en 27:46",
+            "Hebr. 5:7",
+            "Jes. 53:5"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-17",
+      "number": 17,
+      "label": "Zondag 17",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 45,
+          "question": "Wat nut ons de opstanding van Christus?",
+          "answer": "Ten eerste heeft Hij door zijne opstanding den dood overwonnen, opdat Hij ons de gerechtigheid, die Hij door zijnen dood ons verworven had, konde deelachtig maken. Ten andere worden ook wij door zijne kracht opgewekt tot een nieuw leven. Ten derde is ons de opstanding van Christus een zeker pand onzer zalige opstanding.",
+          "refs": [
+            "Rom. 4:25",
+            "1 Petr. 1:3",
+            "1 Cor. 15:16",
+            "Rom. 6:4",
+            "Col. 3:1, 3",
+            "Eph. 2:5, 6",
+            "1 Cor. 15:20, 21"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-18",
+      "number": 18,
+      "label": "Zondag 18",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 46,
+          "question": "Wat verstaat gij daarmede: Opgevaren ten hemel?",
+          "answer": "Dat Christus voor de oogen zijner jongeren van de aarde ten hemel is opgeheven, en dat Hij ons ten goede daar is, totdat Hij wederkomt om te oordeelen de levenden en de dooden.",
+          "refs": [
+            "Hand. 1:9",
+            "Marc. 16:19",
+            "Luc. 24:51",
+            "Hebr. 9:24 en 4:14",
+            "Rom. 8:34",
+            "Col. 3:1",
+            "Hand. 1:11",
+            "Matth. 24:30"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 47,
+          "question": "Is dan Christus niet bij ons tot aan het einde der wereld, gelijk Hij ons beloofd heeft?",
+          "answer": "Christus is waarachtig mensch en waarachtig God. Naar zijne menschelijke natuur is Hij niet meer op aarde; maar naar zijne Godheid, majesteit, genade en Geest wijkt Hij nimmermeer van ons.",
+          "refs": [
+            "Matth. 28:20",
+            "Hebr. 8:4",
+            "Matth. 26:11",
+            "Joh. 16:28 en 17:11",
+            "Hand. 3:21",
+            "Joh. 14:18",
+            "Matth. 28:20"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 48,
+          "question": "Maar zoo de menschheid niet overal is waar de Godheid is, worden dan de twee naturen in Christus niet van elkander gescheiden?",
+          "answer": "Ganschelijk niet; want dewijl de Godheid door niets kan ingesloten worden en overal tegenwoordig is, zoo moet volgen, dat zij wel buiten hare aangenomene menschheid is, en nochtans niettemin ook in haar is en persoonlijk met haar vereenigd blijft.",
+          "refs": [
+            "Jer. 23:24",
+            "Hand. 7:49",
+            "Col. 2:9",
+            "Joh. 3:13 en 11:15",
+            "Matth. 28:6"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 49,
+          "question": "Wat nut ons de hemelvaart van Christus?",
+          "answer": "Ten eerste, dat Hij in den hemel voor het aangezicht zijns Vaders onze Voorspreker is. Ten andere, dat wij ons vleesch in den hemel tot een zeker pand hebben, dat Hij, als het Hoofd, ons zijne lidmaten ook tot zich zal nemen. Ten derde, dat Hij ons zijnen Geest tot een tegenpand zendt, door wiens kracht wij zoeken dat daarboven is, waar Christus is, zittende ter rechterhand Gods, en niet dat op de aarde is.",
+          "refs": [
+            "1 Joh. 2:1",
+            "Rom. 8:34",
+            "Joh. 14:2 en 17:24 en 20:17",
+            "Eph. 2:6",
+            "Joh. 14:16 en 16:7",
+            "Hand. 2:33",
+            "2 Cor. 1:22 en 5:5",
+            "Col. 3:1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-19",
+      "number": 19,
+      "label": "Zondag 19",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 50,
+          "question": "Waarom wordt daarbij gezet: Zittende ter rechterhand Gods?",
+          "answer": "Dewijl Christus daarom ten hemel gevaren is, opdat Hij zichzelven daar bewijze als het Hoofd zijner Christelijke Kerke, door wien de Vader alle ding regeert.",
+          "refs": [
+            "Eph. 1:20, 21, 22, 23",
+            "Col. 1:18",
+            "Matth. 28:18",
+            "Joh. 5:22"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 51,
+          "question": "Wat nuttigheid brengt ons deze heerlijkheid van ons Hoofd Christus?",
+          "answer": "Eerstelijk, dat Hij door zijnen Heiligen Geest in ons, zijne lidmaten, de hemelsche gaven uitgiet. Daarna, dat Hij ons met zijne macht tegen alle vijanden beschut en bewaart.",
+          "refs": [
+            "Hand. 2:33",
+            "Eph. 4:8",
+            "Ps. 2:9 en 110:1, 2",
+            "Joh. 10:28",
+            "Eph. 4:8"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 52,
+          "question": "Wat troost u de wederkomst van Christus om te oordeelen de levenden en de dooden?",
+          "answer": "Dat ik in alle droefenis en vervolging met opgerichten hoofde even denzelfde, die zich tevoren om mijnentwille voor Gods gericht gesteld en al den vloek van mij weggenomen heeft, tot eenen Rechter uit den hemel verwachte, die alle zijne en mijne vijanden in de eeuwige verdoemenis werpen, maar mij met alle uitverkorenen tot zich in de hemelsche blijdschap en heerlijkheid nemen zal.",
+          "refs": [
+            "Philipp. 3:20",
+            "Luc. 21:28",
+            "Rom. 8:23",
+            "Tit. 2:13",
+            "1 Thess. 4:16",
+            "Matth. 25:41",
+            "2 Thess. 1:6",
+            "Matth. 25:34",
+            "2 Thess. 1:7"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-20",
+      "number": 20,
+      "label": "Zondag 20",
+      "title": null,
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Van God den Heiligen Geest en onze heiligmaking."
+        },
+        {
+          "type": "qa",
+          "number": 53,
+          "question": "Wat gelooft gij van den Heiligen Geest?",
+          "answer": "Eerstelijk, dat Hij te zamen met den Vader en den Zoon waarachtig en eeuwig God is. Ten andere, dat Hij ook mij gegeven is, opdat Hij mij door een waar geloof Christus en alle zijne weldaden deelachtig make, mij trooste en bij mij eeuwiglijk blijve.",
+          "refs": [
+            "1 Joh. 5:7",
+            "Gen. 1:2",
+            "Jes. 48:16",
+            "1 Cor. 3:16 en 6:19",
+            "Hand. 5:3, 4",
+            "Gal. 4:6",
+            "Matth. 28:19, 20",
+            "2 Cor. 1:22",
+            "Eph. 1:13",
+            "Gal. 3:14",
+            "1 Petr. 1:2",
+            "1 Cor. 6:17",
+            "Joh. 15:26",
+            "Hand. 9:31",
+            "Joh. 14:16",
+            "1 Petr. 4:14"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-21",
+      "number": 21,
+      "label": "Zondag 21",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 54,
+          "question": "Wat gelooft gij van de heilige algemeene Christelijke Kerk?",
+          "answer": "Dat de Zone Gods uit het gansche menschelijk geslacht zich eene gemeente, tot het eeuwige leven uitverkoren, door zijn Geest en Woord, in eenigheid des waren geloofs, van den beginne der wereld tot aan het einde, vergadert, beschermt en onderhoudt; en dat ik daarvan een levend lidmaat ben, en eeuwig zal blijven.",
+          "refs": [
+            "Eph. 5; 26",
+            "Joh. 10:11",
+            "Hand. 20:28",
+            "Eph. 4:11, 12, 13",
+            "Gen. 26:4",
+            "Openb. 5:9",
+            "Rom. 8:29",
+            "Eph. 1:10, 11, 12, 13",
+            "Jes. 59:21",
+            "Rom. 1:16 en 10:14, 15, 16, 17",
+            "Eph. 5:26",
+            "Hand. 2:42",
+            "Eph. 4:3, 4, 5",
+            "Ps. 71:17, 18",
+            "Jes. 59:21",
+            "1 Cor. 11:26",
+            "Matth. 16:18",
+            "Joh. 10:28, 29, 30",
+            "Ps. 129:1, 2, 3, 4, 5",
+            "1 Joh. 3:14, 19, 20, 21",
+            "2 Cor. 13:5",
+            "Rom. 8:10",
+            "Ps. 23:6",
+            "1 Cor. 1:8, 9",
+            "Joh. 10:28",
+            "1 Joh. 2:19",
+            "1 Petr. 1:5"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 55,
+          "question": "Wat verstaat gij door de gemeenschap der heiligen?",
+          "answer": "Eerstelijk, dat de geloovigen, allen en een iegelijk, als lidmaten aan den Heere Christus en alle zijne schatten en gaven gemeenschap hebben. Ten andere, dat elk zich moet schuldig weten, zijne gaven ten nutte en ter zaligheid der andere lidmaten gewilliglijk en met vreugde aan te wenden.",
+          "refs": [
+            "1 Joh. 1:3",
+            "Rom. 8:32",
+            "1 Cor. 12:12, 13",
+            "1 Cor. 6:17",
+            "1 Cor. 12:21 en 13:1, 5",
+            "Philipp. 2:4, 5, 6, 7, 8"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 56,
+          "question": "Wat gelooft gij van de vergeving der zonden?",
+          "answer": "Dat God, om des genoegdoens van Christus wille, alle mijne zonden, ook mijnen zondigen aard, waarmede ik al mijn leven lang te strijden heb, nimmermeer wil gedenken, maar mij uit genade de gerechtigheid van Christus schenken, opdat ik nimmermeer in het gericht Gods kome.",
+          "refs": [
+            "1 Joh. 2:2",
+            "1 Joh. 1:7",
+            "2 Cor. 5; 19",
+            "Rom. 7:23, 24, 25",
+            "Jer. 31:34",
+            "Mich. 7:19",
+            "Ps. 103:3, 10, 12",
+            "Joh. 3:18",
+            "Joh. 5:24"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-22",
+      "number": 22,
+      "label": "Zondag 22",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 57,
+          "question": "Wat troost geeft u de opstanding des vleesches?",
+          "answer": "Dat niet alleen mijne ziele na dit leven van stonden aan tot Christus, haar Hoofd, zal opgenomen worden, maar dat ook dit mijn vleesch, door de kracht van Christus opgewekt zijnde, wederom met mijne ziele vereenigd, en aan het heerlijk lichaam van Christus gelijkvormig zal worden.",
+          "refs": [
+            "Luc. 16:22 en 23:43",
+            "Philipp. 1:21, 23",
+            "Job 19:25, 26",
+            "1 Joh. 3:2",
+            "Philipp. 3:21"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 58,
+          "question": "Wat troost schept gij uit het artikel van het eeuwige leven?",
+          "answer": "Dat, nademaal ik nu het beginsel der eeuwige vreugde in mijn hart gevoel, ik na dit leven volkomene zaligheid bezitten zal, die geen oog gezien, geen oor gehoord heeft, en in geens menschen hart opgeklommen is, en dat, om God daarin eeuwiglijk te prijzen.",
+          "refs": [
+            "2 Cor. 5:2, 3",
+            "1 Cor. 2:9"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-23",
+      "number": 23,
+      "label": "Zondag 23",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 59,
+          "question": "Maar wat baat het u nu, dat gij dit alles gelooft?",
+          "answer": "Dat ik in Christus voor God rechtvaardig ben, en een erfgenaam des eeuwigen levens.",
+          "refs": [
+            "Hab. 2:4",
+            "Rom. 1:17",
+            "Joh. 3:36"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 60,
+          "question": "Hoe zijt gij rechtvaardig voor God?",
+          "answer": "Alleen door een waar geloof in Jezus Christus; alzoo dat, al is het dat mij mijne consciëntie aanklaagt, dat ik tegen alle de geboden Gods zwaarlijk gezondigd en geen daarvan gehouden heb, en nog steeds tot alle boosheid geneigd ben, nochtans God, zonder eenige verdienste mijnerzijds, uit louter genade mij de volkomene genoegdoening, gerechtigheid en heiligheid van Christus schenkt en toerekent, evenals hadde ik nooit zonde gehad noch gedaan, ja, als hadde ik zelf al de gehoorzaamheid volbracht, die Christus voor mij volbracht heeft, in zooverre ik zulke weldaad met een geloovig harte aanneem.",
+          "refs": [
+            "Rom. 3:21, 22, 24 en 5:1, 2",
+            "Gal. 2:16",
+            "Eph. 2:8, 9",
+            "Philipp. 3:9",
+            "Rom. 3:9",
+            "Rom. 7:23",
+            "Tit. 3:5",
+            "Deut. 9:6",
+            "Ezech. 36:22",
+            "Rom. 3:24",
+            "Eph. 2:8",
+            "1 Joh. 2:2",
+            "1 Joh. 2:1",
+            "Rom. 4:4",
+            "2 Cor. 5:19",
+            "2 Cor. 5:21",
+            "Rom. 3:22",
+            "Joh. 3:18"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 61,
+          "question": "Waarom zegt gij, dat gij alleen door het geloof rechtvaardig zijt?",
+          "answer": "Niet, dat ik vanwege de waardigheid mijns geloofs Gode aangenaam ben; maar daarom, dat alleen de genoegdoening, gerechtigheid en heiligheid van Christus mijne gerechtigheid voor God is, en dat ik die niet anders dan alleen door het geloof aannemen en mij toeëigenen kan.",
+          "refs": [
+            "1 Cor. 1:30 en 2:2",
+            "1 Joh. 5:10"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-24",
+      "number": 24,
+      "label": "Zondag 24",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 62,
+          "question": "Maar waarom kunnen onze goede werken niet de gerechtigheid voor God of een stuk daarvan zijn?",
+          "answer": "Daarom, dat de gerechtigheid, die voor Gods gericht bestaan kan, gansch volkomen en der wet Gods in alle stukken gelijkvormig zijn moet, en dat ook onze beste werken in dit leven alle onvolkomen en met zonden bevlekt zijn.",
+          "refs": [
+            "Gal. 3:10",
+            "Deut. 27:26",
+            "Jes. 64:6"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 63,
+          "question": "Hoe? Verdienen onze goede werken niet, die God nochtans in dit en in het toekomende leven wil beloonen?",
+          "answer": "Deze belooning geschiedt niet uit verdienste, maar uit genade.",
+          "refs": [
+            "Luc. 17:10"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 64,
+          "question": "Maar maakt deze leer niet zorgelooze en goddelooze menschen?",
+          "answer": "Neen zij; want het is onmogelijk, dat, zoo wie Christus door een waarachtig geloof ingeplant is, niet zoude voortbrengen vruchten der dankbaarheid.",
+          "refs": [
+            "Matth. 7:18",
+            "Joh. 15:5"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-25",
+      "number": 25,
+      "label": "Zondag 25",
+      "title": null,
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Van de Sacramenten."
+        },
+        {
+          "type": "qa",
+          "number": 65,
+          "question": "Aangezien dan alleen het geloof ons Christus en alle zijne weldaden deelachtig maakt, vanwaar komt zulk geloof?",
+          "answer": "Van den Heiligen Geest, die het geloof in onze harten werkt door de verkondiging des heiligen Evangelies, en het sterkt door het gebruik van de Sacramenten.",
+          "refs": [
+            "Eph. 2:8 en 6:23",
+            "Joh. 3:5",
+            "Philipp. 1:29",
+            "Matth. 28:19",
+            "1 Petr. 1:22, 23"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 66,
+          "question": "Wat zijn Sacramenten?",
+          "answer": "De Sacramenten zijn heilige zichtbare waarteekenen en zegelen, van God ingezet, opdat Hij ons door het gebruik daarvan de belofte des Evangelies des te beter te verstaan geve en verzegele; namelijk, dat Hij ons vanwege het eenige slachtoffer van Christus, aan het kruis volbracht, vergeving der zonden en het eeuwige leven uit genade schenkt.",
+          "refs": [
+            "Gen. 17:11",
+            "Rom. 4:11",
+            "Deut. 30:6",
+            "Lev. 6:25",
+            "Hebr. 9:7, 8, 9, 24",
+            "Ezech. 20:12",
+            "Jes. 6:6, 7 en 54:9"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 67,
+          "question": "Zijn dan beide, het Woord en de Sacramenten, daarhenen gericht, of daartoe verordend, dat zij ons geloof op de offerande van Jezus Christus aan het kruis, als op den eenigen grond onzer zaligheid, wijzen?",
+          "answer": "Ja zij toch; want de Heilige Geest leert ons in het Evangelie, en verzekert ons door de Sacramenten, dat onze volkomene zaligheid in de eenige offerande van Christus staat, die voor ons aan het kruis geschied is.",
+          "refs": [
+            "Rom. 6:3",
+            "Gal. 3:27"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 68,
+          "question": "Hoeveel Sacramenten heeft Christus in het nieuwe Verbond of Testament ingezet?",
+          "answer": "Twee, namelijk, den Heiligen Doop en het Heilige Avondmaal."
+        }
+      ]
+    },
+    {
+      "id": "zondag-26",
+      "number": 26,
+      "label": "Zondag 26",
+      "title": null,
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Van den Heiligen Doop."
+        },
+        {
+          "type": "qa",
+          "number": 69,
+          "question": "Hoe wordt gij in den Heiligen Doop vermaand en verzekerd, dat de eenige offerande van Christus, aan het kruis geschied, u ten goede komt?",
+          "answer": "Alzoo, dat Christus dit uitwendig waterbad ingezet en daarbij toegezegd heeft, dat ik zoo zekerlijk met zijn bloed en Geest van de onreinigheid mijner ziele, dat is, van alle mijne zonden, gewasschen ben, als ik uitwendig met het water, hetwelk de onzuiverheid des lichaams pleegt weg te nemen, gewasschen ben.",
+          "refs": [
+            "Matth. 28:19",
+            "Matth. 28:19",
+            "Marc. 16:16",
+            "Hand. 2:38",
+            "Joh. 1:33",
+            "Matth. 3:11",
+            "Rom. 6:3, 4",
+            "1 Petr. 3:21",
+            "Marc. 1:4",
+            "Luc. 3:3"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 70,
+          "question": "Wat is dat, met het bloed en den Geest van Christus gewasschen te zijn?",
+          "answer": "Het is vergeving der zonden van God uit genade te hebben om des bloeds van Christus wille, hetwelk Hij in zijne offerande aan het kruis voor ons uitgestort heeft; daarna ook, door den Heiligen Geest vernieuwd en tot lidmaten van Christus geheiligd te zijn, opdat wij hoe langer hoe meer der zonden afsterven, en in een Godzalig, onstraffelijk leven wandelen.",
+          "refs": [
+            "Hebr. 12:24",
+            "1 Petr. 1:2",
+            "Openb. 1:5 en 7:14",
+            "Zach. 13:1",
+            "Ezech. 36:25",
+            "Joh. 1:33 en 3:5",
+            "1 Cor. 6:11 en 12:13",
+            "Rom. 6:4",
+            "Col. 2:12"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 71,
+          "question": "Waar heeft ons Christus toegezegd, dat Hij ons zoo zekerlijk met zijn bloed en Geest wasschen wil, als wij met het Doopwater gewasschen worden?",
+          "answer": "In de inzetting des Doops, welke alzoo luidt: Gaat dan henen, onderwijst alle de volkeren, hen doopende in den naam des Vaders, en des Zoons, en des Heiligen Geestes; Matth. 28:19. En: Die geloofd zal hebben en gedoopt zal zijn, zal zalig worden; maar die niet zal geloofd hebben, zal verdoemd worden; Marc. 16:16. Deze belofte wordt ook herhaald, waar de Schrift den Doop het bad der wedergeboorte en de afwassching der zonden noemt; Tit. 3:5; Hand. 22:16."
+        }
+      ]
+    },
+    {
+      "id": "zondag-27",
+      "number": 27,
+      "label": "Zondag 27",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 72,
+          "question": "Is dan het uiterlijk waterbad de afwassching der zonden zelve?",
+          "answer": "Neen het; want alleen het bloed van Jezus Christus en de Heilige Geest reinigt ons van alle zonden.",
+          "refs": [
+            "Matth. 3:11",
+            "1 Petr. 3:21",
+            "Eph. 5:26",
+            "1 Joh. 1:7",
+            "1 Cor. 6:11"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 73,
+          "question": "Waarom noemt dan de Heilige Geest den Doop het bad der wedergeboorte en de afwassching der zonden?",
+          "answer": "God spreekt alzoo niet zonder groote oorzaak; namelijk, niet alleen om ons daarmede te leeren, dat, gelijk de onzuiverheid des lichaams door het water, alzoo ook onze zonden door het bloed en den Geest van Jezus Christus weggenomen worden, maar veelmeer, omdat Hij ons door dit Goddelijk pand en waarteeken wil verzekeren, dat wij zoo waarachtiglijk van onze zonden geestelijk gewasschen zijn, als wij uitwendig met het water gewasschen worden.",
+          "refs": [
+            "Openb. 1:5 en 7:14",
+            "1 Cor. 6:11",
+            "Marc. 16:16",
+            "Gal. 3:27"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 74,
+          "question": "Zal men ook de jonge kinderen doopen?",
+          "answer": "Ja het; want mitsdien zij alzoowel als de volwassenen in het verbond Gods en in zijne gemeente begrepen zijn, en dat hun door Christus' bloed de verlossing van de zonden en de Heilige Geest, die het geloof werkt, niet minder dan den volwassenen toegezegd wordt, zoo moeten zij ook door den Doop, als door het teeken des Verbonds, der Christelijke Kerk ingelijfd en van de kinderen der ongeloovigen onderscheiden worden, gelijk in het oude Verbond of Testament door de Besnijdenis geschied is, voor dewelke in het nieuwe Verbond de Doop ingezet is.",
+          "refs": [
+            "Gen. 17:7",
+            "Matth. 19:14",
+            "Luc. 1:15",
+            "Ps. 22:11",
+            "Jes. 44:1, 2, 3",
+            "Hand. 2:39",
+            "Hand. 10:47",
+            "Gen. 17:14",
+            "Col. 2:11, 12, 13"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-28",
+      "number": 28,
+      "label": "Zondag 28",
+      "title": null,
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Van het Heilig Avondmaal onzes Heeren."
+        },
+        {
+          "type": "qa",
+          "number": 75,
+          "question": "Hoe wordt gij in het Heilig Avondmaal vermaand en verzekerd, dat gij aan de eenige offerande van Christus, aan het kruis volbracht, en aan al zijn goed gemeenschap hebt?",
+          "answer": "Alzoo, dat Christus mij en allen geloovigen tot zijne gedachtenis van dit gebroken brood te eten en van dezen drinkbeker te drinken bevolen heeft, en daarbij ook beloofd heeft: eerstelijk, dat zijn lichaam zoo zekerlijk voor mij aan het kruis geofferd en gebroken en zijn bloed voor mij vergoten is, als ik met de oogen zie, dat het brood des Heeren mij gebroken en de drinkbeker mij medegedeeld wordt; en ten andere, dat Hijzelf mijne ziele met zijn gekruisigd lichaam en vergoten bloed zoo zekerlijk tot het eeuwige leven spijst en laaft, als ik het brood en den drinkbeker des Heeren (als zekere waarteekenen des lichaams en bloeds van Christus) uit des dienaars hand ontvang en met den mond geniet.",
+          "refs": [
+            "Matth. 26:26, 27, 28",
+            "Marc. 14:22, 23, 24",
+            "Luc. 22:19, 20",
+            "1 Cor. 10:16, 17 en 11:23, 24, 25 en 12:13"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 76,
+          "question": "Wat is dat te zeggen, het gekruisigde lichaam van Christus eten en zijn vergoten bloed drinken?",
+          "answer": "Het is niet alleen met een geloovig harte het gansche lijden en sterven van Christus aannemen en daardoor vergeving der zonden en het eeuwige leven verkrijgen, maar ook daarbenevens door den Heiligen Geest, die èn in Christus èn in ons woont, alzoo met zijn heilig lichaam hoe langer hoe meer vereenigd worden, dat wij, al is het dat Christus in den hemel is en wij op aarde zijn, nochtans vleesch van zijnen vleesche en been van zijn gebeente zijn, en dat wij door éénen Geest (gelijk de leden van een lichaam door ééne ziele) eeuwiglijk leven en geregeerd worden.",
+          "refs": [
+            "Joh. 6:35, 40, 47, 48, 50, 51, 53, 54",
+            "Joh. 6:55, 56",
+            "Col. 3:1",
+            "Hand. 3:21",
+            "1 Cor. 11:26",
+            "Eph. 5:29, 30 en 3:16",
+            "1 Cor. 6:15",
+            "1 Joh. 3:24 en 4:13",
+            "Joh. 6:57 en 15:1, 2, 3, 4, 5. 6",
+            "Eph. 4:15, 16"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 77,
+          "question": "Waar heeft Christus beloofd, dat Hij de geloovigen zoo zekerlijk alzoo met zijn lichaam en bloed wil spijzen en laven, als zij van dit gebroken brood eten en van dezen drinkbeker drinken?",
+          "answer": "In de inzetting des Avondmaals, welke alzoo luidt: De Heere Jezus, in den nacht, in welken Hij verraden werd, nam het brood, en als Hij gedankt had, brak Hij het, en zeide: Neemt, eet; dat is mijn lichaam, dat voor u gebroken wordt; doet dat tot mijne gedachtenis. Desgelijks nam Hij ook den drinkbeker, na het eten des Avondmaals, en zeide: Deze drinkbeker is het nieuwe Testament in mijn bloed; doet dat, zoo dikwijls als gij dien zult drinken, tot mijne gedachtenis. Want zoo dikwijls als gij dit brood zult eten, en dezen drinkbeker zult drinken, zoo verkondigt den dood des Heeren, totdat Hij komt; 1 Cor. 11:23—26.\n\nDeze toezegging wordt ook herhaald door den Heiligen Paulus, waar hij spreekt: De drinkbeker der dankzegging, dien wij dankzeggende zegenen, is die niet eene gemeenschap des bloeds van Christus? Het brood, dat wij breken, is dat niet eene gemeenschap des lichaams van Christus? Want één brood is het, zoo zijn wij velen één lichaam, dewijl wij allen ééns broods deelachtig zijn; 1 Cor. 10:16, 17.",
+          "refs": [
+            "Matth. 26:26, 27, 28",
+            "Marc. 14:22, 23, 24",
+            "Luc. 22:19, 20"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-29",
+      "number": 29,
+      "label": "Zondag 29",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 78,
+          "question": "Wordt dan uit brood en wijn het wezenlijk lichaam en bloed van Christus?",
+          "answer": "Neen; maar gelijk het water in den Doop niet in het bloed van Christus veranderd wordt, noch de afwassching der zonden zelve is (waarvan het alleen een Goddelijk waarteeken en verzekering is, alzoo wordt ook het brood in het Avondmaal niet het lichaam van Christus zelf, hoewel het naar den aard en de eigenschap der Sacramenten het lichaam van Christus Jezus genaamd wordt.",
+          "refs": [
+            "Matth. 26:29",
+            "Eph. 5:26",
+            "Tit. 3:5",
+            "1 Cor. 10:16 en 11:26",
+            "Gen. 17:10, 11",
+            "Ex. 12:11, 13 en 13:9",
+            "1 Petr. 3:21",
+            "1 Cor. 10:3, 4"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 79,
+          "question": "Waarom noemt dan Christus het brood zijn lichaam en den drinkbeker zijn bloed, of het nieuwe Testament in zijn bloed, en Paulus de gemeenschap des lichaams en bloeds van Christus?",
+          "answer": "Christus spreekt alzoo niet zonder groote oorzaak; namelijk, niet alleen om ons daarmede te leeren, dat, gelijk als brood en wijn dit tijdelijk leven onderhouden, alzoo ook zijn gekruisigd lichaam en zijn vergoten bloed de waarachtige spijs en drank zijn, waardoor onze zielen ten eeuwigen leven gevoed worden; maar veelmeer om ons door deze zichtbare teekenen en panden te verzekeren, dat wij zoo waarachtiglijk zijns waren lichaams en bloeds door de werking des Heiligen Geestes deelachtig worden, als wij deze heilige waarteekenen met den lichamelijken mond tot zijne gedachtenis ontvangen, en dat al zijn lijden en gehoorzaamheid zoo zekerlijk onze eigene is, als hadden wijzelven in onzen eigenen persoon alles geleden en Gode voor onze zonden genoeg gedaan.",
+          "refs": [
+            "Joh. 6:55",
+            "1 Cor. 10:16"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-30",
+      "number": 30,
+      "label": "Zondag 30",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 80,
+          "question": "Wat onderscheid is er tusschen het Avondmaal des Heeren en de Paapsche Mis?",
+          "answer": "Het Avondmaal des Heeren betuigt ons, dat wij volkomene vergeving van alle onze zonden hebben door de éénige offerande van Jezus Christus, die Hijzelf eenmaal aan het kruis volbracht heeft, en dat wij door den Heiligen Geest Christus worden ingelijfd, die nu naar zijne menschelijke natuur niet op de aarde maar in den hemel is, ter rechterhand Gods zijns Vaders, en daar van ons wil aangebeden zijn. Maar de Mis leert, dat de levenden en de dooden niet door het lijden van Christus vergeving der zonden hebben, tenzij dat Christus nog dagelijks voor hen van de Mispriesters geofferd worde, en dat Christus lichamelijk onder de gestalte des broods en wijns is, en daarom ook daarin moet aangebeden worden; en alzoo is de Mis in den grond anders niet, dan eene verloochening der eenige offerande en des lijdens van Jezus Christus, en eene vervloekte afgoderij.",
+          "refs": [
+            "Hebr. 10:10, 12 en 7:26, 27 en 9:12, 25",
+            "Joh. 19:30",
+            "Matth. 26:28",
+            "Luc. 22:19",
+            "1 Cor. 10:16, 17 en 6:17",
+            "Joh. 20:17",
+            "Col. 3:1",
+            "Hebr. 1:3 en 8:1",
+            "Matth. 6:20, 21",
+            "Joh. 4:21",
+            "Luc. 24:52",
+            "Hand. 7:55",
+            "Col. 3:1",
+            "Philipp. 3:20",
+            "1 Thess. 1:10",
+            "Hebr. 9:26 en 10:12, 14"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 81,
+          "question": "Voor wie is het Avondmaal des Heeren ingesteld?",
+          "answer": "Voor degenen, die zichzelven vanwege hunne zonden mishagen, en nochtans vertrouwen, dat deze hun om Christus' wille vergeven zijn, en dat ook de overblijvende zwakheid met zijn lijden en sterven bedekt is; die ook begeeren, hoe langer hoe meer hun geloof te sterken en hun leven te beteren. Maar de hypocrieten en die zich niet met waren harte tot God bekeeren, die eten en drinken zichzelven een oordeel.",
+          "refs": [
+            "1 Cor. 11:28 en 10:19, 20, 21, 22"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 82,
+          "question": "Zal men ook diegenen tot dit Avondmaal laten komen, die zich met hunne belijdenis en hun leven als ongeloovige en goddelooze menschen aanstellen?",
+          "answer": "Neen; want alzoo wordt het verbond Gods ontheiligd, en zijn toorn over de gansche gemeente verwekt. Daarom is de Christelijke Kerk schuldig, naar de ordening van Christus en van zijne Apostelen, zulken, totdat zij betering huns levens bewijzen, door de Sleutelen des hemelrijks uit te sluiten.",
+          "refs": [
+            "1 Cor. 11:20, 34",
+            "Jes. 1:11 en 66:3",
+            "Jer. 7:21",
+            "Ps. 50:16"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-31",
+      "number": 31,
+      "label": "Zondag 31",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 83,
+          "question": "Wat zijn de Sleutelen des hemelrijks?",
+          "answer": "De verkondiging des heiligen Evangelies en de Christelijke ban of uitsluiting uit de Christelijke gemeente, door welke twee stukken het hemelrijk den geloovigen opengedaan en den ongeloovigen toegesloten wordt."
+        },
+        {
+          "type": "qa",
+          "number": 84,
+          "question": "Hoe wordt het hemelrijk door de prediking des heiligen Evangelies ontsloten en toegesloten?",
+          "answer": "Alzoo, als, volgens het bevel van Christus, aan de geloovigen, allen en een iegelijk, verkondigd en openlijk betuigd wordt, dat hun, zoo dikwijls als zij de beloftenis des Evangelies met een waar geloof aannemen, waarachtiglijk alle hunne zonden van God, om der verdiensten van Christus wille, vergeven zijn; daarentegen allen ongeloovigen, en die zich niet van harte bekeeren, verkondigd en betuigd wordt, dat de toorn Gods en de eeuwige verdoemenis op hen ligt, zoolang als zij zich niet bekeeren; naar welk getuigenis des Evangelies God zal oordeelen, beide in dit en in het toekomende leven.",
+          "refs": [
+            "Joh. 20:21, 22, 23",
+            "Matth. 16:19"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 85,
+          "question": "Hoe wordt het hemelrijk toegesloten en ontsloten door den Christelijken ban?",
+          "answer": "Alzoo, als, volgens het bevel van Christus, degenen, die onder den Christelijken naam onchristelijke leer of leven voeren, nadat zij, ettelijke malen broederlijk vermaand zijnde, van hunne dwalingen of hun schandelijk leven niet willen aflaten, der gemeente, of dengenen die van de gemeente daartoe verordineerd zijn, aangebracht worden, en, zoo zij aan de vermaning zich niet storen, van henlieden door het verbieden der Sacramenten uit de Christelijke gemeente, en van God zelven uit het Rijk van Christus gesloten worden; en wederom als lidmaten van Christus en van zijne gemeente aangenomen, zoo wanneer zij waarachtige betering beloven en bewijzen.",
+          "refs": [
+            "Matth. 18:15, 16, 17",
+            "1 Cor. 5:4, 5, 11",
+            "2 Cor. 2:6, 7, 8"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-32",
+      "number": 32,
+      "label": "Zondag 32",
+      "title": null,
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Het derde deel. Van de dankbaarheid, die men Gode voor de verlossing schuldig is."
+        },
+        {
+          "type": "qa",
+          "number": 86,
+          "question": "Aangezien wij uit onze ellendigheid, zonder eenige verdienste onzerzijds, alleen uit genade, door Christus verlost zijn, waarom moeten wij dan nog goede werken doen?",
+          "answer": "Daarom, dat Christus, nadat Hij ons met zijn bloed gekocht en vrijgemaakt heeft, ons ook door zijnen Heiligen Geest tot zijn evenbeeld vernieuwt, opdat wij ons met ons gansche leven Gode dankbaar voor zijne weldaden bewijzen, en Hij door ons geprezen worde. Daarna ook, dat elk bij zichzelven van zijn geloof uit de vruchten verzekerd zij, en dat door onzen Godzaligen wandel onze naasten ook voor Christus gewonnen worden.",
+          "refs": [
+            "Rom. 6:13 en 12:1, 2",
+            "1 Petr. 2:5, 9",
+            "1 Cor. 6:20",
+            "Matth. 5:16",
+            "1 Petr. 2:12",
+            "2 Petr. 1:10",
+            "Matth. 7:17",
+            "Gal. 5:6, 22",
+            "1 Petr. 3:1, 2",
+            "Rom. 14:19"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 87,
+          "question": "Kunnen dan die niet zalig worden, die, in hun goddeloos ondankbaar leven voortvarende, zich tot God niet bekeeren?",
+          "answer": "In geenerlei wijze; want de Schrift zegt, dat geen onkuische, afgodendienaar, echtbreker, dief, geldgierige, dronkaard, lasteraar, noch roover, noch dergelijke, het Koninkrijk Gods beërven zal.",
+          "refs": [
+            "1 Cor. 6:9, 10",
+            "Eph. 5:5, 6",
+            "1 Joh. 3:14"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-33",
+      "number": 33,
+      "label": "Zondag 33",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 88,
+          "question": "In hoeveel stukken bestaat de waarachtige bekeering des menschen?",
+          "answer": "In twee stukken: in de afsterving des ouden, en in de opstanding des nieuwen menschen.",
+          "refs": [
+            "Rom. 6:1, 4, 5, 6",
+            "Eph. 4:22, 23, 24",
+            "Col. 3:5, 6, 8, 9, 10",
+            "1 Cor. 5:7",
+            "2 Cor. 7:10"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 89,
+          "question": "Wat is de afsterving des ouden menschen?",
+          "answer": "Het is een hartelijk leedwezen, dat wij God door onze zonden vertoornd hebben, en die hoe langer hoe meer haten en vlieden.",
+          "refs": [
+            "Rom. 8:13",
+            "Joel 2:13",
+            "Hos. 6:1"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 90,
+          "question": "Wat is de opstanding des nieuwen menschen?",
+          "answer": "Het is eene hartelijke vreugde in God door Christus, en lust en liefde om naar den wille Gods in alle goede werken te leven.",
+          "refs": [
+            "Rom. 5:1 en 14:17",
+            "Jes. 57:15",
+            "Rom. 6:10, 11",
+            "Gal. 2:20"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 91,
+          "question": "Maar wat zijn goede werken?",
+          "answer": "Alleen die uit waar geloof, naar de Wet Gods, alleen Hem ter eere geschieden, en niet die op ons goeddunken of op menschen-inzettingen gegrond zijn.",
+          "refs": [
+            "Rom. 14:23",
+            "Lev. 18:4",
+            "1 Sam. 15:22",
+            "Eph. 2:10",
+            "1 Cor. 10:31",
+            "Ezech. 20:18, 19",
+            "Jes. 29:13",
+            "Matth. 15:7, 8, 9"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-34",
+      "number": 34,
+      "label": "Zondag 34",
+      "title": null,
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Van de Wet."
+        },
+        {
+          "type": "qa",
+          "number": 92,
+          "question": "Hoe luidt de Wet des Heeren?",
+          "answer": "God sprak alle deze woorden, Exod. 20:1—17, Deut. 5:6—21:\n\nIk ben de HEERE uw God, die u uit Egypteland, uit den diensthuize, uitgeleid heb.\n\nHet eerste gebod.\n\nGij zult geene andere goden voor mijn aangezichte hebben.\n\nHet tweede gebod.\n\nGij zult u geen gesneden beeld, noch eenige gelijkenisse maken, van hetgene dat boven in den hemel is, noch van hetgene dat onder op de aarde is, noch van hetgene dat in de wateren onder de aarde is. Gij zult u voor die niet buigen, noch hen dienen. Want Ik, de HEERE uw God, ben een ijverig God, die de misdaad der vaderen bezoeke aan de kinderen, aan het derde, en aan het vierde lid dergenen, die Mij haten; en doe barmhartigheid aan duizenden dergenen, die Mij liefhebben en mijne geboden onderhouden.\n\nHet derde gebod.\n\nGij zult den name des HEEREN uws Gods niet ijdellijk gebruiken; want de HEERE zal niet onschuldig houden, die zijnen name ijdellijk gebruikt.\n\nHet vierde gebod.\n\nGedenkt des Sabbathdags, dat gij dien heiligt. Zes dagen zult gij arbeiden en al uw werk doen; maar de zevende dag is de Sabbath des HEEREN uws Gods. Dan zult gij geen werk doen, gij, noch uw zoon, noch uwe dochter, noch uw dienstknecht, noch uwe dienstmaagd, noch uw vee, noch uw vreemdeling, die in uwe poorten is. Want in zes dagen heeft de HEERE den hemel en de aarde gemaakt, de zee en alles wat daarin is, en Hij rustte ten zevenden dage. Daarom zegende de HEERE den Sabbathdag, en heiligde denzelven.\n\nHet vijfde gebod.\n\nEer uwen vader en uwe moeder, opdat uwe dagen verlengd worden in het land, dat u de HEERE uw God geeft.\n\nHet zesde gebod.\n\nGij zult niet doodslaan.\n\nHet zevende gebod.\n\nGij zult niet echtbreken.\n\nHet achtste gebod.\n\nGij zult niet stelen.\n\nHet negende gebod.\n\nGij zult geene valsche getuigenis spreken tegen uwen naaste.\n\nHet tiende gebod.\n\nGij zult niet begeeren uws naasten huis; gij zult niet begeeren uws naasten vrouwe, noch zijnen dienstknecht, noch zijne dienstmaagd, noch zijnen os, noch zijnen ezel, noch iets, dat uws naasten is."
+        },
+        {
+          "type": "qa",
+          "number": 93,
+          "question": "Hoe worden deze tien geboden gedeeld?",
+          "answer": "In twee tafelen; waarvan de eerste leert, hoe wij ons jegens God zullen houden; de andere, wat wij onzen naaste schuldig zijn.",
+          "refs": [
+            "Deut. 4:13",
+            "Ex. 34:28",
+            "Deut. 10:3, 4",
+            "Matth. 22:37-40"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 94,
+          "question": "Wat gebiedt God in het eerste gebod?",
+          "answer": "Dat ik, zoo lief als mij mijner ziele zaligheid is, alle afgoderij, tooverij, waarzegging, superstitie of bijgeloof, aanroeping van de heiligen of van andere schepselen, mijde en vliede, en den eenigen waren God recht leere kennen, Hem alleen vertrouwe, in alle ootmoedigheid en lijdzaamheid mij Hem alleen onderwerpe, van Hem alleen alles goeds verwachte. Hem van ganscher harte liefhebbe, vreeze en eere, alzoo, dat ik eer van alle schepselen afga en die varen late, dan dat ik in het allerminste tegen zijnen wil doe.",
+          "refs": [
+            "1 Joh. 5:21",
+            "1 Cor. 6:10 en 10:7, 14",
+            "Lev. 19:31",
+            "Deut. 18:9, 10",
+            "Matth. 4:10",
+            "Openb. 19:10 en 22:8, 9",
+            "Joh. 17:3",
+            "Jer. 17:5, 7",
+            "1 Petr. 5:5",
+            "Hebr. 10:36",
+            "Col. 1:11",
+            "Rom. 5:3, 4",
+            "1 Cor. 10:10",
+            "Philipp. 2:14",
+            "Ps. 104:27",
+            "Jes. 45:7",
+            "Jac. 1:17",
+            "Deut. 6:5",
+            "Matth. 22:37",
+            "Deut. 6:2",
+            "Ps. 111:10",
+            "Spr. 1:7 en 9:10",
+            "Matth. 10:28",
+            "Matth. 4:10",
+            "Deut. 10:20",
+            "Matth. 5:29 en 10:37",
+            "Hand. 5:29"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 95,
+          "question": "Wat is afgoderij?",
+          "answer": "Afgoderij is, in de plaats des eenigen waren Gods, die zich in zijn Woord geopenbaard heeft, of benevens Hem, iets anders verzinnen of hebben, waarop de mensch zijn vertrouwen zet.",
+          "refs": [
+            "Eph. 5:5",
+            "1 Kron. 16:26",
+            "Philipp. 3:19",
+            "Gal. 4:8",
+            "Eph. 2:12",
+            "1 Joh. 2:23",
+            "2 Joh. vs. 9",
+            "Joh. 5:23"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-35",
+      "number": 35,
+      "label": "Zondag 35",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 96,
+          "question": "Wat eischt God in het tweede gebod?",
+          "answer": "Dat wij God in geenerlei wijze afbeelden, en op geene andere wijze vereeren, dan Hij in zijn Woord bevolen heeft.",
+          "refs": [
+            "Jes. 40:18, 19, 25",
+            "Deut. 4:15, 16",
+            "Rom. 1:23",
+            "Hand. 17:29",
+            "1 Sam. 15:23",
+            "Deut. 12:30",
+            "Matth. 15:9"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 97,
+          "question": "Mag men dan ganschelijk geene beelden maken?",
+          "answer": "God kan noch mag in geenerlei wijze afgebeeld worden. Maar de schepselen, al is het dat zij mogen afgebeeld worden, zoo verbiedt toch God, hunne beeltenis te maken en te hebben, om die te vereeren, of God daardoor te dienen.",
+          "refs": [
+            "Jes. 40:25",
+            "Ex. 34:17 en 23:24 en 34:13",
+            "Num. 33:52"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 98,
+          "question": "Maar zoude men de beelden in de kerken als boeken der leeken niet mogen dulden?",
+          "answer": "Neen; want wij moeten niet wijzer zijn dan God, dewelke zijne Christenen niet door stomme beelden, maar door de levende verkondiging zijns Woords wil onderwezen hebben.",
+          "refs": [
+            "Jer. 10:8",
+            "Hab. 2:18, 19",
+            "Rom. 10:14, 15, 17",
+            "2 Petr. 1:19",
+            "2 Tim. 3:16, 17"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-36",
+      "number": 36,
+      "label": "Zondag 36",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 99,
+          "question": "Wat wil het derde gebod?",
+          "answer": "Dat wij niet alleen met vloeken of met valschen eede, maar ook met onnoodig zweren, den naam Gods niet lasteren noch misbruiken, noch ons met ons stilzwijgen en toezien zulke schrikkelijke zonden deelachtig maken; en in het kort, dat wij den heiligen Name Gods anders niet dan met vreeze en eerbied gebruiken, opdat Hij van ons recht beleden aangeroepen, en in alle onze woorden en werken geprezen worde.",
+          "refs": [
+            "Lev. 24:15, 16",
+            "Lev. 19:12",
+            "Matth. 5:37",
+            "Jac. 5:12",
+            "Lev. 5:1",
+            "Spr. 29:24",
+            "Jer. 4:2",
+            "Jes. 45:23",
+            "Matth. 10:32",
+            "Rom. 10:9. 10",
+            "Ps. 50:15",
+            "1 Tim. 2:8",
+            "Col. 3:17",
+            "Rom. 2:24",
+            "1 Tim. 6:1"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 100,
+          "question": "Is het dan zoo groote zonde, Gods naam met zweren en vloeken te lasteren, dat God zich ook over diegenen vertoornt, die, zooveel als hun mogelijk is, het vloeken en zweren niet helpen weren en verbieden?",
+          "answer": "Ja gewisselijk; want er is geen grooter zonde, noch die God meer vertoornt, dan de lastering zijns Naams; waarom Hij die ook met den dood te straffen bevolen heeft.",
+          "refs": [
+            "Spr. 29:24",
+            "Lev. 5:1",
+            "Lev. 24:16"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-37",
+      "number": 37,
+      "label": "Zondag 37",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 101,
+          "question": "Maar mag men ook Godzaliglijk bij den Name Gods eenen eed zweren?",
+          "answer": "Ja, als het de Overheid van hare onderdanen, of anderszins ook de nood vordert, om trouw en waarheid daardoor te bevestigen, en dat tot Gods eere en des naasten heil; want zulk eedzweren is in Gods Woord gegrond, en daarom ook van de heiligen in het Oude en Nieuwe Testament recht gebruikt geweest.",
+          "refs": [
+            "Deut. 6:13 en 10:20",
+            "Jes. 48:1",
+            "Hebr. 6:16",
+            "Gen. 21:24 en 31:53",
+            "Jos. 9:15",
+            "1 Sam. 24:23",
+            "2 Sam. 3:35",
+            "1 Kon. 1:29",
+            "Rom. 1:9 en 9:1",
+            "2 Cor. 1:23"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 102,
+          "question": "Mag men ook bij de heiligen, of bij eenige andere schepselen, eenen eed zweren?",
+          "answer": "Neen; want eenen rechten eed zweren is God aanroepen, dat Hij, als die alleen het harte kent, der waarheid getuigenis wille geven, en mij straffe, indien ik valschelijk zweer; welke eer aan geen schepsel toebehoort.",
+          "refs": [
+            "2 Cor. 1:23",
+            "Rom. 9:1",
+            "Matth. 5:34, 35, 36",
+            "Jac. 5:12"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-38",
+      "number": 38,
+      "label": "Zondag 38",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 103,
+          "question": "Wat gebiedt God in het vierde gebod?",
+          "answer": "Eerstelijk, dat de kerkedienst, of het predikambt, en de scholen onderhouden worden, en dat ik, inzonderheid op den Sabbath, dat is, op den rustdag, tot de gemeente Gods naarstiglijk kome, om Gods Woord te hooren, de Sacramenten te gebruiken, God den Heere openlijk aan te roepen, en den armen Christelijke handreiking te doen; ten andere, dat ik alle de dagen mijns levens van mijne booze werken ruste, den Heere door zijnen Geest in mij werke late, en alzoo den eeuwigen Sabbath in dit leven aanvange.",
+          "refs": [
+            "Tit. 1:5",
+            "2 Tim. 3:14",
+            "1 Cor. 9:13, 14",
+            "2 Tim. 2:2 en 3:15",
+            "Ps. 40:10, 11 en 68:27",
+            "Hand. 2:42",
+            "1 Tim. 4:13",
+            "1 Cor. 14:29",
+            "1 Cor. 11:33",
+            "1 Tim. 2:1",
+            "1 Cor. 14:16",
+            "1 Cor. 16:2",
+            "Jes. 66:23"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-39",
+      "number": 39,
+      "label": "Zondag 39",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 104,
+          "question": "Wat wil God in het vijfde gebod?",
+          "answer": "Dat ik mijnen vader en mijne moeder, en allen die over mij gesteld zijn, alle eere, liefde en trouwe bewijze, en mij hunner goede leere en straffe met behoorlijke gehoorzaamheid onderwerpe, en ook met hunne zwakheid en gebreken geduld hebbe, aangezien het Gode belieft, ons door hunne hand te regeeren.",
+          "refs": [
+            "Eph. 6:1, 2, 5",
+            "Col. 3:18, 20, 22",
+            "Eph. 5:22",
+            "Spr. 1:8 en 4:1 en 15:20 en 20:20",
+            "Ex. 21:17",
+            "Rom. 13:1",
+            "Spr. 23:22",
+            "Gen. 9:24",
+            "1 Petr. 2:18",
+            "Eph. 6:4, 9",
+            "Col. 3:20",
+            "Rom. 13:2, 3",
+            "Matth. 22:21"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-40",
+      "number": 40,
+      "label": "Zondag 40",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 105,
+          "question": "Wat eischt God in het zesde gebod?",
+          "answer": "Dat ik mijnen naaste noch met gedachten, noch met woorden of eenig gebaar, veel minder met de daad, door mijzelven of door anderen onteere, hate, kwetse of doode; maar dat ik alle wraakgierigheid aflegge; ook mijzelven niet kwetse of moedwilliglijk in eenig gevaar begeve; waarom ook de Overheid het zwaard draagt om den doodslag te weren.",
+          "refs": [
+            "Matth. 5:21, 22 en 26:52",
+            "Gen. 9:6",
+            "Eph. 4:26",
+            "Rom. 12:19",
+            "Matth. 5:25 en 18:35",
+            "Rom. 13:14",
+            "Col. 2:23",
+            "Matth. 4:7",
+            "Gen. 9:6",
+            "Ex. 21:14",
+            "Matth. 26:52",
+            "Rom. 13:4"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 106,
+          "question": "Maar dit gebod schijnt alleen van het doodslaan te spreken?",
+          "answer": "God, verbiedende den doodslag, leert ons, dat Hij den wortel des doodslags, als nijd, haat, toorn en wraakgierigheid, haat en zulks alles voor eenen doodslag houdt.",
+          "refs": [
+            "Spr. 14:30",
+            "Rom. 1:29",
+            "1 Joh. 2:11",
+            "Jac. 1:20",
+            "Gal. 5:19, 20, 21",
+            "1 Joh. 3:15"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 107,
+          "question": "Maar is het genoeg, dat wij onzen naaste, zooals tevoren gezegd is, niet dooden?",
+          "answer": "Neen; want God, verbiedende den nijd, haat en toorn, gebiedt, dat wij onzen naaste liefhebben als onszelven, en jegens hem geduld, vrede, zachtmoedigheid, barmhartigheid en alle vriendelijkheid bewijzen, zijne schade, zooveel als ons mogelijk is, afkeeren, en ook onzen vijanden goed doen.",
+          "refs": [
+            "Matth. 22:39 en 7:12",
+            "Rom. 12:10",
+            "Eph. 4:2",
+            "Gal. 6:1, 2",
+            "Matth. 5:5",
+            "Rom. 12:18",
+            "Luc. 6:36",
+            "Matth. 5:7",
+            "1 Petr. 3:8",
+            "Col. 3:12",
+            "Ex. 23:5",
+            "Matth. 5:44, 45",
+            "Rom. 12:20"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-41",
+      "number": 41,
+      "label": "Zondag 41",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 108,
+          "question": "Wat leert ons het zevende gebod?",
+          "answer": "Dat alle onkuischheid van God vervloekt is, en dat wij daarom, haar van harte vijand zijnde, kuisch en ingetogen leven moeten, hetzij in den heiligen huwelijken staat of daarbuiten.",
+          "refs": [
+            "Lev. 18:28",
+            "Jud. vs. 23",
+            "1 Thess. 4:3, 4, 5",
+            "Hebr. 13:4",
+            "1 Cor. 7:7"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 109,
+          "question": "Verbiedt God in dit gebod niet meer dan echtbreken en diergelijke schandelijkheden?",
+          "answer": "Dewijl ons lichaam en ziele tempelen des Heiligen Geestes zijn, zoo wil Hij, dat wij ze beide zuiver en heilig bewaren; daarom verbiedt Hij alle onkuische daden, gebaren, woorden, gedachten, lusten, en wat den mensch daartoe trekken kan.",
+          "refs": [
+            "Eph. 5:3, 4",
+            "1 Cor. 6:18, 19",
+            "Matth. 5:27, 28",
+            "Eph. 5:18",
+            "1 Cor. 15:33"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-42",
+      "number": 42,
+      "label": "Zondag 42",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 110,
+          "question": "Wat verbiedt God in het achtste gebod?",
+          "answer": "God verbiedt niet alleen dat stelen en rooven, hetwelk de Overheid straft; maar Hij noemt ook dieverij alle booze stukken en aanslagen, waarmede wij onzes naasten goed denken aan ons te brengen, hetzij met geweld of schijn des rechts, als met valsch gewicht, el, maat, waar, munt, woeker, of door eenig middel, van God verboden; daarenboven ook alle gierigheid, alle misbruik en verkwisting zijner gaven.",
+          "refs": [
+            "1 Cor. 6:10",
+            "1 Cor. 5:10",
+            "Jes. 33:1",
+            "Luc. 3:14",
+            "1 Thess. 4:6",
+            "Spr. 11:1 en 16:11",
+            "Ezech. 45:9, 10",
+            "Deut. 25:13",
+            "Ps. 15:5",
+            "Luc. 6:35",
+            "1 Cor. 6:10",
+            "Spr. 23:20, 21 en 21:20"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 111,
+          "question": "Maar wat gebiedt u God in dit gebod?",
+          "answer": "Dat ik mijns naasten nut, waar ik kan en mag, bevordere; met hem alzoo handele, als ik wilde, dat men met mij handelde; daarenboven ook, dat ik trouwelijk arbeide, opdat ik den nooddruftige helpen moge.",
+          "refs": [
+            "Matth. 7:12",
+            "Eph. 4:28"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-43",
+      "number": 43,
+      "label": "Zondag 43",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 112,
+          "question": "Wat wil het negende gebod?",
+          "answer": "Dat ik tegen niemand valsche getuigenis geve, niemand zijne woorden verdraaie, geen achterklapper of lasteraar zij, niemand lichtelijk en onverhoord oordeele of helpe veroordeelen; maar allerlei liegen en bedriegen als eigene werken des duivels, vermijde, tenzij dat ik den zwaren toorn Gods op mij laden wil; insgelijks, dat ik in het gericht en alle andere handelingen de waarheid liefhebbe, oprechtelijk spreke en belijde; ook mijns naasten eer en goed gerucht naar mijn vermogen voorsta en bevordere.",
+          "refs": [
+            "Spr. 19:5, 9 en 21:28",
+            "Ps. 15:3 en 50:19, 20",
+            "Rom. 1:30",
+            "Matth. 7:1",
+            "Luc. 6:37",
+            "Joh. 8:44",
+            "Spr. 12:22 en 13:5",
+            "1 Cor. 13:6",
+            "Eph. 4:25",
+            "1 Petr. 4:8"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-44",
+      "number": 44,
+      "label": "Zondag 44",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 113,
+          "question": "Wat eischt van ons het tiende gebod?",
+          "answer": "Dat ook de minste lust of gedachte tegen eenig gebod Gods in ons hart nimmermeer kome, maar dat wij ten allen tijde van ganscher harte aller zonden vijand zijn en lust tot alle gerechtigheid hebben.",
+          "refs": [
+            "Rom. 7. 7"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 114,
+          "question": "Maar kunnen degenen, die tot God bekeerd zijn, deze geboden volkomenlijk houden?",
+          "answer": "Neen zij; maar ook de allerheiligsten zoolang als zij in dit leven zijn, hebben maar een klein beginsel dezer gehoorzaamheid; doch alzoo, dat zij met een ernstig voornemen niet alleen naar sommige, maar naar alle de geboden Gods beginnen te leven.",
+          "refs": [
+            "1 Joh. 1:8",
+            "Rom. 7:14, 15",
+            "Pred. 7:20",
+            "1 Cor. 13:9",
+            "Rom. 7:22",
+            "Ps. 1:2"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 115,
+          "question": "Waarom laat ons dan God alzoo scherpelijk de tien geboden prediken, zoo ze toch niemand in dit leven houden kan?",
+          "answer": "Eerstelijk, opdat wij ons leven lang onzen zondigen aard hoe langer hoe meer leeren kennen, en des te begeeriger zijn, om de vergeving der zonden en de gerechtigheid in Christus te zoeken. Daarna, opdat wij zonder ophouden ons benaarstigen, en God bidden om de genade des Heiligen Geestes, opdat wij hoe langer hoe meer naar het evenbeeld Gods vernieuwd worden, totdat wij tot deze voorgestelde volkomenheid na dit leven geraken.",
+          "refs": [
+            "Rom. 3:20",
+            "1 Joh. 1:9",
+            "Ps. 32:5",
+            "Matth. 5:6",
+            "Rom. 7:24, 25",
+            "1 Cor. 9:24",
+            "Philipp. 3:12, 13, 14"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-45",
+      "number": 45,
+      "label": "Zondag 45",
+      "title": null,
+      "blocks": [
+        {
+          "type": "heading",
+          "text": "Van het Gebed."
+        },
+        {
+          "type": "qa",
+          "number": 116,
+          "question": "Waarom is het gebed den Christenen van noode?",
+          "answer": "Daarom dat het het voornaamste stuk der dankbaarheid is, welke God van ons vordert, en dat God zijne genade en den Heiligen Geest alleen aan diegenen geven wil, die Hem met hartelijke zuchten zonder ophouden daarom bidden en daarvoor danken.",
+          "refs": [
+            "Ps. 50:14",
+            "Matth. 7:7",
+            "Luc. 11:9, 13",
+            "1 Thess. 5:17"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 117,
+          "question": "Wat behoort tot zulk een gebed, dat Gode aangenaam is en van Hem verhoord wordt?",
+          "answer": "Eerstelijk, dat wij alleen den eenigen waren God, die zich in zijn Woord ons geopenbaard heeft, om al hetgene dat Hij ons geboden heeft te bidden, van harte aanroepen. Ten andere, dat wij onzen nood en ellendigheid recht en grondig kennen, opdat wij ons voor het aangezicht zijner majesteit verootmoedigen. Ten derde, dat wij dezen vasten grond hebben, dat Hij ons gebed, niettegenstaande wij zulks onwaardig zijn, om des Heeren Christus' wille zekerlijk wil verhooren, gelijk Hij ons in zijn Woord beloofd heeft.",
+          "refs": [
+            "Openb. 19:10",
+            "Joh. 4:22, 23, 24",
+            "Rom. 8:26",
+            "1 Joh. 5:14",
+            "Jac. 1:5",
+            "Joh. 4:24",
+            "Ps. 145:18",
+            "2 Kron. 20:12",
+            "Ps. 2:11 en 34:19",
+            "Jes. 66:2",
+            "Rom. 10:14",
+            "Jac. 1:6",
+            "Joh. 14:13 en 16:23",
+            "Dan. 9:18",
+            "Matth. 7:8",
+            "Ps. 27:8"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 118,
+          "question": "Wat heeft ons God bevolen van Hem te bidden?",
+          "answer": "Alle geestelijke en lichamelijke nooddruft, welke de Heere Christus begrepen heeft in het gebed, dat Hij ons zelf geleerd heeft.",
+          "refs": [
+            "Jac. 1:17",
+            "Matth. 6:33"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 119,
+          "question": "Hoe luidt dat gebed?",
+          "answer": "Onze Vader, die in de hemelen zijt;\n\n1. Uw naam worde geheiligd.\n\n2. Uw koninkrijk kome.\n\n3. Uw wil geschiede, gelijk in den hemel, alzoo ook op de aarde.\n\n4. Geef ons heden ons dagelijksch brood.\n\n5. En vergeef ons onze schulden, gelijk ook wij vergeven onzen schuldenaren.\n\n6. En leid ons niet in verzoeking, maar verlos ons van den booze.\n\nWant uw is het koninkrijk, en de kracht, en de heerlijkheid in der eeuwigheid. Amen.",
+          "refs": [
+            "Matth. 6:9-13",
+            "Luc. 11:2, 3, 4"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-46",
+      "number": 46,
+      "label": "Zondag 46",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 120,
+          "question": "Waarom heeft ons Christus geboden, God alzoo aan te spreken: Onze Vader?",
+          "answer": "Opdat Hij van stonde aan, in het begin onzes gebeds, in ons de kinderlijke vreeze en toevoorzicht tot God verwekke welke beide de grond onzes gebeds zijn, namelijk, dat God onze Vader door Christus geworden is, en dat Hij ons veel minder afslaan zal hetgene dat wij Hem met een recht geloof bidden, dan onze vaders ons aardsche dingen ontzeggen.",
+          "refs": [
+            "Matth. 7:9, 10, 11",
+            "Luc. 11:11, 12, 13"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 121,
+          "question": "Waarom wordt hier bijgevoegd: Die in de hemelen zijt?",
+          "answer": "Opdat wij van de hemelsche majesteit Gods niet aardschelijk denken, en van zijne almachtigheid alle nooddruft des lichaams en der ziele verwachten.",
+          "refs": [
+            "Jer. 23:23, 24",
+            "Hand. 17:24, 25, 27",
+            "Rom. 10:12"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-47",
+      "number": 47,
+      "label": "Zondag 47",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 122,
+          "question": "Welke is de eerste bede?",
+          "answer": "Uw naam worde geheiligd. Dat is: Geef ons eerstelijk, dat wij U recht kennen, en U in alle uwe werken, in welke uwe almachtigheid, wijsheid, goedheid, gerechtigheid, barmhartigheid en waarheid klaarlijk schijnt, heiligen, roemen en prijzen; daarna ook dat wij al ons leven, gedachten, woorden en werken, alzoo schikken en richten, dat uw naam om onzentwille niet gelasterd, maar geëerd en geprezen worde.",
+          "refs": [
+            "Joh. 17:3",
+            "Jer. 9:24 en 31:33, 34",
+            "Matth. 16:17",
+            "Jac. 1:5",
+            "Ps. 119:105",
+            "Ps. 119:137",
+            "Luc. 1:46, 47, 68, 69",
+            "Rom. 11:33",
+            "Ps. 71:8 en 115:1"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-48",
+      "number": 48,
+      "label": "Zondag 48",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 123,
+          "question": "Welke is de tweede bede?",
+          "answer": "Uw koninkrijk kome. Dat is: Regeer ons alzoo door uw Woord en uwen Geest, dat wij ons hoe langer hoe meer aan U onderwerpen; bewaar en vermeerder uwe kerk; verstoor de werken des duivels en alle heerschappij, welke zich tegen U verheft, mitsgaders alle booze raadslagen, die tegen uw heilig Woord bedacht worden; totdat de volkomenheid uws Rijks kome, waarin Gij alles zult zijn in allen.",
+          "refs": [
+            "Ps. 143:10 en 119:5",
+            "Matth. 6:33",
+            "Ps. 51:20 en 122:6",
+            "1 Joh. 3:8",
+            "Rom. 16:20",
+            "Openb. 22:20",
+            "Rom. 8:22, 23",
+            "1 Cor. 15:28"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-49",
+      "number": 49,
+      "label": "Zondag 49",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 124,
+          "question": "Welke is de derde bede?",
+          "answer": "Uw wil geschiede, gelijk in den hemel, alzoo ook op de aarde. Dat is: Geef, dat wij en alle menschen onzen eigen wil verzaken, en uwen wil, die alleen goed is, zonder eenig tegenspreken gehoorzaam zijn; opdat alzoo een iegelijk zijn ambt en beroep zoo gewilliglijk en getrouwelijk moge bedienen en uitvoeren, als de engelen in den hemel doen.",
+          "refs": [
+            "Matth. 16:24",
+            "Tit. 2:11, 12",
+            "Luc. 22:42",
+            "Eph. 5:10",
+            "Rom. 12:2",
+            "1 Cor. 7:24",
+            "Ps. 103:20, 21"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-50",
+      "number": 50,
+      "label": "Zondag 50",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 125,
+          "question": "Welke is de vierde bede?",
+          "answer": "Geef ons heden ons dagelijksch brood. Dat is: Wil ons met alle nooddruft des lichaams verzorgen, opdat wij daardoor erkennen, dat Gij de eenige oorsprong alles goeds zijt, en dat noch onze zorg en arbeid, noch uwe gaven, zonder uwen zegen ons gedijen, en dat wij derhalve ons vertrouwen van alle schepselen aftrekken en op U alleen stellen.",
+          "refs": [
+            "Ps. 145:15 en 104:27",
+            "Matth. 6:26",
+            "Jac. 1:17",
+            "Hand. 14:17 en 17:27",
+            "1 Cor. 15:58",
+            "Deut. 8:3",
+            "Ps. 37:16 en 127:1, 2",
+            "Ps. 55:23 en 62:11 en 146:3",
+            "Jer. 17:5, 7"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-51",
+      "number": 51,
+      "label": "Zondag 51",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 126,
+          "question": "Welke is de vijfde bede?",
+          "answer": "Vergeef ons onze schulden, gelijk ook wij vergeven onzen schuldenaren. Dat is: Wil ons, armen zondaren, alle onze misdaden, en ook de boosheid, die ons altijd aanhangt, om des bloeds van Christus wille niet toerekenen, gelijk wij ook dit getuigenis uwer genade in ons bevinden, dat ons gansche voornemen is, onzen naaste van harte te vergeven.",
+          "refs": [
+            "Ps. 51:3 en 143:2",
+            "1 Joh. 2:1",
+            "Rom. 8:1",
+            "Matth. 6:14"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zondag-52",
+      "number": 52,
+      "label": "Zondag 52",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 127,
+          "question": "Welke is de zesde bede?",
+          "answer": "Leid ons niet in verzoeking, maar verlos ons van den booze. Dat is: Dewijl wij van onszelven alzoo zwak zijn, dat wij niet een oogenblik zouden kunnen bestaan, en daartoe onze doodvijanden, de duivel, de wereld, en ons eigen vleesch, niet ophouden ons aan te vechten; zoo wil ons toch staande houden en sterken door de kracht uws Heiligen Geestes, opdat wij in dezen geestelijken strijd niet onderliggen, maar altijd sterken wederstand doen, totdat wij eindelijk ten eenenmale de overhand behouden.",
+          "refs": [
+            "Joh. 15:5",
+            "Ps. 103:14",
+            "1 Petr. 5:8",
+            "Eph. 6:12",
+            "Joh. 15:19",
+            "Rom. 7:23",
+            "Gal. 5:17",
+            "Matth. 26:41",
+            "Marc. 13:33",
+            "1 Thess. 3:13 en 5:23"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 128,
+          "question": "Hoe besluit gij uw gebed?",
+          "answer": "Want uw is het koninkrijk, en de kracht, en de heerlijkheid in der eeuwigheid. Dat is: Zulks alles bidden wij van U, daarom, dat Gij, als onze Koning en aller dingen machtig, ons alles goeds te geven den wil en het vermogen hebt, en dat alles, opdat daardoor, niet wij, maar uw heilige naam eeuwiglijk geprezen worde.",
+          "refs": [
+            "Rom. 10:12",
+            "2 Petr. 2:9",
+            "Joh. 14:13",
+            "Jer. 33:8, 9",
+            "Ps. 115:1"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 129,
+          "question": "Wat beduidt het woordeken: Amen?",
+          "answer": "Amen wil zeggen: Het zal waar en zeker zijn. Want mijn gebed is veel zekerder van God verhoord, dan ik in mijn harte gevoel, dat ik zulks van Hem begeer.",
+          "refs": [
+            "2 Cor. 1:20",
+            "2 Tim. 2:13"
+          ]
+        }
+      ]
+    }
+  ]
+}

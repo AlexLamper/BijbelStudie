@@ -8,6 +8,7 @@ import {
   readChaptersFrom,
   unreadableBookKeys,
 } from "../../../../lib/readChaptersCanon"
+import { readChaptersRepairPipeline } from "../../../../lib/readChaptersRepair"
 
 export async function GET() {
   try {
@@ -35,12 +36,22 @@ export async function GET() {
     // Repair rather than only read around it: while the bad key sits there the
     // field stays unhydratable, so every other caller that loads the user as a
     // document keeps seeing no reading progress at all.
+    //
+    // Only the broken keys, evaluated by Mongo at write time
+    // (lib/readChaptersRepair.ts) - never the whole map written back, which
+    // dropped any `$addToSet` landing between this read and the write. A
+    // failed repair must never fail the read.
     const broken = unreadableBookKeys(user.readChapters)
-    if (broken.length > 0) {
-      await User.updateOne({ _id: user._id }, { $set: { readChapters: stored } })
-      console.warn(
-        `[reading-progress] Ongeldige readChapters-sleutels hersteld: ${broken.join(", ")}`,
-      )
+    const repair = readChaptersRepairPipeline(user.readChapters)
+    if (repair) {
+      try {
+        await User.updateOne({ _id: user._id }, repair)
+        console.warn(
+          `[reading-progress] Ongeldige readChapters-sleutels hersteld: ${broken.join(", ")}`,
+        )
+      } catch (error) {
+        console.warn("[reading-progress] readChapters repair skipped:", error)
+      }
     }
 
     return NextResponse.json({ readChapters: canonicaliseReadChapters(stored) })

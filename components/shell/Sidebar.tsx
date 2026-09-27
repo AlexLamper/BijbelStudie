@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+import { BrandIcon } from "../ui/BrandIcon";
 import { usePathname } from "next/navigation";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
@@ -150,11 +150,9 @@ export default function Sidebar({
           : "flex h-topbar flex-none items-center gap-[10px] border-b border-line px-[18px] no-underline"
       }
     >
-      <Image
+      <BrandIcon
         src="/app-icon.png"
-        alt=""
-        width={30}
-        height={30}
+        size={30}
         className="block rounded-[8px]"
         priority
       />

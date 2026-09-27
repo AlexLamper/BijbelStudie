@@ -1,6 +1,6 @@
 'use client';
 
-import Image from 'next/image';
+import { BrandIcon } from '../ui/BrandIcon';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import {
@@ -87,11 +87,9 @@ export default function AppPromoBanner() {
       style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
     >
       <div className="mx-auto flex max-w-md items-start gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-lg dark:border-slate-700 dark:bg-slate-900">
-        <Image
+        <BrandIcon
           src="/app-icon.png"
-          alt=""
-          width={44}
-          height={44}
+          size={44}
           className="h-11 w-11 shrink-0 rounded-xl"
         />
         <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">

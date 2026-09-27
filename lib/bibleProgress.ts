@@ -138,10 +138,15 @@ export function filterBooks(books: BookProgress[], filter: BookFilter): BookProg
 }
 
 /**
- * Deep link into the reader. `/lezen` only honours `book` and `chapter` when
- * `version` is present too (hooks/useBibleData, case A), and `book` must be the
- * data-folder spelling, not the display name.
+ * Deep link into the reader. `book` must be the data-folder spelling, not the
+ * display name.
+ *
+ * No `version`: the reader then opens the chapter in the reader's own
+ * translation (hooks/useBibleData, a book-only link). Naming one here forced
+ * the Statenvertaling on everyone who reads in another, and the reader then
+ * saved it as their last-read translation - which the dashboard's verse of the
+ * day follows.
  */
 export function chapterReaderHref(book: Pick<BibleCanonBook, 'readerName'>, chapter: number): string {
-  return `/lezen?book=${encodeURIComponent(book.readerName)}&chapter=${chapter}&version=statenvertaling`;
+  return `/lezen?book=${encodeURIComponent(book.readerName)}&chapter=${chapter}`;
 }

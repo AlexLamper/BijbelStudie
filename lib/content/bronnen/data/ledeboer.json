@@ -1,0 +1,841 @@
+{
+  "slug": "ledeboer",
+  "title": "Een klein vragenboekje voor kinderen",
+  "author": "L.G.C. Ledeboer",
+  "year": "1860",
+  "sectionNoun": "Vragen",
+  "source": {
+    "name": "Delpher (KB), OCR van \"Klein vragenboekje voor kinderen\", N.V. Drukkerij \"De Banier\", Rotterdam (ca. 1948)",
+    "url": "https://resolver.kb.nl/resolve?urn=MMKB47:275013000",
+    "edition": "Oude herdruk (spelling-De Vries-Te Winkel, 'menschen', 'begeeren'), zonder bewerker; vragen 1-97 zoals gedrukt.",
+    "retrieved": "2026-09-27",
+    "note": "Gecontroleerd tegen de achttiende druk, W.M. den Hertog, Utrecht (1935), Delpher https://resolver.kb.nl/resolve?urn=MMKB21:045899000, en voor het aantal vragen tegen de transcriptie op theologienet.nl (97 vragen, ongedeeld). OCR-correcties bevestigd door de druk van 1935: v.24 'Tit. 3 . 3' -> 'Tit. 3 : 3'; v.29 'Eph. 4 : 22 24' -> '22-24'; v.82 'obeschrijven? 44Den' -> 'beschrijven? A. Den'. Leesvarianten in de druk van 1935 (niet overgenomen): v.23 heeft daar ook 'Eph. 2:12'; v.92 heeft daar 'Phil. 1:23'; v.6 'uwen Schepper'; v.24 'onzen naasten'; v.26 'welk een wijze'; v.47 'Zijns volks'; v.69 'Zijne Naam'; v.74 'al deze'. V.89 '1 Joh. 1 : 17' staat zo in beide drukken (bedoeld is vermoedelijk 1 Joh. 2:17). Het rijmpje 'Ik las een stukje voor de jeugd' achter in het boekje is weggelaten. Verwijzingen achter een antwoord staan in refs; verwijzingen midden in een antwoord staan ook in de tekst."
+  },
+  "rights": "Tekst van ds. L.G.C. Ledeboer (1808-1863), voor het eerst uitgegeven in 1860, hier naar een oude ongewijzigde herdruk zonder bewerker; publiek domein.",
+  "sections": [
+    {
+      "id": "vragen",
+      "number": null,
+      "label": "Vragen en antwoorden",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Wie heeft u geschapen?",
+          "answer": "God.",
+          "refs": [
+            "Gen. 1:26"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Wie is God?",
+          "answer": "Een allervolmaaktste Geest.",
+          "refs": [
+            "Joh. 4:24"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Hoe moet God gediend worden?",
+          "answer": "In geest en waarheid.",
+          "refs": [
+            "Joh. 4:24"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Kunt gij dat?",
+          "answer": "Neen ik.",
+          "refs": [
+            "1 Cor. 2:14"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Waarom niet?",
+          "answer": "Omdat ik Hem niet ken.",
+          "refs": [
+            "Pred. 7:29"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Hoe komt dat, dat gij uw Schepper niet kent?",
+          "answer": "Door de zonde.",
+          "refs": [
+            "Rom. 5:12"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Wat is zonde?",
+          "answer": "Ongehoorzaamheid tegen God.",
+          "refs": [
+            "Rom. 7:10"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Wat eischt God van ons?",
+          "answer": "Dat wij Hem lief zullen hebben boven alles.",
+          "refs": [
+            "Matth. 22:37, enz."
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 9,
+          "question": "Wat hebben wij lief?",
+          "answer": "De zonde en de wereld.",
+          "refs": [
+            "1 Joh. 2:15"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 10,
+          "question": "Hoe is de zonde in de wereld gekomen?",
+          "answer": "Door de ongehoorzaamheid van onze eerste ouders Adam en Eva.",
+          "refs": [
+            "Gen. 3:6"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 11,
+          "question": "Waar is die zonde begaan?",
+          "answer": "In het Paradijs."
+        },
+        {
+          "type": "qa",
+          "number": 12,
+          "question": "Wat was de eerste zonde?",
+          "answer": "Het eten van den verboden boom."
+        },
+        {
+          "type": "qa",
+          "number": 13,
+          "question": "Wat is daarop gevolgd?",
+          "answer": "De dood en het verderf.",
+          "refs": [
+            "Rom. 1:18"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 14,
+          "question": "Waarin bestaat het verderf?",
+          "answer": "In geheele onmacht en onwil ten goede.",
+          "refs": [
+            "Eph. 4:18"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 15,
+          "question": "Wat is de grootste ellende?",
+          "answer": "Zijne ellende niet te gevoelen.",
+          "refs": [
+            "Openb. 3:17"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 16,
+          "question": "Is dat noodzakelijk?",
+          "answer": "Ja. Jer. 3 : 13, Alleen kent uwe ongerechtigheid.",
+          "refs": [
+            "Jer. 3:13"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 17,
+          "question": "Hoe komt men aan die kennis?",
+          "answer": "Door het ontdekkend licht des Heiligen Geestes.",
+          "refs": [
+            "Joh. 16:8"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 18,
+          "question": "Waarin openbaart zich die rechte kennis?",
+          "answer": "In zich zelven schuldig te kennen en God te billijken in Zijne straffen.",
+          "refs": [
+            "Psalm 51:6"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 19,
+          "question": "Welke is die straf?",
+          "answer": "Het eeuwig verderf.",
+          "refs": [
+            "2 Thess. 1:9"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 20,
+          "question": "Waar zal dat zijn?",
+          "answer": "In de hel.",
+          "refs": [
+            "Luc. 16:23"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 21,
+          "question": "Wat is de hel?",
+          "answer": "Een poel die brandt van vuur en sulfer.",
+          "refs": [
+            "Openb. 21:8"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 22,
+          "question": "Wie komen daar?",
+          "answer": "Onbekeerde menschen en kinderen.",
+          "refs": [
+            "Lucas 19:27"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 23,
+          "question": "Wat is dat onbekeerd te zijn?",
+          "answer": "Gods gunst en zalige gemeenschap te missen."
+        },
+        {
+          "type": "qa",
+          "number": 24,
+          "question": "Waarin openbaart zich dat?",
+          "answer": "In God en onze naasten te haten.",
+          "refs": [
+            "Rom. 8:7",
+            "Tit. 3:3"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 25,
+          "question": "Kunnen wij uit dien toestand verlost worden?",
+          "answer": "Ja wij.",
+          "refs": [
+            "Hand. 10:43"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 26,
+          "question": "Op welke wijze?",
+          "answer": "Door waarachtige bekeering.",
+          "refs": [
+            "Hand. 2:38"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 27,
+          "question": "Wat is dat, bekeerd te worden?",
+          "answer": "Een nieuw hart te ontvangen.",
+          "refs": [
+            "Ezech. 36:26"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 28,
+          "question": "Wie kan dat ons geven?",
+          "answer": "God alleen.",
+          "refs": [
+            "Luc. 18:27"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 29,
+          "question": "Wat is dat, een nieuw hart te ontvangen?",
+          "answer": "God lief te hebben boven alles.",
+          "refs": [
+            "Eph. 4:22-24"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 30,
+          "question": "Waarin bestaat dat meer?",
+          "answer": "In het haten van de zonde, dat daar van zelve mede gepaard gaat.",
+          "refs": [
+            "Ps. 139:21"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 31,
+          "question": "Waarin moeten wij de zonde haten?",
+          "answer": "In haren oorsprong.",
+          "refs": [
+            "Rom. 7:7"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 32,
+          "question": "Wat is de oorzaak der zonde?",
+          "answer": "De begeerlijkheid.",
+          "refs": [
+            "Jac. 1:14, 15"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 33,
+          "question": "Waarin bestaat de kwade begeerlijkheid?",
+          "answer": "In iets anders te begeeren dan hetgeen God wil, dat wij begeeren zullen.",
+          "refs": [
+            "Matth. 10:37"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 34,
+          "question": "Wat wil God, dat wij begeeren zullen?",
+          "answer": "Hem alleen.",
+          "refs": [
+            "Ps. 73:25"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 35,
+          "question": "Mogen wij dan geen spijs of drank begeeren?",
+          "answer": "Ja, maar om er door tot God opgeleid te worden.",
+          "refs": [
+            "1 Cor. 10:31"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 36,
+          "question": "Wat is dat, door spijs en drank tot God opgeleid te worden?",
+          "answer": "Dat wij Hem erkennen als den Gever van hetzelve.",
+          "refs": [
+            "1 Tim. 6:7"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 37,
+          "question": "Waarom geeft God ons die spijze en dien drank?",
+          "answer": "Om Hem te dienen.",
+          "refs": [
+            "Deut. 8:10, 11"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 38,
+          "question": "Wat is dat, God te dienen?",
+          "answer": "Ziel en lichaam Hem over te geven tot Zijnen wille.",
+          "refs": [
+            "1 Cor. 6:20"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 39,
+          "question": "Hoe kan dat geschieden?",
+          "answer": "Door wedergeboorte.",
+          "refs": [
+            "Joh. 3:5"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 40,
+          "question": "Wat is dat, wedergeboorte?",
+          "answer": "Eene geheele verandering van den mensch in al zijne genegenheden.",
+          "refs": [
+            "Eph. 4:22-24"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 41,
+          "question": "Wie kan dat werken?",
+          "answer": "God door Zijn Woord en Geest.",
+          "refs": [
+            "Tit. 3:5"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 42,
+          "question": "Moeten wij Hem ook om dien Geest bidden?",
+          "answer": "Ja gewisselijk.",
+          "refs": [
+            "Matth. 7:7"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 43,
+          "question": "Hebben wij grond daartoe?",
+          "answer": "Ja, in onzen doop."
+        },
+        {
+          "type": "qa",
+          "number": 44,
+          "question": "In wiens naam zijt gij gedoopt?",
+          "answer": "In den naam des Vaders, en des Zoons, en des Heiligen Geestes.",
+          "refs": [
+            "Matth. 28:19"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 45,
+          "question": "Is dat genoeg, dat gij gedoopt zijt?",
+          "answer": "Neen, ik moet gewasschen worden van mijne zonden in het bloed van den Heere Jezus.",
+          "refs": [
+            "1 Joh. 1:7"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 46,
+          "question": "Waar heeft Hij dat gestort?",
+          "answer": "Op Golgotha, aan het vloekhout des kruises.",
+          "refs": [
+            "Gal. 3:13"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 47,
+          "question": "Waarom stierf de Heere Jezus aan het kruis?",
+          "answer": "Om de zonden Zijn volks.",
+          "refs": [
+            "1 Petr. 2:24"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 48,
+          "question": "Wat is de grootste zonde?",
+          "answer": "Ondankbaarheid en ongehoorzaamheid.",
+          "refs": [
+            "Rom. 5:19"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 49,
+          "question": "Waar heeft God ons Zijne geboden gegeven?",
+          "answer": "Allereerst in ons hart, dat getuigt ons geweten.",
+          "refs": [
+            "Rom. 2:15"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 50,
+          "question": "Wat is ons hart geworden door de zonde?",
+          "answer": "Eene woonplaats der duivelen.",
+          "refs": [
+            "Rom. 1:29, enz."
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 51,
+          "question": "Wie heeft den duivel den kop vermorzeld?",
+          "answer": "De Heere Jezus Christus.",
+          "refs": [
+            "Gen. 3:15"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 52,
+          "question": "Wie is gekomen om de werken des duivels te verbreken?",
+          "answer": "De Heere Jezus Christus.",
+          "refs": [
+            "1 Joh. 3:8"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 53,
+          "question": "Wat staat daar 1 Joh. 3 :8?",
+          "answer": "Hiertoe is de Zone Gods geopenbaard, opdat Hij de werken des duivels verbreken zoude.",
+          "refs": [
+            "1 Joh. 3:8"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 54,
+          "question": "Wat zijn de werken des duivels?",
+          "answer": "Liegen, lasteren en moorden.",
+          "refs": [
+            "Joh. 8:44"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 55,
+          "question": "Wat zegt de Heere van de leugenaars?",
+          "answer": "Dat Hij ze verdoen zal.",
+          "refs": [
+            "Ps. 5:7"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 56,
+          "question": "Kunnen zij, die de werken des duivels doen, wel in den hemel komen?",
+          "answer": "Neen.",
+          "refs": [
+            "2 Cor. 6:15"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 57,
+          "question": "Wie komen er in den hemel?",
+          "answer": "Die God en den Heere Jezus liefhebben.",
+          "refs": [
+            "Joh. 17:3",
+            "Ps. 65:5"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 58,
+          "question": "Hoe moeten wij den Heere liefhebben?",
+          "answer": "Met ons gansche hart.",
+          "refs": [
+            "Spr. 23:26"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 59,
+          "question": "Wien hebben wij dat gegeven?",
+          "answer": "Den duivel en de wereld."
+        },
+        {
+          "type": "qa",
+          "number": 60,
+          "question": "Wat moet er dan met ons gebeuren, zullen wij in den hemel komen?",
+          "answer": "De Heere Jezus moet woning in onze harten komen maken.",
+          "refs": [
+            "2 Cor. 13:5"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 61,
+          "question": "Moeten wij Hem daarom bidden?",
+          "answer": "Ja, want Hij heeft gezegd: „Zoek Mij terwijl Ik te vinden ben, roep Mij aan terwijl Ik nabij ben\".",
+          "refs": [
+            "Jes. 55:6"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 62,
+          "question": "Is het genoeg als wij oud geworden zijn?",
+          "answer": "Neen, want ik ben geen oogenblik van mijn leven verzekerd.",
+          "refs": [
+            "Hebr. 4:7"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 63,
+          "question": "Waar verzekert ons de Bijbel van?",
+          "answer": "Dat als wij onbekeerd sterven, wij in de eeuwige verdoemenis komen.",
+          "refs": [
+            "Joh. 3:36"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 64,
+          "question": "Wilt gij daar wezen?",
+          "answer": "Ik toon het met mijne werken van ja."
+        },
+        {
+          "type": "qa",
+          "number": 65,
+          "question": "In welke werken toonen dat de kinderen?",
+          "answer": "In hunne ongehoorzaamheid aan God en hunne ouders."
+        },
+        {
+          "type": "qa",
+          "number": 66,
+          "question": "Waar komen die kinderen, die alzoo blijven?",
+          "answer": "Bij de duivelen in de hel.",
+          "refs": [
+            "Luc. 16:24"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 67,
+          "question": "Mogen de kinderen wel spelen op de straat, of met andere ondeugende kinderen omgaan?",
+          "answer": "Neen, want ofschoon ik evenzoo verdorven ben, zou ik daar nog meer kwaad leeren.",
+          "refs": [
+            "1 Cor. 15:33"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 68,
+          "question": "Wat leeren de kinderen op straat?",
+          "answer": "Vloeken en vuile praat spreken."
+        },
+        {
+          "type": "qa",
+          "number": 69,
+          "question": "Wat heeft de Heere van de vloekers gezegd?",
+          "answer": "Dat Hij niet onschuldig zal houden, die Zijnen Naam ijdellijk gebruiken."
+        },
+        {
+          "type": "qa",
+          "number": 70,
+          "question": "Wat beteekent dat?",
+          "answer": "Dat Hij ze met de allerzwaarste straffen bezoeken zal, beide naar ziel en lichaam in de hel."
+        },
+        {
+          "type": "qa",
+          "number": 71,
+          "question": "Wat moeten de kinderen dan doen?",
+          "answer": "Bidden, Gods Woord lezen en gehoorzaam zijn."
+        },
+        {
+          "type": "qa",
+          "number": 72,
+          "question": "Wat moeten de kinderen bedenken?",
+          "answer": "Van alles wat ik doe, moet ik eenmaal rekenschap geven.",
+          "refs": [
+            "2 Cor. 5:10"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 73,
+          "question": "Waar staat dat?",
+          "answer": "Prediker 11 : 9.",
+          "refs": [
+            "Prediker 11:9"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 74,
+          "question": "Wat staat daar?",
+          "answer": "Maar weet dat God om alle deze dingen u zal doen komen voor het gericht."
+        },
+        {
+          "type": "qa",
+          "number": 75,
+          "question": "Wat zegt de Heere van hen, die Hem vroeg zoeken?",
+          "answer": "Dat die Hem zullen vinden en een welgevallen van den Heere trekken."
+        },
+        {
+          "type": "qa",
+          "number": 76,
+          "question": "En wat van die Hem haten?",
+          "answer": "Dat zij den dood liefhebben."
+        },
+        {
+          "type": "qa",
+          "number": 77,
+          "question": "Waar staat dat?",
+          "answer": "Spreuken 8 : 35 en 36.",
+          "refs": [
+            "Spreuken 8:35 en 36"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 78,
+          "question": "Wat staat daar in vers 35?",
+          "answer": "Want die Mij vindt, vindt het leven en trekt een welgevallen van den Heere."
+        },
+        {
+          "type": "qa",
+          "number": 79,
+          "question": "Wat staat er in vs. 36?",
+          "answer": "Maar die (tegen) Mij zondigt, doet zijne ziel geweld aan; allen die Mij haten, hebben den dood lief."
+        },
+        {
+          "type": "qa",
+          "number": 80,
+          "question": "Moeten de kinderen vroeg met den Bijbel zoeken bekend te worden?",
+          "answer": "Ja zij, omdat het Gods Woord is, en Hij ons dat bevolen heeft.",
+          "refs": [
+            "Joh. 5:39",
+            "Spr. 22:6"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 81,
+          "question": "Kunnen wij dat verstaan?",
+          "answer": "Neen, daartoe hebben wij noodig de opening des harten door God den Heiligen Geest.",
+          "refs": [
+            "Hand. 16:14"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 82,
+          "question": "Wat heeft de Heere in den Bijbel laten beschrijven?",
+          "answer": "Den weg der zaligheid.",
+          "refs": [
+            "Hand. 4:12"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 83,
+          "question": "Door wien is de Bijbel geschreven?",
+          "answer": "God heeft dien door Zijnen Geest laten beschrijven.",
+          "refs": [
+            "2 Petr. 1:21"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 84,
+          "question": "Mogen wij daar wel bij of afdoen?",
+          "answer": "Neen, diens deel zoude afgedaan worden uit het boek des levens.",
+          "refs": [
+            "Openb. 22:18, 19"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 85,
+          "question": "Waarover moeten wij het meest bekommerd zijn?",
+          "answer": "Of wij vergeving van zonden hebben ontvangen, door het bloed van den Heere Jezus.",
+          "refs": [
+            "Hebr. 9:22b"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 86,
+          "question": "Waarin bestaat het hoogste goed?",
+          "answer": "In het kennen en liefhebben van God.",
+          "refs": [
+            "Pred. 12:13"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 87,
+          "question": "Wat moeten wij het meeste vreezen?",
+          "answer": "De zonde.",
+          "refs": [
+            "Gen. 39:9b"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 88,
+          "question": "Wie kunnen getroost sterven?",
+          "answer": "De bekeerde menschen en kinderen.",
+          "refs": [
+            "Openb. 14:13"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 89,
+          "question": "Wat moeten wij het eerst verlaten?",
+          "answer": "De wereld en hare begeerlijkheden.",
+          "refs": [
+            "1 Joh. 1:17"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 90,
+          "question": "Wat zal er van ons lichaam worden?",
+          "answer": "Tot het stof wederkeeren en van de wormen gegeten worden.",
+          "refs": [
+            "Gen. 3:19b"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 91,
+          "question": "Wie kunnen alleen rijk genoemd worden?",
+          "answer": "Die eenen schat hebben in den hemel.",
+          "refs": [
+            "Col. 1:12"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 92,
+          "question": "Wie willen de wereld gaarne verlaten?",
+          "answer": "Die den Heere Jezus tot hun deel hebben."
+        },
+        {
+          "type": "qa",
+          "number": 93,
+          "question": "Wat zeide Asaf daarvan in den 73en Psalm?",
+          "answer": "Wien heb ik nevens U in den hemel, nevens U lust mij ook niets op de aarde."
+        },
+        {
+          "type": "qa",
+          "number": 94,
+          "question": "Wie zijn de gelukkigste menschen?",
+          "answer": "Die geen grooter geluk kennen en begeeren dan Gods wil te doen.",
+          "refs": [
+            "Joh. 4:34"
+          ]
+        },
+        {
+          "type": "qa",
+          "number": 95,
+          "question": "Wie zijn de ongelukkigste?",
+          "answer": "Die eigen wil en zin blijven doen."
+        },
+        {
+          "type": "qa",
+          "number": 96,
+          "question": "Wat zal het einde daarvan zijn?",
+          "answer": "Het eeuwig verderf."
+        },
+        {
+          "type": "qa",
+          "number": 97,
+          "question": "Maar wat zal het einde zijn der vromen?",
+          "answer": "De eeuwige zaligheid en heerlijkheid. Amen.",
+          "refs": [
+            "Matth. 25:46"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -2,6 +2,7 @@ import connectMongoDB from './mongodb';
 import User from '../models/User';
 import StudyProgress from '../models/StudyProgress.js';
 import PlanEnrollment from '../models/PlanEnrollment.js';
+import BibleYearEnrollment from '../models/BibleYearEnrollment.js';
 import { creditReferrerIfActivated } from './referral';
 
 /**
@@ -95,6 +96,8 @@ export type BadgeContext = {
   studiesCompleted: number;
   plansCompleted: number;
   lessonsCompleted: number;
+  /** Completed "Bijbel in een jaar" runs (also counted in plansCompleted). */
+  bibleYearsCompleted?: number;
 };
 
 /**
@@ -124,6 +127,8 @@ export function evaluateBadges(ctx: BadgeContext): string[] {
   if (completed >= 5) earned.push('completed5');
   if (completed >= 10) earned.push('completed10');
 
+  if ((ctx.bibleYearsCompleted ?? 0) >= 1) earned.push('bibleyear');
+
   if (ctx.lessonsCompleted >= 1) earned.push('firstlesson');
   if (ctx.isPro) earned.push('premium');
   if (ctx.hasImage) earned.push('profilepic');
@@ -145,6 +150,18 @@ export type GrantResult = {
   awarded: number;
   newBadges: string[];
 };
+
+/**
+ * Completed "Bijbel in een jaar" runs that count toward plansCompleted and
+ * the plan badges: at most one. A run can be restarted and "finished" again
+ * by ticking every chapter at once, so only the first completion is honest
+ * evidence (it is also the only one that pays plan_completed XP,
+ * lib/bibleYear/service.ts settleProgress). Without the cap, restart +
+ * mark-all would farm completed5/completed10.
+ */
+export function countedBibleYears(completedRuns: number): number {
+  return Math.min(1, Math.max(0, completedRuns || 0));
+}
 
 /**
  * Adds XP and re-evaluates badges in one place.
@@ -181,13 +198,16 @@ export async function grantXp(
   const xp = updated.xp ?? 0;
   const level = levelForXp(xp);
 
-  const [lessonsCompleted, plansCompleted, studiesCompleted] = await Promise.all([
+  const [lessonsCompleted, oldPlansCompleted, studiesCompleted, bibleYearsCompleted] = await Promise.all([
     StudyProgress.countDocuments({ userId }),
     PlanEnrollment.countDocuments({ userId, status: 'completed' }),
     StudyProgress.distinct('studyId', { userId, source: 'curated' }).then(
       (ids: unknown[]) => ids.filter(Boolean).length,
     ),
+    BibleYearEnrollment.countDocuments({ userId, status: 'completed' }).then(countedBibleYears),
   ]);
+  // A finished "Bijbel in een jaar" is a finished leesplan.
+  const plansCompleted = oldPlansCompleted + bibleYearsCompleted;
 
   const earned = evaluateBadges({
     streak: updated.streak ?? 0,
@@ -198,6 +218,7 @@ export async function grantXp(
     studiesCompleted,
     plansCompleted,
     lessonsCompleted,
+    bibleYearsCompleted,
   });
 
   const existing: string[] = updated.badges ?? [];
@@ -228,12 +249,17 @@ export async function readProgressSummary(userId: string, isPro: boolean) {
   const user = await User.findById(userId).select('xp level badges streak freezeCount image createdAt');
   if (!user) return null;
 
-  const [lessonsCompleted, plansCompleted, plansActive, studyIds] = await Promise.all([
-    StudyProgress.countDocuments({ userId }),
-    PlanEnrollment.countDocuments({ userId, status: 'completed' }),
-    PlanEnrollment.countDocuments({ userId, status: 'active' }),
-    StudyProgress.distinct('studyId', { userId, source: 'curated' }),
-  ]);
+  const [lessonsCompleted, oldPlansCompleted, oldPlansActive, studyIds, bibleYearsCompleted, bibleYearsActive] =
+    await Promise.all([
+      StudyProgress.countDocuments({ userId }),
+      PlanEnrollment.countDocuments({ userId, status: 'completed' }),
+      PlanEnrollment.countDocuments({ userId, status: 'active' }),
+      StudyProgress.distinct('studyId', { userId, source: 'curated' }),
+      BibleYearEnrollment.countDocuments({ userId, status: 'completed' }).then(countedBibleYears),
+      BibleYearEnrollment.countDocuments({ userId, status: 'active' }),
+    ]);
+  const plansCompleted = oldPlansCompleted + bibleYearsCompleted;
+  const plansActive = oldPlansActive + bibleYearsActive;
   const studiesCompleted = (studyIds as unknown[]).filter(Boolean).length;
 
   const xp = user.xp ?? 0;
@@ -246,6 +272,7 @@ export async function readProgressSummary(userId: string, isPro: boolean) {
     studiesCompleted,
     plansCompleted,
     lessonsCompleted,
+    bibleYearsCompleted,
   });
 
   // Manual badges already on the account must survive the merge.

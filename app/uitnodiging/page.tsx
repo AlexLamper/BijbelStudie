@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import Image from "next/image";
+import { BrandIcon } from "../../components/ui/BrandIcon";
 import { generatePageMetadata } from "../../lib/pageMetadata";
 import SessionProvider from "../../components/providers/SessionProvider";
 import InviteDetails from "./InviteDetails";
@@ -30,7 +30,7 @@ export default function InvitePage() {
     <SessionProvider>
       <div className="flex min-h-screen flex-col items-center justify-center bg-line-soft px-5 py-16 dark:bg-background">
         <div className="w-full max-w-sm text-center">
-          <Image src="/images/logo.svg" alt="" width={44} height={44} className="mx-auto" priority />
+          <BrandIcon src="/images/logo.svg" size={44} className="mx-auto block" priority />
           <Suspense fallback={null}>
             <InviteDetails />
           </Suspense>

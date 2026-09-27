@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { Check, Copy, Share2 } from "lucide-react"
 import { Card, Skeleton } from "../kit/primitives"
+import { useIsPro } from "../../hooks/useIsPro"
 import type { ReferralOverview } from "../../lib/referral"
 
 function formatDay(iso: string): string {
@@ -22,6 +23,7 @@ function formatDay(iso: string): string {
 export default function InviteCard() {
   const router = useRouter()
   const { update } = useSession()
+  const isPro = useIsPro()
   const [overview, setOverview] = useState<ReferralOverview | null>(null)
   const [failed, setFailed] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -105,7 +107,12 @@ export default function InviteCard() {
       ) : (
         <>
           <p className="mt-[13px] text-[13px] leading-relaxed text-ink-body">
-            Maakt een vriend via jouw link een account, dan krijgt die meteen een week Pro.
+            {/* Pro members (paying, trial, comp) give the week; it is no sales pitch to them.
+                The server decides (`copyVariant`); the client's own Pro check is only the
+                fallback for a response from before that field existed. */}
+            {(overview.copyVariant ?? (isPro ? "gift" : "offer")) === "gift"
+              ? "Geef een vriend een week Pro cadeau. Maakt die via jouw link een account, dan gaat de week meteen in."
+              : "Maakt een vriend via jouw link een account, dan krijgt die meteen een week Pro."}
             {overview.youEarn ? " Gaat je vriend echt aan de slag, dan krijg jij er ook een week bij." : ""}
           </p>
 

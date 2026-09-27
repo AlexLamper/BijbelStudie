@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+import { BrandIcon } from "../ui/BrandIcon";
 import { usePathname } from "next/navigation";
 import { Fragment } from "react";
 import NavTreeAvatar from "../levensboom/NavTreeAvatar";
@@ -54,7 +54,7 @@ export default function LessonRail() {
           aria-label="BijbelStudie"
           className="flex h-[52px] w-full flex-none items-center justify-center border-b border-les-line no-underline"
         >
-          <Image src="/app-icon.png" alt="" width={30} height={30} className="block rounded-[8px]" priority />
+          <BrandIcon src="/app-icon.png" size={30} className="block rounded-[8px]" priority />
         </Link>
 
         <div className="flex flex-1 flex-col items-center gap-1 overflow-y-auto py-3">

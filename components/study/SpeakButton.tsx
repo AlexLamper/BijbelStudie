@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useContext } from 'react';
+import { useState, useRef, useEffect, useContext, useImperativeHandle } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { SessionContext } from 'next-auth/react';
@@ -26,6 +26,27 @@ interface SpeakButtonProps {
    * doing rather than what it is for.
    */
   icon?: React.ReactNode;
+  /**
+   * For a caller that starts the voice from somewhere else - the /lezen
+   * toolbar does it from its "Meer opties" menu. `toggle` is exactly what a
+   * tap on the button does (play, pause, resume); `stop` ends the reading.
+   */
+  controlRef?: React.Ref<SpeakButtonHandle>;
+  /** Told whenever the voice changes state, so that caller can word its menu. */
+  onStatusChange?: (status: SpeakStatus) => void;
+  /**
+   * Compact only: render no button while idle. It appears while loading,
+   * playing, paused or failed, so pause/resume stays one tap away. The sign-in
+   * dialog and the error toast render either way.
+   */
+  hideWhenIdle?: boolean;
+}
+
+export type SpeakStatus = 'unsupported' | 'idle' | 'loading' | 'playing' | 'paused' | 'error';
+
+export interface SpeakButtonHandle {
+  toggle: () => void;
+  stop: () => void;
 }
 
 const TEAL = '#0D9488';
@@ -47,6 +68,9 @@ export default function SpeakButton({
   showSettings = true,
   className,
   icon,
+  controlRef,
+  onStatusChange,
+  hideWhenIdle = false,
 }: SpeakButtonProps) {
   const tts = useTTS();
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -109,8 +133,6 @@ export default function SpeakButton({
   // chapter changes - and a highlight nobody is speaking to would stay lit.
   useEffect(() => () => publishSpoken(null, null), [publishSpoken]);
 
-  if (!tts.isSupported && !tts.cloudAvailable) return null;
-
   /** The one way this component starts a voice, so the text is never unrecorded. */
   const startSpeaking = (text: string, voiceOverride?: SelectedVoice) => {
     // A known guest gets the sign-in dialog straight away instead of a request
@@ -138,6 +160,33 @@ export default function SpeakButton({
   };
 
   const isPlaying = tts.isSpeaking && !tts.isPaused;
+  const supported = tts.isSupported || tts.cloudAvailable;
+  const status: SpeakStatus = !supported
+    ? 'unsupported'
+    : tts.isLoading
+      ? 'loading'
+      : tts.error
+        ? 'error'
+        : isPlaying
+          ? 'playing'
+          : tts.isPaused
+            ? 'paused'
+            : 'idle';
+
+  useEffect(() => {
+    onStatusChange?.(status);
+  }, [onStatusChange, status]);
+
+  // The latest handlers, read at call time: the handle itself stays stable.
+  const handlersRef = useRef({ toggle: handlePlayPause, stop: tts.stop });
+  handlersRef.current = { toggle: handlePlayPause, stop: tts.stop };
+  useImperativeHandle(controlRef, () => ({
+    toggle: () => handlersRef.current.toggle(),
+    stop: () => handlersRef.current.stop(),
+  }), []);
+
+  if (!supported) return null;
+
   const browserDutch = tts.browserVoices.filter(v => v.lang.toLowerCase().startsWith('nl'));
 
   const handleFallbackToBrowser = () => {
@@ -153,12 +202,14 @@ export default function SpeakButton({
   );
 
   if (compact) {
+    // One label for sight and for screen readers, following the state.
+    const compactLabel = tts.error ? tts.error : isPlaying ? 'Pauzeren' : tts.isPaused ? 'Hervatten' : label;
     return (
       <>
-        <button
+        {!(hideWhenIdle && status === 'idle') && <button
           onClick={handlePlayPause}
-          title={tts.error ? tts.error : isPlaying ? 'Pauzeren' : tts.isPaused ? 'Hervatten' : label}
-          aria-label={label}
+          title={compactLabel}
+          aria-label={compactLabel}
           disabled={tts.isLoading}
           className={cn(
             'inline-flex items-center justify-center rounded-md p-1.5 transition-colors disabled:opacity-50',
@@ -176,9 +227,11 @@ export default function SpeakButton({
               ? <AlertCircle className="h-3.5 w-3.5" />
               : isPlaying
                 ? <Pause className="h-3.5 w-3.5" />
-                : icon ?? <Play className="h-3.5 w-3.5" />
+                : tts.isPaused && hideWhenIdle
+                  ? <Play className="h-3.5 w-3.5" />
+                  : icon ?? <Play className="h-3.5 w-3.5" />
           }
-        </button>
+        </button>}
 
         {/* Portalled, not inline. In the study flow this button lives inside a
             hover-only `opacity-0 group-hover:opacity-100` overlay and a header

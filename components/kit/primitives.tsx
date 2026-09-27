@@ -98,7 +98,7 @@ export function Chip({
   onClick,
   href,
 }: {
-  label: string;
+  label: React.ReactNode;
   active?: boolean;
   onClick?: () => void;
   href?: string;
@@ -117,7 +117,7 @@ export function Chip({
     );
   }
   return (
-    <button type="button" onClick={onClick} className={cls}>
+    <button type="button" onClick={onClick} aria-pressed={active} className={cls}>
       {label}
     </button>
   );

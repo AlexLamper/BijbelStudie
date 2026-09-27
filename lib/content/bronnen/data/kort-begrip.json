@@ -1,0 +1,493 @@
+{
+  "slug": "kort-begrip",
+  "title": "Kort Begrip der Christelijke Religie",
+  "author": "Hermannus Faukelius",
+  "year": "1608",
+  "sectionNoun": "Deel",
+  "source": {
+    "name": "De berijmde Psalmen met eenige gezangen in gebruik bij de Gereformeerde Kerken in Nederland, alsmede hare Formulieren van eenigheid ... met het Kort Begrip en den Ziekentroost (Maassluis: Biblia, 1913), scan Princeton Theological Seminary Library via Internet Archive",
+    "url": "https://archive.org/details/deberijmdepsal00gere",
+    "edition": "Kort Begrip der Christelijke Religie, gesteld in vragen en antwoorden, zoals afgedrukt in het kerkboek van de Gereformeerde Kerken in Nederland (zetsel Middelharnis 1898, herdrukt 1913): de Middelburgse tekst van 1611 met Statenvertaling in de aangehaalde Bijbelteksten; spelling De Vries-Te Winkel; deze uitgave drukt geen bewijsteksten af",
+    "retrieved": "2026-09-26",
+    "note": "Tekst verkregen door de OCR-tekstlagen van vier scans te laten stemmen (1913 archive.org/details/deberijmdepsal00gere, 1898 archive.org/details/deberijmdepsalme00gere_0, en twee exemplaren van de druk Middelharnis 1897: archive.org/details/deberie00gere en archive.org/details/deberijmdepsalme00gere); alle 41 verschilplaatsen zijn op de paginabeelden gecontroleerd. Tweede, onafhankelijke controle: woordvergelijking met de uitgave A. Kuyper, De Drie Formulieren van Eenigheid, met het Kort Begrip als aanhangsel (Kampen: Kok, 37e druk; archive.org/details/dedrieformul00kuyp); de verschillen daarmee zijn uitgaveverschillen (bijv. 'voor mijne verlossing' hier tegenover 'voor zulke verlossing' bij Kuyper, dat hier 'alleen' ontbreekt in vr. 45) en zijn op de scan bevestigd. Weggelaten: de redactionele inleiding van de uitgevers. De 'Vragen, te stellen bij de openbare belijdenis des geloofs' staan niet in deze uitgave en zijn daarom niet opgenomen. De vraag vóór het eerste deel staat in een sectie 'Inleiding'. Jaartal 1608 is de eerste uitgave door Faukelius; deze tekst volgt volgens de uitgevers de Middelburgse uitgave van 1611."
+  },
+  "rights": "Kort Begrip van Hermannus Faukelius (overleden 1625), tekst zoals afgedrukt in het kerkboek van de Gereformeerde Kerken in Nederland van 1898/1913; publiek domein.",
+  "sections": [
+    {
+      "id": "inleiding",
+      "number": null,
+      "label": "Inleiding",
+      "title": null,
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 1,
+          "question": "Hoe vele stukken zijn u noodig te weten, opdat gij welgetroost, zaliglijk leven en sterven moogt?",
+          "answer": "Drie stukken: ten eerste, hoe groot mijne zonden en ellende zijn; ten andere, hoe ik van alle mijne zonden en ellende verlost worde; ten derde, hoe ik Gode voor mijne verlossing zal dankbaar zijn."
+        }
+      ]
+    },
+    {
+      "id": "deel-1",
+      "number": 1,
+      "label": "Deel 1",
+      "title": "Van des menschen ellende",
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 2,
+          "question": "Waaruit kent gij uwe ellende?",
+          "answer": "Uit de wet Gods."
+        },
+        {
+          "type": "qa",
+          "number": 3,
+          "question": "Wat heeft u God in zijne wet bevolen?",
+          "answer": "Dat heeft Hij ons schriftelijk in tien geboden begrepen, welke aldus luiden:\n\nIk ben de HEERE uw God, die u uit Egypteland, uit den diensthuize, uitgeleid heb.\n\nHet eerste gebod.\n\nGij zult geene andere goden voor mijn aangezichte hebben.\n\nHet tweede gebod.\n\nGij zult u geen gesneden beeld, noch eenige gelijkenisse maken, van hetgene dat boven in den hemel is, noch van hetgene dat onder op de aarde is, noch van hetgene dat in de wateren onder de aarde is. Gij zult u voor die niet buigen noch hen dienen. Want Ik, de HEERE uw God, ben een ijverig God, die de misdaad der vaderen bezoeke aan de kinderen, aan het derde, en aan het vierde lid dergenen, die Mij haten; en doe barmhartigheid aan duizenden dergenen, die Mij liefhebben en mijne geboden onderhouden.\n\nHet derde gebod.\n\nGij zult den name des HEEREN uws Gods niet ijdellijk gebruiken; want de HEERE zal niet onschuldig houden, die zijnen name ijdellijk gebruikt.\n\nHet vierde gebod.\n\nGedenk des Sabbathdags, dat gij dien heiligt. Zes dagen zult gij arbeiden en al uw werk doen; maar de zevende dag is de Sabbath des HEEREN uws Gods. Dan zult gij geen werk doen, gij, noch uw zoon, noch uwe dochter, noch uw dienstknecht, noch uwe dienstmaagd, noch uw vee, noch uw vreemdeling, die in uwe poorten is. Want in zes dagen heeft de HEERE den hemel en de aarde gemaakt, de zee en alles wat daarin is, en Hij rustte ten zevenden dage. Daarom zegende de HEERE den Sabbathdag, en heiligde denzelven.\n\nHet vijfde gebod.\n\nEer uwen vader en uwe moeder, opdat uwe dagen verlengd worden in het land, dat u de HEERE uw God geeft.\n\nHet zesde gebod.\n\nGij zult niet doodslaan.\n\nHet zevende gebod.\n\nGij zult niet echtbreken.\n\nHet achtste gebod.\n\nGij zult niet stelen.\n\nHet negende gebod.\n\nGij zult geene valsche getuigenis spreken tegen uwen naaste.\n\nHet tiende gebod.\n\nGij zult niet begeeren uws naasten huis; gij zult niet begeeren uws naasten vrouwe, noch zijnen dienstknecht, noch zijne dienstmaagd, noch zijnen os, noch zijnen ezel, noch iets, dat uws naasten is."
+        },
+        {
+          "type": "qa",
+          "number": 4,
+          "question": "Hoe worden deze tien geboden gedeeld?",
+          "answer": "In twee tafelen."
+        },
+        {
+          "type": "qa",
+          "number": 5,
+          "question": "Welke is de hoofdsom van hetgene u God gebiedt in de vier geboden der eerste tafel?",
+          "answer": "Dat ik den Heere mijnen God zal liefhebben van ganscher harte, van ganscher ziele, van ganschen gemoede, en met alle krachten. Dit is het eerste en het groot gebod."
+        },
+        {
+          "type": "qa",
+          "number": 6,
+          "question": "Welke is de hoofdsom van hetgene u God gebiedt in de zes geboden der tweede tafel?",
+          "answer": "Dat ik mijnen naaste zal liefhebben als mijzelven. Aan deze twee geboden hangt de gansche wet en de profeten."
+        },
+        {
+          "type": "qa",
+          "number": 7,
+          "question": "Kunt gij dit alles volkomenlijk houden?",
+          "answer": "Neen ik; maar ik ben van nature geneigd, God en mijnen naaste te haten, en Gods geboden met gedachten, woorden, en werken te overtreden."
+        },
+        {
+          "type": "qa",
+          "number": 8,
+          "question": "Heeft God u alzoo boos en verdorven van natuur geschapen?",
+          "answer": "Neen Hij; maar Hij heeft mij goed en naar zijn evenbeeld geschapen, in ware kennisse Gods, gerechtigheid en heiligheid."
+        },
+        {
+          "type": "qa",
+          "number": 9,
+          "question": "Vanwaar komt dan die verdorvenheid, die in u is?",
+          "answer": "Uit den val en de ongehoorzaamheid van Adam en Eva in het Paradijs, waar onze natuur alzoo is verdorven, dat wij allen in zonden ontvangen en geboren worden."
+        },
+        {
+          "type": "qa",
+          "number": 10,
+          "question": "Wat is dat voor eene ongehoorzaamheid geweest?",
+          "answer": "Dat zij hebben gegeten van de vrucht des booms, welke God hun verboden had."
+        },
+        {
+          "type": "qa",
+          "number": 11,
+          "question": "Gaat ons de ongehoorzaamheid van Adam aan?",
+          "answer": "Ja zij toch; want hij is ons aller vader, en wij hebben allen in hem gezondigd."
+        },
+        {
+          "type": "qa",
+          "number": 12,
+          "question": "Zoo zijn wij dan onbekwaam tot eenig goed als uit onszelven, en geneigd tot alle kwaad?",
+          "answer": "Ja wij; tenzij dat wij door den Geest Gods wedergeboren worden."
+        },
+        {
+          "type": "qa",
+          "number": 13,
+          "question": "Wil God zulke ongehoorzaamheid en verdorvenheid ongestraft laten?",
+          "answer": "Neen Hij; maar naar zijn rechtvaardig oordeel wil Hij die tijdelijk en eeuwiglijk straffen, gelijk geschreven staat: Vervloekt is een iegelijk, die niet blijft in al hetgene geschreven is in het boek der wet, om dat te doen."
+        }
+      ]
+    },
+    {
+      "id": "deel-2",
+      "number": 2,
+      "label": "Deel 2",
+      "title": "Van des menschen verlossing uit zijne ellende",
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 14,
+          "question": "Hoe kunt gij deze straffen ontgaan, en wederom tot genade komen?",
+          "answer": "Door zulk eenen middelaar, die tegelijk waarachtig God en een waarachtig rechtvaardig mensch is."
+        },
+        {
+          "type": "qa",
+          "number": 15,
+          "question": "Wie is die middelaar?",
+          "answer": "Onze Heere Jezus Christus, die in één persoon waarachtig God en een waarachtig rechtvaardig mensch is."
+        },
+        {
+          "type": "qa",
+          "number": 16,
+          "question": "Kunnen de engelen onze middelaars niet zijn?",
+          "answer": "Neen zij; want zij zijn noch God noch menschen."
+        },
+        {
+          "type": "qa",
+          "number": 17,
+          "question": "Kunnen de heiligen onze middelaars niet zijn?",
+          "answer": "Neen zij; want zij hebben zelven gezondigd, en zijn niet anders dan door dezen eenigen Middelaar zalig geworden."
+        },
+        {
+          "type": "qa",
+          "number": 18,
+          "question": "Zullen ook alle menschen door den Middelaar Jezus zalig worden, gelijk zij allen door Adam zijn verdoemd geworden?",
+          "answer": "Neen zij; maar alleen, die Hem met een waar geloof aannemen; gelijk geschreven staat, Joh. III: 16: Alzoo lief heeft God de wereld gehad, dat Hij zijnen eeniggeborenen Zoon gegeven heeft, opdat een iegelijk, die in Hem gelooft, niet verderve, maar het eeuwige leven hebbe."
+        },
+        {
+          "type": "qa",
+          "number": 19,
+          "question": "Wat is een waar geloof?",
+          "answer": "Het is eene stellige kennis van God, en van zijne beloften, ons in het Evangelie geopenbaard, en een hartelijk vertrouwen, dat mij alle mijne zonden om Christus' wille vergeven zijn."
+        },
+        {
+          "type": "qa",
+          "number": 20,
+          "question": "Wat is de hoofdsom van hetgene ons God in het Evangelie belooft, en bevolen heeft te gelooven?",
+          "answer": "Dat is begrepen in de twaalf Artikelen des algemeenen Christelijken geloofs, die aldus luiden:\n\n1. Ik geloof in God den Vader, den Almachtige, Schepper des hemels en der aarde.\n\n2. En in Jezus Christus, zijnen eeniggeborenen Zoon, onzen Heere; 3. die ontvangen is van den Heiligen Geest, geboren uit de maagd Maria; 4. die geleden heeft onder Pontius Pilatus, is gekruisigd, gestorven en begraven, nedergedaald ter helle; 5. ten derden dage wederom opgestaan van de dooden; 6. opgevaren ten hemel, zittende ter rechterhand Gods des almachtigen Vaders; 7. van waar Hij komen zal om te oordeelen de levenden en de dooden.\n\n8. Ik geloof in den Heiligen Geest. 9. Ik geloof eene heilige, algemeene, Christelijke Kerk, de gemeenschap der heiligen; 10. vergeving der zonden; 11. wederopstanding des vleesches; 12. en een eeuwig leven."
+        },
+        {
+          "type": "qa",
+          "number": 21,
+          "question": "Als gij belijdt te gelooven in God den Vader, en den Zoon, en den Heiligen Geest, bedoelt gij daarmede drie Goden?",
+          "answer": "Neen ik geenszins; want er is maar één eenig waarachtig God."
+        },
+        {
+          "type": "qa",
+          "number": 22,
+          "question": "Waarom noemt gij dan drie: den Vader, den Zoon, en den Heiligen Geest?",
+          "answer": "Omdat God zich alzoo in zijn Woord heeft geopenbaard, dat deze drie onderscheidene Personen de eenige en waarachtige God zijn; gelijk wij ook gedoopt zijn in den naam des Vaders, en des Zoons, en des Heiligen Geestes."
+        },
+        {
+          "type": "qa",
+          "number": 23,
+          "question": "Wat gelooft gij met deze woorden: Ik geloof in God den Vader, den Almachtige, Schepper des hemels en der aarde?",
+          "answer": "Dat de eeuwige Vader onzes Heeren Jezus Christus, die hemel en aarde uit niet geschapen heeft, en nog door zijne voorzienigheid onderhoudt, om zijns Zoons Christus' wille mijn God en mijn Vader is."
+        },
+        {
+          "type": "qa",
+          "number": 24,
+          "question": "Wat gelooft gij met deze woorden: En in Jezus Christus, zijnen eeniggeborenen Zoon, onzen Heere?",
+          "answer": "Dat Jezus Christus de eeuwige en eenige Zoon des Vaders is, éénswezens met God den Vader, en den Heiligen Geest."
+        },
+        {
+          "type": "qa",
+          "number": 25,
+          "question": "Gelooft gij niet, dat Hij ook mensch geworden is?",
+          "answer": "Ja ik; want Hij is ontvangen van den Heiligen Geest, en geboren uit de maagd Maria."
+        },
+        {
+          "type": "qa",
+          "number": 26,
+          "question": "Is dan zijne Godheid veranderd in menschheid?",
+          "answer": "Neen; want de Godheid is onveranderlijk."
+        },
+        {
+          "type": "qa",
+          "number": 27,
+          "question": "Hoe is Hij dan mensch geworden?",
+          "answer": "Door aanneming der menschheid in eenigheid zijns persoons."
+        },
+        {
+          "type": "qa",
+          "number": 28,
+          "question": "Heeft Hij dan zijne menschheid uit den hemel gebracht?",
+          "answer": "Neen Hij; maar Hij heeft die aangenomen uit de maagd Maria, door de werking des Heiligen Geestes; en is alzoo ons, zijnen broederen, in alles gelijk geworden, uitgenomen de zonde; Hebr. II: 17 en IV: 15."
+        },
+        {
+          "type": "qa",
+          "number": 29,
+          "question": "Waarom wordt Hij Jezus, dat is, Zaligmaker, genoemd?",
+          "answer": "Omdat Hij zijn volk zalig maakt van hunne zonden."
+        },
+        {
+          "type": "qa",
+          "number": 30,
+          "question": "Is er anders geen Zaligmaker?",
+          "answer": "Neen; want er is ook onder den hemel geen andere naam die onder de menschen gegeven is, door welken wij moeten zalig worden, dan de naam van Jezus; Hand. IV: 12."
+        },
+        {
+          "type": "qa",
+          "number": 31,
+          "question": "Waarom wordt Hij Christus, dat is, Gezalfde, genoemd?",
+          "answer": "Omdat Hij met den Heiligen Geest is gezalfd, en van God den Vader verordend, tot onzen grooten Profeet, tot onzen eenigen Hoogepriester, en tot onzen eeuwigen Koning."
+        },
+        {
+          "type": "qa",
+          "number": 32,
+          "question": "Wat heeft dan Jezus Christus gedaan, om ons zalig te maken?",
+          "answer": "Hij heeft voor ons geleden, is gekruisigd, en gestorven, is begraven, en nedergedaald ter helle, dat is, Hij heeft de helsche pijn geleden; en is alzoo zijnen Vader gehoorzaam geworden, opdat Hij ons van de tijdelijke en eeuwige straffen der zonde verlossen zoude."
+        },
+        {
+          "type": "qa",
+          "number": 33,
+          "question": "In welke natuur heeft Hij dit geleden?",
+          "answer": "Alleen in zijne menschelijke natuur, dat is, in zijn ziel en lichaam."
+        },
+        {
+          "type": "qa",
+          "number": 34,
+          "question": "Wat heeft dan zijne Godheid hiertoe gedaan?",
+          "answer": "Zijne Godheid heeft door hare kracht die aangenomene menschheid alzoo gesterkt, dat zij den last van den toorn Gods tegen de zonde heeft kunnen verdragen, en ons daarvan verlossen."
+        },
+        {
+          "type": "qa",
+          "number": 35,
+          "question": "Is Christus in den dood gebleven?",
+          "answer": "Neen Hij; maar Hij is ten derden dage opgestaan van de dooden tot onze rechtvaardigmaking; Rom. IV: 25."
+        },
+        {
+          "type": "qa",
+          "number": 36,
+          "question": "Waar is Christus nu naar zijne menschheid?",
+          "answer": "Hij is opgevaren ten hemel, en zit ter rechterhand Gods des Vaders, dat is, verheven in de hoogste heerlijkheid boven alle schepselen; Eph. I: 20, 21."
+        },
+        {
+          "type": "qa",
+          "number": 37,
+          "question": "Waartoe is Hij daar zoo hoog verheven?",
+          "answer": "Inzonderheid opdat Hij van daar zijne gemeente zoude regeeren, en onze Voorbidder zijn bij den Vader."
+        },
+        {
+          "type": "qa",
+          "number": 38,
+          "question": "Is Hij dan niet bij ons tot aan het einde der wereld, gelijk Hij ons beloofd heeft? Matth. XXVIII: 20.",
+          "answer": "Naar zijne Godheid, majesteit, genade en Geest, wijkt Hij nimmermeer van ons; maar naar zijne menschheid blijft Hij in den hemel, totdat Hij eenmaal komen zal om te oordeelen de levenden en de dooden."
+        },
+        {
+          "type": "qa",
+          "number": 39,
+          "question": "Wat gelooft gij van den Heiligen Geest?",
+          "answer": "Dat Hij te zamen met den Vader en den Zoon waarachtig, eeuwig God is; en dat Hij mij van den Vader door Christus gegeven zijnde, wederbaart, in alle waarheid leidt, mij troost en in eeuwigheid bij mij zal blijven."
+        },
+        {
+          "type": "qa",
+          "number": 40,
+          "question": "Wat gelooft gij van de heilige, algemeene Kerk?",
+          "answer": "Dat de Zone Gods uit het gansche menschelijk geslacht de uitverkorenen ten eeuwigen leven, door zijn Geest en Woord, zich tot eene gemeente vergadert; waarvan ik geloof, dat ik een levend lidmaat ben en eeuwig zal blijven."
+        },
+        {
+          "type": "qa",
+          "number": 41,
+          "question": "Waar vergadert Hij deze Kerk?",
+          "answer": "Waar men Gods Woord recht predikt, en de Heilige Sacramenten bedient naar de instelling van Christus."
+        },
+        {
+          "type": "qa",
+          "number": 42,
+          "question": "Welke weldaden doet God aan deze gemeente?",
+          "answer": "Hij schenkt haar vergeving der zonden, wederopstanding des vleesches, en het eeuwige leven."
+        },
+        {
+          "type": "qa",
+          "number": 43,
+          "question": "Wat baat het u nu, dat gij dit alles gelooft?",
+          "answer": "Dat ik in Christus voor God rechtvaardig ben."
+        },
+        {
+          "type": "qa",
+          "number": 44,
+          "question": "Hoe zijt gij rechtvaardig voor God?",
+          "answer": "Alleen door een waar geloof in Jezus Christus."
+        },
+        {
+          "type": "qa",
+          "number": 45,
+          "question": "Hoe is het te verstaan, dat gij door het geloof gerechtvaardigd zijt?",
+          "answer": "Alzoo, dat alleen de volkomene genoegdoening en gerechtigheid van Christus door God mij wordt toegerekend, waardoor mij mijne zonden vergeven en ik een erfgenaam des eeuwigen levens word; en dat ik die niet anders dan door het geloof kan aannemen."
+        },
+        {
+          "type": "qa",
+          "number": 46,
+          "question": "Waarom kunnen onze goede werken onze gerechtigheid voor God niet zijn, noch ook een stuk daarvan?",
+          "answer": "Daarom, dat ook onze beste werken in dit leven onvolkomen en met zonde bevlekt zijn."
+        },
+        {
+          "type": "qa",
+          "number": 47,
+          "question": "Verdienen dan onze goede werken niet, die God nochtans in dit en in het toekomende leven wil beloonen?",
+          "answer": "Deze belooning geschiedt niet uit verdienste, maar uit genade."
+        },
+        {
+          "type": "qa",
+          "number": 48,
+          "question": "Wie werkt dat geloof in u?",
+          "answer": "De Heilige Geest."
+        },
+        {
+          "type": "qa",
+          "number": 49,
+          "question": "Door wat middel?",
+          "answer": "Door het gehoor van het gepredikte Woord; Rom. X: 14, 17."
+        },
+        {
+          "type": "qa",
+          "number": 50,
+          "question": "Hoe versterkt Hij dat geloof?",
+          "answer": "Door datzelfde gepredikte Woord, en het gebruik der Heilige Sacramenten."
+        },
+        {
+          "type": "qa",
+          "number": 51,
+          "question": "Wat zijn Sacramenten?",
+          "answer": "Heilige teekenen en zegelen, van God ingesteld, om ons daardoor te verzekeren, dat Hij ons vergeving der zonden en het eeuwige leven uit genade schenkt, om het eenige slachtoffer van Christus aan het kruis volbracht."
+        },
+        {
+          "type": "qa",
+          "number": 52,
+          "question": "Hoeveel Sacramenten heeft Christus in het nieuwe Testament ingesteld?",
+          "answer": "Twee: den Heiligen Doop en het Heilige Avondmaal."
+        },
+        {
+          "type": "qa",
+          "number": 53,
+          "question": "Welk is het teeken in den Doop?",
+          "answer": "Het water, waarmede wij gedoopt worden in den naam des Vaders, en des Zoons, en des Heiligen Geestes."
+        },
+        {
+          "type": "qa",
+          "number": 54,
+          "question": "Wat beteekent en verzegelt dat?",
+          "answer": "De afwassching der zonden door het bloed en den Geest van Jezus Christus."
+        },
+        {
+          "type": "qa",
+          "number": 55,
+          "question": "Waar heeft ons Christus zulks toegezegd en beloofd?",
+          "answer": "In de inzetting des Doops, die aldus luidt: Gaat henen in de geheele wereld, predikt het Evangelie aan alle creaturen; onderwijst alle de volkeren, hen doopende in den naam des Vaders, en des Zoons, en des Heiligen Geestes; die geloofd zal hebben en gedoopt zal zijn, zal zalig worden; maar die niet zal geloofd hebben, zal verdoemd worden."
+        },
+        {
+          "type": "qa",
+          "number": 56,
+          "question": "Zal men ook de jonge kinderen doopen?",
+          "answer": "Ja; want zij zijn alzoowel als de volwassenen in het verbond Gods en in zijne gemeente begrepen."
+        },
+        {
+          "type": "qa",
+          "number": 57,
+          "question": "Welk is het uiterlijk teeken in het Avondmaal?",
+          "answer": "Het gebroken brood, dat wij eten, en de vergoten wijn, dien wij drinken, tot gedachtenis van het lijden en sterven van Christus."
+        },
+        {
+          "type": "qa",
+          "number": 58,
+          "question": "Wat beteekent en verzegelt dat?",
+          "answer": "Dat Christus onze ziele met zijn gekruisigd lichaam en vergoten bloed spijst en laaft ten eeuwigen leven."
+        },
+        {
+          "type": "qa",
+          "number": 59,
+          "question": "Waar heeft ons Christus zulks toegezegd?",
+          "answer": "In de instelling des Heiligen Avondmaals, die door Paulus aldus wordt beschreven, 1 Cor. XI: Ik heb van den Heere ontvangen, hetgene ik u ook overgegeven heb, dat de Heere Jezus, in den nacht in welken Hij verraden werd, het brood nam; en als Hij gedankt had, brak Hij het, en zeide: Neemt, eet; dat is mijn lichaam, dat voor u gebroken wordt; doet dat tot mijne gedachtenis. Desgelijks nam Hij ook den drinkbeker, na het eten des avondmaals, en zeide: Deze drinkbeker is het nieuwe Testament in mijn bloed; doet dat, zoo dikwijls als gij dien zult drinken, tot mijne gedachtenis. Want zoo dikwijls als gij dit brood zult eten, en dezen drinkbeker zult drinken, zoo verkondigt den dood des Heeren, totdat Hij komt."
+        },
+        {
+          "type": "qa",
+          "number": 60,
+          "question": "Wordt het brood veranderd in het lichaam van Christus, of de wijn in zijn bloed?",
+          "answer": "Neen; niet meer dan het water in den Doop wordt veranderd in het bloed van Christus."
+        },
+        {
+          "type": "qa",
+          "number": 61,
+          "question": "Hoe moet gij uzelven beproeven, eer gij tot het Avondmaal des Heeren gaat?",
+          "answer": "Eerst moet ik onderzoeken, of ik mijzelven vanwege mijne zonden mishaag, en mij daarom voor God verootmoedig; ten tweede, of ik geloof en vertrouw, dat mij alle mijne zonden om Christus' wille vergeven zijn; ten derde, of ik ook een ernstig voornemen heb, om voortaan in alle goede werken te wandelen."
+        },
+        {
+          "type": "qa",
+          "number": 62,
+          "question": "Zal men ook diegenen ten Avondmaal laten gaan, die ongoddelijke leer drijven, of een ergerlijk leven leiden?",
+          "answer": "Neen; opdat Gods verbond niet worde ontheiligd, en zijn toorn over de gansche gemeente niet aangestoken worde."
+        },
+        {
+          "type": "qa",
+          "number": 63,
+          "question": "Hoe zal men dan met zoodanigen handelen?",
+          "answer": "Volgens de ordinantie, die ons Christus daarvan heeft gegeven, Matth. XVIII: 15, welke aldus luidt: Indien uw broeder tegen u gezondigd heeft, ga henen en bestraf hem tusschen u en hem alleen; indien hij u hoort, zoo hebt gij uwen broeder gewonnen. Maar indien hij u niet hoort, zoo neem nog één of twee met u; opdat in den mond van twee of drie getuigen alle woord besta; en indien hij dezen geen gehoor geeft, zoo zeg het der gemeente; en indien hij ook der gemeente geen gehoor geeft, zoo zij hij u als de heiden en de tollenaar."
+        }
+      ]
+    },
+    {
+      "id": "deel-3",
+      "number": 3,
+      "label": "Deel 3",
+      "title": "Van de dankbaarheid",
+      "blocks": [
+        {
+          "type": "qa",
+          "number": 64,
+          "question": "Aangezien wij alleen uit genade door Christus zalig worden, waarom moet gij nog goede werken doen?",
+          "answer": "Niet om den hemel daarmede te verdienen (hetwelk Christus gedaan heeft), maar omdat God mij zulks heeft geboden."
+        },
+        {
+          "type": "qa",
+          "number": 65,
+          "question": "Waartoe dienen dan uwe goede werken?",
+          "answer": "Dat ik Gode daarmede dankbaarheid voor alle zijne weldaden bewijze, en Hij door mij geprezen worde; dat ik ook uit de goede werken, als uit de vruchten, van de echtheid van mijn geloof verzekerd zij; en dat mijn naaste daardoor gesticht en voor Christus gewonnen worde."
+        },
+        {
+          "type": "qa",
+          "number": 66,
+          "question": "Zullen diegenen ook zalig worden, die geene goede werken doen?",
+          "answer": "Neen zij; want de Schrift zegt, dat geen onkuische, afgodendienaar, echtbreker, hoereerder, dief, geldgierige, dronkaard, lasteraar, noch roover, noch dergelijke, het Rijk Gods beërven zal, 1 Cor. VI: 9 en 10, tenzij dat zij zich tot God bekeeren."
+        },
+        {
+          "type": "qa",
+          "number": 67,
+          "question": "Waarin bestaat de bekeering des menschen?",
+          "answer": "In een hartelijk leedwezen en vlieden van de zonden; en in een ernstigen lust, en doen van alle goede werken."
+        },
+        {
+          "type": "qa",
+          "number": 68,
+          "question": "Wat zijn goede werken?",
+          "answer": "Alleen die uit waar geloof, naar de Wet Gods, Hem ter eere geschieden; en niet, die op menschen-inzettingen, of op ons goeddunken gegrond zijn."
+        },
+        {
+          "type": "qa",
+          "number": 69,
+          "question": "Kunnen degenen, die tot God bekeerd zijn, de Wet Gods volkomenlijk houden?",
+          "answer": "Neen zij toch; maar ook de allerheiligsten, zoolang als zij in dit leven zijn, hebben maar een klein beginsel dezer gehoorzaamheid; doch alzoo, dat zij met een ernstig voornemen, niet alleen naar sommige, maar naar alle de geboden Gods beginnen te leven; gelijk zij ook den Heere geduriglijk bidden om dagelijks daarin toe te nemen."
+        },
+        {
+          "type": "qa",
+          "number": 70,
+          "question": "Wien moeten wij hierom bidden?",
+          "answer": "Niet eenig schepsel, maar alleen God, die ons helpen kan, en om Jezus Christus' wille verhooren wil."
+        },
+        {
+          "type": "qa",
+          "number": 71,
+          "question": "In wiens naam moeten wij God bidden?",
+          "answer": "Alleen in den naam van Christus, Joh. XVI: 23, en niet in den naam van eenigen heilige."
+        },
+        {
+          "type": "qa",
+          "number": 72,
+          "question": "Om welke dingen moeten wij dezen God bidden?",
+          "answer": "Om alle geestelijke en lichamelijke nooddruft, welke de Heere Christus begrepen heeft in het gebed, dat Hij ons zelf geleerd heeft."
+        },
+        {
+          "type": "qa",
+          "number": 73,
+          "question": "Hoe luidt dat gebed?",
+          "answer": "Onze Vader, die in de hemelen zijt;\n\nUw naam worde geheiligd.\n\nUw koninkrijk kome.\n\nUw wil geschiede, gelijk in den hemel, alzoo ook op de aarde.\n\nGeef ons heden ons dagelijksch brood.\n\nEn vergeef ons onze schulden, gelijk ook wij vergeven onzen schuldenaren.\n\nEn leid ons niet in verzoeking, maar verlos ons van den booze.\n\nWant uw is het koninkrijk, en de kracht, en de heerlijkheid in der eeuwigheid. Amen."
+        },
+        {
+          "type": "qa",
+          "number": 74,
+          "question": "Wat begeert gij van God in dit gansche gebed?",
+          "answer": "Ten eerste, dat al wat dient tot Gods eer, bevorderd worde, en daarentegen geweerd, wat haar verhindert of zijnen wil wederstaat. Ten andere, dat Hij mij met alle nooddruft naar het lichaam verzorge, en naar de ziele mij beware voor alle kwaad, dat mij aan mijne zaligheid zoude kunnen schadelijk zijn."
+        }
+      ]
+    }
+  ]
+}

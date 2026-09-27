@@ -282,14 +282,16 @@ export function pickVariant(
  */
 export function pickSeries(
   type: NotificationType,
-  tokens: CopyTokens,
+  /** One token set for the whole run, or one per day (e.g. that day's own verse). */
+  tokens: CopyTokens | ((day: number) => CopyTokens),
   options: { seed: string; count: number; recentVariantIds?: string[] },
 ): RenderedNotification[] {
   const out: RenderedNotification[] = [];
   const used = [...(options.recentVariantIds ?? [])];
 
   for (let day = 0; day < options.count; day++) {
-    const rendered = pickVariant(type, tokens, {
+    const dayTokens = typeof tokens === 'function' ? tokens(day) : tokens;
+    const rendered = pickVariant(type, dayTokens, {
       seed: `${options.seed}:${day}`,
       recentVariantIds: used,
       // Exclude everything already placed in this batch, not just the last 10.

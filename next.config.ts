@@ -97,6 +97,11 @@ const nextConfig: NextConfig = {
     // untraced file is simply absent from the lambda. The website reads the
     // very same files straight off the CDN and needs no entry.
     "/api/v1/crossrefs/**": ["./public/data/crossrefs/v1/**/*"],
+    // Bronnen are prerendered (pages and /api/v1/bronnen alike), so these reads
+    // happen at build. Listed anyway so a revalidation can never find the
+    // folder missing and quietly publish an empty library.
+    "/api/v1/bronnen/**": ["./lib/content/bronnen/data/*.json"],
+    "/sitemap.xml": ["./lib/content/bronnen/data/*.json"],
   },
   /**
    * Headers that affect Core Web Vitals or crawling. Nothing decorative here -

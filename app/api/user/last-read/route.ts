@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextRequest, NextResponse, after } from "next/server"
 import { getServerSession } from "next-auth"
 import connectMongoDB from "../../../../lib/mongodb"
 import User from "../../../../models/User"
@@ -8,6 +8,7 @@ import { isAdminEmail } from "../../../../lib/adminEmails"
 import { resolveIsPro } from "../../../../lib/mobilePremium"
 import { isSafeBookKey, isSafeChapter } from "../../../../lib/readingProgress"
 import { toCanonicalDutchBook } from "../../../../lib/readChaptersCanon"
+import { recordBibleYearChapter } from "../../../../lib/bibleYear/service"
 
 // GET - Fetch user's last read chapter
 export async function GET() {
@@ -104,10 +105,17 @@ export async function POST(request: NextRequest) {
     // The guided study flow grants `study_lesson` on completion; letting it also
     // collect `chapter_read` would pay twice for one passage, and replaying a
     // lesson would farm the difference.
+    const isPro = resolveIsPro(user, isAdminEmail(session.user.email))
     const xp =
       alreadyRead || body?.awardXp === false
         ? null
-        : await grantXp(String(user._id), "chapter_read", { isPro: resolveIsPro(user, isAdminEmail(session.user.email)) })
+        : await grantXp(String(user._id), "chapter_read", { isPro })
+
+    // Bijbel in een jaar auto-tick: one indexed update, a no-op without a
+    // running plan. After the response (`after`), so it never delays the read;
+    // it catches and logs its own errors - never fails the read.
+    const userId = String(user._id)
+    after(() => recordBibleYearChapter(userId, progressKey, chapter, { isPro }))
 
     return NextResponse.json({
       message: "Last read chapter updated successfully",

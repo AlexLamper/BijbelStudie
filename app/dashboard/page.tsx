@@ -3,16 +3,15 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useSession } from "next-auth/react"
-import { ArrowRight, BookOpen, ChartNoAxesColumn } from "lucide-react"
-import { CHAPTER_COUNTS } from "../../lib/data/bible-chapter-counts"
+import { BookOpen, ChartNoAxesColumn } from "lucide-react"
 import { curatedStudies } from "../../lib/data/curated-studies"
-import { findAnyStudy } from "../../lib/bookStudies"
 import {
   NT_BOOKS,
   OT_BOOKS,
-  readHref,
   useDashboardData,
 } from "../../hooks/useDashboardData"
+import type { DashboardResume } from "../../lib/resumeTypes"
+import ResumeCard, { ResumeCardSkeleton } from "../../components/dashboard/ResumeCard"
 import BillingNotices from "../../components/pricing/BillingNotices"
 import DailyVerseCard from "../../components/dashboard/DailyVerseCard"
 import DashboardFeedbackSlot from "../../components/feedback/DashboardFeedbackSlot"
@@ -20,7 +19,7 @@ import { useTreeSummary } from "../../components/dashboard/ProgressTree"
 import GrowthAnnouncementCard from "../../components/dashboard/GrowthAnnouncementCard"
 import AppShell from "../../components/shell/AppShell"
 import StudyArtwork from "../studies/StudyArtwork"
-import { completedStudyIds, splitRecommendations } from "../../lib/studyRecommendations"
+import { splitRecommendations } from "../../lib/studyRecommendations"
 import TreeAvatar from "../../components/kit/TreeAvatar"
 import {
   Card,
@@ -36,13 +35,13 @@ import {
  * The dashboard (design_handoff_web/PAGES.md §1).
  *
  * Two columns: the work at `flex-1` and a 320 px rail, 20 px apart. The work
- * column is the verse, the one thing to carry on with, and four recommended
- * studies; the rail is the tree, the week and the 66 books.
+ * column is the verse, the one thing to carry on with (ResumeCard), and four
+ * recommended studies; the rail is the tree, the week and the 66 books.
  *
  * Every number on this screen comes from the hooks that were already here -
  * `useDashboardData` and `useTreeSummary` are untouched. The one addition is
- * `useResumeStudy` below: a single indexed read of the user's enrolments, so
- * "Verder waar je was" can name the running study lesson.
+ * `useDashboardResume` below: the server-built `DashboardResume`, so "Verder
+ * waar je was" names the running lesson or the last chapter.
  *
  * THE READING HEATMAP is the one derived value RULES.md §3 asks for: a 0-4 step
  * per book, computed here from `bookReadRatio`, which the hook already returns.
@@ -61,71 +60,37 @@ function heatStep(ratio: number): number {
 /** A stable empty set, so the effect's initial state is not a new object a render. */
 const EMPTY_IDS: Set<string> = new Set()
 
-/** The fields of a serialised enrolment this page reads. */
-interface EnrollmentSummary {
-  studyId: string
-  status: string
-  currentLessonDay: number | null
-  lessonsTotal: number
-  lessonsCompleted: number
-  completedAt: string | null
-}
-
 /**
- * The running study lesson for "Verder waar je was".
+ * The resume card's data, from GET /api/v1/dashboard/resume.
  *
- * One GET to /api/v1/study-enrollments: a single indexed find on
- * `{ userId, lastActivityAt }`, already sorted newest first, and a 401 before
- * any query for a guest. The first active, unfinished enrolment wins - the
- * same one /studie resumes.
+ * That route replaces this page's former /api/v1/study-enrollments call: the
+ * same single indexed enrolment read, and the server builds the whole
+ * `DashboardResume` (lib/dashboardResume.ts) - the exact object the app gets
+ * inside GET /api/v1/dashboard - so lesson, step and schedule are resolved once,
+ * on the server, with the lesson's real step list. The same response carries
+ * the finished-study ids the recommendation rows filter on. A guest gets a 401
+ * before any query and the card shows its start prompt.
  */
-function useResumeStudy() {
-  const [enrollment, setEnrollment] = useState<EnrollmentSummary | null>(null)
+function useDashboardResume() {
+  const [resume, setResume] = useState<DashboardResume | null>(null)
   const [completed, setCompleted] = useState<Set<string>>(EMPTY_IDS)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     let cancelled = false
-    fetch("/api/v1/study-enrollments")
+    fetch("/api/v1/dashboard/resume")
       .then(r => (r.ok ? r.json() : null))
       .then(data => {
         if (cancelled) return
-        const list: EnrollmentSummary[] = data?.enrollments ?? []
-        const active = list.find(e => e.status === "active" && !e.completedAt && findAnyStudy(e.studyId))
-        setEnrollment(active ?? null)
-        // The same single response also says which studies are finished, so the
-        // recommendation rows cost no extra request.
-        setCompleted(completedStudyIds(list))
+        setResume((data?.resume as DashboardResume | undefined) ?? null)
+        setCompleted(new Set<string>(Array.isArray(data?.completedStudyIds) ? data.completedStudyIds : []))
       })
       .catch(() => {})
       .finally(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true }
   }, [])
 
-  if (!enrollment) return { resume: null, completed, loading }
-
-  const study = findAnyStudy(enrollment.studyId)!
-  const total = enrollment.lessonsTotal || study.lessons.length
-  const day = enrollment.currentLessonDay ?? Math.min(total, enrollment.lessonsCompleted + 1)
-  const lesson = study.lessons.find(l => l.day === day)
-  // Generated book lessons are titled "6. Noach" or "Hoofdstuk 6"; the number
-  // is already in "les 6", so keep only a name that says something.
-  const rawTitle = lesson?.title.replace(/^\d+\.\s*/, "") ?? ""
-  const lessonTitle = /^Hoofdstuk \d+$/.test(rawTitle) ? "" : rawTitle
-
-  return {
-    loading,
-    completed,
-    resume: {
-      studyId: study.id,
-      href: `/studie/${study.id}`,
-      title: study.title,
-      day,
-      total,
-      lessonTitle,
-      pct: total > 0 ? Math.round((enrollment.lessonsCompleted / total) * 100) : 0,
-    },
-  }
+  return { resume, completed, loading }
 }
 
 /** The recommended-row cards; "Meer om te ontdekken" renders the very same card. */
@@ -203,10 +168,7 @@ export default function DashboardPage() {
   const isGuest = status !== "authenticated"
   const d = useDashboardData()
   const tree = useTreeSummary()
-  const { resume, completed, loading: resumeLoading } = useResumeStudy()
-  // Hold the card until both sources have answered, so it never flips from the
-  // last chapter to the study lesson a moment later.
-  const continueLoading = !resume && (d.loading || resumeLoading)
+  const { resume, completed, loading: resumeLoading } = useDashboardResume()
 
   const level = d.level?.level ?? tree.level
   const pct = Math.min(100, d.level?.progressPercentage ?? tree.progressPercentage)
@@ -214,14 +176,6 @@ export default function DashboardPage() {
   // The step strip needs the tree's own state (its floor); until it has that,
   // or when the tree is off, the card keeps counting levels.
   const growthStrip = Boolean(tree.hasTree && tree.stageName && tree.stepLine)
-
-  const lastRead = d.lastRead
-  const readingHref = lastRead
-    ? readHref(lastRead.book, lastRead.chapter, lastRead.version)
-    : "/lezen"
-  const bookChapters = lastRead ? (CHAPTER_COUNTS[lastRead.book] ?? 1) : 0
-  const bookRead = lastRead ? d.bookReadCount(lastRead.book) : 0
-  const bookPct = lastRead ? Math.round(d.bookReadRatio(lastRead.book) * 100) : 0
 
   const todayIndex = Math.max(0, d.weekDays.findIndex(day => day.isToday))
 
@@ -237,7 +191,7 @@ export default function DashboardPage() {
   const { recommended, more: moreStudies } = splitRecommendations({
     studies: curatedStudies,
     completed,
-    resumeStudyId: resume?.studyId ?? null,
+    resumeStudyId: resume?.primary.studyId ?? null,
   })
 
   return (
@@ -268,82 +222,9 @@ export default function DashboardPage() {
               rating or a welcome-back question. Usually nothing. */}
           <DashboardFeedbackSlot />
 
-          {/* Verder waar je was.
-              One row: the text block at `flex-1` (eyebrow, title, a slim bar
-              with "les 6 van 50" beside it) and a single teal button on the
-              right. The row wraps, so in a narrow work column the button drops
-              under the text instead of squeezing the title.
-              Three states, most specific first: a running study lesson (from
-              the enrolment), else the last chapter read, else a start. */}
-          {continueLoading ? (
-            <Card className="flex flex-none flex-wrap items-center gap-x-8 gap-y-4 px-6 py-5 max-md:px-5">
-              <div className="min-w-[min(100%,240px)] flex-1" aria-busy="true">
-                <div className="h-[11px] w-[130px] animate-pulse rounded bg-line-soft" />
-                <div className="mt-[10px] h-[24px] w-[min(100%,300px)] animate-pulse rounded bg-line-soft" />
-                <div className="mt-[14px] h-[6px] max-w-[340px] animate-pulse rounded-full bg-line-soft" />
-              </div>
-              <div className="h-12 w-[180px] flex-none animate-pulse rounded-btn bg-line-soft" />
-            </Card>
-          ) : (
-            <Card className="flex flex-none flex-wrap items-center gap-x-8 gap-y-4 px-6 py-5 max-md:px-5">
-              <div className="min-w-[min(100%,240px)] flex-1">
-                <div className="text-[11px] font-semibold uppercase tracking-[1.4px] text-teal dark:text-teal-400">
-                  {resume || lastRead ? "Verder waar je was" : "Begin waar je wilt"}
-                </div>
-                <div className="mt-[6px] text-[22px] font-bold leading-[1.25] tracking-[-0.3px] text-ink [overflow-wrap:anywhere] max-md:text-[19px]">
-                  {resume
-                    ? `${resume.title} · les ${resume.day}${resume.lessonTitle ? ` - ${resume.lessonTitle}` : ""}`
-                    : lastRead
-                      ? `${lastRead.book} ${lastRead.chapter}`
-                      : "Kies een hoofdstuk of een studie"}
-                </div>
-
-                {resume || lastRead ? (
-                  <div className="mt-[14px] flex items-center gap-[14px]">
-                    <ProgressBar
-                      value={resume ? resume.pct : bookPct}
-                      height={6}
-                      className="max-w-[340px] flex-1"
-                    />
-                    <span className="flex-none whitespace-nowrap text-[13px] text-ink-muted tabular-nums">
-                      {resume
-                        ? `les ${resume.day} van ${resume.total}`
-                        : `${bookRead} van ${bookChapters} hoofdstukken`}
-                    </span>
-                  </div>
-                ) : (
-                  <div className="mt-[6px] text-[13px] text-ink-muted">
-                    Je laatst gelezen hoofdstuk verschijnt hier
-                  </div>
-                )}
-              </div>
-
-              <div className="flex flex-none flex-wrap items-center gap-x-5 gap-y-2 max-md:w-full">
-                {/* The old card's second door to /studie stays wherever the card
-                    is not already about a study. */}
-                {!resume && (
-                  <Link
-                    href="/studie"
-                    className="text-[14px] font-semibold text-ink-body no-underline transition-colors hover:text-teal dark:hover:text-teal-400"
-                  >
-                    Studie openen
-                  </Link>
-                )}
-                <Link
-                  href={resume ? resume.href : readingHref}
-                  data-track={resume ? "study_resume" : undefined}
-                  className="inline-flex h-12 items-center gap-[10px] rounded-[12px] bg-teal px-[22px] text-[15px] font-semibold text-white no-underline transition-colors hover:bg-teal-dark max-md:flex-1 max-md:justify-center"
-                >
-                  {resume
-                    ? `Verder met les ${resume.day}`
-                    : lastRead
-                      ? "Verder lezen"
-                      : "Beginnen met lezen"}
-                  <ArrowRight size={17} strokeWidth={2.2} />
-                </Link>
-              </div>
-            </Card>
-          )}
+          {/* Verder waar je was: the original minimal one-row card (eyebrow,
+              title, slim bar, one teal button), fed by the server's resume. */}
+          {resumeLoading ? <ResumeCardSkeleton /> : <ResumeCard resume={resume} />}
 
           <SectionHeading
             title="Aanbevolen voor jou"

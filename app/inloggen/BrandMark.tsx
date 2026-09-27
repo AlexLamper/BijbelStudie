@@ -1,4 +1,4 @@
-import Image from "next/image"
+import { BrandIcon } from "../../components/ui/BrandIcon"
 
 /**
  * The brand mark as it is drawn on the night-coloured auth pages.
@@ -12,17 +12,20 @@ import Image from "next/image"
  * owner's request: the icon is a rounded square with one much rounder corner,
  * and a circular glow behind it read as a mismatch rather than a lift. The
  * green "Studie" in the wordmark beside it now does the separating.
+ *
+ * The page is night-coloured in both themes, so the white-outlined tile
+ * (logo-icon-dark.svg) is drawn here regardless of the theme.
  */
 export function BrandMark() {
   return (
     <span className="relative inline-flex shrink-0">
-      <Image
+      <BrandIcon
         src="/images/icon-192.png"
         alt="BijbelStudie"
-        width={28}
-        height={28}
+        size={28}
         className="relative rounded-md"
         priority
+        alwaysDark
       />
     </span>
   )

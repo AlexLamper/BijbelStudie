@@ -87,6 +87,10 @@ export type ReferralOverview = {
   youEarn: boolean;
   /** End of this account's current comp period, if it has one. */
   proUntil: string | null;
+  /** Which invite line the card shows, decided here from the server's Pro
+   * state so web and app agree: 'gift' for Pro members (paying, trial, comp),
+   * who give the week; 'offer' for everyone else. */
+  copyVariant: 'gift' | 'offer';
   /** Whether this account may still enter someone else's code. */
   claim: { eligible: boolean; windowDays: number };
 };
@@ -102,15 +106,17 @@ export async function referralOverview(userId: string, isPro: boolean, now = new
     User.countDocuments({ referredBy: me._id, referralCreditedAt: { $ne: null } }),
   ]);
 
+  const youEarn = canReceiveCompWeek(me) && !(isPro && !me.compedProUntil);
   return {
     code,
     url: inviteUrl(code),
-    shareText: inviteShareText(code),
+    shareText: inviteShareText(code, youEarn),
     rewardDays: REFERRAL_REWARD_DAYS,
     joined,
     active,
-    youEarn: canReceiveCompWeek(me) && !(isPro && !me.compedProUntil),
+    youEarn,
     proUntil: me.compedProUntil ? new Date(me.compedProUntil).toISOString() : null,
+    copyVariant: isPro ? 'gift' : 'offer',
     claim: { eligible: claimantRefusal(me, isPro, now) === null, windowDays: REFERRAL_CLAIM_WINDOW_DAYS },
   };
 }
