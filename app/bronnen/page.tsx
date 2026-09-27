@@ -7,9 +7,9 @@ import { graph, webPageNode, itemListNode } from "../../lib/seo/structuredData";
 import { BRON_GROUPS, BRONNEN_PATH, workPath } from "../../lib/content/bronnen/catalog";
 import { loadWorks } from "../../lib/content/bronnen/load";
 import type { BronGroup } from "../../lib/content/bronnen/types";
-import { workCard, zondagCards } from "../../lib/content/bronnen/view";
+import { workCard } from "../../lib/content/bronnen/view";
 import { BronnenOverview } from "../../components/bronnen/BronnenOverview";
-import { BronnenSide } from "../../components/bronnen/BronnenSide";
+import { BronnenContinue } from "../../components/bronnen/BronnenContinue";
 
 /**
  * /bronnen - the confessions, forms and catechism booklets.
@@ -48,38 +48,36 @@ export default async function BronnenPage() {
     }),
   );
 
-  const hc = works.find(work => work.slug === "heidelbergse-catechismus");
   const cards = works.map(work => workCard(work, false));
   const groups = BRON_GROUPS.map(group => ({ ...group, chip: CHIP_LABEL[group.id] }));
 
   return (
     <AppShell title="Bronnen" ownHeading>
       <JsonLd data={pageGraph} />
-      <div className="grid w-full gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="min-w-0">
-          <header className="mb-6">
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[1.4px] text-teal-dark dark:text-teal-400">
-              Bronnen
-            </p>
-            <h1 className="text-[26px] font-bold leading-tight tracking-[-0.5px] text-ink sm:text-[30px]">
-              Belijdenis, catechismus en formulieren
-            </h1>
-            <p className="mt-2 max-w-[46rem] text-[15px] leading-[1.65] text-ink-muted">
-              Wat de kerk door de eeuwen heen uit de Schrift beleden heeft, met bij elke verwijzing de tekst uit de
-              Statenvertaling.
-            </p>
-          </header>
+      <div className="w-full min-w-0">
+        <header className="mb-6">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[1.4px] text-teal-dark dark:text-teal-400">
+            Bronnen
+          </p>
+          <h1 className="text-[26px] font-bold leading-tight tracking-[-0.5px] text-ink sm:text-[30px]">
+            Belijdenis, catechismus en formulieren
+          </h1>
+          <p className="mt-2 max-w-[46rem] text-[15px] leading-[1.65] text-ink-muted">
+            Wat de kerk door de eeuwen heen uit de Schrift beleden heeft, met bij elke verwijzing de tekst uit de
+            Statenvertaling.
+          </p>
+        </header>
 
-          {works.length === 0 ? (
-            <p className="rounded-card border border-line bg-surface p-6 text-[14px] text-ink-muted">
-              De bronnen worden op dit moment toegevoegd.
-            </p>
-          ) : (
+        {works.length === 0 ? (
+          <p className="rounded-card border border-line bg-surface p-6 text-[14px] text-ink-muted">
+            De bronnen worden op dit moment toegevoegd.
+          </p>
+        ) : (
+          <>
+            <BronnenContinue works={cards} />
             <BronnenOverview groups={groups} works={cards} />
-          )}
-        </div>
-
-        {works.length > 0 && <BronnenSide works={cards} zondagen={hc ? zondagCards(hc) : []} />}
+          </>
+        )}
       </div>
     </AppShell>
   );

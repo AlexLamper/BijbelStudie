@@ -125,7 +125,7 @@ export function BronnenOverview({ groups, works }: { groups: OverviewGroup[]; wo
                 ))}
               </ul>
             ) : (
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 {group.works.map(work => (
                   <Link
                     key={work.slug}
