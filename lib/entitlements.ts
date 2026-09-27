@@ -46,3 +46,12 @@ export function canCreateGroup(groupsLed: number, isPro: boolean): boolean {
 export const GROUP_LIMIT_MESSAGE =
   `Met een gratis account leid je ${FREE_GROUP_LIMIT === 1 ? 'één groep' : `${FREE_GROUP_LIMIT} groepen`}. ` +
   'Met Pro start je zoveel groepen als je wilt. Deelnemen aan groepen blijft altijd gratis.';
+
+/**
+ * Cross-references a free reader sees per verse, website and app together.
+ * They are the top-ranked ones (the list is sorted by OpenBible votes), so the
+ * free taste is the best material; the rest of the list is Pro. A verse with
+ * this many references or fewer shows no lock at all. Enforced by
+ * `gateCrossRefs` in lib/proContent.ts - server-side on /api/v1/crossrefs.
+ */
+export const FREE_CROSS_REFS = 2;

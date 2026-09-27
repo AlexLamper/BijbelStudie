@@ -1,5 +1,5 @@
 import type { Guide } from "./types";
-import { FREE_AI_DAILY_CAP, PRO_AI_DAILY_CAP } from "../../entitlements";
+import { FREE_AI_DAILY_CAP, FREE_CROSS_REFS, PRO_AI_DAILY_CAP } from "../../entitlements";
 
 /**
  * /bijbelstudie/bijbel-met-uitleg - target: "bijbel met uitleg online (lezen)",
@@ -158,8 +158,8 @@ export const GUIDE_EXPLAINED: Guide = {
           text: "Het hedendaagse vers-voor-vers commentaar van Ger de Koning op de hele Bijbel, volledig en zonder abonnement te lezen bij elk hoofdstuk.",
         },
         {
-          title: "Gratis: verwijzingen en achtergrond",
-          text: "Verwijzingen naar verwante bijbelplaatsen, algemene informatie over het bijbelboek en, waar beschikbaar, afbeeldingen van de plaatsen die in het hoofdstuk voorkomen.",
+          title: "Gratis: achtergrond en de sterkste verwijzingen",
+          text: `Algemene informatie over het bijbelboek, waar beschikbaar afbeeldingen van de plaatsen die in het hoofdstuk voorkomen, en per vers de ${FREE_CROSS_REFS} sterkste verwijzingen naar verwante bijbelplaatsen. Met Pro zie je ze allemaal.`,
         },
         {
           title: "Gratis: een inleiding bij elk bijbelboek",

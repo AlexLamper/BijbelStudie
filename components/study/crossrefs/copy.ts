@@ -12,7 +12,7 @@ import { useTranslation } from '../../../app/i18n/client';
  * like the rest of the reader. This table maps the short name each component
  * asks for onto that key, and carries a `defaultValue` so a key that has not
  * landed yet renders the sentence rather than its own name - the feature is
- * free for everyone including guests, and a raw `cross_references.empty` on
+ * open to guests too, and a raw `cross_references.empty` on
  * screen is worse than a duplicated string in this file.
  *
  * Interpolation never uses the variable name `count`: i18next reads that one as
@@ -66,6 +66,18 @@ const COPY = {
   expand_row: ['cross_references.aria.expand_row', 'Toon de tekst van {{ref}}'],
   collapse_row: ['cross_references.aria.collapse_row', 'Verberg de tekst van {{ref}}'],
   jump_to_verse: ['cross_references.aria.jump_to_verse', 'Spring naar vers {{n}} in de tekst'],
+  /** The locked row under a free reader's first references (lib/entitlements FREE_CROSS_REFS). */
+  locked_one: ['cross_references.locked_one', 'Nog 1 kruisverwijzing met Pro'],
+  locked_other: ['cross_references.locked_other', 'Nog {{n}} kruisverwijzingen met Pro'],
+  locked_aria: [
+    'cross_references.aria.locked',
+    'Nog {{n}} van de {{total}} kruisverwijzingen bij dit vers met Pro. Bekijk Pro.',
+  ],
+  /** The line the Pro offer dialog opens with when the locked row raised it. */
+  locked_reason: [
+    'cross_references.locked_reason',
+    'Met Pro zie je alle {{n}} kruisverwijzingen bij dit vers, niet alleen de eerste {{free}}.',
+  ],
 } as const;
 
 export type CrossRefCopyKey = keyof typeof COPY;

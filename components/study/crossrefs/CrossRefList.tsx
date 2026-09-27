@@ -1,11 +1,16 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { ArrowRight, ChevronDown, ChevronRight } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { ArrowRight, ChevronDown, ChevronRight, Lock } from 'lucide-react';
 
 import { track, trackNow } from '../../../lib/analytics';
+import { FREE_CROSS_REFS } from '../../../lib/entitlements';
+import { gateCrossRefs } from '../../../lib/proContent';
+import { openProOffer } from '../../../lib/proOffer';
 import { cn } from '../../../lib/utils';
 import type { CrossRefTarget } from '../../../hooks/useCrossRefs';
+import { useIsPro } from '../../../hooks/useIsPro';
 import { useVersePreviews } from '../../../hooks/useVersePreviews';
 import { useCrossRefCopy } from './copy';
 
@@ -111,7 +116,23 @@ export default function CrossRefList({
   const [showAll, setShowAll] = useState(false);
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
 
-  const visible = showAll ? refs : refs.slice(0, initialCount);
+  /**
+   * Free readers see the first FREE_CROSS_REFS (the top-voted ones) and a
+   * locked row for the rest; Pro sees everything. Every in-app surface (the
+   * /lezen verse panel, the Verwijzingen tab, /studie's reader and Verdieping
+   * step) renders through this list, so this is the one web gate. The public
+   * SEO chapter pages render their own list and stay ungated.
+   *
+   * The app is gated server-side (/api/v1/crossrefs); the web reads the static
+   * CC BY shards straight off the CDN at zero function cost, so here the gate
+   * is the UI - see the route's doc comment for the trade-off.
+   */
+  const isPro = useIsPro();
+  const { status: sessionStatus } = useSession();
+  const gate = useMemo(() => gateCrossRefs(refs, { isPro }), [refs, isPro]);
+  const shown = gate.items;
+
+  const visible = showAll ? shown : shown.slice(0, initialCount);
 
   // Only the rows on screen ask for text. Expanding the list adds its chapters
   // to this array on the next render, and the hook picks them up from there.
@@ -290,15 +311,72 @@ export default function CrossRefList({
         })}
       </ul>
 
-      {refs.length > initialCount && (
+      {shown.length > initialCount && (
         <button
           type="button"
           onClick={() => setShowAll((value) => !value)}
           className="mt-1 text-[12px] font-semibold text-ink-muted underline-offset-2 outline-none transition-colors hover:text-ink-body hover:underline"
         >
-          {showAll ? c('show_less') : c('show_all', { n: refs.length })}
+          {showAll ? c('show_less') : c('show_all', { n: shown.length })}
         </button>
       )}
+
+      {/* Held back while the session loads, so a Pro reader never sees a lock
+          flash before their full list appears. */}
+      {gate.locked && sessionStatus !== 'loading' && (
+        <LockedCrossRefs
+          lockedCount={gate.lockedCount}
+          total={gate.total}
+          onOpen={() => {
+            trackNow('paywall_cta_clicked', { surface: 'crossrefs', platform: 'web' });
+            openProOffer({
+              surface: 'crossrefs',
+              reason: c('locked_reason', { n: gate.total, free: FREE_CROSS_REFS }),
+            });
+          }}
+        />
+      )}
     </div>
+  );
+}
+
+/**
+ * The row under a free reader's first FREE_CROSS_REFS references: how many more
+ * there are, over two placeholder rows. The placeholders are grey bars, never
+ * real labels or text - nothing withheld is in the DOM. The lock identifies
+ * the row as a locked control, which is the only reason it is drawn.
+ */
+function LockedCrossRefs({
+  lockedCount,
+  total,
+  onOpen,
+}: {
+  lockedCount: number;
+  total: number;
+  onOpen: () => void;
+}) {
+  const c = useCrossRefCopy();
+  const label = lockedCount === 1 ? c('locked_one') : c('locked_other', { n: lockedCount });
+
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      aria-label={c('locked_aria', { n: lockedCount, total })}
+      className="mt-1 block w-full rounded-card border border-line-soft text-left outline-none transition-colors hover:bg-[var(--teal-wash)] focus-visible:ring-2 focus-visible:ring-[#0D9488]"
+    >
+      <span aria-hidden className="block select-none space-y-2 px-3 pt-2.5">
+        {Array.from({ length: Math.min(2, lockedCount) }, (_, row) => (
+          <span key={row} className="block blur-[1.5px]">
+            <span className={cn('block h-[10px] rounded bg-line-soft', row === 0 ? 'w-1/4' : 'w-1/3')} />
+            <span className="mt-1 block h-[9px] w-full rounded bg-line-soft" />
+          </span>
+        ))}
+      </span>
+      <span className={cn('flex items-center gap-1.5 px-3 pb-2.5 pt-2 text-[12.5px] font-semibold', LINK)}>
+        <Lock size={13} aria-hidden className="flex-none" />
+        {label}
+      </span>
+    </button>
   );
 }
