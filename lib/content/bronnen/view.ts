@@ -69,25 +69,3 @@ export function workCard(work: Work, withOpenings = true): WorkCard {
 export function workThemes(work: Work): ThemeRange[] {
   return themeRanges(work.slug, work.sections);
 }
-
-/** One Heidelberg zondag for the "Deze week" card. */
-export interface ZondagCard {
-  id: string;
-  number: number;
-  topic: string | null;
-  /** "Vraag 104" or "Vraag 92–95". */
-  questions: string;
-}
-
-export function zondagCards(work: Work): ZondagCard[] {
-  return work.sections
-    .filter(s => s.number != null)
-    .map(s => {
-      const numbers = s.blocks.flatMap(b => (b.type === "qa" && b.number != null ? [b.number] : []));
-      const a = numbers[0];
-      const b = numbers[numbers.length - 1];
-      const questions =
-        a == null ? "" : a === b ? `Vraag ${a}` : `Vragen ${a}–${b}`;
-      return { id: s.id, number: s.number!, topic: sectionTitle(work.slug, s), questions };
-    });
-}
