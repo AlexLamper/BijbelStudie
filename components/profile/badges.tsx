@@ -126,7 +126,10 @@ export function BadgeRings({ earned, show = 4 }: { earned: string[]; show?: numb
           <span
             key={b.id}
             title={label}
-            className="-ml-[9px] flex h-11 w-11 items-center justify-center rounded-full border-[2.5px] border-badgering bg-badgering-wash shadow-[0_0_0_3px_var(--surface)]"
+            className="-ml-[9px] flex h-11 w-11 items-center justify-center rounded-full border-[2.5px] border-badgering shadow-[0_0_0_3px_var(--surface)]"
+            // The dark wash is translucent; layered on the surface so the ring
+            // underneath does not show through the overlap.
+            style={{ background: "linear-gradient(var(--badge-wash), var(--badge-wash)), var(--surface)" }}
           >
             <Icon size={19} strokeWidth={1.8} className="text-badgering" aria-hidden />
           </span>
