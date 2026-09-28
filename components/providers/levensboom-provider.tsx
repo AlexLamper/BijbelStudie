@@ -1,6 +1,8 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { usePathname } from 'next/navigation';
+import { getSession } from 'next-auth/react';
 import { describeLevel, fracOf, type GamificationSummary, type GrantResult } from '../../lib/levensboom/client';
 import { phaseForStep } from '../../lib/levensboom/stages';
 import { growthInfo } from '../../lib/levensboom/growth';
@@ -134,8 +136,8 @@ async function patchLevensboom(body: Record<string, unknown>): Promise<
 }
 
 export function LevensboomProvider({
-  enabled,
-  userKey,
+  enabled: serverEnabled,
+  userKey: serverUserKey,
   children,
 }: {
   /** False when nobody is signed in: the provider then does nothing at all. */
@@ -144,14 +146,7 @@ export function LevensboomProvider({
   userKey?: string | null;
   children: React.ReactNode;
 }) {
-  const cacheKey = `${CACHE_PREFIX}${userKey ?? 'anon'}`;
-  const [data, setData] = useState<GamificationSummary | null>(null);
-  const [loading, setLoading] = useState(enabled);
-  const [celebrate, setCelebrate] = useState<number | null>(null);
-  const [lastGrowth, setLastGrowth] = useState<LevensboomContextValue['lastGrowth']>(null);
-  const growthSeq = useRef(0);
   const mounted = useRef(true);
-  const inflight = useRef<Promise<void> | null>(null);
 
   useEffect(() => {
     mounted.current = true;
@@ -159,6 +154,35 @@ export function LevensboomProvider({
       mounted.current = false;
     };
   }, []);
+
+  // The root layout's session read is empty on force-static pages, and the root
+  // layout is not re-rendered on client navigation - so a visit that starts on
+  // one of those pages would keep the tree switched off everywhere after it.
+  // Ask the client session once, on the first navigation away from that page.
+  const pathname = usePathname();
+  const firstPath = useRef(pathname);
+  const probed = useRef(false);
+  const [clientUserKey, setClientUserKey] = useState<string | null>(null);
+  useEffect(() => {
+    if (serverEnabled || probed.current || pathname === firstPath.current) return;
+    probed.current = true;
+    getSession()
+      .then((session) => {
+        if (mounted.current && session?.user) setClientUserKey(session.user.email ?? '');
+      })
+      .catch(() => {});
+  }, [serverEnabled, pathname]);
+
+  const enabled = serverEnabled || clientUserKey !== null;
+  const userKey = serverEnabled ? serverUserKey : clientUserKey;
+
+  const cacheKey = `${CACHE_PREFIX}${userKey ?? 'anon'}`;
+  const [data, setData] = useState<GamificationSummary | null>(null);
+  const [loading, setLoading] = useState(enabled);
+  const [celebrate, setCelebrate] = useState<number | null>(null);
+  const [lastGrowth, setLastGrowth] = useState<LevensboomContextValue['lastGrowth']>(null);
+  const growthSeq = useRef(0);
+  const inflight = useRef<Promise<void> | null>(null);
 
   const refresh = useCallback(async () => {
     if (!enabled) return;
