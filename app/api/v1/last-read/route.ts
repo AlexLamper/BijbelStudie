@@ -51,7 +51,7 @@ export async function POST(req: Request) {
   try {
     const auth = await requireUser(req);
     const body = await req.json();
-    const { book, chapter, version, commentary, awardXp } = body ?? {};
+    const { book, chapter, version, commentary, awardXp, planTick } = body ?? {};
 
     if (!book || !chapter || !version) {
       return errorV1('MISSING_FIELDS', 400, 'book, chapter and version are required');
@@ -96,8 +96,12 @@ export async function POST(req: Request) {
 
     // Bijbel in een jaar auto-tick: one indexed update, a no-op without a
     // running plan. After the response (`after`), so it never delays the read;
-    // it catches and logs its own errors - never fails the read.
-    after(() => recordBibleYearChapter(auth.id, progressKey, chapter, { isPro: auth.isPro }));
+    // it catches and logs its own errors - never fails the read. Apps from
+    // 1.1.4 send `planTick: false`: they tick a plan chapter only once it is
+    // read to the end (POST /bible-year/mark), not when it is opened.
+    if (planTick !== false) {
+      after(() => recordBibleYearChapter(auth.id, progressKey, chapter, { isPro: auth.isPro }));
+    }
 
     const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
     const recent = await ReadingSession.findOne({

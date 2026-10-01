@@ -11,7 +11,10 @@ import mongoose from 'mongoose';
  *   paidDays   `$addToSet` behind a `{paidDays: {$ne: day}}` filter, so the
  *              `plan_day_read` XP for a day is paid exactly once. Never pulled:
  *              un-ticking a chapter does not take XP back.
- *   shiftDays  `$inc` ("Schema verschuiven").
+ *   shiftDays  `$inc` ("Schema verschuiven"); `$set` to 0 by a settings
+ *              update that moves the start date.
+ *   planKey, track, mode, startDate, timeZone, scheduleVersion
+ *              `$set` by a settings update (PATCH update); readRefs stay.
  *   status     active -> completed | abandoned. "Opnieuw beginnen" abandons the
  *              running document and creates a new one; nothing is deleted
  *              except by the account purge (lib/accountPurge.ts).
@@ -21,7 +24,10 @@ const bibleYearEnrollmentSchema = new mongoose.Schema(
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
 
     planKey: { type: String, enum: ['jaar-1', 'jaar-2'], required: true },
-    track: { type: String, enum: ['gemengd', 'canoniek'], required: true },
+    track: { type: String, enum: ['gemengd', 'canoniek', 'chronologisch'], required: true },
+    // 'studeren' adds a commentary and a question per day (lib/bibleYear/study.ts).
+    // Absent on older runs, which read as 'lezen'.
+    mode: { type: String, enum: ['lezen', 'studeren'], default: 'lezen' },
     // Frozen at start: a later schedule version never moves a running plan.
     scheduleVersion: { type: Number, required: true },
 
@@ -39,6 +45,8 @@ const bibleYearEnrollmentSchema = new mongoose.Schema(
 
     // "CODE.chapter" keys ("GEN.1"), codes from lib/readChaptersCanon.ts.
     readRefs: { type: [String], default: [] },
+    // Study parts done, "day.part" ("23.vraag"); `$addToSet` / `$pull` only.
+    studyDone: { type: [String], default: [] },
     // Schedule days (1-based) whose plan_day_read XP has been paid.
     paidDays: { type: [Number], default: [] },
 
