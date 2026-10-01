@@ -388,8 +388,10 @@ function Hero({ reviews }: { reviews?: ReviewsData }) {
  * for the commentaries.
  *
  * Nothing in here may be quoted on this page. Only the Statenvertaling is
- * public domain; the NBG 1951 is licensed and the HSV and BasisBijbel never
- * ship at all, so every source is named and nothing more. The commentaries are
+ * public domain; the NBG 1951 is licensed and BasisBijbel never ships at all,
+ * so every source is named and nothing more. The HSV is not on this list
+ * either: it is not a translation the product serves, only fifty verses it may
+ * quote beside another translation (lib/hsvQuota.ts). The commentaries are
  * named for the same reason - KingComments may not be redistributed.
  */
 const TRANSLATIONS = [

@@ -12,7 +12,12 @@
  *   net              NET Bible, (c) Biblical Studies Press. Whole-text
  *                    electronic distribution needs written permission and
  *                    "cannot be bundled with anything sold". We sell Pro.
- *   hsv              Copyrighted (Stichting HSV). Not in manifest.json. Keep out.
+ *   hsv              Copyrighted (Stichting HSV). Not in manifest.json, and it
+ *                    must never be added here: as a *readable version* it would
+ *                    be the whole translation, which needs a contract we do not
+ *                    have. What the product does have is the free-of-charge
+ *                    allowance to quote 50 verses - served by its own endpoints
+ *                    from a 50-verse file. See lib/hsvQuota.ts.
  *   basisbijbel      Copyrighted. Not in manifest.json. Keep out.
  *   schlachter       Schlachter 2000, (c) Genfer Bibelgesellschaft. In
  *                    manifest.json for the website but not public domain.
