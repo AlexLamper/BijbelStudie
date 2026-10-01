@@ -28,6 +28,7 @@
  */
 
 import { readFileSync } from "node:fs";
+import { sitemapUrls } from "./lib/sitemap.mjs";
 
 const args = process.argv.slice(2);
 const argValue = name => {
@@ -69,8 +70,9 @@ async function robotsDisallows() {
 
 async function main() {
   const blocked = await robotsDisallows();
-  const sitemap = await (await fetch(`${BASE}/sitemap.xml`)).text();
-  const urls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1].trim().replace(/^https:\/\/www\.bijbelstudie\.io/, BASE));
+  const urls = (await sitemapUrls(BASE)).map(loc =>
+    loc.replace(/^https:\/\/www\.bijbelstudie\.io/, BASE)
+  );
   const results = [];
   const inlinks = new Map();
   /** target URL -> the sitemap pages that link to it */

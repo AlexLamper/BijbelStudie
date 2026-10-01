@@ -101,7 +101,10 @@ const nextConfig: NextConfig = {
     // happen at build. Listed anyway so a revalidation can never find the
     // folder missing and quietly publish an empty library.
     "/api/v1/bronnen/**": ["./lib/content/bronnen/data/*.json"],
+    // The sitemap index reads every section's newest date, and
+    // /sitemaps/bronnen.xml reads the works themselves.
     "/sitemap.xml": ["./lib/content/bronnen/data/*.json"],
+    "/sitemaps/[section]": ["./lib/content/bronnen/data/*.json"],
   },
   /**
    * Headers that affect Core Web Vitals or crawling. Nothing decorative here -
