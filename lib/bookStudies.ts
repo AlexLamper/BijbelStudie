@@ -1,6 +1,7 @@
 import { BIBLE_BOOKS, getBibleBook, readerBookName, type BibleBook } from './content/bibleBooks';
 import { curatedStudies, type CuratedStudy, type Lesson } from './data/curated-studies';
 import { studyPhotoFor } from './studyPhotos';
+import { chapterStudyTemplate } from './chapterStudyTemplate';
 import { normaliseDashes } from './textFormat';
 
 /**
@@ -50,8 +51,7 @@ export function isBookStudyId(id: string): boolean {
  * Deliberately answerable about any passage in the canon, and deliberately not
  * a comprehension check - the flow already has a quiz step for that.
  */
-const GENERIC_QUESTION =
-  'Wat laat dit hoofdstuk zien over wie God is, en wat vraagt dat van jou?';
+const GENERIC_QUESTION = 'Wat betekent dit hoofdstuk voor jou?';
 
 /**
  * Fifteen is the authored default; a single generated chapter is a shorter sit,
@@ -79,13 +79,15 @@ function sectionFor(book: BibleBook, chapter: number): string | null {
 /**
  * One lesson per chapter, in order.
  *
- * The authored `studyQuestions` are rotated through rather than used once: they
- * are written to push a reader into the text of THIS book, so they are worth
- * more spread across it than spent on the first three chapters. Books without
- * them fall back to the generic question.
+ * The `focus` is the Toepassing question, so it comes from the genre's simple
+ * questions in lib/chapterStudyTemplate.ts, rotated per chapter. NOT from the
+ * book's `studyQuestions`: those belong to the book page and are written for a
+ * study of the whole book, so rotated onto chapters they asked about verses
+ * the reader had not read, in words a new reader could not answer.
  */
 function generateLessons(book: BibleBook): Lesson[] {
-  const questions = book.studyQuestions.length > 0 ? book.studyQuestions : [GENERIC_QUESTION];
+  const genreQuestions = chapterStudyTemplate(book.genre)?.questions ?? [];
+  const questions = genreQuestions.length > 0 ? genreQuestions : [GENERIC_QUESTION];
   const readerBook = readerBookName(book);
 
   return Array.from({ length: book.chapters }, (_, index) => {
