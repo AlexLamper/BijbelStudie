@@ -7,7 +7,7 @@ import connectMongoDB from "./mongodb";
 import User from "../models/User";
 import { isAdminEmail } from "./adminEmails";
 import { resolveIsPro } from "./mobilePremium";
-import { findUserByEmail, normaliseEmail } from "./userLookup";
+import { emailMatchFilters, findUserByEmail, normaliseEmail } from "./userLookup";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -105,17 +105,34 @@ export const authOptions: NextAuthOptions = {
           // This runs on every session read - once per page render and once per
           // API call - so it fetches only the fields it uses instead of
           // hydrating the whole user document.
-          const user = await User.findOne({ email: session.user.email })
-            .select("name isAdmin subscribed storePremium preferences.onboardingCompleted preferences.studyStyle")
-            .lean<{
-              _id: unknown;
-              name?: string;
-              isAdmin?: boolean;
-              subscribed?: boolean;
-              storePremium?: boolean;
-              preferences?: { onboardingCompleted?: boolean; studyStyle?: string };
-            }>();
+          type SessionUserRow = {
+            _id: unknown;
+            name?: string;
+            isAdmin?: boolean;
+            subscribed?: boolean;
+            storePremium?: boolean;
+            preferences?: { onboardingCompleted?: boolean; studyStyle?: string };
+          };
+          const fields =
+            "name isAdmin subscribed storePremium preferences.onboardingCompleted preferences.studyStyle";
+          // Case-insensitive, the same two filters findUserByEmail tries. A
+          // plain `{ email: session.user.email }` is case-SENSITIVE, so an
+          // account whose stored address was written before emails were
+          // normalised found nobody here - and "nobody" is indistinguishable
+          // from "a brand-new account" in the fields below.
+          const [exactFilter, insensitiveFilter] = emailMatchFilters(session.user.email);
+          const user =
+            (await User.findOne(exactFilter).select(fields).lean<SessionUserRow>()) ??
+            (await User.findOne(insensitiveFilter).select(fields).lean<SessionUserRow>());
           if (user) {
+            // Everything below was read from the account, so it may be trusted
+            // to mean what it says. Without this flag an absent field is
+            // ambiguous: `onboardingCompleted` is undefined both for an account
+            // that has never answered the questions AND for one whose lookup
+            // threw or found nothing, and the second case is what re-opened the
+            // five-step first-run flow over a returning user's page. The gate
+            // in lib/onboardingGate.ts reads this, not the bare flag.
+            session.user.profileResolved = true;
             session.user.id = String(user._id);
             // The display name is read from Mongo rather than taken from the
             // JWT. Nothing refreshes a token's `name` claim, so after a rename

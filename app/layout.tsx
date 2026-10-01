@@ -6,6 +6,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../lib/authOptions";
 import { OnboardingWrapper } from "../components/onboarding/onboarding-wrapper";
 import { GuestOnboardingWrapper } from "../components/onboarding/guest-onboarding-wrapper";
+import { shouldAskOnboarding } from "../lib/onboardingGate";
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Suspense } from "react";
 import { PrefetchProvider } from "../components/providers/prefetch-provider";
@@ -269,7 +270,7 @@ export default async function RootLayout({
                         handover of whatever this browser answered while it was
                         still a guest, so nobody is asked the same five things
                         twice. See components/onboarding/onboarding-wrapper.tsx. */}
-                    <OnboardingWrapper shouldShow={!session.user.onboardingCompleted} />
+                    <OnboardingWrapper shouldShow={shouldAskOnboarding(session.user)} />
                   </>
                 ) : (
                   // The same first-run flow, for a visitor without an
