@@ -36,8 +36,23 @@ export type UserModelLike = {
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
 export async function findUserByEmail(email: string, model: UserModelLike = User) {
-  const normalised = normaliseEmail(email);
-  const exact = await model.findOne({ email: normalised });
+  const [exactFilter, insensitiveFilter] = emailMatchFilters(email);
+  const exact = await model.findOne(exactFilter);
   if (exact) return exact;
-  return model.findOne({ email: new RegExp(`^${escapeRegExp(normalised)}$`, 'i') });
+  return model.findOne(insensitiveFilter);
+}
+
+/**
+ * The same two filters `findUserByEmail` tries, in the same order, for callers
+ * that cannot use it because they need a projection - the session callback runs
+ * on every page render and every API call, so it reads six fields rather than
+ * hydrating the document. Sharing the filters is what keeps those callers from
+ * quietly reverting to a case-SENSITIVE match and finding nobody.
+ */
+export function emailMatchFilters(email: string): [Record<string, unknown>, Record<string, unknown>] {
+  const normalised = normaliseEmail(email);
+  return [
+    { email: normalised },
+    { email: new RegExp(`^${escapeRegExp(normalised)}$`, 'i') },
+  ];
 }

@@ -28,7 +28,36 @@ const OnboardingModal = dynamic(
 )
 
 interface OnboardingWrapperProps {
+  /** lib/onboardingGate.ts, from the session the root layout already read. */
   shouldShow: boolean
+}
+
+/**
+ * Second opinion, straight from the account, before a full-screen flow opens
+ * over the page.
+ *
+ * The server's answer comes out of the session callback, and that callback has
+ * to be allowed to fail softly - it runs on every render and every API call,
+ * and nothing on the page should break because one Mongo read timed out. The
+ * gate in lib/onboardingGate.ts already refuses to ask when the read failed,
+ * so this is the belt to that braces: whatever went wrong upstream, the flow
+ * does not open unless the account itself, asked now, says it never answered.
+ *
+ * Fails closed. Anything other than a clear "false" - a 500, an offline
+ * browser, a shape we did not expect - means the questions wait for the next
+ * page load. Delaying them for a genuinely new account costs one render; the
+ * other mistake is covering a returning reader's page with five steps they
+ * have already been through.
+ */
+async function accountStillNeedsOnboarding(): Promise<boolean> {
+  try {
+    const res = await fetch("/api/user/preferences", { cache: "no-store" })
+    if (!res.ok) return false
+    const data = (await res.json()) as { onboardingCompleted?: unknown }
+    return data.onboardingCompleted === false
+  } catch {
+    return false
+  }
 }
 
 export function OnboardingWrapper({ shouldShow }: OnboardingWrapperProps) {
@@ -42,6 +71,7 @@ export function OnboardingWrapper({ shouldShow }: OnboardingWrapperProps) {
   const [ask, setAsk] = useState(false)
   const [resolved, setResolved] = useState(false)
   const ran = useRef(false)
+  const cancelled = useRef(false)
 
   // Hold the modal back until the page's content has fully loaded, so it
   // never flashes over a half-rendered (or still-loading) page on the user's
@@ -61,10 +91,18 @@ export function OnboardingWrapper({ shouldShow }: OnboardingWrapperProps) {
   useEffect(() => {
     if (ran.current) return
     ran.current = true
+    cancelled.current = false
+
+    /** Every path that wants to ask goes through the account first. */
+    const askIfTheAccountAgrees = async (want: boolean) => {
+      const ok = want && (await accountStillNeedsOnboarding())
+      if (cancelled.current) return
+      setAsk(ok)
+      setResolved(true)
+    }
 
     if (!hasGuestOnboarding()) {
-      setAsk(shouldShow)
-      setResolved(true)
+      void askIfTheAccountAgrees(shouldShow)
       return
     }
 
@@ -76,16 +114,14 @@ export function OnboardingWrapper({ shouldShow }: OnboardingWrapperProps) {
       return
     }
 
-    let cancelled = false
     void migrateGuestOnboarding()
       .then(async answers => {
-        if (cancelled) return
+        if (cancelled.current) return
         if (!answers) {
           // The post failed, so nothing was carried over and the record is
           // still there for the next load. Ask the questions in the meantime -
           // answering them writes the same preferences anyway.
-          setAsk(true)
-          setResolved(true)
+          await askIfTheAccountAgrees(true)
           return
         }
         // Applied to the live app before the refresh, exactly as the flow does
@@ -93,18 +129,16 @@ export function OnboardingWrapper({ shouldShow }: OnboardingWrapperProps) {
         // server render.
         if (answers.studyStyle) setStudyStyle(answers.studyStyle)
         if (answers.species) await plant(answers.species)
-        if (cancelled) return
+        if (cancelled.current) return
         setResolved(true)
         router.refresh()
       })
       .catch(() => {
-        if (cancelled) return
-        setAsk(shouldShow)
-        setResolved(true)
+        void askIfTheAccountAgrees(shouldShow)
       })
 
     return () => {
-      cancelled = true
+      cancelled.current = true
     }
   }, [shouldShow, plant, setStudyStyle, router])
 

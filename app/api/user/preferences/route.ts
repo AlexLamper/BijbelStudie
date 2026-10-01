@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import connectMongoDB from "../../../../lib/mongodb";
 import User from "../../../../models/User";
 import { authOptions } from "../../../../lib/authOptions";
+import { emailMatchFilters } from "../../../../lib/userLookup";
 
 /**
  * Accepted values for `preferences.studyStyle`, checked here rather than passed
@@ -61,12 +62,23 @@ export async function POST(request: NextRequest) {
     if (showVerseNumbers !== undefined) updateData["preferences.showVerseNumbers"] = showVerseNumbers;
     if (ttsVoice) updateData["preferences.ttsVoice"] = ttsVoice;
 
-    // Update user preferences
-    const updatedUser = await User.findOneAndUpdate(
-      { email: session.user.email },
-      { $set: updateData },
-      { new: true }
-    );
+    // Case-insensitive, like every other read of an account by address: a
+    // plain `{ email: session.user.email }` matches nothing for an account
+    // whose stored address was written before emails were normalised, and
+    // `findOneAndUpdate` then returns null rather than erroring. Reading
+    // `.preferences` off that null threw a 500, which meant
+    // `onboardingCompleted: true` was never written - so the first-run flow
+    // asked the same account again on every single page load.
+    const [exactFilter, insensitiveFilter] = emailMatchFilters(session.user.email);
+    const updatedUser =
+      (await User.findOneAndUpdate(exactFilter, { $set: updateData }, { new: true })) ??
+      (await User.findOneAndUpdate(insensitiveFilter, { $set: updateData }, { new: true }));
+
+    if (!updatedUser) {
+      // The session names an account that is not there. Say so, rather than
+      // reporting a save that did not happen.
+      return NextResponse.json({ error: "Account niet gevonden" }, { status: 404 });
+    }
 
     return NextResponse.json({
       message: "Preferences saved successfully",
@@ -92,9 +104,20 @@ export async function GET() {
 
     await connectMongoDB();
     
-    const user = await User.findOne({ email: session.user.email });
-    
-    if (!user || !user.preferences) {
+    const [exactFilter, insensitiveFilter] = emailMatchFilters(session.user.email);
+    const user =
+      (await User.findOne(exactFilter)) ?? (await User.findOne(insensitiveFilter));
+
+    // "No such account" and "this account has answered nothing yet" are
+    // different answers, and the onboarding gate acts on the difference: it
+    // only asks the questions on a definite `onboardingCompleted: false`.
+    // Collapsing the two into `false` here would re-open the flow for an
+    // account this route simply failed to find.
+    if (!user) {
+      return NextResponse.json({ error: "Account niet gevonden" }, { status: 404 });
+    }
+
+    if (!user.preferences) {
       return NextResponse.json({
         preferences: null,
         onboardingCompleted: false

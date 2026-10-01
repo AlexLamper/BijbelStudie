@@ -26,6 +26,7 @@ import { readFileSync, writeFileSync } from "fs";
 import { resolve, relative } from "path";
 import { createSign } from "crypto";
 
+import { sitemapUrls as allSitemapUrls } from "./lib/sitemap.mjs";
 const BASE = "https://www.bijbelstudie.io";
 const SITE_URL = process.env.GSC_SITE || "sc-domain:bijbelstudie.io";
 const SCOPE = "https://www.googleapis.com/auth/webmasters.readonly";
@@ -67,10 +68,8 @@ async function accessToken(key) {
   return data.access_token;
 }
 
-async function sitemapUrls() {
-  const xml = await (await fetch(`${BASE}/sitemap.xml`)).text();
-  return [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1].trim());
-}
+/** Every page in the sitemap index, across all section files. */
+const sitemapUrls = () => allSitemapUrls(BASE, fail);
 
 async function inspect(token, url) {
   const res = await fetch(ENDPOINT, {

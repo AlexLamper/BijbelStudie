@@ -19,6 +19,7 @@
  * the script checks that file is live before sending anything.
  */
 
+import { sitemapPages } from "./lib/sitemap.mjs";
 // Keep in step with BASE_URL in lib/seo/constants.ts (www is canonical).
 const HOST = "www.bijbelstudie.io";
 const BASE = `https://${HOST}`;
@@ -59,15 +60,8 @@ function fail(message) {
   process.exit(1);
 }
 
-async function sitemapEntries() {
-  const res = await fetch(`${BASE}/sitemap.xml`);
-  if (!res.ok) fail(`sitemap.xml gaf HTTP ${res.status}`);
-  const xml = await res.text();
-  return [...xml.matchAll(/<url>([\s\S]*?)<\/url>/g)].map(([, block]) => ({
-    loc: block.match(/<loc>([^<]+)<\/loc>/)?.[1]?.trim(),
-    lastmod: block.match(/<lastmod>([^<]+)<\/lastmod>/)?.[1]?.trim() ?? null,
-  })).filter(entry => entry.loc);
-}
+/** Pages from the sitemap index, through every section file. */
+const sitemapEntries = () => sitemapPages(BASE, fail);
 
 function toUrl(pathOrUrl) {
   const url = pathOrUrl.startsWith("http") ? pathOrUrl : `${BASE}${pathOrUrl.startsWith("/") ? "" : "/"}${pathOrUrl}`;
