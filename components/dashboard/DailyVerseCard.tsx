@@ -1,7 +1,9 @@
 "use client"
 
 import { useEffect, useMemo, useRef, useState } from "react"
+import { flushSync } from "react-dom"
 import Link from "next/link"
+import { useSession } from "next-auth/react"
 import { Heart, Share2, MoreHorizontal, BookOpen, History } from "lucide-react"
 import {
   DropdownMenu,
@@ -19,6 +21,7 @@ import { ProgressTreeScene } from "./ProgressTree"
 import { useLevensboom } from "../../hooks/useLevensboom"
 import { paletteForNow } from "../../lib/levensboom/palette"
 import {
+  DAILY_VERSE_BACKGROUNDS,
   dailyVersePhoto,
   dayKeyNL,
   dayLabel,
@@ -26,13 +29,22 @@ import {
   parseDayTextArchive,
   previousDays,
   readHistory,
+  readDailyVerseBackground,
   readLikes,
   rememberVerse,
+  saveDailyVerseBackground,
   toggleLike,
   versionAbbreviation,
+  type DailyVerseBackground,
   type StoredVerse,
 } from "../../lib/dailyVerseStore"
 import { getBibleAttribution } from "../../lib/bible-attribution"
+import {
+  loadImage,
+  renderDailyVerseShareImage,
+  shareFileName,
+  shareOrDownload,
+} from "../../lib/dailyVerseShareImage"
 
 const TEAL = "#0D9488"
 /** The liked heart: red-600, the same red as the app's heart. Unliked it stays a white outline. */
@@ -64,6 +76,26 @@ const SCENE_MAX_W = 880
 const SCENE_FADE_W = 280
 const sceneMask = `linear-gradient(to right, transparent calc(100% - ${SCENE_MAX_W}px), #000 calc(100% - ${SCENE_MAX_W - SCENE_FADE_W}px))`
 
+/** How far a drag may overshoot the first and last page, in pages. */
+const PAGE_GIVE = 0.12
+/** Travel, in CSS px, before a press counts as a swipe rather than a tap or a scroll. */
+const DRAG_SLOP = 8
+/** A fling faster than this (px per ms, the app's 300 px/s) turns the page whatever the distance. */
+const FLING = 0.3
+/**
+ * The box the tree is drawn in for the share image: 9:16, so on a 2x screen
+ * its canvas is exactly 1080 x 1920. `TreeCanvas` sizes its backdrop from the
+ * width and the tree from the height, so any 9:16 box draws the same picture.
+ */
+const SHARE_TREE_W = 540
+const SHARE_TREE_H = 960
+/** The app icon in the share image's wordmark. */
+const SHARE_LOGO = "/images/icon-192.png"
+const BACKGROUND_LABEL: Record<DailyVerseBackground, string> = {
+  photo: "Natuurfoto",
+  tree: "Jouw Levensboom",
+}
+
 export type DailyVerse = {
   text: string
   reference: string
@@ -84,7 +116,7 @@ export type DailyVerse = {
  * (`lib/features/dashboard/present/daily_verse_card.dart`).
  *
  * The layout is deliberately identical, so the two products read as one: a
- * full-bleed nature photograph, the eyebrow and the reference at the top left,
+ * full-bleed background, the eyebrow and the reference at the top left,
  * the verse itself set in a serif underneath and left-aligned, and a centred
  * row of three plain icon actions along the bottom. Icons only - no button
  * chrome - because the verse is the content here and a row of filled buttons
@@ -94,6 +126,13 @@ export type DailyVerse = {
  * token, and it sits on a scrim: the colours have to hold up over any of the
  * photographs, in either light or dark mode, and a token that flips with the
  * theme would go invisible on half of them.
+ *
+ * The background is one of two pages the reader swipes (or drags, or picks
+ * with the two dots top right) between: the day's nature photo, the default
+ * and first, and their own Levensboom. The choice is remembered per account
+ * in localStorage (`daytext.background.<userId>`), as the app remembers it.
+ * "Delen" draws a 1080 x 1920 status image over the chosen background
+ * (`lib/dailyVerseShareImage.ts`).
  *
  * Like the app's card, the heart and the record of each day this browser saw
  * live in localStorage (`/api/bible/daytext` serves today's verse only).
@@ -119,6 +158,50 @@ export default function DailyVerseCard({
   const [archive, setArchive] = useState<StoredVerse[]>([])
   const [archiveState, setArchiveState] = useState<"idle" | "loading" | "done" | "failed">("idle")
   const archiveRequest = useRef<AbortController | null>(null)
+
+  // The chosen background, per account. "photo" on the server and the first
+  // client paint; the stored choice is read after mount.
+  const { data: session } = useSession()
+  const userId = session?.user?.id ?? null
+  const [background, setBackground] = useState<DailyVerseBackground>("photo")
+  // Where the pages are mid-drag (0 = photo, 1 = tree), or null when at rest.
+  const [dragPage, setDragPage] = useState<number | null>(null)
+  // No slide on the first paint: a stored "tree" shows at once.
+  const [animated, setAnimated] = useState(false)
+  const drag = useRef<{
+    id: number
+    x: number
+    y: number
+    lastX: number
+    lastT: number
+    vx: number
+    width: number
+    swiping: boolean
+  } | null>(null)
+  const cardRef = useRef<HTMLDivElement>(null)
+  const verseRef = useRef<HTMLParagraphElement>(null)
+  const dotRefs = useRef<(HTMLButtonElement | null)[]>([])
+  // The off-screen tree the share image copies, mounted only while sharing.
+  const [shareTree, setShareTree] = useState(false)
+  const shareTreeRef = useRef<HTMLDivElement>(null)
+  const [sharing, setSharing] = useState(false)
+  // The last image drawn, so a second tap (after the browser refused a share
+  // that came too long after the first) shares at once.
+  const lastShare = useRef<{ key: string; blob: Blob } | null>(null)
+
+  useEffect(() => {
+    setBackground(readDailyVerseBackground(userId))
+  }, [userId])
+
+  const pageIndex = DAILY_VERSE_BACKGROUNDS.indexOf(background)
+  const lastPage = DAILY_VERSE_BACKGROUNDS.length - 1
+  const pagePos = dragPage ?? pageIndex
+
+  function selectBackground(value: DailyVerseBackground) {
+    setAnimated(true)
+    setBackground(value)
+    saveDailyVerseBackground(userId, value)
+  }
 
   // The id first: it is exact, where the display name ("De Heilige Schrift
   // 1917") has no abbreviation of its own.
@@ -214,28 +297,192 @@ export default function DailyVerseCard({
     return () => clearTimeout(timer)
   }, [shareNote])
 
-  async function handleShare() {
-    if (!verse) return
-    const source = version ? `${verse.reference} (${version})` : verse.reference
-    // A licensed translation's notice travels with its text, off the site too.
-    const payload = `"${verse.text}"\n\n${source}${attribution ? `\n${attribution}` : ""}`
+  // Draws the tree off screen at 9:16 and copies its pixels. Null when there
+  // is no canvas to copy (no tree yet, or it did not paint in time).
+  async function captureShareTree(): Promise<HTMLCanvasElement | null> {
+    flushSync(() => setShareTree(true))
+    try {
+      for (let i = 0; i < 20; i++) {
+        await new Promise((resolve) => requestAnimationFrame(resolve))
+        const canvas = shareTreeRef.current?.querySelector("canvas")
+        // Until TreeCanvas measures its box the bitmap is the default 300 x 150.
+        if (canvas && canvas.height >= SHARE_TREE_H * 0.5) {
+          const copy = document.createElement("canvas")
+          copy.width = canvas.width
+          copy.height = canvas.height
+          copy.getContext("2d")?.drawImage(canvas, 0, 0)
+          return copy
+        }
+      }
+      return null
+    } finally {
+      setShareTree(false)
+    }
+  }
 
-    // The Web Share sheet where the browser has one (mostly mobile), the
-    // clipboard everywhere else. A share the user cancels is not a failure.
-    if (typeof navigator !== "undefined" && navigator.share) {
-      try {
-        await navigator.share({ title: verse.reference, text: payload })
-        return
-      } catch {
-        return
+  async function buildShareImage(useTree: boolean, label: string): Promise<Blob> {
+    const logo = loadImage(SHARE_LOGO).catch(() => null)
+    let source: CanvasImageSource | null = null
+    let width = 0
+    let height = 0
+    let isPhoto = false
+    if (useTree) {
+      const tree = await captureShareTree()
+      if (tree) {
+        source = tree
+        width = tree.width
+        height = tree.height
       }
     }
-    try {
-      await navigator.clipboard.writeText(payload)
-      setShareNote("Gekopieerd")
-    } catch {
-      setShareNote("Kopiëren lukte niet")
+    if (!source) {
+      // The tree page falls back to the day's photo, here as on the card.
+      const img = await loadImage(photo).catch(() => null)
+      if (img) {
+        source = img
+        width = img.naturalWidth
+        height = img.naturalHeight
+        isPhoto = true
+      }
     }
+    // The page's own fonts (next/font's Lora and Inter), resolved.
+    const serifFamily = verseRef.current
+      ? getComputedStyle(verseRef.current).fontFamily
+      : "Georgia, serif"
+    const sansFamily = cardRef.current
+      ? getComputedStyle(cardRef.current).fontFamily
+      : "system-ui, sans-serif"
+    return renderDailyVerseShareImage({
+      background: source,
+      backgroundWidth: width,
+      backgroundHeight: height,
+      photoWash: isPhoto,
+      text: verse?.text ?? "",
+      label,
+      // A licensed translation's notice travels with its text, off the site too.
+      attribution,
+      logo: await logo,
+      serifFamily,
+      sansFamily,
+    })
+  }
+
+  async function deliverShare(blob: Blob, title: string) {
+    const result = await shareOrDownload(blob, shareFileName(), title)
+    if (result === "blocked") setShareNote("Afbeelding klaar, tik nogmaals op delen")
+    else if (result === "downloaded") setShareNote("Afbeelding gedownload")
+  }
+
+  // A 1080 x 1920 image of the verse over the chosen background: through the
+  // share sheet where the browser can share files, else as a download.
+  async function handleShare() {
+    if (!verse || sharing) return
+    const label = version ? `${verse.reference} ${version}` : verse.reference
+    const title = `Tekst van de dag - ${verse.reference}`
+    const useTree = background === "tree" && hasTree
+    const key = `${photo}|${label}|${verse.text}|${useTree ? "tree" : "photo"}`
+    const cached = lastShare.current
+    if (cached && cached.key === key) {
+      await deliverShare(cached.blob, title)
+      return
+    }
+    setSharing(true)
+    try {
+      const blob = await buildShareImage(useTree, label)
+      lastShare.current = { key, blob }
+      await deliverShare(blob, title)
+    } catch {
+      setShareNote("Delen lukte niet")
+    } finally {
+      setSharing(false)
+    }
+  }
+
+  // --- paging: swipe, drag, the dots and the arrow keys ---
+
+  function isControl(target: EventTarget | null): boolean {
+    return (
+      target instanceof Element &&
+      Boolean(target.closest("button, a, input, textarea, select, [role='menu'], [role='dialog']"))
+    )
+  }
+
+  function onPointerDown(event: React.PointerEvent<HTMLDivElement>) {
+    if (event.button !== 0 || !event.isPrimary || isControl(event.target)) return
+    const width = cardRef.current?.clientWidth ?? 0
+    if (width <= 0) return
+    drag.current = {
+      id: event.pointerId,
+      x: event.clientX,
+      y: event.clientY,
+      lastX: event.clientX,
+      lastT: event.timeStamp,
+      vx: 0,
+      width,
+      swiping: false,
+    }
+  }
+
+  function onPointerMove(event: React.PointerEvent<HTMLDivElement>) {
+    const d = drag.current
+    if (!d || d.id !== event.pointerId) return
+    // Released outside the card before it became a swipe: forget it.
+    if (event.pointerType === "mouse" && event.buttons === 0) {
+      drag.current = null
+      return
+    }
+    const dx = event.clientX - d.x
+    const dy = event.clientY - d.y
+    if (!d.swiping) {
+      if (Math.abs(dx) < DRAG_SLOP && Math.abs(dy) < DRAG_SLOP) return
+      // Mostly vertical: a scroll, or a text selection going down - not ours.
+      if (Math.abs(dy) >= Math.abs(dx)) {
+        drag.current = null
+        return
+      }
+      d.swiping = true
+      event.currentTarget.setPointerCapture(event.pointerId)
+      window.getSelection()?.removeAllRanges()
+      setAnimated(true)
+    }
+    const dt = event.timeStamp - d.lastT
+    if (dt > 0) d.vx = (event.clientX - d.lastX) / dt
+    d.lastX = event.clientX
+    d.lastT = event.timeStamp
+    let at = pageIndex - dx / d.width
+    // Resistance past the first and last page, like a scroll's overscroll.
+    if (at < 0) at *= 0.3
+    else if (at > lastPage) at = lastPage + (at - lastPage) * 0.3
+    setDragPage(Math.min(lastPage + PAGE_GIVE, Math.max(-PAGE_GIVE, at)))
+  }
+
+  function onPointerUp(event: React.PointerEvent<HTMLDivElement>) {
+    const d = drag.current
+    if (!d || d.id !== event.pointerId) return
+    drag.current = null
+    if (!d.swiping) return
+    const at = pageIndex - (event.clientX - d.x) / d.width
+    // A fling turns the page in its direction; otherwise the nearest page.
+    let target = d.vx < -FLING ? Math.ceil(at) : d.vx > FLING ? Math.floor(at) : Math.round(at)
+    target = Math.min(lastPage, Math.max(0, target))
+    setDragPage(null)
+    selectBackground(DAILY_VERSE_BACKGROUNDS[target])
+  }
+
+  function onPointerCancel() {
+    drag.current = null
+    setDragPage(null)
+  }
+
+  function onDotKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
+    let next = pageIndex
+    if (event.key === "ArrowRight" || event.key === "ArrowDown") next = Math.min(lastPage, pageIndex + 1)
+    else if (event.key === "ArrowLeft" || event.key === "ArrowUp") next = Math.max(0, pageIndex - 1)
+    else if (event.key === "Home") next = 0
+    else if (event.key === "End") next = lastPage
+    else return
+    event.preventDefault()
+    selectBackground(DAILY_VERSE_BACKGROUNDS[next])
+    dotRefs.current[next]?.focus()
   }
 
   // A beat left running past unmount would set state on a gone component.
@@ -268,62 +515,77 @@ export default function DailyVerseCard({
     // `min-h`, not `h`: 218 px is the design's height, but a long verse at a
     // phone's width (or four lines at the 680 px measure) needs more, and a
     // fixed height clipped it under the action row.
-    <div className="relative flex min-h-[218px] min-w-0 flex-none flex-col overflow-hidden rounded-card">
-      {/* THE PICTURE IS THE READER'S OWN TREE.
-          `ProgressTreeScene` draws the landscape they built in the studio -
-          their species, their scene, their animal, at their level - which is
-          the same picture /profiel/boom and the navbar avatar show, from the
-          provider the root layout already mounts. So it costs no request.
+    //
+    // The whole card takes the swipe (`touch-pan-y` leaves vertical scrolling
+    // to the browser); presses on its buttons and links are left alone.
+    <div
+      ref={cardRef}
+      className={`relative flex min-h-[218px] min-w-0 flex-none touch-pan-y flex-col overflow-hidden rounded-card ${dragPage !== null ? "cursor-grabbing select-none" : ""}`}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerCancel}
+    >
+      {/* TWO PAGES, SIDE BY SIDE, slid by `pagePos` (0 = photo, 1 = tree).
 
-          `still`: one frame, no loop. A landscape moving behind the verse is
-          the one thing atmosphere must not do on a screen someone is reading,
-          and it is the rule the reading room follows for the same reason.
+          The photo page is the day's nature photograph, the same file the app
+          shows today (`dailyVersePhoto`), under a light wash of its own: the
+          photos are mid-bright, and the wash is what keeps white text readable
+          on the lightest skies and dunes.
 
-          The curated photograph stays underneath as the ground: it is what a
-          reader with no tree yet, or one who switched the tree off, keeps - and
-          it is what fills the card in the beat before the provider answers.
-          The handoff's mauve-to-amber gradient with two hills was a placeholder
-          for exactly this (design_handoff_web/RULES.md §4) - the structure and
-          the measurements below are the design's, the illustration is not.
+          The tree page is the reader's own tree. `ProgressTreeScene` draws the
+          landscape they built in the studio - their species, their scene,
+          their animal, at their level - which is the same picture
+          /profiel/boom and the navbar avatar show, from the provider the root
+          layout already mounts. So it costs no request. `still`: one frame, no
+          loop. A landscape moving behind the verse is the one thing atmosphere
+          must not do on a screen someone is reading. The photograph stays
+          underneath as its ground: it is what a reader with no tree yet, or
+          one who switched the tree off, keeps there.
 
           Either way the same two scrims go over it: a flat layer that
           guarantees contrast over a bright sky, and a gradient that keeps the
           eyebrow and the action row readable over a light patch at either edge.
           Both are copied from the app's _PhotoScrim. */}
-      <div
-        aria-hidden
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${photo})` }}
-      />
-      {hasTree && (
-        // Over the photograph rather than instead of it, and faded in: the
-        // provider answers a beat after the first paint, and a hard cut from
-        // one landscape to another reads as a glitch.
-        <div
-          aria-hidden
-          className="absolute inset-0 motion-safe:animate-fade-in"
-          style={{ backgroundImage: sceneGround }}
-        >
-          {/* The canvas never gets wider than SCENE_MAX_W, so its backdrop
-              keeps the proportions it was drawn for (the tree itself is always
-              drawn at one uniform scale, so it never distorts). The mask sits
-              on the full-card layer so its stops follow the card: on a card
-              narrower than SCENE_MAX_W - SCENE_FADE_W both stops fall left of
-              the card and nothing is faded; wider, the landscape's left edge
-              dissolves over SCENE_FADE_W into the plain sky and earth. */}
+      <div aria-hidden className="absolute inset-0 overflow-hidden">
+        {DAILY_VERSE_BACKGROUNDS.map((kind, i) => (
           <div
-            className="absolute inset-0"
-            style={{
-              WebkitMaskImage: sceneMask,
-              maskImage: sceneMask,
-            }}
+            key={kind}
+            className={`absolute inset-0 ${animated && dragPage === null ? "transition-transform duration-[280ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none" : ""}`}
+            style={{ transform: `translateX(${(i - pagePos) * 100}%)` }}
           >
-            <div className="absolute inset-y-0 right-0 w-full" style={{ maxWidth: SCENE_MAX_W }}>
-              <ProgressTreeScene still className="h-full w-full" />
-            </div>
+            <DayPhoto src={photo} />
+            {kind === "tree" && hasTree && (
+              // Over the photograph rather than instead of it, and faded in: the
+              // provider answers a beat after the first paint, and a hard cut from
+              // one landscape to another reads as a glitch.
+              <div
+                className="absolute inset-0 motion-safe:animate-fade-in"
+                style={{ backgroundImage: sceneGround }}
+              >
+                {/* The canvas never gets wider than SCENE_MAX_W, so its backdrop
+                    keeps the proportions it was drawn for (the tree itself is always
+                    drawn at one uniform scale, so it never distorts). The mask sits
+                    on the full-card layer so its stops follow the card: on a card
+                    narrower than SCENE_MAX_W - SCENE_FADE_W both stops fall left of
+                    the card and nothing is faded; wider, the landscape's left edge
+                    dissolves over SCENE_FADE_W into the plain sky and earth. */}
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    WebkitMaskImage: sceneMask,
+                    maskImage: sceneMask,
+                  }}
+                >
+                  <div className="absolute inset-y-0 right-0 w-full" style={{ maxWidth: SCENE_MAX_W }}>
+                    <ProgressTreeScene still className="h-full w-full" />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        ))}
+      </div>
       <div
         aria-hidden
         className="absolute inset-0"
@@ -334,10 +596,49 @@ export default function DailyVerseCard({
         }}
       />
 
+      {/* The page indicator, top right: the current page's dot white, the
+          other a faint white, following the drag. Each dot is a radio with a
+          24 px target; the arrow keys move between them. */}
+      <div
+        role="radiogroup"
+        aria-label="Achtergrond"
+        onKeyDown={onDotKeyDown}
+        className="absolute right-[18px] top-[14px] z-[2] flex items-center max-md:right-3"
+      >
+        {DAILY_VERSE_BACKGROUNDS.map((kind, i) => {
+          const selected = kind === background
+          const alpha = 1 - 0.6 * Math.min(1, Math.abs(i - Math.min(lastPage, Math.max(0, pagePos))))
+          return (
+            <button
+              key={kind}
+              ref={(el) => {
+                dotRefs.current[i] = el
+              }}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              aria-label={BACKGROUND_LABEL[kind]}
+              title={BACKGROUND_LABEL[kind]}
+              tabIndex={selected ? 0 : -1}
+              onClick={() => selectBackground(kind)}
+              className="group flex h-6 w-[17px] items-center justify-center rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
+            >
+              <span
+                className="block h-1.5 w-1.5 rounded-full"
+                style={{
+                  backgroundColor: `rgba(255,255,255,${alpha})`,
+                  boxShadow: "0 0 3px rgba(0,0,0,0.25)",
+                }}
+              />
+            </button>
+          )
+        })}
+      </div>
+
       <div className="relative z-[1] flex flex-1 flex-col px-[26px] pb-5 pt-[22px] max-md:px-5">
         {/* One eyebrow carries both the label and the reference, so the verse
-            itself is the next thing the eye lands on. */}
-        <p className="text-[10.5px] font-semibold uppercase tracking-[1.5px] text-white/[0.82]">
+            itself is the next thing the eye lands on. Kept clear of the dots. */}
+        <p className="pr-12 text-[10.5px] font-semibold uppercase tracking-[1.5px] text-white/[0.82]">
           Tekst van de dag
           {verse ? ` · ${verse.reference}${version ? ` ${version}` : ""}` : ""}
         </p>
@@ -349,6 +650,7 @@ export default function DailyVerseCard({
           </div>
         ) : verse ? (
           <p
+            ref={verseRef}
             className="content-in mt-3 max-w-[680px] font-serif text-[21px] font-normal leading-[1.45] text-white sm:text-[25px]"
             style={{ textShadow: "0 1px 3px rgba(0,0,0,.28)", overflowWrap: "break-word" }}
           >
@@ -395,7 +697,7 @@ export default function DailyVerseCard({
             </span>
           </RoundAction>
 
-          <RoundAction label="Delen" onClick={handleShare} disabled={!verse}>
+          <RoundAction label="Delen" onClick={handleShare} disabled={!verse || sharing}>
             <Share2 size={19} />
           </RoundAction>
 
@@ -441,9 +743,31 @@ export default function DailyVerseCard({
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {shareNote && <span className="text-[11px] text-white/85">{shareNote}</span>}
+          {sharing && (
+            <span role="status" className="text-[11px] text-white/85">
+              Afbeelding maken...
+            </span>
+          )}
+          {!sharing && shareNote && (
+            <span role="status" className="text-[11px] text-white/85">
+              {shareNote}
+            </span>
+          )}
         </div>
       </div>
+
+      {/* The tree for the share image, off screen at 9:16, only while a
+          share is being drawn. */}
+      {shareTree && (
+        <div
+          ref={shareTreeRef}
+          aria-hidden
+          className="pointer-events-none fixed top-0"
+          style={{ left: -10_000, width: SHARE_TREE_W, height: SHARE_TREE_H }}
+        >
+          <ProgressTreeScene still className="h-full w-full" />
+        </div>
+      )}
 
       <Dialog open={historyOpen} onOpenChange={setHistoryOpen}>
         {/* The Dialog has no trigger of its own (it opens from a menu item
@@ -523,6 +847,23 @@ export default function DailyVerseCard({
         </DialogContent>
       </Dialog>
     </div>
+  )
+}
+
+/** The day's photo, cover-cropped, under a light wash of its own. */
+function DayPhoto({ src }: { src: string }) {
+  return (
+    <>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={src}
+        alt=""
+        decoding="async"
+        draggable={false}
+        className="absolute inset-0 h-full w-full object-cover"
+      />
+      <div className="absolute inset-0 bg-black/[0.18]" />
+    </>
   )
 }
 
