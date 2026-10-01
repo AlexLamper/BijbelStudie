@@ -40,7 +40,7 @@ export const danielLessons: Record<number, LessonContent> = {
       ],
     },
     reflection: {
-      question: 'Waar ligt jouw grens als de omgeving je vormt?',
+      question: 'Waar trek jij een grens, net als Daniël?',
       practices: [
         'Bepaal een grens voor deze week waarvan je weet dat je omgeving hem niet begrijpt, en houd hem.',
         'Schrijf op waarin jij je wel aanpast en waarin niet, en of je daar bewust voor koos.',
@@ -48,9 +48,9 @@ export const danielLessons: Record<number, LessonContent> = {
       ],
       memoryVerse: 'Daniël 1:8',
       prompts: [
-        'Waarin past Daniël zich wel aan, en waarin niet?',
-        'Wat maakt zijn verzoek respectvol in plaats van opstandig?',
-        'Welke grens zou jij deze week bewust willen bewaken?',
+        'Waarin past Daniël zich aan in Babel?',
+        'Hoe vraagt Daniël om ander eten?',
+        'Welke grens wil jij deze week bewaken?',
       ],
     },
     quiz: quizFor(1),
@@ -81,7 +81,7 @@ export const danielLessons: Record<number, LessonContent> = {
       ],
     },
     reflection: {
-      question: 'Wat betekent het voor jou dat het laatste koninkrijk niet door mensenhanden komt?',
+      question: 'Wat betekent het voor jou dat God het laatste woord heeft?',
       practices: [
         'Noem een rijk in je eigen leven dat onwrikbaar lijkt, en schrijf op wat er volgens dit hoofdstuk van overblijft.',
         'Dank deze week een keer voor een antwoord voordat je het hebt gekregen, zoals Daniël doet.',
@@ -89,7 +89,7 @@ export const danielLessons: Record<number, LessonContent> = {
       ],
       memoryVerse: 'Daniël 2:44',
       prompts: [
-        'Welke "rijken" in jouw leven lijken onwrikbaar?',
+        'Wat lijkt in jouw leven zo sterk dat niets het kan breken?',
         'Waarvoor dankt Daniël God nog vóór hij naar de koning gaat?',
       ],
     },
@@ -121,7 +121,7 @@ export const danielLessons: Record<number, LessonContent> = {
       ],
     },
     reflection: {
-      question: 'Kun jij "en zo niet" zeggen - geloven zonder garantie op de goede afloop?',
+      question: 'Kun jij God vertrouwen, ook als het niet goed afloopt?',
       practices: [
         'Schrijf je eigen en zo niet op: wat blijf je doen als het niet goed afloopt?',
         'Zoek deze week een keuze waarin je gehoorzaamheid niet laat afhangen van de uitkomst.',
@@ -129,8 +129,8 @@ export const danielLessons: Record<number, LessonContent> = {
       ],
       memoryVerse: 'Daniël 3:17-18',
       prompts: [
-        'Waar in jouw geloof hangt veel af van de uitkomst?',
-        'Wat verandert er als je gehoorzaamheid niet afhankelijk maakt van redding?',
+        'Wanneer vind jij het moeilijk om God te vertrouwen?',
+        'Wat zeggen de drie vrienden tegen de koning in vers 17 en 18?',
       ],
     },
     quiz: quizFor(3),
@@ -161,15 +161,15 @@ export const danielLessons: Record<number, LessonContent> = {
       ],
     },
     reflection: {
-      question: 'Waar schrijf jij jezelf toe wat je hebt gekregen?',
+      question: 'Wat heb jij gekregen waar je God voor kunt danken?',
       practices: [
         'Noem drie dingen die je hebt en schrijf erbij van wie je ze gekregen hebt.',
         'Let deze week op het woord ik in je eigen zinnen over je werk.',
         'Lees het slot van het hoofdstuk naast de zin waarmee de koning begon, en schrijf op wat ertussen gebeurd is.',
       ],
       prompts: [
-        'Lees vers 30 nog eens. Wat is precies het probleem in die zin?',
-        'Hoe eindigt de koning zijn eigen verslag - en wat zegt dat?',
+        'Waar is de koning trots op in vers 30?',
+        'Wat zegt de koning over God aan het eind van het hoofdstuk?',
       ],
     },
     quiz: quizFor(4),
@@ -200,15 +200,15 @@ export const danielLessons: Record<number, LessonContent> = {
       ],
     },
     reflection: {
-      question: 'Wat weet jij, dat je nog niet doet?',
+      question: 'Wat weet jij al wel, maar doe je nog niet?',
       practices: [
         'Schrijf op wat jij weet maar nog niet doet, en zet er een dag bij waarop je begint.',
         'Weiger deze week een keer iets wat je zou kunnen aannemen maar niet wilt verdienen.',
         'Vergelijk Belsazar met zijn vader uit hoofdstuk 4, en schrijf het verschil op.',
       ],
       prompts: [
-        'Vers 22: "en gij, Belsazar, hebt uw hart niet vernederd, hoewel gij dit alles wist."',
-        'Waarom weigert Daniël de beloning voordat hij uitlegt?',
+        'Wat wist Belsazar volgens vers 22 al wel?',
+        'Wat zegt Daniël over de beloning van de koning?',
       ],
     },
     quiz: quizFor(5),
@@ -239,15 +239,15 @@ export const danielLessons: Record<number, LessonContent> = {
       ],
     },
     reflection: {
-      question: 'Zou iemand jouw geloof herkennen aan je gewoonten?',
+      question: 'Aan welke gewoonte kunnen anderen zien dat jij gelooft?',
       practices: [
         'Houd deze week een vast moment van gebed aan, op dezelfde tijd, ook als het niet uitkomt.',
         'Schrijf op wat het jou zou kosten als je geloof op je werk of school algemeen bekend was.',
         'Kijk wat de koning doet in de nacht, en schrijf op wat dat over zijn geweten zegt.',
       ],
       prompts: [
-        'Wat is in jouw week het equivalent van "driemaal per dag"?',
-        'Waarom is een gewoonte sterker dan een besluit op het moment zelf?',
+        'Wanneer neem jij elke dag tijd voor God?',
+        'Wat doet Daniël als hij hoort dat bidden verboden is?',
       ],
     },
     quiz: quizFor(6),
@@ -278,7 +278,7 @@ export const danielLessons: Record<number, LessonContent> = {
       ],
     },
     reflection: {
-      question: 'Hoe verandert het jouw kijk op de macht van vandaag, als je haar als beest én als vergankelijk ziet?',
+      question: 'Wat betekent het voor jou dat het koninkrijk van God nooit voorbijgaat?',
       practices: [
         'Schrijf naast elkaar op wat er met de vier dieren gebeurt en wat er met de Zoon des mensen gebeurt.',
         'Zoek een plaats op waar Jezus zichzelf de Zoon des mensen noemt, en lees die.',
@@ -286,8 +286,8 @@ export const danielLessons: Record<number, LessonContent> = {
       ],
       memoryVerse: 'Daniël 7:14',
       prompts: [
-        'Vergelijk het beeld uit hoofdstuk 2 met de dieren hier.',
-        'Wat wordt er in vers 27 beloofd aan "het volk der heiligen"?',
+        'Welke dieren ziet Daniël in zijn droom?',
+        'Wat krijgt het volk van God volgens vers 27?',
       ],
     },
     quiz: quizFor(7),
@@ -318,15 +318,15 @@ export const danielLessons: Record<number, LessonContent> = {
       ],
     },
     reflection: {
-      question: 'Wat doe je met een profetie die je niet volledig begrijpt?',
+      question: 'Wat doe jij met een stuk uit de Bijbel dat je niet begrijpt?',
       practices: [
         'Zoek op welke rijken hier bij name genoemd worden, en waar ze in de geschiedenis staan.',
         'Schrijf op wat het visioen met Daniël doet aan het eind van het hoofdstuk, en wanneer jij zoiets voelde.',
         'Lees het hoofdstuk nog een keer en let alleen op wat er over tijd gezegd wordt.',
       ],
       prompts: [
-        'Daniël begreep het niet en werd er ziek van (vers 27). Wat deed hij daarna?',
-        'Wat is het verschil tussen niet begrijpen en niet vertrouwen?',
+        'Wat doet Daniël nadat hij ziek is geweest (vers 27)?',
+        'Kun jij God vertrouwen zonder alles te begrijpen?',
       ],
     },
     quiz: quizFor(8),
@@ -357,15 +357,15 @@ export const danielLessons: Record<number, LessonContent> = {
       ],
     },
     reflection: {
-      question: 'Voor wie zou jij "wij" durven zeggen in je gebed?',
+      question: 'Voor welke groep mensen wil jij bidden, net als Daniël?',
       practices: [
         'Schrijf een schuldbelijdenis in de wij-vorm, over iets in je kerk of je familie.',
         'Lees het gebed van Daniël deze week een keer hardop als je eigen gebed.',
         'Onderstreep hoe vaak Daniël wij zegt, en schrijf op wat hij daarmee doet.',
       ],
       prompts: [
-        'Wat doet Daniël met een belofte die al vaststaat? En wat zegt dat over bidden?',
-        'Waarop baseert hij zijn vraag om vergeving?',
+        'Wat doet Daniël als hij bij Jeremia leest wat God beloofd heeft?',
+        'Waarom vraagt Daniël God om vergeving, volgens vers 18?',
       ],
     },
     quiz: quizFor(9),
@@ -396,15 +396,15 @@ export const danielLessons: Record<number, LessonContent> = {
       ],
     },
     reflection: {
-      question: 'Wat doe je in de periode tussen bidden en antwoord krijgen?',
+      question: 'Wat doe jij als je op een antwoord van God wacht?',
       practices: [
         'Bid deze week drie dagen achter elkaar voor iets waarvan je geen antwoord ziet.',
         'Schrijf op wat er volgens dit hoofdstuk gebeurde terwijl Daniël niets merkte.',
         'Kies iemand voor wie je deze week bidt zonder het hem of haar te vertellen.',
       ],
       prompts: [
-        'Het antwoord was er vanaf dag één. Wat verandert dat aan hoe jij stilte uitlegt?',
-        'Waarom moest Daniël eerst versterkt worden voor hij kon horen?',
+        'Wanneer werd het gebed van Daniël al gehoord, volgens vers 12?',
+        'Wat doet de engel als Daniël geen kracht meer heeft?',
       ],
     },
     quiz: quizFor(10),
@@ -435,15 +435,15 @@ export const danielLessons: Record<number, LessonContent> = {
       ],
     },
     reflection: {
-      question: 'Wat betekent "wie hun God kennen, zullen sterk zijn" in een tijd die je niet kunt sturen?',
+      question: 'Waar heb jij deze week kracht van God nodig?',
       practices: [
         'Lees het hoofdstuk met een tijdlijn ernaast en schrijf drie namen op die je terugvindt.',
         'Schrijf op wat het voor jou betekent dat God de geschiedenis zo nauwkeurig kent.',
         'Noem een situatie waarin jij het overzicht mist, en leg die naast wat hier over kennen van God staat.',
       ],
       prompts: [
-        'Wat valt je op aan hoe kort elke heerser in dit hoofdstuk aan de macht is?',
-        'Waar zie jij vandaag iets van dat patroon terug?',
+        'Hoe lang blijven de koningen in dit hoofdstuk aan de macht?',
+        'Wat zegt vers 32 over mensen die God kennen?',
       ],
     },
     quiz: quizFor(11),
@@ -474,7 +474,7 @@ export const danielLessons: Record<number, LessonContent> = {
       ],
     },
     reflection: {
-      question: 'Wat neem je mee uit twaalf hoofdstukken Daniël?',
+      question: 'Wat neem jij mee uit het boek Daniël?',
       practices: [
         'Schrijf in je eigen woorden op wat er beloofd wordt aan wie ontwaken.',
         'Noem iemand die voor jou is geweest wat vers 3 beschrijft, en laat het diegene weten.',
@@ -482,9 +482,9 @@ export const danielLessons: Record<number, LessonContent> = {
       ],
       memoryVerse: 'Daniël 12:3',
       prompts: [
-        'Wat is er veranderd in hoe je naar macht en geschiedenis kijkt?',
-        'Daniël krijgt geen volledig antwoord, wel een belofte. Is dat genoeg voor jou?',
-        'Welke gewoonte uit dit boek wil je overnemen?',
+        'Welk verhaal uit Daniël blijft je het meest bij?',
+        'Welke belofte krijgt Daniël in het laatste vers?',
+        'Welke gewoonte van Daniël wil jij overnemen?',
       ],
       noteTags: ['daniel', 'studie'],
     },

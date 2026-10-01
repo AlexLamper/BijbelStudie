@@ -11,20 +11,30 @@ import type { LessonContent } from './data/study-lessons/types';
  * genre, because "let op wat Jezus zegt" is useless above a psalm. The three
  * practices are what the reader leaves with.
  *
- * These 24 lines carry about 1200 generated chapter lessons, which is every
+ * These lines carry about 1200 generated chapter lessons, which is every
  * chapter of the canon nobody has written a study for. They are worth the same
  * care as authored prose.
  *
- * Deliberately NO reflection question: the lesson's own `focus` (a rotated
- * study question of that book) stays the question, and these prompts sit
- * under it. Authored content always wins, field by field - see
- * `mergeTemplateUnder`.
+ * The Toepassing question itself is the lesson's `focus`, which
+ * lib/bookStudies.ts rotates through `questions` below, one per chapter. It
+ * used to rotate the book page's `studyQuestions`, but those are written for
+ * a study of the whole book ("zoek de vijf redevoeringen op") and landed on
+ * chapters they had nothing to do with. Authored content always wins, field
+ * by field - see `mergeTemplateUnder`.
  *
- * Copy rule: Dutch, no em or en dashes and no spaced hyphens.
+ * Copy rule: Dutch, no em or en dashes and no spaced hyphens. Every question
+ * is one short question in plain words: personal ("Wat betekent dit voor
+ * jou") or answerable from the text itself, never two questions in one line,
+ * never a term a new reader has to look up.
  */
 export interface ChapterStudyTemplate {
   readingCue: string;
-  /** Exactly three: waarnemen, uitleggen, toepassen. */
+  /**
+   * The Toepassing question, rotated per chapter. Has to fit ANY chapter of
+   * the genre, because nobody wrote one for this chapter.
+   */
+  questions: string[];
+  /** Exactly three, in the order notice, understand, apply. */
   prompts: [string, string, string];
   /**
    * Exactly three things to DO with this chapter this week.
@@ -42,10 +52,17 @@ export interface ChapterStudyTemplate {
 export const CHAPTER_STUDY_TEMPLATES: Record<BookGenre, ChapterStudyTemplate> = {
   Wet: {
     readingCue: 'Lees rustig en let op wat God van zijn volk vraagt, en waarom Hij dat vraagt.',
+    questions: [
+      'Welk gebod uit dit hoofdstuk valt jou het meest op?',
+      'Wat vraagt God hier van zijn volk?',
+      'Welk vers uit dit hoofdstuk wil jij deze week onthouden?',
+      'Wat leer jij in dit hoofdstuk over hoe God is?',
+      'Wat betekent dit hoofdstuk voor jouw leven van nu?',
+    ],
     prompts: [
-      'Waarnemen: welke geboden, gebeurtenissen of herhalingen vallen je op in dit hoofdstuk?',
-      'Uitleggen: wat zegt dit over de heiligheid van God en over zijn verbond met Israël?',
-      'Toepassen: hoe wijst dit hoofdstuk vooruit naar Christus, en wat betekent dat voor jou vandaag?',
+      'Wat valt je op als je dit hoofdstuk leest?',
+      'Waarom vraagt God dit van zijn volk, denk je?',
+      'Wat kun jij hier deze week mee doen?',
     ],
     practices: [
       'Kies een gebod uit dit hoofdstuk en let deze week op het moment waarop het je echt iets kost.',
@@ -55,10 +72,17 @@ export const CHAPTER_STUDY_TEMPLATES: Record<BookGenre, ChapterStudyTemplate> = 
   },
   Geschiedenis: {
     readingCue: 'Lees het als een verhaal: wie handelt er, wat gebeurt er, en waar is God in het geheel?',
+    questions: [
+      'Welke persoon uit dit verhaal lijkt het meest op jou?',
+      'Waar zie jij God aan het werk in dit hoofdstuk?',
+      'Welke keuze uit dit verhaal had jij anders gemaakt?',
+      'Welk moment uit dit hoofdstuk blijft je het meest bij?',
+      'Wat leer jij van dit verhaal voor je eigen leven?',
+    ],
     prompts: [
-      'Waarnemen: wie zijn de hoofdpersonen, en welke keuzes maken ze?',
-      'Uitleggen: wat laat dit verhaal zien over de trouw van God, ook waar mensen tekortschieten?',
-      'Toepassen: in welke persoon of keuze herken je iets van jezelf, en wat neem je daarvan mee?',
+      'Wie zijn de belangrijkste personen in dit verhaal?',
+      'Waar zie je dat God trouw blijft, ook als mensen fouten maken?',
+      'Wat neem jij mee uit dit verhaal?',
     ],
     practices: [
       'Noem de persoon uit dit hoofdstuk op wie jij het meest lijkt, en schrijf op waarin.',
@@ -68,10 +92,17 @@ export const CHAPTER_STUDY_TEMPLATES: Record<BookGenre, ChapterStudyTemplate> = 
   },
   'Poëzie en wijsheid': {
     readingCue: 'Lees langzaam, en als het kan hardop. Let op beelden, herhalingen en de toon van de woorden.',
+    questions: [
+      'Welk vers uit dit gedeelte raakt jou het meest?',
+      'Welk gevoel uit dit gedeelte herken jij bij jezelf?',
+      'Welk beeld uit de tekst blijft je bij?',
+      'Wat wil jij God zeggen na het lezen van dit gedeelte?',
+      'Welke wijze les uit dit gedeelte heb jij deze week nodig?',
+    ],
     prompts: [
-      'Waarnemen: welke beelden en herhalingen gebruikt de schrijver?',
-      'Uitleggen: welke gevoelens of welke wijsheid brengt hij onder woorden, en wat zegt dat over God?',
-      'Toepassen: welk vers neem je deze week mee in je gebed of in een keuze die je maakt?',
+      'Welke beelden of woorden komen steeds terug?',
+      'Wat voelt of denkt de schrijver hier?',
+      'Welk vers neem jij deze week mee?',
     ],
     practices: [
       'Leer een vers uit dit gedeelte uit je hoofd en zeg het deze week elke dag een keer.',
@@ -81,10 +112,17 @@ export const CHAPTER_STUDY_TEMPLATES: Record<BookGenre, ChapterStudyTemplate> = 
   },
   'Grote profeten': {
     readingCue: 'Let op tot wie de profeet spreekt, welke aanklacht hij brengt en welke belofte er klinkt.',
+    questions: [
+      'Welke belofte uit dit hoofdstuk wil jij onthouden?',
+      'Waar roept dit hoofdstuk jou op om iets te veranderen?',
+      'Wat leer jij in dit hoofdstuk over hoe God is?',
+      'Welk vers uit dit hoofdstuk geeft jou hoop?',
+      'Waar zie jij vandaag iets terug van wat de profeet hier beschrijft?',
+    ],
     prompts: [
-      'Waarnemen: tot wie spreekt de profeet, en in welke situatie?',
-      'Uitleggen: welke oordelen en welke beloften staan hier naast elkaar, en wat zeggen ze over God?',
-      'Toepassen: waar roept dit hoofdstuk jou op tot omkeer of tot vertrouwen?',
+      'Tegen wie spreekt de profeet in dit hoofdstuk?',
+      'Wat belooft God in dit hoofdstuk?',
+      'Wat zegt dit hoofdstuk tegen jou?',
     ],
     practices: [
       'Schrijf op welke aanklacht uit dit hoofdstuk ook over jouw leven zou kunnen gaan.',
@@ -94,10 +132,17 @@ export const CHAPTER_STUDY_TEMPLATES: Record<BookGenre, ChapterStudyTemplate> = 
   },
   'Kleine profeten': {
     readingCue: 'Een korte profetie met een scherpe boodschap. Let op waar het volk van God is afgedwaald.',
+    questions: [
+      'Wat wil God dat zijn volk anders gaat doen?',
+      'Waar herken jij jezelf in de boodschap van dit hoofdstuk?',
+      'Welk vers uit dit hoofdstuk blijft je het meest bij?',
+      'Wat leer jij hier over hoe God is?',
+      'Wat betekent deze boodschap voor jou vandaag?',
+    ],
     prompts: [
-      'Waarnemen: welke zonde wordt genoemd, en welke woorden keren steeds terug?',
-      'Uitleggen: wat wil God met deze boodschap bij zijn volk bereiken?',
-      'Toepassen: waar klinkt deze roepstem ook in jouw leven of in de kerk van nu?',
+      'Welke woorden komen steeds terug in dit hoofdstuk?',
+      'Wat doet het volk verkeerd volgens de profeet?',
+      'Waar zie jij deze boodschap terug in je eigen leven?',
     ],
     practices: [
       'Benoem een gewoonte waarvan je zelf weet dat die niet klopt, en zet deze week een eerste stap.',
@@ -107,10 +152,17 @@ export const CHAPTER_STUDY_TEMPLATES: Record<BookGenre, ChapterStudyTemplate> = 
   },
   Evangelie: {
     readingCue: 'Let op wat Jezus zegt en doet, en hoe de mensen om Hem heen reageren.',
+    questions: [
+      'Wat doet Jezus in dit hoofdstuk dat jou raakt?',
+      'Met wie uit dit hoofdstuk voel jij je het meest verbonden?',
+      'Welke woorden van Jezus wil jij deze week onthouden?',
+      'Wat leer jij hier over wie Jezus is?',
+      'Wat zou Jezus met dit hoofdstuk tegen jou willen zeggen?',
+    ],
     prompts: [
-      'Waarnemen: wat zegt en doet Jezus in dit hoofdstuk, en wie zijn erbij?',
-      'Uitleggen: wat laat dit zien over wie Jezus is en over het koninkrijk van God?',
-      'Toepassen: hoe zou jij gereageerd hebben als je erbij was, en wat vraagt Hij nu van jou?',
+      'Wat zegt en doet Jezus in dit hoofdstuk?',
+      'Hoe reageren de mensen om Hem heen?',
+      'Hoe zou jij gereageerd hebben als je erbij was?',
     ],
     practices: [
       'Doe deze week een keer op jouw schaal wat Jezus in dit hoofdstuk doet.',
@@ -120,10 +172,17 @@ export const CHAPTER_STUDY_TEMPLATES: Record<BookGenre, ChapterStudyTemplate> = 
   },
   Brief: {
     readingCue: 'Volg de redenering van de schrijver. Let op woorden als daarom, want en maar.',
+    questions: [
+      'Welke zin uit dit hoofdstuk is voor jou het belangrijkst?',
+      'Wat wil de schrijver dat zijn lezers gaan doen?',
+      'Welke opdracht uit dit hoofdstuk kun jij deze week doen?',
+      'Waar geeft dit hoofdstuk jou troost of moed?',
+      'Wat betekent dit hoofdstuk voor jouw leven van nu?',
+    ],
     prompts: [
-      'Waarnemen: wat is de hoofdgedachte van dit hoofdstuk, en welke woorden keren terug?',
-      'Uitleggen: wat wilde de schrijver de eerste lezers leren of op het hart drukken?',
-      'Toepassen: welke opdracht of troost uit dit hoofdstuk geldt ook voor jou vandaag?',
+      'Waar gaat dit hoofdstuk vooral over?',
+      'Welke woorden of zinnen komen steeds terug?',
+      'Wat kun jij hier deze week mee doen?',
     ],
     practices: [
       'Schrijf de hoofdgedachte van dit hoofdstuk op in een zin en leg die ergens neer waar je hem ziet.',
@@ -133,10 +192,17 @@ export const CHAPTER_STUDY_TEMPLATES: Record<BookGenre, ChapterStudyTemplate> = 
   },
   Apocalyptiek: {
     readingCue: 'Lees de beelden niet te snel. Vraag steeds wat ze zeggen over de overwinning van God.',
+    questions: [
+      'Welk beeld uit dit hoofdstuk blijft je het meest bij?',
+      'Waar geeft dit hoofdstuk jou hoop?',
+      'Wat leer jij hier over de macht van God?',
+      'Welk vers wil jij onthouden als het moeilijk wordt?',
+      'Wat betekent het voor jou dat God het laatste woord heeft?',
+    ],
     prompts: [
-      'Waarnemen: welke beelden, getallen en personen komen in dit hoofdstuk voor?',
-      'Uitleggen: wat zeggen deze beelden over de macht van God en over de afloop van de geschiedenis?',
-      'Toepassen: hoe geeft dit hoofdstuk jou hoop of houvast in wat je nu meemaakt?',
+      'Welke beelden en personen zie je in dit hoofdstuk?',
+      'Wat laten deze beelden zien over God?',
+      'Hoe helpt dit hoofdstuk jou in wat je nu meemaakt?',
     ],
     practices: [
       'Schrijf in een zin op wat dit hoofdstuk zegt over hoe de geschiedenis afloopt.',

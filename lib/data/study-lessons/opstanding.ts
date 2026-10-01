@@ -34,7 +34,7 @@ export const opstandingLessons: Record<number, LessonContent> = {
       ],
     },
     reflection: {
-      question: 'Maria herkent Jezus pas wanneer Hij haar naam noemt. Waar in jouw leven herken je Hem eerder aan wat Hij zegt dan aan wat je ziet?',
+      question: 'Waar merk jij dat Jezus jou kent?',
       practices: [
         'Schrijf op waaraan jij Jezus herkent als je Hem niet ziet: welke woorden, welke momenten.',
         'Lees dit gedeelte deze week nog een keer hardop, en let alleen op wat er gezien wordt.',
@@ -42,9 +42,9 @@ export const opstandingLessons: Record<number, LessonContent> = {
       ],
       memoryVerse: 'Johannes 20:16',
       prompts: [
-        'Wat viel je op in de tekst? (observatie)',
-        'Wat betekende dit voor de eerste lezers? (uitleg)',
-        'Wat vraagt dit van jou, deze week? (toepassing)',
+        'Wat valt je op in dit verhaal?',
+        'Waaraan herkent Maria Jezus?',
+        'Wat wil jij deze week met dit verhaal doen?',
       ],
       placeholder: 'Schrijf op wat je opviel...',
       noteTags: ['opstanding', 'Johannes 20'],
@@ -76,7 +76,7 @@ export const opstandingLessons: Record<number, LessonContent> = {
       ],
     },
     reflection: {
-      question: 'Jezus noemt hen zalig die niet gezien hebben en toch geloven. Wat maakt geloven zonder zien voor jou moeilijk - en wat helpt?',
+      question: 'Wat maakt het voor jou moeilijk om te geloven zonder te zien?',
       practices: [
         'Schrijf de vraag op die jij aan Jezus zou stellen als je Hem een keer mocht zien.',
         'Zoek deze week iemand op die twijfelt, en luister zonder het meteen op te lossen.',
@@ -84,9 +84,9 @@ export const opstandingLessons: Record<number, LessonContent> = {
       ],
       memoryVerse: 'Johannes 20:29',
       prompts: [
-        'Waar lijk je op Thomas?',
-        'Wat zou jij willen zien of weten?',
-        'Wat verandert er als het antwoord niet komt?',
+        'Waar lijk jij op Thomas?',
+        'Wat zegt Thomas als hij Jezus ziet?',
+        'Wat helpt jou om te blijven geloven?',
       ],
       noteTags: ['opstanding', 'twijfel', 'Johannes 20'],
     },
@@ -118,7 +118,7 @@ export const opstandingLessons: Record<number, LessonContent> = {
       showMedia: true,
     },
     reflection: {
-      question: 'Petrus verbindt de opstanding met een belofte van eeuwen eerder. Wat betekent het voor jou dat dit geen losse gebeurtenis was, maar het sluitstuk van een lange lijn?',
+      question: 'Wat betekent het voor jou dat Jezus echt is opgestaan?',
       practices: [
         'Leg de opstanding deze week in drie zinnen uit aan iemand, met de Schrift erbij, zoals Petrus doet.',
         'Lees Psalm 16 helemaal en onderstreep wat Petrus eruit citeert.',
@@ -126,8 +126,8 @@ export const opstandingLessons: Record<number, LessonContent> = {
       ],
       memoryVerse: 'Handelingen 2:32',
       prompts: [
-        'Welk deel van Petrus zijn betoog overtuigt jou het meest?',
-        'Hoe zou jij dit in eigen woorden aan iemand uitleggen?',
+        'Welke woorden van David haalt Petrus aan?',
+        'Hoe zou jij in je eigen woorden vertellen dat Jezus leeft?',
       ],
       noteTags: ['opstanding', 'Handelingen 2', 'Pinksteren'],
     },
