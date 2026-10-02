@@ -18,8 +18,7 @@ import { LP_THEME_VARS } from "./studyLandingShared"
 import { PLANS, euro } from "../../lib/pricing"
 import { getBibleBook } from "../../lib/content/bibleBooks"
 import { PromoBanner } from "./PromoBanner"
-import { HeroVisual } from "./HeroVisual"
-import { HeroMobileCard } from "./HeroMobileCard"
+import HeroDemo from "./heroDemo/HeroDemo"
 import { ReviewsRow, type ReviewsData } from "./ReviewsRow"
 import { FREE_AI_DAILY_CAP, FREE_NOTE_LIMIT, PRO_AI_DAILY_CAP } from "../../lib/entitlements"
 
@@ -264,6 +263,12 @@ function Navbar() {
 /** One fixed seed for every tree on this page, so the build output is stable. */
 const LANDING_SEED = "bijbelstudie-levensboom"
 
+/** The tree in the hero demo's last scene: rendered here, on the server, so
+    the hero ships a finished SVG and none of the generator. */
+function heroTreeSvg(): string {
+  return renderTreeSvg({ seed: LANDING_SEED, level: 12, frac: 0.7, species: "eik", framing: "portrait", width: 150, height: 150, rootAttributes: 'aria-hidden="true"' })
+}
+
 /* ─── Hero ───────────────────────────────────────────────────── */
 /**
  * `reviews` is the real, imported App Store summary, handed down from
@@ -277,9 +282,12 @@ function Hero({ reviews }: { reviews?: ReviewsData }) {
       className="relative overflow-x-clip"
       style={{ backgroundColor: "var(--lp-hero-bg)" }}
     >
-      <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-[18px] px-5 py-7 sm:px-6 lg:min-h-[calc(100vh-112px)] lg:flex-row lg:items-center lg:gap-16 lg:py-0 lg:pl-[120px] lg:pr-0">
-        {/* Left column: fixed 540px from 1280px up, ~460px between 1024-1279. */}
-        <div className="flex flex-col items-start gap-[18px] lg:w-[460px] lg:flex-shrink-0 lg:gap-6 xl:w-[540px]">
+      {/* The paddings, the gap and the two column widths are sized together
+          so both columns fit beside a scrollbar at 1024, 1152, 1280 and 1440px
+          - change one and re-add the row. */}
+      <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-[18px] px-5 py-7 sm:px-6 lg:min-h-[calc(100vh-112px)] lg:flex-row lg:items-center lg:justify-between lg:gap-8 lg:py-0 lg:pl-8 lg:pr-6 xl:gap-12 xl:pl-16 min-[1440px]:gap-16 min-[1440px]:pl-[120px] min-[1440px]:pr-16">
+        {/* Left column: 400px from 1024, 500px from 1280, 540px from 1440. */}
+        <div className="flex flex-col items-start gap-[18px] lg:w-[400px] lg:flex-shrink-0 lg:gap-6 xl:w-[500px] min-[1440px]:w-[540px]">
           <p
             className="text-[11px] font-bold uppercase leading-normal lg:text-[13px]"
             style={{ letterSpacing: "0.12em", color: "var(--lp-hero-eyebrow)" }}
@@ -292,20 +300,20 @@ function Hero({ reviews }: { reviews?: ReviewsData }) {
           <h1
             className="text-balance font-extrabold"
             style={{
-              fontSize: "clamp(2.625rem, 2rem + 3vw, 4rem)",
+              fontSize: "clamp(2.5rem, 1.6rem + 2.6vw, 3.75rem)",
               lineHeight: 1.05,
               letterSpacing: "-0.035em",
               color: "var(--lp-hero-heading)",
             }}
           >
-            <span style={{ color: "var(--lp-hero-accent)" }}>Begrijp</span> wat je leest in de Bijbel.
+            Stop met Bijbellezen zonder het te <span style={{ color: "var(--lp-hero-accent)" }}>begrijpen</span>
           </h1>
 
           <p
             className="text-pretty text-[17px] lg:max-w-[520px] lg:text-xl"
             style={{ lineHeight: 1.55, color: "var(--lp-hero-lead)" }}
           >
-            Lees de tekst en het commentaar naast elkaar, met de grondtekst en je eigen notities één klik verder.
+            Lees elk hoofdstuk met uitleg, context en de grondtekst ernaast. Zo lees je niet alleen wat er staat, maar snap je ook wat het betekent.
           </p>
 
           {/* Two buttons, exactly 202x60 from 1024px up; a 2-column grid of
@@ -349,18 +357,17 @@ function Hero({ reviews }: { reviews?: ReviewsData }) {
           <ReviewsRow data={reviews} />
         </div>
 
-        {/* Right side: the product visual. Fixed-size inner box, scaled down
-            with a transform between 1024 and 1279px so the composition keeps
-            its proportions; hidden below 1024px in favour of HeroMobileCard. */}
-        <div className="relative hidden h-[500px] flex-grow items-center lg:flex xl:h-[600px]">
-          <div className="origin-left scale-[0.83] xl:scale-100">
-            <HeroVisual />
+        {/* Right side: the product, playing itself - one hard verse, the
+            explanation beside it, the Greek, a question answered, and the
+            progress. One component at every width: under the copy below
+            1024px, beside it from there up, where it is laid out at a fixed
+            620px and scaled down with a transform between 1024 and 1151px so
+            its two columns keep their proportions. Its height is fixed, so it
+            never moves the copy. */}
+        <div className="w-full min-w-0 pt-1 lg:w-[510px] lg:flex-shrink-0 lg:pt-0 min-[1152px]:w-[620px]">
+          <div className="mx-auto w-full max-w-[640px] lg:mx-0 lg:w-[620px] lg:max-w-none lg:origin-left lg:scale-[0.82] min-[1152px]:scale-100">
+            <HeroDemo treeSvg={heroTreeSvg()} />
           </div>
-        </div>
-
-        {/* Mobile: one compact lesson card instead of the two screenshots. */}
-        <div className="lg:hidden">
-          <HeroMobileCard />
         </div>
       </div>
 
