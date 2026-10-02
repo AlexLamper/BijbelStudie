@@ -1,4 +1,4 @@
-import { PLANS, annualSaving, euro, perYear } from "../../lib/pricing";
+import { PLANS, annualSaving, perYear } from "../../lib/pricing";
 import {
   FREE_AI_DAILY_CAP,
   FREE_GROUP_LIMIT,
@@ -8,14 +8,15 @@ import {
 import { PRO_TRIAL_DAYS } from "../../lib/promo";
 
 /**
- * The part of /abonnement that is not the checkout: what the free account
- * includes, what Pro adds, and the questions people ask before they pay.
+ * The part of /abonnement that is not the offer: the questions people ask
+ * before they pay, shown under the two columns (app/abonnement/page.tsx).
  *
  * Why this exists: Google crawled /abonnement and declined to index it. The
  * server HTML carried ~216 words, most of them the app shell's navigation, and
  * everything the page said about the plans was already on the indexed home
  * page (/#prijzen). This copy is what the page has that no other page has - the
  * per-feature line between free and Pro, and the billing facts from the terms.
+ * The offer above it is deliberately short, so the FAQ is where that lives.
  *
  * Every claim is checked against the code that enforces it, not against what
  * would read well:
@@ -43,8 +44,6 @@ const groupsLed = FREE_GROUP_LIMIT === 1 ? "één groep" : `${FREE_GROUP_LIMIT} 
 
 const MONTHLY = PLANS.monthly;
 const ANNUAL = PLANS.annual;
-
-export const PRICING_INTRO = `Lezen, begeleide studies, KingComments en ${FREE_AI_DAILY_CAP} AI-vragen per dag zijn gratis. Pro voegt Matthew Henry, Calvijn, Dachsel, de grondtekst bij elk vers en ${PRO_AI_DAILY_CAP} AI-vragen per dag toe, vanaf ${euro(MONTHLY.amountCents)}/maand. Eerste ${PRO_TRIAL_DAYS} dagen gratis.`;
 
 /**
  * The FAQ, rendered visibly on the page and emitted as the page's only
@@ -83,34 +82,5 @@ export const ABONNEMENT_FAQ: { q: string; a: string }[] = [
   {
     q: "Kan ik mijn geld terugkrijgen?",
     a: "Binnen 14 dagen na het afsluiten kun je de overeenkomst zonder opgave van reden herroepen, via info@bijbelstudie.io. Omdat je direct toegang tot Pro krijgt, betaal je dan alleen naar verhouding voor de dagen dat je het al gebruikte; de rest krijg je binnen 14 dagen terug. Daarna worden betaalde periodes niet terugbetaald, tenzij de wet anders bepaalt.",
-  },
-];
-
-/** Public pages this one should hand a reader on to - and the only crawlable links on it besides the app shell's. */
-export const ABONNEMENT_LINKS: { href: string; label: string; description: string }[] = [
-  {
-    href: "/bijbelstudie/gratis",
-    label: "Gratis bijbelstudie",
-    description: "Alle gratis vertalingen, commentaren en bronnen op een rij, ook buiten deze site.",
-  },
-  {
-    href: "/studies",
-    label: "Begeleide studies",
-    description: "Uitgewerkte studies over personen, thema's en bijbelboeken - gratis.",
-  },
-  {
-    href: "/bijbelstudie",
-    label: "Bijbelstudie: de complete gids",
-    description: "Wat bijbelstudie is, welke methoden er zijn en hoe je begint.",
-  },
-  {
-    href: "/help",
-    label: "Help en veelgestelde vragen",
-    description: "Over je account, de vertalingen, de AI-assistent en privacy.",
-  },
-  {
-    href: "/algemene-voorwaarden",
-    label: "Algemene voorwaarden",
-    description: "Looptijd, verlenging, opzeggen en herroepingsrecht in detail.",
   },
 ];

@@ -1,277 +1,221 @@
 "use client"
 
 /**
- * The interactive half of /abonnement: the trial notice, the three plan cards
- * and the checkout they start. Moved out of page.tsx unchanged in behaviour -
- * the checkout call, the sign-up redirect and the `?plan=` resume are the same
- * code as before; the trial notice now follows /api/trial instead of the old
- * one-week-on, one-week-off promo window.
+ * The interactive half of /abonnement: the two plan cards, the one button and
+ * the checkout it starts. The left column (heading, what Pro includes, the
+ * verse) and the FAQ are server components in page.tsx, so they are in the
+ * HTML for every visitor and crawler and never wait for the session check.
  *
- * Everything static (the heading, the comparison, the FAQ) now lives in
- * page.tsx as server components, so it is in the HTML for every visitor and
- * crawler, is not hidden behind the skeleton while a signed-in session is
- * checked, and is not shipped again as client JavaScript.
+ * A card only SELECTS a plan; the single button starts the checkout for the
+ * selected one. The checkout call, the sign-up redirect and the `?plan=`
+ * resume are the same code paths as before (lib/startCheckout.ts).
  */
 
-import { ArrowRight, Check, Loader2 } from "lucide-react"
+import Link from "next/link"
+import { Check, Loader2 } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { useState, useEffect, useCallback } from "react"
 import { useToast } from "../../hooks/use-toast"
 import { useRouter, useSearchParams } from "next/navigation"
 import {
   PLANS,
-  PRO_FEATURES,
+  RECOMMENDED,
   annualDiscountPercent,
-  annualSaving,
   effectivePerMonth,
+  euro,
   perWeek,
   type BillingInterval,
 } from "../../lib/pricing"
 import { PRO_TRIAL_DAYS } from "../../lib/promo"
-import { FREE_AI_DAILY_CAP } from "../../lib/entitlements"
 import { signupForCheckoutHref, startCheckout as requestCheckout } from "../../lib/startCheckout"
 import { track, trackNow } from "../../lib/analytics"
-import { Card, Skeleton } from "../../components/kit/primitives"
+import { Skeleton } from "../../components/kit/primitives"
 
-/** The four free-tier lines. Only "Bijbelstudie Pro" writes copy that touches
- *  price or entitlement, so this list lives beside PRO_FEATURES rather than in
- *  lib/pricing.ts, which is about what Pro unlocks, not what free already has.
- *
- *  "Commentaren: eerste alinea" was replaced: KingComments is free in full
- *  (lib/proContent.ts `isAlwaysFreeCommentary`), and the line undersold it.
- *  The per-feature detail, including the notes limit, is in the comparison
- *  table under the cards (app/abonnement/content.ts). */
-const FREE_FEATURES = [
-  "Bijbeltekst in alle vertalingen",
-  "Alle begeleide studies",
-  "KingComments volledig",
-  `${FREE_AI_DAILY_CAP} AI-vragen per dag`,
-]
+/** What /api/trial answers. */
+interface TrialStatus {
+  signedIn: boolean
+  isPro: boolean
+  eligible: boolean
+  trialDays: number
+}
 
-function FreeCard({ isPro }: { isPro: boolean }) {
+/** "€ 89,99": this page sets the amounts large, with the space Dutch typography puts after the sign. */
+function spaced(amount: string): string {
+  return amount.replace("€", "€ ")
+}
+
+const PLAN_COPY: Record<BillingInterval, { name: string; derived: string; period: string }> = {
+  annual: {
+    name: "Jaarlijks",
+    derived: `${spaced(effectivePerMonth(PLANS.annual))} per maand`,
+    period: "per jaar",
+  },
+  monthly: {
+    name: "Maandelijks",
+    derived: `${spaced(perWeek(PLANS.monthly))} per week`,
+    period: "per maand",
+  },
+}
+
+/** The filled or empty circle at the head of a plan card. Also marks the current plan for a Pro reader. */
+function RadioMark({ selected }: { selected: boolean }) {
   return (
-    <Card className="flex flex-col self-center px-[22px] py-6">
-      <p className="text-[11px] font-semibold uppercase tracking-[1.1px] text-ink-faint">Gratis</p>
-      <div className="mt-2 flex items-baseline gap-2">
-        <span className="text-[32px] font-bold tracking-[-0.8px] text-ink">€0</span>
-        <span className="text-[13.5px] text-ink-muted">voor altijd</span>
-      </div>
-      <p className="mt-1 text-[12.5px] text-ink-faint">Wat je nu al hebt</p>
-      <ul className="mt-[18px] flex-1 space-y-[11px]">
-        {FREE_FEATURES.map(f => (
-          <li key={f} className="flex items-start gap-2 text-[13.5px] text-ink-body">
-            <Check size={16} strokeWidth={2.2} aria-hidden className="mt-[1px] flex-shrink-0 text-ink-faint" />
-            {f}
-          </li>
-        ))}
-      </ul>
-      {!isPro && (
-        <button
-          disabled
-          className="mt-[18px] flex h-[42px] w-full items-center justify-center rounded-btn border border-line text-[13.5px] font-semibold text-ink-faint"
-        >
-          Huidig plan
-        </button>
+    <span
+      aria-hidden
+      className={`flex h-6 w-6 flex-none items-center justify-center rounded-full ${
+        selected ? "bg-teal text-white" : "border-[1.5px] border-line-strong bg-surface"
+      }`}
+    >
+      {selected && <Check size={14} strokeWidth={3} />}
+    </span>
+  )
+}
+
+function PlanOption({
+  interval,
+  selected,
+  disabled,
+  onSelect,
+}: {
+  interval: BillingInterval
+  selected: boolean
+  disabled: boolean
+  onSelect: () => void
+}) {
+  const plan = PLANS[interval]
+  const copy = PLAN_COPY[interval]
+  return (
+    // 1 px border plus a 1 px ring when selected, rather than a 2 px border:
+    // the card keeps its size, so nothing shifts when the selection moves.
+    <label
+      className={`relative flex cursor-pointer items-center gap-4 rounded-card border bg-surface p-6 transition-colors has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[#0F766E] max-md:gap-3 max-md:p-[18px] ${
+        selected ? "border-teal ring-1 ring-teal" : "border-line hover:border-line-strong"
+      }`}
+    >
+      <input
+        type="radio"
+        name="abonnement-plan"
+        value={interval}
+        checked={selected}
+        disabled={disabled}
+        onChange={onSelect}
+        className="sr-only"
+      />
+
+      {/* Stays on Jaarlijks whichever card is selected: it compares the two
+          tariffs, it does not describe the selection. */}
+      {interval === "annual" && (
+        <span className="absolute -top-[11px] right-5 whitespace-nowrap rounded-full bg-teal-dark px-[11px] py-[5px] text-[11px] font-bold uppercase leading-none tracking-[0.6px] text-white">
+          Bespaar {annualDiscountPercent()}%
+          <span className="sr-only"> ten opzichte van maandelijks betalen</span>
+        </span>
       )}
-    </Card>
+
+      <RadioMark selected={selected} />
+
+      <span className="min-w-0 flex-1">
+        <span className="block text-[19px] font-bold leading-[1.2] tracking-[-0.3px] text-ink max-md:text-[17px]">
+          {copy.name}
+        </span>
+        <span className="mt-[3px] block text-[14px] text-ink-muted tabular-nums">{copy.derived}</span>
+      </span>
+
+      <span className="flex-none text-right">
+        <span className="block text-[26px] font-bold leading-none tracking-[-0.6px] text-ink tabular-nums max-md:text-[22px]">
+          {spaced(euro(plan.amountCents))}
+        </span>
+        <span className="mt-[5px] block text-[13px] text-ink-muted">{copy.period}</span>
+      </span>
+    </label>
   )
 }
 
-function AnnualCard({
-  busy,
-  isCurrent,
-  isOtherPro,
-  onSelect,
-}: {
-  busy: boolean
-  isCurrent: boolean
-  isOtherPro: boolean
-  onSelect: () => void
-}) {
-  const plan = PLANS.annual
-  return (
-    <Card className="relative flex flex-col px-[26px] py-7" style={{ borderColor: "#0D9488", borderWidth: 2 }}>
-      <div className="absolute -top-[13px] left-1/2 -translate-x-1/2">
-        <span className="whitespace-nowrap rounded-full bg-teal px-[13px] py-[5px] text-[12px] font-bold text-white">
-          Meest gekozen
-        </span>
-      </div>
-
-      <div className="flex flex-wrap items-center gap-2">
-        <p className="text-[11px] font-semibold uppercase tracking-[1.1px] text-teal-dark">Pro · Jaarlijks</p>
-        <span className="whitespace-nowrap rounded-full bg-teal-soft px-2 py-[2px] text-[11px] font-bold text-teal-dark">
-          {annualDiscountPercent()}% goedkoper
-        </span>
-      </div>
-
-      <div className="mt-[10px] flex items-baseline gap-1.5">
-        <span className="text-[42px] font-bold leading-none tracking-[-1.2px] text-ink tabular-nums">
-          {perWeek(plan)}
-        </span>
-        <span className="text-[14px] text-ink-muted">per week</span>
-      </div>
-      <p className="mt-2 text-[12.5px] leading-[1.5] text-ink-muted">
-        {plan.billedLabel} · {effectivePerMonth(plan)} per maand
-      </p>
-      <p className="mt-[2px] text-[12.5px] font-semibold text-teal-dark">
-        Je bespaart {annualSaving()} per jaar
-      </p>
-
-      <ul className="mt-5 flex-1 space-y-3">
-        {PRO_FEATURES.map(f => (
-          <li key={f} className="flex items-start gap-2.5 text-[14px] text-ink">
-            <Check size={16} strokeWidth={2.2} aria-hidden className="mt-[2px] flex-shrink-0 text-teal" />
-            {f}
-          </li>
-        ))}
-      </ul>
-
-      <button
-        onClick={onSelect}
-        disabled={busy || isCurrent}
-        className="press mt-5 flex h-[46px] w-full items-center justify-center gap-2 rounded-btn bg-teal text-[14.5px] font-semibold text-white outline-none transition-colors hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#0F766E] focus-visible:ring-offset-2 disabled:opacity-60"
-      >
-        {busy ? (
-          <Loader2 size={16} aria-hidden className="animate-spin" />
-        ) : isCurrent ? (
-          "Huidig plan"
-        ) : isOtherPro ? (
-          <>
-            Wissel naar jaarlijks
-            <ArrowRight size={16} strokeWidth={2.2} aria-hidden />
-          </>
-        ) : (
-          <>
-            Start met Pro
-            <ArrowRight size={16} strokeWidth={2.2} aria-hidden />
-          </>
-        )}
-      </button>
-      <p className="mt-[9px] text-center text-[12px] text-ink-faint">
-        Altijd opzegbaar · Geen verborgen kosten
-      </p>
-    </Card>
-  )
-}
-
-function MonthlyCard({
-  busy,
-  isCurrent,
-  isOtherPro,
-  onSelect,
-}: {
-  busy: boolean
-  isCurrent: boolean
-  isOtherPro: boolean
-  onSelect: () => void
-}) {
-  const plan = PLANS.monthly
-  return (
-    <Card className="flex flex-col self-center px-[22px] py-6">
-      <p className="text-[11px] font-semibold uppercase tracking-[1.1px] text-ink-faint">Pro · Maandelijks</p>
-      <div className="mt-2 flex items-baseline gap-2">
-        <span className="text-[32px] font-bold tracking-[-0.8px] text-ink tabular-nums">{perWeek(plan)}</span>
-        <span className="text-[13.5px] text-ink-muted">per week</span>
-      </div>
-      <p className="mt-1 text-[12.5px] text-ink-faint">{plan.billedLabel}</p>
-      <ul className="mt-[18px] flex-1 space-y-[11px]">
-        {PRO_FEATURES.map(f => (
-          <li key={f} className="flex items-start gap-2 text-[13.5px] text-ink-body">
-            <Check size={16} strokeWidth={2.2} aria-hidden className="mt-[1px] flex-shrink-0 text-teal" />
-            {f}
-          </li>
-        ))}
-      </ul>
-      <button
-        onClick={onSelect}
-        disabled={busy || isCurrent}
-        className="press mt-[18px] flex h-[42px] w-full items-center justify-center gap-2 rounded-btn border border-line-strong bg-surface text-[13.5px] font-semibold text-ink outline-none transition-colors hover:border-line-strong focus-visible:ring-2 focus-visible:ring-[#0F766E] focus-visible:ring-offset-2 disabled:opacity-60"
-      >
-        {busy ? (
-          <Loader2 size={16} aria-hidden className="animate-spin" />
-        ) : isCurrent ? (
-          "Huidig plan"
-        ) : isOtherPro ? (
-          <>
-            Wissel naar maandelijks
-            <ArrowRight size={16} strokeWidth={2.2} aria-hidden />
-          </>
-        ) : (
-          <>
-            Kies maandelijks
-            <ArrowRight size={16} strokeWidth={2.2} aria-hidden />
-          </>
-        )}
-      </button>
-    </Card>
-  )
-}
-
-/** Stands in for the cards only - the heading and the text under them are server-rendered and never wait. */
+/** Stands in for the plan column only - the left column and the FAQ are server-rendered and never wait. */
 export function PricingSkeleton() {
   return (
-    <div role="status" aria-label="Abonnement laden" className="mt-[22px] grid grid-cols-1 gap-4 md:grid-cols-3">
-      <Skeleton className="h-80 rounded-card" />
-      <Skeleton className="h-96 rounded-card" />
-      <Skeleton className="h-80 rounded-card" />
+    <div role="status" aria-label="Abonnement laden" className="flex w-full flex-col gap-[18px]">
+      <Skeleton className="h-7 w-36" />
+      <Skeleton className="h-[98px] rounded-card" />
+      <Skeleton className="h-[98px] rounded-card" />
+      <Skeleton className="mt-2 h-[58px] rounded-panel" />
+      <Skeleton className="mx-auto h-4 w-64" />
+    </div>
+  )
+}
+
+/** What a reader who already has Pro sees instead of the choice. */
+function CurrentPlan() {
+  return (
+    <div className="flex w-full flex-col gap-[18px]">
+      <h2 className="text-[20px] font-semibold tracking-[-0.3px] text-ink">Je huidige plan</h2>
+      <div className="flex items-center gap-4 rounded-card border border-teal bg-surface p-6 ring-1 ring-teal max-md:gap-3 max-md:p-[18px]">
+        <RadioMark selected />
+        <div className="min-w-0 flex-1">
+          <p className="text-[19px] font-bold leading-[1.2] tracking-[-0.3px] text-ink max-md:text-[17px]">
+            BijbelStudie Pro
+          </p>
+          <p className="mt-[3px] text-[14px] text-ink-muted">Actief op dit account</p>
+        </div>
+      </div>
+      <p className="text-center text-[13px] text-ink-muted">
+        Facturen, pauzeren of opzeggen:{" "}
+        <Link
+          href="/instellingen?sectie=abonnement#instelling-abonnement"
+          className="font-semibold text-teal-dark underline-offset-2 hover:underline dark:text-teal-400"
+        >
+          Instellingen &rsaquo; Abonnement
+        </Link>
+      </p>
     </div>
   )
 }
 
 export default function PricingPlans() {
   const { data: session, status } = useSession()
-  const [loading, setLoading] = useState<BillingInterval | null>(null)
-  const [checking, setChecking] = useState(true)
-  // The session/API only report whether Stripe is active, not which interval -
-  // so "which card is current" can't be answered without guessing. Both Pro
-  // cards fall back to the same disabled "Huidig plan" state rather than
-  // fabricating an interval.
-  const [isPro, setIsPro] = useState(false)
-  // Whether the checkout will include the free trial for this visitor. Asked
-  // of /api/trial, which runs the same check as app/api/checkout
-  // (lib/trialEligibility.ts), so the notice never promises a trial the
-  // checkout will not give: once per account, never to someone who had Pro.
-  // Resolved after mount only - a cached server render cannot know who is
-  // looking.
-  const [offersTrial, setOffersTrial] = useState(false)
-  useEffect(() => {
-    let cancelled = false
-    fetch("/api/trial", { cache: "no-store" })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => { if (!cancelled) setOffersTrial(Boolean(data?.eligible)) })
-      .catch(() => {})
-    return () => { cancelled = true }
-  }, [session])
-
   const { toast } = useToast()
   const router = useRouter()
   const searchParams = useSearchParams()
 
   const sourceParam = searchParams.get("source")
   const planParam = searchParams.get("plan")
+  const resumePlan: BillingInterval | null =
+    planParam === "monthly" || planParam === "annual" ? planParam : null
 
+  const [selected, setSelected] = useState<BillingInterval>(resumePlan ?? RECOMMENDED)
+  const [busy, setBusy] = useState(false)
+
+  const signedIn = Boolean(session)
+  const sessionPro = Boolean(session?.user?.isSubscribed)
+
+  // /api/trial runs the same checks as app/api/checkout (lib/trialEligibility.ts)
+  // and the same `resolveIsPro` as the session, so one request answers both
+  // "is this reader Pro after all" (the session can be older than a purchase)
+  // and "will the checkout include the trial". Only asked for a signed-in
+  // reader the session does not already call Pro: a guest's answer is a
+  // constant (a new account has never had a trial; the check that binds is
+  // the checkout's, after sign-up), and a Pro reader is not offered anything.
+  const needsLookup = signedIn && !sessionPro
+  const [trial, setTrial] = useState<TrialStatus | null>(null)
+  const [checking, setChecking] = useState(needsLookup)
   useEffect(() => {
-    if (status === "loading") return
+    if (!needsLookup) { setChecking(false); return }
+    let cancelled = false
+    setChecking(true)
+    fetch("/api/trial", { cache: "no-store" })
+      .then((res) => (res.ok ? (res.json() as Promise<TrialStatus>) : null))
+      .catch(() => null)
+      .then((data) => {
+        if (cancelled) return
+        setTrial(data)
+        setChecking(false)
+      })
+    return () => { cancelled = true }
+  }, [needsLookup])
 
-    async function checkSubscription() {
-      if (!session) { setChecking(false); return }
-      if (session.user?.isSubscribed) {
-        setIsPro(true)
-        setChecking(false)
-        return
-      }
-      try {
-        const r = await fetch("/api/user")
-        if (r.ok) {
-          const d = await r.json()
-          if (d.user?.subscribed) setIsPro(true)
-        }
-      } catch { /* noop */ } finally {
-        setChecking(false)
-      }
-    }
-    checkSubscription()
-  }, [session, status])
+  const isPro = sessionPro || Boolean(trial?.isPro)
+  // A failed lookup promises nothing: the button falls back to "Start met Pro".
+  const offersTrial = !isPro && (signedIn ? Boolean(trial?.eligible) : true)
+  const trialDays = trial?.trialDays ?? PRO_TRIAL_DAYS
 
   useEffect(() => {
     if (status === "loading") return
@@ -283,7 +227,7 @@ export default function PricingPlans() {
   }, [session, status, sourceParam])
 
   const startCheckout = useCallback(async (interval: BillingInterval) => {
-    setLoading(interval)
+    setBusy(true)
     try {
       trackNow("checkout_started", { interval })
       await requestCheckout(interval)
@@ -296,60 +240,68 @@ export default function PricingPlans() {
             : "Afrekenen mislukt. Controleer je verbinding en probeer het opnieuw.",
         variant: "destructive",
       })
-      setLoading(null)
+      setBusy(false)
     }
   }, [toast])
 
-  const handleSelect = useCallback((interval: BillingInterval) => {
-    track("plan_selected", { interval, logged_in: session ? "yes" : "no" })
+  const handleContinue = useCallback(() => {
+    track("plan_selected", { interval: selected, logged_in: session ? "yes" : "no" })
 
     if (!session) {
-      trackNow("signup_for_checkout", { interval })
-      router.push(signupForCheckoutHref(interval))
+      trackNow("signup_for_checkout", { interval: selected })
+      router.push(signupForCheckoutHref(selected))
       return
     }
 
-    void startCheckout(interval)
-  }, [session, router, startCheckout])
+    void startCheckout(selected)
+  }, [selected, session, router, startCheckout])
 
+  // Back from sign-up with `?plan=`: carry on into the checkout the guest asked for.
   useEffect(() => {
     if (!session || checking || isPro) return
-    if (planParam !== "monthly" && planParam !== "annual") return
-    if (loading) return
+    if (!resumePlan) return
+    if (busy) return
 
     router.replace("/abonnement")
-    void startCheckout(planParam)
+    void startCheckout(resumePlan)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session, checking, isPro, planParam])
+  }, [session, checking, isPro, resumePlan])
 
-  if (status === "authenticated" && checking) {
-    return <PricingSkeleton />
-  }
+  if (status === "loading" || checking) return <PricingSkeleton />
+  if (isPro) return <CurrentPlan />
 
   return (
-    <>
-      {offersTrial && !isPro && (
-        <p className="mx-auto mt-[14px] max-w-[540px] rounded-card bg-teal-soft px-4 py-3 text-center text-[13px] leading-[1.6] text-teal-dark">
-          <strong className="font-bold">Eerste {PRO_TRIAL_DAYS} dagen gratis.</strong>{" "}
-          Zeg binnen {PRO_TRIAL_DAYS} dagen op en je betaalt niets. Eén keer per account.
-        </p>
-      )}
+    <div className="flex w-full flex-col gap-[18px]">
+      <h2 id="kies-je-plan" className="text-[20px] font-semibold tracking-[-0.3px] text-ink">
+        Kies je plan
+      </h2>
 
-      <div className="mt-[22px] grid grid-cols-1 gap-4 md:grid-cols-[300px_360px_300px] md:justify-center md:items-stretch">
-        <FreeCard isPro={isPro} />
-        <AnnualCard
-          busy={loading === "annual"}
-          isCurrent={isPro}
-          isOtherPro={false}
-          onSelect={() => handleSelect("annual")}
-        />
-        <MonthlyCard
-          busy={loading === "monthly"}
-          isCurrent={isPro}
-          isOtherPro={false}
-          onSelect={() => handleSelect("monthly")}
-        />
+      <div role="radiogroup" aria-labelledby="kies-je-plan" className="flex flex-col gap-[18px]">
+        {(["annual", "monthly"] as const).map((interval) => (
+          <PlanOption
+            key={interval}
+            interval={interval}
+            selected={selected === interval}
+            disabled={busy}
+            onSelect={() => setSelected(interval)}
+          />
+        ))}
       </div>
-    </>
+
+      <button
+        type="button"
+        onClick={handleContinue}
+        disabled={busy}
+        className="press mt-2 flex h-[58px] w-full items-center justify-center gap-2 rounded-panel bg-teal-dark text-[17px] font-bold text-white outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#0F766E] focus-visible:ring-offset-2 disabled:opacity-60"
+      >
+        {busy && <Loader2 size={18} aria-hidden className="animate-spin" />}
+        {offersTrial ? `Probeer ${trialDays} dagen gratis` : "Start met Pro"}
+      </button>
+
+      <p className="text-center text-[13px] text-ink-muted">
+        {offersTrial && <>Vandaag €&nbsp;0. </>}
+        Altijd opzegbaar. Prijzen incl. btw.
+      </p>
+    </div>
   )
 }
