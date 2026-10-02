@@ -40,7 +40,9 @@ import {
   type BibleYearProgressInput,
 } from './progress';
 import { SCHEDULE_VERSION, TOTAL_CHAPTERS, getSchedule, isPlanKey, isTrackKey } from './schedule';
+import { isStudyPart, studyKey } from './study';
 import type {
+  BibleYearMode,
   BibleYearMutationResponse,
   BibleYearPlanKey,
   BibleYearRef,
@@ -52,6 +54,8 @@ import type {
 
 /** Furthest start date accepted: a year and a day ahead (matches lib/bibleYear/display.ts). */
 export const MAX_START_DAYS_AHEAD = 366;
+/** Earliest start date accepted: a year and a day back, so 1 January always fits. */
+export const MAX_START_DAYS_BACK = 366;
 /** Most chapters one mark request may carry (a whole day is at most a few dozen). */
 export const MAX_MARK_REFS = 200;
 
@@ -75,29 +79,33 @@ type LeanEnrollment = {
   _id: { toString(): string };
   planKey: BibleYearPlanKey;
   track: BibleYearTrackKey;
+  mode?: BibleYearMode | null;
   scheduleVersion: number;
   startDate: string;
   timeZone?: string | null;
   shiftDays?: number | null;
   status: BibleYearStatus;
   readRefs?: string[] | null;
+  studyDone?: string[] | null;
   paidDays?: number[] | null;
   completedAt?: Date | null;
 };
 
 const ENROLLMENT_FIELDS =
-  '_id planKey track scheduleVersion startDate timeZone shiftDays status readRefs paidDays completedAt';
+  '_id planKey track mode scheduleVersion startDate timeZone shiftDays status readRefs studyDone paidDays completedAt';
 
 export function toProgressInput(doc: LeanEnrollment): BibleYearProgressInput {
   return {
     id: doc._id.toString(),
     planKey: doc.planKey,
     track: doc.track,
+    mode: doc.mode === 'studeren' ? 'studeren' : 'lezen',
     scheduleVersion: doc.scheduleVersion,
     startDate: doc.startDate,
     timeZone: doc.timeZone || DEFAULT_TIME_ZONE,
     shiftDays: doc.shiftDays || 0,
     readRefs: doc.readRefs ?? [],
+    studyDone: doc.studyDone ?? [],
     status: doc.status,
     completedAt: doc.completedAt ?? null,
   };
@@ -121,21 +129,65 @@ function findActive(userId: string) {
 export type ParsedStart = {
   planKey: BibleYearPlanKey;
   track: BibleYearTrackKey;
+  mode: BibleYearMode;
   startDate: string;
   timeZone: string;
 };
 
-/** Validates a start/restart body. The start date must be today or later in the chosen zone. */
+function isMode(v: unknown): v is BibleYearMode {
+  return v === 'lezen' || v === 'studeren';
+}
+
+/**
+ * Validates a start/restart body. The start date lies within a year either
+ * side of today in the chosen zone; an earlier one ("1 januari") starts with
+ * its past days open. The mode defaults to 'lezen'.
+ */
 export function parseStartBody(body: unknown, now: Date): ParsedStart {
   const b = (body && typeof body === 'object' ? body : {}) as Record<string, unknown>;
   if (!isPlanKey(b.planKey)) throw invalid('Kies 1 jaar of 2 jaar.');
   if (!isTrackKey(b.track)) throw invalid('Kies een volgorde.');
+  if (b.mode !== undefined && !isMode(b.mode)) throw invalid('Kies lezen of studeren.');
   const timeZone = isValidTimeZone(b.timeZone) ? (b.timeZone as string) : DEFAULT_TIME_ZONE;
   if (!isValidDateString(b.startDate)) throw invalid('Kies een geldige datum.');
   const today = localDateIn(timeZone, now);
-  if (b.startDate < today) throw invalid('Kies vandaag of een latere datum.');
+  if (daysBetween(b.startDate, today) > MAX_START_DAYS_BACK) throw invalid('Kies een datum binnen een jaar.');
   if (daysBetween(today, b.startDate) > MAX_START_DAYS_AHEAD) throw invalid('Kies een datum binnen een jaar.');
-  return { planKey: b.planKey, track: b.track, startDate: b.startDate, timeZone };
+  return {
+    planKey: b.planKey,
+    track: b.track,
+    mode: isMode(b.mode) ? b.mode : 'lezen',
+    startDate: b.startDate,
+    timeZone,
+  };
+}
+
+/** Validates an update body: each field optional, the running plan's value kept when absent. */
+export function parseUpdateBody(body: unknown, current: LeanEnrollment, now: Date): ParsedStart {
+  const b = (body && typeof body === 'object' ? body : {}) as Record<string, unknown>;
+  const startDate = b.startDate === undefined ? current.startDate : b.startDate;
+  // An unchanged start date stands as it is, however far back it now lies.
+  const checkAt = startDate === current.startDate ? new Date(`${current.startDate}T12:00:00Z`) : now;
+  return parseStartBody(
+    {
+      planKey: b.planKey ?? current.planKey,
+      track: b.track ?? current.track,
+      mode: b.mode ?? current.mode ?? 'lezen',
+      startDate,
+      timeZone: b.timeZone ?? current.timeZone,
+    },
+    checkAt,
+  );
+}
+
+/**
+ * Days 1..(today - 1) of a plan with this start, as already paid: a start in
+ * the past, or a settings change, must not turn the reached days into XP.
+ */
+export function prepaidDays(start: Pick<ParsedStart, 'startDate' | 'timeZone'>, shiftDays: number, now: Date): number[] {
+  const elapsed = daysBetween(start.startDate, localDateIn(start.timeZone, now));
+  const today = elapsed + 1 - shiftDays;
+  return Array.from({ length: Math.max(0, today - 1) }, (_, i) => i + 1);
 }
 
 /** Validates a mark body against the running plan. Returns canonical keys, de-duplicated. */
@@ -159,6 +211,20 @@ export function parseMarkBody(
     return { keys, read: b.read };
   }
   throw invalid('Kies een hoofdstuk of een dag.');
+}
+
+/** `{ day, study, read }`, validated against the running plan; null for any other mark body. */
+export function parseStudyMark(
+  body: unknown,
+  enrollment: Pick<BibleYearProgressInput, 'planKey' | 'track' | 'scheduleVersion'>,
+): { key: string; read: boolean } | null {
+  const b = (body && typeof body === 'object' ? body : {}) as Record<string, unknown>;
+  if (!('study' in b)) return null;
+  if (typeof b.read !== 'boolean') throw invalid('Geef aan of het gelezen is.');
+  if (!isStudyPart(b.study)) throw invalid('Kies de uitleg of de vraag.');
+  const day = typeof b.day === 'number' ? b.day : NaN;
+  if (!refKeysForDay(enrollment, day)) throw invalid('Deze dag hoort niet bij je leesplan.');
+  return { key: studyKey(day, b.study), read: b.read };
 }
 
 // ---------------------------------------------------------------------------
@@ -307,18 +373,24 @@ async function createRun(userId: string, start: ParsedStart, now: Date): Promise
     updatedAt: { $gte: new Date(now.getTime() - 24 * 60 * 60 * 1000) },
     'paidDays.0': { $exists: true },
   });
+  // A start in the past: its reached days are paid up front (no XP), else
+  // "restart on 1 January, tick everything" would pay a year of days at once.
+  const prepaid = prepaidDays(start, 0, now);
+  if (recentlyPaid) prepaid.push(prepaid.length + 1);
   try {
     const created = await BibleYearEnrollment.create({
       userId,
       planKey: start.planKey,
       track: start.track,
+      mode: start.mode,
       scheduleVersion: SCHEDULE_VERSION,
       startDate: start.startDate,
       timeZone: start.timeZone,
       shiftDays: 0,
       status: 'active',
       readRefs: [],
-      paidDays: recentlyPaid ? [1] : [],
+      studyDone: [],
+      paidDays: prepaid,
       completedAt: null,
       lastActivityAt: now,
     });
@@ -338,11 +410,44 @@ export async function start(userId: string, body: unknown, now: Date = new Date(
   return mutationResponse(await createRun(userId, parsed, now), now);
 }
 
-/** PATCH: shift, stop or restart. */
+/** PATCH: shift, stop, restart or update. */
 export async function patch(userId: string, body: unknown, now: Date = new Date()): Promise<BibleYearMutationResponse> {
   const action = body && typeof body === 'object' ? (body as { action?: unknown }).action : undefined;
-  if (action !== 'shift' && action !== 'stop' && action !== 'restart') {
+  if (action !== 'shift' && action !== 'stop' && action !== 'restart' && action !== 'update') {
     throw invalid('Onbekende actie.');
+  }
+
+  if (action === 'update') {
+    await connectMongoDB();
+    const active = await findActive(userId);
+    if (!active) throw NO_PLAN();
+    const next = parseUpdateBody(body, active, now);
+    const layoutChanged =
+      next.planKey !== active.planKey || next.track !== active.track || next.startDate !== active.startDate;
+    // Read chapters stay: progress is per chapter, whatever day holds it now.
+    // A new start date starts the shift over; a new layout pays its reached days up front.
+    const shiftDays = next.startDate !== active.startDate ? 0 : active.shiftDays || 0;
+    const updated = await BibleYearEnrollment.findOneAndUpdate(
+      { _id: active._id, status: 'active' },
+      {
+        $set: {
+          planKey: next.planKey,
+          track: next.track,
+          mode: next.mode,
+          startDate: next.startDate,
+          timeZone: next.timeZone,
+          shiftDays,
+          ...(layoutChanged ? { scheduleVersion: SCHEDULE_VERSION } : {}),
+          lastActivityAt: now,
+        },
+        ...(layoutChanged ? { $addToSet: { paidDays: { $each: prepaidDays(next, shiftDays, now) } } } : {}),
+      },
+      { new: true },
+    )
+      .select(ENROLLMENT_FIELDS)
+      .lean<LeanEnrollment | null>();
+    if (!updated) throw NO_PLAN();
+    return mutationResponse(updated, now);
   }
   // Validate a restart before anything is abandoned.
   const restartWith = action === 'restart' ? parseStartBody(body, now) : null;
@@ -431,6 +536,23 @@ export async function mark(
   await connectMongoDB();
   const active = await findActive(userId);
   if (!active) throw NO_PLAN();
+
+  // A study part ('studeren'): its own list, no XP and no readChapters.
+  const study = parseStudyMark(body, active);
+  if (study) {
+    const done = await BibleYearEnrollment.findOneAndUpdate(
+      { _id: active._id, status: 'active' },
+      study.read
+        ? { $addToSet: { studyDone: study.key }, $set: { lastActivityAt: now } }
+        : { $pull: { studyDone: study.key }, $set: { lastActivityAt: now } },
+      { new: true },
+    )
+      .select(ENROLLMENT_FIELDS)
+      .lean<LeanEnrollment | null>();
+    if (!done) throw NO_PLAN();
+    return mutationResponse(done, now);
+  }
+
   const { keys, read } = parseMarkBody(body, active);
 
   const updated = await BibleYearEnrollment.findOneAndUpdate(

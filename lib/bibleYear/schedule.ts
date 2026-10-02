@@ -14,6 +14,8 @@
  *             paced over all N days by its own weight, so all three finish on
  *             the last day.
  * - canoniek: one strand 'all', Genesis to Openbaring.
+ * - chronologisch: one strand 'all', in CHRONO_RANGES order (a new track,
+ *             so version 1 of the other two is untouched).
  *
  * Split rule (no drift). With C(k) the running weight after chapter k, day d
  * ends at the chapter boundary whose C(k) is NEAREST to the cumulative target
@@ -54,7 +56,7 @@ export const SCHEDULE_VERSION = 1;
 
 export const PLAN_DAYS: Record<BibleYearPlanKey, number> = { 'jaar-1': 365, 'jaar-2': 730 };
 export const PLAN_KEYS: readonly BibleYearPlanKey[] = ['jaar-1', 'jaar-2'];
-export const TRACK_KEYS: readonly BibleYearTrackKey[] = ['gemengd', 'canoniek'];
+export const TRACK_KEYS: readonly BibleYearTrackKey[] = ['gemengd', 'canoniek', 'chronologisch'];
 export const TOTAL_CHAPTERS = 1189;
 
 /** Part of SCHEDULE_VERSION 1 - changing either moves chapters. */
@@ -79,9 +81,59 @@ const POETRY = new Set(['PS', 'PROV']);
 
 type Strand = { strand: BibleYearStrand; refs: readonly WeightedRef[] };
 
+/**
+ * The 'chronologisch' order: book ranges in the order the events (or, for
+ * prophets and letters, the writing) fall. Job sits in the patriarchs' days,
+ * the Psalms beside David and the return from exile, the prophets beside the
+ * kings they spoke to, Paul's letters inside Acts. The gospels stay whole.
+ * `[code, from, to]`; no range means the whole book. Every chapter exactly once
+ * (asserted where it is built).
+ */
+const CHRONO_RANGES: readonly (readonly [string, number?, number?])[] = [
+  ['GEN', 1, 11], ['JOB'], ['GEN', 12, 50], ['EXOD'], ['LEV'], ['NUM'], ['DEUT'], ['PS', 90, 90],
+  ['JOSH'], ['JUDG'], ['RUTH'], ['1SAM'], ['2SAM'], ['PS', 1, 72], ['1CHR'], ['PS', 73, 89],
+  ['1KGS', 1, 11], ['2CHR', 1, 9], ['PROV'], ['SONG'], ['ECCL'], ['1KGS', 12, 22], ['2CHR', 10, 20],
+  ['2KGS', 1, 14], ['2CHR', 21, 25], ['JOEL'], ['JONAH'], ['AMOS'], ['HOS'], ['2KGS', 15, 17],
+  ['2CHR', 26, 28], ['ISA'], ['MIC'], ['2KGS', 18, 20], ['2CHR', 29, 32], ['PS', 91, 125],
+  ['2KGS', 21, 23], ['2CHR', 33, 35], ['NAH'], ['ZEPH'], ['HAB'], ['JER'], ['2KGS', 24, 25],
+  ['2CHR', 36, 36], ['LAM'], ['OBAD'], ['EZEK'], ['DAN'], ['EZRA', 1, 6], ['HAG'], ['ZECH'],
+  ['ESTH'], ['EZRA', 7, 10], ['NEH'], ['PS', 126, 150], ['MAL'],
+  ['MATT'], ['MARK'], ['LUKE'], ['JOHN'], ['ACTS', 1, 14], ['JAS'], ['GAL'], ['ACTS', 15, 18],
+  ['1THESS'], ['2THESS'], ['ACTS', 19, 19], ['1COR'], ['2COR'], ['ROM'], ['ACTS', 20, 28], ['EPH'],
+  ['PHIL'], ['COL'], ['PHLM'], ['1TIM'], ['TITUS'], ['1PET'], ['HEB'], ['2TIM'], ['2PET'], ['JUDE'],
+  ['1JOHN'], ['2JOHN'], ['3JOHN'], ['REV'],
+];
+
+let chronoRefs: WeightedRef[] | null = null;
+
+/** ALL_REFS in CHRONO_RANGES order. Throws when a chapter is missing or doubled. */
+export function chronologicalRefs(): readonly WeightedRef[] {
+  if (chronoRefs) return chronoRefs;
+  const byCode = new Map<string, WeightedRef[]>();
+  for (const r of ALL_REFS) byCode.set(r.code, [...(byCode.get(r.code) ?? []), r]);
+  const out: WeightedRef[] = [];
+  const seen = new Set<string>();
+  for (const [code, from, to] of CHRONO_RANGES) {
+    const book = byCode.get(code);
+    if (!book) throw new RangeError(`chronological order: unknown book ${code}`);
+    for (const r of book.slice((from ?? 1) - 1, to ?? book.length)) {
+      const key = `${r.code}.${r.chapter}`;
+      if (seen.has(key)) throw new RangeError(`chronological order: ${key} twice`);
+      seen.add(key);
+      out.push(r);
+    }
+  }
+  if (out.length !== ALL_REFS.length) {
+    throw new RangeError(`chronological order holds ${out.length} of ${ALL_REFS.length} chapters`);
+  }
+  chronoRefs = out;
+  return out;
+}
+
 /** Strands in placement order. */
 function strandsFor(track: BibleYearTrackKey): Strand[] {
   if (track === 'canoniek') return [{ strand: 'all', refs: ALL_REFS }];
+  if (track === 'chronologisch') return [{ strand: 'all', refs: chronologicalRefs() }];
   const ntStart = BIBLE_CHAPTER_WEIGHTS.slice(0, 39).reduce((n, b) => n + b.weights.length, 0);
   return [
     { strand: 'ot', refs: ALL_REFS.slice(0, ntStart).filter((r) => !POETRY.has(r.code)) },
@@ -203,6 +255,13 @@ export function portionLabel(refs: readonly BibleYearRef[]): string {
 
 export function minutesForWeight(weight: number): number {
   return Math.max(1, Math.round(weight / CHARS_PER_MINUTE));
+}
+
+const WEIGHT_BY_KEY = new Map(ALL_REFS.map((r) => [`${r.code}.${r.chapter}`, r.weight]));
+
+/** Estimated reading minutes of one chapter (at least 1). */
+export function chapterMinutes(code: string, chapter: number): number {
+  return minutesForWeight(WEIGHT_BY_KEY.get(`${code}.${chapter}`) ?? 0);
 }
 
 function build(planKey: BibleYearPlanKey, track: BibleYearTrackKey): BibleYearSchedule {

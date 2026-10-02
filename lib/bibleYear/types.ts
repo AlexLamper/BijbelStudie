@@ -10,8 +10,20 @@
 
 export type BibleYearPlanKey = 'jaar-1' | 'jaar-2';
 
-/** 'gemengd' = OT / NT / Psalmen+Spreuken side by side; 'canoniek' = Genesis to Openbaring. */
-export type BibleYearTrackKey = 'gemengd' | 'canoniek';
+/**
+ * 'gemengd' = OT / NT / Psalmen+Spreuken side by side; 'canoniek' = Genesis to
+ * Openbaring; 'chronologisch' = in the order the events happened.
+ */
+export type BibleYearTrackKey = 'gemengd' | 'canoniek' | 'chronologisch';
+
+/**
+ * 'lezen' = the chapters only; 'studeren' = the chapters plus, per day, a
+ * commentary on one of them ('uitleg') and one question ('vraag').
+ */
+export type BibleYearMode = 'lezen' | 'studeren';
+
+/** The two extra parts of a 'studeren' day. */
+export type BibleYearStudyPart = 'uitleg' | 'vraag';
 
 /** Which strand of the day a portion belongs to. 'all' is the single canonical strand. */
 export type BibleYearStrand = 'ot' | 'nt' | 'poetry' | 'all';
@@ -26,7 +38,8 @@ export type BibleYearRef = {
   chapter: number;
 };
 
-export type BibleYearRefState = BibleYearRef & { read: boolean };
+/** `minutes`: estimated reading time of this chapter. */
+export type BibleYearRefState = BibleYearRef & { read: boolean; minutes: number };
 
 export type BibleYearPortion = {
   strand: BibleYearStrand;
@@ -43,12 +56,22 @@ export type BibleYearScheduleDay = {
   minutes: number;
 };
 
+/** The study parts of one day ('studeren'): the chapter the commentary is on, and the question. */
+export type BibleYearDayStudy = {
+  ref: BibleYearRef;
+  question: string;
+};
+
 export type BibleYearSchedule = {
   planKey: BibleYearPlanKey;
   track: BibleYearTrackKey;
   version: number;
   totalDays: number;
-  days: BibleYearScheduleDay[];
+  /**
+   * With `?detail=1` every day also carries its `study` and every ref its
+   * reading `minutes`.
+   */
+  days: (BibleYearScheduleDay & { study?: BibleYearDayStudy })[];
 };
 
 export type BibleYearCatalogueEntry = {
@@ -68,6 +91,7 @@ export type BibleYearEnrollmentDTO = {
   id: string;
   planKey: BibleYearPlanKey;
   track: BibleYearTrackKey;
+  mode: BibleYearMode;
   scheduleVersion: number;
   /** 'YYYY-MM-DD' in the user's time zone. */
   startDate: string;
@@ -76,6 +100,10 @@ export type BibleYearEnrollmentDTO = {
   status: BibleYearStatus;
   totalDays: number;
   chaptersRead: number;
+  /** Every read chapter, "CODE.chapter" ("GEN.1"), so a client can draw the calendar. */
+  readRefs: string[];
+  /** Study parts done, "day.part" ("23.vraag"). Empty in 'lezen'. */
+  studyDone: string[];
   /** 0-100, share of the 1189 chapters read within this plan. */
   percentBible: number;
   /** 'YYYY-MM-DD', start + totalDays - 1 + shiftDays. */
@@ -96,8 +124,11 @@ export type BibleYearToday = {
   /** 'YYYY-MM-DD' in the user's time zone. */
   localDate: string;
   portions: BibleYearPortionState[];
+  /** 'studeren' only: today's commentary chapter and question, with their state. */
+  study: (BibleYearDayStudy & { uitlegDone: boolean; vraagDone: boolean }) | null;
+  /** Every chapter read, and in 'studeren' both study parts done. */
   todayDone: boolean;
-  /** Days before today with unread chapters. */
+  /** Days before today that are not done (see todayDone). */
   behindDays: number;
   /** Future days already fully read. */
   aheadDays: number;
@@ -122,7 +153,12 @@ export type BibleYearStateResponse = {
 export type BibleYearStartBody = {
   planKey: BibleYearPlanKey;
   track: BibleYearTrackKey;
-  /** 'YYYY-MM-DD', today or later in the user's time zone. */
+  /** Default 'lezen'. */
+  mode?: BibleYearMode;
+  /**
+   * 'YYYY-MM-DD' in the user's time zone: today, a later date within a year,
+   * or an earlier date up to a year back (its past days start open).
+   */
   startDate: string;
   timeZone?: string;
 };
@@ -131,12 +167,15 @@ export type BibleYearStartBody = {
 export type BibleYearPatchBody =
   | { action: 'shift' } // move the schedule forward by behindDays
   | { action: 'stop' } // status -> abandoned (document kept)
-  | ({ action: 'restart' } & BibleYearStartBody); // abandon current, start new
+  | ({ action: 'restart' } & BibleYearStartBody) // abandon current, start new
+  // change the running plan's settings; read chapters are kept (they are per chapter)
+  | ({ action: 'update' } & Partial<BibleYearStartBody>);
 
 /** POST /api/v1/bible-year/mark */
 export type BibleYearMarkBody =
   | { refs: { code: string; chapter: number }[]; read: boolean }
-  | { day: number; read: boolean };
+  | { day: number; read: boolean }
+  | { day: number; study: BibleYearStudyPart; read: boolean };
 
 /** Response of POST/PATCH/mark: the fresh state. */
 export type BibleYearMutationResponse = Pick<BibleYearStateResponse, 'enrollment' | 'today'>;
