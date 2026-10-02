@@ -15,6 +15,7 @@ import ResumeCard, { ResumeCardSkeleton } from "../../components/dashboard/Resum
 import BillingNotices from "../../components/pricing/BillingNotices"
 import DailyVerseCard from "../../components/dashboard/DailyVerseCard"
 import DashboardFeedbackSlot from "../../components/feedback/DashboardFeedbackSlot"
+import { FriendsDashboardSection } from "../../components/friends/FriendsDashboardSection"
 import { useTreeSummary } from "../../components/dashboard/ProgressTree"
 import GrowthAnnouncementCard from "../../components/dashboard/GrowthAnnouncementCard"
 import AppShell from "../../components/shell/AppShell"
@@ -225,6 +226,11 @@ export default function DashboardPage() {
           {/* Verder waar je was: the original minimal one-row card (eyebrow,
               title, slim bar, one teal button), fed by the server's resume. */}
           {resumeLoading ? <ResumeCardSkeleton /> : <ResumeCard resume={resume} />}
+
+          {/* Bij je vrienden: the two newest posts in the kring, or the
+              invitation. The same block the app's Start tab carries, so the
+              kring is in the same place on both. */}
+          <FriendsDashboardSection />
 
           <SectionHeading
             title="Aanbevolen voor jou"

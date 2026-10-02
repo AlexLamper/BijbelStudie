@@ -1,6 +1,7 @@
 import type { ElementType } from "react";
 import {
   House,
+  Users,
   GraduationCap,
   BookMarked,
   NotebookPen,
@@ -41,6 +42,10 @@ export const NAV_GROUPS: { label: string; items: NavItem[]; adminOnly?: boolean 
       { title: "Lezen", url: "/lezen", icon: BookMarked, trackId: "sidebar_lezen" },
       { title: "Notities", url: "/notities", icon: NotebookPen, trackId: "sidebar_notities" },
       { title: "Bronnen", url: "/bronnen", icon: Library, trackId: "sidebar_bronnen", noTab: true },
+      // The phone tab bar has room for five tabs and no more, so Vriendenkring
+      // is sidebar-only there; the dashboard's "Bij je vrienden" block is the
+      // way in on a phone.
+      { title: "Vriendenkring", url: "/vriendenkring", icon: Users, noTab: true },
     ],
   },
   {
