@@ -4,7 +4,6 @@ import connectMongoDB from '../../../../../lib/mongodb';
 import User from '../../../../../models/User';
 import { listEnrollments } from '../../../../../lib/studyEnrollmentService';
 import { loadDashboardResume } from '../../../../../lib/dashboardResumeService';
-import { completedStudyIds } from '../../../../../lib/studyRecommendations';
 import {
   canonicaliseReadChapters,
   readChaptersFrom,
@@ -17,8 +16,7 @@ export async function OPTIONS() {
 }
 
 /**
- * The website dashboard's resume card, and the finished-study ids its
- * recommendation rows filter on.
+ * The website dashboard's resume card.
  *
  * The web dashboard assembles its screen from separate calls
  * (hooks/useDashboardData.ts), so it cannot take the whole of GET
@@ -30,7 +28,7 @@ export async function OPTIONS() {
  * built by the same function GET /api/v1/dashboard uses, so web and app never
  * disagree about where the reader is.
  *
- * `{ resume: DashboardResume, completedStudyIds: string[] }`
+ * `{ resume: DashboardResume }`
  *
  * No Bijbel-in-een-jaar state: that card left the dashboard; the plan page
  * (/studies/bijbel-in-een-jaar) is linked from /studies. The app never calls this route.
@@ -66,10 +64,7 @@ export async function GET(req: Request) {
       enrollments,
     });
 
-    return jsonV1({
-      resume,
-      completedStudyIds: [...completedStudyIds(enrollments)],
-    });
+    return jsonV1({ resume });
   } catch (error) {
     return handleV1Error(error);
   }

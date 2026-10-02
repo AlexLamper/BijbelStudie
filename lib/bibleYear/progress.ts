@@ -26,7 +26,7 @@ import {
   minutesPerDay,
   portionLabel,
 } from './schedule';
-import { isStudyDone, studyForDay, studyKey } from './study';
+import { studyForDay, studyKey } from './study';
 import type {
   BibleYearCatalogueEntry,
   BibleYearEnrollmentDTO,
@@ -169,16 +169,16 @@ export function fullyReadDays(schedule: BibleYearSchedule, read: ReadonlySet<str
 }
 
 /**
- * A day is done when every chapter is read and, in 'studeren', both study
- * parts are done. (XP is paid on the chapters alone: see isDayRead.)
+ * A day is done when every chapter of it is read.
+ *
+ * 'studeren' is the same plan with more to read, not a stricter one: the uitleg
+ * and the vraag are extra material the reader ticks off, never a gate on the
+ * day. That is what lets someone switch to 'studeren' halfway through a plan
+ * without a single finished day reopening behind them. (XP is paid on the
+ * chapters alone either way: see isDayRead.)
  */
-export function isDayDone(
-  day: BibleYearScheduleDay,
-  mode: BibleYearMode,
-  read: ReadonlySet<string>,
-  studyDone: ReadonlySet<string>,
-): boolean {
-  return isDayRead(day, read) && (mode !== 'studeren' || isStudyDone(day.day, studyDone));
+export function isDayDone(day: BibleYearScheduleDay, read: ReadonlySet<string>): boolean {
+  return isDayRead(day, read);
 }
 
 /** The valid study keys ("23.vraag") of a stored list. */
@@ -361,7 +361,7 @@ function unreadLabel(day: BibleYearScheduleDay, read: ReadonlySet<string>, study
 export function buildToday(input: BibleYearProgressInput, now: Date): BibleYearToday {
   const { schedule, mode, read, studyDone, localDate, dayNumber } = compute(input, now);
   const day = schedule.days[Math.max(1, dayNumber) - 1];
-  const done = (sd: BibleYearScheduleDay) => isDayDone(sd, mode, read, studyDone);
+  const done = (sd: BibleYearScheduleDay) => isDayDone(sd, read);
 
   let behindDays = 0;
   const backlogDays: { day: number; label: string }[] = [];
@@ -453,12 +453,12 @@ export function shiftForCatchUp(
   input: BibleYearProgressInput,
   now: Date,
 ): { shiftBy: number; shiftDays: number; expectedEndDate: string } {
-  const { schedule, mode, read, studyDone, rawDay, dayNumber } = compute(input, now);
+  const { schedule, read, rawDay, dayNumber } = compute(input, now);
   let shiftBy = 0;
   if (dayNumber > 0) {
     const last = Math.min(rawDay - 1, schedule.totalDays);
     for (let d = 1; d <= last; d++) {
-      if (!isDayDone(schedule.days[d - 1], mode, read, studyDone)) {
+      if (!isDayDone(schedule.days[d - 1], read)) {
         shiftBy = rawDay - d;
         break;
       }
@@ -520,9 +520,7 @@ export function scheduleDaysOnDates(
 ): Map<string, BibleYearDayOnDate> {
   const schedule = getSchedule(input.planKey, input.track, input.scheduleVersion);
   const read = readSetFrom(input.readRefs);
-  const mode = modeOf(input);
-  const studyDone = studySetFrom(input.studyDone);
-  const done = (day: BibleYearScheduleDay) => isDayDone(day, mode, read, studyDone);
+  const done = (day: BibleYearScheduleDay) => isDayDone(day, read);
   const out = new Map<string, BibleYearDayOnDate>();
   dates.forEach((date, i) => {
     if (!isValidDateString(date)) return;

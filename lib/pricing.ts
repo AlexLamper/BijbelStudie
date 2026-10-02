@@ -142,3 +142,22 @@ export const PRO_FEATURES = [
   "Streakbescherming als je een dag mist",
   "Extra bomen, landschappen en de gouden ring",
 ];
+
+/**
+ * The same nine entitlements in the same order, worded for /abonnement's
+ * two-column list, where a line has room for about thirty characters. Not a
+ * second list of claims: every entry is the PRO_FEATURES line at the same
+ * index with the comparison dropped, so the rule above covers it too
+ * (tests/abonnementContent.test.ts keeps the two the same length).
+ */
+export const PRO_FEATURES_SHORT = [
+  "Matthew Henry, Calvijn en Dachsel",
+  "Grondtekst bij elk vers",
+  `${PRO_AI_DAILY_CAP} AI-vragen per dag`,
+  "Onbeperkt notities",
+  "Alle kruisverwijzingen",
+  "Onbeperkt groepen leiden",
+  "Voorlezen met natuurlijke stemmen",
+  "Streakbescherming",
+  "Extra bomen en landschappen",
+];

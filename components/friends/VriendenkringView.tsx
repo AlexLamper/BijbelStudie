@@ -88,7 +88,8 @@ export function VriendenkringView() {
         ) : hasKring ? (
           <Card className="p-6 text-center">
             <p className="text-[14px] text-ink-faint">
-              Nog niets gedeeld in je kring. Deel zelf een tekst of een mijlpaal om te beginnen.
+              Nog niets te zien in je kring. Zodra iemand een studie afrondt of een tekst
+              bewaart, staat het hier.
             </p>
           </Card>
         ) : (
