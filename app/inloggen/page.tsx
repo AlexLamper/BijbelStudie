@@ -32,6 +32,10 @@ const FIELD =
 const LABEL = "mb-1.5 block text-sm font-medium text-white/85"
 const QUIET_LINK =
   "rounded font-medium text-white no-underline underline-offset-4 outline-none transition-colors hover:underline focus-visible:ring-2 focus-visible:ring-white"
+// The one link on the page that should be found at a glance: the way to an
+// account. TEAL_ON_DARK (#2DD4BF) by hand, since Tailwind needs the literal.
+const ACCENT_LINK =
+  "rounded font-semibold text-[#2DD4BF] underline decoration-[#2DD4BF]/50 decoration-[1.5px] underline-offset-4 outline-none transition-colors hover:text-[#5EEAD4] hover:decoration-[#5EEAD4] focus-visible:ring-2 focus-visible:ring-white"
 
 const PANEL_BENEFITS = [
   { title: "Persoonlijke notities", desc: "Bewaar inzichten bij elk vers." },
@@ -58,7 +62,7 @@ function FeaturePanel() {
         <div>
           <p className={EYEBROW} style={{ color: TEAL_ON_DARK }}>BijbelStudie</p>
           <h2 className="mt-3 text-3xl font-semibold leading-tight tracking-tight xl:text-4xl">
-            Log in en ga direct verder met je studie.
+            Log in of maak een account aan en begin je bijbelstudie.
           </h2>
           <p className="mt-4 text-sm leading-relaxed text-white/70">
             Behoud je notities, volg je leesplan en vraag de AI-assistent om uitleg bij elke passage.
@@ -174,7 +178,7 @@ function SignInPageInner() {
             </h1>
             <p className="mt-1.5 text-sm text-white/70">
               Nog geen account?{" "}
-              <Link href="/registreren" className={QUIET_LINK}>
+              <Link href="/registreren" className={ACCENT_LINK}>
                 Maak er gratis een aan
               </Link>
             </p>

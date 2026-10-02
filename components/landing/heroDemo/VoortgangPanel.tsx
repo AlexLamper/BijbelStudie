@@ -7,11 +7,11 @@ import { HD, HERO_DEMO, type VoortgangPanelProps } from './shared';
 /** Steps already ticked when the scene opens (Inleiding, Bijbelse context). The
     rest - what the visitor has just watched - tick themselves off. */
 const DONE_AT_START = 2;
-const FIRST_TICK_MS = 500;
-const TICK_EVERY_MS = 600;
+const FIRST_TICK_MS = 400;
+const TICK_EVERY_MS = 500;
 /** The XP lands on the tree this long after the last step is ticked. With six
-    steps: ticks at 500, 1100, 1700 and 2300 ms, the badge at 2700 ms - settled
-    by about 3.0 s, well inside the scene's 4800 ms dwell. */
+    steps: ticks at 400, 900, 1400 and 1900 ms, the badge at 2300 ms - settled
+    by about 2.6 s, well inside the scene's 4000 ms dwell. */
 const REWARD_AFTER_MS = 400;
 
 /* The one keyframe this panel adds to the shared set: a check landing in its
