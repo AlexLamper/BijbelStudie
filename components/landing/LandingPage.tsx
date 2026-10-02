@@ -5,7 +5,6 @@ import { Footer } from "./footer"
 import { BrandIcon } from "../ui/BrandIcon"
 import { FAQItem } from "./FAQItem"
 import { ScrollEffects } from "./ScrollEffects"
-import { LandingSeenMarker } from "./LandingSeenMarker"
 import { StudyDiscovery } from "./StudyDiscovery"
 import { HOME_FAQS } from "../../lib/content/homeFaq"
 import { APP_STORE_URL } from "../../lib/appStore"
@@ -925,7 +924,6 @@ export default function LandingPage({ reviews }: { reviews?: ReviewsData }) {
           sentinel answers that with an observer instead of a scroll listener
           running a React state update on every frame. */}
       <div id="landing-top-sentinel" aria-hidden className="absolute left-0 top-0 h-px w-px" />
-      <LandingSeenMarker />
       <ScrollEffects />
       <PromoBanner />
       <Navbar />

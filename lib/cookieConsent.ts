@@ -19,9 +19,7 @@
  *  - our own usage statistics (lib/analytics.ts, which writes the `bs_anon_id`
  *    key into localStorage and posts events to /api/analytics),
  *  - Google Analytics (lib/googleAnalytics.ts, the `_ga` / `_ga_<id>` cookies),
- *    which is not even downloaded before "Accepteren",
- *  - the `bs_seen_landing` convenience cookie, which is a comfort feature and
- *    not required to deliver anything.
+ *    which is not even downloaded before "Accepteren".
  *
  * All of it is one purpose - measuring how the site is used - so there is one
  * question, not a category matrix. "Declined" is a real, honoured answer rather
@@ -122,11 +120,6 @@ export function clearConsent(): void {
  */
 export function hasAnalyticsConsent(): boolean {
   return readConsent()?.status === "accepted";
-}
-
-/** Same rule, for the optional `bs_seen_landing` convenience cookie. */
-export function hasFunctionalConsent(): boolean {
-  return hasAnalyticsConsent();
 }
 
 /**

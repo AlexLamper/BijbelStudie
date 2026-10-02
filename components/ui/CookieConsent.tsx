@@ -19,9 +19,8 @@ import { useCookieConsent } from "../../hooks/useCookieConsent";
  * necessary and are never gated - asking about them would be theatre, and
  * turning them off would break signing in and paying. What genuinely waits for
  * an answer is usage measurement - our own statistics (lib/analytics.ts) and
- * Google Analytics (lib/googleAnalytics.ts) - plus the `bs_seen_landing`
- * convenience cookie. That is one purpose, so one question and no fake
- * toggles. See lib/cookieConsent.ts.
+ * Google Analytics (lib/googleAnalytics.ts). That is one purpose, so one
+ * question and no fake toggles. See lib/cookieConsent.ts.
  *
  * BOTH ANSWERS ARE EQUAL. "Accepteren" and "Alleen noodzakelijk" are the same
  * size, the same shape and one click each; refusing is remembered exactly as

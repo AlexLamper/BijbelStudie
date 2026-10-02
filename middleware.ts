@@ -15,12 +15,10 @@ export const config = {
   ],
 };
 
-// Set client-side (see components/landing/LandingPage.tsx) once a guest
-// leaves "/" for the app. Not httpOnly: the landing page itself needs to set
-// it from the browser at the moment of navigation, and it carries no
-// sensitive data - tampering with it only ever skips a marketing page, never
-// grants access to anything gated.
-export const GUEST_SEEN_LANDING_COOKIE = "bs_seen_landing";
+// Retired. It used to send a guest who had seen the landing page from "/"
+// straight to /studies; a guest now always gets the landing page there. Still
+// named here only so the copies left in browsers (set for a year) are expired.
+const RETIRED_SEEN_LANDING_COOKIE = "bs_seen_landing";
 
 const SESSION_COOKIES = [
   "next-auth.session-token",
@@ -81,6 +79,9 @@ export async function middleware(req: NextRequest) {
       sameSite: "lax",
     });
   }
+  if (req.cookies.has(RETIRED_SEEN_LANDING_COOKIE)) {
+    response.cookies.set(RETIRED_SEEN_LANDING_COOKIE, "", { path: "/", maxAge: 0 });
+  }
 
   // Decode token - auto-clear stale/corrupt cookies instead of looping errors
   let session = null;
@@ -120,14 +121,9 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  // Guest mode (Phase 1 MVP): a visitor who has already seen the landing page
-  // once (marked by GUEST_SEEN_LANDING_COOKIE, set client-side when they leave
-  // "/" for the app) skips straight past the marketing page on repeat visits -
-  // there is no session yet, so the `session && pathname === "/"` redirect
-  // above never fires for them.
-  if (!session && pathname === "/" && req.cookies.get(GUEST_SEEN_LANDING_COOKIE)?.value === "1") {
-    return NextResponse.redirect(new URL("/studies", req.url));
-  }
+  // Without a session "/" is always the landing page - also for a guest who
+  // has already been inside the app. Only the session redirect above ever
+  // takes a visitor away from it.
 
   // Only /beheer is closed at the edge. Everything else is open to a guest:
   //

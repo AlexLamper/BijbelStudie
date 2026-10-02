@@ -3,9 +3,9 @@ import { safeRedirect } from "./safeRedirect";
 /**
  * Where "Doorgaan als gast" on /inloggen and /registreren sends a visitor.
  *
- * The studies are the guest front door - the same place middleware.ts sends a
- * returning guest from "/". /dashboard is NOT: its layout answers a guest with
- * GuestGate, so a guest button pointing there would land on "log eerst in".
+ * The studies are the guest front door. /dashboard is NOT: its layout answers
+ * a guest with GuestGate, so a guest button pointing there would land on "log
+ * eerst in".
  *
  * A `next` parameter is honoured only when a guest can actually use that page.
  * The account-bound routes below each render GuestGate from their own layout
