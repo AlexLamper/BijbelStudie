@@ -122,7 +122,9 @@ const TYPE_PILLS: { value: CuratedStudy['type'] | null; label: string }[] = [
   { value: 'Onderwerp', label: "Thema's" },
 ]
 
-const LIST_PAGE_SIZE = 16
+// A multiple of both column counts (2 and 3), so a page never ends on a
+// half-filled row.
+const LIST_PAGE_SIZE = 18
 
 export default function StudiesBrowser() {
   const [typeFilter, setTypeFilter] = useState<CuratedStudy['type'] | null>(null)
@@ -436,7 +438,7 @@ export default function StudiesBrowser() {
             </p>
           </Card>
         ) : (
-          <div className="grid flex-none grid-cols-1 gap-[14px] sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid flex-none grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {visibleRows.map(entry => (
               <CatalogueCard key={entry.study.id} entry={entry} status={statusFor(entry.study)} />
             ))}
@@ -526,7 +528,7 @@ function CatalogueCard({ entry, status }: { entry: Entry; status: Status }) {
       data-track="study_card"
       className="flex min-w-0 flex-col overflow-hidden rounded-card border border-line bg-surface no-underline transition-colors hover:border-line-strong"
     >
-      <div className="relative h-[112px] flex-none overflow-hidden">
+      <div className="relative h-[136px] flex-none overflow-hidden">
         <StudyArtwork
           id={entry.study.id}
           kind={entry.study.type}
@@ -542,14 +544,14 @@ function CatalogueCard({ entry, status }: { entry: Entry; status: Status }) {
             {status.pct}%
           </span>
         ) : null}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 px-3 pb-[9px]">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.8px] text-white/85">{entry.kind}</div>
-          <div className="mt-[1px] truncate text-[15px] font-bold text-white">{entry.study.title}</div>
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 px-[14px] pb-[11px]">
+          <div className="text-[10.5px] font-semibold uppercase tracking-[0.8px] text-white/85">{entry.kind}</div>
+          <div className="mt-[2px] truncate text-[16.5px] font-bold text-white">{entry.study.title}</div>
         </div>
       </div>
-      <div className="flex flex-1 items-center gap-3 px-[14px] py-[11px]">
-        <span className="min-w-0 flex-1 truncate text-[12px] text-ink-faint">{metaRight}</span>
-        <span className="flex-none text-[13px] font-semibold text-teal dark:text-teal-400">{action} ›</span>
+      <div className="flex flex-1 items-center gap-3 px-4 py-[13px]">
+        <span className="min-w-0 flex-1 truncate text-[12.5px] text-ink-faint">{metaRight}</span>
+        <span className="flex-none text-[13.5px] font-semibold text-teal dark:text-teal-400">{action} ›</span>
       </div>
     </Link>
   )

@@ -31,9 +31,9 @@ export default function StudiesLoading() {
             <Skeleton key={i} className="h-[37px] w-[110px] rounded-full" />
           ))}
         </div>
-        <div className="grid grid-cols-1 gap-[14px] md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {[0, 1, 2, 3, 4, 5, 6, 7].map(i => (
-            <Skeleton key={i} className="h-[160px] rounded-card" />
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {[0, 1, 2, 3, 4, 5].map(i => (
+            <Skeleton key={i} className="h-[186px] rounded-card" />
           ))}
         </div>
       </div>
