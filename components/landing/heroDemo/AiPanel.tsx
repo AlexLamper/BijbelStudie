@@ -7,15 +7,15 @@ import { HD, HERO_DEMO, type PanelProps } from './shared';
 const QUESTION = HERO_DEMO.ai.question;
 const WORDS = HERO_DEMO.ai.answer.split(' ');
 
-/* The timeline, in ms from mount: typing ends at 1.56 s, the question is sent
-   at 1.8 s, the answer streams from 2.5 s and its last word is fully opaque at
-   about 4.3 s, which leaves the last two seconds of the scene for reading. */
-const TYPE_AT = 300;
-const CHAR_MS = 35;
+/* The timeline, in ms from mount: typing ends at 1.33 s, the question is sent
+   at 1.57 s, the answer streams from 2.27 s and its last word is fully opaque
+   at about 3.9 s, which leaves the last 1.7 seconds of the scene for reading. */
+const TYPE_AT = 250;
+const CHAR_MS = 30;
 const SEND_AT = TYPE_AT + QUESTION.length * CHAR_MS + 240;
 const THINK_AT = SEND_AT + 200;
 const STREAM_AT = THINK_AT + 500;
-const WORD_MS = 50;
+const WORD_MS = 45;
 const END_AT = STREAM_AT + WORDS.length * WORD_MS;
 
 type Stage = 'ask' | 'sent' | 'thinking' | 'answer';
