@@ -290,11 +290,12 @@ export function dayLabel(date: string): string {
 
 /**
  * How many nature photographs ship in `public/images/daytext/` (`001.jpg` ..
- * `100.jpg`). Pexels photos under the Pexels License; see `CREDITS.md` beside
- * them. The same files, in the same order, ship in the app's
+ * `365.jpg`) - one for every day of the year, so a date never shares its photo
+ * with another date in the same year. Pexels photos under the Pexels License;
+ * see `CREDITS.md` beside them. The same files, in the same order, ship in the app's
  * `assets/images/daytext/`.
  */
-export const DAILY_VERSE_PHOTO_COUNT = 100;
+export const DAILY_VERSE_PHOTO_COUNT = 365;
 
 /**
  * The photo behind the card on a given day.
