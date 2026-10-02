@@ -12,6 +12,11 @@ import PlanEnrollment from '../models/PlanEnrollment';
 import BibleYearEnrollment from '../models/BibleYearEnrollment';
 import AiUsage from '../models/AiUsage';
 import GroupMessage from '../models/GroupMessage';
+import Friendship from '../models/Friendship';
+import FriendRequest from '../models/FriendRequest';
+import FriendProfile from '../models/FriendProfile';
+import FriendPost from '../models/FriendPost';
+import FriendPostComment from '../models/FriendPostComment';
 import StudyGroup from '../models/StudyGroup';
 import BiblePlan from '../models/BiblePlan';
 import RefreshToken from '../models/RefreshToken';
@@ -50,6 +55,15 @@ export async function deleteAccountData(userId: mongoose.Types.ObjectId): Promis
     await AiUsage.deleteMany({ userId }, opts);
     await GroupMessage.deleteMany({ userId }, opts);
     await FeedbackState.deleteMany({ userId }, opts);
+
+    // Vriendenkring. The posts have to go with the account: leaving them would
+    // keep a deleted reader's words in other people's feeds. The vriendschap
+    // and the verzoek are keyed on a pair, so both sides are matched.
+    await FriendProfile.deleteMany({ userId }, opts);
+    await FriendPost.deleteMany({ userId }, opts);
+    await FriendPostComment.deleteMany({ userId }, opts);
+    await Friendship.deleteMany({ $or: [{ userAId: userId }, { userBId: userId }] }, opts);
+    await FriendRequest.deleteMany({ $or: [{ fromUserId: userId }, { toUserId: userId }] }, opts);
 
     // Feedback answers and analytics events describe the product, not the
     // person. Cut the link and keep the row - the same fields the 2-year

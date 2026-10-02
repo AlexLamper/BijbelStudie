@@ -11,6 +11,11 @@ import PlanEnrollment from '../models/PlanEnrollment';
 import BibleYearEnrollment from '../models/BibleYearEnrollment';
 import AiUsage from '../models/AiUsage';
 import GroupMessage from '../models/GroupMessage';
+import Friendship from '../models/Friendship';
+import FriendRequest from '../models/FriendRequest';
+import FriendProfile from '../models/FriendProfile';
+import FriendPost from '../models/FriendPost';
+import FriendPostComment from '../models/FriendPostComment';
 import DeletedAccount from '../models/DeletedAccount';
 import { isAdminEmail } from './adminEmails';
 
@@ -54,6 +59,19 @@ export type ArchiveMeta = {
 type LeanFindModel = {
   find(filter: Record<string, unknown>): { limit(n: number): { lean(): Promise<any[]> } };
 };
+/**
+ * Vriendenkring stores a vriendschap and a verzoek on a PAIR, not on a single
+ * `userId`, so those two do not fit the `{ userId: id }` filter the archive
+ * uses. This wraps them so they do: same contract, the filter rewritten to
+ * whichever of the two sides the account is on.
+ */
+function pairKeyed(model: LeanFindModel, fields: readonly [string, string]): LeanFindModel {
+  return {
+    find: (filter) =>
+      model.find({ $or: [{ [fields[0]]: filter.userId }, { [fields[1]]: filter.userId }] }),
+  };
+}
+
 export type ArchiveDeps = {
   user: { findById(id: unknown): { lean(): Promise<any> } };
   related: Record<string, LeanFindModel>;
@@ -75,6 +93,16 @@ const defaultDeps: ArchiveDeps = {
     bibleyearenrollments: BibleYearEnrollment,
     aiusages: AiUsage,
     groupmessages: GroupMessage,
+    // Vriendenkring. A collection this guard does not know about is a hole in
+    // it, so these go in with the schemas (VRIENDENKRING_PLAN.md §2).
+    // `friendprofiles` carries the contact hashes and the findability choice;
+    // `friendships` and `friendrequests` are keyed on a pair rather than a
+    // single `userId`, so they go through `pairKeyed` above.
+    friendprofiles: FriendProfile,
+    friendposts: FriendPost,
+    friendpostcomments: FriendPostComment,
+    friendships: pairKeyed(Friendship, ['userAId', 'userBId']),
+    friendrequests: pairKeyed(FriendRequest, ['fromUserId', 'toUserId']),
   },
   archive: DeletedAccount,
 };
