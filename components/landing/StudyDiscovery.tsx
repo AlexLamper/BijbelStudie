@@ -26,15 +26,6 @@ const AUTHORED = curatedStudies.filter(
 )
 const FEATURED = AUTHORED.slice(0, 3)
 
-/**
- * The rest of the authored studies, as one quiet list of titles under the
- * cards. A visitor sees at a glance what else there is without a second row of
- * cover art, and these are the only links from the homepage to most study
- * pages - on /studies they sit behind "Meer tonen", after 66 book studies.
- */
-const MORE = AUTHORED.slice(3)
-
-
 export function StudyDiscovery() {
   return (
     <>
@@ -121,37 +112,6 @@ export function StudyDiscovery() {
               </div>
             ))}
           </div>
-
-          {MORE.length > 0 && (
-            <div className="reveal mt-8">
-              <p
-                className="text-[0.6875rem] font-bold uppercase"
-                style={{ color: ST.muted, letterSpacing: "0.16em" }}
-              >
-                Meer studies
-              </p>
-              <ul className="mt-3 grid gap-x-6 gap-y-2.5 sm:grid-cols-2 lg:grid-cols-4">
-                {MORE.map((study) => (
-                  <li key={study.id} className="min-w-0 text-sm leading-snug">
-                    {/* No prefetch: eight links in view at once would
-                        otherwise each cost a render nobody asked for. */}
-                    <Link
-                      href={`/studies/${study.id}`}
-                      prefetch={false}
-                      className="font-semibold underline-offset-2 hover:underline"
-                      style={{ color: ST.tealText }}
-                    >
-                      {study.title}
-                    </Link>
-                    <span className="tabular-nums" style={{ color: ST.muted }}>
-                      {" "}· {study.lessons.length}{" "}
-                      {study.lessons.length === 1 ? "les" : "lessen"}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
         </div>
       </section>
     </>

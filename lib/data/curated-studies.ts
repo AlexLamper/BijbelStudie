@@ -45,7 +45,7 @@ export interface CuratedStudy {
   startVersion: string
   /**
    * Card banner: the study's cover photo from `lib/studyPhotos.ts`
-   * (`/images/study-photos/u-<id>.webp`), or '' when it has none.
+   * (`/images/study-photos/p-<id>.webp`), or '' when it has none.
    *
    * LEGACY and PERMANENT field: `/api/v1/studies` returns it absolutised to
    * the shipped Flutter binary, which renders rasters via `Image.network` and

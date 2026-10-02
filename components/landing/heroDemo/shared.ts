@@ -23,13 +23,15 @@ export type HeroScene = 'verse' | 'uitleg' | 'grondtekst' | 'ai' | 'voortgang';
 
 export const HERO_SCENES: HeroScene[] = ['verse', 'uitleg', 'grondtekst', 'ai', 'voortgang'];
 
-/** The tab under the frame, and the caption read out for the scene. */
+/** The tab under the frame, and the caption read out for the scene. One word
+    each: five tabs share one row, and a label that wraps to two lines there
+    reads as a caption rather than as a tab. */
 export const SCENE_LABEL: Record<HeroScene, string> = {
-  verse: 'Een moeilijk vers',
-  uitleg: 'De uitleg ernaast',
-  grondtekst: 'De grondtekst',
-  ai: 'Je vraag beantwoord',
-  voortgang: 'Je voortgang',
+  verse: 'Vers',
+  uitleg: 'Uitleg',
+  grondtekst: 'Grondtekst',
+  ai: 'Vraag',
+  voortgang: 'Voortgang',
 };
 
 /** How long each scene stays, in ms. The ones that type or tick get longer. */

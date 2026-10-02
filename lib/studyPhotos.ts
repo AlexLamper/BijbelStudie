@@ -2,181 +2,188 @@
  * A study's cover photograph.
  *
  * Every study in the catalogue - the 66 book studies and the authored person,
- * passage and theme studies - has one real landscape or still-life photograph
- * chosen for its subject, and no two studies share one. They sit on top of the
- * drawn horizon from `lib/studyArt.ts`, which stays underneath as the
- * placeholder while the photo loads and as the fallback when a study has no
- * entry here (a new study) or the file fails.
+ * passage and theme studies - has one calm nature photograph of its own, and
+ * no two studies share one. They sit on top of the drawn horizon from
+ * `lib/studyArt.ts`, which stays underneath as the placeholder while the photo
+ * loads and as the fallback when a study has no entry here (a new study) or
+ * the file fails.
  *
- * Licence: every photo is from Unsplash under the Unsplash License (free for
- * commercial use, no attribution required - credited here anyway). Unsplash+ /
- * `premium_photo` results are a different, restricted licence and must never
- * be added. None of these repeat a Dagtekst photo (`lib/dailyVerseStore.ts`).
+ * Same look as the Dagtekst library (`lib/dailyVerseStore.ts`): mid-bright,
+ * low contrast, almost no fine detail, muted colour, no people or buildings,
+ * so a title reads over it and nothing competes with the study itself. The
+ * subject still follows the book - desert for Exodus, a dark sea for Jona -
+ * but the style comes first.
+ *
+ * Licence: every photo is from Pexels under the Pexels License (free for
+ * commercial use, no attribution required - credited in the comment above each
+ * entry). None of these repeat a Dagtekst photo.
  *
  * Files are local, like the Dagtekst library, so a page makes no third-party
  * request and Vercel does no image optimisation:
- *   `/images/study-photos/u-<id>.webp`     800 px wide, q70 (banners)
- *   `/images/study-photos/u-<id>-sm.webp`  240 x 240 crop, q70 (list thumbnails)
- * To add one: take `urls.raw` from `https://unsplash.com/napi/photos/<id>`
- * (plain curl, check `premium` and `plus` are false) and download it with
- * `?w=800&q=70&fm=webp&fit=max` and `?w=240&h=240&q=70&fm=webp&fit=crop&crop=entropy`.
- * `tests/studyPhotos.test.ts` keeps every entry backed by both files.
+ *   `/images/study-photos/p-<id>.webp`     800 px wide, q70 (banners)
+ *   `/images/study-photos/p-<id>-sm.webp`  240 x 240 crop, q70 (list thumbnails)
+ * To add one: take the photo id from its pexels.com URL, download
+ * `https://images.pexels.com/photos/<id>/pexels-photo-<id>.jpeg?cs=srgb&w=800`
+ * as the banner and a centre square of it at 240 x 240 as the thumbnail, both
+ * WebP q70. `tests/studyPhotos.test.ts` keeps every entry backed by both files.
  */
 
 /** Study id -> Unsplash photo id. Comment: what it shows - photographer. */
 export const STUDY_PHOTOS: Readonly<Record<string, string>> = {
-  // sunlight breaking through clouds over the sea - Timo Volz
-  'boek-genesis': 'K2jUGU6ttO0',
-  // lone acacia tree at sunrise, Serabit el-Khadim, Sinai - Youhana Nassif
-  'boek-exodus': 'pIL6duZR3yM',
-  // single candle flame against black - David Tomaseti
-  'boek-leviticus': 'AaZlf5FgUws',
-  // sandstone outcrop in Wadi Rum desert under a wide sky - Anton Lecock
-  'boek-numeri': '-EJEaytR9fw',
-  // looking down a long mountain valley from a height - Jimmy Liu
-  'boek-deuteronomium': 'QakqNbgJqwI',
-  // Jordan Valley seen from the hills - Thomas Vogel
-  'boek-jozua': 'HmNWXPzRx1M',
-  // bare golden hills under a dark sky - Stephen Pedersen
-  'boek-richteren': '3amCorLRlPk',
-  // ripe wheat field under summer clouds - Nick Fewings
-  'boek-ruth': 'aEJP6b-VMxY',
-  // oil lantern burning on a dark wooden table - Bernard Tuck
-  'boek-1-samuel': 'dkrvlD1UC2s',
-  // stone archway and steps in the Jewish Quarter, Jerusalem - Viktor SOLOMONIK
-  'boek-2-samuel': 'hvMsIEo3CW0',
-  // looking up into a tall conifer forest - Suzi Kim
-  'boek-1-koningen': '87IVr1pjoPM',
-  // ancient stone ruins in a desert plain - Annie Spratt
-  'boek-2-koningen': 'P2Jr9B3J_MQ',
-  // Hebrew text on weathered parchment - Tanner Mardis
-  'boek-1-kronieken': 'xUXGHzhIbN4',
-  // menorah resting on an old Hebrew scroll - Diana Polekhina
-  'boek-2-kronieken': '7a79GN3AZMM',
-  // old stacked stone wall with moss - biemme zeta
-  'boek-ezra': 'JGp4wwYqM78',
-  // ancient crenellated city walls - Efe Kekikciler
-  'boek-nehemia': 'se80dJ1xN6A',
-  // Persepolis gateways and reliefs - Reza Modiri
-  'boek-esther': 'L45JVcMegCg',
-  // arid plain under a gathering storm (Karoo) - Eric Robinson
-  'boek-job': 'I0X7BkEkCWk',
-  // layered mountain ridges in morning mist - Fabrizio Conti
-  'boek-psalmen': '9CfajiGQL0o',
-  // open handwritten book in soft light - Kiwihug
-  'boek-spreuken': '5bzMOpMTDRM',
-  // autumn forest with low sunbeams - Johannes Plenio
-  'boek-prediker': 'RwHv7LgeC7s',
-  // vineyard rows under a warm low sun - Dan Meyers
-  'boek-hooglied': '0AgtPoAARtE',
-  // desert slope in bloom with purple flowers - Andreas Vonlanthen
-  'boek-jesaja': 'Vv1VCU6GcVM',
-  // almond blossom against blue sky - Dulcineia Dias
-  'boek-jeremia': 'HQOA0LA91As',
-  // ruined stone castle in thick fog - Bernd Dittrich
-  'boek-klaagliederen': 'MY4jRyrUZdQ',
-  // river running through a green forested valley - Peter Robbins
-  'boek-ezechiel': 'U_emIOrVQBY',
-  // dew on grass at sunrise - Aaron Burden
-  'boek-hosea': '3TmLV0fLzfU',
-  // golden grain field under a massive storm cloud - Steve Gribble
-  'boek-joel': 'EzJQlDo3oCk',
-  // small waterfall in a mossy forest - John Thomas
-  'boek-amos': 'SqrZCO21V-Y',
-  // sunlit sandstone canyon (the Siq, Petra) - Haci
-  'boek-obadja': 'JnnOcB75lLs',
-  // dark waves under a moody sky - Tim Marshall
-  'boek-jona': 'qKlD2QlK-CY',
-  // Judean hills with olive trees near Ein Karem - Laura Siegal
-  'boek-micha': '_6d1KujNzug',
-  // lightning over a mountain ridge at night - Micah Tindell
-  'boek-nahum': 'AdOeV-qlAs4',
-  // lone bare tree in a ploughed field - Ja Kubislav
-  'boek-habakuk': 'pVV39dmFCEE',
-  // golden sunrise over misty hills - Sam Burrough
-  'boek-zefanja': 'jTcw4VlP-ac',
-  // ancient stone vaulted arcade - Nico Ruge
-  'boek-haggai': '-3QVdNHz1AI',
-  // single olive tree against a pale sky - Vasilis Caravitis
-  'boek-zacharia': '6gFxye8SVoY',
-  // sunrise over misty farmland - Vincent Picavet
-  'boek-maleachi': 'hpI18Ca87aE',
-  // rocks in the Sea of Galilee - james ballard
-  'boek-mattheus': 'RzV8XqB7QT0',
-  // dusty desert valley with rock formations - Juli Kosolapova
-  'boek-markus': 'Us_dv71f1bc',
-  // country path between vineyards at dusk - Karsten Würth
-  'boek-lukas': 'HiE1bIIoRqQ',
-  // grapes on the vine in golden light - David Köhler
-  'boek-johannes': 'gBdG886bLDY',
-  // Mediterranean cliffs over deep-blue sea - Paweł Wojciechowski
-  'boek-handelingen': 'QYAojSRu82c',
-  // Via Appia lined with cypresses and pines - Mitch Botsford
-  'boek-romeinen': 'bB6pr94w_EA',
-  // Temple of Apollo, Ancient Corinth - Constantinos Kollias
-  'boek-1-corinthiers': 'nESI7TqYBto',
-  // clay jars and vases in soft light - Oshin Khandelwal
-  'boek-2-corinthiers': 'OVpUFAvwhNA',
-  // rock landscape of Cappadocia, Anatolia - Claude Taliana
-  'boek-galaten': 'sBzqwzcY4tY',
-  // Temple of Hadrian, Ephesus - Ulvi Safari
-  'boek-efeziers': 'WClG5w6GC9I',
-  // daisies in a meadow at evening sun - andreas kretschmer
-  'boek-filippenzen': 'zUytXs3fusw',
-  // exposed moss-covered tree roots - Eilis Garvey
-  'boek-colossenzen': 'MskbR8VLNrA',
-  // sea of clouds at dawn - Paxson Woelber
-  'boek-1-thessalonicenzen': 'nv7WX42LKjU',
-  // lighthouse beam over still water at night - Evgeni Tcherkasski
-  'boek-2-thessalonicenzen': 'SHA85I0G8K4',
-  // dip pen and ink on a blank sheet - Kelly Sikkema
-  'boek-1-timotheus': 'SDa3foPsj5o',
-  // old handwritten manuscript with quill and inkwell - David Billington
-  'boek-2-timotheus': 'b3D8BfG1L8Y',
-  // mountainous coastline over a deep-blue sea - Tadeusz Zachwieja
-  'boek-titus': 'Qmhvd2LoKEc',
-  // wax-sealed letters on a desk (black and white) - Raymond Petrik
-  'boek-filemon': 'yG1mlQ1Rqpc',
-  // old anchor on a sandy beach - Janosch Jost
-  'boek-hebreeen': 'iupXZ62DQBY',
-  // rain moving in over green farmland - Veronica White
-  'boek-jakobus': 'lKILWySmEHs',
-  // large boulders (a dolmen) in grass under sunrays - Joeri Römer
-  'boek-1-petrus': 'Xne1N4yZuOY',
-  // morning star above a dawn horizon (Uluru) - Grant McIver
-  'boek-2-petrus': 'pmUEwPKL5IE',
-  // sunlight streaming through a dark forest - Pascal van de Vendel
-  'boek-1-johannes': 'xhD49fKOzw0',
-  // forest path in golden morning light - Patrick Fore
-  'boek-2-johannes': '74TufExdP3Y',
-  // old wooden door - Joel & Jasmin Førestbird
-  'boek-3-johannes': '4SvxBUfT-_c',
-  // dark storm clouds over mountains and valley - simon
-  'boek-judas': 'IzsVq4gwQO4',
-  // golden light over clouds and mountain peaks - Nitish Meena
-  'boek-openbaring': 'RbbdzZBKRDY',
-  // sunrise over misty hills - Xingjiao Liu
-  'opstanding': 'U9BStwKrP2c',
-  // desert dune under a starry sky - Daniel Olah
-  'abraham': '6KQETG8J-zI',
-  // sunrise over the Sinai mountains - Vlad Kiselov
-  'mozes': 'RGR-7-G4Wvs',
-  // storm rolling in over a mountain lake - marco forno
-  'geloof-in-storm': 'BLeKlh5je6k',
-  // rainbow over green mountain slopes - Look Up Look Down Photography
-  'noach': 't02XukS9dUU',
-  // palm frond against a blue sky - Jakob Owens
-  'intocht': 'TMxUnMAAwFA',
-  // flock of sheep grazing on a green hill - Hasan Almasi
-  'david': 'DNnxRx9Vkb4',
-  // green hillside sloping down to a wide lake - T Y
-  'bergrede': 'EYyD5ZrxJpo',
-  // Roman gate on the road into Hierapolis - Gray Clary
-  'paulus': '06BkQ54A3Zo',
-  // still mountain lake mirroring the peaks - Gabor Koszegi
-  'psalmen': 'fps3SRiQqoQ',
-  // lion resting in tall grass - Birger Strahl
-  'daniel': 'hesJq5WhaSA',
+  // peaceful sunrise over serene ocean waters - dexter pan
+  'boek-genesis': '35678996',
+  // scenic view of a desert - K
+  'boek-exodus': '9229398',
+  // grass field on a foggy day - Plato Terentev
+  'boek-leviticus': '9807794',
+  // clear sky over hills and barren plains - Julia Volk
+  'boek-numeri': '5199772',
+  // a vast brown field under blue sky - Barbaros Gültekin
+  'boek-deuteronomium': '12009801',
+  // photo of brown mountains with a river below - K
+  'boek-jozua': '9229433',
+  // scenic view of a desert landscape - 康
+  'boek-richteren': '11016989',
+  // yellow, rural field - Andriy Nestruiev
+  'boek-ruth': '17745468',
+  // sun hidden behind mountains at dawn - Rodion Kutsaiev
+  'boek-1-samuel': '19015073',
+  // green trees and brown grass on a slope - Sami Aksu
+  'boek-2-samuel': '9820926',
+  // silhouette of trees on cornfield - Ivars
+  'boek-1-koningen': '5583064',
+  // panorama of a valley fields and distant mountain ranges - Gu Bra
+  'boek-2-koningen': '19032042',
+  // texture of sandstone - bima
+  'boek-1-kronieken': '15107121',
+  // golden dunes at sunrise in desert landscape - Stephen Leonardi
+  'boek-2-kronieken': '28639369',
+  // green trees covered with fog - William CHIANG
+  'boek-ezra': '11952288',
+  // blue, calm sea - Engin Akyurt
+  'boek-nehemia': '17828906',
+  // brown rocky mountain under blue sky - Brett Sayles
+  'boek-esther': '4114953',
+  // dry field and mountain range on horizon - Brett Sayles
+  'boek-job': '4388478',
+  // mesmerizing sunset over Zuluk mountain ranges - Mehul
+  'boek-psalmen': '35462851',
+  // pathway in the wheat field - Boys in Bristol Photography
+  'boek-spreuken': '10255172',
+  // autumn trees in thick fog - Nikola Tomašić
+  'boek-prediker': '15695545',
+  // blossoming tree on the background of blue sky - Hà Nguyễn
+  'boek-hooglied': '11858149',
+  // plant on ground - Thắng-Nhật Trần
+  'boek-jesaja': '17699678',
+  // a tree with pink flowers against a blue sky - Nikolett Emmert
+  'boek-jeremia': '26970326',
+  // field with trees in fog - Plato Terentev
+  'boek-klaagliederen': '9807810',
+  // scenic river and green hills in spring landscape - philotravel
+  'boek-ezechiel': '32473704',
+  // morning dew on grass blades in soft focus - Jelena Kazak
+  'boek-hosea': '39824768',
+  // dramatic sky over fields in merzifon, türkiye - Orhan Namlı
+  'boek-joel': '36459951',
+  // tranquil stream flowing over mossy rocks - Thorarinn Torfason
+  'boek-amos': '38216304',
+  // Buckskin gulch ravine - ARNAUD VIGNE
+  'boek-obadja': '11958638',
+  // foamy waves crashing on the shore - Alexey Demidov
+  'boek-jona': '9313555',
+  // a lush olive tree farm - Magda Ehlers
+  'boek-micha': '5283373',
+  // mountain shrouded in thick clouds - Francesco Ungaro
+  'boek-nahum': '13394132',
+  // landscape of mountains and fields under a dark sky - Mehmet Turgut Kirkgoz
+  'boek-habakuk': '9646292',
+  // sunlight over hills at sunset - Quang Nguyen Vinh
+  'boek-zefanja': '10615213',
+  // stones stacked on sand heap - General Kenobi
+  'boek-haggai': '16567024',
+  // lonely desert tree in rugged landscape - Sunrain L
+  'boek-zacharia': '38635724',
+  // serene misty sunrise over rural Latvian countryside - Lauma Augstkalne
+  'boek-maleachi': '29561587',
+  // serene lake view with tranquil pebbles - Ilo Frey
+  'boek-mattheus': '37822950',
+  // barren mountain landscape - Uri Baruch
+  'boek-markus': '5590720',
+  // sunset above rural countryside field - Vitaliy Fursov
+  'boek-lukas': '8964315',
+  // mountain and trees - Janko Ferlic
+  'boek-johannes': '602430',
+  // sea seen from cliff top - SlimMars 13
+  'boek-handelingen': '18729420',
+  // gray field under gray sky - Marko Tabak
+  'boek-romeinen': '5660354',
+  // scenic beach view in çanakkale, türkiye - Emre Ayata
+  'boek-1-corinthiers': '31172056',
+  // overcast Atlantic beach scene in North Carolina - A G
+  'boek-2-corinthiers': '39835772',
+  // brown mountain under blue sky - Michael Porter
+  'boek-galaten': '6068242',
+  // green and brown tree branch on blue sea - Engin Akyurt
+  'boek-efeziers': '9097405',
+  // delicate cosmos flowers in sunlit field - Chris Harvey
+  'boek-filippenzen': '36999842',
+  // white clouds and blue sky - Chris Flaten
+  'boek-colossenzen': '3623693',
+  // mystical sunset over misty hills in Kintzheim - Julien Goettelmann
+  'boek-1-thessalonicenzen': '29379622',
+  // lake in the mountains - Tom Fisk
+  'boek-2-thessalonicenzen': '21535033',
+  // serene lake at sunrise reflects tranquility - Cara Denison
+  'boek-1-timotheus': '37437654',
+  // view of hills covered in autumnal trees under a dark, cloudy sky - Rodion Kutsaiev
+  'boek-2-timotheus': '16053990',
+  // silhouette of mountains by ocean - Ramon Perucho
+  'boek-titus': '19593947',
+  // grayscale photo of a cropland under sprawling fog - Rastislav Durica
+  'boek-filemon': '6018772',
+  // weeds on beach - Arthur Shuraev
+  'boek-hebreeen': '16693512',
+  // agricultural farmland landscape under dark clouds - Péter Kövesi
+  'boek-jakobus': '15211413',
+  // a large boulder on a grass hill - César
+  'boek-1-petrus': '17061420',
+  // snow covered mountain under blue sky - Marek Piwnicki
+  'boek-2-petrus': '13922651',
+  // monochrome sand dunes with shadow patterns - Phil Evenden
+  'boek-1-johannes': '31838829',
+  // snow covered field with pine trees - andy jossi
+  'boek-2-johannes': '14475552',
+  // serene forest edge under clear blue sky - Сергей ЮССтудия
+  'boek-3-johannes': '33143258',
+  // mountains under thick clouds - Connor Scott McManus
+  'boek-judas': '13258134',
+  // aerial view of clouds illuminated by sunlight - Porfirio Trinidad Matos
+  'boek-openbaring': '33462407',
+  // sandy beach and a plaint - Alexey Demidov
+  'boek-daniel': '11006331',
+  // clouds over fields on hills - Quang Nguyen Vinh
+  'opstanding': '6871919',
+  // sunset over dunes in Death valley National Park - Stephen Leonardi
+  'abraham': '28638790',
+  // landscape - Leonardo Rossatti
+  'mozes': '2613111',
+  // gray mountains near the ocean - Nico Becker
+  'geloof-in-storm': '5495456',
+  // aerial view of rainbow over hills in Bangladesh - Juber Ahmed Sahel
+  'noach': '36958971',
+  // tall palm trees against clear blue sky - Sébastien Vincon
+  'intocht': '33543030',
+  // empty grass hill - Ron Lach
+  'david': '10211887',
+  // lake on hillside - Jakob Lorenzi
+  'bergrede': '14975898',
+  // lone tree in rural landscape - Oleksandra Zhyvytsia
+  'paulus': '14960005',
+  // withered leaf on water in shallow photography - Tobias Aeppli
+  'psalmen': '1125266',
+  // a desert with a lone mountain in the distance - Francesco Ungaro
+  'daniel': '28202562',
 };
 
 export type StudyPhoto = {
@@ -191,7 +198,7 @@ export function studyPhotoFor(studyId: string): StudyPhoto | null {
   const id = STUDY_PHOTOS[studyId];
   if (!id) return null;
   return {
-    src: `/images/study-photos/u-${id}.webp`,
-    thumb: `/images/study-photos/u-${id}-sm.webp`,
+    src: `/images/study-photos/p-${id}.webp`,
+    thumb: `/images/study-photos/p-${id}-sm.webp`,
   };
 }

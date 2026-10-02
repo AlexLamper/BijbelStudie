@@ -15,7 +15,6 @@ import StudyFlowDemo, { type DemoLesson } from "./StudyFlowDemo"
 import { renderTreeSvg } from "../../lib/levensboom/svg"
 import { LP_THEME_VARS } from "./studyLandingShared"
 import { PLANS, euro } from "../../lib/pricing"
-import { getBibleBook } from "../../lib/content/bibleBooks"
 import { PromoBanner } from "./PromoBanner"
 import HeroDemo from "./heroDemo/HeroDemo"
 import { ReviewsRow, type ReviewsData } from "./ReviewsRow"
@@ -295,11 +294,16 @@ function Hero({ reviews }: { reviews?: ReviewsData }) {
           </p>
 
           {/* The only h1 on the page - the LCP element, so it is never
-              inside a `.reveal` and always painted from the served HTML. */}
+              inside a `.reveal` and always painted from the served HTML.
+
+              Fluid below 1024px, where it has the full width. Beside the demo
+              the column is a fixed 400/500/540px, so the size steps with it:
+              45/54/56px keeps the headline on three lines at every width
+              ("Bijbellezen zonder" has to fit on one), where the old fluid
+              60px tipped into four at 1024-1279 and again around 1366. */}
           <h1
-            className="text-balance font-extrabold"
+            className="text-balance text-[length:clamp(2.5rem,1.6rem_+_2.6vw,3.75rem)] font-extrabold lg:text-[2.8125rem] xl:text-[3.375rem] min-[1440px]:text-[3.5rem]"
             style={{
-              fontSize: "clamp(2.5rem, 1.6rem + 2.6vw, 3.75rem)",
               lineHeight: 1.05,
               letterSpacing: "-0.035em",
               color: "var(--lp-hero-heading)",
@@ -308,8 +312,10 @@ function Hero({ reviews }: { reviews?: ReviewsData }) {
             Stop met Bijbellezen zonder het te <span style={{ color: "var(--lp-hero-accent)" }}>begrijpen</span>
           </h1>
 
+          {/* 18px beside the demo: three lines in each column width. At 20px
+              the 400px column needed a fourth for "het betekent." alone. */}
           <p
-            className="text-pretty text-[17px] lg:max-w-[520px] lg:text-xl"
+            className="text-pretty text-[17px] lg:max-w-[520px] lg:text-lg"
             style={{ lineHeight: 1.55, color: "var(--lp-hero-lead)" }}
           >
             Lees elk hoofdstuk met uitleg, context en de grondtekst ernaast. Zo lees je niet alleen wat er staat, maar snap je ook wat het betekent.
@@ -408,18 +414,9 @@ const TRANSLATIONS = [
 ]
 const ENGLISH_TRANSLATIONS = 6
 
-/**
- * Named in the library's closing line as examples of a book introduction. Read
- * from the dataset, so the names are spelled the way the pages spell them and
- * a slug that ever stops existing drops out instead of linking to a 404.
- */
-const LIBRARY_BOOKS = ["genesis", "psalmen", "jesaja", "johannes", "romeinen"].flatMap(
-  (slug) => getBibleBook(slug) ?? [],
-)
-
-/** `free` is not rendered per row - four access badges next to eight names was
- *  more furniture than information - but it is what the group's closing line
- *  says out loud, so it stays here as the source of that claim. */
+/** `free` puts one "Gratis te lezen" tag beside the name - only on the source
+ *  that is free, so it is one tag in the section and not an access badge on
+ *  every row - and it is the source of the group's closing line. */
 const COMMENTARIES = [
   { name: "KingComments",        author: "Ger de Koning", note: "Eigentijds Nederlandstalig commentaar op de hele Bijbel, vers voor vers",  free: true  },
   { name: "Matthew Henry",       author: "1662-1714",     note: "Het bekendste commentaar op de hele Bijbel, in Nederlandse vertaling",     free: false },
@@ -439,7 +436,7 @@ function LibraryGroup({
   footnote,
 }: {
   label: string
-  items: { name: string; meta: string; note: string }[]
+  items: { name: string; meta: string; note: string; tag?: string }[]
   footnote: string
 }) {
   return (
@@ -451,11 +448,19 @@ function LibraryGroup({
         {label}
       </p>
       <ul className="mt-6 space-y-6">
-        {items.map(({ name, meta, note }) => (
+        {items.map(({ name, meta, note, tag }) => (
           <li key={name}>
             <p className="text-[15px] font-bold leading-snug tracking-tight" style={{ color: T.text }}>
               {name}
               <span className="ml-2 text-xs font-semibold" style={{ color: T.muted }}>{meta}</span>
+              {tag && (
+                <span
+                  className="ml-2 inline-block whitespace-nowrap rounded-full px-2 py-0.5 align-middle text-[11px] font-bold leading-4 tracking-normal"
+                  style={{ backgroundColor: T.tealLight, color: T.tealDeep }}
+                >
+                  {tag}
+                </span>
+              )}
             </p>
             <p className="mt-1 text-[13px] leading-relaxed" style={{ color: T.muted }}>{note}</p>
           </li>
@@ -473,8 +478,8 @@ function LibraryGroup({
  * tabs, a quoted verse, four commentary chips, eight bordered rows, four access
  * badges and four captions, all competing in one section - and the pane named
  * every source the ledger next to it already named. What is left is the heading,
- * one supporting line, the eight sources grouped and spaced, one link and the
- * licence note. The reader's own screen is already shown by the lesson demo
+ * one supporting line, the eight sources grouped and spaced, and the licence
+ * note. The reader's own screen is already shown by the lesson demo
  * further up the page, so nothing is lost by not mocking it twice.
  *
  * Only the source names carry teal, so the section has one accent and no
@@ -502,51 +507,19 @@ function BibleLibrary() {
             />
             <LibraryGroup
               label="Commentaren"
-              items={COMMENTARIES.map(({ name, author, note }) => ({ name, meta: author, note }))}
-              footnote="KingComments is voor iedereen gratis en volledig te lezen; de overige drie horen bij Pro."
+              items={COMMENTARIES.map(({ name, author, note, free }) => ({
+                name,
+                meta: author,
+                note,
+                tag: free ? "Gratis te lezen" : undefined,
+              }))}
+              footnote="KingComments is voor iedereen gratis en volledig te lezen, zonder abonnement; de overige drie horen bij Pro."
             />
           </div>
 
-          {/* The third thing in the library, and the one a visitor can read
-              right now without an account: an introduction per book. */}
-          <p className="mx-auto mt-8 max-w-2xl text-center text-sm leading-relaxed text-pretty" style={{ color: T.muted }}>
-            En bij elk van de <InlineLink href="/bijbelboeken">66 bijbelboeken</InlineLink> een
-            inleiding met schrijver, ontstaanstijd, thema en hoofdlijn, zoals bij{" "}
-            {LIBRARY_BOOKS.map((book, i) => (
-              <span key={book.slug}>
-                {i > 0 && (i === LIBRARY_BOOKS.length - 1 ? " en " : ", ")}
-                <InlineLink href={`/bijbelboeken/${book.slug}`}>{book.name}</InlineLink>
-              </span>
-            ))}
-            .
-          </p>
-
-          {/* Anchors for what the homepage already appears for in search
-              ("bijbel met uitleg online", "wat zegt de bijbel", "bijbelstudie met
-              vragen en antwoorden"), pointing at the pages written for them. */}
-          <p className="mx-auto mt-4 max-w-2xl text-center text-sm leading-relaxed text-pretty" style={{ color: T.muted }}>
-            Lees ook hoe je de <InlineLink href="/bijbelstudie/bijbel-met-uitleg">Bijbel met uitleg</InlineLink> leest,
-            hoe een <InlineLink href="/bijbelstudie/vragen-en-antwoorden">bijbelstudie met vragen en antwoorden</InlineLink> werkt,
-            en <InlineLink href="/bijbel-over">wat de Bijbel zegt</InlineLink> over onderwerpen als{" "}
-            <InlineLink href="/bijbel-over/angst">angst</InlineLink>,{" "}
-            <InlineLink href="/bijbel-over/vergeving">vergeving</InlineLink> en{" "}
-            <InlineLink href="/bijbel-over/rouw">rouw</InlineLink>.
-          </p>
-
-          <p className="mt-8 text-center">
-            <Link
-              href="/inloggen"
-              data-track="landing_library_cta"
-              className="text-sm font-semibold underline underline-offset-4"
-              style={{ color: T.tealText }}
-            >
-              Gratis beginnen
-            </Link>
-          </p>
-
           {/* Contractual, and reproduced as agreed with the Nederlands-Vlaams
               Bijbelgenootschap. Do not reword or drop it. */}
-          <p className="mt-6 text-center text-xs leading-relaxed" style={{ color: T.muted }}>
+          <p className="mt-8 text-center text-xs leading-relaxed" style={{ color: T.muted }}>
             De NBG-vertaling 1951 wordt gebruikt onder licentie van het Nederlands-Vlaams Bijbelgenootschap.
           </p>
         </FadeUp>
@@ -647,7 +620,7 @@ function StudyFlowSection() {
       <div className={SHELL}>
         <SectionHeader
           label="Zo werkt een les"
-          title="Zes stappen, een kwartier per dag"
+          title="Zes stappen, van lezen naar begrijpen"
           subtitle="Elke les leidt je in dezelfde zes stappen door één bijbelgedeelte: inleiding, bijbelse context, lezen, verdieping, toetsing en toepassing. Hieronder speelt de eerste les van De opstanding van Jezus vanzelf af - de echte les, geen schermafbeelding."
         />
         <FadeUp>
