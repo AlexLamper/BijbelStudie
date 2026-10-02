@@ -62,7 +62,7 @@ export function Footer({ frame }: { frame?: string } = {}) {
               </span>
             </Link>
             <p className="max-w-xs text-sm leading-relaxed" style={{ color: FOOTER_MUTED }}>
-              Online bijbelstudie platform voor serieuze bijbelstudenten. Gratis beginnen, altijd.
+              Online bijbelstudie met vertalingen, commentaren en begeleide lessen. Op één plek.
             </p>
           </div>
 
@@ -87,7 +87,7 @@ export function Footer({ frame }: { frame?: string } = {}) {
                 // The footer's one link into the reference cluster. A sitemap
                 // entry only tells Google a URL exists; it passes no authority
                 // and no anchor text. The cluster's real links now come from
-                // running copy - the landing page's library, lesson and pricing
+                // running copy - the landing page's lesson and pricing
                 // sections, the study pages' book links, /help - and from the
                 // content pages' own header (components/landing/navbar.tsx),
                 // which is why the footer can keep selling the product. This

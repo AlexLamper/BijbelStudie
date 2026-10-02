@@ -240,7 +240,7 @@ export default function HeroDemo({ treeSvg }: { treeSvg: string }) {
                     style={{ color: active ? HD.tealText : HD.muted }}
                   >
                     <span className="flex-none tabular-nums">{i + 1}</span>
-                    <span className="line-clamp-2 min-w-0">{SCENE_LABEL[key]}</span>
+                    <span className="min-w-0 truncate">{SCENE_LABEL[key]}</span>
                   </span>
                 </button>
               </li>
