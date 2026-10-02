@@ -4,7 +4,6 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useSession } from "next-auth/react"
 import { BookOpen, ChartNoAxesColumn } from "lucide-react"
-import { curatedStudies } from "../../lib/data/curated-studies"
 import {
   NT_BOOKS,
   OT_BOOKS,
@@ -19,16 +18,12 @@ import { FriendsDashboardSection } from "../../components/friends/FriendsDashboa
 import { useTreeSummary } from "../../components/dashboard/ProgressTree"
 import GrowthAnnouncementCard from "../../components/dashboard/GrowthAnnouncementCard"
 import AppShell from "../../components/shell/AppShell"
-import StudyArtwork from "../studies/StudyArtwork"
-import { splitRecommendations } from "../../lib/studyRecommendations"
 import TreeAvatar from "../../components/kit/TreeAvatar"
 import {
   Card,
   HeatGrid,
   HeatLegend,
   ProgressBar,
-  SectionHeading,
-  StudyCard,
   WeekBars,
 } from "../../components/kit/primitives"
 
@@ -36,8 +31,8 @@ import {
  * The dashboard (design_handoff_web/PAGES.md §1).
  *
  * Two columns: the work at `flex-1` and a 320 px rail, 20 px apart. The work
- * column is the verse, the one thing to carry on with (ResumeCard), and four
- * recommended studies; the rail is the tree, the week and the 66 books.
+ * column is the verse, the one thing to carry on with (ResumeCard) and the
+ * friends block; the rail is the tree, the week and the 66 books.
  *
  * Every number on this screen comes from the hooks that were already here -
  * `useDashboardData` and `useTreeSummary` are untouched. The one addition is
@@ -58,9 +53,6 @@ function heatStep(ratio: number): number {
   return 4
 }
 
-/** A stable empty set, so the effect's initial state is not a new object a render. */
-const EMPTY_IDS: Set<string> = new Set()
-
 /**
  * The resume card's data, from GET /api/v1/dashboard/resume.
  *
@@ -68,13 +60,11 @@ const EMPTY_IDS: Set<string> = new Set()
  * same single indexed enrolment read, and the server builds the whole
  * `DashboardResume` (lib/dashboardResume.ts) - the exact object the app gets
  * inside GET /api/v1/dashboard - so lesson, step and schedule are resolved once,
- * on the server, with the lesson's real step list. The same response carries
- * the finished-study ids the recommendation rows filter on. A guest gets a 401
- * before any query and the card shows its start prompt.
+ * on the server, with the lesson's real step list. A guest gets a 401 before
+ * any query and the card shows its start prompt.
  */
 function useDashboardResume() {
   const [resume, setResume] = useState<DashboardResume | null>(null)
-  const [completed, setCompleted] = useState<Set<string>>(EMPTY_IDS)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -84,52 +74,14 @@ function useDashboardResume() {
       .then(data => {
         if (cancelled) return
         setResume((data?.resume as DashboardResume | undefined) ?? null)
-        setCompleted(new Set<string>(Array.isArray(data?.completedStudyIds) ? data.completedStudyIds : []))
       })
       .catch(() => {})
       .finally(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true }
   }, [])
 
-  return { resume, completed, loading }
+  return { resume, loading }
 }
-
-/** The recommended-row cards; "Meer om te ontdekken" renders the very same card. */
-function StudyCards({ studies }: { studies: typeof curatedStudies }) {
-  return (
-    <>
-      {studies.map(study => (
-        <StudyCard
-          key={study.id}
-          href={`/studies/${study.id}`}
-          title={study.title}
-          meta={`${study.type} · ${study.lessons.length} lessen`}
-          imageHeight={96}
-          // The banner is the study's own drawn horizon, not a gradient
-          // plate: `lib/studyArt.ts` already owns that picture and
-          // /studies renders the same one, so the two agree.
-          art={
-            <StudyArtwork
-              id={study.id}
-              kind={study.type}
-              ratio={2.8}
-              quiet
-              className="h-full w-full"
-            />
-          }
-        />
-      ))}
-    </>
-  )
-}
-
-/**
- * The card grid: the design's 1 / 2 / 4 columns from md up; below md one
- * horizontally scrolling row of snap-aligned cards, so four studies do not
- * stack into a phone's worth of scrolling.
- */
-const STUDY_GRID =
-  "grid grid-cols-1 gap-[14px] sm:grid-cols-2 xl:grid-cols-4 max-md:flex max-md:snap-x max-md:overflow-x-auto max-md:pb-1 max-md:[&>*]:w-[min(78%,280px)] max-md:[&>*]:flex-none max-md:[&>*]:snap-start"
 
 /**
  * The one line a guest sees at the top of the otherwise-generic dashboard:
@@ -169,7 +121,7 @@ export default function DashboardPage() {
   const isGuest = status !== "authenticated"
   const d = useDashboardData()
   const tree = useTreeSummary()
-  const { resume, completed, loading: resumeLoading } = useDashboardResume()
+  const { resume, loading: resumeLoading } = useDashboardResume()
 
   const level = d.level?.level ?? tree.level
   const pct = Math.min(100, d.level?.progressPercentage ?? tree.progressPercentage)
@@ -183,26 +135,13 @@ export default function DashboardPage() {
   const otLevels = OT_BOOKS.map(b => heatStep(d.bookReadRatio(b)))
   const ntLevels = NT_BOOKS.map(b => heatStep(d.bookReadRatio(b)))
 
-  // Four: one full row of four on a wide screen, a clean 2 x 2 below it.
-  // "Meer om te ontdekken" is the next four from the same static list (no
-  // request), never one already above and never the study the reader is in the
-  // middle of. There is no popularity signal to rank by, so the title does not
-  // claim one. A study this reader has already finished is in neither row: the
-  // finished ids come from the enrolment response the resume card already made.
-  const { recommended, more: moreStudies } = splitRecommendations({
-    studies: curatedStudies,
-    completed,
-    resumeStudyId: resume?.primary.studyId ?? null,
-  })
-
   return (
     <AppShell title="Dashboard">
       <div className="flex min-h-full gap-5 max-md:flex-col">
         {/* ── The work ─────────────────────────────────────────────── */}
-        {/* Below md the column is `display: contents`, so its children join the
-            stacked page directly and "Meer om te ontdekken" can move under
-            the rail with `order-last`. */}
-        <div className="flex min-w-0 flex-1 flex-col gap-[18px] max-md:contents">
+        {/* Below md the page stacks: this column first at its own height, the
+            rail under it, everything 20 px apart. */}
+        <div className="flex min-w-0 flex-1 flex-col gap-[18px] max-md:flex-none max-md:gap-5">
           {isGuest && <GuestBanner />}
 
           {/* A flex gap is not created for a `display:none` child, so on the
@@ -231,53 +170,6 @@ export default function DashboardPage() {
               invitation. The same block the app's Start tab carries, so the
               kring is in the same place on both. */}
           <FriendsDashboardSection />
-
-          <SectionHeading
-            title="Aanbevolen voor jou"
-            action={{ label: "Alle studies", href: "/studies" }}
-          />
-
-          {/* The work column is the viewport less the 196 px sidebar, 56 px of
-              body padding, the 320 px rail and its 20 px gap - about 590 px of
-              fixed chrome. At xl (1280) that leaves ~690 px, ~160 px a card at
-              four across, still room for a two-line title and the meta line;
-              under xl four would crush them, so it stays at two. */}
-          {/* Until the enrolments have answered, the finished studies are not
-              known yet, so cards are held back rather than shown and then
-              pulled away again. */}
-          {resumeLoading ? (
-            <div className={STUDY_GRID} aria-busy="true">
-              {[0, 1, 2, 3].map(i => (
-                <div key={i} className="h-[178px] animate-pulse rounded-card bg-line-soft" />
-              ))}
-            </div>
-          ) : recommended.length === 0 ? (
-            <Card className="flex-none px-6 py-5 max-md:px-5">
-              <div className="text-[15px] font-bold text-ink">Je hebt alle studies afgerond</div>
-              <div className="mt-[6px] text-[13px] text-ink-muted">
-                Mooi werk. Kies via{" "}
-                <Link href="/studies" className="font-semibold text-teal no-underline hover:underline dark:text-teal-400">
-                  alle studies
-                </Link>{" "}
-                een studie om opnieuw te doen, of lees verder in de Bijbel.
-              </div>
-            </Card>
-          ) : (
-            <div className={STUDY_GRID}>
-              <StudyCards studies={recommended} />
-            </div>
-          )}
-
-          {/* Always shown. From md up it follows the recommended row in the
-              work column; below md it sits at the very bottom, under the rail. */}
-          {moreStudies.length > 0 && (
-            <section className="flex flex-col gap-[18px] max-md:order-last">
-              <SectionHeading title="Meer om te ontdekken" />
-              <div className={STUDY_GRID}>
-                <StudyCards studies={moreStudies} />
-              </div>
-            </section>
-          )}
         </div>
 
         {/* ── The rail ─────────────────────────────────────────────── */}
