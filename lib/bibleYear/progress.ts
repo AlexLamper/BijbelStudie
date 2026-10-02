@@ -453,7 +453,7 @@ export function shiftForCatchUp(
   input: BibleYearProgressInput,
   now: Date,
 ): { shiftBy: number; shiftDays: number; expectedEndDate: string } {
-  const { schedule, mode, read, studyDone, rawDay, dayNumber } = compute(input, now);
+  const { schedule, read, rawDay, dayNumber } = compute(input, now);
   let shiftBy = 0;
   if (dayNumber > 0) {
     const last = Math.min(rawDay - 1, schedule.totalDays);
@@ -520,8 +520,6 @@ export function scheduleDaysOnDates(
 ): Map<string, BibleYearDayOnDate> {
   const schedule = getSchedule(input.planKey, input.track, input.scheduleVersion);
   const read = readSetFrom(input.readRefs);
-  const mode = modeOf(input);
-  const studyDone = studySetFrom(input.studyDone);
   const done = (day: BibleYearScheduleDay) => isDayDone(day, read);
   const out = new Map<string, BibleYearDayOnDate>();
   dates.forEach((date, i) => {
