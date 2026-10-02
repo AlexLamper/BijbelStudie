@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { HD, HERO_DEMO, type VersePaneProps } from './shared';
 
 /** How long the verse sits untouched before the marker lands on the word. */
-const MARK_BEAT = 700;
+const MARK_BEAT = 600;
 
 const MARKER = `linear-gradient(${HD.tealLight}, ${HD.tealLight})`;
 const VERSE_TINT = `color-mix(in srgb, ${HD.teal} 7%, transparent)`;

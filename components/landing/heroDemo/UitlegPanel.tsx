@@ -31,7 +31,7 @@ export default function UitlegPanel({ reduce }: PanelProps) {
         {first}
       </p>
 
-      <p className={`hidden flex-none text-[12.5px] leading-[1.55] sm:block ${rise}`} style={enter(500, HD.text)}>
+      <p className={`hidden flex-none text-[12.5px] leading-[1.55] sm:block ${rise}`} style={enter(400, HD.text)}>
         {second}
       </p>
 
@@ -41,7 +41,7 @@ export default function UitlegPanel({ reduce }: PanelProps) {
           borderColor: HD.border,
           borderLeftColor: HD.teal,
           backgroundColor: HD.surface,
-          ...(reduce ? null : { animationDelay: '1100ms' }),
+          ...(reduce ? null : { animationDelay: '900ms' }),
         }}
       >
         <figcaption className="text-[10.5px] font-semibold" style={{ color: HD.tealText }}>

@@ -34,11 +34,11 @@ export const SCENE_LABEL: Record<HeroScene, string> = {
 
 /** How long each scene stays, in ms. The ones that type or tick get longer. */
 export const SCENE_DWELL: Record<HeroScene, number> = {
-  verse: 3000,
-  uitleg: 4600,
-  grondtekst: 4200,
-  ai: 6400,
-  voortgang: 4800,
+  verse: 2500,
+  uitleg: 3900,
+  grondtekst: 3600,
+  ai: 5600,
+  voortgang: 4000,
 };
 
 /** Props of the three side panels (UitlegPanel, GrondtekstPanel, AiPanel). */
