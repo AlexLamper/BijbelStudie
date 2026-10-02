@@ -15,7 +15,7 @@ export async function OPTIONS() {
  *
  * GET   -> BibleYearStateResponse (running plan, else the latest completed one, else null)
  * POST  BibleYearStartBody -> BibleYearMutationResponse; 409 ACTIVE_PLAN when one runs
- * PATCH BibleYearPatchBody (shift | stop | restart) -> BibleYearMutationResponse
+ * PATCH BibleYearPatchBody (shift | stop | restart | update) -> BibleYearMutationResponse
  */
 export async function GET(req: Request) {
   try {
