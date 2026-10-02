@@ -20,7 +20,7 @@ export const metadata: Metadata = generatePageMetadata("privacyPolicy");
 /** Prerendered: the text is the same for everyone. See app/bijbelstudie/[slug]/page.tsx. */
 export const dynamic = "force-static";
 
-const LAST_UPDATED = "23 september 2026";
+const LAST_UPDATED = "2 oktober 2026";
 const SUPPORT_EMAIL = "info@bijbelstudie.io";
 
 type Item = { title: string; body: string };
@@ -460,10 +460,6 @@ export default function PrivacyPolicyPage() {
           <li>
             <strong>Google Analytics</strong> (_ga en _ga_34DVLFFCBS): herkennen je browser bij een volgend bezoek,
             zodat we bezoeken en bezoekers kunnen tellen. 2 jaar.
-          </li>
-          <li>
-            <strong>Startpagina gezien</strong> (bs_seen_landing): zonder account slaan we de introductie over als je die
-            al hebt gezien. 1 jaar.
           </li>
         </ul>
         <p className={`${bodyClass} mt-2`}>
