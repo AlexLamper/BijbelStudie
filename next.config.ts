@@ -113,13 +113,22 @@ const nextConfig: NextConfig = {
    */
   async headers() {
     return [
-      {
-        // Fingerprinted build output never changes under the same URL.
-        source: "/_next/static/:path*",
-        headers: [
-          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
-        ],
-      },
+      // Fingerprinted build output never changes under the same URL - in a
+      // production build. `next dev` serves app chunks under fixed names
+      // (`/_next/static/chunks/app/page.js`), so the same header there pins
+      // the browser to the first copy it saw for a year: a client component
+      // added later is missing from the cached chunk, and the page dies on
+      // load with "Cannot read properties of undefined (reading 'call')".
+      ...(process.env.NODE_ENV === "production"
+        ? [
+            {
+              source: "/_next/static/:path*",
+              headers: [
+                { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+              ],
+            },
+          ]
+        : []),
       {
         // OG cards are a pure function of their query string.
         source: "/og",
