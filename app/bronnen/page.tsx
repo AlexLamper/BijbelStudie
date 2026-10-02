@@ -9,7 +9,6 @@ import { loadWorks } from "../../lib/content/bronnen/load";
 import type { BronGroup } from "../../lib/content/bronnen/types";
 import { workCard } from "../../lib/content/bronnen/view";
 import { BronnenOverview } from "../../components/bronnen/BronnenOverview";
-import { BronnenContinue } from "../../components/bronnen/BronnenContinue";
 
 /**
  * /bronnen - the confessions, forms and catechism booklets.
@@ -73,10 +72,7 @@ export default async function BronnenPage() {
             De bronnen worden op dit moment toegevoegd.
           </p>
         ) : (
-          <>
-            <BronnenContinue works={cards} />
-            <BronnenOverview groups={groups} works={cards} />
-          </>
+          <BronnenOverview groups={groups} works={cards} />
         )}
       </div>
     </AppShell>

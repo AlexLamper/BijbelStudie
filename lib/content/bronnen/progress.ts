@@ -109,15 +109,6 @@ export function continueTarget(
   return { id: firstUnread, started: ids.some(id => read.has(id)) };
 }
 
-/** The section opened most recently across all works. */
-export function latestPlace(state: BronProgressState): BronPlace | null {
-  let best: BronPlace | null = null;
-  for (const [slug, place] of Object.entries(state.last)) {
-    if (!best || place.at > best.at) best = { slug, id: place.id, at: place.at };
-  }
-  return best;
-}
-
 export function withOpened(state: BronProgressState, slug: string, id: string, at: number): BronProgressState {
   return { ...state, last: { ...state.last, [slug]: { id, at } } };
 }
