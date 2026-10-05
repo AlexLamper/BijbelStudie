@@ -540,7 +540,7 @@ function CatalogueCard({ entry, status }: { entry: Entry; status: Status }) {
             <Check size={11} strokeWidth={2.5} /> Afgerond
           </span>
         ) : status.started ? (
-          <span className="absolute right-[10px] top-[10px] rounded-full bg-white/92 px-[8px] py-[3px] text-[10.5px] font-bold text-ink">
+          <span className="absolute right-[10px] top-[10px] rounded-full bg-black/45 px-[8px] py-[3px] text-[10.5px] font-bold text-white">
             {status.pct}%
           </span>
         ) : null}
