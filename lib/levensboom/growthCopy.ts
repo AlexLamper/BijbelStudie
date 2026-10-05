@@ -161,6 +161,38 @@ export function stripUnlockLine(
 }
 
 // ---------------------------------------------------------------------------
+// Boomkaart (dashboard rail, design 41b)
+// ---------------------------------------------------------------------------
+
+/**
+ * The card's step line, the step and nothing else: "Stap 12 van 20", and past
+ * step 20 the jaarringen - "3 jaarringen".
+ *
+ * `stripLine` puts the XP in the same sentence; on the card the XP is line
+ * three, towards the next phase, and 41b says it appears exactly once.
+ */
+export function stepOnlyLine(step: number): string {
+  const s = Math.max(1, Math.floor(step));
+  if (s > STEPS_TOTAL) return ringsLabel(ringsForStep(s));
+  return `Stap ${s} van ${STEPS_TOTAL}`;
+}
+
+/**
+ * The card's third line: "Nog 482 XP tot Volwassen boom" - the XP to the level
+ * the next phase starts at, measured through the floor like every other step
+ * number. Null on the last phase, where the card drops the line.
+ */
+export function nextPhaseXpLine(
+  next: { name: string; fromStep: number } | null | undefined,
+  xp: number,
+  floor?: GrowthFloor | null,
+): string | null {
+  if (!next) return null;
+  const toGo = Math.max(0, xpForLevel(levelForStep(next.fromStep, floor)) - Math.max(0, xp));
+  return `Nog ${formatXp(toGo)} XP tot ${next.name}`;
+}
+
+// ---------------------------------------------------------------------------
 // Groei ladder (§9.4)
 // ---------------------------------------------------------------------------
 

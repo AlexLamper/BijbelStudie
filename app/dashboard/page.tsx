@@ -17,13 +17,12 @@ import DashboardFeedbackSlot from "../../components/feedback/DashboardFeedbackSl
 import { FriendsDashboardSection } from "../../components/friends/FriendsDashboardSection"
 import { useTreeSummary } from "../../components/dashboard/ProgressTree"
 import GrowthAnnouncementCard from "../../components/dashboard/GrowthAnnouncementCard"
+import TreeCard from "../../components/dashboard/TreeCard"
 import AppShell from "../../components/shell/AppShell"
-import TreeAvatar from "../../components/kit/TreeAvatar"
 import {
   Card,
   HeatGrid,
   HeatLegend,
-  ProgressBar,
   WeekBars,
 } from "../../components/kit/primitives"
 
@@ -126,9 +125,6 @@ export default function DashboardPage() {
   const level = d.level?.level ?? tree.level
   const pct = Math.min(100, d.level?.progressPercentage ?? tree.progressPercentage)
   const remainingXp = d.level ? Math.max(0, d.level.xpForNextLevel - d.level.xpIntoLevel) : tree.remainingXp
-  // The step strip needs the tree's own state (its floor); until it has that,
-  // or when the tree is off, the card keeps counting levels.
-  const growthStrip = Boolean(tree.hasTree && tree.stageName && tree.stepLine)
 
   const todayIndex = Math.max(0, d.weekDays.findIndex(day => day.isToday))
 
@@ -174,42 +170,11 @@ export default function DashboardPage() {
 
         {/* ── The rail ─────────────────────────────────────────────── */}
         <aside className="flex w-[320px] flex-none flex-col gap-4 max-md:w-full">
-          {/* Je boom.
-              PAGES.md §1 puts "Bekijken →" at the far right of the avatar row,
-              but in a 320 px card that row leaves the title about 110 px. The
-              bar and the link drop to a row of their own, which hands the
-              title and the strip lines the full 205 px, and leaves the card the
-              same height whether they take one line or two, because the 64 px
-              disc sets it. The whole card is the link now: it has only ever
-              had the one destination, and that is a larger target than four
-              words.
-              Growth v2 (plan §9.5): with a tree, the title is its phase and
-              the lines count its steps - the level is on the disc. Without
-              one (switched off, or not loaded) it is the level, as before. */}
-          <Link href="/profiel/boom" className="group block flex-none no-underline">
-            <Card className="p-[18px] transition-colors group-hover:border-line-strong">
-              <div className="flex items-center gap-[15px]">
-                <TreeAvatar size={64} ring={3} level={level} levelStyle="gold" />
-                <div className="min-w-0 flex-1">
-                  <div className="text-[15px] font-bold leading-[1.3] text-ink">
-                    {growthStrip ? tree.stageName : `Niveau ${level}`}
-                  </div>
-                  <div className="mt-[3px] text-[12.5px] text-ink-faint">
-                    {growthStrip ? tree.stepLine : `nog ${remainingXp} XP tot niveau ${level + 1}`}
-                  </div>
-                  {growthStrip && tree.unlockLine && (
-                    <div className="mt-[2px] text-[12.5px] text-ink-faint">{tree.unlockLine}</div>
-                  )}
-                </div>
-              </div>
-              <div className="mt-[13px] flex items-center gap-3">
-                <ProgressBar value={growthStrip ? tree.stepPercentage : pct} height={6} className="flex-1" />
-                <span className="flex-none whitespace-nowrap text-[13px] font-semibold text-teal dark:text-teal-400 group-hover:text-teal-dark dark:group-hover:text-teal-300">
-                  Bekijken →
-                </span>
-              </div>
-            </Card>
-          </Link>
+          {/* Je boom (design 41b): one low row - the tree in a ring with the
+              level on it, three lines of text, a chevron. The card is the link;
+              the progress is the ring, so there is no bar and no "Bekijken →".
+              components/dashboard/TreeCard.tsx owns the lay-out. */}
+          <TreeCard level={level} pct={pct} remainingXp={remainingXp} />
 
           {/* Deze week */}
           <Card className="flex-none p-[18px]">
