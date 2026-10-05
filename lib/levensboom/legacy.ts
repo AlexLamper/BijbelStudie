@@ -125,13 +125,7 @@ export function floorForUser(user: LegacySource): GrowthFloor | null {
   return floorForLegacyXp(stored ?? user.xp ?? 0);
 }
 
-/**
- * Whether this account should see the one-time "je boom groeit nu in twintig
- * stappen" card (plan §9.6): it had a tree before the launch. Fails closed -
- * nothing captured (a preview) means no card, so nobody dismisses it before it
- * means anything.
- */
-export function announcesGrowth(user: LegacySource): boolean {
-  const stored = storedLegacyXp(user);
-  return stored !== null && stored > 0;
-}
+// `announcesGrowth` is gone with the one-time growth-v2 card (plan §9.6): no
+// surface tells the reader how the tree counts any more, so nothing has to
+// know whether this account predates the launch. The floor above is what that
+// history is actually for.

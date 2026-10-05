@@ -1,9 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { friendsClient } from "../../lib/friends/client"
-import type { FriendRequestView } from "../../lib/friends/types"
+import { friendsClient, type PublicProfileFlag } from "../../lib/friends/client"
+import type { FriendRequestView, FriendSummary } from "../../lib/friends/types"
 import { FriendAvatar } from "./FriendAvatar"
+import { FriendLink } from "./FriendLink"
 
 /**
  * A pending verzoek. Incoming gets "Accepteren" and a quiet "Weigeren";
@@ -15,11 +16,12 @@ export function FriendRequestRow({
   direction,
   onChanged,
 }: {
-  request: FriendRequestView
+  request: FriendRequestView & { user: FriendSummary & PublicProfileFlag }
   direction: "incoming" | "outgoing"
   onChanged?: () => void
 }) {
   const [busy, setBusy] = useState(false)
+  const name = request.user.name || "Iemand"
 
   async function act(action: "accept" | "decline" | "cancel") {
     setBusy(true)
@@ -35,9 +37,17 @@ export function FriendRequestRow({
 
   return (
     <div className="flex items-center gap-3 px-4 py-3">
-      <FriendAvatar name={request.user.name} image={request.user.image} size={40} />
+      <FriendLink
+        person={request.user}
+        name={name}
+        className="shrink-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-[#0D9488]"
+      >
+        <FriendAvatar name={request.user.name} image={request.user.image} size={40} />
+      </FriendLink>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[14px] font-semibold text-ink">{request.user.name || "Iemand"}</p>
+        <p className="truncate text-[14px] font-semibold text-ink">
+          <FriendLink person={request.user}>{name}</FriendLink>
+        </p>
         <p className="text-[12.5px] text-ink-faint">
           {direction === "incoming" ? "Wil vrienden worden" : "Verzoek verstuurd"}
         </p>

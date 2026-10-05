@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { flushSync } from "react-dom"
 import Link from "next/link"
 import { useSession } from "next-auth/react"
-import { Heart, Share2, MoreHorizontal, BookOpen, History } from "lucide-react"
+import { Heart, Share2, MoreHorizontal, BookOpen, History, Users } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -39,6 +39,11 @@ import {
   type StoredVerse,
 } from "../../lib/dailyVerseStore"
 import { getBibleAttribution } from "../../lib/bible-attribution"
+import {
+  SHARE_TO_KRING_FEEDBACK,
+  SHARE_TO_KRING_LABEL,
+  useShareToKring,
+} from "../friends/ShareToKring"
 import {
   loadImage,
   renderDailyVerseShareImage,
@@ -185,6 +190,9 @@ export default function DailyVerseCard({
   const [shareTree, setShareTree] = useState(false)
   const shareTreeRef = useRef<HTMLDivElement>(null)
   const [sharing, setSharing] = useState(false)
+  // Sharing the verse itself with the vriendenkring, which is a different act
+  // from "Delen" above: that one hands the reader an image for anywhere.
+  const kringShare = useShareToKring()
   // The last image drawn, so a second tap (after the browser refused a share
   // that came too long after the first) shares at once.
   const lastShare = useRef<{ key: string; blob: Blob } | null>(null)
@@ -505,6 +513,22 @@ export default function DailyVerseCard({
     beatTimer.current = setTimeout(() => setBeating(false), BEAT_MS)
   }
 
+  /**
+   * Put today's verse in the reader's vriendenkring, as a copy: the reference
+   * and the words travel with the request, so the post stands on its own even
+   * after the day rolls over. `sourceId` is the day, which is what a later
+   * "you already shared this" check would key on.
+   */
+  async function shareWithKring() {
+    if (!verse) return
+    await kringShare.share({
+      kind: "verse",
+      body: verse.text,
+      reference: version ? `${verse.reference} ${version}` : verse.reference,
+      sourceId: `daytext:${dayKeyNL()}`,
+    })
+  }
+
   const chapterHref = verse
     ? `/lezen?book=${encodeURIComponent(verse.book)}&chapter=${verse.chapter}&version=${encodeURIComponent(verse.readerVersion ?? verse.versionId ?? "statenvertaling")}`
     : "/lezen"
@@ -740,8 +764,27 @@ export default function DailyVerseCard({
                 <History size={14} className="mr-2" />
                 Bekijk voorgaande dagen
               </DropdownMenuItem>
+              {/* The kring gets the words, not the picture: "Delen" above
+                  builds a 1080 x 1920 image for anywhere else, while this
+                  posts the verse itself so a friend can tap through to the
+                  chapter. Explicit, per plan section 8 - nothing about the
+                  daily verse posts on its own. */}
+              <DropdownMenuItem
+                className="cursor-pointer"
+                disabled={!verse || kringShare.busy}
+                onSelect={() => void shareWithKring()}
+              >
+                <Users size={14} className="mr-2" />
+                {SHARE_TO_KRING_LABEL}
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+
+          {kringShare.state !== "idle" && (
+            <span role="status" className="text-[11px] text-white/85">
+              {kringShare.message || SHARE_TO_KRING_FEEDBACK[kringShare.state]}
+            </span>
+          )}
 
           {sharing && (
             <span role="status" className="text-[11px] text-white/85">

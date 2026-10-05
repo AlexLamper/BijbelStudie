@@ -28,12 +28,38 @@
 
 import { createHash } from 'crypto';
 
+/**
+ * The four vriendenkring events worth a push.
+ *
+ * These differ from the five above in one way that changes everything about
+ * them: somebody else caused them. A reading reminder is a clock going off and
+ * may be rescheduled, skipped or backed off without anyone noticing. "Marieke
+ * reageerde" is a fact about another person, and arriving late or not at all
+ * is a visible failure. So these are sent by the server the moment the write
+ * lands (iOS, via lib/push/send.ts) and are also readable from
+ * `GET /api/v1/notifications/social` - which is how Android, which gets no
+ * push at all, and any iPhone that was offline both catch up.
+ */
+export type SocialNotificationType =
+  | 'friend_request'
+  | 'friend_accepted'
+  | 'post_like'
+  | 'post_comment';
+
+export const SOCIAL_NOTIFICATION_TYPES: readonly SocialNotificationType[] = [
+  'friend_request',
+  'friend_accepted',
+  'post_like',
+  'post_comment',
+];
+
 export type NotificationType =
   | 'daily_reading'
   | 'streak_risk'
   | 'streak_lost'
   | 'study_nudge'
-  | 'tree_wilting';
+  | 'tree_wilting'
+  | SocialNotificationType;
 
 /** Values a variant can interpolate. Absent keys remove a variant from the pool. */
 export type CopyTokens = {
@@ -52,6 +78,14 @@ export type CopyTokens = {
   versverwijzing?: string;
   /** The reader's Levensboom level, for the tree nudge. */
   niveau?: number;
+  /** The other person in a vriendenkring notification - a first name. */
+  vriend?: string;
+  /** That person's account id, for the deep link. Never rendered. */
+  vriendId?: string;
+  /** The post the like or comment landed on. Never rendered. */
+  berichtId?: string;
+  /** A comment, quoted. Trimmed at a word boundary like `vers`. */
+  reactie?: string;
 };
 
 export type Variant = {
@@ -148,6 +182,53 @@ const TREE_WILTING: Variant[] = [
   { id: 'b05', title: 'Terug naar {boek}', body: 'Je boom veert op zodra je weer leest. Geen haast.', needs: ['boek'] },
 ];
 
+/**
+ * Vriendenkring copy.
+ *
+ * Two rules on top of the house rules, both learned from the pools above.
+ *
+ * The name is a *first* name and is optional. An OAuth account sometimes
+ * carries an email address in `name`, and "alex.lamper06@gmail.com reageerde"
+ * is worse than "Iemand reageerde", so every pool here keeps three or more
+ * variants that need no token at all and the caller passes `vriend` only when
+ * `firstNameOf` gave something real.
+ *
+ * Nothing here counts. "3 mensen vinden dit mooi" would need a tally the server
+ * does not keep, and the coalescing rule in lib/friends/notify.ts means the
+ * fourth like sends nothing anyway - a number that stops being true after the
+ * third like is worse than no number.
+ */
+const FRIEND_REQUEST: Variant[] = [
+  { id: 'f01', title: '{vriend} wil vrienden worden', body: 'Een nieuw verzoek in je vriendenkring.', needs: ['vriend'] },
+  { id: 'f02', title: 'Nieuw vriendschapsverzoek', body: 'Iemand wil vrienden worden. Je vindt het verzoek in je kring.', needs: [] },
+  { id: 'f03', title: 'Een verzoek voor je', body: 'Er wacht een vriendschapsverzoek in je kring.', needs: [] },
+  { id: 'f04', title: 'Iemand zocht je op', body: 'Er staat een nieuw vriendschapsverzoek voor je klaar.', needs: [] },
+];
+
+const FRIEND_ACCEPTED: Variant[] = [
+  { id: 'g01', title: '{vriend} is nu je vriend', body: 'Jullie zien vanaf nu elkaars mijlpalen in de kring.', needs: ['vriend'] },
+  { id: 'g02', title: 'Je verzoek is aangenomen', body: 'Jullie zijn nu vrienden in je kring.', needs: [] },
+  { id: 'g03', title: 'Nieuwe vriend in je kring', body: 'Je verzoek is geaccepteerd. Kijk wie erbij is gekomen.', needs: [] },
+  { id: 'g04', title: 'Jullie zijn nu vrienden', body: 'Vanaf nu zie je elkaars mijlpalen in de kring.', needs: [] },
+];
+
+const POST_LIKE: Variant[] = [
+  { id: 'h01', title: '{vriend} vindt dit mooi', body: 'Een hart bij je bericht in de kring.', needs: ['vriend'] },
+  { id: 'h02', title: 'Een hart bij je bericht', body: 'Iemand uit je kring vindt wat je deelde mooi.', needs: [] },
+  { id: 'h03', title: 'Je bericht is gezien', body: 'Iemand liet een hart achter bij je bericht.', needs: [] },
+  { id: 'h04', title: 'Waardering uit je kring', body: 'Iemand vindt je bericht mooi.', needs: [] },
+];
+
+const POST_COMMENT: Variant[] = [
+  // The one variant that quotes: a reaction you can read on the lock screen is
+  // worth far more than a notice that one exists.
+  { id: 'k01', title: '{vriend} reageerde', body: '{reactie}', needs: ['vriend', 'reactie'] },
+  { id: 'k02', title: '{vriend} reageerde op je', body: 'Een reactie onder je bericht in de kring.', needs: ['vriend'] },
+  { id: 'k03', title: 'Een reactie op je bericht', body: 'Iemand uit je kring schreef iets onder je bericht.', needs: [] },
+  { id: 'k04', title: 'Nieuwe reactie', body: 'Er staat een reactie onder je bericht in de kring.', needs: [] },
+  { id: 'k05', title: 'Iemand schreef je terug', body: 'Een reactie onder je bericht in je vriendenkring.', needs: [] },
+];
+
 /** The pool for a type, given the context that changes which pool applies. */
 export function poolFor(type: NotificationType, tokens: CopyTokens): Variant[] {
   switch (type) {
@@ -161,6 +242,14 @@ export function poolFor(type: NotificationType, tokens: CopyTokens): Variant[] {
       return STUDY_NUDGE;
     case 'tree_wilting':
       return TREE_WILTING;
+    case 'friend_request':
+      return FRIEND_REQUEST;
+    case 'friend_accepted':
+      return FRIEND_ACCEPTED;
+    case 'post_like':
+      return POST_LIKE;
+    case 'post_comment':
+      return POST_COMMENT;
   }
 }
 
@@ -190,7 +279,7 @@ function tokenValue(tokens: CopyTokens, key: keyof CopyTokens): string | undefin
   const raw = tokens[key];
   if (raw === undefined || raw === null) return undefined;
   if (typeof raw === 'number') return Number.isFinite(raw) ? String(raw) : undefined;
-  const text = key === 'vers' ? truncateVerse(raw) : raw.trim();
+  const text = key === 'vers' || key === 'reactie' ? truncateVerse(raw) : raw.trim();
   return text.length > 0 ? text : undefined;
 }
 
@@ -210,8 +299,27 @@ function fill(template: string, tokens: CopyTokens): string {
   });
 }
 
-/** Where a notification of this type should land. */
+/**
+ * Where a notification of this type should land.
+ *
+ * The vriendenkring paths are the app's own routes, not web URLs that happen to
+ * rhyme: `features/friends` is reached at `/vriendenkring` and one person at
+ * `/vriendenkring/:userId` (the app's router mirrors the website's
+ * `app/vriendenkring/[userId]`). A query string the app does not read yet is
+ * dropped by go_router rather than failing to match, so `?tab=verzoeken` and
+ * `?post=` land on the kring today and can be honoured later without the
+ * server having to change what it sends.
+ */
 export function deepLinkFor(type: NotificationType, tokens: CopyTokens): string {
+  if (type === 'friend_request') return '/vriendenkring?tab=verzoeken';
+  if (type === 'friend_accepted') {
+    return tokens.vriendId ? `/vriendenkring/${encodeURIComponent(tokens.vriendId)}` : '/vriendenkring';
+  }
+  if (type === 'post_like' || type === 'post_comment') {
+    return tokens.berichtId
+      ? `/vriendenkring?post=${encodeURIComponent(tokens.berichtId)}`
+      : '/vriendenkring';
+  }
   if (type === 'study_nudge') return '/studies';
   if (type === 'streak_lost') return '/dashboard';
   // The nudge is about the tree, so it opens the tree rather than a chapter.
@@ -301,4 +409,74 @@ export function pickSeries(
     used.unshift(rendered.variantId);
   }
   return out;
+}
+
+/** True for the four vriendenkring types, narrowing as it goes. */
+export function isSocialNotificationType(value: string): value is SocialNotificationType {
+  return (SOCIAL_NOTIFICATION_TYPES as readonly string[]).includes(value);
+}
+
+/**
+ * iOS groups notifications that share a `thread-id` into one stack, so these
+ * are families rather than types: four likes and a comment collapse into one
+ * "Vriendenkring" stack instead of five separate rows pushing the reading
+ * reminder off the screen.
+ */
+export function apnsThreadId(type: NotificationType): string {
+  if (isSocialNotificationType(type)) return 'vriendenkring';
+  if (type === 'study_nudge') return 'studie';
+  if (type === 'tree_wilting') return 'boom';
+  return 'lezen';
+}
+
+/**
+ * The APNs JSON body.
+ *
+ * `aps` is Apple's; everything beside it is ours and is what the app reads to
+ * route the tap. `deepLink` is the contract: the app already maps a payload
+ * path onto its router (`/vriendenkring`, `/lezen?book=...`), so a new
+ * notification type needs no app release as long as it deep-links to a route
+ * that exists. `type` and `variantId` ride along for analytics and for the
+ * app's own de-duplication against `GET /api/v1/notifications/social`, which
+ * can deliver the same event to a phone that was offline when the push went
+ * out. `eventId` is that join key: it is the exact `id` the social endpoint
+ * gives the same event, so a phone that receives both shows one notification.
+ * It is not the same as the `apns-collapse-id` header, which is coarser on
+ * purpose - that one groups every like on a post so the third replaces the
+ * first on screen, where `eventId` must stay unique per event.
+ */
+export type ApnsAlertPayload = {
+  aps: {
+    alert: { title: string; body: string };
+    sound: string;
+    'thread-id': string;
+    badge?: number;
+  };
+  type: NotificationType;
+  deepLink: string;
+  variantId: string;
+  /** Matches the `id` of the same event in the social pull response. */
+  eventId?: string;
+};
+
+export function apnsPayloadFor(
+  type: NotificationType,
+  rendered: RenderedNotification,
+  options: { badge?: number; eventId?: string } = {},
+): ApnsAlertPayload {
+  const payload: ApnsAlertPayload = {
+    aps: {
+      alert: { title: rendered.title, body: rendered.body },
+      sound: 'default',
+      'thread-id': apnsThreadId(type),
+    },
+    type,
+    deepLink: rendered.deepLink,
+    variantId: rendered.variantId,
+  };
+  if (typeof options.badge === 'number' && Number.isFinite(options.badge) && options.badge >= 0) {
+    payload.aps.badge = Math.trunc(options.badge);
+  }
+  if (options.eventId) payload.eventId = options.eventId;
+  return payload;
 }

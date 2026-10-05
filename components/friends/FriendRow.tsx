@@ -1,37 +1,62 @@
 "use client"
 
 import { useState } from "react"
-import { Flame, UserMinus } from "lucide-react"
-import { friendsClient, planLabel } from "../../lib/friends/client"
+import { Flame, MoreHorizontal, Ban, UserMinus } from "lucide-react"
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "../ui/dropdown-menu"
+import { ConfirmDialog } from "../ui/ConfirmDialog"
+import { friendsClient, planLabel, type PublicProfileFlag } from "../../lib/friends/client"
 import type { FriendSummary } from "../../lib/friends/types"
+import { BLOCK_CONFIRM_COPY, blockConfirmTitle } from "../settings/vriendenkringCopy"
 import { FriendAvatar } from "./FriendAvatar"
+import { FriendLink } from "./FriendLink"
 
 /**
  * One person in the kring: name, their streak, and the plan day they are on -
  * the three things that make reading together feel like company rather than a
  * list of accounts.
  *
- * Removing asks first. It is quiet rather than hidden: a kring you cannot leave
- * is a kring nobody joins.
+ * Both ways out ask first, and both live behind one menu rather than two icons
+ * on the row: "uit je kring halen" is an ordinary choice, blocking is not, and
+ * a row that puts them side by side invites the wrong one. Quiet rather than
+ * hidden, though: a kring you cannot leave is a kring nobody joins.
+ *
+ * Blocking is undone in Instellingen > Vriendenkring, where the blocked list
+ * lives (`FriendSettings.blocked`), which is what the confirm text says.
  */
-export function FriendRow({ friend, onChanged }: { friend: FriendSummary; onChanged?: () => void }) {
-  const [confirming, setConfirming] = useState(false)
+export function FriendRow({
+  friend,
+  onChanged,
+}: {
+  friend: FriendSummary & PublicProfileFlag
+  onChanged?: () => void
+}) {
+  const [confirming, setConfirming] = useState<"remove" | "block" | null>(null)
   const [busy, setBusy] = useState(false)
   const plan = planLabel(friend)
+  const name = friend.name || "Een vriend"
 
-  async function remove() {
+  async function act(what: "remove" | "block") {
     setBusy(true)
-    const result = await friendsClient.removeFriend(friend.userId)
+    const result =
+      what === "block"
+        ? await friendsClient.block(friend.userId)
+        : await friendsClient.removeFriend(friend.userId)
     setBusy(false)
-    setConfirming(false)
+    setConfirming(null)
     if (result.ok) onChanged?.()
   }
 
   return (
     <div className="flex items-center gap-3 px-4 py-3">
-      <FriendAvatar name={friend.name} image={friend.image} size={40} />
+      <FriendLink person={friend} name={name} className="shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-[#0D9488] rounded-full">
+        <FriendAvatar name={friend.name} image={friend.image} size={40} />
+      </FriendLink>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[14px] font-semibold text-ink">{friend.name || "Een vriend"}</p>
+        <p className="truncate text-[14px] font-semibold text-ink">
+          <FriendLink person={friend}>{name}</FriendLink>
+        </p>
         <p className="truncate text-[12.5px] text-ink-faint">
           {plan ?? "Leest mee"}
           {friend.streak > 0 && (
@@ -43,34 +68,56 @@ export function FriendRow({ friend, onChanged }: { friend: FriendSummary; onChan
         </p>
       </div>
 
-      {confirming ? (
-        <span className="flex items-center gap-2">
+      {/* Not modal: both items open a ConfirmDialog, and a modal Radix menu
+          plus a Radix dialog each set `pointer-events: none` on <body> from
+          their own copy of DismissableLayer - the dialog, opened while the menu
+          is still up, puts the menu's "none" back when it closes and the page
+          stays unclickable. Full account in
+          components/dashboard/DailyVerseCard.tsx. */}
+      <DropdownMenu modal={false}>
+        <DropdownMenuTrigger asChild>
           <button
             type="button"
-            onClick={remove}
-            disabled={busy}
-            className="press rounded-btn bg-danger px-3 py-1.5 text-[13px] font-semibold text-white outline-none disabled:opacity-50"
+            aria-label={`Acties voor ${name}`}
+            className="press grid h-9 w-9 place-items-center rounded-full text-ink-faint outline-none hover:bg-line-soft focus-visible:ring-2 focus-visible:ring-[#0D9488]"
           >
-            Verwijderen
+            <MoreHorizontal size={17} />
           </button>
-          <button
-            type="button"
-            onClick={() => setConfirming(false)}
-            className="press rounded-btn border border-line bg-surface px-3 py-1.5 text-[13px] font-semibold text-ink-body outline-none hover:bg-line-soft"
-          >
-            Annuleren
-          </button>
-        </span>
-      ) : (
-        <button
-          type="button"
-          onClick={() => setConfirming(true)}
-          aria-label={`${friend.name || "Deze vriend"} uit je kring halen`}
-          className="press grid h-9 w-9 place-items-center rounded-full text-ink-faint outline-none hover:bg-line-soft focus-visible:ring-2 focus-visible:ring-[#0D9488]"
-        >
-          <UserMinus size={17} />
-        </button>
-      )}
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem className="cursor-pointer" onSelect={() => setConfirming("remove")}>
+            <UserMinus size={14} className="mr-2" />
+            Uit je kring halen
+          </DropdownMenuItem>
+          <DropdownMenuItem className="cursor-pointer text-destructive" onSelect={() => setConfirming("block")}>
+            <Ban size={14} className="mr-2" />
+            Blokkeren
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <ConfirmDialog
+        open={confirming === "remove"}
+        onCancel={() => setConfirming(null)}
+        onConfirm={() => void act("remove")}
+        title={`${name} uit je kring halen?`}
+        description="Jullie zien elkaars berichten niet meer. Je kunt elkaar later opnieuw uitnodigen."
+        confirmLabel="Verwijderen"
+        pendingLabel="Verwijderen..."
+        pending={busy}
+        destructive
+      />
+      <ConfirmDialog
+        open={confirming === "block"}
+        onCancel={() => setConfirming(null)}
+        onConfirm={() => void act("block")}
+        title={blockConfirmTitle(name)}
+        description={BLOCK_CONFIRM_COPY.body}
+        confirmLabel={BLOCK_CONFIRM_COPY.action}
+        pendingLabel="Blokkeren..."
+        pending={busy}
+        destructive
+      />
     </div>
   )
 }

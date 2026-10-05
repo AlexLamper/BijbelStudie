@@ -3,10 +3,18 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "../../lib/authOptions"
 import SessionProvider from "../../components/providers/SessionProvider"
 import GuestGateScene from "../../components/auth/GuestGateScene"
+import { robotsFor } from "../../lib/pageMetadata"
 
+/**
+ * Noindex like /groepen and /notities: a signed-in-only page is not content.
+ * app/robots.ts disallows the path as well, but robots.txt only governs
+ * crawling - a URL linked from somewhere else can still be indexed URL-only,
+ * which is what this header is for.
+ */
 export const metadata: Metadata = {
   title: "Vriendenkring",
   description: "Lees samen met vrienden: zie waar zij lezen en moedig elkaar aan.",
+  robots: robotsFor(false),
 }
 
 /**

@@ -5,8 +5,11 @@ import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import {
-  Search, Plus, Edit, Trash2, ChevronDown, MoreHorizontal, Lock,
+  Search, Plus, Edit, Trash2, ChevronDown, MoreHorizontal, Lock, Users,
 } from "lucide-react"
+import {
+  SHARE_TO_KRING_LABEL, ShareToKringStatus, notePostBody, useShareToKring,
+} from "../../components/friends/ShareToKring"
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "../../components/ui/dropdown-menu"
@@ -102,6 +105,16 @@ export default function NotesPage() {
   const [showEditModal, setShowEditModal] = useState(false)
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null)
   const [deleting, setDeleting]         = useState(false)
+  // Sharing a note with the vriendenkring. One hook for the page, plus which
+  // note it was about, so the answer appears under that note instead of as a
+  // line at the top that could be about any of them.
+  const kringShare = useShareToKring()
+  const [sharedNoteId, setSharedNoteId] = useState<string | null>(null)
+
+  function shareWithKring(note: Note) {
+    setSharedNoteId(note._id)
+    void kringShare.share(notePostBody(note))
+  }
 
   const uniqueBooks = Array.from(new Set(notes.map(n => n.book))).sort()
   const uniqueTags  = Array.from(new Set(notes.flatMap(n => n.tags))).sort()
@@ -370,6 +383,17 @@ export default function NotesPage() {
                           <DropdownMenuItem onClick={() => editNote(note)}>
                             <Edit className="mr-2 h-4 w-4" /> Bewerken
                           </DropdownMenuItem>
+                          {/* Always a deliberate choice, never a default:
+                              notes are private, and what the kring gets is a
+                              COPY of these words (VRIENDENKRING_PLAN.md §8),
+                              so editing the note tomorrow does not rewrite
+                              what they read today. */}
+                          <DropdownMenuItem
+                            disabled={kringShare.busy || !(note.noteText || note.verseText)}
+                            onClick={() => shareWithKring(note)}
+                          >
+                            <Users className="mr-2 h-4 w-4" /> {SHARE_TO_KRING_LABEL}
+                          </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => setPendingDeleteId(note._id)} className="text-destructive">
                             <Trash2 className="mr-2 h-4 w-4" /> Verwijderen
                           </DropdownMenuItem>
@@ -393,6 +417,10 @@ export default function NotesPage() {
                           {note.verseText}
                         </p>
                       </div>
+                    )}
+
+                    {sharedNoteId === note._id && (
+                      <ShareToKringStatus state={kringShare.state} message={kringShare.message} />
                     )}
 
                     {note.tags.length > 0 && (

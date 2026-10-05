@@ -3,7 +3,13 @@
 import TreeCanvas from "../levensboom/TreeCanvas"
 import { useStableFloor } from "../levensboom/useStableFloor"
 import { useLevensboom, fracOf } from "../../hooks/useLevensboom"
-import { stepProgress, stripLine, stripUnlockLine } from "../../lib/levensboom/growthCopy"
+import {
+  nextPhaseXpLine,
+  stepOnlyLine,
+  stepProgress,
+  stripLine,
+  stripUnlockLine,
+} from "../../lib/levensboom/growthCopy"
 
 const TEAL = "#0D9488"
 
@@ -41,6 +47,10 @@ export type TreeSummary = {
   stepLine: string | null
   /** Strip line 2, "nog 340 XP → Palmboom", when that unlock comes no later than the next step. */
   unlockLine: string | null
+  /** Boomkaart line 2, the step on its own: "Stap 12 van 20", past 20 "3 jaarringen". */
+  stepOnly: string | null
+  /** Boomkaart line 3, "Nog 482 XP tot Volwassen boom". Null on the last phase. */
+  nextPhaseLine: string | null
   /** 0-100 towards the next step. */
   stepPercentage: number
   /** XP still needed for the next level. */
@@ -68,7 +78,10 @@ export function useTreeSummary(): TreeSummary {
     step: growth?.step ?? 1,
     stepLine: progress ? stripLine(progress.step, progress.xpToNextStep, { withPhase: false }) : null,
     unlockLine: data && progress ? stripUnlockLine(tree?.nextUnlock, data.xp, progress.nextStepLevel) : null,
-    stepPercentage: progress ? Math.round(progress.frac * 100) : 0,
+    stepOnly: progress ? stepOnlyLine(progress.step) : null,
+    nextPhaseLine: data && growth ? nextPhaseXpLine(growth.nextPhase, data.xp, growth.floor) : null,
+    // Fully grown (no next phase) reads as a full ring: 41b.
+    stepPercentage: growth && !growth.nextPhase ? 100 : progress ? Math.round(progress.frac * 100) : 0,
     remainingXp: data ? Math.max(0, data.xpForNextLevel - data.xpIntoLevel) : 0,
     progressPercentage: data?.progressPercentage ?? 0,
     wilting: tree?.wilting ?? false,

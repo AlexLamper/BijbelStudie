@@ -3,9 +3,10 @@
 import { useState } from "react"
 import { Heart, MessageCircle, MoreHorizontal } from "lucide-react"
 import { Card } from "../kit/primitives"
-import { POST_KIND_LABELS, friendsClient, postWhen } from "../../lib/friends/client"
+import { POST_KIND_LABELS, friendsClient, postWhen, type PublicProfileFlag } from "../../lib/friends/client"
 import type { FriendPost } from "../../lib/friends/types"
 import { FriendAvatar } from "./FriendAvatar"
+import { FriendLink } from "./FriendLink"
 
 /**
  * One card in the vriendenkring feed - the same card the app draws: avatar,
@@ -14,13 +15,26 @@ import { FriendAvatar } from "./FriendAvatar"
  * The heart answers the click and is put back if the server refuses, so the
  * one interaction people repeat never waits on a round trip.
  */
-export function FriendPostCard({ post, onChanged }: { post: FriendPost; onChanged?: () => void }) {
+export function FriendPostCard({
+  post,
+  onChanged,
+}: {
+  post: FriendPost & PublicProfileFlag
+  onChanged?: () => void
+}) {
   const [liked, setLiked] = useState(post.likedByMe)
   const [likeCount, setLikeCount] = useState(post.likeCount)
   const [commenting, setCommenting] = useState(false)
   const [comment, setComment] = useState("")
   const [commentCount, setCommentCount] = useState(post.commentCount)
   const [busy, setBusy] = useState(false)
+
+  // The author as a linkable person: the post carries them under `authorId`,
+  // not `userId`. `publicProfile` rides along for `authorHref` - the way on to
+  // the opt-in tree page - but the byline links to `/vriendenkring/<id>`,
+  // which needs no opt-in (see FriendLink).
+  const authorName = post.authorName || "Een vriend"
+  const author = { userId: post.authorId, publicProfile: post.publicProfile }
 
   async function toggleLike() {
     const next = !liked
@@ -49,9 +63,17 @@ export function FriendPostCard({ post, onChanged }: { post: FriendPost; onChange
   return (
     <Card className="p-4">
       <div className="flex items-start gap-3">
-        <FriendAvatar name={post.authorName} image={post.authorImage} size={36} />
+        <FriendLink
+          person={author}
+          name={authorName}
+          className="shrink-0 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-[#0D9488]"
+        >
+          <FriendAvatar name={post.authorName} image={post.authorImage} size={36} />
+        </FriendLink>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[14px] font-semibold text-ink">{post.authorName || "Een vriend"}</p>
+          <p className="truncate text-[14px] font-semibold text-ink">
+            <FriendLink person={author}>{authorName}</FriendLink>
+          </p>
           <p className="text-[12.5px] text-ink-faint">
             {POST_KIND_LABELS[post.kind] ?? "Deelde iets"} · {postWhen(post.createdAt)}
           </p>

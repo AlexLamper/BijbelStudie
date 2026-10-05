@@ -6,24 +6,38 @@ import FriendRequest from '../../models/FriendRequest';
 import FriendProfile from '../../models/FriendProfile';
 import FriendPost from '../../models/FriendPost';
 import FriendPostComment from '../../models/FriendPostComment';
+import Report from '../../models/Report';
 import BibleYearEnrollment from '../../models/BibleYearEnrollment';
 import { scheduledDayNumber } from '../bibleYear/progress';
 import { PLAN_DAYS } from '../bibleYear/schedule';
+import { isPublicTree } from '../levensboom/summary';
 import { normaliseReferralCode } from '../referralRules';
 import { ensureReferralCode } from '../referral';
 import { contactPepper, hashIdentifier, normaliseEmail, normalisePhone, sanitiseHashes } from './discovery';
+import {
+  notifyFriendRequest,
+  notifyPostComment,
+  notifyPostLike,
+  notifyRequestAccepted,
+} from './notify';
+import { REPORT_REASONS } from './types';
 import type {
+  BlockedUser,
   FriendMutationResponse,
   FriendPost as FriendPostView,
   FriendPostBody,
   FriendPostComment as FriendPostCommentView,
+  FriendProfileView,
+  FriendReportBody,
   FriendRequestView,
   FriendRequestsResponse,
   FriendSettings,
   FriendSource,
+  FriendSuggestionsResponse,
   FriendSummary,
   FriendsFeed,
   FriendsKring,
+  ReportReason,
 } from './types';
 
 /**
@@ -45,15 +59,36 @@ export const FEED_MAX_PAGE_SIZE = 50;
 export const MAX_POST_BODY = 2000;
 export const MAX_COMMENT_BODY = 1000;
 export const MAX_MATCH_HASHES = 2000;
+export const MAX_REPORT_NOTE = 1000;
 
-/** Everything a list row needs off a `User`, and nothing more. No e-mail. */
-const USER_CARD_FIELDS = '_id name image streak';
+/** "Mensen die je misschien kent" never gets longer than this. */
+export const SUGGESTIONS_LIMIT = 20;
+/** Named mutual friends on a profile. `mutualCount` carries the real total. */
+export const MUTUALS_SHOWN = 12;
+/**
+ * Hard ceiling on how much of the graph one profile or suggestions call reads.
+ * A kring is tens of people by design, so this is a runaway guard rather than
+ * a page size; a reader at the cap sees a count that stops growing, not an
+ * error.
+ */
+export const GRAPH_SCAN_LIMIT = 2000;
+
+/**
+ * Everything a list row needs off a `User`, and nothing more. No e-mail.
+ *
+ * The two `levensboom.*` paths are the public-profile flag and nothing else:
+ * dotted, so this stays a projection rather than pulling the whole preferences
+ * subdocument (the avatar choice, the seen items, the legacy capture) into
+ * every kring list.
+ */
+const USER_CARD_FIELDS = '_id name image streak levensboom.publicProfile levensboom.disabled';
 
 type UserCard = {
   _id: mongoose.Types.ObjectId;
   name?: string;
   image?: string;
   streak?: number;
+  levensboom?: { publicProfile?: boolean | null; disabled?: boolean | null } | null;
 };
 
 type PlanRow = {
@@ -194,6 +229,7 @@ async function summariesFor(ids: string[], since: Map<string, Date | null> = new
         planDay: plan ? plan.day : null,
         planTotalDays: plan ? plan.total : null,
         friendsSince: isoOrNull(since.get(key) ?? null),
+        publicProfile: isPublicTree(user.levensboom),
       };
     })
     .sort((a, b) => (order.get(a.userId) ?? 0) - (order.get(b.userId) ?? 0));
@@ -222,6 +258,197 @@ export async function getKring(userId: string): Promise<FriendsKring> {
     FriendRequest.countDocuments({ toUserId: id, status: 'pending' }),
   ]);
   return { friends, pendingIncoming };
+}
+
+// ------------------------------------------------------ the wider social graph
+
+/**
+ * The owner decided a vriendschap IS visible to the kring - the reverse of the
+ * plan's §11 question 1 - because that is what readers expect from YouVersion:
+ * "3 gezamenlijke vrienden", "Mensen die je misschien kent", and a friend's
+ * own kring on their profile.
+ *
+ * What that does NOT mean is a public directory. The grading, enforced here
+ * and nowhere else:
+ *
+ * - a count of someone's friends, and the friends you share with them, are
+ *   visible to anyone who is not blocked. Shared friends are the reader's own
+ *   friends, so naming them tells them nothing new about who exists;
+ * - the full friend list, the streak, the plan day and "vrienden sinds" are
+ *   for an actual friend only;
+ * - anything the caller may not see is a 404, never a 403, the same rule
+ *   `readablePost` follows: whether a person is in the graph is itself private.
+ */
+
+type RequestSideRow = {
+  fromUserId: mongoose.Types.ObjectId;
+  toUserId: mongoose.Types.ObjectId;
+};
+
+/** Everyone with a pending request to or from the caller, either direction. */
+async function requestsInFlight(userId: string): Promise<Set<string>> {
+  await connectMongoDB();
+  const id = oid(userId);
+  const rows = await FriendRequest.find({
+    status: 'pending',
+    $or: [{ fromUserId: id }, { toUserId: id }],
+  })
+    .select('fromUserId toUserId')
+    .limit(GRAPH_SCAN_LIMIT)
+    .lean<RequestSideRow[]>();
+  const out = new Set<string>();
+  const me = String(id);
+  for (const row of rows) {
+    const other = String(row.fromUserId) === me ? String(row.toUserId) : String(row.fromUserId);
+    out.add(other);
+  }
+  return out;
+}
+
+/**
+ * `GET /api/v1/friends/suggestions` - friend-of-friend candidates, most shared
+ * friends first.
+ *
+ * One indexed query over `{ userAId }` / `{ userBId }` for every vriendschap
+ * the caller's own friends are in. The other side of each of those pairs is a
+ * friend-of-a-friend, and the number of the caller's friends pointing at the
+ * same person IS the mutual count: a mutual friend is by definition one of
+ * mine, so the count falls out of the same scan and needs no second pass and
+ * no fan-out collection.
+ *
+ * Excluded: the caller, existing friends, a pending request in either
+ * direction, and anyone blocked in either direction.
+ */
+export async function getSuggestions(
+  userId: string,
+  limit = SUGGESTIONS_LIMIT,
+): Promise<FriendSuggestionsResponse> {
+  await connectMongoDB();
+  const me = String(userId);
+  const myFriends = await friendIdsFor(me);
+  // No friends, no friends-of-friends. Contact matching and the invite code are
+  // how a kring starts; this list only ever grows one.
+  if (myFriends.length === 0) return { suggestions: [] };
+
+  const friendSet = new Set(myFriends);
+  const rows = await Friendship.find({
+    $or: [
+      { userAId: { $in: myFriends.map((value) => oid(value)) } },
+      { userBId: { $in: myFriends.map((value) => oid(value)) } },
+    ],
+  })
+    .select('userAId userBId')
+    .limit(GRAPH_SCAN_LIMIT)
+    .lean<PairRow[]>();
+
+  const counts = new Map<string, number>();
+  for (const row of rows) {
+    const a = String(row.userAId);
+    const b = String(row.userBId);
+    // The friend is the side that is in my kring; the candidate is the other.
+    // When BOTH sides are my friends the candidate is a friend too, and the
+    // filter below drops it - that pair is not a suggestion, it is my kring.
+    const candidate = friendSet.has(a) ? b : a;
+    const via = candidate === a ? b : a;
+    if (!friendSet.has(via)) continue;
+    if (candidate === me || friendSet.has(candidate)) continue;
+    counts.set(candidate, (counts.get(candidate) ?? 0) + 1);
+  }
+  if (counts.size === 0) return { suggestions: [] };
+
+  const [blocked, inFlight] = await Promise.all([blockedBetween(me), requestsInFlight(me)]);
+
+  const ranked = [...counts.entries()]
+    .filter(([id]) => !blocked.has(id) && !inFlight.has(id))
+    // Most shared friends first, then by id so the order is stable between
+    // two calls that find the same ties.
+    .sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1))
+    .slice(0, Math.min(Math.max(limit, 1), SUGGESTIONS_LIMIT));
+
+  const summaries = await summariesFor(ranked.map(([id]) => id));
+  const byCount = new Map(ranked);
+  return {
+    suggestions: summaries.map((summary) => ({
+      ...summary,
+      // Not friends yet, so there is no "vrienden sinds" to show.
+      friendsSince: null,
+      mutualCount: byCount.get(summary.userId) ?? 0,
+    })),
+  };
+}
+
+/**
+ * `GET /api/v1/friends/:userId` - one person's profile.
+ *
+ * Reading their pair documents once gives their friend count, whether the
+ * caller is among them, when that started, and - intersected with the
+ * caller's own kring - the mutual friends. The caller's own id is not a
+ * profile here: they have their own screens for that.
+ */
+export async function getFriendProfile(userId: string, otherId: string): Promise<FriendProfileView> {
+  await connectMongoDB();
+  const notFound = () => new FriendsError('NOT_FOUND', 404, 'Deze persoon is niet gevonden.');
+  if (!mongoose.isValidObjectId(otherId)) throw notFound();
+
+  const me = String(userId);
+  const other = String(otherId);
+  if (other === me) throw notFound();
+
+  const blocked = await blockedBetween(me);
+  if (blocked.has(other)) throw notFound();
+
+  const rows = await Friendship.find({ $or: [{ userAId: oid(other) }, { userBId: oid(other) }] })
+    .select('userAId userBId createdAt')
+    .sort({ createdAt: -1 })
+    .limit(GRAPH_SCAN_LIMIT)
+    .lean<PairRow[]>();
+
+  const theirFriendIds: string[] = [];
+  let isFriend = false;
+  let since: Date | null = null;
+  for (const row of rows) {
+    const side = String(row.userAId) === other ? String(row.userBId) : String(row.userAId);
+    theirFriendIds.push(side);
+    if (side === me) {
+      isFriend = true;
+      since = row.createdAt ?? null;
+    }
+  }
+
+  const myFriends = new Set(await friendIdsFor(me));
+  const mutualIds = theirFriendIds.filter((id) => id !== me && myFriends.has(id) && !blocked.has(id));
+
+  const [card] = await summariesFor([other], since ? new Map([[other, since]]) : new Map());
+  // A deleted account still leaves pair documents behind for a moment; a
+  // profile without a person is a 404, not an empty card.
+  if (!card) throw notFound();
+
+  const [mutuals, friends] = await Promise.all([
+    summariesFor(mutualIds.slice(0, MUTUALS_SHOWN)),
+    isFriend
+      ? summariesFor(theirFriendIds.filter((id) => id !== me && !blocked.has(id)))
+      : Promise.resolve(null),
+  ]);
+
+  return {
+    user: isFriend
+      ? { ...card, mutualCount: mutualIds.length }
+      : {
+          // A non-friend's progress is not public. The card stays, so a
+          // suggestion is recognisable; the numbers wait for a vriendschap.
+          ...card,
+          streak: 0,
+          planDay: null,
+          planTotalDays: null,
+          friendsSince: null,
+          mutualCount: mutualIds.length,
+        },
+    isFriend,
+    friendCount: theirFriendIds.length,
+    mutuals,
+    mutualCount: mutualIds.length,
+    friends,
+  };
 }
 
 // --------------------------------------------------------------------- feed
@@ -381,7 +608,10 @@ export async function postMilestone(
 async function readablePost(userId: string, postId: string) {
   await connectMongoDB();
   if (!mongoose.isValidObjectId(postId)) throw new FriendsError('NOT_FOUND', 404, 'Bericht niet gevonden.');
-  const post = await FriendPost.findById(postId).select('_id userId commentCount').lean<PostRow>();
+  // `likes` is selected for the notification coalescing rule in notify.ts: how
+  // many likes the post already had decides whether this one pushes. The array
+  // is tens of entries, so it is cheaper than the extra round trip would be.
+  const post = await FriendPost.findById(postId).select('_id userId commentCount likes').lean<PostRow>();
   if (!post) throw new FriendsError('NOT_FOUND', 404, 'Bericht niet gevonden.');
   const author = String(post.userId);
   if (author !== String(userId) && !(await areFriends(userId, author))) {
@@ -397,10 +627,20 @@ export async function setLike(userId: string, postId: string, liked: boolean): P
   const id = oid(userId);
   if (liked) {
     // `$addToSet` on the embedded like is what makes a double tap idempotent.
-    await FriendPost.updateOne(
+    const result = await FriendPost.updateOne(
       { _id: post._id, 'likes.userId': { $ne: id } },
       { $push: { likes: { userId: id, at: new Date() } } },
     );
+    // Only when a like was actually added. The filter above makes a second tap
+    // a no-op, and a no-op must not notify the author all over again.
+    if ((result?.modifiedCount ?? 0) > 0) {
+      await notifyPostLike({
+        authorId: String(post.userId),
+        actorId: String(userId),
+        postId: String(post._id),
+        priorLikes: post.likes?.length ?? 0,
+      });
+    }
   } else {
     await FriendPost.updateOne({ _id: post._id }, { $pull: { likes: { userId: id } } });
   }
@@ -439,9 +679,17 @@ export async function addComment(userId: string, postId: string, body: unknown):
   const text = cleanBody((body as { body?: unknown })?.body, MAX_COMMENT_BODY);
   if (!text) throw new FriendsError('EMPTY_COMMENT', 400, 'Een reactie kan niet leeg zijn.');
 
-  await FriendPostComment.create({ postId: post._id, userId: oid(userId), body: text });
+  const comment = await FriendPostComment.create({ postId: post._id, userId: oid(userId), body: text });
   // Kept beside the comment with `$inc` so the feed query needs no join.
   await FriendPost.updateOne({ _id: post._id }, { $inc: { commentCount: 1 } });
+  await notifyPostComment({
+    authorId: String(post.userId),
+    actorId: String(userId),
+    postId: String(post._id),
+    commentId: String(comment._id),
+    body: text,
+    priorComments: post.commentCount ?? 0,
+  });
   return { ok: true };
 }
 
@@ -543,6 +791,8 @@ export async function sendRequest(
     { $set: { status: 'pending', source, respondedAt: null }, $setOnInsert: { createdAt: now } },
     { upsert: true },
   );
+  // Awaited, and unable to fail this: see the contract in lib/friends/notify.ts.
+  await notifyFriendRequest(targetId, String(userId));
   return { ok: true, status: 'pending', message: 'Verzoek verstuurd.' };
 }
 
@@ -568,6 +818,8 @@ export async function acceptRequest(userId: string, requestId: string, now = new
     { upsert: true },
   );
   await FriendRequest.updateOne({ _id: request._id }, { $set: { status: 'accepted', respondedAt: now } });
+  // The person who asked is the one told, not the one who accepted.
+  await notifyRequestAccepted(String(request.fromUserId), String(userId), String(request._id));
   return { ok: true, message: 'Jullie zijn nu vrienden.' };
 }
 
@@ -620,7 +872,97 @@ export async function blockUser(userId: string, otherId: string): Promise<Friend
   return { ok: true };
 }
 
+/**
+ * `DELETE /api/v1/friends/:userId/block` - the reverse of `blockUser`, which
+ * was write-once until now.
+ *
+ * `$pull` only. It deliberately does NOT restore the vriendschap: blocking
+ * deleted the pair document, and putting it back would hand someone a friend
+ * they never re-accepted. They can invite each other again.
+ */
+export async function unblockUser(userId: string, otherId: string): Promise<FriendMutationResponse> {
+  await connectMongoDB();
+  if (!mongoose.isValidObjectId(otherId)) throw new FriendsError('NOT_FOUND', 404, 'Niet gevonden.');
+  await FriendProfile.updateOne({ userId: oid(userId) }, { $pull: { blocked: oid(otherId) } });
+  return { ok: true, message: 'Blokkering opgeheven. Jullie zijn geen vrienden meer.' };
+}
+
+// ------------------------------------------------------------------ moderation
+
+/**
+ * `POST /api/v1/friends/posts/:id/report`, for the post or for one comment
+ * under it (`commentId`).
+ *
+ * Goes through `readablePost`, so reporting a stranger's post is the same 404
+ * as liking it: the report endpoint must not become a way to probe for posts.
+ * The write is an upsert on `{reporterId, targetKind, targetId}` - the unique
+ * index on `models/Report.js` - so tapping twice updates the reason instead of
+ * filling the queue.
+ */
+export async function reportContent(
+  userId: string,
+  postId: string,
+  body: unknown,
+): Promise<FriendMutationResponse> {
+  const post = await readablePost(userId, postId);
+  const input = (body ?? {}) as FriendReportBody;
+  const reason = REPORT_REASONS.includes(input.reason) ? (input.reason as ReportReason) : null;
+  if (!reason) throw new FriendsError('BAD_REASON', 400, 'Kies een reden voor je melding.');
+  const note = cleanBody(input.note, MAX_REPORT_NOTE);
+
+  let targetKind: 'post' | 'comment' = 'post';
+  let targetId = post._id;
+  let targetUserId = post.userId;
+
+  if (typeof input.commentId === 'string' && input.commentId.length > 0) {
+    if (!mongoose.isValidObjectId(input.commentId)) {
+      throw new FriendsError('NOT_FOUND', 404, 'Reactie niet gevonden.');
+    }
+    // Scoped to this post, so a comment id from elsewhere cannot be attached
+    // to a post the caller happens to be able to read.
+    const comment = await FriendPostComment.findOne({ _id: oid(input.commentId), postId: post._id })
+      .select('_id userId')
+      .lean<{ _id: mongoose.Types.ObjectId; userId: mongoose.Types.ObjectId } | null>();
+    if (!comment) throw new FriendsError('NOT_FOUND', 404, 'Reactie niet gevonden.');
+    targetKind = 'comment';
+    targetId = comment._id;
+    targetUserId = comment.userId;
+  }
+
+  if (String(targetUserId) === String(userId)) {
+    throw new FriendsError('OWN_CONTENT', 400, 'Je kunt je eigen bericht niet melden.');
+  }
+
+  await Report.updateOne(
+    { reporterId: oid(userId), targetKind, targetId },
+    {
+      $set: { reason, note, status: 'new' },
+      $setOnInsert: { reporterId: oid(userId), targetKind, targetId, targetUserId },
+    },
+    { upsert: true },
+  );
+
+  // One line per report in the function logs, so the queue is visible before
+  // there is a screen for it.
+  console.warn(`[friends-report] ${targetKind} ${String(targetId)} gemeld als "${reason}"`);
+  return { ok: true, message: 'Bedankt. We kijken ernaar.' };
+}
+
 // ----------------------------------------------------------------- settings
+
+/** Name and picture per blocked user, which is all an "opheffen" row needs. */
+async function blockedUsers(ids: mongoose.Types.ObjectId[]): Promise<BlockedUser[]> {
+  if (ids.length === 0) return [];
+  await connectMongoDB();
+  const users = await User.find({ _id: { $in: ids } })
+    .select(USER_CARD_FIELDS)
+    .lean<UserCard[]>();
+  return users.map((user) => ({
+    userId: String(user._id),
+    name: user.name ?? '',
+    image: user.image ?? null,
+  }));
+}
 
 export async function getSettings(userId: string): Promise<FriendSettings> {
   const profile = await profileFor(userId);
@@ -632,6 +974,10 @@ export async function getSettings(userId: string): Promise<FriendSettings> {
       notes: Boolean(profile?.autoShare?.notes),
     },
     hasContactHashes: Boolean((profile?.phoneHashes?.length ?? 0) + (profile?.emailHashes?.length ?? 0)),
+    // Blocking had no reverse and no list: a reader could block someone and
+    // then had no way to see or undo it. The list is nearly always empty, so
+    // it rides along with the switches rather than costing its own call.
+    blocked: await blockedUsers(profile?.blocked ?? []),
   };
 }
 

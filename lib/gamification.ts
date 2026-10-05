@@ -4,6 +4,7 @@ import StudyProgress from '../models/StudyProgress.js';
 import PlanEnrollment from '../models/PlanEnrollment.js';
 import BibleYearEnrollment from '../models/BibleYearEnrollment.js';
 import { creditReferrerIfActivated } from './referral';
+import { announceBadges, announceStreak } from './friends/milestones';
 
 /**
  * XP, levels and badges.
@@ -238,6 +239,15 @@ export async function grantXp(
   } catch (error) {
     console.error('[referral] crediting the inviter failed', error);
   }
+
+  // Vriendenkring (VRIENDENKRING_PLAN.md §8). This is the right place for both
+  // of these because it is the ONLY place badges are awarded, and because both
+  // streak routes write the streak to User and then call this with
+  // `streak_day` - so `updated.streak` is already the new run and neither
+  // route needs its own copy of the rule. The functions never throw; the
+  // reader's XP cannot be lost to a feed card.
+  await announceBadges(String(userId), newBadges);
+  if (event === 'streak_day') await announceStreak(String(userId), updated.streak ?? 0);
 
   return { xp, level, levelledUp: level > levelBefore, awarded: amount, newBadges };
 }

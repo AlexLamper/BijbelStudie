@@ -24,9 +24,6 @@ import { fruitAtLevel, traitAtLevel, TRAIT_LABELS, type SpiritFruit } from './tr
  * given phone).
  */
 
-/** The seen-key that records the one-time growth-v2 card (§9.6). */
-export const GROWTH_ANNOUNCEMENT_KEY = 'growth-v2';
-
 /** Dutch thousands: 2100 -> "2.100". Whole numbers only; XP never has a fraction. */
 export function formatXp(value: number): string {
   const n = Math.max(0, Math.round(Number.isFinite(value) ? value : 0));
@@ -158,6 +155,38 @@ export function stripUnlockLine(
   if (!unlock || unlock.level > nextStepLevel) return null;
   const toGo = Math.max(0, xpForLevel(unlock.level) - Math.max(0, xp));
   return `nog ${formatXp(toGo)} XP → ${unlock.name}`;
+}
+
+// ---------------------------------------------------------------------------
+// Boomkaart (dashboard rail, design 41b)
+// ---------------------------------------------------------------------------
+
+/**
+ * The card's step line, the step and nothing else: "Stap 12 van 20", and past
+ * step 20 the jaarringen - "3 jaarringen".
+ *
+ * `stripLine` puts the XP in the same sentence; on the card the XP is line
+ * three, towards the next phase, and 41b says it appears exactly once.
+ */
+export function stepOnlyLine(step: number): string {
+  const s = Math.max(1, Math.floor(step));
+  if (s > STEPS_TOTAL) return ringsLabel(ringsForStep(s));
+  return `Stap ${s} van ${STEPS_TOTAL}`;
+}
+
+/**
+ * The card's third line: "Nog 482 XP tot Volwassen boom" - the XP to the level
+ * the next phase starts at, measured through the floor like every other step
+ * number. Null on the last phase, where the card drops the line.
+ */
+export function nextPhaseXpLine(
+  next: { name: string; fromStep: number } | null | undefined,
+  xp: number,
+  floor?: GrowthFloor | null,
+): string | null {
+  if (!next) return null;
+  const toGo = Math.max(0, xpForLevel(levelForStep(next.fromStep, floor)) - Math.max(0, xp));
+  return `Nog ${formatXp(toGo)} XP tot ${next.name}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -363,21 +392,8 @@ export function levelUpCopy(input: { level: number; fromLevel?: number | null; f
   };
 }
 
-// ---------------------------------------------------------------------------
-// One-time announcement (§9.6)
-// ---------------------------------------------------------------------------
-
-export const GROWTH_ANNOUNCEMENT = {
-  title: 'Je boom groeit nu in twintig stappen',
-  body:
-    'Vanaf vandaag groeit je boom langzamer en in meer stappen, met elke les en elk hoofdstuk een stukje. ' +
-    'Hij blijft minstens zo groot als hij was. Bij stap 20 is hij volgroeid; daarna komt er met elk niveau een jaarring bij.',
-  open: 'Bekijk je groei',
-  close: 'Sluiten',
-} as const;
-
-/** Show the card: an account from before the launch that has not dismissed it yet. */
-export function showsGrowthAnnouncement(tree: { announceGrowth?: boolean; seenItems?: readonly string[]; disabled?: boolean } | null | undefined): boolean {
-  if (!tree || tree.disabled || !tree.announceGrowth) return false;
-  return !(tree.seenItems ?? []).includes(GROWTH_ANNOUNCEMENT_KEY);
-}
+// The one-time growth-v2 announcement card (§9.6) is gone: the reader does not
+// need to be told how the tree counts. The copy, the `showsGrowthAnnouncement`
+// gate and the card itself (components/dashboard/GrowthAnnouncementCard.tsx)
+// were removed; `announceGrowth` stays in the payload, always false, because
+// installed app builds still read the key.

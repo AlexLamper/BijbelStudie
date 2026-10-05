@@ -47,6 +47,24 @@ export type LevensboomPrefs = {
   legacyAt?: Date | null;
 };
 
+/**
+ * Whether *other people* may open `/gebruiker/<id>` for this account.
+ *
+ * Two stored switches, and both have to agree: "Openbaar profiel" on, and
+ * "Boom tonen" not off - a reader who hid their tree hid it everywhere, their
+ * own public page included. app/gebruiker/[id]/page.tsx decides between the
+ * page and a 404 with this, and `summariesFor` in lib/friends/service.ts fills
+ * `FriendSummary.publicProfile` with it, so the flag a client links on and the
+ * page it links to can never disagree.
+ *
+ * Pure, and deliberately in this file rather than beside either caller: it
+ * takes the stored prefs and nothing else, so a test can check it without a
+ * database.
+ */
+export function isPublicTree(prefs: LevensboomPrefs | null | undefined): boolean {
+  return Boolean(prefs?.publicProfile) && !prefs?.disabled;
+}
+
 export type LevensboomPayload = {
   seed: string;
   health: number;
@@ -65,7 +83,11 @@ export type LevensboomPayload = {
   /** `growth.phase` in the v1 stage shape; `nextLevel` is a step. */
   stage: Stage;
   growth: GrowthInfo;
-  /** Show the one-time growth-v2 card (seen key `growth-v2` in `seenItems`); true only for accounts from before the launch. */
+  /**
+   * Always false. The one-time growth-v2 card is gone; the key stays in the
+   * payload because installed app builds still read it, and a missing key
+   * there is not the same as a false one.
+   */
   announceGrowth: boolean;
   /** What is stored. May name items the account is not entitled to right now. */
   chosen: AvatarChoice;
@@ -90,8 +112,6 @@ export function buildLevensboomPayload(input: {
   frac?: number | null;
   /** From `floorForUser`; null for an account without a head start. */
   floor?: GrowthFloor | null;
-  /** From `announcesGrowth`. */
-  announceGrowth?: boolean;
   lastStreakDate?: Date | null;
   prefs?: LevensboomPrefs | null;
   now?: Date;
@@ -138,7 +158,7 @@ export function buildLevensboomPayload(input: {
       : 'auto',
     stage: phaseForStep(growth.step),
     growth,
-    announceGrowth: Boolean(input.announceGrowth),
+    announceGrowth: false,
     chosen,
     avatar: resolveAvatar(chosen, unlocked),
     unlocked,

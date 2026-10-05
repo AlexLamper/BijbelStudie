@@ -12,7 +12,7 @@ export const INTENT_EVENT = "bs:intent";
 
 export const GROEPEN_ACTIES = ["aanmaken", "code"] as const;
 export const PROFIEL_ACTIES = ["naam", "bio", "badges"] as const;
-export const INSTELLINGEN_SECTIES = ["lezen", "meldingen", "account", "abonnement", "over"] as const;
+export const INSTELLINGEN_SECTIES = ["lezen", "meldingen", "vriendenkring", "account", "abonnement", "over"] as const;
 
 export type GroepenActie = (typeof GROEPEN_ACTIES)[number];
 export type ProfielActie = (typeof PROFIEL_ACTIES)[number];

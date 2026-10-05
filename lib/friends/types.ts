@@ -27,6 +27,29 @@ export type FriendSummary = {
   planDay: number | null;
   planTotalDays: number | null;
   friendsSince: string | null;
+  /**
+   * Friends this person and the reader have in common.
+   *
+   * Additive and optional on purpose: the kring list does not pay for it, the
+   * suggestions list and a friend's profile do. A client that does not know
+   * the field, or a row that was built without it, must read as "unknown",
+   * never as "0 gezamenlijke vrienden" - so renderers check for `undefined`
+   * before showing the line.
+   */
+  mutualCount?: number;
+  /**
+   * Whether `/gebruiker/<userId>` - this person's public tree - exists.
+   *
+   * `levensboom.publicProfile` on, "Boom tonen" not off: the exact condition
+   * app/gebruiker/[id]/page.tsx applies before it 404s, read from the same
+   * two stored fields so the flag and the page can never disagree.
+   *
+   * Optional and additive like `mutualCount`: a client that does not know the
+   * field, or an older build of one, reads it as "no public page" and simply
+   * does not link there - which is the safe answer, since a link that 404s is
+   * worse than a name that is not a link.
+   */
+  publicProfile?: boolean;
 };
 
 export type FriendPost = {
@@ -74,6 +97,70 @@ export type FriendsKring = {
   pendingIncoming: number;
 };
 
+/**
+ * `GET /api/v1/friends/:userId` - one person's profile.
+ *
+ * The owner asked for what YouVersion does, which reverses the plan's §11
+ * question 1: a vriendschap IS visible to the kring. What is visible to whom
+ * is still graded, and the grading lives in the service, not in a client:
+ *
+ * - anyone who is not blocked sees the card, `friendCount`, `mutualCount` and
+ *   the `mutuals` themselves (those are the reader's OWN friends, so no name
+ *   reaches them that they could not already see in their kring);
+ * - `streak`, `planDay`, `friendsSince` and the full `friends` list are for an
+ *   actual friend only. `friends` is `null` otherwise, not an empty array, so
+ *   "they have nobody" and "you may not look" cannot be confused.
+ */
+export type FriendProfileView = {
+  user: FriendSummary;
+  isFriend: boolean;
+  /** How many people are in their kring. A count is public; the list is not. */
+  friendCount: number;
+  /** The shared friends, named. Capped; `mutualCount` is the true total. */
+  mutuals: FriendSummary[];
+  mutualCount: number;
+  /** Their kring, for a friend. `null` means "not yours to see". */
+  friends: FriendSummary[] | null;
+};
+
+/** `GET /api/v1/friends/suggestions` - "Mensen die je misschien kent". */
+export type FriendSuggestionsResponse = {
+  /** Friends of friends, most shared friends first. `mutualCount` is always set. */
+  suggestions: FriendSummary[];
+};
+
+/** One row in the blocked list, which is all a client needs to unblock. */
+export type BlockedUser = {
+  userId: string;
+  name: string;
+  image: string | null;
+};
+
+/**
+ * Why something was reported. Storage values, not copy: the Dutch labels live
+ * in the clients, so a wording change is not a data migration.
+ */
+export type ReportReason = 'spam' | 'inappropriate' | 'hate' | 'harassment' | 'misinformation' | 'other';
+
+export const REPORT_REASONS: readonly ReportReason[] = [
+  'spam',
+  'inappropriate',
+  'hate',
+  'harassment',
+  'misinformation',
+  'other',
+];
+
+/**
+ * `POST /api/v1/friends/posts/:id/report`. With `commentId` the report is
+ * about that comment rather than the post it hangs under.
+ */
+export type FriendReportBody = {
+  reason: ReportReason;
+  note?: string;
+  commentId?: string;
+};
+
 export type FriendRequestView = {
   id: string;
   status: FriendRequestStatus;
@@ -117,4 +204,11 @@ export type FriendSettings = {
   autoShare: { milestones: boolean; verses: boolean; notes: boolean };
   /** Whether contact hashes are on file, so the client can offer "vergeten". */
   hasContactHashes: boolean;
+  /**
+   * Who the reader blocked, with enough to render a row and undo it. On the
+   * settings response rather than its own endpoint: blocking is a setting, the
+   * list belongs on the screen that holds the other switches, and an extra
+   * round trip for a list that is nearly always empty buys nothing.
+   */
+  blocked: BlockedUser[];
 };

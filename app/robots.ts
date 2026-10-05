@@ -39,6 +39,14 @@ export default function robots(): MetadataRoute.Robots {
     "/profiel",
     "/instellingen",
     "/groepen",
+    // Signed-in only, like /notities and /profiel: a crawler gets the sign-in
+    // redirect, which Search Console files as "Pagina met omleiding".
+    "/vriendenkring",
+    // The per-person profile, /vriendenkring/<userId>. The line above already
+    // matches it by prefix; it is spelled out because it is a page per account
+    // rather than a sub-path of one page, and a future anchor on the line above
+    // must not quietly open a thousand of them to crawlers.
+    "/vriendenkring/",
     "/feedback",
     "/succes",
     "/geannuleerd",

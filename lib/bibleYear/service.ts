@@ -39,7 +39,8 @@ import {
   type BibleYearDayOnDate,
   type BibleYearProgressInput,
 } from './progress';
-import { SCHEDULE_VERSION, TOTAL_CHAPTERS, getSchedule, isPlanKey, isTrackKey } from './schedule';
+import { PLAN_DAYS, SCHEDULE_VERSION, TOTAL_CHAPTERS, getSchedule, isPlanKey, isTrackKey } from './schedule';
+import { announcePlanDay } from '../friends/milestones';
 import { isStudyPart, studyKey } from './study';
 import type {
   BibleYearMode,
@@ -296,6 +297,15 @@ export async function settleProgress(
       } catch (error) {
         console.error('[bible-year] plan_day_read XP failed', error);
       }
+      // Vriendenkring: one card for the day just reached, not one per day a
+      // catch-up settled - "Dag 12, 13, 14 gelezen" is three cards nobody
+      // wants. `paidDays` is the pay-once set, so this fires exactly as often
+      // as the XP does; `announcePlanDay` never throws.
+      await announcePlanDay(userId, {
+        enrollmentId: String(doc._id),
+        day: Math.max(...paidDays),
+        totalDays: PLAN_DAYS[doc.planKey] ?? 365,
+      });
     }
   }
 
