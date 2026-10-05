@@ -34,6 +34,16 @@ const FriendProfileSchema = new mongoose.Schema(
     feedSeenAt: { type: Date },
 
     /**
+     * How far `GET /api/v1/notifications/social` has handed events to a
+     * client. Deliberately not `feedSeenAt`: that one means "the reader
+     * looked", this one means "a client was told". Sharing one field would
+     * make opening the kring silence notifications nobody saw, and a
+     * background poll clear the feed badge. Only a fallback for a client with
+     * no cursor of its own, and only ever advanced with `$max`.
+     */
+    socialSeenAt: { type: Date },
+
+    /**
      * Which categories post to the kring on their own. Milestones are the only
      * one on by default; a note or a verse is shared by hand (plan §8).
      */

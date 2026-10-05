@@ -14,6 +14,12 @@ import { isPublicTree } from '../levensboom/summary';
 import { normaliseReferralCode } from '../referralRules';
 import { ensureReferralCode } from '../referral';
 import { contactPepper, hashIdentifier, normaliseEmail, normalisePhone, sanitiseHashes } from './discovery';
+import {
+  notifyFriendRequest,
+  notifyPostComment,
+  notifyPostLike,
+  notifyRequestAccepted,
+} from './notify';
 import { REPORT_REASONS } from './types';
 import type {
   BlockedUser,
@@ -602,7 +608,10 @@ export async function postMilestone(
 async function readablePost(userId: string, postId: string) {
   await connectMongoDB();
   if (!mongoose.isValidObjectId(postId)) throw new FriendsError('NOT_FOUND', 404, 'Bericht niet gevonden.');
-  const post = await FriendPost.findById(postId).select('_id userId commentCount').lean<PostRow>();
+  // `likes` is selected for the notification coalescing rule in notify.ts: how
+  // many likes the post already had decides whether this one pushes. The array
+  // is tens of entries, so it is cheaper than the extra round trip would be.
+  const post = await FriendPost.findById(postId).select('_id userId commentCount likes').lean<PostRow>();
   if (!post) throw new FriendsError('NOT_FOUND', 404, 'Bericht niet gevonden.');
   const author = String(post.userId);
   if (author !== String(userId) && !(await areFriends(userId, author))) {
@@ -618,10 +627,20 @@ export async function setLike(userId: string, postId: string, liked: boolean): P
   const id = oid(userId);
   if (liked) {
     // `$addToSet` on the embedded like is what makes a double tap idempotent.
-    await FriendPost.updateOne(
+    const result = await FriendPost.updateOne(
       { _id: post._id, 'likes.userId': { $ne: id } },
       { $push: { likes: { userId: id, at: new Date() } } },
     );
+    // Only when a like was actually added. The filter above makes a second tap
+    // a no-op, and a no-op must not notify the author all over again.
+    if ((result?.modifiedCount ?? 0) > 0) {
+      await notifyPostLike({
+        authorId: String(post.userId),
+        actorId: String(userId),
+        postId: String(post._id),
+        priorLikes: post.likes?.length ?? 0,
+      });
+    }
   } else {
     await FriendPost.updateOne({ _id: post._id }, { $pull: { likes: { userId: id } } });
   }
@@ -660,9 +679,17 @@ export async function addComment(userId: string, postId: string, body: unknown):
   const text = cleanBody((body as { body?: unknown })?.body, MAX_COMMENT_BODY);
   if (!text) throw new FriendsError('EMPTY_COMMENT', 400, 'Een reactie kan niet leeg zijn.');
 
-  await FriendPostComment.create({ postId: post._id, userId: oid(userId), body: text });
+  const comment = await FriendPostComment.create({ postId: post._id, userId: oid(userId), body: text });
   // Kept beside the comment with `$inc` so the feed query needs no join.
   await FriendPost.updateOne({ _id: post._id }, { $inc: { commentCount: 1 } });
+  await notifyPostComment({
+    authorId: String(post.userId),
+    actorId: String(userId),
+    postId: String(post._id),
+    commentId: String(comment._id),
+    body: text,
+    priorComments: post.commentCount ?? 0,
+  });
   return { ok: true };
 }
 
@@ -764,6 +791,8 @@ export async function sendRequest(
     { $set: { status: 'pending', source, respondedAt: null }, $setOnInsert: { createdAt: now } },
     { upsert: true },
   );
+  // Awaited, and unable to fail this: see the contract in lib/friends/notify.ts.
+  await notifyFriendRequest(targetId, String(userId));
   return { ok: true, status: 'pending', message: 'Verzoek verstuurd.' };
 }
 
@@ -789,6 +818,8 @@ export async function acceptRequest(userId: string, requestId: string, now = new
     { upsert: true },
   );
   await FriendRequest.updateOne({ _id: request._id }, { $set: { status: 'accepted', respondedAt: now } });
+  // The person who asked is the one told, not the one who accepted.
+  await notifyRequestAccepted(String(request.fromUserId), String(userId), String(request._id));
   return { ok: true, message: 'Jullie zijn nu vrienden.' };
 }
 
