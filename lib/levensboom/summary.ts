@@ -47,6 +47,24 @@ export type LevensboomPrefs = {
   legacyAt?: Date | null;
 };
 
+/**
+ * Whether *other people* may open `/gebruiker/<id>` for this account.
+ *
+ * Two stored switches, and both have to agree: "Openbaar profiel" on, and
+ * "Boom tonen" not off - a reader who hid their tree hid it everywhere, their
+ * own public page included. app/gebruiker/[id]/page.tsx decides between the
+ * page and a 404 with this, and `summariesFor` in lib/friends/service.ts fills
+ * `FriendSummary.publicProfile` with it, so the flag a client links on and the
+ * page it links to can never disagree.
+ *
+ * Pure, and deliberately in this file rather than beside either caller: it
+ * takes the stored prefs and nothing else, so a test can check it without a
+ * database.
+ */
+export function isPublicTree(prefs: LevensboomPrefs | null | undefined): boolean {
+  return Boolean(prefs?.publicProfile) && !prefs?.disabled;
+}
+
 export type LevensboomPayload = {
   seed: string;
   health: number;

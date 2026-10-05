@@ -16,6 +16,7 @@ import FriendRequest from '../models/FriendRequest';
 import FriendProfile from '../models/FriendProfile';
 import FriendPost from '../models/FriendPost';
 import FriendPostComment from '../models/FriendPostComment';
+import Report from '../models/Report';
 import DeletedAccount from '../models/DeletedAccount';
 import { isAdminEmail } from './adminEmails';
 
@@ -103,6 +104,10 @@ const defaultDeps: ArchiveDeps = {
     friendpostcomments: FriendPostComment,
     friendships: pairKeyed(Friendship, ['userAId', 'userBId']),
     friendrequests: pairKeyed(FriendRequest, ['fromUserId', 'toUserId']),
+    // Moderation. Both sides: the reports this person made (their own free
+    // text) and the reports about them, because the purge deletes both and an
+    // archive that keeps only one half cannot restore the account.
+    reports: pairKeyed(Report, ['reporterId', 'targetUserId']),
   },
   archive: DeletedAccount,
 };

@@ -12,6 +12,8 @@ import { useIsPro } from "../../hooks/useIsPro"
 import { openProOffer } from "../../lib/proOffer"
 import SubscriptionSection from "../../components/settings/SubscriptionSection"
 import LevensboomSection from "../../components/settings/LevensboomSection"
+import VriendenkringSection from "../../components/settings/VriendenkringSection"
+import { VRIENDENKRING_SECTION } from "../../components/settings/vriendenkringCopy"
 import PasswordSection from "../../components/settings/PasswordSection"
 import DeleteAccountSection from "../../components/settings/DeleteAccountSection"
 import FeedbackPromptsSetting from "../../components/settings/FeedbackPromptsSetting"
@@ -100,7 +102,7 @@ const SEG_OFF = "text-ink-muted hover:bg-line-soft hover:text-ink-body"
 /** A closing line of explanation under a panel's rows. */
 const FOOTNOTE = "mt-4 border-t border-line-soft pt-4 text-[12px] leading-relaxed text-ink-muted"
 
-type Section = "lezen" | "meldingen" | "account" | "abonnement" | "over"
+type Section = "lezen" | "meldingen" | "vriendenkring" | "account" | "abonnement" | "over"
 
 /**
  * The section buttons across the top of the page.
@@ -113,10 +115,16 @@ type Section = "lezen" | "meldingen" | "account" | "abonnement" | "over"
  * belongs to the tree and therefore sits under Account with it, and the policy
  * itself is a page, which is under Over with the other documents. Say the word
  * and it can become a seventh button that repeats those two.
+ *
+ * Vriendenkring is its own button rather than a card under Account: it is what
+ * other people can see of you and find you by, which is a different question
+ * from your password and your tree, and it is the one section somebody opens
+ * on purpose after a verzoek arrives.
  */
 const SECTIONS: { id: Section; label: string }[] = [
   { id: "lezen", label: "Leesweergave" },
   { id: "meldingen", label: "Meldingen" },
+  { id: "vriendenkring", label: "Vriendenkring" },
   { id: "account", label: "Account" },
   { id: "abonnement", label: "Abonnement" },
   { id: "over", label: "Over" },
@@ -537,6 +545,16 @@ export default function SettingsPage() {
             )}
 
             {section === "meldingen" && <FeedbackPromptsSetting />}
+
+            {section === "vriendenkring" && (
+              <SectionCard
+                id="instelling-vriendenkring"
+                title={VRIENDENKRING_SECTION.title}
+                subtitle={VRIENDENKRING_SECTION.subtitle}
+              >
+                <VriendenkringSection />
+              </SectionCard>
+            )}
 
             {section === "account" && (
               <SectionCard title="Voortgang" subtitle="Je boom op je profiel, en wie hem mag zien">

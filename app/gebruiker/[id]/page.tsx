@@ -7,6 +7,7 @@ import User from '../../../models/User';
 import { buildMetadata, robotsFor } from '../../../lib/pageMetadata';
 import { badgeDescription, badgeLabel } from '../../../lib/badgeCatalog';
 import { PUBLIC_CARD_FIELDS, publicLevensboomCard, type PublicCardSource } from '../../../lib/levensboom/publicCard';
+import { isPublicTree } from '../../../lib/levensboom/summary';
 import { catalogItem } from '../../../lib/levensboom/catalog';
 import { growthPill } from '../../../lib/levensboom/growthCopy';
 import TreeCanvas from '../../../components/levensboom/TreeCanvas';
@@ -55,7 +56,10 @@ async function loadPublicUser(id: string): Promise<PublicUser | null> {
   const user = (await User.findById(id)
     .select(`name createdAt ${PUBLIC_CARD_FIELDS}`)
     .lean()) as unknown as PublicUser | null;
-  if (!user || !user.levensboom?.publicProfile || user.levensboom?.disabled) return null;
+  // One shared predicate with lib/friends/service.ts, which fills
+  // `FriendSummary.publicProfile` from it: a kring row may only link here when
+  // this page would actually answer.
+  if (!user || !isPublicTree(user.levensboom)) return null;
   return user;
 }
 

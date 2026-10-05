@@ -12,9 +12,12 @@ import type {
   FriendMutationResponse,
   FriendPostBody,
   FriendPostComment,
+  FriendProfileView,
+  FriendReportBody,
   FriendRequestBody,
   FriendRequestsResponse,
   FriendSettings,
+  FriendSuggestionsResponse,
   FriendSummary,
   FriendsFeed,
   FriendsKring,
@@ -74,13 +77,76 @@ async function call<T>(path: string, init?: RequestInit): Promise<FriendsResult<
 const post = (body?: unknown) =>
   ({ method: 'POST', body: body === undefined ? undefined : JSON.stringify(body) }) satisfies RequestInit;
 
+/**
+ * What `GET /feed` takes. `before` is a cursor, not a filter: the ISO
+ * `createdAt` of the oldest post already on screen, so the next page starts
+ * one post further down. The route reads both (app/api/v1/friends/feed).
+ */
+export type FeedQuery = { limit?: number; before?: string | null };
+
+/**
+ * What `PATCH /settings` takes. One switch at a time, including inside
+ * `autoShare`: the service `$set`s each named path on its own, so sending the
+ * other two switches back could only overwrite a change made on the phone a
+ * moment ago. `Partial<FriendSettings>` cannot say that - it would demand all
+ * three members of `autoShare` - hence a patch type of its own.
+ */
+export type FriendSettingsPatch = {
+  discoverable?: boolean;
+  autoShare?: Partial<FriendSettings['autoShare']>;
+};
+
+/**
+ * `?limit=&before=`, with only the parts that were asked for.
+ *
+ * A bare number is still accepted: `feed()` took a limit before `before`
+ * existed, and callers that only want "the first n" should not have to be
+ * rewritten to say `{ limit: n }`.
+ */
+export function feedQuery(query: FeedQuery | number = {}): string {
+  const { limit, before } = typeof query === 'number' ? { limit: query, before: null } : query;
+  const params = new URLSearchParams();
+  if (limit) params.set('limit', String(limit));
+  if (before) params.set('before', before);
+  const search = params.toString();
+  return search ? `?${search}` : '';
+}
+
+/**
+ * The cursor for the page after these posts: the oldest post's `createdAt`.
+ *
+ * Null for an empty page, which is also the only honest answer - there is
+ * nothing to page past. The feed is sorted newest first, so the last row is
+ * the oldest; it is read off the row rather than tracked separately so a
+ * refetch can never leave the cursor pointing at a post that is gone.
+ */
+export function feedCursor(posts: readonly { createdAt: string }[]): string | null {
+  const last = posts.length > 0 ? posts[posts.length - 1] : null;
+  return last?.createdAt ?? null;
+}
+
 export const friendsClient = {
-  feed: (limit?: number) => call<FriendsFeed>(limit ? `/feed?limit=${limit}` : '/feed'),
+  feed: (query?: FeedQuery | number) => call<FriendsFeed>(`/feed${feedQuery(query)}`),
   markSeen: () => call<FriendMutationResponse>('/feed/seen', post()),
 
   kring: () => call<FriendsKring>(''),
   removeFriend: (userId: string) => call<FriendMutationResponse>(`/${userId}`, { method: 'DELETE' }),
   block: (userId: string) => call<FriendMutationResponse>(`/${userId}/block`, post()),
+
+  /** One person's profile. A 404 means "not yours to see", not "does not exist". */
+  profile: (userId: string) => call<FriendProfileView>(`/${userId}`),
+  /** "Mensen die je misschien kent" - friends of friends, most shared first. */
+  suggestions: () => call<FriendSuggestionsResponse>('/suggestions'),
+  /**
+   * Undo a block. The blocked list itself rides along on `settings()`
+   * (`FriendSettings.blocked`), so there is nothing to fetch for it.
+   *
+   * The REST inverse of the POST above rather than a second contract - the
+   * same pairing `removeFriend` already uses on `/:userId`. It does NOT bring
+   * the vriendschap back: blocking deleted the pair document, so the two have
+   * to invite each other again.
+   */
+  unblock: (userId: string) => call<FriendMutationResponse>(`/${userId}/block`, { method: 'DELETE' }),
 
   requests: () => call<FriendRequestsResponse>('/requests'),
   invite: (body: FriendRequestBody) => call<FriendMutationResponse>('/requests', post(body)),
@@ -94,19 +160,105 @@ export const friendsClient = {
   comments: (postId: string) => call<{ comments: FriendPostComment[] }>(`/posts/${postId}/comments`),
   comment: (postId: string, body: string) =>
     call<FriendMutationResponse>(`/posts/${postId}/comments`, post({ body })),
+  report: (postId: string, body: FriendReportBody) =>
+    call<FriendMutationResponse>(`/posts/${postId}/report`, post(body)),
 
   settings: () => call<FriendSettings>('/settings'),
-  updateSettings: (body: Partial<FriendSettings>) =>
+  updateSettings: (body: FriendSettingsPatch) =>
     call<FriendSettings>('/settings', { method: 'PATCH', body: JSON.stringify(body) }),
 
   /** Contacts are app-only (a browser has no address book), but findability is an account setting. */
   forgetContacts: () => call<FriendMutationResponse>('/discovery', { method: 'DELETE' }),
 };
 
+/**
+ * Whether `/gebruiker/<id>` exists for this person.
+ *
+ * That page is opt-in and answers a hard 404 for anyone who did not switch
+ * "Openbaar profiel" on - deliberately, so it never confirms an account. A
+ * kring row therefore may only become a link when the server has said the
+ * page is there.
+ *
+ * `FriendSummary.publicProfile` is that signal, served by `summariesFor` in
+ * lib/friends/service.ts from the same two stored fields the page reads. It is
+ * optional there, so it stays optional here: absent means "the server did not
+ * say", which answers the same as "opted out".
+ *
+ * Still declared as its own type rather than taken from `FriendSummary`,
+ * because a feed post carries its author under `authorId` and is not a
+ * summary - `authorHref` below reads the flag off a post.
+ */
+export type PublicProfileFlag = { publicProfile?: boolean };
+
+/**
+ * `/gebruiker/<id>`, or null when linking there would land on a 404.
+ *
+ * Null is the answer both for "opted out" and for "the server did not say",
+ * because a link that 404s is worse than a name that is not a link.
+ */
+export function profileHref(person: { userId: string } & PublicProfileFlag): string | null {
+  if (person.publicProfile !== true) return null;
+  return `/gebruiker/${encodeURIComponent(person.userId)}`;
+}
+
+/** The same, for a feed post - its author is identified by `authorId`. */
+export function authorHref(post: { authorId: string } & PublicProfileFlag): string | null {
+  return profileHref({ userId: post.authorId, publicProfile: post.publicProfile });
+}
+
+/**
+ * `/vriendenkring/<id>` - the in-app profile, and the link every kring row and
+ * every feed byline points at.
+ *
+ * Unconditional on purpose, which is the difference from `profileHref`: that
+ * page is built on `GET /api/v1/friends/:userId`, so it answers for anyone the
+ * reader is allowed to look at and 404s for exactly the people they are not -
+ * a block either way, a deleted account, their own id. There is no opt-in to
+ * wait for, so a name is always a link.
+ *
+ * `/gebruiker/<id>` is still a page, and still opt-in: the profile links on to
+ * it when `publicProfile` says it is there (`profileHref`).
+ */
+export function kringProfileHref(userId: string): string {
+  return `/vriendenkring/${encodeURIComponent(userId)}`;
+}
+
+/**
+ * What a profile should do with `FriendProfileView.friends`.
+ *
+ * The one place the `null` / `[]` distinction is decided, so no renderer has
+ * to get it right twice:
+ *
+ * - `null` is "not yours to see" - the caller is not a friend - and the whole
+ *   section is `hidden`. An empty-list state there would read as "they have no
+ *   friends", which is a claim the server never made and the UI must not;
+ * - `[]` is a friend whose only friend is the reader (their kring comes back
+ *   with the reader filtered out), which is true, is theirs to know, and gets
+ *   the `empty` line;
+ * - anything else is the `list`.
+ */
+export function theirKringState(friends: readonly unknown[] | null | undefined): 'hidden' | 'empty' | 'list' {
+  if (friends == null) return 'hidden';
+  return friends.length === 0 ? 'empty' : 'list';
+}
+
 /** "Dag 42 van 365", or null when this person runs no plan. */
 export function planLabel(friend: FriendSummary): string | null {
   if (!friend.planDay || !friend.planTotalDays) return null;
   return `Dag ${friend.planDay} van ${friend.planTotalDays}`;
+}
+
+/**
+ * "3 gezamenlijke vrienden", or null when there are none to mention.
+ *
+ * `mutualCount` is optional on `FriendSummary`, and an absent count is
+ * unknown, not zero - the kring list does not compute it. Both cases return
+ * null, so a renderer cannot accidentally print "0 gezamenlijke vrienden".
+ */
+export function mutualLabel(friend: Pick<FriendSummary, 'mutualCount'>): string | null {
+  const count = friend.mutualCount;
+  if (typeof count !== 'number' || count < 1) return null;
+  return count === 1 ? '1 gezamenlijke vriend' : `${count} gezamenlijke vrienden`;
 }
 
 const MONTHS = [

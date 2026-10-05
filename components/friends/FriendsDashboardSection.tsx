@@ -20,7 +20,7 @@ export function FriendsDashboardSection({ maxPosts = 2 }: { maxPosts?: number })
   const [loading, setLoading] = useState(true)
 
   const load = useCallback(async () => {
-    const result = await friendsClient.feed(maxPosts)
+    const result = await friendsClient.feed({ limit: maxPosts })
     if (result.ok) setFeed(result.data)
     setLoading(false)
   }, [maxPosts])

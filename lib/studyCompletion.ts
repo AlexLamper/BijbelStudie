@@ -4,6 +4,7 @@ import Note from '../models/Note';
 import { grantXp } from './gamification';
 import { getChapter } from './local-data';
 import { findAnyStudy } from './bookStudies';
+import { announceStudyCompleted } from './friends/milestones';
 
 /**
  * The one place a lesson is written to the completion ledger.
@@ -93,6 +94,13 @@ export async function recordLessonCompletion(
         xp.level = bonus.level;
         xp.levelledUp = xp.levelledUp || bonus.levelledUp;
         xp.newBadges = [...xp.newBadges, ...bonus.newBadges];
+        // Vriendenkring (VRIENDENKRING_PLAN.md §8). Deduped on the study id, so
+        // re-ticking the last lesson posts nothing new, and it never throws:
+        // the lesson is already on the ledger either way.
+        await announceStudyCompleted(input.userId, {
+          studyId: input.studyId,
+          title: study.title,
+        });
       }
     }
   }

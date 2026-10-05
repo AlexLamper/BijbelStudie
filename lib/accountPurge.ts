@@ -17,6 +17,7 @@ import FriendRequest from '../models/FriendRequest';
 import FriendProfile from '../models/FriendProfile';
 import FriendPost from '../models/FriendPost';
 import FriendPostComment from '../models/FriendPostComment';
+import Report from '../models/Report';
 import StudyGroup from '../models/StudyGroup';
 import BiblePlan from '../models/BiblePlan';
 import RefreshToken from '../models/RefreshToken';
@@ -64,6 +65,14 @@ export async function deleteAccountData(userId: mongoose.Types.ObjectId): Promis
     await FriendPostComment.deleteMany({ userId }, opts);
     await Friendship.deleteMany({ $or: [{ userAId: userId }, { userBId: userId }] }, opts);
     await FriendRequest.deleteMany({ $or: [{ fromUserId: userId }, { toUserId: userId }] }, opts);
+    // A report carries the reporter's own words, and a report about this
+    // person points at content that is being deleted in the lines above, so
+    // neither half outlives the account.
+    await Report.deleteMany({ $or: [{ reporterId: userId }, { targetUserId: userId }] }, opts);
+    // The one place this person's id survives in SOMEONE ELSE's document: a
+    // block list. `$pull` rather than delete - the list belongs to the other
+    // reader - and without it a deleted id would sit in `blocked` forever.
+    await FriendProfile.updateMany({ blocked: userId }, { $pull: { blocked: userId } }, opts);
 
     // Feedback answers and analytics events describe the product, not the
     // person. Cut the link and keep the row - the same fields the 2-year
