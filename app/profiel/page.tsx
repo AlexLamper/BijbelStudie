@@ -322,14 +322,43 @@ export default function ProfilePage() {
                       {isAdmin ? "Beheerder" : "Lid"}
                     </span>
                   )}
-                  {streak > 0 && <Pill tone="warn" label={`${streak} ${dayWord(streak)} reeks`} />}
+                  {/* The flame is what makes the number a streak rather than a
+                      count of something unnamed; the app marks it the same way. */}
+                  {streak > 0 && (
+                    <Pill
+                      tone="warn"
+                      label={
+                        <span className="inline-flex items-center gap-[5px]">
+                          <Flame size={13} strokeWidth={2.2} aria-hidden />
+                          {`${streak} ${dayWord(streak)} op rij`}
+                        </span>
+                      }
+                    />
+                  )}
                   {memberSince && <Pill label={`Lid sinds ${memberSince}`} />}
                 </div>
               </div>
             </Card>
 
             <div className="grid flex-none grid-cols-2 gap-[13px] sm:grid-cols-4">
-              <StatCard label="Leesreeks" value={waiting ? "-" : streak} icon={<StatIcon icon={Flame} />} />
+              {/* The one stat whose number needs a unit: "2" alone reads as a
+                  score. Flame tone for the same reason. */}
+              <StatCard
+                label="Leesreeks"
+                value={
+                  waiting ? (
+                    "-"
+                  ) : (
+                    <>
+                      {streak}
+                      <span className="ml-[5px] text-[13px] font-semibold text-ink-muted">
+                        {dayWord(streak)} op rij
+                      </span>
+                    </>
+                  )
+                }
+                icon={<StatIcon icon={Flame} tone="flame" />}
+              />
               <StatCard label="Badges" value={waiting ? "-" : `${badgeCount}/${BADGE_TOTAL}`} icon={<StatIcon icon={Award} />} />
               <StatCard label="Lessen afgerond" value={levensboom ? levensboom.lessonsCompleted : "-"} icon={<StatIcon icon={BookOpenCheck} />} />
               <StatCard label="Studies afgerond" value={levensboom ? levensboom.studiesCompleted : "-"} icon={<StatIcon icon={GraduationCap} />} />
@@ -463,11 +492,20 @@ export default function ProfilePage() {
 }
 
 /** Small teal-tinted square that names the data type of a stat card. */
-function StatIcon({ icon: Icon }: { icon: LucideIcon }) {
+/**
+ * The stat's glyph. Teal for every stat but the streak, which takes the one
+ * orange the palette has (`--warn`, the colour of the streak badges further
+ * down this page) - a teal flame says nothing, an orange one says fire.
+ */
+function StatIcon({ icon: Icon, tone = "teal" }: { icon: LucideIcon; tone?: "teal" | "flame" }) {
   return (
     <span
       aria-hidden="true"
-      className="-my-1 flex h-6 w-6 flex-none items-center justify-center rounded-[8px] bg-[#0D9488]/[0.08] text-[#0D9488] dark:bg-[#0D9488]/[0.18] dark:text-teal-300"
+      className={`-my-1 flex h-6 w-6 flex-none items-center justify-center rounded-[8px] ${
+        tone === "flame"
+          ? "bg-warn-wash text-warn"
+          : "bg-[#0D9488]/[0.08] text-[#0D9488] dark:bg-[#0D9488]/[0.18] dark:text-teal-300"
+      }`}
     >
       <Icon size={15} strokeWidth={1.9} />
     </span>

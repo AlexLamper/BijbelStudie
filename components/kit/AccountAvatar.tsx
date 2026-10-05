@@ -1,5 +1,6 @@
 "use client";
 
+import { Flame } from "lucide-react";
 import NavTreeAvatar from "../levensboom/NavTreeAvatar";
 import { useIsPro } from "../../hooks/useIsPro";
 import { useLevensboom } from "../../hooks/useLevensboom";
@@ -73,6 +74,12 @@ function ProMark({ size }: { size: number }) {
  * The streak count, top-right. The quiet partner of the PRO mark: white plate,
  * slate-900 number, a hairline for an edge on a white ground, and the same
  * surface-coloured outline where it crosses the ring.
+ *
+ * The number carries an orange flame in front of it, for the reason the app
+ * gave up its own bare corner number (RETENTION_PLAN.md §3.1): "2" beside a
+ * face is not readable as two days in a row. The flame is `--warn`, the same
+ * orange the streak badges on /profiel use, and the plate grows with it rather
+ * than squeezing the number.
  */
 function StreakMark({ size, streak }: { size: number; streak: number }) {
   const { pill } = metrics(size);
@@ -83,13 +90,20 @@ function StreakMark({ size, streak }: { size: number; streak: number }) {
     <span
       aria-label={label}
       title={label}
-      className="absolute inline-flex items-center justify-center rounded-full bg-surface font-semibold leading-none tabular-nums text-[#0F172A] [--streak-edge:rgba(15,23,42,.14)] dark:text-ink dark:[--streak-edge:rgba(255,255,255,.18)]"
+      className="absolute inline-flex items-center justify-center gap-[2px] rounded-full bg-surface font-semibold leading-none tabular-nums text-[#0F172A] [--streak-edge:rgba(15,23,42,.14)] dark:text-ink dark:[--streak-edge:rgba(255,255,255,.18)]"
       style={{
         ...pillBase(size, "top"),
+        paddingLeft: Math.max(2, pill.padX - 2),
         minWidth: pill.height,
         boxShadow: `inset 0 0 0 1px var(--streak-edge), 0 0 0 ${pill.outline}px var(--surface, #fff), 0 1px 3px rgba(15,23,42,.10)`,
       }}
     >
+      <Flame
+        size={Math.round(pill.font + 1.5)}
+        strokeWidth={2.2}
+        className="flex-none text-warn"
+        aria-hidden
+      />
       {streak}
     </span>
   );

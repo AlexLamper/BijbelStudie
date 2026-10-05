@@ -19,6 +19,7 @@ import { useTreeSummary } from "../../components/dashboard/ProgressTree"
 import GrowthAnnouncementCard from "../../components/dashboard/GrowthAnnouncementCard"
 import TreeCard from "../../components/dashboard/TreeCard"
 import AppShell from "../../components/shell/AppShell"
+import StreakPill from "../../components/kit/StreakPill"
 import {
   Card,
   HeatGrid,
@@ -192,6 +193,14 @@ export default function DashboardPage() {
                 todayIndex={todayIndex}
               />
             </div>
+            {/* The streak, under the week it is made of: a flame and the days
+                in a row, so the number says what it counts. Hidden at 0 -
+                there is no reeks to name yet. */}
+            {d.streak > 0 && (
+              <div className="mt-[15px] border-t border-line-soft pt-[13px]">
+                <StreakPill streak={d.streak} withLabel />
+              </div>
+            )}
           </Card>
 
           {/* Bijbelboeken - `flex-none` so the card stops at its content
