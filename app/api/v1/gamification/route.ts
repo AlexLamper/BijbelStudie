@@ -4,7 +4,7 @@ import connectMongoDB from '../../../../lib/mongodb';
 import User from '../../../../models/User';
 import { XP_LABELS, XP_VALUES, readProgressSummary } from '../../../../lib/gamification';
 import { buildLevensboomPayload, type LevensboomPrefs } from '../../../../lib/levensboom/summary';
-import { announcesGrowth, ensureLegacyXp, floorForUser } from '../../../../lib/levensboom/legacy';
+import { ensureLegacyXp, floorForUser } from '../../../../lib/levensboom/legacy';
 import { fracOf } from '../../../../lib/levensboom/client';
 
 export const dynamic = 'force-dynamic';
@@ -50,7 +50,6 @@ export async function GET(req: Request) {
         level: summary.level,
         frac: fracOf(summary),
         floor: user ? floorForUser(user) : null,
-        announceGrowth: user ? announcesGrowth(user) : false,
         lastStreakDate: user?.lastStreakDate ?? null,
         prefs: user?.levensboom ?? null,
         badges: summary.badges,

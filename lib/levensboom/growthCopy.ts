@@ -24,9 +24,6 @@ import { fruitAtLevel, traitAtLevel, TRAIT_LABELS, type SpiritFruit } from './tr
  * given phone).
  */
 
-/** The seen-key that records the one-time growth-v2 card (§9.6). */
-export const GROWTH_ANNOUNCEMENT_KEY = 'growth-v2';
-
 /** Dutch thousands: 2100 -> "2.100". Whole numbers only; XP never has a fraction. */
 export function formatXp(value: number): string {
   const n = Math.max(0, Math.round(Number.isFinite(value) ? value : 0));
@@ -395,21 +392,8 @@ export function levelUpCopy(input: { level: number; fromLevel?: number | null; f
   };
 }
 
-// ---------------------------------------------------------------------------
-// One-time announcement (§9.6)
-// ---------------------------------------------------------------------------
-
-export const GROWTH_ANNOUNCEMENT = {
-  title: 'Je boom groeit nu in twintig stappen',
-  body:
-    'Vanaf vandaag groeit je boom langzamer en in meer stappen, met elke les en elk hoofdstuk een stukje. ' +
-    'Hij blijft minstens zo groot als hij was. Bij stap 20 is hij volgroeid; daarna komt er met elk niveau een jaarring bij.',
-  open: 'Bekijk je groei',
-  close: 'Sluiten',
-} as const;
-
-/** Show the card: an account from before the launch that has not dismissed it yet. */
-export function showsGrowthAnnouncement(tree: { announceGrowth?: boolean; seenItems?: readonly string[]; disabled?: boolean } | null | undefined): boolean {
-  if (!tree || tree.disabled || !tree.announceGrowth) return false;
-  return !(tree.seenItems ?? []).includes(GROWTH_ANNOUNCEMENT_KEY);
-}
+// The one-time growth-v2 announcement card (§9.6) is gone: the reader does not
+// need to be told how the tree counts. The copy, the `showsGrowthAnnouncement`
+// gate and the card itself (components/dashboard/GrowthAnnouncementCard.tsx)
+// were removed; `announceGrowth` stays in the payload, always false, because
+// installed app builds still read the key.

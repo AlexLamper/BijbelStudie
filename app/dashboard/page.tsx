@@ -16,7 +16,6 @@ import DailyVerseCard from "../../components/dashboard/DailyVerseCard"
 import DashboardFeedbackSlot from "../../components/feedback/DashboardFeedbackSlot"
 import { FriendsDashboardSection } from "../../components/friends/FriendsDashboardSection"
 import { useTreeSummary } from "../../components/dashboard/ProgressTree"
-import GrowthAnnouncementCard from "../../components/dashboard/GrowthAnnouncementCard"
 import TreeCard from "../../components/dashboard/TreeCard"
 import AppShell from "../../components/shell/AppShell"
 import StreakPill from "../../components/kit/StreakPill"
@@ -149,11 +148,6 @@ export default function DashboardPage() {
           </div>
 
           <DailyVerseCard verse={d.verse} loading={d.verseLoading} />
-
-          {/* Once, for accounts from before growth v2: right under the verse
-              card, whose landscape is the reader's own tree. Renders nothing
-              for everyone else. */}
-          <GrowthAnnouncementCard />
 
           {/* At most one feedback card: an unseen answer, a finished-study
               rating or a welcome-back question. Usually nothing. */}

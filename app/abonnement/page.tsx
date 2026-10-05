@@ -43,7 +43,10 @@ function AboutPro() {
       <p className={`${LABEL} ${TEAL_TEXT}`}>BijbelStudie Pro</p>
       <h1
         id="abonnement-titel"
-        className="mt-7 max-w-[400px] font-serif text-[46px] font-normal leading-[1.1] tracking-[-0.5px] text-ink [text-wrap:balance] max-md:text-[34px]"
+        // 46 px is the size for a wide screen. On a laptop the left column is
+        // narrow enough that 46 px breaks the line in the wrong place, so the
+        // band under 1440 px takes one step down.
+        className="mt-7 max-w-[400px] font-serif text-[46px] font-normal leading-[1.1] tracking-[-0.5px] text-ink [text-wrap:balance] max-[1439px]:text-[40px] max-md:text-[34px]"
       >
         Onderzoek de Schriften met meer diepgang.
       </h1>
@@ -51,7 +54,7 @@ function AboutPro() {
       <h2 className={`mt-7 ${LABEL} text-ink-faint`}>Alles in Pro</h2>
       {/* Column-first: five on the left, four on the right. One column once
           two no longer fit a line each. */}
-      <ul className="mt-[14px] grid grid-flow-col grid-cols-2 grid-rows-5 gap-x-6 gap-y-3 max-[520px]:grid-flow-row max-[520px]:grid-cols-1 max-[520px]:grid-rows-none">
+      <ul className="mt-[14px] grid grid-flow-col grid-cols-2 grid-rows-5 gap-x-6 gap-y-[7px] max-[520px]:grid-flow-row max-[520px]:grid-cols-1 max-[520px]:grid-rows-none">
         {PRO_FEATURES_SHORT.map(feature => (
           <li key={feature} className="flex items-start gap-2 text-[14px] leading-[1.4] text-ink-body">
             <Check size={16} strokeWidth={2.4} aria-hidden className="mt-[2px] flex-none text-teal" />

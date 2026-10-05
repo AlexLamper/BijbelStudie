@@ -65,7 +65,11 @@ export type LevensboomPayload = {
   /** `growth.phase` in the v1 stage shape; `nextLevel` is a step. */
   stage: Stage;
   growth: GrowthInfo;
-  /** Show the one-time growth-v2 card (seen key `growth-v2` in `seenItems`); true only for accounts from before the launch. */
+  /**
+   * Always false. The one-time growth-v2 card is gone; the key stays in the
+   * payload because installed app builds still read it, and a missing key
+   * there is not the same as a false one.
+   */
   announceGrowth: boolean;
   /** What is stored. May name items the account is not entitled to right now. */
   chosen: AvatarChoice;
@@ -90,8 +94,6 @@ export function buildLevensboomPayload(input: {
   frac?: number | null;
   /** From `floorForUser`; null for an account without a head start. */
   floor?: GrowthFloor | null;
-  /** From `announcesGrowth`. */
-  announceGrowth?: boolean;
   lastStreakDate?: Date | null;
   prefs?: LevensboomPrefs | null;
   now?: Date;
@@ -138,7 +140,7 @@ export function buildLevensboomPayload(input: {
       : 'auto',
     stage: phaseForStep(growth.step),
     growth,
-    announceGrowth: Boolean(input.announceGrowth),
+    announceGrowth: false,
     chosen,
     avatar: resolveAvatar(chosen, unlocked),
     unlocked,
