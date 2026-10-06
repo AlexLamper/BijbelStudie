@@ -117,7 +117,18 @@ export function contentEtag(payload: unknown): string {
 export function cachedJsonV1(
   req: Request,
   payload: unknown,
-  options?: { maxAge?: number; immutable?: boolean; private?: boolean; cdnMaxAge?: number },
+  options?: {
+    maxAge?: number;
+    immutable?: boolean;
+    private?: boolean;
+    cdnMaxAge?: number;
+    /**
+     * Extra request headers this response depends on, added to `Vary`. A route
+     * whose body changes with a client capability header must declare it, or a
+     * shared cache will hand one client's body to another.
+     */
+    varyHeaders?: string[];
+  },
 ) {
   const etag = contentEtag(payload);
   const maxAge = options?.maxAge ?? 60 * 60 * 24 * 365;
@@ -138,7 +149,11 @@ export function cachedJsonV1(
     ETag: etag,
     'Cache-Control': cacheControl,
   };
-  if (options?.private) headers.Vary = 'Authorization';
+  const vary = [
+    ...(options?.private ? ['Authorization'] : []),
+    ...(options?.varyHeaders ?? []),
+  ];
+  if (vary.length > 0) headers.Vary = vary.join(', ');
 
   if (req.headers.get('if-none-match') === etag) {
     return new NextResponse(null, { status: 304, headers });

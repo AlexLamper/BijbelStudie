@@ -1,6 +1,11 @@
 import type { NextRequest } from 'next/server';
 import { corsPreflight, errorV1, handleV1Error, jsonV1 } from '../../../../lib/apiV1';
 import { searchMobileBible } from '../../../../lib/mobileContent';
+import {
+  COPY_GUARD_REFUSAL,
+  mayServeToClient,
+  requestCapabilities,
+} from '../../../../lib/bibleCopyPolicy';
 import { checkRateLimit, clientIp } from '../../../../lib/mobileRateLimit';
 
 export const runtime = 'nodejs';
@@ -27,6 +32,12 @@ export async function GET(req: NextRequest) {
     const version = searchParams.get('version') ?? 'statenvertaling';
     const book = searchParams.get('book');
     const max = searchParams.get('limit');
+
+    // Search over a restricted translation returns its text a verse at a time;
+    // an old client that cannot honour the copy limit does not get to walk it.
+    if (!mayServeToClient(version, requestCapabilities(req))) {
+      return errorV1(COPY_GUARD_REFUSAL.code, COPY_GUARD_REFUSAL.status, COPY_GUARD_REFUSAL.message);
+    }
 
     if (q.length < 2) {
       return errorV1('QUERY_TOO_SHORT', 400, 'Zoekopdracht moet minstens 2 tekens zijn.');

@@ -14,6 +14,7 @@ import {
   filterAllowedForMobile,
   isMobileAllowed,
 } from './mobileLicensing';
+import { isCopyRestricted, mayServeToClient } from './bibleCopyPolicy';
 import {
   mobileBibleAttribution,
   mobileCommentaryAttribution,
@@ -51,6 +52,17 @@ export type ChapterEnvelope = {
   verses: Verse[];
   attribution: string;
   updatedAt: string;
+  /**
+   * True when this translation's text may not be copied or shared in bulk
+   * (lib/bibleCopyPolicy.ts). The server decides it so a client never has to
+   * ask whether its own id list is current; a client that does not read this
+   * field never gets a restricted translation in the first place.
+   *
+   * Absent on commentary and original-language envelopes, which carry their own
+   * licensing story - which is why it is optional here and why a client reads
+   * it as "true means restricted" rather than "false means free".
+   */
+  copyRestricted?: boolean;
 };
 
 export type SourceSummary = {
@@ -58,6 +70,8 @@ export type SourceSummary = {
   name: string;
   language: string;
   attribution: string;
+  /** Bible versions only: see `ChapterEnvelope.copyRestricted`. */
+  copyRestricted?: boolean;
 };
 
 /**
@@ -79,17 +93,31 @@ function versesToList(verses: Record<string, string> | null | undefined): Verse[
     .sort((a, b) => a.n - b.n);
 }
 
-export async function listMobileBibles(): Promise<SourceSummary[]> {
+/**
+ * The translations this client may be offered.
+ *
+ * `capabilities` is the request's `X-Bs-Capabilities` header. A client that
+ * cannot honour the copy limit is not shown the translations that have one -
+ * an installed app build from before the limit existed would otherwise draw a
+ * licensed translation with a "share whole chapter" button. See
+ * lib/bibleCopyPolicy.ts.
+ */
+export async function listMobileBibles(
+  capabilities?: string | null,
+): Promise<SourceSummary[]> {
   const versions = await getVersions();
-  return filterAllowedForMobile('bible', versions).map((v) => ({
-    id: v.id,
-    name: v.name,
-    // manifest.json omits `language` for a few entries and local-data then
-    // defaults them to 'en'. Every entry the mobile allowlist admits does
-    // declare one, so no per-id correction is needed here.
-    language: v.language ?? 'nl',
-    attribution: mobileBibleAttribution(v.id),
-  }));
+  return filterAllowedForMobile('bible', versions)
+    .filter((v) => mayServeToClient(v.id, capabilities))
+    .map((v) => ({
+      id: v.id,
+      name: v.name,
+      // manifest.json omits `language` for a few entries and local-data then
+      // defaults them to 'en'. Every entry the mobile allowlist admits does
+      // declare one, so no per-id correction is needed here.
+      language: v.language ?? 'nl',
+      attribution: mobileBibleAttribution(v.id),
+      copyRestricted: isCopyRestricted(v.id),
+    }));
 }
 
 export async function listMobileCommentaries(): Promise<SourceSummary[]> {
@@ -132,6 +160,7 @@ export async function getMobileBibleChapter(
     verses,
     attribution: mobileBibleAttribution(versionId),
     updatedAt: contentUpdatedAt(),
+    copyRestricted: isCopyRestricted(versionId),
   };
 }
 

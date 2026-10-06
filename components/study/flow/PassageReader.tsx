@@ -14,6 +14,12 @@ import CrossRefPanel from '../crossrefs/CrossRefPanel';
 import OriginalVersePanel from './OriginalVersePanel';
 import { useCrossRefCopy } from '../crossrefs/copy';
 import { getBibleAttribution } from '../../../lib/bible-attribution';
+import {
+  COPY_RESTRICTED_NOTICE,
+  copyGuardProps,
+  isCopyRestricted,
+} from '../../../lib/bibleCopyPolicy';
+import CopyVerseButton from '../CopyVerseButton';
 import { toBookIndex } from '../../../lib/readChaptersCanon';
 import { cn } from '../../../lib/utils';
 import { useCrossRefs } from '../../../hooks/useCrossRefs';
@@ -199,6 +205,14 @@ export default function PassageReader({
 
   const attribution = getBibleAttribution(version);
 
+  /**
+   * Same rule as /lezen: a licensed translation is readable here but not
+   * selectable, and the copy button beside the verse is the way out. See
+   * lib/bibleCopyPolicy.ts.
+   */
+  const copyRestricted = isCopyRestricted(version);
+  const guard = copyGuardProps(copyRestricted);
+
   if (loading) {
     return (
       <div className="py-2 space-y-4" role="status" aria-label="Bijbeltekst laden">
@@ -244,7 +258,7 @@ export default function PassageReader({
     // call then falls through to it rather than shadowing it.
     <SpokenTextScope>
       <div className="content-in">
-        <div className="space-y-[15px]">
+        <div {...guard} className={cn('space-y-[15px]', guard.className)}>
           {inRange.map(([number, text]) => {
             const marks = annotations.get(number);
             const tint = marks?.highlight ? HIGHLIGHT_TINTS[marks.highlight] : null;
@@ -352,6 +366,13 @@ export default function PassageReader({
                 >
                   <Languages className="h-3.5 w-3.5" aria-hidden />
                 </button>
+                <CopyVerseButton
+                  verse={number}
+                  text={text}
+                  reference={`${book} ${chapter}:${number}`}
+                  attribution={attribution}
+                  className="border-les-card-line bg-les-bg"
+                />
                 <CrossRefButton
                   ref={(element) => {
                     crossRefButtons.current.set(number, element);
@@ -420,12 +441,15 @@ export default function PassageReader({
             an exact string. `les-muted` and not `les-faint`: a required
             copyright notice is the last line on a screen that may be allowed to
             go quiet, but it still has to clear 4.5:1. */}
-        {attribution && (
-          <p
-            className="mt-8 border-t border-les-line pt-4 text-[11px] leading-snug text-les-muted"
-          >
-            {attribution}
-          </p>
+        {(attribution || copyRestricted) && (
+          <div className="mt-8 space-y-1 border-t border-les-line pt-4">
+            {attribution && (
+              <p className="text-[11px] leading-snug text-les-muted">{attribution}</p>
+            )}
+            {copyRestricted && (
+              <p className="text-[11px] leading-snug text-les-muted">{COPY_RESTRICTED_NOTICE}</p>
+            )}
+          </div>
         )}
 
         {selected && (

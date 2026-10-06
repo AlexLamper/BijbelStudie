@@ -10,6 +10,12 @@ import { useCrossRefs } from '../../hooks/useCrossRefs';
 import { useIsPro } from '../../hooks/useIsPro';
 import { cn } from '../../lib/utils';
 import { getBibleAttribution } from '../../lib/bible-attribution';
+import {
+  COPY_RESTRICTED_NOTICE,
+  copyGuardProps,
+  isCopyRestricted,
+} from '../../lib/bibleCopyPolicy';
+import CopyVerseButton from './CopyVerseButton';
 import { toBookIndex } from '../../lib/readChaptersCanon';
 import SpeakButton from './SpeakButton';
 import { SpokenText } from './SpokenText';
@@ -300,6 +306,17 @@ export default function ChapterViewer({
     setSelectedVerse(null);
   };
 
+  /**
+   * A licensed translation may be read here but not carried out by the chapter
+   * (lib/bibleCopyPolicy.ts): cursor selection over the scripture column is
+   * off and the copy button beside each verse is the way out. Public-domain
+   * translations - everything the product ships today - are untouched by this
+   * and stay selectable.
+   */
+  const copyRestricted = isCopyRestricted(version);
+  const guard = copyGuardProps(copyRestricted);
+  const attribution = getBibleAttribution(version);
+
   return (
     <div>
       {loading && (
@@ -325,7 +342,7 @@ export default function ChapterViewer({
           component now renders inside it. */}
       {!loading && !error && Object.keys(verses).length > 0 && (
           <div className="content-in">
-            <div className="space-y-0">
+            <div {...guard} className={cn('space-y-0', guard.className)}>
               {Object.entries(verses).map(([verseNumber, text]) => {
                 const vNum = parseInt(verseNumber, 10);
                 const isHighlighted = highlightRange
@@ -475,6 +492,12 @@ export default function ChapterViewer({
                         {HSV_SHORT_CODE}
                       </button>
                     )}
+                    <CopyVerseButton
+                      verse={verseNumber}
+                      text={text}
+                      reference={`${book} ${chapter}:${verseNumber}`}
+                      attribution={attribution}
+                    />
                     <CrossRefButton
                       ref={(element) => {
                         crossRefButtons.current.set(vNum, element);
@@ -558,10 +581,19 @@ export default function ChapterViewer({
                 licence is an exact string. It was #9CA3AF, which measures
                 2.5:1 on white; a required copyright notice has to be readable,
                 so on the room's ground it is the muted token, 8.6:1. */}
-            {getBibleAttribution(version) && (
-              <p className="mt-4 border-t border-line-soft pt-3 text-[11px] leading-snug text-ink-muted">
-                {getBibleAttribution(version)}
-              </p>
+            {(attribution || copyRestricted) && (
+              <div className="mt-4 space-y-1 border-t border-line-soft pt-3">
+                {attribution && (
+                  <p className="text-[11px] leading-snug text-ink-muted">{attribution}</p>
+                )}
+                {/* Said once, under the chapter, where a reader who tried to
+                    select it will look - not as a dialog over the text. */}
+                {copyRestricted && (
+                  <p className="text-[11px] leading-snug text-ink-muted">
+                    {COPY_RESTRICTED_NOTICE}
+                  </p>
+                )}
+              </div>
             )}
 
             {/* Note Creation Modal */}

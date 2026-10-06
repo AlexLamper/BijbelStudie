@@ -9,6 +9,7 @@ import { FREE_CROSS_REFS } from '../../../lib/entitlements';
 import { gateCrossRefs } from '../../../lib/proContent';
 import { openProOffer } from '../../../lib/proOffer';
 import { cn } from '../../../lib/utils';
+import { copyGuardProps, isCopyRestricted } from '../../../lib/bibleCopyPolicy';
 import type { CrossRefTarget } from '../../../hooks/useCrossRefs';
 import { useIsPro } from '../../../hooks/useIsPro';
 import { useVersePreviews } from '../../../hooks/useVersePreviews';
@@ -141,6 +142,10 @@ export default function CrossRefList({
     [visible],
   );
   const previews = useVersePreviews(version, chapters);
+  // The previews are this translation's own text, so a licensed translation's
+  // copy rule applies here too: readable, not harvestable. One verse at a time
+  // still leaves through the copy button in the reader beside this panel.
+  const guard = copyGuardProps(isCopyRestricted(version));
 
   const rowKey = (target: CrossRefTarget, index: number) => `${target.label}#${index}`;
 
@@ -245,7 +250,13 @@ export default function CrossRefList({
                     {target.label}
                   </span>
                   {!open && (
-                    <span className="mt-[2px] block text-[12.5px] leading-[1.55] text-ink-muted">
+                    <span
+                      {...guard}
+                      className={cn(
+                        'mt-[2px] block text-[12.5px] leading-[1.55] text-ink-muted',
+                        guard.className,
+                      )}
+                    >
                       {snippet.state === 'ready' && snippet.text}
                       {snippet.state === 'missing' && c('missing_verse')}
                       {(snippet.state === 'loading' || snippet.state === 'idle') && (
@@ -264,7 +275,10 @@ export default function CrossRefList({
               {open && (
                 <div className="pb-[10px] pt-[2px]">
                   {passage.state === 'ready' && (
-                    <div className="text-[13px] leading-[1.7] text-ink-body">
+                    <div
+                      {...guard}
+                      className={cn('text-[13px] leading-[1.7] text-ink-body', guard.className)}
+                    >
                       {passage.verses.map((verse) => (
                         <p key={verse.n} className="mb-1 last:mb-0">
                           <sup className="mr-[5px] align-super font-sans text-[10.5px] font-semibold text-ink-faint">
