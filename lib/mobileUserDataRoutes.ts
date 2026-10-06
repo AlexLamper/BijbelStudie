@@ -65,7 +65,7 @@ export function collectionHandlers(kind: SyncKind) {
           return errorV1('NOTE_LIMIT_REACHED', 403, NOTE_LIMIT_MESSAGE);
         }
 
-        // Writing a reflection feeds the Levensboom like reading and studying
+        // Writing a reflection feeds the ProgressTree like reading and studying
         // do. `grantNoteXp` decides whether this one earns anything - creates
         // only, real text only, three a day - so `null` is the ordinary answer
         // and never an error. Additive field; existing clients ignore it.

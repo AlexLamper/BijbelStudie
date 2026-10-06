@@ -6,9 +6,9 @@ import { ArrowLeft, Check, BookOpen, BookMarked, Library, Sun, Moon, Monitor } f
 import { useTheme } from "next-themes"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import TreeCanvas from "../levensboom/TreeCanvas"
-import { useLevensboom } from "../../hooks/useLevensboom"
-import { catalogItem } from "../../lib/levensboom/catalog"
+import TreeCanvas from "../progressTree/TreeCanvas"
+import { useProgressTree } from "../../hooks/useProgressTree"
+import { catalogItem } from "../../lib/progressTree/catalog"
 import { getBibleAttribution } from "../../lib/bible-attribution"
 import { writeGuestOnboarding } from "../../lib/guestOnboarding"
 import { cn } from "../../lib/utils"
@@ -331,7 +331,7 @@ export function OnboardingModal({
 
   // The seed is the account id, which the provider already knows; before it
   // has loaded the preview simply uses a stable stand-in.
-  const { data: levensboom, plant } = useLevensboom()
+  const { data: progressTree, plant } = useProgressTree()
   const [species, setSpecies] = useState<PlantSpecies>("eik")
 
   useEffect(() => { setOpen(initialIsOpen) }, [initialIsOpen])
@@ -683,7 +683,7 @@ export function OnboardingModal({
                             />
                             <span className="block aspect-[4/3] w-full overflow-hidden">
                               <TreeCanvas
-                                seed={levensboom?.levensboom?.seed ?? "levensboom"}
+                                seed={progressTree?.levensboom?.seed ?? "levensboom"}
                                 level={12}
                                 frac={0.6}
                                 species={o.code}

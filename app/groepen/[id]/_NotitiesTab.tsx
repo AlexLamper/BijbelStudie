@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
-import MiniTreeAvatar from "../../../components/levensboom/MiniTreeAvatar"
-import type { PublicLevensboomCard } from "../../../lib/levensboom/publicCard"
+import MiniTreeAvatar from "../../../components/progressTree/MiniTreeAvatar"
+import type { PublicProgressTreeCard } from "../../../lib/progressTree/publicCard"
 
 interface SharedNote {
   _id: string
-  userId: { _id: string; name: string; image?: string; levensboom?: PublicLevensboomCard | null }
+  userId: { _id: string; name: string; image?: string; levensboom?: PublicProgressTreeCard | null }
   verseReference: string
   noteText: string
   book?: string
@@ -17,7 +17,7 @@ interface SharedNote {
 }
 
 /** The author's tree at row size; initials only when there is no tree to show. */
-function Avatar({ name, size = 8, card }: { name: string; size?: number; card?: PublicLevensboomCard | null }) {
+function Avatar({ name, size = 8, card }: { name: string; size?: number; card?: PublicProgressTreeCard | null }) {
   return <MiniTreeAvatar card={card} name={name} size={size * 4} />
 }
 

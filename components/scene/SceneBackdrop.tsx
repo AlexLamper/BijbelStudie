@@ -17,12 +17,12 @@ import dynamic from "next/dynamic"
  * the chunk is fetched at exactly the moment the element would have had
  * something to show.
  */
-const TreeCanvas = dynamic(() => import("../levensboom/TreeCanvas"), { ssr: false })
+const TreeCanvas = dynamic(() => import("../progressTree/TreeCanvas"), { ssr: false })
 const ProgressTreeScene = dynamic(
   () => import("../dashboard/ProgressTree").then(m => m.ProgressTreeScene),
   { ssr: false },
 )
-import { buildPalette, type Season, type TimeOfDay } from "../../lib/levensboom/palette"
+import { buildPalette, type Season, type TimeOfDay } from "../../lib/progressTree/palette"
 import {
   MUTED_PICTURE_OPACITY,
   MUTED_SCRIM,

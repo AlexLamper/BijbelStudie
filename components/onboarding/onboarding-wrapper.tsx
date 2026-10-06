@@ -8,14 +8,14 @@ import {
   hasGuestOnboarding,
   migrateGuestOnboarding,
 } from "../../lib/guestOnboarding"
-import { useLevensboom } from "../../hooks/useLevensboom"
+import { useProgressTree } from "../../hooks/useProgressTree"
 import { useStudyStyle } from "../providers/study-style-provider"
 
 /**
  * Loaded on demand, never with the page.
  *
  * This wrapper is mounted by the ROOT layout, so a static import of the modal
- * put its entire graph - Radix's dialog, TreeCanvas and the levensboom
+ * put its entire graph - Radix's dialog, TreeCanvas and the progress-tree
  * generator behind it - into the client graph of every signed-in route, to
  * render a surface that only a brand-new account ever sees, once. The wrapper
  * already renders nothing until `contentLoaded`, so deferring the import
@@ -62,7 +62,7 @@ async function accountStillNeedsOnboarding(): Promise<boolean> {
 
 export function OnboardingWrapper({ shouldShow }: OnboardingWrapperProps) {
   const router = useRouter()
-  const { plant } = useLevensboom()
+  const { plant } = useProgressTree()
   const { setStudyStyle } = useStudyStyle()
 
   // Resolved once the guest handover below has had its say. Until then nothing

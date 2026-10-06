@@ -29,7 +29,7 @@ const MAILTO =
 const DELETED = [
   "Je account en profiel: naam, e-mailadres en profielfoto",
   "Notities, markeringen en bladwijzers",
-  "Leesgeschiedenis, voortgang, reeksen en je Levensboom",
+  "Leesgeschiedenis, voortgang, reeksen en je boom",
   "Voortgang in studies en leesplannen",
   "Het aantal vragen dat je aan de AI-assistent stelde (gesprekken bewaren we niet bij je account)",
   "Berichten in groepen; je lidmaatschap van groepen en leesplannen vervalt",

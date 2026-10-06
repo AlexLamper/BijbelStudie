@@ -6,16 +6,16 @@ import StudyGroup from "../../../../../models/StudyGroup"
 import GroupMessage from "../../../../../models/GroupMessage"
 import User from "../../../../../models/User"
 import mongoose from "mongoose"
-import { PUBLIC_CARD_FIELDS, publicLevensboomCard, type PublicCardSource } from "../../../../../lib/levensboom/publicCard"
+import { PUBLIC_CARD_FIELDS, publicProgressTreeCard, type PublicCardSource } from "../../../../../lib/progressTree/publicCard"
 
 /**
- * The author as the group sees them: name, image and the Levensboom card.
+ * The author as the group sees them: name, image and the ProgressTree card.
  * The raw fields the card is derived from (xp, streak, Pro) never leave.
  */
 function publicAuthor(user: unknown) {
   if (!user || typeof user !== "object" || !("_id" in user)) return user ?? null
   const doc = user as PublicCardSource & { name?: string; image?: string }
-  return { _id: doc._id, name: doc.name, image: doc.image, levensboom: publicLevensboomCard(doc) }
+  return { _id: doc._id, name: doc.name, image: doc.image, levensboom: publicProgressTreeCard(doc) }
 }
 
 const PUBLIC_CARD_PROJECTION = Object.fromEntries(

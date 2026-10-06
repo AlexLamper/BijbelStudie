@@ -52,7 +52,7 @@ export type PanelProps = {
 export type VersePaneProps = { scene: HeroScene; reduce: boolean };
 
 export type VoortgangPanelProps = PanelProps & {
-  /** Server-rendered SVG of the reader's tree (lib/levensboom/svg). */
+  /** Server-rendered SVG of the reader's tree (lib/progressTree/svg). */
   treeSvg: string;
 };
 

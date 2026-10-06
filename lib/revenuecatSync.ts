@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import User from '../models/User';
 import type { PremiumUserFields } from './mobilePremium';
-import { proRingGrant } from './levensboom/proRing';
+import { proRingGrant } from './progressTree/proRing';
 
 /**
  * RevenueCat -> MongoDB entitlement sync.
@@ -171,7 +171,7 @@ export async function applyStorePremium(
 
   // Read before write: the write below runs on every purchase, restore and
   // launch-time reconciliation, and only the false -> true transition to Pro
-  // equips the gold ring (lib/levensboom/proRing.ts). Explicit paths and
+  // equips the gold ring (lib/progressTree/proRing.ts). Explicit paths and
   // `.lean()`, for the same reason as lib/subscriptionSync: an unrelated
   // corrupt field must never be able to block an entitlement write.
   const before = await User.findById(_id)

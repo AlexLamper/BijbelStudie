@@ -6,11 +6,11 @@ import connectMongoDB from '../../../lib/mongodb';
 import User from '../../../models/User';
 import { buildMetadata, robotsFor } from '../../../lib/pageMetadata';
 import { badgeDescription, badgeLabel } from '../../../lib/badgeCatalog';
-import { PUBLIC_CARD_FIELDS, publicLevensboomCard, type PublicCardSource } from '../../../lib/levensboom/publicCard';
-import { isPublicTree } from '../../../lib/levensboom/summary';
-import { catalogItem } from '../../../lib/levensboom/catalog';
-import { growthPill } from '../../../lib/levensboom/growthCopy';
-import TreeCanvas from '../../../components/levensboom/TreeCanvas';
+import { PUBLIC_CARD_FIELDS, publicProgressTreeCard, type PublicCardSource } from '../../../lib/progressTree/publicCard';
+import { isPublicTree } from '../../../lib/progressTree/summary';
+import { catalogItem } from '../../../lib/progressTree/catalog';
+import { growthPill } from '../../../lib/progressTree/growthCopy';
+import TreeCanvas from '../../../components/progressTree/TreeCanvas';
 import { Card, Pill } from '../../../components/kit/primitives';
 
 /**
@@ -20,7 +20,7 @@ import { Card, Pill } from '../../../components/kit/primitives';
  * 404 for an id that does not exist, so the page never confirms an account.
  * What it shows is the tree, the first name, the stage and level, the badges
  * and the join month - never the email, the streak or anything read. That list
- * is `lib/levensboom/publicCard.ts` and this page adds nothing to it.
+ * is `lib/progressTree/publicCard.ts` and this page adds nothing to it.
  *
  * Static for five minutes at a time (ISR): the tree changes slowly and the
  * page depends on no session, so a shared link costs the CDN, not a render
@@ -37,7 +37,7 @@ import { Card, Pill } from '../../../components/kit/primitives';
  * public card - its `growth` (the fraction into the level and the account's
  * floor), so a visitor sees the tree its owner sees rather than one drawn
  * halfway into the level. `components/kit/TreeAvatar` cannot stand in for it here: that
- * one draws *the viewer's* tree through `useLevensboom`, which on this page is
+ * one draws *the viewer's* tree through `useProgressTree`, which on this page is
  * either nobody's or the wrong person's.
  */
 export const revalidate = 300;
@@ -71,7 +71,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { id } = await params;
   const user = await loadPublicUser(id);
   if (!user) return { title: { absolute: 'BijbelStudie | Niet gevonden' }, robots: robotsFor(false) };
-  const card = publicLevensboomCard(user);
+  const card = publicProgressTreeCard(user);
   const species = catalogItem('species', card.avatar.species)?.name ?? 'Boom';
   return buildMetadata({
     title: `De boom van ${firstName(user.name)}`,
@@ -88,7 +88,7 @@ export default async function PublicProfilePage({ params }: Params) {
   const user = await loadPublicUser(id);
   if (!user) notFound();
 
-  const card = publicLevensboomCard(user);
+  const card = publicProgressTreeCard(user);
   const name = firstName(user.name);
   const species = catalogItem('species', card.avatar.species);
   const scene = catalogItem('scene', card.avatar.scene);

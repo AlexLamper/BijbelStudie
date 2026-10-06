@@ -39,8 +39,8 @@ const DATA: Item[] = [
     body: "Notities, markeringen en bladwijzers; gelezen hoofdstukken, je laatst gelezen plek en leesgeschiedenis; voortgang in studies, lessen, quizzen en leesplannen.",
   },
   {
-    title: "Levensboom en voortgang",
-    body: "Je reeks (streak), XP, niveau, badges en de keuzes voor je Levensboom. Alleen als je zelf een openbaar profiel aanzet, zijn je voornaam, je Levensboom, niveau en badges zichtbaar voor iedereen met de link.",
+    title: "Voortgang en je boom",
+    body: "Je reeks (streak), XP, niveau, badges en de keuzes voor je boom. Alleen als je zelf een openbaar profiel aanzet, zijn je voornaam, je boom, niveau en badges zichtbaar voor iedereen met de link.",
   },
   {
     title: "Groepen (website)",
@@ -84,7 +84,7 @@ const DEVICE_ONLY = [
 const BASES: Item[] = [
   {
     title: "Uitvoering van de overeenkomst",
-    body: "Je account aanmaken en inloggen; je notities, markeringen, voortgang en Levensboom opslaan en tussen je apparaten synchroniseren; groepen; antwoorden van de AI-assistent; voorlezen; Pro-toegang leveren en je abonnement beheren; de e-mail om je wachtwoord te herstellen.",
+    body: "Je account aanmaken en inloggen; je notities, markeringen, voortgang en je boom opslaan en tussen je apparaten synchroniseren; groepen; antwoorden van de AI-assistent; voorlezen; Pro-toegang leveren en je abonnement beheren; de e-mail om je wachtwoord te herstellen.",
   },
   {
     title: "Gerechtvaardigd belang",
@@ -92,7 +92,7 @@ const BASES: Item[] = [
   },
   {
     title: "Toestemming",
-    body: "De gebruiksstatistieken van de website, inclusief Google Analytics, waar we in de cookiebanner toestemming voor vragen; meldingen en herinneringen op je apparaat (via de toestemming van iOS of Android), een openbaar Levensboom-profiel en contactgegevens die je vrijwillig bij feedback invult. Je kunt je toestemming altijd intrekken, bijvoorbeeld door meldingen of je openbare profiel uit te zetten, of via Cookie-instellingen op de website.",
+    body: "De gebruiksstatistieken van de website, inclusief Google Analytics, waar we in de cookiebanner toestemming voor vragen; meldingen en herinneringen op je apparaat (via de toestemming van iOS of Android), een openbaar voortgangsprofiel en contactgegevens die je vrijwillig bij feedback invult. Je kunt je toestemming altijd intrekken, bijvoorbeeld door meldingen of je openbare profiel uit te zetten, of via Cookie-instellingen op de website.",
   },
   {
     title: "Wettelijke plicht",
@@ -155,7 +155,7 @@ const RECIPIENTS: Recipient[] = [
 
 const RETENTION: Item[] = [
   {
-    title: "Account, profiel, instellingen, notities, markeringen, bladwijzers, leesgeschiedenis, voortgang, Levensboom en groepsberichten",
+    title: "Account, profiel, instellingen, notities, markeringen, bladwijzers, leesgeschiedenis, voortgang, je boom en groepsberichten",
     body: "Zolang je account bestaat. Verwijder je je account, dan wissen we ze direct.",
   },
   {
@@ -365,7 +365,7 @@ export default function PrivacyPolicyPage() {
           </li>
           <li>
             <strong>Andere gebruikers</strong>: leden van je groepen, en iedereen met de link als je een openbaar
-            Levensboom-profiel aanzet.
+            ProgressTree-profiel aanzet.
           </li>
           <li>
             <strong>Overheidsinstanties</strong>, alleen als de wet ons daartoe verplicht.

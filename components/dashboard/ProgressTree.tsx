@@ -1,15 +1,15 @@
 "use client"
 
-import TreeCanvas from "../levensboom/TreeCanvas"
-import { useStableFloor } from "../levensboom/useStableFloor"
-import { useLevensboom, fracOf } from "../../hooks/useLevensboom"
+import TreeCanvas from "../progressTree/TreeCanvas"
+import { useStableFloor } from "../progressTree/useStableFloor"
+import { useProgressTree, fracOf } from "../../hooks/useProgressTree"
 import {
   nextPhaseXpLine,
   stepOnlyLine,
   stepProgress,
   stripLine,
   stripUnlockLine,
-} from "../../lib/levensboom/growthCopy"
+} from "../../lib/progressTree/growthCopy"
 
 const TEAL = "#0D9488"
 
@@ -24,10 +24,10 @@ const TEAL = "#0D9488"
  * Copy rule for every surface that uses these: the feature is never named to
  * the reader. It is "je boom" and the section is "Jouw voortgang".
  *
- * Growth v2 (LEVENSBOOM_GROWTH_PLAN.md §9.5): the strip counts the tree's
+ * Growth v2 (PROGRESS_TREE_GROWTH_PLAN.md §9.5): the strip counts the tree's
  * steps, not the account's levels - "Stap 9 van 20 · nog 740 XP tot stap 10",
  * then the next unlock when it comes no later than that step. The copy is
- * `lib/levensboom/growthCopy.ts`, which the app mirrors.
+ * `lib/progressTree/growthCopy.ts`, which the app mirrors.
  */
 
 export type TreeSummary = {
@@ -66,7 +66,7 @@ export type TreeSummary = {
 
 /** The numbers a variant prints next to the tree, from the same state the tree is drawn from. */
 export function useTreeSummary(): TreeSummary {
-  const { data, loading } = useLevensboom()
+  const { data, loading } = useProgressTree()
   const tree = data?.levensboom
   const growth = tree?.growth ?? null
   const progress = data && growth ? stepProgress(data.xp, data.level, growth.floor) : null
@@ -103,7 +103,7 @@ export function useTreeSummary(): TreeSummary {
  * never do.
  */
 export function ProgressTreeScene({ className = "", still = false }: { className?: string; still?: boolean }) {
-  const { data, loading } = useLevensboom()
+  const { data, loading } = useProgressTree()
   const floor = useStableFloor(data?.levensboom?.growth?.floor)
 
   if (loading) {

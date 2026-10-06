@@ -11,7 +11,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Suspense } from "react";
 import { PrefetchProvider } from "../components/providers/prefetch-provider";
 import { StudyStyleProvider } from "../components/providers/study-style-provider";
-import { LevensboomProvider } from "../components/providers/levensboom-provider";
+import { ProgressTreeProvider } from "../components/providers/progress-tree-provider";
 import AnalyticsTracker from "../components/providers/AnalyticsTracker";
 import GoogleAnalytics from "../components/providers/GoogleAnalytics";
 import GuestProgressMigration from "../components/auth/GuestProgressMigration";
@@ -243,10 +243,10 @@ export default async function RootLayout({
               here, before the HTML is sent. See study-style-provider.tsx. */}
           <StudyStyleProvider initial={session?.user?.studyStyle}>
             <PrefetchProvider>
-              {/* The reader's Levensboom, fetched once per page load for the
+              {/* The reader's ProgressTree, fetched once per page load for the
                   navbar, the profile, the studio and the lesson card alike.
-                  Idle when nobody is signed in. See levensboom-provider.tsx. */}
-              <LevensboomProvider enabled={Boolean(session?.user)} userKey={session?.user?.email ?? null}>
+                  Idle when nobody is signed in. See progress-tree-provider.tsx. */}
+              <ProgressTreeProvider enabled={Boolean(session?.user)} userKey={session?.user?.email ?? null}>
                 {/* Page views and clicks for /beheer/inzichten. Renders nothing and
                     never blocks - see components/providers/AnalyticsTracker.tsx. */}
                 <Suspense fallback={null}>
@@ -280,7 +280,7 @@ export default async function RootLayout({
                   // the marketing, pricing, legal and auth pages.
                   <GuestOnboardingWrapper />
                 )}
-              </LevensboomProvider>
+              </ProgressTreeProvider>
             </PrefetchProvider>
           </StudyStyleProvider>
         </ThemeProvider>

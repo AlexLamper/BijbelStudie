@@ -6,7 +6,7 @@ import { FREE_NOTE_LIMIT } from './entitlements';
 /**
  * XP for writing an aantekening.
  *
- * "Notes & reflection" is one of the four activities the Levensboom is fed by,
+ * "Notes & reflection" is one of the four activities the ProgressTree is fed by,
  * and it was the only one with no XP event. It is
  * also the one that is trivially farmable - a note is a text field and a save
  * button - so the guardrails are the point, not an afterthought:

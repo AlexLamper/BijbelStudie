@@ -195,7 +195,7 @@ the served HTML, not produced by hydration.
 **2. One animated canvas per page.** The shell already owns the only one there is
 allowed to be. Do not mount a `TreeCanvas`, a video loop or a Lottie in the
 content on top of it. If a page needs a second tree, draw it with
-`renderTreeSvg` (still) - see `lib/levensboom/svg.ts`.
+`renderTreeSvg` (still) - see `lib/progressTree/svg.ts`.
 
 ---
 

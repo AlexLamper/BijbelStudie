@@ -11,7 +11,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@radix-ui/react-avatar"
 import { SubscriptionBadge } from "../subscription-badge"
 import Link from "next/link"
 import { BrandIcon } from "../ui/BrandIcon"
-import NavTreeAvatar from "../levensboom/NavTreeAvatar"
+import NavTreeAvatar from "../progressTree/NavTreeAvatar"
 import { MobileMenuButton } from "../shell/MobileNav"
 
 /**
@@ -256,7 +256,7 @@ export function Header({ title, variant = "default" }: HeaderProps) {
             className="flex items-center gap-2 h-9 px-2 hover:bg-secondary rounded-md"
             onClick={() => setIsProfileOpen(!isProfileOpen)}
           >
-            {/* The face of the account is the Levensboom, not a photo. The
+            {/* The face of the account is the ProgressTree, not a photo. The
                 initials/photo circle only stands in while the tree loads or
                 when the reader has switched it off. */}
             <NavTreeAvatar

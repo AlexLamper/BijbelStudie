@@ -76,7 +76,7 @@ export type CopyTokens = {
   plandag?: number;
   vers?: string;
   versverwijzing?: string;
-  /** The reader's Levensboom level, for the tree nudge. */
+  /** The reader's ProgressTree level, for the tree nudge. */
   niveau?: number;
   /** The other person in a vriendenkring notification - a first name. */
   vriend?: string;
@@ -165,14 +165,14 @@ const STUDY_NUDGE: Variant[] = [
 ];
 
 /**
- * The Levensboom nudge, fired at exactly two days away - before the tree
+ * The ProgressTree nudge, fired at exactly two days away - before the tree
  * visibly wilts, never after.
  *
  * The plan's draft copy carried a seedling emoji; the house rules above forbid
  * emoji, so it is gone. What survives is the useful half: the tree is a thing
  * of the reader's own that responds to them, and one short sitting is enough.
  * No variant says the tree could die, because it cannot - health floors at 0.3
- * (lib/levensboom/health.ts) precisely so this copy never has to threaten.
+ * (lib/progressTree/health.ts) precisely so this copy never has to threaten.
  */
 const TREE_WILTING: Variant[] = [
   { id: 'b01', title: 'Je boom mist wat licht', body: 'Twee dagen zonder lezen. Een paar verzen en hij staat er weer fris bij.', needs: [] },

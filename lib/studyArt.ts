@@ -3,7 +3,7 @@
  *
  * Every study gets a picture that is generated, not authored: a sky, a land and
  * a ridge line drawn from the same vocabulary the tree stands in
- * (`lib/levensboom/scenes.ts`, `palette.ts`, `backdrop.ts`). One study id in,
+ * (`lib/progressTree/scenes.ts`, `palette.ts`, `backdrop.ts`). One study id in,
  * one stable landscape out, at no asset weight - which is the point. It sits
  * under the study's cover photo (`lib/studyPhotos.ts`) as placeholder and
  * fallback.
@@ -18,10 +18,10 @@
  *    fixed order. Adding a draw shifts every later one, so append at the end.
  */
 
-import { hillPath } from './levensboom/backdrop';
-import { buildPalette, type Palette, type Season, type TimeOfDay } from './levensboom/palette';
-import { seededRng } from './levensboom/rng';
-import { sceneSpec, type SceneId } from './levensboom/scenes';
+import { hillPath } from './progressTree/backdrop';
+import { buildPalette, type Palette, type Season, type TimeOfDay } from './progressTree/palette';
+import { seededRng } from './progressTree/rng';
+import { sceneSpec, type SceneId } from './progressTree/scenes';
 
 /** The four kinds `curatedStudies` uses, plus the generated book studies. */
 export type StudyArtKind = 'Gedeelte' | 'Persoon' | 'Onderwerp' | 'Boek';

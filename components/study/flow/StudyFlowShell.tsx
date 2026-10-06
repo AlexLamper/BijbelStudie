@@ -31,7 +31,7 @@ import StepReflection from './StepReflection';
 import StepQuiz from './StepQuiz';
 import LessonCompleteCard, { type CompletionSummary } from './LessonCompleteCard';
 import type { SerialisedPrompt } from '../../../lib/feedbackPrompts';
-import { useLevensboom } from '../../../hooks/useLevensboom';
+import { useProgressTree } from '../../../hooks/useProgressTree';
 import AiAssistantIcon from '../../ui/AiAssistantIcon';
 import ResizableSplit from '../../ui/resizable-split';
 import AiDock from './AiDock';
@@ -250,9 +250,9 @@ export default function StudyFlowShell({
    * of completions.
    */
   const [feedbackPrompt, setFeedbackPrompt] = useState<SerialisedPrompt | null>(null);
-  // The Levensboom applies the grant at once, so the navbar and the tree on
+  // The ProgressTree applies the grant at once, so the navbar and the tree on
   // the completion card move without waiting for a refetch.
-  const { applyXp } = useLevensboom();
+  const { applyXp } = useProgressTree();
   const [finishing, setFinishing] = useState(false);
 
   const [aiOpen, setAiOpen] = useState(false);

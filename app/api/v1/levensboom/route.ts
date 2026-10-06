@@ -1,3 +1,11 @@
+/**
+ * The Voortgang (progress-tree) endpoints.
+ *
+ * The route path and the `levensboom` payload key keep the old word: installed
+ * app builds call this URL and read that key, and the same word is the field on
+ * the user document (models/User.js). Everything else about the feature is
+ * named `progressTree` / ProgressTree.
+ */
 import { requireUser } from '../../../../lib/apiAuth';
 import { corsPreflight, handleV1Error, jsonV1 } from '../../../../lib/apiV1';
 import connectMongoDB from '../../../../lib/mongodb';
@@ -10,10 +18,10 @@ import {
   unlockedKeys,
   unlockLabel,
   type ItemKind,
-} from '../../../../lib/levensboom/catalog';
-import { buildLevensboomPayload, type LevensboomPrefs } from '../../../../lib/levensboom/summary';
-import { ensureLegacyXp, floorForUser } from '../../../../lib/levensboom/legacy';
-import { fracOf } from '../../../../lib/levensboom/client';
+} from '../../../../lib/progressTree/catalog';
+import { buildProgressTreePayload, type ProgressTreePrefs } from '../../../../lib/progressTree/summary';
+import { ensureLegacyXp, floorForUser } from '../../../../lib/progressTree/legacy';
+import { fracOf } from '../../../../lib/progressTree/client';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,13 +37,13 @@ type UserRow = {
   streak?: number | null;
   longestStreak?: number | null;
   lastStreakDate?: Date | null;
-  levensboom?: LevensboomPrefs | null;
+  levensboom?: ProgressTreePrefs | null;
 };
 
 const SELECT = 'xp createdAt badges streak longestStreak lastStreakDate levensboom';
 
 async function payloadFor(userId: string, isPro: boolean, row: UserRow) {
-  return buildLevensboomPayload({
+  return buildProgressTreePayload({
     userId,
     level: levelForXp(row.xp ?? 0),
     frac: fracOf(describeLevel(row.xp ?? 0)),

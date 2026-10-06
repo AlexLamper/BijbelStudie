@@ -2,7 +2,7 @@ import type Stripe from "stripe";
 import stripe from "./stripe";
 import connectMongoDB from "./mongodb";
 import User from "../models/User";
-import { LEVENSBOOM_RING_PATH, proRingGrant } from "./levensboom/proRing";
+import { LEVENSBOOM_RING_PATH, proRingGrant } from "./progressTree/proRing";
 
 /**
  * Stripe -> Mongo billing state, in one place.

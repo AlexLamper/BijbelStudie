@@ -10,7 +10,7 @@ import ActivityFeed, { type ActivityFilter } from "../../components/profile/Acti
 import AppShell from "../../components/shell/AppShell"
 import Tabs from "../../components/kit/Tabs"
 import { Card, Pill, ProgressBar, Skeleton, StatCard } from "../../components/kit/primitives"
-import { useLevensboom } from "../../hooks/useLevensboom"
+import { useProgressTree } from "../../hooks/useProgressTree"
 import { useIsPro } from "../../hooks/useIsPro"
 import { INTENT_EVENT, PROFIEL_ACTIES, consumeIntent, readIntent } from "../../lib/commands/deepLink"
 import AccountAvatar from "../../components/kit/AccountAvatar"
@@ -42,7 +42,7 @@ type Status = "idle" | "saving" | "success" | "error"
  *
  * Reads and writes: GET /api/user, PUT /api/user/update for the name and the
  * bio, and `updateSession()` after a rename so the sidebar does not keep the old
- * one. The level, the streak and the badge count come from `useLevensboom`.
+ * one. The level, the streak and the badge count come from `useProgressTree`.
  * One read-only extra for Pro accounts: GET /api/subscription/billing-state for
  * the plan and renewal date in the membership panel.
  *
@@ -53,7 +53,7 @@ type Status = "idle" | "saving" | "success" | "error"
 export default function ProfilePage() {
   const { update: updateSession } = useSession()
   const router = useRouter()
-  const { data: levensboom } = useLevensboom()
+  const { data: progressTree } = useProgressTree()
   const [user, setUser] = useState<UserData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -207,10 +207,10 @@ export default function ProfilePage() {
     : null
   const earnedBadges = user?.badges || []
   const badgeCount = earnedBadges.length
-  const streak = user?.streak ?? levensboom?.streak ?? 0
-  const level = levensboom?.level ?? 1
-  const stageName = levensboom?.levensboom?.stage?.name ?? null
-  const remainingXp = levensboom ? Math.max(0, levensboom.xpForNextLevel - levensboom.xpIntoLevel) : 0
+  const streak = user?.streak ?? progressTree?.streak ?? 0
+  const level = progressTree?.level ?? 1
+  const stageName = progressTree?.levensboom?.stage?.name ?? null
+  const remainingXp = progressTree ? Math.max(0, progressTree.xpForNextLevel - progressTree.xpIntoLevel) : 0
   const dayWord = (n: number) => (n === 1 ? "dag" : "dagen")
   const isAdmin = isPro && !!user?.isAdmin
 
@@ -360,8 +360,8 @@ export default function ProfilePage() {
                 icon={<StatIcon icon={Flame} tone="flame" />}
               />
               <StatCard label="Badges" value={waiting ? "-" : `${badgeCount}/${BADGE_TOTAL}`} icon={<StatIcon icon={Award} />} />
-              <StatCard label="Lessen afgerond" value={levensboom ? levensboom.lessonsCompleted : "-"} icon={<StatIcon icon={BookOpenCheck} />} />
-              <StatCard label="Studies afgerond" value={levensboom ? levensboom.studiesCompleted : "-"} icon={<StatIcon icon={GraduationCap} />} />
+              <StatCard label="Lessen afgerond" value={progressTree ? progressTree.lessonsCompleted : "-"} icon={<StatIcon icon={BookOpenCheck} />} />
+              <StatCard label="Studies afgerond" value={progressTree ? progressTree.studiesCompleted : "-"} icon={<StatIcon icon={GraduationCap} />} />
             </div>
 
             <Card className="flex min-h-[320px] flex-1 flex-col overflow-hidden lg:min-h-0">
@@ -464,11 +464,11 @@ export default function ProfilePage() {
                 <InfoLine label="Dagelijkse reeks" value={waiting ? "-" : `${streak} ${dayWord(streak)}`} />
                 <InfoLine label="Badges verdiend" value={waiting ? "-" : `${badgeCount}`} last />
               </div>
-              {levensboom && (
+              {progressTree && (
                 <div className="mt-3">
-                  <ProgressBar value={levensboom.progressPercentage} height={4} />
+                  <ProgressBar value={progressTree.progressPercentage} height={4} />
                   <p className="mt-2 text-[11.5px] text-ink-faint tabular-nums">
-                    {levensboom.xpIntoLevel} / {levensboom.xpForNextLevel} XP tot niveau {level + 1}
+                    {progressTree.xpIntoLevel} / {progressTree.xpForNextLevel} XP tot niveau {level + 1}
                   </p>
                 </div>
               )}

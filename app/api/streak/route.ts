@@ -80,7 +80,7 @@ export async function POST(request: Request) {
     { _id: user._id },
     {
       $set: set,
-      // The record the streak-gated Levensboom items read: it only ever grows.
+      // The record the streak-gated ProgressTree items read: it only ever grows.
       $max: { longestStreak: move.streak },
     },
     { new: true }

@@ -11,7 +11,7 @@ export async function OPTIONS() {
 }
 
 /**
- * "I have seen my tree at this level" - and the two Levensboom prefs, which
+ * "I have seen my tree at this level" - and the two ProgressTree prefs, which
  * ride along because they are written from the same settings screen.
  *
  * The celebration fires on `level > lastSeenLevel`, so this is what stops it

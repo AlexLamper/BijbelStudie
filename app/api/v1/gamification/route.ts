@@ -3,9 +3,9 @@ import { corsPreflight, handleV1Error, jsonV1 } from '../../../../lib/apiV1';
 import connectMongoDB from '../../../../lib/mongodb';
 import User from '../../../../models/User';
 import { XP_LABELS, XP_VALUES, readProgressSummary } from '../../../../lib/gamification';
-import { buildLevensboomPayload, type LevensboomPrefs } from '../../../../lib/levensboom/summary';
-import { ensureLegacyXp, floorForUser } from '../../../../lib/levensboom/legacy';
-import { fracOf } from '../../../../lib/levensboom/client';
+import { buildProgressTreePayload, type ProgressTreePrefs } from '../../../../lib/progressTree/summary';
+import { ensureLegacyXp, floorForUser } from '../../../../lib/progressTree/legacy';
+import { fracOf } from '../../../../lib/progressTree/client';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,7 +19,7 @@ export async function OPTIONS() {
  *
  * The `levensboom` block is additive: it is derived on every request from xp,
  * level, lastStreakDate, badges, the longest streak, Pro, the stored studio
- * choice and the one-time `legacyXp` (lib/levensboom/legacy.ts), so the tree
+ * choice and the one-time `legacyXp` (lib/progressTree/legacy.ts), so the tree
  * needs no stored shape and the existing consumers of this route keep the
  * shape they already parse.
  */
@@ -38,14 +38,14 @@ export async function GET(req: Request) {
         createdAt?: Date | null;
         lastStreakDate?: Date | null;
         longestStreak?: number | null;
-        levensboom?: LevensboomPrefs | null;
+        levensboom?: ProgressTreePrefs | null;
       } | null>();
     // Growth v2's one-time head start, captured before the payload reads it.
     const user = row ? await ensureLegacyXp(row) : null;
 
     return jsonV1({
       ...summary,
-      levensboom: buildLevensboomPayload({
+      levensboom: buildProgressTreePayload({
         userId: auth.id,
         level: summary.level,
         frac: fracOf(summary),

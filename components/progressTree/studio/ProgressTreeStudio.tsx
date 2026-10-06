@@ -1,0 +1,556 @@
+'use client';
+
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
+import { ArrowLeft, Link2 } from 'lucide-react';
+import { useProgressTree, fracOf } from '../../../hooks/useProgressTree';
+import { itemsOfKind, itemKey, type AvatarChoice, type CatalogItem, type ItemKind } from '../../../lib/progressTree/catalog';
+import LevelUpDialog from '../LevelUpDialog';
+import StudioStage from './StudioStage';
+import { ItemGrid, KIND_TITLES, type TilePick } from './StudioTiles';
+import GroeiTab from './GroeiTab';
+import LockedPanel from './LockedPanel';
+import WholeGrowthDialog from './WholeGrowthDialog';
+import AppShell from '../../shell/AppShell';
+import { track } from '../../../lib/analytics';
+import { growthPill, nextPhaseLabel } from '../../../lib/progressTree/growthCopy';
+
+const TIME_OF_DAY_OPTIONS: { id: 'auto' | 'dawn' | 'day' | 'dusk' | 'night'; label: string }[] = [
+  { id: 'auto', label: 'Automatisch' },
+  { id: 'day', label: 'Dag' },
+  { id: 'dusk', label: 'Avond' },
+  { id: 'night', label: 'Nacht' },
+];
+
+type Tab = ItemKind | 'groei';
+const TABS: { id: Tab; label: string }[] = [
+  { id: 'species', label: 'Boomsoort' },
+  { id: 'scene', label: 'Omgeving' },
+  { id: 'animal', label: 'Dieren' },
+  { id: 'ring', label: 'Ring' },
+  { id: 'groei', label: 'Groei' },
+];
+
+const tabId = (id: Tab) => `boom-tab-${id}`;
+
+/** The two pills over the scene, top left. */
+const SCENE_PILL =
+  'inline-flex items-center gap-[6px] rounded-full px-[14px] py-2 max-md:py-[10px] text-[12.5px] font-semibold text-white no-underline outline-none transition-opacity hover:opacity-90 disabled:opacity-60';
+
+const SCENE_PILL_STYLE = { backgroundColor: 'rgba(17,24,39,.72)' } as const;
+
+/**
+ * /profiel/boom - the studio (design_handoff_web/PAGES.md §7).
+ *
+ * READ design_handoff_web/RULES.md §4 BEFORE CHANGING THIS FILE. The tree is
+ * NOT redrawn from the prototype: the scene is still StudioStage, which mounts
+ * the one live TreeCanvas this page is allowed, and everything it paints -
+ * species, scene, animal, ring, time of day - is unchanged. What the redesign
+ * owns is the chrome around it: the shell, the two pills, the heading, the
+ * level card, and the 446 px panel on `--panel-dark` with its tabs, its hint
+ * line and its two-column grid.
+ *
+ * Gone with the immersive shell: the scene navbar, the floating rail, the
+ * three-column grid and the masthead's own toolbar. The page wears the same
+ * sidebar and top bar as every other route now, and `padded={false}` lets the
+ * scene and the panel meet the edges.
+ *
+ * Nothing about what this reads or writes moved: the same `useProgressTree` hook,
+ * the same optimistic `setAvatar` / `setPrefs` / `markItemsSeen` calls, the
+ * same unlock rules off the served `unlocked` list, the same share URL.
+ */
+export default function ProgressTreeStudio() {
+  const { data, loading, celebrate, dismissCelebration, setAvatar, setPrefs, markItemsSeen } = useProgressTree();
+  const [tab, setTab] = useState<Tab>('species');
+  const [preview, setPreview] = useState<Partial<AvatarChoice>>({});
+  /** The locked item the reader tapped last; the card over the scene explains it. */
+  const [lockedPick, setLockedPick] = useState<CatalogItem | null>(null);
+  const [notice, setNotice] = useState<{ text: string; pro?: boolean } | null>(null);
+  const [copied, setCopied] = useState(false);
+  /** "Bekijk de hele groei" is open. Only ever set by its button; the dialog mounts only while this is true. */
+  const [watchingGrowth, setWatchingGrowth] = useState(false);
+
+  const reportedStudioRef = useRef(false);
+  // Baseline funnel event (PROGRESS_TREE_GROWTH_PLAN.md §13): once per mount.
+  useEffect(() => {
+    if (reportedStudioRef.current) return;
+    reportedStudioRef.current = true;
+    track('tree_studio_opened');
+  }, []);
+
+  // `/profiel/boom?tab=groei` opens on the ladder: the dashboard's growth-v2
+  // card links here. Read once from the URL rather than through
+  // useSearchParams, which would need a Suspense boundary around the page.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('tab') === 'groei') setTab('groei');
+  }, []);
+
+  const tree = data?.levensboom ?? null;
+  const unlocked = useMemo(() => new Set(tree?.unlocked ?? []), [tree?.unlocked]);
+  const seen = useMemo(() => new Set(tree?.seenItems ?? []), [tree?.seenItems]);
+  const draw: AvatarChoice | null = tree ? { ...tree.avatar, ...preview } : null;
+
+  /**
+   * Put the scene back. Closing the locked card and dropping its preview are one
+   * act, never two: leaving the preview up would show the reader a tree wearing
+   * something they have not got.
+   *
+   * `useCallback` so the timer below can depend on it without restarting on
+   * every render.
+   */
+  const closeLocked = useCallback(() => {
+    setPreview({});
+    setLockedPick(null);
+  }, []);
+
+  // The "Nieuw" dots of the tab on screen are cleared once the reader has had
+  // a moment to see them.
+  useEffect(() => {
+    if (!tree || tab === 'groei') return;
+    const fresh = itemsOfKind(tab)
+      .filter((item) => item.unlock.kind !== 'free')
+      .map(itemKey)
+      .filter((key) => unlocked.has(key) && !seen.has(key));
+    if (fresh.length === 0) return;
+    const id = window.setTimeout(() => void markItemsSeen(fresh), 2500);
+    return () => window.clearTimeout(id);
+  }, [tab, tree, unlocked, seen, markItemsSeen]);
+
+  useEffect(() => {
+    if (!notice) return;
+    const id = window.setTimeout(() => setNotice(null), 5000);
+    return () => window.clearTimeout(id);
+  }, [notice]);
+
+  // The locked card is an answer to a tap, not a mode the reader has to leave:
+  // it goes away on its own, a little slower than a notice because there is a
+  // rule and a bar to read. Tapping a different locked tile hands this a new
+  // item and starts the clock again; tabbing away closes it through pickTab.
+  useEffect(() => {
+    if (!lockedPick) return;
+    const id = window.setTimeout(closeLocked, 6000);
+    return () => window.clearTimeout(id);
+  }, [lockedPick, closeLocked]);
+
+  const frac = data ? fracOf(data) : 0;
+
+  const onPick = async ({ item, locked }: TilePick) => {
+    const kind = item.kind;
+    if (locked) {
+      // Preview it on the whole landscape and open the card that says what
+      // it takes; nothing is written.
+      setPreview({ [kind]: item.id });
+      setLockedPick(item);
+      return;
+    }
+    setPreview({});
+    setLockedPick(null);
+    const result = await setAvatar({ [kind]: item.id } as Partial<AvatarChoice>);
+    if (result.ok === false) {
+      setNotice({
+        text: result.label ? `${item.name}: ${result.label} nodig.` : 'Opslaan is niet gelukt. Probeer het nog eens.',
+        pro: result.error === 'ITEM_LOCKED' && item.unlock.kind === 'pro',
+      });
+    }
+  };
+
+  const share = async () => {
+    if (!tree || !tree.publicProfile) {
+      setNotice({ text: "Zet 'Openbaar profiel' aan bij Instellingen om je boom te delen." });
+      return;
+    }
+    const url = `${window.location.origin}/gebruiker/${tree.seed}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setNotice({ text: url });
+    }
+  };
+
+  const pickTab = (id: Tab) => {
+    setTab(id);
+    setPreview({});
+    setLockedPick(null);
+  };
+
+  /** Left and right walk the tabs, as a tablist is expected to. */
+  const onTabKey = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+    const step = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0;
+    if (step === 0) return;
+    event.preventDefault();
+    const here = TABS.findIndex((t) => t.id === tab);
+    const next = TABS[(here + step + TABS.length) % TABS.length];
+    pickTab(next.id);
+    window.setTimeout(() => document.getElementById(tabId(next.id))?.focus(), 0);
+  };
+
+  /**
+   * What a locked tile takes, as a card over the scene.
+   *
+   * It used to be pinned to the foot of the picking column, under the grid it
+   * was talking about and half over the last row of tiles. It belongs on the
+   * scene: tapping a locked tile previews the item on the landscape, so the
+   * answer should stand next to the thing it is explaining - "Je ziet hem
+   * alvast op de achtergrond" only makes sense there.
+   *
+   * It rides in the notice stack rather than in a corner of its own, and that is
+   * measured, not lazy. The scene is `flex-1` beside a fixed 446px panel, so on
+   * a 1280px screen it is about 638px wide; a 352px card at the bottom right
+   * would sit on top of the 352px level card at the bottom left. This stack is
+   * the one place on the scene that cannot collide with anything, because it is
+   * a flex column that grows downwards from a single anchor. `ml-auto` keeps it
+   * against the panel edge, a hand's width from the tile that opened it, while
+   * the notices stay in the heading's column.
+   */
+  const lockedCard =
+    data && tree && lockedPick && lockedPick.kind === tab ? (
+      <LockedPanel
+        item={lockedPick}
+        level={data.level}
+        xp={data.xp}
+        longestStreak={tree.longestStreak}
+        onClose={closeLocked}
+        className="ml-auto w-[352px] max-w-full"
+      />
+    ) : null;
+
+  /* -- The level card -------------------------------------------- */
+  const levelCard =
+    data && tree ? (
+      // `max-w`: between md and 1020 px the scene beside the 196 px
+      // sidebar and the 446 px panel is narrower than 26 + 352 px, and the card
+      // ran off its right edge, cut off by the scene's overflow-hidden.
+      <div
+        className="absolute bottom-[26px] left-[26px] z-10 w-[352px] max-w-[calc(100%-52px)] rounded-panel p-4 max-md:static max-md:w-full max-md:max-w-none"
+        style={{ backgroundColor: 'var(--panel-card)', border: '1px solid var(--panel-border)' }}
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex h-[58px] w-[58px] flex-none flex-col items-center justify-center rounded-[11px] bg-teal">
+            <span className="text-[10px] font-bold tracking-[0.9px] text-white/80">NIVEAU</span>
+            <span className="text-[22px] font-bold leading-none text-white tabular-nums">{data.level}</span>
+          </div>
+          <div className="min-w-0 flex-1">
+            {/* The tree's phase and step, beside the account's level: two labels,
+                never one sentence (plan §9.1). May wrap to a second line. */}
+            <p className="text-[17px] font-bold leading-tight text-white">{growthPill(tree.growth.step)}</p>
+            <p className="mt-[2px] text-[13px] text-white/70">
+              Nog <span className="font-bold">{Math.max(0, data.xpForNextLevel - data.xpIntoLevel)} XP</span> tot niveau {data.level + 1}
+            </p>
+          </div>
+        </div>
+
+        {/* The XP bar, with the figure inside the fill. */}
+        <div
+          className="relative mt-3 h-[22px] overflow-hidden rounded-full"
+          style={{ backgroundColor: 'rgba(255,255,255,.14)' }}
+          role="progressbar"
+          aria-valuenow={data.progressPercentage}
+          aria-valuemin={0}
+          aria-valuemax={100}
+        >
+          <div className="h-full rounded-full bg-teal" style={{ width: `${data.progressPercentage}%` }} />
+          <span className="absolute inset-0 flex items-center justify-center text-[11.5px] font-bold text-white tabular-nums">
+            {data.xpIntoLevel} / {data.xpForNextLevel} XP
+          </span>
+        </div>
+        <div className="mt-[6px] flex justify-between text-[11px] text-white/60">
+          <span>Niveau {data.level}</span>
+          <span>Niveau {data.level + 1}</span>
+        </div>
+
+        <div className="my-3 h-px" style={{ backgroundColor: 'rgba(255,255,255,.14)' }} />
+
+        {tree.nextUnlock && (
+          <p className="text-[12px] text-white/70">
+            Hierna ontgrendel je →{' '}
+            <span className="font-semibold text-teal-bright">
+              {tree.nextUnlock.name} · niveau {tree.nextUnlock.level}
+            </span>
+          </p>
+        )}
+        {tree.growth.nextPhase && (
+          <p className="mt-1 text-[12px] text-white/70">
+            Volgende fase → <span className="font-semibold text-white">{nextPhaseLabel(tree.growth.nextPhase)}</span>
+          </p>
+        )}
+      </div>
+    ) : null;
+
+  /* -- The scene ------------------------------------------------- */
+  const scene = (
+    <div className="relative min-w-0 flex-1 overflow-hidden max-md:h-[60svh] max-md:min-h-[400px] max-md:flex-none">
+      <StudioStage
+        tree={
+          tree && draw && data && !tree.disabled
+            ? {
+                seed: tree.seed,
+                level: data.level,
+                frac,
+                health: tree.health,
+                avatar: draw,
+                growth: tree.growth,
+                // Still while the growth playback is open: the page's one
+                // animated canvas is the one in that dialog then.
+                reducedMotion: tree.reducedMotion || watchingGrowth,
+                timeOfDay: tree.timeOfDay,
+              }
+            : null
+        }
+      />
+
+      {/* Two pills, top left. */}
+      <div className="absolute left-[26px] top-[22px] z-10 flex gap-2 max-md:left-4 max-md:top-4">
+        <Link href="/profiel" className={SCENE_PILL} style={SCENE_PILL_STYLE}>
+          <ArrowLeft size={14} aria-hidden />
+          Profiel
+        </Link>
+        <button type="button" onClick={() => void share()} disabled={!tree} className={SCENE_PILL} style={SCENE_PILL_STYLE}>
+          <Link2 size={14} aria-hidden />
+          {copied ? 'Link gekopieerd' : 'Deel link'}
+        </button>
+      </div>
+
+      {/* The heading, straight onto the picture. */}
+      <div className="absolute left-[26px] top-[86px] z-10 max-md:left-4 max-md:top-[76px]">
+        <p className="text-[11.5px] font-bold uppercase tracking-[1.4px] text-teal-bright">Voortgang</p>
+        <h1
+          className="mt-1 text-[40px] font-bold tracking-[-0.8px] text-white max-md:text-[32px]"
+          style={{ textShadow: '0 2px 6px rgba(0,0,0,.3)' }}
+        >
+          Je boom
+        </h1>
+      </div>
+
+      {/* Where the reader stands. Below md it moves under the picture (see
+          the end of the scroller) so it does not cover the tree on a phone. */}
+      {levelCard && <div className="max-md:hidden">{levelCard}</div>}
+
+      {/* Notices sit over the scene, under the heading; the locked card joins
+          them at the foot of the same stack. */}
+      {(notice || lockedCard || (tree && tree.wilting) || (tree && tree.disabled)) && (
+        <div className="absolute left-[26px] right-[26px] top-[170px] z-10 flex flex-col gap-2 max-md:left-4 max-md:right-4 max-md:top-[150px]">
+          {tree?.wilting && (
+            <p
+              className="max-w-[420px] rounded-[10px] px-3 py-2 text-[12px] font-medium text-white"
+              style={{ backgroundColor: 'var(--panel-card)', border: '1px solid var(--panel-border)' }}
+            >
+              {tree.daysSinceActive} dagen niet gelezen - één sessie en hij veert op
+            </p>
+          )}
+          {tree?.disabled && (
+            <div
+              className="max-w-[420px] rounded-[10px] p-4"
+              style={{ backgroundColor: 'var(--panel-card)', border: '1px solid var(--panel-border)' }}
+            >
+              <p className="text-[13.5px] font-semibold text-white">Je boom staat uit</p>
+              <p className="mt-1 text-[12px] leading-relaxed text-white/75">
+                Je XP, niveau en badges lopen gewoon door - alleen de boom wordt niet getoond.
+              </p>
+              <button
+                type="button"
+                onClick={() => void setPrefs({ disabled: false })}
+                // teal-dark, not teal: this fill carries white type, and white on #0D9488
+                // is 3.74:1. It also has to match the two fills in LockedPanel, which
+                // sits a few pixels away on the same dark panel.
+                className="mt-3 inline-flex h-9 items-center rounded-btn bg-teal-dark px-4 text-[13px] font-semibold text-white transition-opacity hover:opacity-90"
+              >
+                Boom weer tonen
+              </button>
+            </div>
+          )}
+          {notice && (
+            <div
+              role="status"
+              className="flex max-w-[420px] items-center justify-between gap-3 rounded-[10px] px-3 py-2 text-[12px]"
+              style={{ backgroundColor: 'var(--panel-card)', border: '1px solid var(--panel-border)' }}
+            >
+              <span className="text-white">{notice.text}</span>
+              {notice.pro && (
+                <Link
+                  href="/abonnement?bron=levensboom"
+                  className="flex-shrink-0 font-semibold text-teal-bright no-underline hover:underline"
+                >
+                  Bekijk Pro →
+                </Link>
+              )}
+            </div>
+          )}
+          {lockedCard}
+        </div>
+      )}
+    </div>
+  );
+
+  /* -- The panel ------------------------------------------------- */
+  const panel = (
+    <aside
+      className="flex w-[446px] flex-none flex-col overflow-hidden max-md:w-full max-md:overflow-visible"
+      style={{ backgroundColor: 'var(--panel-dark)' }}
+    >
+      <h2 className="sr-only">Je boom aanpassen</h2>
+
+      <div
+        className="flex h-14 flex-none items-stretch gap-5 overflow-x-auto px-5"
+        style={{ borderBottom: '1px solid rgba(255,255,255,.1)' }}
+        role="tablist"
+        aria-label="Wat je kunt aanpassen"
+      >
+        {TABS.map((t) => {
+          const active = tab === t.id;
+          // Roving tabindex: Tab reaches the tablist once and lands on the tab
+          // that is open; Left and Right walk the rest.
+          return (
+            <button
+              key={t.id}
+              id={tabId(t.id)}
+              role="tab"
+              aria-selected={active}
+              aria-controls="boom-tabpaneel"
+              tabIndex={active ? 0 : -1}
+              onClick={() => pickTab(t.id)}
+              onKeyDown={onTabKey}
+              className={`flex-none whitespace-nowrap border-b-2 text-[13px] outline-none transition-colors ${
+                active
+                  ? 'border-teal font-bold text-white'
+                  : 'border-transparent font-medium text-white/60 hover:text-white/85'
+              }`}
+            >
+              {t.label}
+            </button>
+          );
+        })}
+      </div>
+
+      <p
+        className="flex-none px-5 py-[14px] text-[12.5px] leading-[1.55] text-white/60"
+        style={{ borderBottom: '1px solid rgba(255,255,255,.08)' }}
+      >
+        {tab === 'groei'
+          ? 'Wat je boom onderweg krijgt, en bij welk niveau.'
+          : `${KIND_TITLES[tab as ItemKind]} · tik om te kiezen; vergrendelde keuzes laten zien wat ervoor nodig is.`}
+      </p>
+
+      <div
+        id="boom-tabpaneel"
+        role="tabpanel"
+        aria-labelledby={tabId(tab)}
+        className="min-h-0 flex-1 overflow-y-auto px-5 py-4 max-md:flex-none max-md:overflow-visible max-md:pb-8"
+      >
+        {loading || !data || !tree ? (
+          <div className="grid grid-cols-2 gap-[14px]">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="h-[160px] rounded-[12px] bg-white/[0.06]" />
+            ))}
+          </div>
+        ) : tab === 'groei' ? (
+          <>
+            {/* The time-of-day control has no row of its own in the design, and
+                it is a display preference rather than a choice about the tree -
+                so it sits at the head of the tab that is about the tree over
+                time. Same handler, same values. */}
+            <div className="mb-4">
+              <p className="text-[10.5px] font-semibold uppercase tracking-[1.1px] text-white/50">Tijdstip</p>
+              <div
+                className="mt-2 inline-flex overflow-hidden rounded-[9px]"
+                style={{ border: '1px solid rgba(255,255,255,.14)' }}
+                role="group"
+                aria-label="Tijdstip van de boom"
+              >
+                {TIME_OF_DAY_OPTIONS.map((opt) => {
+                  const active = (tree.timeOfDay ?? 'auto') === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => void setPrefs({ timeOfDay: opt.id })}
+                      aria-pressed={active}
+                      className={`px-3 py-[7px] max-md:py-[10px] text-[12px] font-semibold outline-none transition-colors ${
+                        active ? 'bg-teal text-white' : 'text-white/65 hover:text-white'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <GroeiTab
+              level={data.level}
+              xp={data.xp}
+              xpTable={data.xpTable}
+              growth={tree.growth}
+              seed={tree.seed}
+              species={tree.avatar.species}
+              scene={tree.avatar.scene}
+              onWatchGrowth={tree.disabled ? undefined : () => setWatchingGrowth(true)}
+            />
+          </>
+        ) : (
+          <ItemGrid
+            kind={tab}
+            items={itemsOfKind(tab)}
+            seed={tree.seed}
+            level={data.level}
+            frac={frac}
+            health={tree.health}
+            avatar={tree.avatar}
+            selectedId={tree.chosen[tab]}
+            previewId={preview[tab] ?? null}
+            unlocked={unlocked}
+            seenItems={seen}
+            onPick={(pick) => void onPick(pick)}
+          />
+        )}
+      </div>
+    </aside>
+  );
+
+  return (
+    <AppShell title="Je boom" padded={false}>
+      {/* Phones: the scene, the level card and the panel stack in one column
+          that scrolls on its own. From md up the wrapper is `display: contents`,
+          so the scene and the panel are the shell's flex children exactly as
+          before. */}
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden md:contents">
+        {scene}
+        {levelCard && (
+          <div className="flex-none px-4 py-4 md:hidden" style={{ backgroundColor: 'var(--panel-dark)' }}>
+            {levelCard}
+          </div>
+        )}
+        {panel}
+      </div>
+
+      {celebrate !== null && tree && (
+        <LevelUpDialog
+          seed={tree.seed}
+          level={celebrate}
+          lastSeenLevel={tree.lastSeenLevel}
+          floor={tree.growth.floor}
+          species={tree.avatar.species}
+          scene={tree.avatar.scene}
+          animal={tree.avatar.animal}
+          reducedMotion={tree.reducedMotion}
+          onClose={() => void dismissCelebration()}
+        />
+      )}
+
+      {watchingGrowth && data && tree && draw && !tree.disabled && (
+        <WholeGrowthDialog
+          seed={tree.seed}
+          species={draw.species}
+          scene={draw.scene}
+          timeOfDay={tree.timeOfDay}
+          level={data.level}
+          frac={frac}
+          step={tree.growth.step}
+          floor={tree.growth.floor}
+          reducedMotion={tree.reducedMotion}
+          onClose={() => setWatchingGrowth(false)}
+        />
+      )}
+    </AppShell>
+  );
+}

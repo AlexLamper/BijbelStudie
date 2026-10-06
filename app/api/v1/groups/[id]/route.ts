@@ -4,7 +4,7 @@ import connectMongoDB from '../../../../../lib/mongodb';
 import StudyGroup from '../../../../../models/StudyGroup.js';
 import User from '../../../../../models/User';
 import { serialiseGroup, type GroupDoc, type GroupMember } from '../../../../../lib/mobileGroups';
-import { PUBLIC_CARD_FIELDS, publicLevensboomCard, type PublicCardSource } from '../../../../../lib/levensboom/publicCard';
+import { PUBLIC_CARD_FIELDS, publicProgressTreeCard, type PublicCardSource } from '../../../../../lib/progressTree/publicCard';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,7 +50,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
           joinedAt: m.joinedAt,
           isSelf: m.userId.toString() === auth.id,
           // Enough to draw the member's tree, nothing else - see publicCard.ts.
-          levensboom: doc ? publicLevensboomCard(doc) : null,
+          levensboom: doc ? publicProgressTreeCard(doc) : null,
         };
       }),
     });

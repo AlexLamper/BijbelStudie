@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import TreeLab from '../../../components/levensboom/dev/TreeLab';
+import TreeLab from '../../../components/progressTree/dev/TreeLab';
 
 /**
  * /dev/boom - the tree lab for the growth v2 design pass
- * (LEVENSBOOM_GROWTH_PLAN.md §10.2). Development only: a production build
+ * (PROGRESS_TREE_GROWTH_PLAN.md §10.2). Development only: a production build
  * answers 404, and it is in no sitemap or navigation.
  */
 

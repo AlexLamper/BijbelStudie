@@ -4,7 +4,7 @@ import Link from "next/link"
 import { ChevronRight } from "lucide-react"
 import TreeAvatar from "../kit/TreeAvatar"
 import { Card } from "../kit/primitives"
-import { formatXp } from "../../lib/levensboom/growthCopy"
+import { formatXp } from "../../lib/progressTree/growthCopy"
 import { useTreeSummary } from "./ProgressTree"
 
 /**
@@ -20,8 +20,8 @@ import { useTreeSummary } from "./ProgressTree"
  * towards the next phase - where the old card said it twice.
  *
  * Copy rule, as everywhere: the feature is never named to the reader. It is
- * "je boom". The strings are `lib/levensboom/growthCopy.ts`, which the app
- * mirrors in `lib/features/levensboom/domain/growth_copy.dart`.
+ * "je boom". The strings are `lib/progressTree/growthCopy.ts`, which the app
+ * mirrors in `lib/features/progress_tree/domain/growth_copy.dart`.
  */
 
 /** The disc and the ring around it. 88 px outer, a 5 px ring, 3 px of card between. */

@@ -318,7 +318,7 @@ export function dailyVersePhoto(date = new Date()): string {
 
 /**
  * What the card paints behind the verse, in the order of the pages the reader
- * swipes through: the day's photo (the default) and their own Levensboom.
+ * swipes through: the day's photo (the default) and their own ProgressTree.
  * The same two, in the same order, as the app's `DailyVerseBackground`.
  */
 export const DAILY_VERSE_BACKGROUNDS = ['photo', 'tree'] as const;

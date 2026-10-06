@@ -1,5 +1,5 @@
-import { renderTreeSvg } from "../../lib/levensboom/svg"
-import type { Season, TimeOfDay } from "../../lib/levensboom/palette"
+import { renderTreeSvg } from "../../lib/progressTree/svg"
+import type { Season, TimeOfDay } from "../../lib/progressTree/palette"
 
 /**
  * The scene for a page that has no session to draw: one fixed tree, rendered to

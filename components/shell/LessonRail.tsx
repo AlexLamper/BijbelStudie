@@ -4,9 +4,9 @@ import Link from "next/link";
 import { BrandIcon } from "../ui/BrandIcon";
 import { usePathname } from "next/navigation";
 import { Fragment } from "react";
-import NavTreeAvatar from "../levensboom/NavTreeAvatar";
-import { useLevensboom } from "../../hooks/useLevensboom";
-import { ringColors } from "../../lib/levensboom/ring";
+import NavTreeAvatar from "../progressTree/NavTreeAvatar";
+import { useProgressTree } from "../../hooks/useProgressTree";
+import { ringColors } from "../../lib/progressTree/ring";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import { NAV_GROUPS, isNavActive } from "./nav";
 import { useIsAdmin } from "./useIsAdmin";
@@ -40,7 +40,7 @@ import { useIsAdmin } from "./useIsAdmin";
 export default function LessonRail() {
   const pathname = usePathname();
   const isAdmin = useIsAdmin();
-  const { data } = useLevensboom();
+  const { data } = useProgressTree();
 
   return (
     <TooltipProvider delayDuration={0} skipDelayDuration={0}>

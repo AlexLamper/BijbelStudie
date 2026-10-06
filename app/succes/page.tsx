@@ -7,7 +7,7 @@ import { CheckCircle } from "lucide-react"
 import { useSession } from "next-auth/react"
 import { useTranslation } from "../i18n/client"
 import { trackNow } from "../../lib/analytics"
-import { useLevensboom } from "../../hooks/useLevensboom"
+import { useProgressTree } from "../../hooks/useProgressTree"
 import AppShell from "../../components/shell/AppShell"
 import { Card, Skeleton } from "../../components/kit/primitives"
 
@@ -15,7 +15,7 @@ import { Card, Skeleton } from "../../components/kit/primitives"
  * The checkout return, in the app shell.
  *
  * Restyled, not rebuilt: the same single POST to /api/verify-subscription per
- * session id, the same `update()` of the session, the same Levensboom refresh
+ * session id, the same `update()` of the session, the same ProgressTree refresh
  * for the new gold ring, the same `checkout_completed` event, the same
  * redirect back to /abonnement when there is no session id or the verification
  * fails, and the same two destinations afterwards.
@@ -35,18 +35,18 @@ export default function SuccessPage() {
   // subscriber they are charged EUR 9,99 a month, which is simply untrue.
   const [billingInterval, setBillingInterval] = useState<"monthly" | "annual" | null>(null)
   const { update } = useSession()
-  const { refresh: refreshLevensboom } = useLevensboom()
+  const { refresh: refreshProgressTree } = useProgressTree()
 
   useEffect(() => {
     if (status !== "success") return
     // /api/verify-subscription has just written the account's first Pro grant
-    // and, with it, the gold ring (lib/levensboom/proRing.ts). The shared tree
+    // and, with it, the gold ring (lib/progressTree/proRing.ts). The shared tree
     // state was fetched before the payment and sits in a one-minute session
     // cache, so refetch it: the navbar and the profile then show the ring now,
     // not after a reload. Its own effect, deliberately not a dependency of the
     // verification below - that one must run exactly once per session id.
-    void refreshLevensboom()
-  }, [status, refreshLevensboom])
+    void refreshProgressTree()
+  }, [status, refreshProgressTree])
 
   useEffect(() => {
     // Redirect if no sessionId is found

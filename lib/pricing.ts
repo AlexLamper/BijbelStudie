@@ -125,7 +125,7 @@ export function freeMonthsOnAnnual(): number {
  *  - kruisverwijzingen: lib/proContent.ts (`gateCrossRefs`, `FREE_CROSS_REFS`)
  *  - voorlezen: app/api/tts refuses the cloud voices without Pro
  *  - streak protection: lib/streak.ts spends a freeze only for a Pro reader
- *  - tree items: lib/levensboom/catalog.ts, the `pro` unlocks
+ *  - tree items: lib/progressTree/catalog.ts, the `pro` unlocks
  * Two claims were removed earlier for failing that test ("Historische context
  * en kaarten" is free for everyone, and the AI is capped, so never
  * "onbeperkt"), and "Prioriteit bij ondersteuning" was removed because nothing

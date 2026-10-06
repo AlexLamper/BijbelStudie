@@ -27,7 +27,7 @@ import { PRO_TRIAL_DAYS } from "../../lib/promo";
  *    (app/api/ai/chat, app/api/notes, app/api/groepen) AND the app's v1 routes
  *  - voorlezen: app/api/tts serves the natural (cloud) voices to Pro only
  *  - streak protection: lib/streak.ts spends a freeze only for a Pro reader
- *  - tree items: lib/levensboom/catalog.ts (`pro` unlocks)
+ *  - tree items: lib/progressTree/catalog.ts (`pro` unlocks)
  *  - trial: lib/promo.ts `PRO_TRIAL_DAYS`, once per account (lib/trialEligibility.ts)
  *  - payment methods: app/api/checkout/route.ts `payment_method_types`
  *  - pause 1-3 months: app/api/subscription/pause/route.ts (Stripe only)

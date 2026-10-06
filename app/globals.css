@@ -191,7 +191,7 @@
      not as an edge, and that soft halo is most of why the badge looked cheap.
      Depth on a small warm object comes from a border of the SAME hue, a couple
      of steps darker than the fill it holds. #926C10 is that step; it is the
-     same deep gold the avatar ring falls to in lib/levensboom/ring.ts, so the
+     same deep gold the avatar ring falls to in lib/progressTree/ring.ts, so the
      Pro label and the Pro cosmetic are visibly cut from one metal. */
   --pro-pill-border:#D5B36A;   /* edge of the quiet chip, 2.0:1 on white     */
   --pro-pill-ink:#4A3506;      /* Pro-pill ink      (TOKENS.md, gradients)   */

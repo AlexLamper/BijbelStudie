@@ -4,7 +4,7 @@ import { authOptions } from "../../../../lib/authOptions"
 import connectMongoDB from "../../../../lib/mongodb"
 import StudyGroup from "../../../../models/StudyGroup"
 import User from "../../../../models/User"
-import { PUBLIC_CARD_FIELDS, publicLevensboomCard, type PublicCardSource } from "../../../../lib/levensboom/publicCard"
+import { PUBLIC_CARD_FIELDS, publicProgressTreeCard, type PublicCardSource } from "../../../../lib/progressTree/publicCard"
 
 export async function GET(
   _req: NextRequest,
@@ -21,7 +21,7 @@ export async function GET(
     .lean<{ _id: { toString(): string } }>()
   if (!caller) return NextResponse.json({ error: "Gebruiker niet gevonden" }, { status: 404 })
 
-  // Members are populated with the fields their Levensboom card needs, then
+  // Members are populated with the fields their ProgressTree card needs, then
   // trimmed back to name, image and the card below: the raw fields (xp,
   // streak, Pro) are nobody else's business.
   const group = await StudyGroup.findById(id)
@@ -69,7 +69,7 @@ export async function GET(
           _id: m.userId._id,
           name: m.userId.name,
           image: m.userId.image,
-          levensboom: publicLevensboomCard(m.userId),
+          levensboom: publicProgressTreeCard(m.userId),
         }
       : m.userId,
   }))

@@ -58,7 +58,7 @@ import { topicHeading, topicPath, topicsCiting } from "../../../../lib/content/t
  *   X-Vercel-Cache MISS on every hit, while the force-static pages come back as
  *   HIT. force-static hands the layout an empty cookie jar, so it renders its
  *   signed-out branch for everyone: no onboarding gate, no guest-progress
- *   migration, the Levensboom provider idle. None of that belongs on a public
+ *   migration, the ProgressTree provider idle. None of that belongs on a public
  *   reading page (the guest onboarding only opens on /studies, /lezen and
  *   /studie), and ContentShell's header does not read the session at all.
  *   A signed-in member never gets this page: middleware sends them to the

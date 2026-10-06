@@ -90,7 +90,7 @@ export default function TopBar({ title, ownHeading = false }: { title: string; o
           </div>
 
           {/* 5. Account. The same AccountAvatar as the profile header - one component, one Pro source (useIsPro), one
-                 streak source (useLevensboom) - so they can never disagree.
+                 streak source (useProgressTree) - so they can never disagree.
                  38 px is the old 34 px circle plus the 2 px ring it drew
                  outside itself. Streak top-right, PRO bottom-right; both are
                  drawn as siblings of the clipped disc, so neither is cut off. */}

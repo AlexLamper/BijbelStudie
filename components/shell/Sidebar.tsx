@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { MoreHorizontal, LogOut, X } from "lucide-react";
-import { useLevensboom } from "../../hooks/useLevensboom";
+import { useProgressTree } from "../../hooks/useProgressTree";
 import { useIsPro } from "../../hooks/useIsPro";
 import { NAV_GROUPS, isNavActive, type NavItem } from "./nav";
 import { useIsAdmin } from "./useIsAdmin";
@@ -134,7 +134,7 @@ export default function Sidebar({
 }) {
   const pathname = usePathname();
   const { data: session } = useSession();
-  const { data: tree } = useLevensboom();
+  const { data: tree } = useProgressTree();
   const isAdmin = useIsAdmin();
   const isPro = useIsPro();
   const drawer = variant === "drawer";
@@ -212,7 +212,7 @@ export default function Sidebar({
                           : "font-medium text-ink-body hover:bg-line-soft",
                       ].join(" ")}
                     >
-                      Levensboom
+                      ProgressTree
                     </Link>
                   )}
                 </Fragment>

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useReducedMotion } from 'framer-motion';
 import { ArrowRight, Award, NotebookPen, Trophy } from 'lucide-react';
 import { badgeDescription, badgeLabel } from '../../../lib/badgeCatalog';
-import LessonTreeMoment from '../../levensboom/LessonTreeMoment';
+import LessonTreeMoment from '../../progressTree/LessonTreeMoment';
 import { INK, INK_FAINT, INK_MUTED, SURFACE } from './lesson-layout';
 import PromptCard from '../../feedback/PromptCard';
 import LessonThumbs from '../../feedback/LessonThumbs';

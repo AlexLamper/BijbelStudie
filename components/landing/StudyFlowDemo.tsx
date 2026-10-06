@@ -20,7 +20,7 @@ import {
   StickyNote,
   X,
 } from 'lucide-react';
-import TreeCanvas from '../levensboom/TreeCanvas';
+import TreeCanvas from '../progressTree/TreeCanvas';
 
 const TEAL = '#0D9488';
 /* Neutrals as CSS variables so the demo follows dark mode. The `--lp-*` set

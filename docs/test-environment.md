@@ -20,7 +20,7 @@ there is a fixed place to merge into before `main`.
 | Badge | red `LIVE DATA · scriptura · <branch>` | none |
 
 So a preview is a **safe place to test code**, and **not** a safe place to test
-data. New routes, new UI, a migration you can undo, the Levensboom rendering -
+data. New routes, new UI, a migration you can undo, the ProgressTree rendering -
 all fine. What is not fine is anything you would not want to happen for real:
 mass deletes, a script over every user, testing the cancellation flow on a live
 subscription.

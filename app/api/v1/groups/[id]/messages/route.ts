@@ -4,7 +4,7 @@ import connectMongoDB from '../../../../../../lib/mongodb';
 import StudyGroup from '../../../../../../models/StudyGroup.js';
 import GroupMessage from '../../../../../../models/GroupMessage.js';
 import User from '../../../../../../models/User';
-import { PUBLIC_CARD_FIELDS, publicLevensboomCard, type PublicCardSource } from '../../../../../../lib/levensboom/publicCard';
+import { PUBLIC_CARD_FIELDS, publicProgressTreeCard, type PublicCardSource } from '../../../../../../lib/progressTree/publicCard';
 
 export const dynamic = 'force-dynamic';
 
@@ -62,7 +62,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
           authorId: m.userId.toString(),
           authorName: author?.name ?? 'Onbekend',
           authorImage: author?.image ?? null,
-          authorLevensboom: author ? publicLevensboomCard(author) : null,
+          authorProgressTree: author ? publicProgressTreeCard(author) : null,
           isSelf: m.userId.toString() === auth.id,
           verseRef: m.verseRef?.book ? m.verseRef : null,
           reactions: (m.reactions ?? []).map((r: { emoji: string }) => r.emoji),
@@ -118,7 +118,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
           authorName: auth.name,
           authorImage: auth.image,
           // The author is the caller, whose own tree state the client holds.
-          authorLevensboom: null,
+          authorProgressTree: null,
           isSelf: true,
           verseRef: message.verseRef?.book ? message.verseRef : null,
           reactions: [],

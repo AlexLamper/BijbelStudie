@@ -13,7 +13,7 @@ const UserSchema = new mongoose.Schema(
     image: { type: String },
     streak: { type: Number, default: 0 },
     // The longest streak ever, kept by `$max` wherever `streak` is written.
-    // Streak-gated Levensboom items (lib/levensboom/catalog.ts) read this, so
+    // Streak-gated ProgressTree items (lib/progressTree/catalog.ts) read this, so
     // an item earned with a 30-day run stays earned after the run breaks.
     longestStreak: { type: Number, default: 0 },
     lastStreakDate: { type: Date },
@@ -35,12 +35,18 @@ const UserSchema = new mongoose.Schema(
     // is understanding a small portion, not covering a large one.
     xp: { type: Number, default: 0 },
     level: { type: Number, default: 1 },
-    // Levensboom. Nothing about the tree's *shape* lives
+    // ProgressTree. Nothing about the tree's *shape* lives
     // here - that is a pure function of xp, level, lastStreakDate and the user
     // id, so an existing account renders its grown tree with no migration. All
     // this holds is "have we celebrated up to here yet" plus the two prefs, so
     // a level-up earned on the website is celebrated once, on whichever client
     // the user opens next, and not again on the other.
+    // NAME: the feature is "Voortgang" (code: progressTree, lib/progressTree/).
+    // This key keeps the old word on purpose - it is a stored field on live
+    // production documents and the key installed app builds parse out of the
+    // gamification payload. Renaming it would need a data migration plus a
+    // dual-read window for old builds, so the boundary stays here: the field
+    // and the wire key are `levensboom`, everything else is `progressTree`.
     levensboom: {
       lastSeenLevel: { type: Number, default: 1 },
       lastSeenAt: { type: Date },
@@ -51,14 +57,14 @@ const UserSchema = new mongoose.Schema(
       // existing clock-based behaviour.
       timeOfDay: { type: String, enum: ['auto', 'dawn', 'day', 'dusk', 'night'], default: 'auto' },
       // The studio choice. Ids from
-      // lib/levensboom/catalog.ts; whether the account may *use* an id is
+      // lib/progressTree/catalog.ts; whether the account may *use* an id is
       // re-derived on every read, never stored, so a lapsed Pro item falls
       // back by itself and comes straight back on renewal.
       species: { type: String, default: 'eik' },
       scene: { type: String, default: 'waterbeken' },
       animal: { type: String, default: 'geen' },
       // No default on purpose: an unset ring means "never chosen", and
-      // lib/levensboom/catalog.ts `defaultRingFor()` then gives a Pro account
+      // lib/progressTree/catalog.ts `defaultRingFor()` then gives a Pro account
       // the gold ring and everyone else teal. A stored value is a real choice.
       ring: { type: String },
       // When the reader planted their tree in onboarding; unset means the
@@ -69,7 +75,7 @@ const UserSchema = new mongoose.Schema(
       publicProfile: { type: Boolean, default: false },
       // Catalog keys whose "Nieuw" dot the reader has already seen.
       seenItems: { type: [String], default: [] },
-      // Growth v2's never-shrink floor (lib/levensboom/legacy.ts): the XP an
+      // Growth v2's never-shrink floor (lib/progressTree/legacy.ts): the XP an
       // account had when it was first read after the launch, written once by a
       // conditional `$set` and never again. No defaults on purpose: `$exists`
       // is the "captured yet?" test, and a default would answer it wrongly.

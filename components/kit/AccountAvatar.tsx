@@ -1,10 +1,10 @@
 "use client";
 
 import { Flame } from "lucide-react";
-import NavTreeAvatar from "../levensboom/NavTreeAvatar";
+import NavTreeAvatar from "../progressTree/NavTreeAvatar";
 import { useIsPro } from "../../hooks/useIsPro";
-import { useLevensboom } from "../../hooks/useLevensboom";
-import { ringColors } from "../../lib/levensboom/ring";
+import { useProgressTree } from "../../hooks/useProgressTree";
+import { ringColors } from "../../lib/progressTree/ring";
 
 const SLATE_900 = "#0F172A";
 
@@ -148,7 +148,7 @@ export function AvatarFrame({
   // when Pro lapses. So gold needs no second check here - gating it on the
   // session's `pro` as well would hide a paid ring whenever the two disagree.
   // A free account keeps its hairline; a Pro account on teal keeps teal.
-  const { data } = useLevensboom();
+  const { data } = useProgressTree();
   const gold = data?.levensboom?.avatar.ring === "goud";
   const ringed = pro || gold;
   const frame = ringColors(gold ? "goud" : "teal").frame;
@@ -205,7 +205,7 @@ export function AvatarFrame({
  * The account's face: the reader's tree, the Pro ring, the streak and the PRO
  * mark. The top bar, the sidebar foot and the profile header all draw this one
  * component, from one source each - Pro from `useIsPro` (the session's resolved
- * entitlement), the streak from `useLevensboom().data.streak` (the
+ * entitlement), the streak from `useProgressTree().data.streak` (the
  * /api/v1/gamification summary) - so they can never show different things for
  * the same account.
  *
@@ -219,7 +219,7 @@ export default function AccountAvatar({
   className?: string;
 }) {
   const pro = useIsPro();
-  const { data } = useLevensboom();
+  const { data } = useProgressTree();
   return (
     <AvatarFrame
       size={size}

@@ -18,8 +18,8 @@ import {
   DialogTitle,
 } from "../ui/dialog"
 import { ProgressTreeScene } from "./ProgressTree"
-import { useLevensboom } from "../../hooks/useLevensboom"
-import { paletteForNow } from "../../lib/levensboom/palette"
+import { useProgressTree } from "../../hooks/useProgressTree"
+import { paletteForNow } from "../../lib/progressTree/palette"
 import {
   DAILY_VERSE_BACKGROUNDS,
   dailyVersePhoto,
@@ -98,7 +98,7 @@ const SHARE_TREE_H = 960
 const SHARE_LOGO = "/images/icon-192.png"
 const BACKGROUND_LABEL: Record<DailyVerseBackground, string> = {
   photo: "Natuurfoto",
-  tree: "Jouw Levensboom",
+  tree: "Jouw voortgang",
 }
 
 export type DailyVerse = {
@@ -134,7 +134,7 @@ export type DailyVerse = {
  *
  * The background is one of two pages the reader swipes (or drags, or picks
  * with the two dots top right) between: the day's nature photo, the default
- * and first, and their own Levensboom. The choice is remembered per account
+ * and first, and their own ProgressTree. The choice is remembered per account
  * in localStorage (`daytext.background.<userId>`), as the app remembers it.
  * "Delen" draws a 1080 x 1920 status image over the chosen background
  * (`lib/dailyVerseShareImage.ts`).
@@ -218,8 +218,9 @@ export default function DailyVerseCard({
 
   // Whether there is a tree to draw at all. `disabled` is the reader's own
   // "verberg mijn boom" setting, and it has to be honoured here too.
-  const { data: levensboom } = useLevensboom()
-  const tree = levensboom?.levensboom
+  const { data: progressTree } = useProgressTree()
+  // `levensboom` is the payload key, kept for installed app builds.
+  const tree = progressTree?.levensboom
   const hasTree = Boolean(tree && !tree.disabled)
 
   // The sky and earth the landscape continues into on a card wider than

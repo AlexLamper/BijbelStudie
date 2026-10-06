@@ -9,7 +9,7 @@ import AppShell from '../../../components/shell/AppShell';
 export default function BoomLoading() {
   return (
     <AppShell title="Je boom" padded={false}>
-      {/* Same stacking as LevensboomStudio: one scrolling column below md,
+      {/* Same stacking as ProgressTreeStudio: one scrolling column below md,
           `display: contents` (the old two-pane row) from md up. */}
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden md:contents">
       <div

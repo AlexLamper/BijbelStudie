@@ -62,7 +62,7 @@ export const EVENTS = {
       "nav", "direct", "landing", "unknown",
       // Mobile entry points.
       "app_profile", "app_resources", "app_study", "app_ai",
-      // A Pro tile in the Levensboom studio (app) - the cosmetics upsell.
+      // A Pro tile in the ProgressTree studio (app) - the cosmetics upsell.
       "app_levensboom",
       // The group limit, the note limit and the app's own paywall screen.
       "app_groups", "app_notes", "app_funnel",
@@ -162,7 +162,7 @@ export const EVENTS = {
     platform: PLATFORM,
   },
   /**
-   * The tree's own funnel (LEVENSBOOM_GROWTH_PLAN.md §13). There is no
+   * The tree's own funnel (PROGRESS_TREE_GROWTH_PLAN.md §13). There is no
    * redesign shipped yet and no events existed before this - these are the
    * baseline, so retention can be compared before and after the growth-v2
    * launch. `step`, `phase` and `floored` are the v2 growth model's own

@@ -1,0 +1,91 @@
+'use client';
+
+import dynamic from 'next/dynamic';
+import { useProgressTree, fracOf } from '../../hooks/useProgressTree';
+import { ringColors } from '../../lib/progressTree/ring';
+
+/**
+ * Deferred, because this component cannot draw before `/api/v1/gamification`
+ * answers - until it does, [fallback] is what is on screen. Statically
+ * importing it put TreeCanvas and the progress-tree generator into the header,
+ * and the header is in twelve app-shell layouts, so every signed-in route
+ * parsed the whole tree renderer before it could hydrate a 28 px avatar that
+ * was not showing yet. The chunk is now fetched alongside the state it needs.
+ */
+const TreeCanvas = dynamic(() => import('./TreeCanvas'), { ssr: false });
+
+const TEAL = '#0D9488';
+
+/**
+ * The tree at navbar size: the reader's own tree, cropped to a disc, with the
+ * level in the corner. This is the face of the account everywhere a 28 px
+ * picture used to be.
+ *
+ * A still frame, always - at this size a sway is sub-pixel, and the canvas
+ * itself refuses to animate below 64 px anyway. [fallback] stands in while
+ * the state loads or when the reader has switched the tree off.
+ */
+export default function NavTreeAvatar({
+  size = 28,
+  fallback,
+  showLevel = true,
+  className,
+}: {
+  size?: number;
+  fallback?: React.ReactNode;
+  showLevel?: boolean;
+  className?: string;
+}) {
+  const { data, loading } = useProgressTree();
+  if (loading || !data?.levensboom || data.levensboom.disabled) return <>{fallback ?? null}</>;
+
+  // The payload key keeps the old word (see lib/progressTree/client.ts).
+  const { levensboom: progressTree } = data;
+  const ring = ringColors(progressTree.avatar.ring);
+  const rim = progressTree.avatar.ring === 'goud' ? ring.stroke : 'var(--border, rgba(0,0,0,0.12))';
+  const badge = Math.max(12, Math.round(size * 0.46));
+
+  return (
+    <span
+      className={`relative inline-block flex-shrink-0 ${className ?? ''}`}
+      style={{ width: size, height: size }}
+      aria-label={`Je boom, niveau ${data.level}`}
+    >
+      <span
+        className="absolute inset-0 overflow-hidden rounded-full"
+        style={{ boxShadow: `0 0 0 2px ${rim}` }}
+      >
+        <TreeCanvas
+          seed={progressTree.seed}
+          level={data.level}
+          frac={fracOf(data)}
+          health={progressTree.health}
+          floor={progressTree.growth?.floor}
+          species={progressTree.avatar.species}
+          scene={progressTree.avatar.scene}
+          animal={progressTree.avatar.animal}
+          framing="portrait"
+          still
+          className="block h-full w-full"
+          ariaLabel=""
+        />
+      </span>
+      {showLevel && (
+        <span
+          className="absolute -bottom-1 -right-1 inline-flex items-center justify-center rounded-full border-2 border-white font-bold tabular-nums text-white dark:border-card"
+          style={{
+            backgroundColor: progressTree.avatar.ring === 'goud' ? ring.stroke : TEAL,
+            minWidth: badge,
+            height: badge,
+            fontSize: Math.max(8, Math.round(badge * 0.62)),
+            lineHeight: 1,
+            paddingLeft: 3,
+            paddingRight: 3,
+          }}
+        >
+          {data.level}
+        </span>
+      )}
+    </span>
+  );
+}

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { generatePageMetadata } from '../../../lib/pageMetadata';
-import LevensboomStudio from '../../../components/levensboom/studio/LevensboomStudio';
+import ProgressTreeStudio from '../../../components/progressTree/studio/ProgressTreeStudio';
 
 export const metadata: Metadata = generatePageMetadata('profileTree');
 
@@ -14,7 +14,7 @@ export const metadata: Metadata = generatePageMetadata('profileTree');
  * there is now exactly one of them and it fills the viewport.
  *
  * The shell that would normally come from SceneShell is assembled inside
- * LevensboomStudio instead, out of the same parts (StudioStage draws the
+ * ProgressTreeStudio instead, out of the same parts (StudioStage draws the
  * picture and the scrims, then `<Header variant="scene" />` and `<SceneRail />`
  * straight from components/scene). It has to be: SceneBackdrop can draw the
  * server SVG or the stored tree, and neither of those repaints as the reader
@@ -25,6 +25,6 @@ export const metadata: Metadata = generatePageMetadata('profileTree');
  * component that renders one client component - and the SVG the old version
  * rendered on every request is gone.
  */
-export default function LevensboomPage() {
-  return <LevensboomStudio />;
+export default function ProgressTreePage() {
+  return <ProgressTreeStudio />;
 }

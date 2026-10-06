@@ -8,7 +8,7 @@
  * `segmented` - a teal plate behind the active label, radius 9. Used where the
  * tabs are a control rather than a heading.
  *
- * `tone="dark"` is the same two shapes inside the Levensboom panel, which is
+ * `tone="dark"` is the same two shapes inside the ProgressTree panel, which is
  * `--panel-dark`: white on the active tab, 60 % white on the rest.
  */
 

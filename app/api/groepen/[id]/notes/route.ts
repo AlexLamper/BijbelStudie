@@ -5,7 +5,7 @@ import connectMongoDB from "../../../../../lib/mongodb"
 import StudyGroup from "../../../../../models/StudyGroup"
 import Note from "../../../../../models/Note"
 import User from "../../../../../models/User"
-import { PUBLIC_CARD_FIELDS, publicLevensboomCard, type PublicCardSource } from "../../../../../lib/levensboom/publicCard"
+import { PUBLIC_CARD_FIELDS, publicProgressTreeCard, type PublicCardSource } from "../../../../../lib/progressTree/publicCard"
 
 export async function GET(
   _req: NextRequest,
@@ -36,7 +36,7 @@ export async function GET(
     .limit(50)
     .lean()) as Array<{ userId?: unknown }>
 
-  // The author as the group sees them: name, image and the Levensboom card;
+  // The author as the group sees them: name, image and the ProgressTree card;
   // the raw fields the card is derived from never leave.
   const shaped = notes.map((note) => {
     const user = note.userId
@@ -44,7 +44,7 @@ export async function GET(
     const doc = user as PublicCardSource & { name?: string; image?: string }
     return {
       ...note,
-      userId: { _id: doc._id, name: doc.name, image: doc.image, levensboom: publicLevensboomCard(doc) },
+      userId: { _id: doc._id, name: doc.name, image: doc.image, levensboom: publicProgressTreeCard(doc) },
     }
   })
 

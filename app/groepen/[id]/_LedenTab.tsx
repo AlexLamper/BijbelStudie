@@ -2,13 +2,13 @@
 
 import { useState } from "react"
 import { Check, Copy, Shield, UserMinus } from "lucide-react"
-import MiniTreeAvatar from "../../../components/levensboom/MiniTreeAvatar"
-import type { PublicLevensboomCard } from "../../../lib/levensboom/publicCard"
+import MiniTreeAvatar from "../../../components/progressTree/MiniTreeAvatar"
+import type { PublicProgressTreeCard } from "../../../lib/progressTree/publicCard"
 
 interface Member {
   _id: string; name: string; image?: string
-  /** The member's Levensboom, from the group API. Null when switched off. */
-  levensboom?: PublicLevensboomCard | null
+  /** The member's ProgressTree, from the group API. Null when switched off. */
+  levensboom?: PublicProgressTreeCard | null
 }
 interface GroupMember {
   userId: Member; role: string; joinedAt: string
@@ -19,7 +19,7 @@ interface Group {
 }
 
 /** The member's tree at row size; initials only when there is no tree to show. */
-function Avatar({ name, size = 9, card }: { name: string; size?: number; card?: PublicLevensboomCard | null }) {
+function Avatar({ name, size = 9, card }: { name: string; size?: number; card?: PublicProgressTreeCard | null }) {
   return <MiniTreeAvatar card={card} name={name} size={size * 4} showLevel={size >= 9} />
 }
 

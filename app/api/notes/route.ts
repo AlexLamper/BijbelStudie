@@ -159,7 +159,7 @@ export async function POST(request: NextRequest) {
 
     const savedNote = await newNote.save();
 
-    // Feeds the Levensboom the same way reading and studying do. The guardrails
+    // Feeds the ProgressTree the same way reading and studying do. The guardrails
     // (creates only, 15 characters, three a day) live in lib/noteXp.ts so this
     // route and the app's /api/v1/notes cannot pay different amounts.
     const xp = await grantNoteXp(user._id.toString(), {

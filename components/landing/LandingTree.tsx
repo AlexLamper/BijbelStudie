@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import TreeCanvas from '../levensboom/TreeCanvas';
+import TreeCanvas from '../progressTree/TreeCanvas';
 
 /**
  * A tree on the landing page: the server's static SVG until the block scrolls

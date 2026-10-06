@@ -114,7 +114,7 @@ scripts/.cache/
 /seo-exports/
 
 # Tree design contact sheets (npm run tree:sheet) - regenerated on demand.
-design/levensboom/sheets/
+design/progressTree/sheets/
 
 # Marketing/strategy documents exported into docs/ - local only.
 docs/*.docx

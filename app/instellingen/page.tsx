@@ -11,7 +11,7 @@ import { CLOUD_VOICES } from "../../lib/cloudVoices"
 import { useIsPro } from "../../hooks/useIsPro"
 import { openProOffer } from "../../lib/proOffer"
 import SubscriptionSection from "../../components/settings/SubscriptionSection"
-import LevensboomSection from "../../components/settings/LevensboomSection"
+import ProgressTreeSection from "../../components/settings/ProgressTreeSection"
 import VriendenkringSection from "../../components/settings/VriendenkringSection"
 import { VRIENDENKRING_SECTION } from "../../components/settings/vriendenkringCopy"
 import PasswordSection from "../../components/settings/PasswordSection"
@@ -558,7 +558,7 @@ export default function SettingsPage() {
 
             {section === "account" && (
               <SectionCard title="Voortgang" subtitle="Je boom op je profiel, en wie hem mag zien">
-                <LevensboomSection />
+                <ProgressTreeSection />
               </SectionCard>
             )}
 

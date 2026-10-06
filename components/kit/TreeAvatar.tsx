@@ -1,13 +1,13 @@
 "use client";
 
-import NavTreeAvatar from "../levensboom/NavTreeAvatar";
+import NavTreeAvatar from "../progressTree/NavTreeAvatar";
 import { AvatarFrame } from "./AccountAvatar";
 import { useIsPro } from "../../hooks/useIsPro";
 
 /**
  * The reader's tree cropped to a disc, at whatever size the page asks for.
  *
- * The picture itself is ALWAYS the existing renderer (components/levensboom/
+ * The picture itself is ALWAYS the existing renderer (components/progressTree/
  * TreeCanvas via NavTreeAvatar) - design_handoff_web/RULES.md §4 is explicit
  * that the prototype's gradient trees are placeholders and the real tree is
  * never rebuilt from them. What this component owns is the frame around it: the

@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useRef } from "react"
 import { Send, Reply, Trash2, ChevronDown, BookOpen, X } from "lucide-react"
-import MiniTreeAvatar from "../../../components/levensboom/MiniTreeAvatar"
-import type { PublicLevensboomCard } from "../../../lib/levensboom/publicCard"
+import MiniTreeAvatar from "../../../components/progressTree/MiniTreeAvatar"
+import type { PublicProgressTreeCard } from "../../../lib/progressTree/publicCard"
 
 type MsgType = "bericht" | "gebedsverzoek" | "aankondiging"
 
@@ -19,14 +19,14 @@ interface Message {
   replyCount: number
   parentId: string | null
   deletedAt: string | null
-  userId: { _id: string; name: string; image?: string; levensboom?: PublicLevensboomCard | null } | null
+  userId: { _id: string; name: string; image?: string; levensboom?: PublicProgressTreeCard | null } | null
   createdAt: string
 }
 
 const EMOJI_PICKER = ["🙏", "❤️", "🔥", "👍", "😢", "🤔", "✨", "🙌"]
 
 /** The author's tree at row size; initials only when there is no tree to show. */
-function Avatar({ name, size = 8, card }: { name: string; size?: number; card?: PublicLevensboomCard | null }) {
+function Avatar({ name, size = 8, card }: { name: string; size?: number; card?: PublicProgressTreeCard | null }) {
   return <MiniTreeAvatar card={card} name={name || "?"} size={size * 4} />
 }
 

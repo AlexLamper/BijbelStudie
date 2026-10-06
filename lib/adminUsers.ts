@@ -4,7 +4,7 @@ import User from "../models/User";
 import Note from "../models/Note";
 
 import type { AdminPayload } from "./adminStats";
-import { proRingGrant } from "./levensboom/proRing";
+import { proRingGrant } from "./progressTree/proRing";
 import { isProtectedAccount } from "./accountArchive";
 import { archiveAndDeleteAccount } from "./accountDeletion";
 import { normaliseEmail } from "./userLookup";

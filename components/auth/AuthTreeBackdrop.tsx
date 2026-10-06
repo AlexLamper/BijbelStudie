@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useMemo } from 'react';
-import { buildPalette } from '../../lib/levensboom/palette';
+import { buildPalette } from '../../lib/progressTree/palette';
 import { SCENE_BG, SCENE_BG_RGB } from '../scene/tokens';
 
 /**
@@ -15,7 +15,7 @@ import { SCENE_BG, SCENE_BG_RGB } from '../scene/tokens';
  * Do not turn this into an SSR import. /inloggen measured an LCP of 9.33s in
  * production and the form has to reach the visitor with nothing in front of it.
  */
-const TreeCanvas = dynamic(() => import('../levensboom/TreeCanvas'), { ssr: false });
+const TreeCanvas = dynamic(() => import('../progressTree/TreeCanvas'), { ssr: false });
 
 /**
  * `SCENE_BG` as rgba, so the washes over the tree fade to exactly the ground

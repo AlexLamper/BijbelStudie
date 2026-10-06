@@ -3,8 +3,8 @@ import mongoose from 'mongoose';
 import connectMongoDB from '../../../lib/mongodb';
 import { appEnv, checkDatabaseSafety, PRODUCTION_DATABASE } from '../../../lib/appEnv';
 import { XP_VALUES } from '../../../lib/gamification';
-import { TRAIT_LEVELS } from '../../../lib/levensboom/traits';
-import { GROWTH_MODEL } from '../../../lib/levensboom/growth';
+import { TRAIT_LEVELS } from '../../../lib/progressTree/traits';
+import { GROWTH_MODEL } from '../../../lib/progressTree/growth';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -53,7 +53,7 @@ export async function GET() {
     },
     commit: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? null,
     branch: process.env.VERCEL_GIT_COMMIT_REF ?? null,
-    // Enough to tell at a glance whether the deployment carries the Levensboom
+    // Enough to tell at a glance whether the deployment carries the ProgressTree
     // work, without shipping a second endpoint for it.
     features: {
       levensboom: true,
