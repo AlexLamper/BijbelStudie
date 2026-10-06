@@ -3,8 +3,14 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "../../../lib/authOptions"
 import connectMongoDB from "../../../lib/mongodb"
 import User from "../../../models/User"
-import { grantXp } from "../../../lib/gamification"
-import { advanceStreak, startOfDay } from "../../../lib/streak"
+import {
+  FREEZE_EVERY_DAYS,
+  currentStreak,
+  startOfDay,
+  streakHeldByFreeze,
+  type StreakTransition,
+} from "../../../lib/streak"
+import { touchStreak } from "../../../lib/streakWrite"
 import { isAdminEmail } from "../../../lib/adminEmails"
 import { resolveIsPro } from "../../../lib/mobilePremium"
 
@@ -18,7 +24,20 @@ export async function GET() {
   if (!user) {
     return NextResponse.json({ message: "User not found" }, { status: 404 })
   }
-  return NextResponse.json({ streak: user.streak, freezes: user.freezeCount }, { status: 200 })
+  const state = {
+    streak: user.streak,
+    freezeCount: user.freezeCount,
+    lastStreakDate: user.lastStreakDate,
+  }
+  // The stored number is a run that may already be over - see lib/streak.
+  return NextResponse.json(
+    {
+      streak: currentStreak(state),
+      freezes: user.freezeCount ?? 0,
+      freezeHolding: streakHeldByFreeze(state),
+    },
+    { status: 200 }
+  )
 }
 
 export async function POST(request: Request) {
@@ -28,7 +47,9 @@ export async function POST(request: Request) {
   }
 
   await connectMongoDB()
-  const user = await User.findOne({ email: session.user.email })
+  const user = await User.findOne({ email: session.user.email }).select(
+    "streak freezeCount lastStreakDate"
+  )
   if (!user) {
     return NextResponse.json({ message: "User not found" }, { status: 404 })
   }
@@ -37,71 +58,40 @@ export async function POST(request: Request) {
   // aid, but as a production route it let any signed-in user inflate their own
   // streak - and now their badges and XP with it - from the browser console.
   const url = new URL(request.url)
-  // Pro through any channel (Stripe, App Store / RevenueCat, admin) - the same
-  // resolution as the session and /api/v1/streak. `subscribed` alone is Stripe.
+  // Pro through any channel (Stripe, App Store / RevenueCat, admin). Freezes no
+  // longer depend on it; XP multipliers still do.
   const isPro = resolveIsPro(user, isAdminEmail(session.user.email))
   const test = url.searchParams.get("test") === "true" && process.env.NODE_ENV !== "production"
 
-  // The rules themselves live in lib/streak.ts, shared with /api/v1/streak so
-  // the website and the app cannot disagree about a reader's streak.
+  // The rules themselves live in lib/streak.ts and the write in
+  // lib/streakWrite.ts, both shared with /api/v1/streak so the website and the
+  // app cannot disagree about a reader's streak.
   const testStreak = (user.streak ?? 0) + 1
-  const move = test
+  const move: StreakTransition | undefined = test
     ? {
         streak: testStreak,
-        freezeCount: (user.freezeCount ?? 0) + (testStreak % 5 === 0 ? 1 : 0),
+        freezeCount: (user.freezeCount ?? 0) + (testStreak % FREEZE_EVERY_DAYS === 0 ? 1 : 0),
         lastStreakDate: startOfDay(new Date()),
         advanced: true,
-        brokenFrom: null as number | null,
+        brokenFrom: null,
         freezeUsed: false,
+        freezesSpent: 0,
       }
-    : advanceStreak(
-        {
-          streak: user.streak,
-          freezeCount: user.freezeCount,
-          lastStreakDate: user.lastStreakDate,
-        },
-        { isPro },
-      )
+    : undefined
 
-  const newBadges = [...(user.badges ?? [])]
-
-  const set: Record<string, unknown> = {
-    streak: move.streak,
-    freezeCount: move.freezeCount,
-    lastStreakDate: move.lastStreakDate,
+  const result = await touchStreak(String(user._id), { isPro, move })
+  if (!result) {
+    return NextResponse.json({ message: "User not found" }, { status: 404 })
   }
-  // What the reader lost, kept for the return-visit prompt on the dashboard.
-  if (move.brokenFrom !== null) {
-    set.lostStreak = move.brokenFrom
-    set.lostStreakAt = startOfDay(new Date())
-  }
-
-  const updated = await User.findOneAndUpdate(
-    { _id: user._id },
-    {
-      $set: set,
-      // The record the streak-gated ProgressTree items read: it only ever grows.
-      $max: { longestStreak: move.streak },
-    },
-    { new: true }
-  )
-
-  // Badges are no longer awarded here. `lib/gamification.ts` evaluates the
-  // whole set at once, which also fixes the old `else if` chain that could
-  // only ever grant one badge per call - a user crossing two thresholds
-  // together silently lost the lower one.
-  const xp = move.advanced
-    ? await grantXp(String(user._id), "streak_day", { isPro })
-    : null
 
   return NextResponse.json(
     {
-      streak: updated.streak,
-      freezes: updated.freezeCount,
-      badges: xp ? [...new Set([...newBadges, ...xp.newBadges])] : newBadges,
-      xp,
-      brokenFrom: move.brokenFrom,
-      freezeUsed: move.freezeUsed,
+      streak: result.streak,
+      freezes: result.freezes,
+      badges: result.badges,
+      xp: result.xp,
+      brokenFrom: result.brokenFrom,
+      freezeUsed: result.freezeUsed,
     },
     { status: 200 }
   )

@@ -4,6 +4,8 @@ import connectMongoDB from '../../../../lib/mongodb';
 import User from '../../../../models/User';
 import Note from '../../../../models/Note';
 import ReadingSession from '../../../../models/ReadingSession';
+import mongoose from 'mongoose';
+import { STREAK_TIME_ZONE, currentStreak, streakHeldByFreeze } from '../../../../lib/streak';
 import { fetchDayTextFor } from '../../../../lib/mobileDayText';
 import { getActivePlanCard } from '../../../../lib/planService';
 import { describeLevel } from '../../../../lib/gamification';
@@ -32,10 +34,44 @@ type LeanUser = {
   preferences?: { reminderTimezone?: string | null } | null;
   streak?: number;
   freezeCount?: number;
+  lastStreakDate?: Date | string | null;
   xp?: number;
   badges?: string[];
 };
 
+
+/**
+ * How many distinct Dutch calendar days this year the reader has a reading
+ * session on.
+ *
+ * Grouped in `Europe/Amsterdam` rather than UTC, for the same reason the streak
+ * is (`lib/streak.ts`): an evening read at 00:30 local belongs to the day the
+ * reader thinks it does. The window starts a day early and the year is filtered
+ * on the formatted date, so a row either side of New Year lands in the right
+ * year without any offset arithmetic.
+ */
+async function activeDaysIn(userId: string, now: Date): Promise<number> {
+  const year = Number(
+    new Intl.DateTimeFormat('en-CA', { timeZone: STREAK_TIME_ZONE, year: 'numeric' }).format(now),
+  );
+  const rows = await ReadingSession.aggregate<{ _id: string }>([
+    {
+      $match: {
+        userId: new mongoose.Types.ObjectId(userId),
+        createdAt: { $gte: new Date(Date.UTC(year - 1, 11, 31)) },
+      },
+    },
+    {
+      $group: {
+        _id: {
+          $dateToString: { date: '$createdAt', format: '%Y-%m-%d', timezone: STREAK_TIME_ZONE },
+        },
+      },
+    },
+  ]);
+  const prefix = `${year}-`;
+  return rows.filter((row) => row._id.startsWith(prefix)).length;
+}
 
 export async function OPTIONS() {
   return corsPreflight();
@@ -61,6 +97,11 @@ export async function GET(req: Request) {
     if (!user) return jsonV1({ error: 'NOT_FOUND' }, { status: 404 });
 
     const now = new Date();
+    const streakState = {
+      streak: user.streak,
+      freezeCount: user.freezeCount,
+      lastStreakDate: user.lastStreakDate,
+    };
     const sevenDaysAgo = new Date(now);
     sevenDaysAgo.setDate(now.getDate() - 6);
     sevenDaysAgo.setHours(0, 0, 0, 0);
@@ -78,47 +119,52 @@ export async function GET(req: Request) {
     const repair = readChaptersRepairPipeline(user.readChapters);
     const readChapters = canonicaliseReadChapters(stored);
 
-    const [notes, sessions, activePlan, dailyVerse, resume, bibleYear] = await Promise.all([
-      Note.find({ userId: user._id }).sort({ createdAt: -1 }).limit(500).lean(),
-      ReadingSession.find({ userId: user._id, createdAt: { $gte: sevenDaysAgo } })
-        .select('createdAt')
-        .lean(),
-      getActivePlanCard(String(user._id)),
-      // `?version=` is the translation the app's reader is in (app 1.1.x and
-      // later); the verse comes back in it, with its licence notice. Without
-      // it, the Statenvertaling payload older builds render as they always did.
-      fetchDayTextFor(new URL(req.url).searchParams.get('version')).catch(() => null),
-      // "Verder waar je gebleven was" (lib/resumeTypes.ts). One indexed read
-      // of the running enrolments, plus one more only on a day a study was
-      // touched. Never fails the dashboard: without the enrolments it still
-      // answers with the last chapter or the start prompt.
-      loadDashboardResume({
-        userId: String(user._id),
-        lastRead: user.lastReadChapter ?? null,
-        readChapters,
-        timeZone: user.preferences?.reminderTimezone ?? null,
-        now,
-      }).catch((error) => {
-        console.error('[v1/dashboard] resume failed:', error);
-        return buildDashboardResume({
-          enrollments: [],
+    const [notes, sessions, activeDaysThisYear, activePlan, dailyVerse, resume, bibleYear] =
+      await Promise.all([
+        Note.find({ userId: user._id }).sort({ createdAt: -1 }).limit(500).lean(),
+        ReadingSession.find({ userId: user._id, createdAt: { $gte: sevenDaysAgo } })
+          .select('createdAt')
+          .lean(),
+        // "Dagen in de app dit jaar" on Profiel: distinct Dutch calendar days
+        // this year on which the reader opened something. Counted here rather
+        // than on the device, which only ever sees the last 7 days.
+        activeDaysIn(String(user._id), now).catch(() => null),
+        getActivePlanCard(String(user._id)),
+        // `?version=` is the translation the app's reader is in (app 1.1.x and
+        // later); the verse comes back in it, with its licence notice. Without
+        // it, the Statenvertaling payload older builds render as they always did.
+        fetchDayTextFor(new URL(req.url).searchParams.get('version')).catch(() => null),
+        // "Verder waar je gebleven was" (lib/resumeTypes.ts). One indexed read
+        // of the running enrolments, plus one more only on a day a study was
+        // touched. Never fails the dashboard: without the enrolments it still
+        // answers with the last chapter or the start prompt.
+        loadDashboardResume({
+          userId: String(user._id),
           lastRead: user.lastReadChapter ?? null,
           readChapters,
+          timeZone: user.preferences?.reminderTimezone ?? null,
           now,
-        });
-      }),
-      // Bijbel in een jaar "Vandaag" (lib/bibleYear/types.ts BibleYearToday),
-      // null without a running plan. One indexed read; never fails the dashboard.
-      getToday(String(user._id), now).catch((error) => {
-        console.error('[v1/dashboard] bible-year failed:', error);
-        return null;
-      }),
-      repair
-        ? User.updateOne({ _id: user._id }, repair).catch((error) => {
-            console.warn('[v1/dashboard] readChapters repair skipped:', error);
-          })
-        : null,
-    ]);
+        }).catch((error) => {
+          console.error('[v1/dashboard] resume failed:', error);
+          return buildDashboardResume({
+            enrollments: [],
+            lastRead: user.lastReadChapter ?? null,
+            readChapters,
+            now,
+          });
+        }),
+        // Bijbel in een jaar "Vandaag" (lib/bibleYear/types.ts BibleYearToday),
+        // null without a running plan. One indexed read; never fails the dashboard.
+        getToday(String(user._id), now).catch((error) => {
+          console.error('[v1/dashboard] bible-year failed:', error);
+          return null;
+        }),
+        repair
+          ? User.updateOne({ _id: user._id }, repair).catch((error) => {
+              console.warn('[v1/dashboard] readChapters repair skipped:', error);
+            })
+          : null,
+      ]);
 
     // ── Weekly reading strip (identical labelling to /api/user/weekly-stats) ──
     const DAY_LABELS = ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo'];
@@ -157,8 +203,15 @@ export async function GET(req: Request) {
 
     return jsonV1({
       user: { name: auth.name, email: auth.email, image: auth.image, isPro: auth.isPro },
-      streak: user.streak ?? 0,
+      // Not `user.streak`: that field is only rewritten when something
+      // advances it, so a run that ended days ago still sits there and the
+      // Start tab printed it as if it were alive. See lib/streak.
+      streak: currentStreak(streakState, { now }),
       freezes: user.freezeCount ?? 0,
+      // The run is standing on freezes, not on today's reading: the app paints
+      // the pill as a snowflake rather than a flame.
+      freezeHolding: streakHeldByFreeze(streakState, { now }),
+      activeDaysThisYear,
       level: describeLevel(user.xp ?? 0),
       badges: user.badges ?? [],
       lastRead: user.lastReadChapter ?? null,

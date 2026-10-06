@@ -12,6 +12,8 @@ import User from '../../../../models/User';
 import ReadingSession from '../../../../models/ReadingSession';
 import { grantXp } from '../../../../lib/gamification';
 import { recordBibleYearChapter } from '../../../../lib/bibleYear/service';
+import { currentStreak, startOfDay, streakHeldByFreeze } from '../../../../lib/streak';
+import { touchStreak } from '../../../../lib/streakWrite';
 
 export const dynamic = 'force-dynamic';
 
@@ -119,7 +121,35 @@ export async function POST(req: Request) {
         ? null
         : await grantXp(auth.id, 'chapter_read', { isPro: auth.isPro });
 
-    return jsonV1({ lastReadChapter: user.lastReadChapter, xp });
+    // Reading a chapter IS showing up today, so it advances the streak - the
+    // thing this route used not to do. Only finishing a guided lesson bumped it
+    // (app: lesson_screen.dart), so a reader who only read chapters saw the week
+    // strip tick days while the pill stayed at "1 dag op rij", and the next
+    // lesson they finished broke the run. The website has always bumped on a
+    // read (hooks/useBibleData.ts); the app's own read path now matches it.
+    //
+    // Already bumped today - the common case - costs no extra query: the day is
+    // read off the document this route already fetched.
+    const stored = {
+      streak: user.streak,
+      freezeCount: user.freezeCount,
+      lastStreakDate: user.lastStreakDate,
+    };
+    const bumpedToday =
+      !!user.lastStreakDate &&
+      startOfDay(new Date(user.lastStreakDate)).getTime() === startOfDay(new Date()).getTime();
+    const moved = bumpedToday ? null : await touchStreak(auth.id, { isPro: auth.isPro });
+
+    return jsonV1({
+      lastReadChapter: user.lastReadChapter,
+      xp,
+      // What the header should show right after this read, so the app does not
+      // have to wait for the next `GET /dashboard` to stop lying.
+      streak: moved ? moved.streak : currentStreak(stored),
+      freezes: moved ? moved.freezes : (user.freezeCount ?? 0),
+      // Never true straight after a bump: today's read is in.
+      freezeHolding: moved ? false : streakHeldByFreeze(stored),
+    });
   } catch (error) {
     return handleV1Error(error);
   }

@@ -112,11 +112,11 @@ export async function GET(req: Request) {
       hoofdstuk: chapter,
       volgendHoofdstuk: nextChapter,
       reeks: user.streak && user.streak > 0 ? user.streak : undefined,
-      // Freezes are Pro-only, so a free account is told it has none rather
-      // than being promised protection it cannot spend. `auth.isPro` is the
-      // resolved entitlement (Stripe, App Store / RevenueCat, admin); the
-      // `subscribed` flag alone told App Store subscribers they had none.
-      vriesdagen: auth.isPro ? (user.freezeCount ?? 0) : 0,
+      // Every reader can spend a banked freeze now (lib/streak.ts), so the
+      // count is the count. It used to be zeroed for a free account, which was
+      // right while freezes were Pro-only and wrong the moment they stopped
+      // being.
+      vriesdagen: user.freezeCount ?? 0,
       niveau: levelForXp(user.xp ?? 0),
     };
     const tokensForDay = (day: number): CopyTokens => {

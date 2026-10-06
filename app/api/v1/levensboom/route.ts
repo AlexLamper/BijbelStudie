@@ -22,6 +22,7 @@ import {
 import { buildProgressTreePayload, type ProgressTreePrefs } from '../../../../lib/progressTree/summary';
 import { ensureLegacyXp, floorForUser } from '../../../../lib/progressTree/legacy';
 import { fracOf } from '../../../../lib/progressTree/client';
+import { currentStreak } from '../../../../lib/streak';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,7 +52,10 @@ async function payloadFor(userId: string, isPro: boolean, row: UserRow) {
     lastStreakDate: row.lastStreakDate ?? null,
     prefs: row.levensboom ?? null,
     badges: badgesFor(row, isPro),
-    streak: row.streak ?? 0,
+    // The same number the Start tab's pill shows. `row.streak` is only
+    // rewritten when something advances it, so a run that ended days ago still
+    // sits in the field - and the tree would grow on it (`lib/streak.ts`).
+    streak: currentStreak(row),
     longestStreak: row.longestStreak ?? 0,
     isPro,
   });

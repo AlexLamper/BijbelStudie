@@ -132,9 +132,9 @@ const DAILY_READING: Variant[] = [
 /**
  * Streak nudges split on whether a freeze will actually catch the miss.
  *
- * Freezes are Pro-only (`app/api/streak/route.ts`), so a free account's
- * `freezeCount` is not protection and the copy must never imply it is. The
- * caller passes `vriesdagen: 0` for anyone who cannot spend one.
+ * A banked freeze is protection for every reader (`lib/streak.ts`): one is
+ * granted on every 7th day of a run and any account may spend it. The caller
+ * passes `vriesdagen: 0` only for someone who has none banked.
  */
 const STREAK_RISK_NO_FREEZE: Variant[] = [
   { id: 's01', title: 'Je reeks van {reeks} dagen', body: 'Eén hoofdstuk vandaag houdt hem heel.', needs: ['reeks'] },

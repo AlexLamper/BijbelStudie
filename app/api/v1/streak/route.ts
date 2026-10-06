@@ -2,8 +2,8 @@ import { requireUser } from '../../../../lib/apiAuth';
 import { corsPreflight, handleV1Error, jsonV1 } from '../../../../lib/apiV1';
 import connectMongoDB from '../../../../lib/mongodb';
 import User from '../../../../models/User';
-import { grantXp } from '../../../../lib/gamification';
-import { advanceStreak, startOfDay } from '../../../../lib/streak';
+import { currentStreak, streakHeldByFreeze } from '../../../../lib/streak';
+import { touchStreak } from '../../../../lib/streakWrite';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,18 +15,30 @@ export async function GET(req: Request) {
   try {
     const auth = await requireUser(req);
     await connectMongoDB();
-    const user = await User.findById(auth.id);
+    const user = await User.findById(auth.id).select('streak freezeCount lastStreakDate');
     if (!user) return jsonV1({ error: 'NOT_FOUND' }, { status: 404 });
-    return jsonV1({ streak: user.streak ?? 0, freezes: user.freezeCount ?? 0 });
+    const state = {
+      streak: user.streak,
+      freezeCount: user.freezeCount,
+      lastStreakDate: user.lastStreakDate,
+    };
+    // `currentStreak`, not `user.streak`: the stored number is only rewritten
+    // when something advances it, so a run that died days ago still sits there.
+    return jsonV1({
+      streak: currentStreak(state),
+      freezes: user.freezeCount ?? 0,
+      freezeHolding: streakHeldByFreeze(state),
+    });
   } catch (error) {
     return handleV1Error(error);
   }
 }
 
 /**
- * Advances the daily streak. Same rules as the website's `/api/streak`:
- * one bump per calendar day, a freeze absorbs a single missed day for Pro
- * users, and every fifth day grants a freeze.
+ * Advances the daily streak. Same rules as the website's `/api/streak`, because
+ * both go through `lib/streakWrite.ts`: one bump per Dutch calendar day, banked
+ * freezes bridge missed days for every reader, and every 7th day grants a
+ * freeze.
  *
  * The website's `?test=true` escape hatch is deliberately not carried over -
  * a client-triggerable streak increment has no place in a shipped binary.
@@ -34,54 +46,16 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const auth = await requireUser(req);
-    await connectMongoDB();
-
-    const user = await User.findById(auth.id);
-    if (!user) return jsonV1({ error: 'NOT_FOUND' }, { status: 404 });
-
-    const move = advanceStreak(
-      {
-        streak: user.streak,
-        freezeCount: user.freezeCount,
-        lastStreakDate: user.lastStreakDate,
-      },
-      { isPro: auth.isPro },
-    );
-    const newBadges = [...(user.badges ?? [])];
-
-    const set: Record<string, unknown> = {
-      streak: move.streak,
-      freezeCount: move.freezeCount,
-      lastStreakDate: move.lastStreakDate,
-    };
-    // What the reader lost, kept for the return-visit prompt. Only the break
-    // itself writes it, so a later read cannot overwrite the number with 1.
-    if (move.brokenFrom !== null) {
-      set.lostStreak = move.brokenFrom;
-      set.lostStreakAt = startOfDay(new Date());
-    }
-
-    const updated = await User.findByIdAndUpdate(
-      user._id,
-      {
-        $set: set,
-        // The record the streak-gated ProgressTree items read: it only ever grows.
-        $max: { longestStreak: move.streak },
-      },
-      { new: true },
-    );
-
-    // Badge evaluation moved to lib/gamification.ts so both streak routes and
-    // every other XP source agree on what has been earned.
-    const xp = move.advanced ? await grantXp(auth.id, 'streak_day', { isPro: auth.isPro }) : null;
+    const result = await touchStreak(auth.id, { isPro: auth.isPro });
+    if (!result) return jsonV1({ error: 'NOT_FOUND' }, { status: 404 });
 
     return jsonV1({
-      streak: updated.streak,
-      freezes: updated.freezeCount,
-      badges: xp ? [...new Set([...newBadges, ...xp.newBadges])] : (updated.badges ?? []),
-      xp,
-      brokenFrom: move.brokenFrom,
-      freezeUsed: move.freezeUsed,
+      streak: result.streak,
+      freezes: result.freezes,
+      badges: result.badges,
+      xp: result.xp,
+      brokenFrom: result.brokenFrom,
+      freezeUsed: result.freezeUsed,
     });
   } catch (error) {
     return handleV1Error(error);
