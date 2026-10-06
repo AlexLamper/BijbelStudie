@@ -547,6 +547,16 @@ export const SETTING_COMMANDS: CommandItem[] = [
     target: { type: "link", href: setting("vriendenkring", "vindbaar") },
   },
   {
+    id: "instelling-openbaar-delen",
+    group: "instelling",
+    title: "Openbaar delen",
+    subtitle: "Instellingen · Vriendenkring",
+    keywords: ["openbaar", "ontdek", "publiek", "delen", "buiten je kring", "privacy", "prive"],
+    icon: "group",
+    visibility: "ingelogd",
+    target: { type: "link", href: setting("vriendenkring", "openbaar-delen") },
+  },
+  {
     id: "instelling-mijlpalen-delen",
     group: "instelling",
     title: "Mijlpalen delen",

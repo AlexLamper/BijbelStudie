@@ -19,6 +19,7 @@ import type {
   FriendSettings,
   FriendSuggestionsResponse,
   FriendSummary,
+  FriendsDiscover,
   FriendsFeed,
   FriendsKring,
 } from './types';
@@ -93,8 +94,18 @@ export type FeedQuery = { limit?: number; before?: string | null };
  */
 export type FriendSettingsPatch = {
   discoverable?: boolean;
+  publicPosts?: boolean;
   autoShare?: Partial<FriendSettings['autoShare']>;
 };
+
+/**
+ * What `GET /discover` takes: the feed query plus the chip.
+ *
+ * `kind` is the storage value, not the Dutch label on the chip - 'verse', not
+ * 'Verzen' - so a wording change on the Ontdek tab is not an API change.
+ * Absent, or 'alles', is no filter at all.
+ */
+export type DiscoverQuery = FeedQuery & { kind?: string | null };
 
 /**
  * `?limit=&before=`, with only the parts that were asked for.
@@ -120,6 +131,21 @@ export function feedQuery(query: FeedQuery | number = {}): string {
  * the oldest; it is read off the row rather than tracked separately so a
  * refetch can never leave the cursor pointing at a post that is gone.
  */
+/**
+ * `?limit=&before=&kind=` for the Ontdek tab.
+ *
+ * Built on `feedQuery` so the two feeds can never page differently, with the
+ * chip appended last. 'alles' is dropped rather than sent: the server treats
+ * an unknown kind as no filter, but a query string that says "alles" invites a
+ * reader of the code to look for a kind by that name.
+ */
+export function discoverQuery(query: DiscoverQuery = {}): string {
+  const base = feedQuery({ limit: query.limit, before: query.before });
+  const kind = query.kind && query.kind !== 'alles' ? query.kind : null;
+  if (!kind) return base;
+  return `${base ? `${base}&` : '?'}kind=${encodeURIComponent(kind)}`;
+}
+
 export function feedCursor(posts: readonly { createdAt: string }[]): string | null {
   const last = posts.length > 0 ? posts[posts.length - 1] : null;
   return last?.createdAt ?? null;
@@ -128,6 +154,9 @@ export function feedCursor(posts: readonly { createdAt: string }[]): string | nu
 export const friendsClient = {
   feed: (query?: FeedQuery | number) => call<FriendsFeed>(`/feed${feedQuery(query)}`),
   markSeen: () => call<FriendMutationResponse>('/feed/seen', post()),
+
+  /** The Ontdek tab: public posts from outside the kring, plus the week's top verses. */
+  discover: (query?: DiscoverQuery) => call<FriendsDiscover>(`/discover${discoverQuery(query)}`),
 
   kring: () => call<FriendsKring>(''),
   removeFriend: (userId: string) => call<FriendMutationResponse>(`/${userId}`, { method: 'DELETE' }),

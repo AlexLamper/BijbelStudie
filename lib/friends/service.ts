@@ -10,7 +10,7 @@ import Report from '../../models/Report';
 import BibleYearEnrollment from '../../models/BibleYearEnrollment';
 import { scheduledDayNumber } from '../bibleYear/progress';
 import { PLAN_DAYS } from '../bibleYear/schedule';
-import { isPublicTree } from '../levensboom/summary';
+import { isPublicTree } from '../progressTree/summary';
 import { normaliseReferralCode } from '../referralRules';
 import { ensureReferralCode } from '../referral';
 import { contactPepper, hashIdentifier, normaliseEmail, normalisePhone, sanitiseHashes } from './discovery';
@@ -35,9 +35,11 @@ import type {
   FriendSource,
   FriendSuggestionsResponse,
   FriendSummary,
+  FriendsDiscover,
   FriendsFeed,
   FriendsKring,
   ReportReason,
+  TrendingShare,
 } from './types';
 
 /**
@@ -81,14 +83,17 @@ export const GRAPH_SCAN_LIMIT = 2000;
  * subdocument (the avatar choice, the seen items, the legacy capture) into
  * every kring list.
  */
-const USER_CARD_FIELDS = '_id name image streak levensboom.publicProfile levensboom.disabled';
+const USER_CARD_FIELDS =
+  '_id name image streak lastStreakDate levensboom.publicProfile levensboom.disabled';
 
 type UserCard = {
   _id: mongoose.Types.ObjectId;
   name?: string;
   image?: string;
   streak?: number;
-  levensboom?: { publicProfile?: boolean | null; disabled?: boolean | null } | null;
+  /** The day the streak was last credited, which is "read something". */
+  lastStreakDate?: Date | string | null;
+  levensboom?:{ publicProfile?: boolean | null; disabled?: boolean | null } | null;
 };
 
 type PlanRow = {
@@ -178,6 +183,25 @@ async function blockedBetween(userId: string): Promise<Set<string>> {
   return out;
 }
 
+/**
+ * The Amsterdam calendar day, `yyyy-mm-dd`.
+ *
+ * Fixed to the product's own zone rather than the server's, the same reason
+ * `dayKeyNL` gives: Vercel runs in UTC, so "today" read at 01:00 Dutch time
+ * would otherwise be filed under yesterday. Inlined rather than imported from
+ * lib/mobileDayText.ts, which would pull the whole day-text surface into every
+ * kring query.
+ */
+function amsterdamDay(date: Date): string {
+  if (Number.isNaN(date.getTime())) return '';
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Amsterdam',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(date);
+}
+
 // ------------------------------------------------------------------- people
 
 /**
@@ -216,6 +240,7 @@ async function summariesFor(ids: string[], since: Map<string, Date | null> = new
     }
   }
 
+  const today = amsterdamDay(now);
   const order = new Map(ids.map((value, index) => [value, index]));
   return users
     .map((user) => {
@@ -226,6 +251,11 @@ async function summariesFor(ids: string[], since: Map<string, Date | null> = new
         name: user.name ?? '',
         image: user.image ?? null,
         streak: user.streak ?? 0,
+        // The green dot. `lastStreakDate` is the day the reader last had their
+        // streak credited, which is the one stored answer to "did they read
+        // today" - no new field, and nothing finer grained than a day, which
+        // is as much as a kring row is allowed to tell.
+        activeToday: user.lastStreakDate ? amsterdamDay(new Date(user.lastStreakDate)) === today : false,
         planDay: plan ? plan.day : null,
         planTotalDays: plan ? plan.total : null,
         friendsSince: isoOrNull(since.get(key) ?? null),
@@ -459,6 +489,7 @@ type PostRow = {
   kind?: string;
   reference?: string;
   body?: string;
+  sourceId?: string;
   likes?: { userId?: mongoose.Types.ObjectId }[];
   commentCount?: number;
   createdAt?: Date;
@@ -478,6 +509,10 @@ function toPostView(row: PostRow, author: UserCard | undefined, me: string): Fri
     likeCount: likes.length,
     likedByMe: likes.some((like) => String(like.userId) === me),
     commentCount: row.commentCount ?? 0,
+    // Stored since the model was written, on the wire since the web feed grew
+    // a card for a finished study. Never resolved - see the note on
+    // `FriendPost.sourceId` in ./types.
+    sourceId: row.sourceId ?? null,
   };
 }
 
@@ -532,6 +567,154 @@ export async function getFeed(
     posts: rows.map((row) => toPostView(row, authorById.get(String(row.userId)), me)),
     newActivityCount,
     hasFriends: true,
+  };
+}
+
+// ------------------------------------------------------------------- ontdek
+
+/**
+ * The prefix `lib/friends/milestones.ts` keys a finished study with
+ * (`study:<studyId>`). One literal, read here by the "Studies" chip and by the
+ * post card, so the two cannot disagree about what a study post is.
+ */
+export const STUDY_SOURCE_PREFIX = 'study:';
+const STUDY_SOURCE_RE = /^study:/;
+
+/** Which posts one chip on Ontdek lets through. `null` is "Alles". */
+export type DiscoverKind = 'verse' | 'note' | 'milestone' | 'study';
+
+/** "Veel gedeeld deze week" is exactly that: seven days, four rows. */
+export const TRENDING_DAYS = 7;
+export const TRENDING_SHOWN = 4;
+/** The opening of the verse, not the verse: a list row is one line. */
+const TRENDING_PREVIEW = 160;
+
+/**
+ * Everyone who publishes to Ontdek and whose posts this reader may see.
+ *
+ * Friends are left out on purpose: their posts are the Vrienden tab, and a
+ * feed that shows the same card twice under two labels reads as a bug. The
+ * reader's own posts and anyone blocked in either direction are gone too.
+ *
+ * Capped by `GRAPH_SCAN_LIMIT`, the same runaway guard the rest of this file
+ * uses. A reader at the cap sees a feed drawn from the first n publishers
+ * rather than an error.
+ */
+async function discoverAuthorIds(userId: string): Promise<string[]> {
+  await connectMongoDB();
+  const [rows, friendIds, blocked] = await Promise.all([
+    FriendProfile.find({ publicPosts: true })
+      .select('userId')
+      .limit(GRAPH_SCAN_LIMIT)
+      .lean<{ userId: mongoose.Types.ObjectId }[]>(),
+    friendIdsFor(userId),
+    blockedBetween(userId),
+  ]);
+  const me = String(userId);
+  const friendSet = new Set(friendIds);
+  return rows
+    .map((row) => String(row.userId))
+    .filter((id) => id !== me && !friendSet.has(id) && !blocked.has(id));
+}
+
+/** The `kind` / `sourceId` half of the feed filter for one chip. */
+function discoverKindFilter(kind: DiscoverKind | null): Record<string, unknown> {
+  if (kind === 'verse' || kind === 'note') return { kind };
+  // The two milestone chips are disjoint, so a finished study appears under
+  // "Studies" and nowhere else. Anchored, so the {userId, kind, sourceId}
+  // index can still be used.
+  if (kind === 'study') return { kind: 'milestone', sourceId: STUDY_SOURCE_RE };
+  if (kind === 'milestone') return { kind: 'milestone', sourceId: { $not: STUDY_SOURCE_RE } };
+  return {};
+}
+
+/**
+ * Which references were shared most in the last week, with the opening of the
+ * most recent copy of each.
+ *
+ * Drawn from the same set of publishers as the feed above it, so a kring-only
+ * post can never be quoted here. Verses only: a milestone has no reference
+ * worth ranking, and a note's "reference" is the passage it hangs under, which
+ * would mix two different things into one list.
+ */
+async function trendingShares(authorIds: string[], now: Date): Promise<TrendingShare[]> {
+  if (authorIds.length === 0) return [];
+  const since = new Date(now.getTime() - TRENDING_DAYS * 86_400_000);
+  const rows = await FriendPost.aggregate<{ _id: string; shareCount: number; preview?: string }>([
+    {
+      $match: {
+        userId: { $in: authorIds.map((id) => oid(id)) },
+        kind: 'verse',
+        reference: { $type: 'string', $ne: '' },
+        createdAt: { $gte: since },
+      },
+    },
+    // Newest first, so `$first` inside the group is the most recent copy.
+    { $sort: { createdAt: -1 } },
+    { $group: { _id: '$reference', shareCount: { $sum: 1 }, preview: { $first: '$body' } } },
+    // Then by reference, so two references shared equally often keep a stable
+    // order between two calls instead of swapping places on a refresh.
+    { $sort: { shareCount: -1, _id: 1 } },
+    { $limit: TRENDING_SHOWN },
+  ]);
+  return rows.map((row) => ({
+    reference: row._id,
+    preview: (row.preview ?? '').trim().slice(0, TRENDING_PREVIEW),
+    shareCount: row.shareCount,
+  }));
+}
+
+/**
+ * `GET /api/v1/friends/discover` - the Ontdek tab.
+ *
+ * Public posts of readers who are not in the kring, newest first, plus the
+ * week's most shared verses. Paged exactly like `getFeed`: `before` is the
+ * `createdAt` of the oldest post on screen, and a short page means the end.
+ *
+ * `trending` is computed for the first page only - paging must not recompute
+ * and resend a list that has not moved.
+ */
+export async function getDiscover(
+  userId: string,
+  options: { limit?: number; before?: Date | null; kind?: DiscoverKind | null } = {},
+): Promise<FriendsDiscover> {
+  await connectMongoDB();
+  const limit = Math.min(Math.max(options.limit ?? FEED_PAGE_SIZE, 1), FEED_MAX_PAGE_SIZE);
+  const authorIds = await discoverAuthorIds(userId);
+  if (authorIds.length === 0) return { posts: [], trending: [] };
+
+  const objectIds = authorIds.map((id) => oid(id));
+  const filter: Record<string, unknown> = {
+    userId: { $in: objectIds },
+    ...discoverKindFilter(options.kind ?? null),
+  };
+  if (options.before) filter.createdAt = { $lt: options.before };
+
+  const [rows, inFlight, trending] = await Promise.all([
+    FriendPost.find(filter).sort({ createdAt: -1 }).limit(limit).lean<PostRow[]>(),
+    requestsInFlight(userId),
+    options.before ? Promise.resolve([] as TrendingShare[]) : trendingShares(authorIds, new Date()),
+  ]);
+
+  const authors = await User.find({ _id: { $in: rows.map((row) => row.userId) } })
+    .select(USER_CARD_FIELDS)
+    .lean<UserCard[]>();
+  const authorById = new Map(authors.map((user) => [String(user._id), user]));
+
+  const me = String(userId);
+  return {
+    posts: rows.map((row) => {
+      const author = String(row.userId);
+      return {
+        ...toPostView(row, authorById.get(author), me),
+        // Friends and the reader's own posts are already out of `authorIds`,
+        // so a request in flight is the only thing left that can close the
+        // invitation. Decided here rather than in a client, which would have
+        // to guess from whichever lists it happened to have loaded.
+        canInvite: !inFlight.has(author),
+      };
+    }),
+    trending,
   };
 }
 
@@ -615,8 +798,21 @@ async function readablePost(userId: string, postId: string) {
   if (!post) throw new FriendsError('NOT_FOUND', 404, 'Bericht niet gevonden.');
   const author = String(post.userId);
   if (author !== String(userId) && !(await areFriends(userId, author))) {
-    // 404 rather than 403: whether a post exists is itself private.
-    throw new FriendsError('NOT_FOUND', 404, 'Bericht niet gevonden.');
+    // Not theirs and not a friend's, so the one remaining way in is Ontdek:
+    // the writer publishes publicly (`FriendProfile.publicPosts`) and there is
+    // no block either way. Checked here rather than in the discover feed
+    // because this is what `setLike` and `addComment` go through - a card a
+    // reader can see has to be a card they can like.
+    const [profile, blocked] = await Promise.all([
+      FriendProfile.findOne({ userId: oid(author) })
+        .select('publicPosts')
+        .lean<{ publicPosts?: boolean } | null>(),
+      blockedBetween(userId),
+    ]);
+    if (profile?.publicPosts !== true || blocked.has(author)) {
+      // 404 rather than 403: whether a post exists is itself private.
+      throw new FriendsError('NOT_FOUND', 404, 'Bericht niet gevonden.');
+    }
   }
   return post;
 }
@@ -968,6 +1164,8 @@ export async function getSettings(userId: string): Promise<FriendSettings> {
   const profile = await profileFor(userId);
   return {
     discoverable: Boolean(profile?.discoverable),
+    // Absent reads as off: a publishing permission is never assumed.
+    publicPosts: Boolean(profile?.publicPosts),
     autoShare: {
       milestones: profile?.autoShare?.milestones !== false,
       verses: Boolean(profile?.autoShare?.verses),
@@ -983,9 +1181,14 @@ export async function getSettings(userId: string): Promise<FriendSettings> {
 
 export async function updateSettings(userId: string, body: unknown): Promise<FriendSettings> {
   await connectMongoDB();
-  const input = (body ?? {}) as { discoverable?: unknown; autoShare?: Record<string, unknown> };
+  const input = (body ?? {}) as {
+    discoverable?: unknown;
+    publicPosts?: unknown;
+    autoShare?: Record<string, unknown>;
+  };
   const set: Record<string, unknown> = {};
   if (typeof input.discoverable === 'boolean') set.discoverable = input.discoverable;
+  if (typeof input.publicPosts === 'boolean') set.publicPosts = input.publicPosts;
   for (const key of ['milestones', 'verses', 'notes'] as const) {
     const value = input.autoShare?.[key];
     // `$set` on the named path only - never the whole `autoShare` object, so

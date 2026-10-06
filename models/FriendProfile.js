@@ -26,6 +26,15 @@ const FriendProfileSchema = new mongoose.Schema(
     /** May others find me by a contact hash? Off until explicitly set. */
     discoverable: { type: Boolean, default: false },
 
+    /**
+     * May what I share also be shown on Ontdek, to people outside my kring?
+     * Off until explicitly set, and separate from `discoverable` on purpose:
+     * that one is about being FOUND by a contact hash, this one is about what
+     * is PUBLISHED. One flag for both would have turned a findability switch
+     * into a publishing permission nobody granted.
+     */
+    publicPosts: { type: Boolean, default: false },
+
     /** HMAC-SHA256(pepper, normalised value), hex, truncated to 32 chars. */
     phoneHashes: { type: [String], default: [] },
     emailHashes: { type: [String], default: [] },
@@ -61,6 +70,9 @@ const FriendProfileSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Who publishes to Ontdek. Sparse-in-effect (nearly every document is
+// `false`), and the one query the discover feed starts from.
+FriendProfileSchema.index({ publicPosts: 1 });
 // Multikey, for the contact match: one query per hash batch.
 FriendProfileSchema.index({ phoneHashes: 1 });
 FriendProfileSchema.index({ emailHashes: 1 });

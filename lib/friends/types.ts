@@ -23,6 +23,15 @@ export type FriendSummary = {
   image: string | null;
   /** Days in a row, for the row's flame. 0 when they have none. */
   streak: number;
+  /**
+   * Did this person read something today, in Amsterdam time? The green dot on
+   * a kring row, and nothing more precise than that on purpose: a kring shows
+   * that somebody is reading along, never when they were last online.
+   *
+   * Additive and optional like `mutualCount`: absent is "the server did not
+   * say", which renders as no dot - the quiet answer.
+   */
+  activeToday?: boolean;
   /** "Dag 42 van 365" is built client-side from these two. */
   planDay: number | null;
   planTotalDays: number | null;
@@ -65,6 +74,19 @@ export type FriendPost = {
   likeCount: number;
   likedByMe: boolean;
   commentCount: number;
+  /**
+   * The note id, daytext date or milestone key the post was made from -
+   * `models/FriendPost.js` has always stored it, the wire never carried it.
+   *
+   * Additive and optional, the rule `mutualCount` set: a client that does not
+   * know the field simply renders the post by its `kind`, which is what every
+   * build before this one did. The web feed reads it for one thing only: a
+   * milestone keyed `study:<id>` is a finished study, and gets the row with the
+   * artwork plate and a way in to `/studie/<id>` instead of a flat sentence.
+   * Nothing is resolved from it - a post is a copy (see the model) - so a
+   * `sourceId` whose study no longer exists costs a dead link, never a render.
+   */
+  sourceId?: string | null;
 };
 
 export type FriendPostComment = {
@@ -121,6 +143,46 @@ export type FriendProfileView = {
   mutualCount: number;
   /** Their kring, for a friend. `null` means "not yours to see". */
   friends: FriendSummary[] | null;
+};
+
+/**
+ * One post on the Ontdek tab.
+ *
+ * `canInvite` is the server's answer to "may this reader still ask the writer
+ * to be friends", and it is the only thing the "Toevoegen als vriend" link is
+ * allowed to depend on: false covers an existing vriendschap, a request in
+ * flight either direction, and the reader's own post. A client must not try to
+ * work that out from the lists it happens to have loaded.
+ */
+export type DiscoverPost = FriendPost & { canInvite: boolean };
+
+/**
+ * One row of "Veel gedeeld deze week".
+ *
+ * `preview` is the opening of the most recently shared copy of that verse, and
+ * it only ever comes from a post whose writer publishes to Ontdek - the same
+ * gate the feed above it uses, so the list can never quote a kring-only post.
+ */
+export type TrendingShare = {
+  reference: string;
+  /** The start of the verse, already cut to length by the server. */
+  preview: string;
+  /** How often it was shared in the window. */
+  shareCount: number;
+};
+
+/**
+ * `GET /api/v1/friends/discover?limit=&before=&kind=`.
+ *
+ * Only writers who switched "Openbaar delen" on appear here
+ * (`FriendProfile.publicPosts`, off until set). `trending` rides along rather
+ * than taking its own call: both halves of the Ontdek tab read the same window
+ * of the same collection, and a second round trip for four lines buys nothing.
+ * It is sent with the first page only - paging the feed must not re-send it.
+ */
+export type FriendsDiscover = {
+  posts: DiscoverPost[];
+  trending: TrendingShare[];
 };
 
 /** `GET /api/v1/friends/suggestions` - "Mensen die je misschien kent". */
@@ -201,6 +263,16 @@ export type FriendMutationResponse = {
 /** The reader's own Vriendenkring settings. */
 export type FriendSettings = {
   discoverable: boolean;
+  /**
+   * May what the reader shares also appear on Ontdek, to people who are not in
+   * their kring? Off until explicitly set, and deliberately NOT the same thing
+   * as `discoverable`, which is only about being found by a contact hash.
+   *
+   * Optional and additive: a client that predates the switch, or a deployed
+   * API that does, reads it as absent, and absent must render as off - the
+   * safe answer for a publishing permission.
+   */
+  publicPosts?: boolean;
   autoShare: { milestones: boolean; verses: boolean; notes: boolean };
   /** Whether contact hashes are on file, so the client can offer "vergeten". */
   hasContactHashes: boolean;

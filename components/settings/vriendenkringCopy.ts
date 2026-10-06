@@ -32,6 +32,16 @@ export const DISCOVERABLE_COPY = {
     'je contacten: een browser kan geen adresboek lezen, contacten zoeken kan alleen in de app.',
 } as const;
 
+export const PUBLIC_POSTS_COPY = {
+  label: 'Openbaar delen',
+  hint:
+    'Hiermee komt wat je deelt ook op het tabblad Ontdek te staan, waar lezers die niet in je ' +
+    'kring zitten het kunnen zien, liken en erop reageren. Staat dit uit, dan blijft alles wat ' +
+    'je deelt alleen voor je vrienden. Dit staat los van vindbaar voor je contacten: dat gaat ' +
+    'over wie jou kan vinden, dit over wie je berichten ziet. Je kunt het altijd weer uitzetten; ' +
+    'berichten die er al staan verdwijnen dan ook van Ontdek.',
+} as const;
+
 export const AUTO_SHARE_COPY = {
   milestones: {
     label: 'Mijlpalen',

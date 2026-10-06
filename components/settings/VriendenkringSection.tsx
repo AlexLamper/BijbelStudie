@@ -13,6 +13,7 @@ import {
   BLOCKED_COPY,
   DISCOVERABLE_COPY,
   FORGET_CONTACTS_COPY,
+  PUBLIC_POSTS_COPY,
 } from './vriendenkringCopy';
 
 /**
@@ -20,7 +21,7 @@ import {
  * findability, the three things that may be published, the blocked list, and
  * throwing away the contact fingerprints.
  *
- * Built on LevensboomSection's row shape and toggle so the switches line up
+ * Built on ProgressTreeSection's row shape and toggle so the switches line up
  * with every other control on the page - the panel is the page's panel, not
  * its own thing. All copy lives in ./vriendenkringCopy so the privacy promise
  * can be read (and tested) as one block.
@@ -30,7 +31,7 @@ import {
  * so a toggle never shows a state the server does not hold.
  */
 
-/** The design's toggle. Copied from LevensboomSection - same panel, same control. */
+/** The design's toggle. Copied from ProgressTreeSection - same panel, same control. */
 const TOGGLE =
   'h-[27px] w-[46px] border-0 px-[3px] data-[state=checked]:bg-teal data-[state=unchecked]:bg-line-strong focus-visible:ring-teal focus-visible:ring-offset-0 [&>span]:h-[21px] [&>span]:w-[21px] [&>span]:bg-white [&>span]:shadow-none [&>span[data-state=checked]]:translate-x-[19px]';
 
@@ -84,6 +85,11 @@ export default function VriendenkringSection() {
   function setDiscoverable(value: boolean) {
     if (!settings) return;
     void write({ discoverable: value }, { ...settings, discoverable: value });
+  }
+
+  function setPublicPosts(value: boolean) {
+    if (!settings) return;
+    void write({ publicPosts: value }, { ...settings, publicPosts: value });
   }
 
   function setAutoShare(key: keyof FriendSettings['autoShare'], value: boolean) {
@@ -144,6 +150,17 @@ export default function VriendenkringSection() {
           checked={Boolean(settings?.discoverable)}
           disabled={busy}
           onChange={setDiscoverable}
+        />
+        {/* Absent reads as off: a deployed API that predates the switch, or a
+            profile written before it existed, must not look like permission to
+            publish outside the kring. */}
+        <Row
+          id="instelling-openbaar-delen"
+          label={PUBLIC_POSTS_COPY.label}
+          hint={PUBLIC_POSTS_COPY.hint}
+          checked={settings?.publicPosts === true}
+          disabled={busy}
+          onChange={setPublicPosts}
         />
         <Row
           id="instelling-mijlpalen-delen"
