@@ -5,7 +5,9 @@ import connectMongoDB from "../../../lib/mongodb"
 import User from "../../../models/User"
 import {
   FREEZE_EVERY_DAYS,
+  availableFreezes,
   currentStreak,
+  earnedFreezes,
   startOfDay,
   streakHeldByFreeze,
   type StreakTransition,
@@ -27,14 +29,18 @@ export async function GET() {
   const state = {
     streak: user.streak,
     freezeCount: user.freezeCount,
+    freezesUsedInRun: user.freezesUsedInRun,
     lastStreakDate: user.lastStreakDate,
   }
   // The stored number is a run that may already be over - see lib/streak.
   return NextResponse.json(
     {
       streak: currentStreak(state),
-      freezes: user.freezeCount ?? 0,
+      // The spendable bank, not the raw counter: see `earnedFreezes`.
+      freezes: availableFreezes(state),
       freezeHolding: streakHeldByFreeze(state),
+      // So the client can say how a freeze is earned without hardcoding 7.
+      freezeEveryDays: FREEZE_EVERY_DAYS,
     },
     { status: 200 }
   )
@@ -48,7 +54,7 @@ export async function POST(request: Request) {
 
   await connectMongoDB()
   const user = await User.findOne({ email: session.user.email }).select(
-    "streak freezeCount lastStreakDate"
+    "streak freezeCount freezesUsedInRun lastStreakDate"
   )
   if (!user) {
     return NextResponse.json({ message: "User not found" }, { status: 404 })
@@ -70,7 +76,14 @@ export async function POST(request: Request) {
   const move: StreakTransition | undefined = test
     ? {
         streak: testStreak,
-        freezeCount: (user.freezeCount ?? 0) + (testStreak % FREEZE_EVERY_DAYS === 0 ? 1 : 0),
+        // The same floor the real rules apply, so a streak walked up by hand
+        // carries the bank a run that long has earned.
+        freezeCount: Math.max(
+          user.freezeCount ?? 0,
+          earnedFreezes(testStreak) - (user.freezesUsedInRun ?? 0),
+        ),
+        freezesUsedInRun: user.freezesUsedInRun ?? 0,
+        freezeDays: [],
         lastStreakDate: startOfDay(new Date()),
         advanced: true,
         brokenFrom: null,

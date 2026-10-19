@@ -12,7 +12,12 @@ import User from '../../../../models/User';
 import ReadingSession from '../../../../models/ReadingSession';
 import { grantXp } from '../../../../lib/gamification';
 import { recordBibleYearChapter } from '../../../../lib/bibleYear/service';
-import { currentStreak, startOfDay, streakHeldByFreeze } from '../../../../lib/streak';
+import {
+  availableFreezes,
+  currentStreak,
+  startOfDay,
+  streakHeldByFreeze,
+} from '../../../../lib/streak';
 import { touchStreak } from '../../../../lib/streakWrite';
 
 export const dynamic = 'force-dynamic';
@@ -133,6 +138,7 @@ export async function POST(req: Request) {
     const stored = {
       streak: user.streak,
       freezeCount: user.freezeCount,
+      freezesUsedInRun: user.freezesUsedInRun,
       lastStreakDate: user.lastStreakDate,
     };
     const bumpedToday =
@@ -146,7 +152,7 @@ export async function POST(req: Request) {
       // What the header should show right after this read, so the app does not
       // have to wait for the next `GET /dashboard` to stop lying.
       streak: moved ? moved.streak : currentStreak(stored),
-      freezes: moved ? moved.freezes : (user.freezeCount ?? 0),
+      freezes: moved ? moved.freezes : availableFreezes(stored),
       // Never true straight after a bump: today's read is in.
       freezeHolding: moved ? false : streakHeldByFreeze(stored),
     });

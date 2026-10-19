@@ -7,6 +7,7 @@ import { toCanonicalDutchBook } from '../../../../../lib/readChaptersCanon';
 import { fetchDayTextForDate } from '../../../../../lib/mobileDayText';
 import { DEFAULT_TIME_ZONE, localDates, notificationReference } from '../../../../../lib/notificationSchedule';
 import { levelForXp } from '../../../../../lib/gamification';
+import { availableFreezes } from '../../../../../lib/streak';
 import {
   firstNameOf,
   pickSeries,
@@ -69,11 +70,13 @@ export async function GET(req: Request) {
 
     await connectMongoDB();
     const user = await User.findById(auth.id)
-      .select('name streak freezeCount lastReadChapter xp')
+      .select('name streak freezeCount freezesUsedInRun lastStreakDate lastReadChapter xp')
       .lean<{
         name?: string;
         streak?: number;
         freezeCount?: number;
+        freezesUsedInRun?: number;
+        lastStreakDate?: Date | null;
         xp?: number;
         lastReadChapter?: { book?: string; chapter?: number } | null;
       } | null>();
@@ -116,7 +119,7 @@ export async function GET(req: Request) {
       // count is the count. It used to be zeroed for a free account, which was
       // right while freezes were Pro-only and wrong the moment they stopped
       // being.
-      vriesdagen: user.freezeCount ?? 0,
+      vriesdagen: availableFreezes(user),
       niveau: levelForXp(user.xp ?? 0),
     };
     const tokensForDay = (day: number): CopyTokens => {

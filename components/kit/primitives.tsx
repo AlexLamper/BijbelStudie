@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Snowflake } from "lucide-react";
 
 /**
  * The shared presentation primitives for the nine app routes.
@@ -432,12 +432,20 @@ export function WeekBars({
   values,
   todayIndex,
   labels = DAY_LABELS,
+  frozen,
 }: {
   /** Seven numbers, any scale; the tallest fills 76 px. */
   values: number[];
   todayIndex: number;
   /** The week does not always start on Sunday - the source decides. */
   labels?: string[];
+  /**
+   * Days with no reading that a streak freeze covered, same order as `values`.
+   * A frozen day is not an empty day: it gets the frost colour and a snowflake
+   * over the bar, so "my vriesdag saved this day" is readable at a glance
+   * instead of looking like the hole that ended the run.
+   */
+  frozen?: boolean[];
 }) {
   const max = Math.max(1, ...values);
   return (
@@ -445,20 +453,34 @@ export function WeekBars({
       <div className="flex h-[76px] items-end gap-[7px]">
         {values.map((v, i) => {
           const empty = v <= 0;
-          const h = empty ? 6 : Math.max(10, Math.round((v / max) * 76));
+          const isFrozen = empty && Boolean(frozen?.[i]);
+          const h = isFrozen ? 14 : empty ? 6 : Math.max(10, Math.round((v / max) * 76));
           return (
             <div
               key={i}
-              className="flex-1 rounded-t-[7px]"
+              className="relative flex-1 rounded-t-[7px]"
+              title={isFrozen ? "Vriesdag - je reeks bleef staan" : undefined}
               style={{
                 height: h,
-                backgroundColor: empty
-                  ? "var(--bar-empty)"
-                  : i === todayIndex
-                    ? "var(--bar-today)"
-                    : "var(--bar-read)",
+                backgroundColor: isFrozen
+                  ? "var(--frost)"
+                  : empty
+                    ? "var(--bar-empty)"
+                    : i === todayIndex
+                      ? "var(--bar-today)"
+                      : "var(--bar-read)",
               }}
-            />
+            >
+              {isFrozen && (
+                <Snowflake
+                  size={13}
+                  strokeWidth={2.2}
+                  aria-hidden
+                  className="absolute -top-[17px] left-1/2 -translate-x-1/2"
+                  style={{ color: "var(--frost)" }}
+                />
+              )}
+            </div>
           );
         })}
       </div>

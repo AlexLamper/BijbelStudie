@@ -18,6 +18,17 @@ const UserSchema = new mongoose.Schema(
     longestStreak: { type: Number, default: 0 },
     lastStreakDate: { type: Date },
     freezeCount: { type: Number, default: 0 },
+    // How many freezes the CURRENT run has spent, and which Dutch calendar days
+    // ('YYYY-MM-DD') they covered. Both written only by lib/streakWrite.ts.
+    // The balance a reader may spend is derived from the run - one freeze per
+    // completed week minus `freezesUsedInRun` (lib/streak.ts `earnedFreezes`) -
+    // because `freezeCount` on its own was incremented on the one day the
+    // streak equalled a multiple of seven and believed ever after, so any
+    // account whose streak moved by another route carried a long run with an
+    // empty bank. `freezeDays` is what lets the week strip mark a covered day
+    // as frozen instead of as a gap; it is capped by $slice.
+    freezesUsedInRun: { type: Number, default: 0 },
+    freezeDays: { type: [String], default: [] },
     // The run that most recently ENDED, and when. Written by lib/streak.ts via
     // both streak routes, read by the return-visit prompt on the dashboard:
     // once `streak` restarts at 1 the number the reader remembers is gone, and

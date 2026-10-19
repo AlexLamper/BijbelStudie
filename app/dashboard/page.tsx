@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useSession } from "next-auth/react"
-import { BookOpen, ChartNoAxesColumn } from "lucide-react"
+import { BookOpen, ChartNoAxesColumn, Snowflake } from "lucide-react"
 import {
   NT_BOOKS,
   OT_BOOKS,
@@ -184,15 +184,35 @@ export default function DashboardPage() {
               <WeekBars
                 values={d.weekDays.map(day => day.count)}
                 labels={d.weekDays.map(day => day.label)}
+                frozen={d.weekDays.map(day => Boolean(day.frozen))}
                 todayIndex={todayIndex}
               />
             </div>
             {/* The streak, under the week it is made of: a flame and the days
                 in a row, so the number says what it counts. Hidden at 0 -
-                there is no reeks to name yet. */}
+                there is no reeks to name yet. The vriesdag line under it is
+                the one place the web said nothing: a reader could not see that
+                they had freezes, or how a freeze is earned, until one quietly
+                saved a day. */}
             {d.streak > 0 && (
               <div className="mt-[15px] border-t border-line-soft pt-[13px]">
-                <StreakPill streak={d.streak} withLabel />
+                <StreakPill streak={d.streak} withLabel frozen={d.freezeHolding} />
+                <p className="mt-[9px] flex items-start gap-[6px] text-[12px] leading-[1.45] text-ink-muted">
+                  <Snowflake
+                    size={13}
+                    strokeWidth={2.2}
+                    aria-hidden
+                    className="mt-[2px] flex-none"
+                    style={{ color: "var(--frost)" }}
+                  />
+                  <span>
+                    {d.freezeHolding
+                      ? `Een vriesdag houdt je reeks heel voor de dag die je oversloeg. Je hebt er nog ${d.freezes} over.`
+                      : d.freezes > 0
+                        ? `${d.freezes} ${d.freezes === 1 ? "vriesdag" : "vriesdagen"} gespaard: mis je een dag, dan blijft je reeks staan. Je krijgt er een bij elke ${d.freezeEveryDays} dagen op rij.`
+                        : `Nog geen vriesdagen. Je krijgt er een bij elke ${d.freezeEveryDays} dagen op rij; die vangt een dag op die je mist.`}
+                  </span>
+                </p>
               </div>
             )}
           </Card>

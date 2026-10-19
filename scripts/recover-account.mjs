@@ -249,6 +249,14 @@ if (archivedUser) {
   }
 }
 if (proposal.longestRun > 0) max.longestStreak = Math.max(max.longestStreak ?? 0, proposal.longestRun);
+// A restored streak has to arrive with the freezes a run that long has earned.
+// It used to restore `streak` and not `freezeCount`, which left the account
+// with a long run and an empty bank - and then one missed day ended it. The
+// rules derive the bank from the run now (lib/streak.ts `earnedFreezes`), so
+// this is a belt-and-braces floor rather than the only thing holding it up.
+if (typeof max.streak === 'number') {
+  max.freezeCount = Math.max(max.freezeCount ?? 0, Math.floor(max.streak / 7));
+}
 if (Array.isArray(archivedUser?.badges) && archivedUser.badges.length) addToSet.badges = { $each: archivedUser.badges };
 
 const update = {};
