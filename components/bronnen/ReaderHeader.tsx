@@ -127,9 +127,18 @@ export function ReaderHeader({
               {hasRefs && (
                 <>
                   <DropdownMenuSeparator />
-                  <label className="flex cursor-pointer items-center justify-between gap-3 px-2 py-2 text-[13px] text-ink-body">
-                    Schriftteksten voluit
-                    <Switch checked={refsOpen === "1"} onCheckedChange={on => setRefsOpen(on ? "1" : "0")} />
+                  <label className="flex cursor-pointer items-center justify-between gap-3 rounded-[7px] px-2 py-2 transition-colors hover:bg-line-soft">
+                    <span className="min-w-0">
+                      <span className="block text-[13.5px] font-medium text-ink-body">Schriftteksten voluit</span>
+                      <span className="block text-[12px] leading-snug text-ink-muted">
+                        Toon de bijbelverzen direct onder de tekst
+                      </span>
+                    </span>
+                    <Switch
+                      checked={refsOpen === "1"}
+                      onCheckedChange={on => setRefsOpen(on ? "1" : "0")}
+                      className="data-[state=checked]:bg-[#0D9488]"
+                    />
                   </label>
                 </>
               )}

@@ -65,14 +65,14 @@ const pageConfigs: Record<string, PageMetadataConfig> = {
     indexable: false
   },
   read: {
-    title: 'Bijbel lezen',
+    title: 'Lezen',
     description: 'Lees de Bijbel online in meerdere vertalingen. Gebruik onze interactieve tools voor diepgaande bijbelstudie.',
     path: '/lezen',
     type: 'website',
     indexable: false
   },
   studies: {
-    title: 'Begeleide bijbelstudies',
+    title: 'Studies',
     description: 'Tien begeleide bijbelstudies over personen, themas, gebeurtenissen en bijbelboeken. Stap voor stap door de Schrift, gratis te volgen.',
     path: '/studies',
     type: 'website'
