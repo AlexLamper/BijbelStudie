@@ -48,7 +48,7 @@ function AboutPro() {
         // band under 1440 px takes one step down.
         className="mt-7 max-w-[400px] text-[44px] font-bold leading-[1.12] tracking-[-0.8px] text-ink [text-wrap:balance] max-[1439px]:text-[38px] max-md:text-[32px]"
       >
-        Onderzoek de Bijbel en ontdek wat er echt staat.
+        Onderzoek de Bijbel en begrijp wat er echt staat.
       </h1>
 
       <h2 className={`mt-7 ${LABEL} text-ink-faint`}>Alles in Pro</h2>
