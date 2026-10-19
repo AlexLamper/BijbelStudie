@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { useSession, getSession, signOut } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Award, BookOpenCheck, Check, Flame, GraduationCap, Loader2, LogOut, Pencil, X, type LucideIcon } from "lucide-react"
+import { Award, BookOpenCheck, Check, Flame, GraduationCap, Loader2, LogOut, Pencil, Snowflake, X, type LucideIcon } from "lucide-react"
 import { BadgesDialog, BadgeRings, BADGE_TOTAL } from "../../components/profile/badges"
 import ActivityFeed, { type ActivityFilter } from "../../components/profile/ActivityFeed"
 import AppShell from "../../components/shell/AppShell"
@@ -17,6 +17,12 @@ import AccountAvatar from "../../components/kit/AccountAvatar"
 import TreeAvatar from "../../components/kit/TreeAvatar"
 import { FreeMembershipPanel, ProMembershipPanel, type BillingInfo } from "../../components/profile/MembershipPanel"
 import InviteCard from "../../components/profile/InviteCard"
+import {
+  FREEZE_EVERY_DAYS,
+  availableFreezes,
+  currentStreak,
+  streakHeldByFreeze,
+} from "../../lib/streak"
 
 interface UserData {
   _id: string
@@ -29,6 +35,11 @@ interface UserData {
   isAdmin?: boolean
   badges?: string[]
   streak?: number
+  // What the streak rules need to answer "is this run still standing, and how
+  // many vriesdagen are there" - see lib/streak.ts.
+  freezeCount?: number
+  freezesUsedInRun?: number
+  lastStreakDate?: string | null
   createdAt?: string
 }
 
@@ -207,7 +218,14 @@ export default function ProfilePage() {
     : null
   const earnedBadges = user?.badges || []
   const badgeCount = earnedBadges.length
-  const streak = user?.streak ?? progressTree?.streak ?? 0
+  // `currentStreak`, not `user.streak`: the stored number is only rewritten
+  // when something advances it, so a run that ended days ago still sits in it.
+  const streak = user ? currentStreak(user) : progressTree?.streak ?? 0
+  // The freeze bank, and whether one is holding the run up right now. Both
+  // were invisible on the web: the reader found out a freeze existed only when
+  // one silently saved a day - or, worse, when one did not.
+  const freezes = user ? availableFreezes(user) : 0
+  const freezeHolding = user ? streakHeldByFreeze(user) : false
   const level = progressTree?.level ?? 1
   const stageName = progressTree?.levensboom?.stage?.name ?? null
   const remainingXp = progressTree ? Math.max(0, progressTree.xpForNextLevel - progressTree.xpIntoLevel) : 0
@@ -331,6 +349,21 @@ export default function ProfilePage() {
                         <span className="inline-flex items-center gap-[5px]">
                           <Flame size={13} strokeWidth={2.2} aria-hidden />
                           {`${streak} ${dayWord(streak)} op rij`}
+                        </span>
+                      }
+                    />
+                  )}
+                  {/* Standing on a freeze rather than on today's reading: said
+                      out loud, in its own cold colour, next to the flame. */}
+                  {freezeHolding && (
+                    <Pill
+                      label={
+                        <span
+                          className="inline-flex items-center gap-[5px]"
+                          style={{ color: "var(--frost)" }}
+                        >
+                          <Snowflake size={13} strokeWidth={2.2} aria-hidden />
+                          Bevroren met een vriesdag
                         </span>
                       }
                     />
@@ -462,6 +495,14 @@ export default function ProfilePage() {
               <div className="mt-[6px]">
                 <InfoLine label="Lid sinds" value={memberSince ?? "-"} />
                 <InfoLine label="Dagelijkse reeks" value={waiting ? "-" : `${streak} ${dayWord(streak)}`} />
+                <InfoLine
+                  label="Vriesdagen"
+                  value={
+                    waiting
+                      ? "-"
+                      : `${freezes} - een per ${FREEZE_EVERY_DAYS} dagen op rij`
+                  }
+                />
                 <InfoLine label="Badges verdiend" value={waiting ? "-" : `${badgeCount}`} last />
               </div>
               {progressTree && (

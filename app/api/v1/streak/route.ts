@@ -2,7 +2,12 @@ import { requireUser } from '../../../../lib/apiAuth';
 import { corsPreflight, handleV1Error, jsonV1 } from '../../../../lib/apiV1';
 import connectMongoDB from '../../../../lib/mongodb';
 import User from '../../../../models/User';
-import { currentStreak, streakHeldByFreeze } from '../../../../lib/streak';
+import {
+  FREEZE_EVERY_DAYS,
+  availableFreezes,
+  currentStreak,
+  streakHeldByFreeze,
+} from '../../../../lib/streak';
 import { touchStreak } from '../../../../lib/streakWrite';
 
 export const dynamic = 'force-dynamic';
@@ -15,19 +20,24 @@ export async function GET(req: Request) {
   try {
     const auth = await requireUser(req);
     await connectMongoDB();
-    const user = await User.findById(auth.id).select('streak freezeCount lastStreakDate');
+    const user = await User.findById(auth.id).select(
+      'streak freezeCount freezesUsedInRun lastStreakDate',
+    );
     if (!user) return jsonV1({ error: 'NOT_FOUND' }, { status: 404 });
     const state = {
       streak: user.streak,
       freezeCount: user.freezeCount,
+      freezesUsedInRun: user.freezesUsedInRun,
       lastStreakDate: user.lastStreakDate,
     };
     // `currentStreak`, not `user.streak`: the stored number is only rewritten
     // when something advances it, so a run that died days ago still sits there.
     return jsonV1({
       streak: currentStreak(state),
-      freezes: user.freezeCount ?? 0,
+      // The spendable bank, derived from the run - see `earnedFreezes`.
+      freezes: availableFreezes(state),
       freezeHolding: streakHeldByFreeze(state),
+      freezeEveryDays: FREEZE_EVERY_DAYS,
     });
   } catch (error) {
     return handleV1Error(error);

@@ -33,7 +33,7 @@ export const HELP_TOPICS: HelpTopic[] = [
       },
       {
         q: "Werkt BijbelStudie op mijn telefoon?",
-        a: "Ja. De website werkt op telefoon, tablet en computer, en er is daarnaast een iOS-app. Je account en je voortgang zijn overal hetzelfde.",
+        a: "Ja. De website werkt op telefoon, tablet en computer, en er is daarnaast een app voor iPhone, iPad en Android. Je account en je voortgang zijn overal hetzelfde.",
       },
     ],
   },

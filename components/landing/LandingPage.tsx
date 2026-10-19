@@ -7,7 +7,7 @@ import { FAQItem } from "./FAQItem"
 import { ScrollEffects } from "./ScrollEffects"
 import { StudyDiscovery } from "./StudyDiscovery"
 import { HOME_FAQS } from "../../lib/content/homeFaq"
-import { APP_STORE_URL } from "../../lib/appStore"
+import { APP_STORE_URL, PLAY_STORE_URL } from "../../lib/appStore"
 import { opstandingLessons } from "../../lib/data/study-lessons/opstanding"
 import { buildLessonContext } from "../../lib/lessonContext"
 import { chapterStudyTemplate } from "../../lib/chapterStudyTemplate"
@@ -290,7 +290,7 @@ function Hero({ reviews }: { reviews?: ReviewsData }) {
             className="text-[11px] font-bold uppercase leading-normal lg:text-[13px]"
             style={{ letterSpacing: "0.12em", color: "var(--lp-hero-eyebrow)" }}
           >
-            Voor iedereen die de Bijbel dieper wil leren kennen
+            Voor iedereen die de Bijbel beter wil leren begrijpen
           </p>
 
           {/* The only h1 on the page - the LCP element, so it is never
@@ -321,13 +321,15 @@ function Hero({ reviews }: { reviews?: ReviewsData }) {
             Lees elk hoofdstuk met uitleg, context en de grondtekst ernaast. Zo lees je niet alleen wat er staat, maar snap je ook wat het betekent.
           </p>
 
-          {/* Two buttons, exactly 202x60 from 1024px up; a 2-column grid of
-              equal 52px-high buttons below that. */}
-          <div className="grid w-full grid-cols-2 gap-2.5 pt-0.5 sm:flex sm:w-auto sm:gap-3">
+          {/* "Start gratis" keeps the first row; the two store badges share the
+              second. Three 202px buttons do not fit the 400px left column at
+              1024px, and a third button inside the 2-column mobile grid left a
+              hole beside it. */}
+          <div className="flex w-full flex-col items-stretch gap-3 pt-0.5 sm:w-auto sm:items-start">
             <Link
               href="/inloggen"
               data-track="hero_cta_signup"
-              className="hero-cta-primary flex h-[52px] items-center justify-center gap-2.5 whitespace-nowrap rounded-[10px] text-[16px] font-bold text-white transition-colors lg:h-[60px] lg:w-[202px] lg:text-[17px]"
+              className="hero-cta-primary flex h-[52px] w-full items-center justify-center gap-2.5 whitespace-nowrap rounded-[10px] text-[16px] font-bold text-white transition-colors sm:w-[202px] lg:h-[60px] lg:text-[17px]"
               style={{
                 letterSpacing: "-0.01em",
                 boxShadow: "0 10px 24px -8px rgba(13,122,102,0.55)",
@@ -336,27 +338,54 @@ function Hero({ reviews }: { reviews?: ReviewsData }) {
               Start gratis
               <ArrowRight className="h-[15px] w-[15px] flex-shrink-0 lg:h-[17px] lg:w-[17px]" />
             </Link>
-            <a
-              href={APP_STORE_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Download BijbelStudie in de App Store"
-              data-track="hero_cta_appstore"
-              className="flex h-[52px] w-full items-center justify-center rounded-[10px] lg:h-[60px] lg:w-[202px]"
-            >
-              {/* The badge artwork carries its own wordmark and glyph, so it is
-                  drawn a little inside the 52/60px button box rather than
-                  filling it - at full bleed the lettering reads larger than the
-                  "Start gratis" label beside it. w-auto keeps Apple's ratio;
-                  the old w-full stretched the PNG in the 2-column mobile grid. */}
-              <Image
-                src="/images/hero/app-store-badge.png"
-                alt="Download on the App Store"
-                width={202}
-                height={60}
-                className="block h-[46px] w-auto max-w-full object-contain lg:h-[53px]"
-              />
-            </a>
+
+            {/* Both badges are sized by width and given the same one, which is
+                what keeps them optically equal: Apple's artwork is 800x238 and
+                the Play badge is trimmed of its transparent margin to 646x192
+                (see public/images/hero/play-store-badge.png), the same 3.36
+                ratio, so one width renders both at one height with no
+                per-badge fudge factor. Google asks for clear space of a quarter
+                of the badge height around it; gap-3 beside a ~50px badge is
+                that. At 1024px the pair is 392px in a 400px column. */}
+            <div className="grid w-full grid-cols-2 items-center gap-3 sm:flex sm:w-auto">
+              <a
+                href={APP_STORE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Download BijbelStudie in de App Store"
+                data-track="hero_cta_appstore"
+                className="flex items-center justify-center"
+              >
+                <Image
+                  src="/images/hero/app-store-badge.png"
+                  alt="Download in de App Store"
+                  width={800}
+                  height={238}
+                  className="block h-auto w-full max-w-[170px] sm:w-[170px] sm:max-w-none lg:w-[190px]"
+                />
+              </a>
+              {/* Null until Android shipped - it has, so this renders, but the
+                  constant stays nullable for the one place that still reads it
+                  that way (lib/mobilePlatform.ts). */}
+              {PLAY_STORE_URL && (
+                <a
+                  href={PLAY_STORE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Download BijbelStudie in Google Play"
+                  data-track="hero_cta_playstore"
+                  className="flex items-center justify-center"
+                >
+                  <Image
+                    src="/images/hero/play-store-badge.png"
+                    alt="Ontdek het op Google Play"
+                    width={646}
+                    height={192}
+                    className="block h-auto w-full max-w-[170px] sm:w-[170px] sm:max-w-none lg:w-[190px]"
+                  />
+                </a>
+              )}
+            </div>
           </div>
 
           <ReviewsRow data={reviews} />

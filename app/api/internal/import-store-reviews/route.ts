@@ -62,6 +62,7 @@ export async function GET(req: NextRequest) {
   }
 
   // 500 only when something actually failed; a platform that deliberately did
-  // nothing (Android, unshipped) is a success.
+  // nothing (Android without GOOGLE_PLAY_SERVICE_ACCOUNT_JSON, say) is a
+  // success - the note in its summary says why.
   return NextResponse.json(summary, { status: summary.ok ? 200 : 500 });
 }

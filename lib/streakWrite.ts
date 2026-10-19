@@ -44,7 +44,9 @@ export async function touchStreak(
 ): Promise<TouchStreakResult | null> {
   await connectMongoDB();
 
-  const user = await User.findById(userId).select('streak freezeCount freezesUsedInRun freezeDays lastStreakDate badges');
+  const user = await User.findById(userId).select(
+    'streak freezeCount freezesUsedInRun lastStreakDate badges',
+  );
   if (!user) return null;
 
   const move =
@@ -54,7 +56,6 @@ export async function touchStreak(
         streak: user.streak,
         freezeCount: user.freezeCount,
         freezesUsedInRun: user.freezesUsedInRun,
-        freezeDays: user.freezeDays,
         lastStreakDate: user.lastStreakDate,
       },
       { now },
@@ -73,19 +74,20 @@ export async function touchStreak(
     set.lostStreakAt = startOfDay(now);
   }
 
-  const updated = await User.findByIdAndUpdate(
-    user._id,
-    {
-      $set: set,
-      // Which days a freeze covered, for the week strip; only the last fortnight is kept.
-      ...(move.freezeDays.length > 0
-        ? { $push: { freezeDays: { $each: move.freezeDays, $slice: -14 } } }
-        : {}),
-      // The record the streak-gated ProgressTree items read: it only ever grows.
-      $max: { longestStreak: move.streak },
-    },
-    { new: true },
-  );
+  const update: Record<string, unknown> = {
+    $set: set,
+    // The record the streak-gated ProgressTree items read: it only ever grows.
+    $max: { longestStreak: move.streak },
+  };
+  // The days this call's freezes covered, so the week strip can mark them. A
+  // bounded $push rather than a rewrite of the array: the week strip only ever
+  // looks seven days back, and 60 is enough for the longest window any surface
+  // asks about.
+  if (move.freezeDays.length > 0) {
+    update.$push = { freezeDays: { $each: move.freezeDays, $slice: -60 } };
+  }
+
+  const updated = await User.findByIdAndUpdate(user._id, update, { new: true });
 
   const before = [...(user.badges ?? [])];
   // Badge evaluation lives in lib/gamification.ts so every XP source agrees on

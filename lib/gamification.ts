@@ -5,6 +5,7 @@ import PlanEnrollment from '../models/PlanEnrollment.js';
 import BibleYearEnrollment from '../models/BibleYearEnrollment.js';
 import { creditReferrerIfActivated } from './referral';
 import { announceBadges, announceStreak } from './friends/milestones';
+import { availableFreezes, currentStreak } from './streak';
 
 /**
  * XP, levels and badges.
@@ -256,7 +257,9 @@ export async function grantXp(
 export async function readProgressSummary(userId: string, isPro: boolean) {
   await connectMongoDB();
 
-  const user = await User.findById(userId).select('xp level badges streak freezeCount image createdAt');
+  const user = await User.findById(userId).select(
+    'xp level badges streak freezeCount freezesUsedInRun lastStreakDate image createdAt',
+  );
   if (!user) return null;
 
   const [lessonsCompleted, oldPlansCompleted, oldPlansActive, studyIds, bibleYearsCompleted, bibleYearsActive] =
@@ -273,6 +276,14 @@ export async function readProgressSummary(userId: string, isPro: boolean) {
   const studiesCompleted = (studyIds as unknown[]).filter(Boolean).length;
 
   const xp = user.xp ?? 0;
+  const streakState = {
+    streak: user.streak,
+    freezeCount: user.freezeCount,
+    freezesUsedInRun: user.freezesUsedInRun,
+    lastStreakDate: user.lastStreakDate,
+  };
+  // Badges are read off the stored number on purpose: a `streak30` earned with
+  // a real 30-day run stays earned after the run ends.
   const earned = evaluateBadges({
     streak: user.streak ?? 0,
     xp,
@@ -291,8 +302,11 @@ export async function readProgressSummary(userId: string, isPro: boolean) {
   return {
     ...describeLevel(xp),
     badges,
-    streak: user.streak ?? 0,
-    freezes: user.freezeCount ?? 0,
+    // `currentStreak`, not the stored number: that one is only rewritten when
+    // something advances it, so a run that died days ago still sits in it.
+    streak: currentStreak(streakState),
+    // The spendable bank, derived from the run - see lib/streak `earnedFreezes`.
+    freezes: availableFreezes(streakState),
     lessonsCompleted,
     studiesCompleted,
     plansCompleted,

@@ -22,6 +22,19 @@ import { toBookCode } from '../bookCanon';
 
 export const BIBLE_YEAR_PATH = '/studies/bijbel-in-een-jaar' as const;
 
+/**
+ * The confirm text behind "Plan stoppen" (PATCH {action:'stop'}). It has to be
+ * exact, because stopping is not reversible in place: the run is marked
+ * `abandoned` and a later "Opnieuw beginnen" creates a new run, which starts
+ * on day 1. Nothing is deleted - `readChapters`, the streak and the tree live
+ * on the user, not on the enrollment, so none of them move. The app repeats
+ * this sentence word for word (features/bible_year/present/plan_stop_action.dart).
+ */
+export const PLAN_STOP_CONFIRM =
+  'Weet je zeker dat je wilt stoppen met Bijbel in een jaar? Wat je gelezen hebt blijft bewaard: ' +
+  'je leesgeschiedenis, je streak en je boom veranderen niet. Begin je later opnieuw, dan start je ' +
+  'plan weer op dag 1.';
+
 /** Used when the API sends an empty list, and on the server-rendered guest page. */
 export const DEFAULT_CATALOGUE: BibleYearCatalogueEntry[] = [
   { planKey: 'jaar-1', label: '1 jaar', totalDays: 365, minutesPerDay: 15 },

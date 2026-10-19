@@ -463,13 +463,13 @@ export async function fetchIosReviews(): Promise<{
 }
 
 // ---------------------------------------------------------------------------
-// Android - Google Play Developer API (built, dormant)
+// Android - Google Play Developer API
 // ---------------------------------------------------------------------------
 
 /**
  * The Play package name, derived from the one canonical store URL
  * (`…/store/apps/details?id=<package>`) or from an explicit env override.
- * Null while Android is unshipped.
+ * Null only if `PLAY_STORE_URL` is ever emptied again.
  */
 export function readPlayPackageName(env: NodeJS.ProcessEnv = process.env): string | null {
   const override = cleanText(env.GOOGLE_PLAY_PACKAGE_NAME);
@@ -607,15 +607,17 @@ export function parsePlayReviews(payload: unknown): NormalisedStoreReview[] {
  *  - an empty or short response is normal and must never be read as "these
  *    reviews were deleted". The import only ever upserts.
  *
- * Dormant until `PLAY_STORE_URL` is non-null (Android is not shipped). It
- * no-ops quietly rather than throwing or logging an error.
+ * Live since the Play launch on 17 October 2026, but still a chain of quiet
+ * no-ops rather than throws: the import is a cron job, and a missing
+ * `PLAY_STORE_URL`, package name or service account is a configuration gap
+ * that must not fail the Apple half of the same run.
  */
 export async function fetchAndroidReviews(): Promise<{
   reviews: NormalisedStoreReview[];
   note?: string;
 }> {
   if (!PLAY_STORE_URL) {
-    return { reviews: [], note: 'Android is niet uitgebracht; Play-import staat uit.' };
+    return { reviews: [], note: 'Geen PLAY_STORE_URL; Play-import staat uit.' };
   }
   const packageName = readPlayPackageName();
   if (!packageName) return { reviews: [], note: 'Geen Play-packagenaam geconfigureerd.' };

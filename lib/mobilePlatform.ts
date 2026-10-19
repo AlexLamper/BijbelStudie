@@ -8,8 +8,11 @@
  * stays client-side: a user agent read during SSR would render a banner the
  * client may disagree with.
  *
- * Store URLs come from lib/appStore.ts. Android shows nothing while
- * PLAY_STORE_URL is null; filling that constant in is the whole Android rollout.
+ * Store URLs come from lib/appStore.ts. Both are live: the App Store since
+ * August 2026 and Google Play since 17 October 2026. `PLAY_STORE_URL` keeps its
+ * `string | null` type - the null branches below are the kill switch, not a
+ * pre-launch placeholder, and taking them out would make a withdrawn Android
+ * build a code change instead of a one-line one.
  */
 import { APP_STORE_URL, PLAY_STORE_URL } from './appStore';
 
@@ -137,8 +140,10 @@ const LINK_PREVIEW_BOT =
 
 /**
  * Where /app sends this visitor, or null to render the /app page itself
- * (bots, `?toon=1`, empty UA). Android falls back to "/" until PLAY_STORE_URL
- * is set. No maxTouchPoints server-side, so an iPad in desktop mode gets "/".
+ * (bots, `?toon=1`, empty UA). iPhone to the App Store, Android to Google Play,
+ * everything else to "/" - and Android to "/" too if PLAY_STORE_URL is ever
+ * emptied again. No maxTouchPoints server-side, so an iPad in desktop mode
+ * gets "/".
  */
 export function appLinkTarget(userAgent: string, show = false): string | null {
   if (show || !userAgent || LINK_PREVIEW_BOT.test(userAgent)) return null;

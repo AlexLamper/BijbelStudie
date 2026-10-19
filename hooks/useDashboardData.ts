@@ -4,7 +4,14 @@ import { useEffect, useMemo, useState } from "react"
 import { useSession } from "next-auth/react"
 import { CHAPTER_COUNTS } from "../lib/data/bible-chapter-counts"
 import type { DailyVerse } from "../components/dashboard/DailyVerseCard"
-import { pendingStreakLoss, type StreakLoss } from "../lib/streak"
+import {
+  FREEZE_EVERY_DAYS,
+  availableFreezes,
+  currentStreak,
+  pendingStreakLoss,
+  streakHeldByFreeze,
+  type StreakLoss,
+} from "../lib/streak"
 import { DAYTEXT_DEFAULT_VERSION, pickDashboardVersion } from "../lib/dailyVerseTranslation"
 import { READER_VERSION_KEY, readReaderVersion } from "../lib/dailyVerseStore"
 
@@ -39,7 +46,14 @@ export const NT_BOOKS: readonly string[] = [
 export const ALL_BOOKS: readonly string[] = [...OT_BOOKS, ...NT_BOOKS]
 
 export interface LastRead { book: string; chapter: number; version: string }
-export interface WeekDay { label: string; count: number; heightPct: number; isToday: boolean }
+export interface WeekDay {
+  label: string
+  count: number
+  heightPct: number
+  isToday: boolean
+  /** No reading on this day, but a freeze covered it - not a gap. */
+  frozen?: boolean
+}
 export interface LevelInfo {
   level: number
   xp: number
@@ -61,7 +75,7 @@ export type { DailyVerse }
 export type { StreakLoss }
 
 export const EMPTY_WEEK: WeekDay[] = ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"].map(label => ({
-  label, count: 0, heightPct: 0, isToday: false,
+  label, count: 0, heightPct: 0, isToday: false, frozen: false,
 }))
 
 export function getGreeting(name: string, date = new Date()): string {
@@ -100,6 +114,9 @@ export function useDashboardData() {
   const [studyCounts, setStudyCounts] = useState<StudyCounts | null>(null)
   const [verse, setVerse] = useState<DailyVerse | null>(null)
   const [streak, setStreak] = useState(0)
+  /** Banked freezes, and whether one is holding the run up right now. */
+  const [freezes, setFreezes] = useState(0)
+  const [freezeHolding, setFreezeHolding] = useState(false)
   const [lastStreakDate, setLastStreakDate] = useState<string | null>(null)
   /**
    * A run that ended, once, if it ended recently and was worth mourning.
@@ -205,7 +222,12 @@ export function useDashboardData() {
       fetch("/api/v1/gamification").then(toJson),
     ])
       .then(([ud, ld, nd, rp, gd]) => {
-        setStreak(ud?.user?.streak ?? 0)
+        // `currentStreak`, not `user.streak`: the stored number is only
+        // rewritten when something advances it, so a run that ended days ago
+        // still sits in it. The app has read it this way all along.
+        setStreak(ud?.user ? currentStreak(ud.user) : 0)
+        setFreezes(ud?.user ? availableFreezes(ud.user) : 0)
+        setFreezeHolding(ud?.user ? streakHeldByFreeze(ud.user) : false)
         setLastStreakDate(ud?.user?.lastStreakDate ?? null)
 
         const loss = ud?.user ? pendingStreakLoss(ud.user) : null
@@ -276,6 +298,7 @@ export function useDashboardData() {
     firstName, greeting, dateLabel,
     // raw
     lastRead, level, studyCounts, verse, streak, streakLoss, notesCount, recentNotes, readChapters,
+    freezes, freezeHolding, freezeEveryDays: FREEZE_EVERY_DAYS,
     weekDays: days, weekTotal,
     // loading flags, one per fetch group, as on the current dashboard
     loading, verseLoading, statsLoading,

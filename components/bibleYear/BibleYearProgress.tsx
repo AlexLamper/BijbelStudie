@@ -6,7 +6,13 @@ import type {
   BibleYearEnrollmentDTO,
   BibleYearTrackEntry,
 } from '../../lib/bibleYear/types'
-import { formatDutchDate, formatPercent, planLabel, trackLabel } from '../../lib/bibleYear/display'
+import {
+  PLAN_STOP_CONFIRM,
+  formatDutchDate,
+  formatPercent,
+  planLabel,
+  trackLabel,
+} from '../../lib/bibleYear/display'
 import { Card } from '../kit/primitives'
 import { ConfirmDialog } from '../ui/ConfirmDialog'
 import { PrimaryButton, ProgressBar } from './parts'
@@ -17,7 +23,7 @@ export type BibleYearProgressProps = {
   enrollment: BibleYearEnrollmentDTO
   catalogue?: BibleYearCatalogueEntry[]
   tracks?: BibleYearTrackEntry[]
-  /** "Stoppen met dit leesplan", after the confirm dialog. Omit to hide it. */
+  /** "Plan stoppen", after the confirm dialog. Omit to hide it. */
   onStop?: () => void | Promise<unknown>
   pending?: boolean
   className?: string
@@ -73,7 +79,7 @@ export function BibleYearProgress({
             disabled={pending}
             className="mt-5 text-[13px] font-semibold text-ink-muted underline-offset-4 hover:text-ink hover:underline disabled:opacity-50"
           >
-            Stoppen met dit leesplan
+            Plan stoppen
           </button>
           <ConfirmDialog
             open={confirmStop}
@@ -83,8 +89,8 @@ export function BibleYearProgress({
               setConfirmStop(false)
             }}
             pending={pending}
-            title="Stoppen met dit leesplan"
-            description="Je leesplan stopt. Wat je gelezen hebt blijft bewaard, ook in je voortgang. Je kunt later altijd opnieuw beginnen."
+            title="Plan stoppen"
+            description={PLAN_STOP_CONFIRM}
             confirmLabel="Stoppen"
             pendingLabel="Bezig…"
           />

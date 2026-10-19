@@ -309,7 +309,7 @@ const pageConfigs: Record<string, PageMetadataConfig> = {
 
   appDownload: {
     title: 'Download de app',
-    description: 'Download de BijbelStudie-app voor iOS. Bijbelstudie, commentaren en de grondtekst in je zak.',
+    description: 'Download de BijbelStudie-app voor iPhone en Android. Bijbelstudie, commentaren en de grondtekst in je zak.',
     path: '/app',
     type: 'website',
     // A bio-link landing page for TikTok/Instagram, not a search-facing page -

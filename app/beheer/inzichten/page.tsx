@@ -86,6 +86,11 @@ const VIOLET = SERIES_VIOLET
 const CLICK_LABELS: Record<string, string> = {
   hero_cta_signup: "Hero: gratis beginnen",
   hero_cta_appstore: "Hero: App Store",
+  hero_cta_playstore: "Hero: Google Play",
+  app_page_appstore: "/app: App Store",
+  app_page_playstore: "/app: Google Play",
+  mobile_banner_appstore: "Appbanner: App Store",
+  mobile_banner_playstore: "Appbanner: Google Play",
   hero_cta_learn_more: "Hero: meer weten",
   nav_signin: "Inloggen (nav)",
   nav_register: "Registreren (nav)",

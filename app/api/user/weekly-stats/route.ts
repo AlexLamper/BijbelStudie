@@ -4,6 +4,7 @@ import { authOptions } from "../../../../lib/authOptions";
 import connectMongoDB from "../../../../lib/mongodb";
 import ReadingSession from "../../../../models/ReadingSession";
 import User from "../../../../models/User";
+import { dayKey, frozenDays, lastSevenDays, weekWindowStart } from "../../../../lib/streak";
 
 export async function GET() {
   try {
@@ -17,44 +18,54 @@ export async function GET() {
     if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
     const now = new Date();
-    const sevenDaysAgo = new Date(now);
-    sevenDaysAgo.setDate(now.getDate() - 6);
-    sevenDaysAgo.setHours(0, 0, 0, 0);
 
     const sessions = await ReadingSession.find({
       userId: user._id,
-      createdAt: { $gte: sevenDaysAgo },
+      createdAt: { $gte: weekWindowStart(now) },
     })
       .select("createdAt")
       .lean();
 
-    const DAY_LABELS = ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"];
-    const days: { label: string; count: number; date: string }[] = [];
-
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(now);
-      d.setDate(now.getDate() - i);
-      const dayKey = d.toISOString().slice(0, 10);
-      const jsDay = d.getDay();
-      const label = DAY_LABELS[jsDay === 0 ? 6 : jsDay - 1];
-      days.push({ label, date: dayKey, count: 0 });
-    }
-
+    // Days and buckets are Dutch calendar days, the same ones the streak
+    // counts (lib/streak). Keyed in UTC, as this route used to be, a read
+    // after midnight local landed on the previous day and the strip showed a
+    // gap on a day the streak had already credited.
+    const strip = lastSevenDays(now);
+    const counts = new Map(strip.map(d => [d.key, 0]));
     for (const s of sessions) {
-      const sDay = (s as unknown as { createdAt: Date }).createdAt.toISOString().slice(0, 10);
-      const entry = days.find(d => d.date === sDay);
-      if (entry) entry.count++;
+      const key = dayKey((s as unknown as { createdAt: Date }).createdAt);
+      if (counts.has(key)) counts.set(key, (counts.get(key) ?? 0) + 1);
     }
 
-    const maxCount = Math.max(...days.map(d => d.count), 1);
-    const result = days.map(d => ({
-      label: d.label,
-      count: d.count,
-      heightPct: Math.round((d.count / maxCount) * 100),
-      isToday: d.date === now.toISOString().slice(0, 10),
-    }));
+    // The days a freeze covered. They are not gaps, and the strip must not
+    // draw them as one.
+    const frozen = frozenDays(
+      {
+        streak: user.streak,
+        freezeCount: user.freezeCount,
+        freezesUsedInRun: user.freezesUsedInRun,
+        freezeDays: user.freezeDays,
+        lastStreakDate: user.lastStreakDate,
+      },
+      { now }
+    );
 
-    return NextResponse.json({ days: result, totalThisWeek: sessions.length });
+    const maxCount = Math.max(...counts.values(), 1);
+    const result = strip.map(d => {
+      const count = counts.get(d.key) ?? 0;
+      return {
+        label: d.label,
+        count,
+        heightPct: Math.round((count / maxCount) * 100),
+        isToday: d.isToday,
+        frozen: count === 0 && frozen.has(d.key),
+      };
+    });
+
+    return NextResponse.json({
+      days: result,
+      totalThisWeek: result.reduce((n, d) => n + d.count, 0),
+    });
   } catch (err) {
     console.error("[weekly-stats]", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

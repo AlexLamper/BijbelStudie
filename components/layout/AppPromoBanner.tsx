@@ -15,8 +15,10 @@ import {
  *
  * iOS Safari gets Apple's own Smart App Banner from the apple-itunes-app meta
  * tag in app/layout.tsx, so this card only appears where that banner cannot:
- * Chrome/Firefox/Edge on iOS and in-app browsers. Android stays silent until
- * PLAY_STORE_URL in lib/appStore.ts is set. Rules live in lib/mobilePlatform.ts.
+ * Chrome/Firefox/Edge on iOS and in-app browsers. On Android it is the only
+ * promo there is - Chrome shows no banner of its own - and it has been live
+ * there since Google Play launch, 17 October 2026. Rules live in
+ * lib/mobilePlatform.ts.
  *
  * Renders nothing on the server and on the first client render, so markup
  * always matches during hydration; it is fixed-positioned, so appearing after

@@ -5,7 +5,17 @@ import User from '../../../../models/User';
 import Note from '../../../../models/Note';
 import ReadingSession from '../../../../models/ReadingSession';
 import mongoose from 'mongoose';
-import { STREAK_TIME_ZONE, currentStreak, streakHeldByFreeze } from '../../../../lib/streak';
+import {
+  FREEZE_EVERY_DAYS,
+  STREAK_TIME_ZONE,
+  availableFreezes,
+  currentStreak,
+  dayKey,
+  frozenDays,
+  lastSevenDays,
+  streakHeldByFreeze,
+  weekWindowStart,
+} from '../../../../lib/streak';
 import { fetchDayTextFor } from '../../../../lib/mobileDayText';
 import { getActivePlanCard } from '../../../../lib/planService';
 import { describeLevel } from '../../../../lib/gamification';
@@ -34,6 +44,8 @@ type LeanUser = {
   preferences?: { reminderTimezone?: string | null } | null;
   streak?: number;
   freezeCount?: number;
+  freezesUsedInRun?: number;
+  freezeDays?: string[];
   lastStreakDate?: Date | string | null;
   xp?: number;
   badges?: string[];
@@ -100,11 +112,13 @@ export async function GET(req: Request) {
     const streakState = {
       streak: user.streak,
       freezeCount: user.freezeCount,
+      freezesUsedInRun: user.freezesUsedInRun,
+      freezeDays: user.freezeDays,
       lastStreakDate: user.lastStreakDate,
     };
-    const sevenDaysAgo = new Date(now);
-    sevenDaysAgo.setDate(now.getDate() - 6);
-    sevenDaysAgo.setHours(0, 0, 0, 0);
+    // The window for the week strip, in Dutch calendar days rather than the
+    // server's own - see lib/streak `lastSevenDays`.
+    const sevenDaysAgo = weekWindowStart(now);
 
     // ── Chapters read per book ───────────────────────────────────────────────
     // Keys are folded onto the canonical Dutch spelling the dashboards look up
@@ -167,30 +181,29 @@ export async function GET(req: Request) {
       ]);
 
     // ── Weekly reading strip (identical labelling to /api/user/weekly-stats) ──
-    const DAY_LABELS = ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo'];
-    const days: { label: string; count: number; date: string }[] = [];
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(now);
-      d.setDate(now.getDate() - i);
-      const jsDay = d.getDay();
-      days.push({
-        label: DAY_LABELS[jsDay === 0 ? 6 : jsDay - 1],
-        date: d.toISOString().slice(0, 10),
-        count: 0,
-      });
-    }
+    // Days and buckets are both Dutch calendar days: the streak counts them
+    // that way, and a strip that counted UTC days drew a gap on a day a read
+    // after midnight local had already been credited to.
+    const strip = lastSevenDays(now);
+    const counts = new Map(strip.map((d) => [d.key, 0]));
     for (const s of sessions) {
-      const key = (s as unknown as { createdAt: Date }).createdAt.toISOString().slice(0, 10);
-      const entry = days.find((d) => d.date === key);
-      if (entry) entry.count++;
+      const key = dayKey((s as unknown as { createdAt: Date }).createdAt);
+      if (counts.has(key)) counts.set(key, (counts.get(key) ?? 0) + 1);
     }
-    const maxCount = Math.max(...days.map((d) => d.count), 1);
-    const weekDays = days.map((d) => ({
-      label: d.label,
-      count: d.count,
-      heightPct: Math.round((d.count / maxCount) * 100),
-      isToday: d.date === now.toISOString().slice(0, 10),
-    }));
+    // The days a freeze covered - drawn as frozen, never as a gap.
+    const frozen = frozenDays(streakState, { now });
+    const maxCount = Math.max(...counts.values(), 1);
+    const weekDays = strip.map((d) => {
+      const count = counts.get(d.key) ?? 0;
+      return {
+        label: d.label,
+        count,
+        heightPct: Math.round((count / maxCount) * 100),
+        isToday: d.isToday,
+        // A day the reader did not read but a freeze held: the strip says so.
+        frozen: count === 0 && frozen.has(d.key),
+      };
+    });
 
     // With no plan running, the card's job is to offer one rather than vanish.
     const planSuggestions = activePlan
@@ -207,7 +220,10 @@ export async function GET(req: Request) {
       // advances it, so a run that ended days ago still sits there and the
       // Start tab printed it as if it were alive. See lib/streak.
       streak: currentStreak(streakState, { now }),
-      freezes: user.freezeCount ?? 0,
+      // The spendable bank, derived from the run (lib/streak `earnedFreezes`),
+      // not the stored counter.
+      freezes: availableFreezes(streakState),
+      freezeEveryDays: FREEZE_EVERY_DAYS,
       // The run is standing on freezes, not on today's reading: the app paints
       // the pill as a snowflake rather than a flame.
       freezeHolding: streakHeldByFreeze(streakState, { now }),
@@ -216,7 +232,12 @@ export async function GET(req: Request) {
       badges: user.badges ?? [],
       lastRead: user.lastReadChapter ?? null,
       readChapters,
-      weeklyStats: { days: weekDays, totalThisWeek: sessions.length },
+      // Counted off the strip, not off `sessions.length`: the query window
+      // reaches a few hours past the oldest day so no Dutch day is clipped.
+      weeklyStats: {
+        days: weekDays,
+        totalThisWeek: weekDays.reduce((n, d) => n + d.count, 0),
+      },
       notesCount: notes.length,
       recentNotes: notes.slice(0, 3).map((n) => ({
         id: n._id.toString(),

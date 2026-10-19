@@ -166,6 +166,12 @@
   --bar-read:#9FD8CD;
   --bar-today:#0F766E;
 
+  /* The streak freeze ("vriesdag"): the flame's counterpart, and the one cold
+     accent in the system. Sky-600, the same value the app uses for
+     AppTheme.frost, so a frozen day reads the same on both platforms. */
+  --frost:#0284C7;
+  --frost-wash:rgba(2,132,199,.14);
+
   --panel-dark:#152229;
   --panel-card:rgba(15,23,42,.82);
   --panel-border:rgba(255,255,255,.12);
@@ -244,6 +250,10 @@
 
   --heat-0:#333333;
   --bar-empty:#333333;
+
+  /* Sky-400 on the dark ground: sky-600 sinks into it. */
+  --frost:#38BDF8;
+  --frost-wash:rgba(56,189,248,.18);
 
   --shadow-field:0 1px 2px rgba(0,0,0,.4);
   --shadow-badge:0 1px 5px rgba(0,0,0,.5);

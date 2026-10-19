@@ -15,10 +15,13 @@ export const APP_STORE_URL =
   'https://apps.apple.com/us/app/bijbelstudie-lees-leer/id6800668187';
 
 /**
- * Android is not shipped yet. At launch, replace `null` with the Play URL in
- * the `https://play.google.com/store/apps/details?id=<package>` form
- * (lib/storeReviews.ts reads the `id` param). That one change turns on the /app
- * redirect, the Android promo banner, the /beoordelingen Play button and
- * Android reviews. Launch checklist: APP_LINK_PLAN.md §8.
+ * Live in Google Play since 17 October 2026.
+ *
+ * Kept in the bare `…/store/apps/details?id=<package>` form on purpose: no
+ * `&hl=`, no `&pli=`, no referrer parameters. `lib/storeReviews.ts` reads the
+ * `id` param to derive the Play package name, and `lib/storeReviewCta.ts`
+ * appends `&showAllReviews=true` to it, so anything extra in here ends up in
+ * both of those.
  */
-export const PLAY_STORE_URL: string | null = null;
+export const PLAY_STORE_URL: string | null =
+  'https://play.google.com/store/apps/details?id=com.bijbelstudie.app';

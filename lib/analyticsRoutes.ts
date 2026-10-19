@@ -164,8 +164,19 @@ export function toRouteKey(pathname: unknown): RouteKey {
 export const CLICK_TARGETS = [
   // Acquisition
   'hero_cta_signup',
+  /** The two store badges under the hero CTA - see lib/appStore.ts. */
   'hero_cta_appstore',
+  'hero_cta_playstore',
   'hero_cta_learn_more',
+  /**
+   * The /app bio-link page. Only a link-preview bot, `?toon=1` or an empty user
+   * agent renders it - a phone is redirected straight to its store - so these
+   * two count the rare deliberate visit, not the traffic from Instagram.
+   * Registered late: the markup has carried them since /app shipped, and
+   * /api/analytics dropped every one of them in the meantime.
+   */
+  'app_page_appstore',
+  'app_page_playstore',
   'nav_signin',
   'nav_register',
   // Guest funnel. A guest can use the whole product without an account, so the
