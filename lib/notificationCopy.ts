@@ -20,7 +20,11 @@
  * HOUSE RULES, enforced by tests/notificationCopy.test.ts:
  * - title <= 32 characters, body <= 110 characters (Android's collapsed
  *   notification shows about that much and nothing more)
- * - no emoji, no exclamation marks, and the word "moet" never appears
+ * - no emoji, no exclamation marks, and the word "moet" never appears.
+ *   The one-off `announcement` carries one exclamation mark, because the
+ *   owner asked for it on 2026-10-19: a launch is good news, told once. The
+ *   ban still holds for every recurring reminder, which is where shouting
+ *   wears out its welcome.
  * - the specific noun goes in the first 30 characters
  * - every pool holds at least 3 variants needing no tokens at all, so a
  *   brand-new account with no reading history still gets a real message
@@ -251,7 +255,7 @@ const ANNOUNCEMENT: Variant[] = [
   {
     id: 'a01',
     title: 'Nu ook in de Play Store',
-    body: 'De app staat nu ook in Google Play. Heb je vrienden met een Android-telefoon? Zij kunnen nu ook meedoen.',
+    body: 'De app staat nu in Google Play. Heb je vrienden met een Android-telefoon? Zij kunnen nu ook de app gebruiken!',
     needs: [],
   },
 ];
