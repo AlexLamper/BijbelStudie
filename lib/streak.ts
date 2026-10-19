@@ -39,6 +39,10 @@ export const FREEZE_EVERY_DAYS = 7;
 export interface StreakState {
   streak?: number | null;
   freezeCount?: number | null;
+  /** Freezes already spent in the current run; reset to 0 when a run restarts. */
+  freezesUsedInRun?: number | null;
+  /** Dutch day keys ("2026-10-11") of days a spent freeze covered, newest last. */
+  freezeDays?: string[] | null;
   lastStreakDate?: Date | string | null;
 }
 
@@ -60,6 +64,10 @@ export interface StreakTransition {
   freezeUsed: boolean;
   /** How many freezes this call spent bridging the gap. */
   freezesSpent: number;
+  /** The run's spent-freeze tally after this call. */
+  freezesUsedInRun: number;
+  /** Dutch day keys of the days this call's freezes covered, oldest first. */
+  freezeDays: string[];
 }
 
 const DAY_MS = 86_400_000;
@@ -101,13 +109,51 @@ function dayGap(from: Date, to: Date): number {
   return Math.round((to.getTime() - from.getTime()) / DAY_MS);
 }
 
+/** Freezes a run has earned: one per completed FREEZE_EVERY_DAYS of it. */
+export function earnedFreezes(streak: number | null | undefined): number {
+  return Math.floor(Math.max(0, Math.floor(streak ?? 0)) / FREEZE_EVERY_DAYS);
+}
+
+/**
+ * The freezes a reader can spend right now.
+ *
+ * The stored `freezeCount` alone is wrong for anyone whose counter never
+ * tracked the run (it only grew on the exact day a streak hit a multiple of
+ * seven, and a free account could not spend one under the old rule). So the
+ * bank is the larger of the stored counter and what the run itself has earned
+ * minus what it already spent. For an account whose counter was always right
+ * the two agree.
+ */
+export function availableFreezes(state: StreakState): number {
+  const stored = Math.max(0, Math.floor(state.freezeCount ?? 0));
+  const used = Math.max(0, Math.floor(state.freezesUsedInRun ?? 0));
+  return Math.max(stored, earnedFreezes(state.streak) - used);
+}
+
+/** The Dutch calendar day of `date` as "YYYY-MM-DD". */
+export function dayKey(date: Date, timeZone: string = STREAK_TIME_ZONE): string {
+  const [y, m, d] = calendarParts(date, timeZone);
+  return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+}
+
 function normalise(state: StreakState, timeZone: string) {
   const last = state.lastStreakDate ? new Date(state.lastStreakDate) : null;
   return {
     streak: Math.max(0, Math.floor(state.streak ?? 0)),
-    freezes: Math.max(0, Math.floor(state.freezeCount ?? 0)),
+    stored: Math.max(0, Math.floor(state.freezeCount ?? 0)),
+    freezes: availableFreezes(state),
+    used: Math.max(0, Math.floor(state.freezesUsedInRun ?? 0)),
     last: last && !Number.isNaN(last.getTime()) ? startOfDay(last, timeZone) : null,
   };
+}
+
+/** Dutch day keys strictly between two day-starts, oldest first. */
+function daysBetween(from: Date, to: Date): string[] {
+  const keys: string[] = [];
+  for (let t = from.getTime() + DAY_MS; t < to.getTime(); t += DAY_MS) {
+    keys.push(dayKey(new Date(t), 'UTC'));
+  }
+  return keys;
 }
 
 /**
@@ -128,25 +174,29 @@ export function advanceStreak(
   }: { now?: Date; timeZone?: string } = {},
 ): StreakTransition {
   const today = startOfDay(now, timeZone);
-  const { streak, freezes, last } = normalise(state, timeZone);
+  const { streak, stored, freezes, used, last } = normalise(state, timeZone);
 
   if (last && today.getTime() === last.getTime()) {
     return {
       streak,
-      freezeCount: freezes,
+      freezeCount: stored,
       lastStreakDate: last,
       advanced: false,
       brokenFrom: null,
       freezeUsed: false,
       freezesSpent: 0,
+      freezesUsedInRun: used,
+      freezeDays: [],
     };
   }
 
   const gap = last ? dayGap(last, today) : null;
   let next = streak;
-  let freezeCount = freezes;
+  let freezeCount = stored;
+  let freezeDays: string[] = [];
   let brokenFrom: number | null = null;
   let freezesSpent = 0;
+  let usedInRun = used;
 
   if (gap === 1) {
     next = streak + 1;
@@ -156,13 +206,16 @@ export function advanceStreak(
     // without the gap. (It used to stand still instead, which made a freeze
     // feel like a punishment for having one.)
     freezesSpent = gap - 1;
-    freezeCount -= freezesSpent;
+    freezeCount = freezes - freezesSpent;
+    freezeDays = daysBetween(last!, today);
+    usedInRun += freezesSpent;
     next = streak + 1;
   } else {
     // A gap too wide for the bank, a clock that went backwards, or a first ever
     // bump. All three start a run at 1; only the first is a loss.
     if (gap !== null && gap > 1 && streak >= 2) brokenFrom = streak;
     next = 1;
+    usedInRun = 0;
   }
 
   // Only a day that was actually added can earn a freeze; a reset to 1 cannot.
@@ -176,6 +229,8 @@ export function advanceStreak(
     brokenFrom,
     freezeUsed: freezesSpent > 0,
     freezesSpent,
+    freezesUsedInRun: usedInRun,
+    freezeDays,
   };
 }
 
@@ -215,6 +270,64 @@ export function streakHeldByFreeze(
   if (streak <= 0 || !last) return false;
   const gap = dayGap(last, startOfDay(now, timeZone));
   return gap >= 2 && freezes >= gap - 1;
+}
+
+const WEEKDAY_LABELS = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za'];
+
+export interface WeekDay {
+  key: string;
+  label: string;
+  isToday: boolean;
+}
+
+/** The last seven Dutch days, today included and last, oldest first. */
+export function lastSevenDays(
+  now: Date = new Date(),
+  timeZone: string = STREAK_TIME_ZONE,
+): WeekDay[] {
+  const today = startOfDay(now, timeZone);
+  const days: WeekDay[] = [];
+  for (let back = 6; back >= 0; back--) {
+    const date = new Date(today.getTime() - back * DAY_MS);
+    days.push({
+      key: dayKey(date, 'UTC'),
+      label: WEEKDAY_LABELS[date.getUTCDay()],
+      isToday: back === 0,
+    });
+  }
+  return days;
+}
+
+/** An instant early enough to catch every read of the last seven Dutch days, in either DST offset. */
+export function weekWindowStart(
+  now: Date = new Date(),
+  timeZone: string = STREAK_TIME_ZONE,
+): Date {
+  return new Date(startOfDay(now, timeZone).getTime() - 7 * DAY_MS);
+}
+
+/**
+ * Day keys in the week strip that a freeze covers: the ones already charged
+ * (`freezeDays`) plus the gap a freeze is holding right now, before the next
+ * read charges it. Anything outside the strip is dropped.
+ */
+export function frozenDays(
+  state: StreakState,
+  { now = new Date(), timeZone = STREAK_TIME_ZONE }: { now?: Date; timeZone?: string } = {},
+): Set<string> {
+  const window = new Set(lastSevenDays(now, timeZone).map((d) => d.key));
+  const out = new Set<string>();
+  for (const key of state.freezeDays ?? []) if (window.has(key)) out.add(key);
+
+  const { streak, freezes, last } = normalise(state, timeZone);
+  if (streak > 0 && last) {
+    const today = startOfDay(now, timeZone);
+    const gap = dayGap(last, today);
+    if (gap >= 2 && freezes >= gap - 1) {
+      for (const key of daysBetween(last, today)) if (window.has(key)) out.add(key);
+    }
+  }
+  return out;
 }
 
 /**

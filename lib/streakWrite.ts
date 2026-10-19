@@ -44,7 +44,7 @@ export async function touchStreak(
 ): Promise<TouchStreakResult | null> {
   await connectMongoDB();
 
-  const user = await User.findById(userId).select('streak freezeCount lastStreakDate badges');
+  const user = await User.findById(userId).select('streak freezeCount freezesUsedInRun freezeDays lastStreakDate badges');
   if (!user) return null;
 
   const move =
@@ -53,6 +53,8 @@ export async function touchStreak(
       {
         streak: user.streak,
         freezeCount: user.freezeCount,
+        freezesUsedInRun: user.freezesUsedInRun,
+        freezeDays: user.freezeDays,
         lastStreakDate: user.lastStreakDate,
       },
       { now },
@@ -61,6 +63,7 @@ export async function touchStreak(
   const set: Record<string, unknown> = {
     streak: move.streak,
     freezeCount: move.freezeCount,
+    freezesUsedInRun: move.freezesUsedInRun,
     lastStreakDate: move.lastStreakDate,
   };
   // What the reader lost, kept for the return-visit prompt. Only the break
@@ -74,6 +77,10 @@ export async function touchStreak(
     user._id,
     {
       $set: set,
+      // Which days a freeze covered, for the week strip; only the last fortnight is kept.
+      ...(move.freezeDays.length > 0
+        ? { $push: { freezeDays: { $each: move.freezeDays, $slice: -14 } } }
+        : {}),
       // The record the streak-gated ProgressTree items read: it only ever grows.
       $max: { longestStreak: move.streak },
     },

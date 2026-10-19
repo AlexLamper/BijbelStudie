@@ -18,6 +18,8 @@ const UserSchema = new mongoose.Schema(
     longestStreak: { type: Number, default: 0 },
     lastStreakDate: { type: Date },
     freezeCount: { type: Number, default: 0 },
+    freezesUsedInRun: { type: Number, default: 0 },
+    freezeDays: { type: [String], default: [] },
     // The run that most recently ENDED, and when. Written by lib/streak.ts via
     // both streak routes, read by the return-visit prompt on the dashboard:
     // once `streak` restarts at 1 the number the reader remembers is gone, and
