@@ -66,9 +66,9 @@ const PLATFORM_LABEL: Record<PublicStoreReview["platform"], string> = {
 };
 
 /**
- * Android is not shipped, so today this reads "de App Store". It follows
- * `PLAY_STORE_URL` rather than the reviews that happen to be imported, so the
- * heading cannot start claiming one store while `StoreLinks` offers two.
+ * "de appstores" now that both are live. It follows `PLAY_STORE_URL` rather
+ * than the reviews that happen to be imported, so the heading cannot claim one
+ * store while `StoreLinks` offers two, or two while it offers one.
  */
 const STORE_NAME = PLAY_STORE_URL === null ? "de App Store" : "de appstores";
 
@@ -317,8 +317,8 @@ export default async function ReviewsPage() {
         <section className="rounded-card border border-line bg-surface px-4 py-[18px] sm:px-[22px]">
           <p className="text-[13.5px] leading-[1.7] text-ink-body">
             Er zijn nog geen beoordelingen opgehaald, dus staat hier geen cijfer. De BijbelStudie-app
-            staat sinds augustus 2026 in de App Store: zodra lezers een beoordeling achterlaten,
-            verschijnt die hier.
+            staat sinds augustus 2026 in de App Store en sinds oktober 2026 in Google Play: zodra
+            lezers een beoordeling achterlaten, verschijnt die hier.
           </p>
           <div className="mt-3.5">
             <StoreLinks />

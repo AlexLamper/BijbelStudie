@@ -59,6 +59,7 @@ export type NotificationType =
   | 'streak_lost'
   | 'study_nudge'
   | 'tree_wilting'
+  | 'announcement'
   | SocialNotificationType;
 
 /** Values a variant can interpolate. Absent keys remove a variant from the pool. */
@@ -229,9 +230,37 @@ const POST_COMMENT: Variant[] = [
   { id: 'k05', title: 'Iemand schreef je terug', body: 'Een reactie onder je bericht in je vriendenkring.', needs: [] },
 ];
 
+/**
+ * One-off product announcements. The only pool here with a single variant, and
+ * that is the point: a broadcast is one message everybody gets, not a rotation.
+ * Rotation exists so a daily reminder does not turn into furniture; an
+ * announcement is sent once and never again.
+ *
+ * `a01` is the Google Play launch (17 October 2026). It is addressed to the
+ * people who can already read it - every device token is an iPhone, because
+ * the owner rejected Firebase and Android gets no push
+ * (models/DeviceToken.js) - so it asks them to pass it on rather than telling
+ * them to go and install something they already have.
+ *
+ * NOT a promotion, which §3.11 of NOTIFICATIONS_PLAN.md rules out for good:
+ * nothing is for sale in it, there is no discount, no trial and no upsell. It
+ * is the kind of thing a release note is for, on the one channel this product
+ * has. If that line ever gets blurry, the rule wins and the pool stays empty.
+ */
+const ANNOUNCEMENT: Variant[] = [
+  {
+    id: 'a01',
+    title: 'Nu ook in de Play Store',
+    body: 'De app staat nu ook in Google Play. Heb je vrienden met een Android-telefoon? Zij kunnen nu ook meedoen.',
+    needs: [],
+  },
+];
+
 /** The pool for a type, given the context that changes which pool applies. */
 export function poolFor(type: NotificationType, tokens: CopyTokens): Variant[] {
   switch (type) {
+    case 'announcement':
+      return ANNOUNCEMENT;
     case 'daily_reading':
       return DAILY_READING;
     case 'streak_risk':
@@ -322,6 +351,11 @@ export function deepLinkFor(type: NotificationType, tokens: CopyTokens): string 
   }
   if (type === 'study_nudge') return '/studies';
   if (type === 'streak_lost') return '/dashboard';
+  // The announcement is about a second store, which is nothing the app can
+  // show. `/dashboard` is also the one route every installed build whitelists
+  // (`isAllowedNotificationRoute` in the app's notification_service.dart), so
+  // the tap lands where it says it will on every version out there.
+  if (type === 'announcement') return '/dashboard';
   // The nudge is about the tree, so it opens the tree rather than a chapter.
   if (type === 'tree_wilting') return '/profiel/boom';
   if (tokens.boek && tokens.hoofdstuk) {
@@ -426,6 +460,9 @@ export function apnsThreadId(type: NotificationType): string {
   if (isSocialNotificationType(type)) return 'vriendenkring';
   if (type === 'study_nudge') return 'studie';
   if (type === 'tree_wilting') return 'boom';
+  // Its own stack: an announcement that lands under "lezen" reads as a reading
+  // reminder, and swiping the reminder away would take it with it.
+  if (type === 'announcement') return 'bijbelstudie';
   return 'lezen';
 }
 

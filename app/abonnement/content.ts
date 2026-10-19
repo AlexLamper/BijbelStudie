@@ -77,7 +77,7 @@ export const ABONNEMENT_FAQ: { q: string; a: string }[] = [
   },
   {
     q: "Ik heb Pro in de app gekocht. Werkt dat ook op de website?",
-    a: "Ja. Log op de website in met hetzelfde account, dan wordt je abonnement uit de App Store herkend. Opzeggen of wijzigen doe je in dat geval in je Apple-account, niet op de website.",
+    a: "Ja. Log op de website in met hetzelfde account, dan wordt je abonnement uit de App Store of Google Play herkend. Opzeggen of wijzigen doe je in dat geval in je Apple- of Google-account, niet op de website.",
   },
   {
     q: "Kan ik mijn geld terugkrijgen?",

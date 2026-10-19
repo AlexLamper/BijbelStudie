@@ -46,7 +46,7 @@ export const APP_STORE_REVIEW_URL: string | null = APP_STORE_ID
 
 /**
  * Play has no write-review deep link on the web; the listing's review section
- * is the destination. Null while Android is unshipped.
+ * is the destination. Null only if `PLAY_STORE_URL` is ever emptied again.
  */
 export const PLAY_STORE_REVIEW_URL: string | null = PLAY_STORE_URL
   ? `${PLAY_STORE_URL}${PLAY_STORE_URL.includes('?') ? '&' : '?'}showAllReviews=true`

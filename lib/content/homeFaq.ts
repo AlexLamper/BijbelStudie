@@ -33,7 +33,7 @@ export const HOME_FAQS: Faq[] = [
   },
   {
     q: "Worden mijn notities opgeslagen?",
-    a: "Ja. Al uw notities en voortgang worden automatisch opgeslagen in uw persoonlijke account en zijn op elk apparaat beschikbaar - in de browser en in de iOS-app.",
+    a: "Ja. Al uw notities en voortgang worden automatisch opgeslagen in uw persoonlijke account en zijn op elk apparaat beschikbaar - in de browser en in de app voor iPhone, iPad en Android.",
   },
   {
     q: "Heb ik een account nodig om te beginnen?",
