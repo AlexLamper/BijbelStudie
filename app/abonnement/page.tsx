@@ -46,9 +46,9 @@ function AboutPro() {
         // 46 px is the size for a wide screen. On a laptop the left column is
         // narrow enough that 46 px breaks the line in the wrong place, so the
         // band under 1440 px takes one step down.
-        className="mt-7 max-w-[400px] font-serif text-[46px] font-normal leading-[1.1] tracking-[-0.5px] text-ink [text-wrap:balance] max-[1439px]:text-[40px] max-md:text-[34px]"
+        className="mt-7 max-w-[400px] text-[44px] font-bold leading-[1.12] tracking-[-0.8px] text-ink [text-wrap:balance] max-[1439px]:text-[38px] max-md:text-[32px]"
       >
-        Onderzoek de Schriften met meer diepgang.
+        Onderzoek de Bijbel, tot in de grondtekst.
       </h1>
 
       <h2 className={`mt-7 ${LABEL} text-ink-faint`}>Alles in Pro</h2>
