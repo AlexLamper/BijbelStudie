@@ -22,7 +22,7 @@ export const REMOTE_COMMENTARIES: ReadonlySet<string> = new Set([
   'calvijn_nl',
 ]);
 
-/** Legacy ids some callers still send (e.g. the /api/commentary default). */
+/** Legacy ids some callers still send (e.g. older /api/commentary links). */
 const REMOTE_ALIASES: Readonly<Record<string, string>> = {
   matthew_henry: 'matthew_henry_nl',
   'matthew-henry': 'matthew_henry_nl',

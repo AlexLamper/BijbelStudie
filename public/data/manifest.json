@@ -903,18 +903,6 @@
   ],
   "commentaries": [
     {
-      "name": "matthew_henry_nl.json",
-      "title": "Matthew Henry (NL)",
-      "language": "nl",
-      "type": "file"
-    },
-    {
-      "name": "calvijn_nl.json",
-      "title": "Johannes Calvijn (NL)",
-      "language": "nl",
-      "type": "file"
-    },
-    {
       "name": "kingcomments_nl",
       "title": "King Comments (NL)",
       "language": "nl",
@@ -987,6 +975,18 @@
         "Zechariah",
         "Zephaniah"
       ]
+    },
+    {
+      "name": "matthew_henry_nl.json",
+      "title": "Matthew Henry (NL)",
+      "language": "nl",
+      "type": "file"
+    },
+    {
+      "name": "calvijn_nl.json",
+      "title": "Johannes Calvijn (NL)",
+      "language": "nl",
+      "type": "file"
     },
     {
       "name": "dachsel",

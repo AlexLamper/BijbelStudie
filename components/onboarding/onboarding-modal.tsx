@@ -68,8 +68,8 @@ const TRANSLATION_NOTES: Record<string, string> = {
 }
 
 const COMMENTARY_NOTES: Record<string, string> = {
-  matthew_henry_nl: "Klassiek commentaar uit 1706, devotionele insteek",
   kingcomments_nl: "Eigentijds Nederlands commentaar, vers-voor-vers",
+  matthew_henry_nl: "Klassiek commentaar uit 1706, devotionele insteek",
   dachsel: "Duits piëtistisch commentaar, in het Nederlands",
 }
 
@@ -88,9 +88,9 @@ const FALLBACK_TRANSLATIONS: Choice[] = [
 
 const FALLBACK_COMMENTARIES: Choice[] = [
   {
-    code: "matthew_henry_nl",
-    label: "Matthew Henry (NL)",
-    desc: COMMENTARY_NOTES.matthew_henry_nl,
+    code: "kingcomments_nl",
+    label: "KingComments (NL)",
+    desc: COMMENTARY_NOTES.kingcomments_nl,
   },
 ]
 
@@ -322,7 +322,7 @@ export function OnboardingModal({
     studyStyle: StudyStyle
   }>({
     translation: "statenvertaling",
-    commentary: "matthew_henry_nl",
+    commentary: "kingcomments_nl",
     intent: "light",
     studyStyle: DEFAULT_STUDY_STYLE,
   })

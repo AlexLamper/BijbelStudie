@@ -22,7 +22,7 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const source = searchParams.get('source') || 'matthew_henry';
+  const source = searchParams.get('source') || 'kingcomments_nl';
   const book = searchParams.get('book');
   const chapter = searchParams.get('chapter');
 

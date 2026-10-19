@@ -24,7 +24,7 @@ export async function OPTIONS() {
 }
 
 /** The floor every client may show; see DEFAULT_COMMENTARY in lib/studyFlow. */
-const MOBILE_FALLBACK_COMMENTARY = 'matthew_henry_nl';
+const MOBILE_FALLBACK_COMMENTARY = 'kingcomments_nl';
 
 /**
  * True for the Flutter app: a bearer token, or `?client=app` for a request
@@ -47,7 +47,7 @@ function isMobileRequest(req: Request, url: URL): boolean {
  * never creates an enrollment.
  *
  * For the app the commentary is filtered through lib/mobileLicensing: a
- * preference for a source the app may not show falls back to Matthew Henry.
+ * preference for a source the app may not show falls back to KingComments.
  */
 export async function GET(req: Request, { params }: RouteContext) {
   try {

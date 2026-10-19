@@ -150,18 +150,20 @@ export function resolvePassage(lesson: Lesson, content?: LessonContent): Passage
 /**
  * The commentary shown when nothing else is chosen.
  *
- * Matthew Henry is devotional, in Dutch, and present for effectively every
- * passage in the corpus - so it is a safe floor. Dachsel is deliberately NOT a
+ * KingComments is in Dutch, written in plain language, and present for all 66
+ * books - and, unlike Matthew Henry, Calvijn and Dachsel, free in full to every
+ * reader (see `isAlwaysFreeCommentary` in lib/proContent.ts), so the default can
+ * never drop a free reader onto a gated panel. Dachsel is deliberately NOT a
  * default: it is a 19th-century exegetical commentary that is missing for many
  * chapters, and defaulting to it strands the reader with an empty panel.
  */
-const DEFAULT_COMMENTARY = 'matthew_henry_nl';
+const DEFAULT_COMMENTARY = 'kingcomments_nl';
 
 /**
  * Which commentary step 3 shows.
  *
  * Order: an explicit per-study choice, then the reader's own setting from
- * reading preferences, then Matthew Henry. A commentary is never auto-picked
+ * reading preferences, then KingComments. A commentary is never auto-picked
  * from the study's depth setting - only a choice the reader actually made
  * counts, otherwise the fallback applies.
  */

@@ -146,7 +146,7 @@ export function useBibleData(lng: string, options: UseBibleDataOptions = {}): Us
       const stored = localStorage.getItem('bijbelstudie_commentary');
       if (stored) return stored;
     } catch { /* noop */ }
-    return 'matthew_henry_nl';
+    return 'kingcomments_nl';
   });
   const [maxChapter, setMaxChapter]     = useState<number>(1);
   const [loadingBooks, setLoadingBooks] = useState(true);

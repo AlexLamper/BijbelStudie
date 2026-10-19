@@ -8,7 +8,7 @@ export interface GeneralSettings {
 
 const DEFAULT_SETTINGS: GeneralSettings = {
   translation: 'statenvertaling',
-  commentary: 'matthew_henry_nl',
+  commentary: 'kingcomments_nl',
   ttsVoice: 'bram',
 };
 

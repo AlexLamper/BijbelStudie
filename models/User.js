@@ -156,7 +156,7 @@ const UserSchema = new mongoose.Schema(
     preferences: {
       language: { type: String },
       translation: { type: String, default: "statenvertaling" },
-      commentary: { type: String, default: "matthew_henry_nl" },
+      commentary: { type: String, default: "kingcomments_nl" },
       intent: { type: String },
       // How the user answered onboarding's "Hoe studeer je het liefst?"
       // question: "guided" (begeleide studies) or "self" (zelf lezen). It

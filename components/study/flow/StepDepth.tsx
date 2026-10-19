@@ -85,7 +85,7 @@ const PANELS: { key: PanelKey; label: string; icon: typeof Images; blurb: string
  * those words properly, one word at a time, with the Hebrew or Greek attached.
  *
  * The commentary source is resolved server-side: an explicit study choice, then
- * the reader's own reading-preference, then Matthew Henry (see lib/studyFlow
+ * the reader's own reading-preference, then KingComments (see lib/studyFlow
  * resolveCommentaryId).
  *
  * WHY THIS STEP IS STILL A HALF AND NOT A 64ch COLUMN WITH A 252px MARGIN.
