@@ -11,7 +11,9 @@ export const config = {
     // Googlebot never pays for a getToken() round-trip just to fetch an image
     // or robots.txt. `images/` is all static files from public/ (icons, the
     // touch icon Google reads for search results, photos) - no page lives there.
-    "/((?!api|og|_next/static|_next/image|assets|favicon.ico|icon.svg|robots.txt|sitemap.xml|sitemap|sw.js|site.webmanifest|data|images/).*)",
+    // `.well-known/` holds assetlinks.json, which Android fetches to verify
+    // App Links and which must come back as the plain file, no locale hop.
+    "/((?!api|og|_next/static|_next/image|assets|favicon.ico|icon.svg|robots.txt|sitemap.xml|sitemap|sw.js|site.webmanifest|data|images/|\.well-known/).*)",
   ],
 };
 

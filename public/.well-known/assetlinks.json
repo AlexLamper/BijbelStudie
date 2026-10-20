@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.bijbelstudie.app",
+      "sha256_cert_fingerprints": [
+        "EB:EE:3A:09:38:91:94:6F:B5:23:44:7E:D6:40:87:1D:3F:A9:C5:80:3B:C5:10:9B:B4:98:8C:BD:8C:73:AA:3F"
+      ]
+    }
+  }
+]
