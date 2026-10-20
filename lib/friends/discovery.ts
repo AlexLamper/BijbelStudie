@@ -26,6 +26,9 @@ const HASH_LENGTH = 32;
 export function normalisePhone(raw: string, country = 'NL'): string | null {
   if (!raw) return null;
   let value = String(raw).trim();
+  // The bracketed trunk zero of `+31 (0)6 12345678` (business cards, e-mail
+  // signatures) goes before the brackets do, or the 0 survives as a digit.
+  value = value.replace(/\(\s*0\s*\)/g, '');
   // Strip everything a human or an address book might add.
   value = value.replace(/[\s\-(). ‑-―]/g, '');
   if (!value) return null;
@@ -41,7 +44,10 @@ export function normalisePhone(raw: string, country = 'NL'): string | null {
   const digits = value.replace(/\D/g, '');
   if (!digits) return null;
 
-  const prefix = COUNTRY_PREFIX[country] ?? COUNTRY_PREFIX.NL;
+  // The US has no trunk zero, so 06... on a phone whose locale says en_US is
+  // a Dutch number, not +1 6... .
+  const effective = country === 'US' && digits.startsWith('0') ? 'NL' : country;
+  const prefix = COUNTRY_PREFIX[effective] ?? COUNTRY_PREFIX.NL;
   // A national number written with its trunk zero: 0612345678 -> +31612345678.
   const national = digits.startsWith('0') ? digits.slice(1) : digits;
   if (national.length < 8) return null;
