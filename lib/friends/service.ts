@@ -1243,11 +1243,18 @@ export async function saveOwnHashes(
     if (!emailHashes.includes(hash)) emailHashes.push(hash);
   }
 
+  // A number given here replaces the stored one rather than piling up next to
+  // it: a reader who changed number should not stay findable by the old one,
+  // which may by now belong to somebody else. No number leaves it as it was.
+  const set: Record<string, unknown> = { discoverable: input.discoverable === false ? false : true };
+  const addToSet: Record<string, unknown> = { emailHashes: { $each: emailHashes } };
+  if (phoneHashes.length > 0) set.phoneHashes = phoneHashes;
+
   await FriendProfile.updateOne(
     { userId: oid(userId) },
     {
-      $set: { discoverable: input.discoverable === false ? false : true },
-      $addToSet: { phoneHashes: { $each: phoneHashes }, emailHashes: { $each: emailHashes } },
+      $set: set,
+      $addToSet: addToSet,
       $setOnInsert: { userId: oid(userId) },
     },
     { upsert: true },
@@ -1286,11 +1293,18 @@ export async function matchContacts(
     .limit(200)
     .lean<{ userId: mongoose.Types.ObjectId }[]>();
 
-  const [existing, blocked] = await Promise.all([friendIdsFor(userId), blockedBetween(userId)]);
+  // A verzoek already in flight either way is left out too, as
+  // `getSuggestions` does: the app folds these into "Mensen die je misschien
+  // kent", where a row offering "Uitnodigen" for a pending verzoek is wrong.
+  const [existing, blocked, inFlight] = await Promise.all([
+    friendIdsFor(userId),
+    blockedBetween(userId),
+    requestsInFlight(userId),
+  ]);
   const already = new Set(existing);
   const ids = rows
     .map((row) => String(row.userId))
-    .filter((id) => !already.has(id) && !blocked.has(id));
+    .filter((id) => !already.has(id) && !blocked.has(id) && !inFlight.has(id));
 
   return { found: await summariesFor(ids) };
 }
