@@ -295,7 +295,7 @@ export default function GeoImages({ book, chapter, className, variant = 'grid', 
   const { t } = useTranslation('study');
   const [images, setImages]   = useState<GeoImage[]>([]);
   const [scope, setScope]     = useState<'chapter' | 'book'>('chapter');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(Boolean(book && chapter));
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [mounted, setMounted]   = useState(false);
 

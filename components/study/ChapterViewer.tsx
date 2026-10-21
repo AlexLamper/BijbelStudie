@@ -91,7 +91,7 @@ export default function ChapterViewer({
   onCrossRefNavigate,
 }: Props) {
   const [verses, setVerses] = useState<VerseData>({});
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedVerse, setSelectedVerse] = useState<SelectedVerse | null>(null);
   const [showCreateNoteModal, setShowCreateNoteModal] = useState(false);

@@ -333,7 +333,9 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
   // the client can no longer tell a short chapter from a truncated one, because
   // the withheld text is not in the response to measure.
   const [locked, setLocked] = useState(false);
-  const [loading, setLoading] = useState(false);
+  // Start in loading when a fetch is about to fire; false here flashed the
+  // "no commentary" empty state on the first render, before the effect ran.
+  const [loading, setLoading] = useState(Boolean(book && chapter));
   const [error, setError] = useState<string | null>(null);
   const [availableSources, setAvailableSources] = useState<CommentarySource[]>([]);
   const [selectedSource, setSelectedSource] = useState(initialSource);
