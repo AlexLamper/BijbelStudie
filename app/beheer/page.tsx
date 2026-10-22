@@ -33,10 +33,25 @@ interface Stats {
   }
   billing: BillingStats
   revenue: {
+    /** Stripe alone. */
     mrrEur: number | null
     arrEur: number | null
+    /** Stripe + the app stores. Null when a half is configured but unreadable. */
+    totalMrrEur: number | null
+    totalArrEur: number | null
     priceEur: number
     annualPriceEur: number
+    /** App Store + Play, read from RevenueCat rather than from the database. */
+    store: {
+      configured: boolean
+      mrrEur: number | null
+      revenueEur: number | null
+      revenuePeriod: string | null
+      activeSubscriptions: number | null
+      activeTrials: number | null
+      currency: string | null
+      updatedAt: string | null
+    }
   }
   content: {
     notes: number | null
@@ -72,6 +87,19 @@ interface RecentUser {
 function formatNumber(n: number | null | undefined): string {
   if (n == null) return "-"
   return n.toLocaleString("nl-NL")
+}
+
+/** Same dash-for-unknown rule as formatNumber: a missing amount is never 0. */
+function formatEuro(n: number | null | undefined): string {
+  if (n == null) return "-"
+  return `€ ${n.toLocaleString("nl-NL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+}
+
+/** "P28D" -> "28 dagen", for the label on RevenueCat's trailing revenue. */
+function formatPeriod(period: string | null | undefined): string | null {
+  if (!period) return null
+  const match = /^P(\d+)D$/.exec(period)
+  return match ? `${match[1]} dagen` : period
 }
 
 function formatDate(d: string): string {
@@ -280,14 +308,17 @@ export default function AdminDashboardPage() {
         <div className="grid flex-none grid-cols-2 gap-[13px] sm:grid-cols-3 xl:grid-cols-6">
           <StatCard
             className="col-span-2 min-w-0 sm:col-span-1"
-            label="MRR"
+            // Every channel, not Stripe alone - the app stores earn real money
+            // and used to be missing from this tile entirely. The label says so
+            // only when there is a second channel wired up to say it about.
+            label={stats?.revenue.store.configured ? "MRR (alle kanalen)" : "MRR"}
             value={
               // The two money figures in this row are shown in the same green the
               // rest of the page keeps for a gain. A missing MRR stays a plain
               // dash: an unknown amount is not a good number, so it is not green.
-              stats?.revenue.mrrEur != null ? (
+              stats?.revenue.totalMrrEur != null ? (
                 <span className="text-success dark:text-emerald-400">
-                  {`€ ${stats.revenue.mrrEur.toLocaleString("nl-NL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                  {formatEuro(stats.revenue.totalMrrEur)}
                 </span>
               ) : (
                 "-"
@@ -296,13 +327,13 @@ export default function AdminDashboardPage() {
           />
           <StatCard
             className="col-span-2 min-w-0 sm:col-span-1"
-            label="ARR"
+            label={stats?.revenue.store.configured ? "ARR (alle kanalen)" : "ARR"}
             value={
               // MRR times twaalf, straight from the API - never recomputed here.
               // Same green-or-dash rule as MRR: a missing ARR is a dash, not 0.
-              stats?.revenue.arrEur != null ? (
+              stats?.revenue.totalArrEur != null ? (
                 <span className="text-success dark:text-emerald-400">
-                  {`€ ${stats.revenue.arrEur.toLocaleString("nl-NL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                  {formatEuro(stats.revenue.totalArrEur)}
                 </span>
               ) : (
                 "-"
@@ -484,6 +515,42 @@ export default function AdminDashboardPage() {
               )}
               <FunnelRow label="Beheerders" value={stats?.users.admins} loading={loading} last />
             </dl>
+
+            {/* Where the MRR at the top splits. The Stripe line is modelled from
+                the database and lib/pricing; the app line is RevenueCat's own
+                MRR, because nothing stored about a store subscriber can price
+                one. Both are gross - what the customer is charged - so the two
+                add up; the app line is before Apple's and Google's commission.
+                Shown only once RevenueCat is wired up: before that the top tile
+                is Stripe and a split of one row explains nothing. */}
+            {stats?.revenue.store.configured && (
+              <>
+                <dl className="mt-[14px] border-t border-line pt-[10px]">
+                  <FunnelRow label="MRR via Stripe" display={formatEuro(stats.revenue.mrrEur)} loading={loading} />
+                  <FunnelRow
+                    label="MRR via de apps"
+                    display={formatEuro(stats.revenue.store.mrrEur)}
+                    loading={loading}
+                  />
+                  {stats.revenue.store.activeTrials != null && stats.revenue.store.activeTrials > 0 && (
+                    <FunnelRow
+                      label="Proefperiodes in de apps"
+                      value={stats.revenue.store.activeTrials}
+                      loading={loading}
+                    />
+                  )}
+                  <FunnelRow
+                    label={`Omzet apps (${formatPeriod(stats.revenue.store.revenuePeriod) ?? "recent"})`}
+                    display={formatEuro(stats.revenue.store.revenueEur)}
+                    loading={loading}
+                    last
+                  />
+                </dl>
+                <p className="mt-2 text-[11.5px] leading-relaxed text-ink-faint">
+                  App-cijfers komen van RevenueCat en zijn bruto, vóór de commissie van Apple en Google.
+                </p>
+              </>
+            )}
           </Card>
 
           <Card className="w-full flex-none p-[14px] lg:w-[340px]">
@@ -651,14 +718,15 @@ function MiniStat({ label, value, delta, loading }: { label: string; value: stri
   )
 }
 
-function FunnelRow({ label, value, loading, last }: { label: string; value?: number | null; loading: boolean; last?: boolean }) {
+/** `display` replaces the formatted count, for rows that hold an amount. */
+function FunnelRow({ label, value, display, loading, last }: { label: string; value?: number | null; display?: string; loading: boolean; last?: boolean }) {
   return (
     <div className={`flex items-center justify-between gap-3 py-2 ${last ? "" : "border-b border-line-soft"}`}>
       <dt className="text-[12.5px] text-ink-muted">{label}</dt>
       {loading ? (
         <dd><Skeleton className="h-3 w-8" /></dd>
       ) : (
-        <dd className="text-[13px] font-bold text-ink tabular-nums">{formatNumber(value)}</dd>
+        <dd className="text-[13px] font-bold text-ink tabular-nums">{display ?? formatNumber(value)}</dd>
       )}
     </div>
   )

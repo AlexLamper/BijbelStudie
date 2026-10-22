@@ -9,6 +9,10 @@ import {
   COMPED_ACCESS_FILTER,
   PAYING_STRIPE_FILTER,
 } from "./billingFilters";
+import {
+  fetchRevenueCatOverview,
+  isRevenueCatMetricsConfigured,
+} from "./revenuecatMetrics";
 
 /**
  * Numbers for /admin.
@@ -30,6 +34,15 @@ import {
  * that as monthly. So a review account created for Apple was reporting EUR 9,99
  * of monthly income that nobody pays. It is now counted and shown separately, as
  * `users.comped`.
+ *
+ * App store revenue does not come from Mongo at all. Nothing in the database
+ * can price a store subscriber - `storePremium` has no interval and no amount -
+ * so the app half of the income is read from RevenueCat, the system of record
+ * for it (lib/revenuecatMetrics). `revenue.mrrEur` therefore stays what it has
+ * always been, Stripe alone, and `revenue.totalMrrEur` is the figure the page
+ * leads with. The total follows the same rule as the Stripe MRR below: when app
+ * billing is configured but its half could not be read, the total is null, not
+ * the Stripe half relabelled as everything.
  *
  * `possiblyMissedWebhooks` is new and is the number that would have caught the
  * original incident on the dashboard: accounts that have a Stripe customer id
@@ -138,6 +151,10 @@ async function buildStats(): Promise<AdminPayload> {
   const degraded: string[] = [];
   const q = <T>(label: string, run: () => PromiseLike<T>) => settle(label, degraded, run);
 
+  // Env check, not a request. It decides what a missing app-revenue figure
+  // means further down: "there is none to read" or "it could not be read".
+  const storeRevenueConfigured = isRevenueCatMetricsConfigured();
+
   // Promise.all is safe here only because `settle` never rejects: every entry
   // resolves, to a number or to null. One dead collection can no longer take the
   // other twenty-two figures down with it.
@@ -165,6 +182,7 @@ async function buildStats(): Promise<AdminPayload> {
     pausedSubscribers,
     possiblyMissedWebhooks,
     statusCounts,
+    storeOverview,
   ] = await Promise.all([
     q("Totaal gebruikers", () => User.countDocuments()),
     q("Stripe-abonnees", () => User.countDocuments(PAYING_STRIPE_FILTER)),
@@ -204,6 +222,12 @@ async function buildStats(): Promise<AdminPayload> {
         { $match: { subscriptionStatus: { $ne: null } } },
         { $group: { _id: "$subscriptionStatus", count: { $sum: 1 } } },
       ])),
+    // The one figure on this page that is not a database read. Skipped entirely
+    // when no keys are set, so an unconfigured install does not report itself
+    // as broken every time an admin opens the dashboard.
+    storeRevenueConfigured
+      ? q("App-omzet (RevenueCat)", () => fetchRevenueCatOverview())
+      : Promise.resolve(null),
   ]);
 
   // A *paying* subscriber whose interval was never recorded is still real
@@ -224,6 +248,15 @@ async function buildStats(): Promise<AdminPayload> {
       ? monthlySubscribers * MRR_CENTS.monthly +
         annualSubscribers * MRR_CENTS.annual +
         unknownInterval * MRR_CENTS.monthly
+      : null;
+
+  // The combined figure. Three cases, and the middle one is the reason this is
+  // not a plain sum: app billing wired up but unreadable must not quietly
+  // render the Stripe half as the whole business.
+  const totalMrrCents = !storeRevenueConfigured
+    ? mrrCents
+    : mrrCents !== null && storeOverview?.mrrCents != null
+      ? mrrCents + storeOverview.mrrCents
       : null;
 
   const paying =
@@ -286,12 +319,30 @@ async function buildStats(): Promise<AdminPayload> {
       unknownInterval,
     },
     revenue: {
+      // Stripe alone, unchanged. Both halves are also reported on their own, so
+      // the dashboard can show where a total came from.
       mrrEur: mrrCents === null ? null : Math.round(mrrCents) / 100,
       arrEur: mrrCents === null ? null : Math.round(mrrCents * 12) / 100,
+      // Every channel. This is the number the page leads with.
+      totalMrrEur: totalMrrCents === null ? null : Math.round(totalMrrCents) / 100,
+      totalArrEur: totalMrrCents === null ? null : Math.round(totalMrrCents * 12) / 100,
       // Retained for the existing card; it is the monthly list price, not an
       // average of what subscribers actually pay.
       priceEur: PLANS.monthly.amountCents / 100,
       annualPriceEur: PLANS.annual.amountCents / 100,
+      // App Store + Play, straight from RevenueCat. `configured` false means no
+      // keys are set, which is why every figure beside it is null; with keys
+      // set, null means the read failed and `degraded` names it.
+      store: {
+        configured: storeRevenueConfigured,
+        mrrEur: storeOverview?.mrrCents == null ? null : storeOverview.mrrCents / 100,
+        revenueEur: storeOverview?.revenueCents == null ? null : storeOverview.revenueCents / 100,
+        revenuePeriod: storeOverview?.revenuePeriod ?? null,
+        activeSubscriptions: storeOverview?.activeSubscriptions ?? null,
+        activeTrials: storeOverview?.activeTrials ?? null,
+        currency: storeOverview?.currency ?? null,
+        updatedAt: storeOverview?.updatedAt ?? null,
+      },
     },
     content: {
       notes: totalNotes,
