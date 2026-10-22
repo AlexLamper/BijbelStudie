@@ -51,6 +51,14 @@ interface Stats {
       activeTrials: number | null
       currency: string | null
       updatedAt: string | null
+      /**
+       * Headcount per store, from our own database. Counts, never euros:
+       * RevenueCat reports app money as a single figure with no store
+       * dimension, and dividing it by headcount would invent a number.
+       */
+      subscribersApple: number | null
+      subscribersGoogle: number | null
+      unknownPlatform: number | null
     }
   }
   content: {
@@ -306,39 +314,32 @@ export default function AdminDashboardPage() {
 
         {/* ── Six figures, MRR and ARR first ────────────────────────── */}
         <div className="grid flex-none grid-cols-2 gap-[13px] sm:grid-cols-3 xl:grid-cols-6">
-          <StatCard
-            className="col-span-2 min-w-0 sm:col-span-1"
-            // Every channel, not Stripe alone - the app stores earn real money
-            // and used to be missing from this tile entirely. The label says so
-            // only when there is a second channel wired up to say it about.
+          {/* Every channel, not Stripe alone - the app stores earn real money
+              and used to be missing from these tiles entirely. The label says
+              so only when there is a second channel wired up to say it about.
+              Both tiles open a breakdown of where the total comes from. */}
+          <RevenueCard
             label={stats?.revenue.store.configured ? "MRR (alle kanalen)" : "MRR"}
-            value={
-              // The two money figures in this row are shown in the same green the
-              // rest of the page keeps for a gain. A missing MRR stays a plain
-              // dash: an unknown amount is not a good number, so it is not green.
-              stats?.revenue.totalMrrEur != null ? (
-                <span className="text-success dark:text-emerald-400">
-                  {formatEuro(stats.revenue.totalMrrEur)}
-                </span>
-              ) : (
-                "-"
-              )
-            }
+            // The two money figures in this row are shown in the same green the
+            // rest of the page keeps for a gain. A missing total stays a plain
+            // dash: an unknown amount is not a good number, so it is not green.
+            total={stats?.revenue.totalMrrEur ?? null}
+            stripe={stats?.revenue.mrrEur ?? null}
+            store={stats?.revenue.store ?? null}
+            // Per month, so the per-channel lines are the monthly figures.
+            multiplier={1}
+            periodLabel="per maand"
           />
-          <StatCard
-            className="col-span-2 min-w-0 sm:col-span-1"
+          <RevenueCard
             label={stats?.revenue.store.configured ? "ARR (alle kanalen)" : "ARR"}
-            value={
-              // MRR times twaalf, straight from the API - never recomputed here.
-              // Same green-or-dash rule as MRR: a missing ARR is a dash, not 0.
-              stats?.revenue.totalArrEur != null ? (
-                <span className="text-success dark:text-emerald-400">
-                  {formatEuro(stats.revenue.totalArrEur)}
-                </span>
-              ) : (
-                "-"
-              )
-            }
+            // MRR times twaalf, straight from the API - never recomputed here.
+            total={stats?.revenue.totalArrEur ?? null}
+            stripe={stats?.revenue.arrEur ?? null}
+            store={stats?.revenue.store ?? null}
+            // The API only reports a monthly app figure, so the breakdown
+            // scales each channel by twelve to match the headline.
+            multiplier={12}
+            periodLabel="per jaar"
           />
           <StatCard className="min-w-0" label="Betalende gebruikers" value={formatNumber(stats?.users.paying)} />
           <StatCard
@@ -699,6 +700,112 @@ function ChartCard({
         </div>
       )}
     </Card>
+  )
+}
+
+/**
+ * A money tile that can say where its number came from.
+ *
+ * The headline adds Stripe and the app stores together, which makes it the one
+ * figure on this page that hides something: two channels, priced differently,
+ * with two separate sources of truth (lib/pricing models Stripe from the
+ * database; RevenueCat reports the apps). Hovering or tapping opens the split,
+ * rather than sending an admin to two dashboards to reconcile it.
+ *
+ * Hover alone would make this desktop-only and /beheer gets opened on a phone,
+ * so the panel is also toggled by click and the tile is a real button. With no
+ * app channel configured there is nothing to split, so it falls back to a plain
+ * tile: no button, no panel, no affordance promising detail that is not there.
+ */
+function RevenueCard({
+  label,
+  total,
+  stripe,
+  store,
+  multiplier,
+  periodLabel,
+}: {
+  label: string
+  total: number | null
+  stripe: number | null
+  store: Stats["revenue"]["store"] | null
+  multiplier: number
+  periodLabel: string
+}) {
+  const [open, setOpen] = useState(false)
+
+  const value =
+    total != null ? (
+      <span className="text-success dark:text-emerald-400">{formatEuro(total)}</span>
+    ) : (
+      "-"
+    )
+
+  if (!store?.configured) {
+    return <StatCard className="col-span-2 min-w-0 sm:col-span-1" label={label} value={value} />
+  }
+
+  // Both channels are stored as monthly amounts, so the yearly tile scales each
+  // line by twelve. Rounded to whole cents per line, the same way the API
+  // rounds the headline, so the two lines still add up to it on screen.
+  const scale = (amount: number | null | undefined) =>
+    amount == null ? null : Math.round(amount * multiplier * 100) / 100
+
+  const unknownStore = (store.unknownPlatform ?? 0) > 0
+
+  return (
+    <div className="group relative col-span-2 min-w-0 sm:col-span-1">
+      <button
+        type="button"
+        onClick={() => setOpen((wasOpen) => !wasOpen)}
+        aria-expanded={open}
+        className="w-full text-left"
+      >
+        <StatCard className="min-w-0" label={label} value={value} />
+      </button>
+
+      <div
+        className={`absolute left-0 top-full z-20 mt-1 w-full min-w-[232px] rounded-card border border-line bg-surface p-[14px] shadow-lg sm:w-[262px] ${
+          open ? "block" : "hidden group-hover:block"
+        }`}
+      >
+        <p className="text-[10.5px] font-semibold uppercase tracking-wide text-ink-faint">
+          Herkomst {periodLabel}
+        </p>
+        <dl className="mt-[6px]">
+          <FunnelRow label="Stripe (web)" display={formatEuro(scale(stripe))} loading={false} />
+          <FunnelRow
+            label="Apps (iOS + Android)"
+            display={formatEuro(scale(store.mrrEur))}
+            loading={false}
+            last
+          />
+        </dl>
+
+        <p className="mt-[12px] border-t border-line pt-[10px] text-[10.5px] font-semibold uppercase tracking-wide text-ink-faint">
+          App-abonnees per store
+        </p>
+        <dl className="mt-[6px]">
+          <FunnelRow label="iPhone (App Store)" value={store.subscribersApple} loading={false} />
+          <FunnelRow
+            label="Android (Play Store)"
+            value={store.subscribersGoogle}
+            loading={false}
+            last={!unknownStore}
+          />
+          {/* Only when it happens: a purchase recorded before the platform was
+              stored, or a webhook that set storePremium without one. */}
+          {unknownStore && (
+            <FunnelRow label="Store onbekend" value={store.unknownPlatform} loading={false} last />
+          )}
+        </dl>
+
+        <p className="mt-[10px] text-[11px] leading-relaxed text-ink-faint">
+          RevenueCat rapporteert één bedrag voor beide stores, dus het geld is niet per store te
+          splitsen - de aantallen hierboven wel. Bruto, vóór de commissie van Apple en Google.
+        </p>
+      </div>
+    </div>
   )
 }
 

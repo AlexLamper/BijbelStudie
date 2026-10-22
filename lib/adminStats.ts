@@ -183,6 +183,8 @@ async function buildStats(): Promise<AdminPayload> {
     possiblyMissedWebhooks,
     statusCounts,
     storeOverview,
+    appleSubscribers,
+    googleSubscribers,
   ] = await Promise.all([
     q("Totaal gebruikers", () => User.countDocuments()),
     q("Stripe-abonnees", () => User.countDocuments(PAYING_STRIPE_FILTER)),
@@ -228,6 +230,14 @@ async function buildStats(): Promise<AdminPayload> {
     storeRevenueConfigured
       ? q("App-omzet (RevenueCat)", () => fetchRevenueCatOverview())
       : Promise.resolve(null),
+    // Which store a paying app subscriber came through. RevenueCat reports its
+    // money as one figure with no store dimension, so these are counts, never
+    // euros - splitting the app MRR by headcount would invent a number, and
+    // the two stores do not price identically.
+    q("App Store-abonnees", () =>
+      User.countDocuments({ storePremium: true, storePremiumPlatform: "apple" })),
+    q("Play Store-abonnees", () =>
+      User.countDocuments({ storePremium: true, storePremiumPlatform: "google" })),
   ]);
 
   // A *paying* subscriber whose interval was never recorded is still real
@@ -342,6 +352,16 @@ async function buildStats(): Promise<AdminPayload> {
         activeTrials: storeOverview?.activeTrials ?? null,
         currency: storeOverview?.currency ?? null,
         updatedAt: storeOverview?.updatedAt ?? null,
+        // Headcount per store, from our own database. Counts, not amounts: see
+        // the query above. `unknownPlatform` is a real case worth seeing - an
+        // older purchase recorded before the platform was stored, or a webhook
+        // that set storePremium without one.
+        subscribersApple: appleSubscribers,
+        subscribersGoogle: googleSubscribers,
+        unknownPlatform:
+          storeSubscribers === null || appleSubscribers === null || googleSubscribers === null
+            ? null
+            : Math.max(0, storeSubscribers - appleSubscribers - googleSubscribers),
       },
     },
     content: {
