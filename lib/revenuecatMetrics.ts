@@ -39,7 +39,13 @@ const CACHE_TTL_MS = 5 * 60 * 1000;
 /** Hard stop on the request, so a slow RevenueCat cannot hold /beheer open. */
 const TIMEOUT_MS = 8000;
 
-/** Asked for explicitly: the Stripe figures beside these are euros. */
+/**
+ * Asked for explicitly: the Stripe figures beside these are euros.
+ *
+ * This is not a cosmetic preference. The endpoint defaults to USD when the
+ * parameter is left off, so omitting it would add dollars to euros and print
+ * the result with a euro sign. EUR is one of the values the API accepts.
+ */
 const CURRENCY = "EUR";
 
 type OverviewMetric = {
@@ -48,14 +54,18 @@ type OverviewMetric = {
   unit?: string | null;
   period?: string | null;
   value?: number | string | null;
-  last_updated_at?: string | null;
+  /** Epoch milliseconds, as a number. */
+  last_updated_at?: string | number | null;
+  /** The same instant as a string, space-separated rather than ISO "T". */
+  last_updated_at_iso8601?: string | null;
 };
 
 type OverviewResponse = {
   object?: string;
   currency?: string | null;
   metrics?: OverviewMetric[] | null;
-  last_updated_at?: string | null;
+  last_updated_at?: string | number | null;
+  last_updated_at_iso8601?: string | null;
 };
 
 export type RevenueCatOverview = {
@@ -102,6 +112,28 @@ function toCount(value: number | string | null | undefined): number | null {
 }
 
 /**
+ * One "last updated" value, normalised to ISO 8601.
+ *
+ * Neither field RevenueCat sends is already an ISO string: `last_updated_at`
+ * is epoch milliseconds as a number, and `last_updated_at_iso8601` is a string
+ * in their own space-separated form with microseconds
+ * ("2022-10-13 09:45:00.123000+00:00"), not the "T" form `toISOString` makes.
+ * Both are accepted here; anything unparseable becomes null, because a wrong
+ * timestamp beside a money figure is worse than no timestamp at all.
+ */
+function toIsoDate(value: string | number | null | undefined): string | null {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date.toISOString();
+  }
+  if (typeof value === "string" && value.trim() !== "") {
+    const date = new Date(value.trim().replace(" ", "T"));
+    return Number.isNaN(date.getTime()) ? null : date.toISOString();
+  }
+  return null;
+}
+
+/**
  * Pure parse of an overview response, exported for tests.
  *
  * Ids are matched case-insensitively against the small set this dashboard
@@ -126,10 +158,18 @@ export function parseOverviewMetrics(data: OverviewResponse): RevenueCatOverview
     revenuePeriod: typeof revenue?.period === "string" && revenue.period ? revenue.period : null,
     activeSubscriptions: toCount(byId.get("active_subscriptions")?.value),
     activeTrials: toCount(byId.get("active_trials")?.value),
+    // The snapshot is one moment, so the first readable stamp anywhere in the
+    // payload describes all of it. The response carries none of its own today
+    // and the metrics each carry their own, hence the walk.
     updatedAt:
-      [data?.last_updated_at, ...metrics.map((m) => m?.last_updated_at)].find(
-        (value): value is string => typeof value === "string" && value.length > 0,
-      ) ?? null,
+      [
+        data?.last_updated_at_iso8601,
+        data?.last_updated_at,
+        ...metrics.map((m) => m?.last_updated_at_iso8601),
+        ...metrics.map((m) => m?.last_updated_at),
+      ]
+        .map(toIsoDate)
+        .find((value): value is string => value !== null) ?? null,
   };
 }
 
