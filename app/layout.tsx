@@ -8,6 +8,7 @@ import { OnboardingWrapper } from "../components/onboarding/onboarding-wrapper";
 import { GuestOnboardingWrapper } from "../components/onboarding/guest-onboarding-wrapper";
 import { shouldAskOnboarding } from "../lib/onboardingGate";
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import { Analytics } from '@vercel/analytics/next';
 import { Suspense } from "react";
 import { PrefetchProvider } from "../components/providers/prefetch-provider";
 import { StudyStyleProvider } from "../components/providers/study-style-provider";
@@ -308,6 +309,8 @@ export default async function RootLayout({
             site - previews and local dev would pollute the property. Nothing is
             downloaded before consent; see lib/googleAnalytics.ts. */}
         <GoogleAnalytics enabled={appEnv() === "production"} />
+        {/* Vercel Web Analytics: cookieless page views, shown in Life OS. */}
+        <Analytics />
         <SpeedInsights />
       </body>
     </html>
