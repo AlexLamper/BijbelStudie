@@ -13,7 +13,8 @@ export const config = {
     // touch icon Google reads for search results, photos) - no page lives there.
     // `.well-known/` holds assetlinks.json, which Android fetches to verify
     // App Links and which must come back as the plain file, no locale hop.
-    "/((?!api|og|_next/static|_next/image|assets|favicon.ico|icon.svg|robots.txt|sitemap.xml|sitemap|sw.js|site.webmanifest|data|images/|\.well-known/).*)",
+    // `audio/` is the app's background music, streamed as plain files.
+    "/((?!api|og|_next/static|_next/image|assets|favicon.ico|icon.svg|robots.txt|sitemap.xml|sitemap|sw.js|site.webmanifest|data|audio/|images/|\.well-known/).*)",
   ],
 };
 

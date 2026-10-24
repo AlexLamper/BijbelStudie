@@ -152,6 +152,14 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        // The app's background music. A file is never changed under its name
+        // (a new recording gets a new name), so a year on every copy is safe.
+        source: "/audio/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
+      },
+      {
         // Loaded cross-origin by the external slideshow generator (canvas
         // needs CORS to export an image that contains it).
         source: "/images/appstore-badge.png",
