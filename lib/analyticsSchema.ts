@@ -101,12 +101,13 @@ export const EVENTS = {
     platform: PLATFORM,
   },
   /** Fired the moment a gated surface refuses the user. `surface` ranks them. */
+  // "music": the app's background-music picker (play without Pro). App-only.
   paywall_hit: {
-    surface: ["commentary", "ai_limit", "original_text", "plan_limit", "offline", "resources", "crossrefs"],
+    surface: ["commentary", "ai_limit", "original_text", "plan_limit", "offline", "resources", "crossrefs", "music"],
     platform: PLATFORM,
   },
   paywall_cta_clicked: {
-    surface: ["commentary", "ai_limit", "original_text", "plan_limit", "offline", "resources", "crossrefs"],
+    surface: ["commentary", "ai_limit", "original_text", "plan_limit", "offline", "resources", "crossrefs", "music"],
     platform: PLATFORM,
   },
   /** Signup that was started in order to buy, so the resume flow can be measured. */
