@@ -41,7 +41,8 @@ export async function adminUsersPayload(params: {
       "name email image isAdmin subscribed compedProUntil storePremium storePremiumPlatform subscriptionStatus " +
         "stripeSubscriptionId " +
         "subscriptionInterval currentPeriodEnd cancelAtPeriodEnd billingIssueSince streak " +
-        "createdAt lastStreakDate stripeCustomerId preferences.onboardingCompleted"
+        "createdAt lastStreakDate stripeCustomerId preferences.onboardingCompleted " +
+        "signupPlatform platformsSeenAt"
     )
     .sort({ createdAt: -1 })
     .limit(limit)
@@ -88,6 +89,14 @@ export async function adminUsersPayload(params: {
       hasStripe: !!u.stripeCustomerId,
       onboardingCompleted: !!u.preferences?.onboardingCompleted,
       noteCount: noteMap.get(String(u._id)) || 0,
+      // Null on accounts made before this was recorded - "unknown", not "web".
+      signupPlatform: u.signupPlatform ?? null,
+      // Last use per client; a missing key means never seen there.
+      platformsSeenAt: {
+        ios: u.platformsSeenAt?.ios ?? null,
+        android: u.platformsSeenAt?.android ?? null,
+        web: u.platformsSeenAt?.web ?? null,
+      },
     })),
     },
   };

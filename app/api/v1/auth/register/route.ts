@@ -6,6 +6,7 @@ import { corsPreflight, errorV1, handleV1Error, jsonV1 } from '../../../../../li
 import { checkRateLimit, clientIp } from '../../../../../lib/mobileRateLimit';
 import { isValidEmail, issueSession } from '../../../../../lib/mobileAuthFlow';
 import { findUserByEmail, normaliseEmail } from '../../../../../lib/userLookup';
+import { normalisePlatform } from '../../../../../lib/mobileTokens';
 
 export const runtime = 'nodejs';
 
@@ -46,7 +47,13 @@ export async function POST(req: NextRequest) {
     const hashedPassword = await bcrypt.hash(password, 12);
     let user;
     try {
-      user = await User.create({ name, email: normaliseEmail(email), password: hashedPassword, bio: '' });
+      user = await User.create({
+        name,
+        email: normaliseEmail(email),
+        password: hashedPassword,
+        bio: '',
+        signupPlatform: normalisePlatform(platform),
+      });
     } catch (createError) {
       // The findOne check above is not atomic with this insert: two requests
       // for the same email racing each other both pass it, and the loser hits

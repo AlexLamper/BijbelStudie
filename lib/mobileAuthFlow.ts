@@ -1,6 +1,7 @@
 import { signAccessToken } from './mobileJwt';
 import { issueRefreshToken, normalisePlatform, type Platform } from './mobileTokens';
 import { toAuthUser, type AuthUser } from './apiAuth';
+import { recordPlatformSeen } from './clientPlatform';
 
 /**
  * Shared "you are logged in now" step for every /api/v1/auth/* route, so the
@@ -54,11 +55,13 @@ export async function issueSession(
     email: user.email,
     isPro: user.isPro,
   });
+  const platform = normalisePlatform(options?.platform) as Platform;
   const { refreshToken } = await issueRefreshToken({
     userId: user.id,
-    platform: normalisePlatform(options?.platform) as Platform,
+    platform,
     deviceName: typeof options?.deviceName === 'string' ? options.deviceName.slice(0, 120) : undefined,
   });
+  await recordPlatformSeen(user.id, platform);
 
   return { accessToken, refreshToken, expiresIn, user: serialiseUser(user) };
 }

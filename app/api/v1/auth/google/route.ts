@@ -3,6 +3,7 @@ import connectMongoDB from '../../../../../lib/mongodb';
 import { corsPreflight, errorV1, handleV1Error, jsonV1 } from '../../../../../lib/apiV1';
 import { checkRateLimit, clientIp } from '../../../../../lib/mobileRateLimit';
 import { issueSession } from '../../../../../lib/mobileAuthFlow';
+import { normalisePlatform } from '../../../../../lib/mobileTokens';
 import { verifyGoogleIdToken } from '../../../../../lib/oauthVerify';
 import { provisionOAuthUser } from '../../../../../lib/oauthUsers';
 
@@ -44,6 +45,7 @@ export async function POST(req: NextRequest) {
       email: identity.email,
       name: identity.name || identity.email.split('@')[0],
       image: identity.picture,
+      signupPlatform: normalisePlatform(platform),
     });
 
     return jsonV1(await issueSession(user, { platform, deviceName }));

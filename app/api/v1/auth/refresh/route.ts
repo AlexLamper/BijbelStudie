@@ -6,6 +6,7 @@ import { rotateRefreshToken } from '../../../../../lib/mobileTokens';
 import { signAccessToken } from '../../../../../lib/mobileJwt';
 import { serialiseUser } from '../../../../../lib/mobileAuthFlow';
 import { toAuthUser } from '../../../../../lib/apiAuth';
+import { recordPlatformSeen } from '../../../../../lib/clientPlatform';
 
 export const runtime = 'nodejs';
 
@@ -39,6 +40,10 @@ export async function POST(req: NextRequest) {
 
     const doc = await User.findById(result.userId);
     if (!doc) return errorV1('INVALID_REFRESH_TOKEN', 401);
+
+    // A refresh is the app being opened or kept in use, so it counts as "seen"
+    // on the platform the login was made from.
+    await recordPlatformSeen(result.userId, result.platform);
 
     const user = toAuthUser(doc);
     const { accessToken, expiresIn } = await signAccessToken({

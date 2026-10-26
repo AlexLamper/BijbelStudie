@@ -61,6 +61,13 @@ interface Stats {
       unknownPlatform: number | null
     }
   }
+  /** Which clients accounts were made on and are used on. Absent on an older API. */
+  platforms?: {
+    signups: PlatformCounts | null
+    signupsLast30d: PlatformCounts | null
+    /** Seen on that client in 30 days. One account on two clients counts twice; `multi` is the overlap. */
+    active30d: { ios: number; android: number; web: number; any: number; multi: number } | null
+  }
   content: {
     notes: number | null
     notesLast7d: number | null
@@ -72,6 +79,8 @@ interface Stats {
   /** Dutch labels of the figures that could not be read. Empty when healthy. */
   degraded?: string[]
 }
+
+type PlatformCounts = { ios: number; android: number; web: number; unknown: number }
 
 interface InsightsResponse {
   signups: { date: string; count: number }[]
@@ -90,6 +99,7 @@ interface RecentUser {
   streak?: number
   lastStreakDate?: string | null
   createdAt: string
+  signupPlatform?: string | null
 }
 
 function formatNumber(n: number | null | undefined): string {
@@ -598,6 +608,8 @@ export default function AdminDashboardPage() {
           />
         </div>
 
+        <PlatformsCard platforms={stats?.platforms} totalUsers={stats?.users.total} loading={loading} />
+
         <div className="flex flex-none flex-col gap-4 lg:flex-row">
           <Card className="min-w-0 flex-1 p-4 sm:p-[17px]">
             <h2 className="text-[14.5px] font-bold text-ink">Content &amp; engagement</h2>
@@ -630,7 +642,7 @@ export default function AdminDashboardPage() {
 
 /** The rows on screen, as a CSV written in the browser. No endpoint is called. */
 function exportUsers(rows: RecentUser[]) {
-  const head = "naam;e-mail;abonnement;lid sinds;reeks"
+  const head = "naam;e-mail;abonnement;lid sinds;reeks;aangemaakt op"
   const body = rows
     .map(u =>
       [
@@ -639,6 +651,7 @@ function exportUsers(rows: RecentUser[]) {
         (u.isPro ?? (u.subscribed || u.isAdmin)) ? "Pro" : "Gratis",
         new Date(u.createdAt).toLocaleDateString("nl-NL"),
         String(u.streak ?? 0),
+        u.signupPlatform && u.signupPlatform !== "unknown" ? u.signupPlatform : "onbekend",
       ].join(";"),
     )
     .join("\n")
@@ -821,6 +834,70 @@ function MiniStat({ label, value, delta, loading }: { label: string; value: stri
           {delta && <span className="text-[11px] font-semibold text-success tabular-nums dark:text-emerald-400">{delta}</span>}
         </dd>
       )}
+    </div>
+  )
+}
+
+/**
+ * Where accounts come from and which clients they use. Two questions, kept
+ * apart: "made on" is one platform per account and adds up to the total;
+ * "active on" counts an account on every client it used in 30 days, so it
+ * does not - the overlap row says by how much.
+ */
+function PlatformsCard({
+  platforms,
+  totalUsers,
+  loading,
+}: {
+  platforms: Stats["platforms"]
+  totalUsers: number | null | undefined
+  loading: boolean
+}) {
+  const signups = platforms?.signups ?? null
+  const recent = platforms?.signupsLast30d ?? null
+  const active = platforms?.active30d ?? null
+  const share = (n: number | undefined) =>
+    n == null || !totalUsers ? "" : `${Math.round((n / totalUsers) * 100)} %`
+  const rows: { key: keyof PlatformCounts; label: string }[] = [
+    { key: "ios", label: "iOS-app" },
+    { key: "android", label: "Android-app" },
+    { key: "web", label: "Website" },
+    { key: "unknown", label: "Onbekend" },
+  ]
+  return (
+    <div className="flex flex-none flex-col gap-4 lg:flex-row">
+      <Card className="min-w-0 flex-1 p-4 sm:p-[17px]">
+        <h2 className="text-[14.5px] font-bold text-ink">Aangemaakt op</h2>
+        <p className="mt-1 text-[12.5px] text-ink-muted">Waar accounts zijn aangemaakt, met de groei van de laatste 30 dagen</p>
+        <div className="mt-3 grid grid-cols-2 gap-[13px] md:grid-cols-4">
+          {rows.map(r => (
+            <MiniStat
+              key={r.key}
+              label={r.label}
+              value={signups ? formatNumber(signups[r.key]) : "-"}
+              delta={recent && recent[r.key] > 0 ? `+${formatNumber(recent[r.key])}` : ""}
+              loading={loading}
+            />
+          ))}
+        </div>
+        {!loading && signups && (
+          <p className="mt-2 text-[11.5px] leading-relaxed text-ink-faint">
+            {`iOS ${share(signups.ios)} · Android ${share(signups.android)} · website ${share(signups.web)}. `}
+            Onbekend zijn accounts van vóór deze meting.
+          </p>
+        )}
+      </Card>
+
+      <Card className="w-full flex-none p-4 sm:p-[17px] lg:w-[340px]">
+        <h2 className="text-[14.5px] font-bold text-ink">Actief in 30 dagen</h2>
+        <dl className="mt-2">
+          <FunnelRow label="iOS-app" value={active?.ios} loading={loading} />
+          <FunnelRow label="Android-app" value={active?.android} loading={loading} />
+          <FunnelRow label="Website" value={active?.web} loading={loading} />
+          <FunnelRow label="Op meerdere platforms" value={active?.multi} loading={loading} />
+          <FunnelRow label="Actieve accounts" value={active?.any} loading={loading} last />
+        </dl>
+      </Card>
     </div>
   )
 }

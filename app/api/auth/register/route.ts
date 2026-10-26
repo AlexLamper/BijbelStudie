@@ -55,6 +55,7 @@ export async function POST(request: NextRequest) {
       password: hashedPassword,
       provider: "credentials",
       emailVerified: false,
+      signupPlatform: "web",
       createdAt: new Date(),
     });
 

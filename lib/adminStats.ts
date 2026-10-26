@@ -185,6 +185,8 @@ async function buildStats(): Promise<AdminPayload> {
     storeOverview,
     appleSubscribers,
     googleSubscribers,
+    signupPlatformCounts,
+    platformUsage,
   ] = await Promise.all([
     q("Totaal gebruikers", () => User.countDocuments()),
     q("Stripe-abonnees", () => User.countDocuments(PAYING_STRIPE_FILTER)),
@@ -238,6 +240,42 @@ async function buildStats(): Promise<AdminPayload> {
       User.countDocuments({ storePremium: true, storePremiumPlatform: "apple" })),
     q("Play Store-abonnees", () =>
       User.countDocuments({ storePremium: true, storePremiumPlatform: "google" })),
+    // Where accounts were made. `unknown` folds in the accounts older than the
+    // field (null) with the rare client that did not say.
+    q("Aanmeldingen per platform", () =>
+      User.aggregate<{ _id: string; total: number; last30d: number }>([
+        {
+          $group: {
+            _id: { $ifNull: ["$signupPlatform", "unknown"] },
+            total: { $sum: 1 },
+            last30d: { $sum: { $cond: [{ $gte: ["$createdAt", start30d] }, 1, 0] } },
+          },
+        },
+      ])),
+    // Who used which client in the last 30 days, from platformsSeenAt. One
+    // account on two platforms counts on both, so these do not add up to the
+    // active total - `multi` says how much overlap there is.
+    q("Gebruik per platform", () =>
+      User.aggregate<{ ios: number; android: number; web: number; any: number; multi: number }>([
+        {
+          $project: {
+            ios: { $cond: [{ $gte: ["$platformsSeenAt.ios", start30d] }, 1, 0] },
+            android: { $cond: [{ $gte: ["$platformsSeenAt.android", start30d] }, 1, 0] },
+            web: { $cond: [{ $gte: ["$platformsSeenAt.web", start30d] }, 1, 0] },
+          },
+        },
+        { $match: { $expr: { $gt: [{ $add: ["$ios", "$android", "$web"] }, 0] } } },
+        {
+          $group: {
+            _id: null,
+            ios: { $sum: "$ios" },
+            android: { $sum: "$android" },
+            web: { $sum: "$web" },
+            any: { $sum: 1 },
+            multi: { $sum: { $cond: [{ $gte: [{ $add: ["$ios", "$android", "$web"] }, 2] }, 1, 0] } },
+          },
+        },
+      ])),
   ]);
 
   // A *paying* subscriber whose interval was never recorded is still real
@@ -285,6 +323,21 @@ async function buildStats(): Promise<AdminPayload> {
       if (row._id) byStatus[row._id] = row.count;
     }
   }
+
+  let signupsByPlatform: Record<string, number> | null = null;
+  let signupsLast30dByPlatform: Record<string, number> | null = null;
+  if (signupPlatformCounts) {
+    signupsByPlatform = { ios: 0, android: 0, web: 0, unknown: 0 };
+    signupsLast30dByPlatform = { ios: 0, android: 0, web: 0, unknown: 0 };
+    for (const row of signupPlatformCounts) {
+      const key = row._id in signupsByPlatform ? row._id : "unknown";
+      signupsByPlatform[key] += row.total;
+      signupsLast30dByPlatform[key] += row.last30d;
+    }
+  }
+  const usage = platformUsage
+    ? (platformUsage[0] ?? { ios: 0, android: 0, web: 0, any: 0, multi: 0 })
+    : null;
 
   return {
     status: 200,
@@ -363,6 +416,13 @@ async function buildStats(): Promise<AdminPayload> {
             ? null
             : Math.max(0, storeSubscribers - appleSubscribers - googleSubscribers),
       },
+    },
+    platforms: {
+      signups: signupsByPlatform,
+      signupsLast30d: signupsLast30dByPlatform,
+      active30d: usage
+        ? { ios: usage.ios, android: usage.android, web: usage.web, any: usage.any, multi: usage.multi }
+        : null,
     },
     content: {
       notes: totalNotes,

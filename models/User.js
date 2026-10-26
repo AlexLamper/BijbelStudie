@@ -164,6 +164,16 @@ const UserSchema = new mongoose.Schema(
     // their email behind a private-relay address.
     appleId: { type: String, index: true, sparse: true },
     googleId: { type: String, index: true, sparse: true },
+    // Where the account was made, for the admin's per-platform figures. Null
+    // on accounts older than the field: unknown, never guessed as "web".
+    signupPlatform: { type: String, enum: ["ios", "android", "web", "unknown", null], default: null },
+    // Last time the account was used on each client, written at most once an
+    // hour per platform by lib/clientPlatform.ts. Absent = never seen there.
+    platformsSeenAt: {
+      ios: { type: Date },
+      android: { type: Date },
+      web: { type: Date },
+    },
     preferences: {
       language: { type: String },
       translation: { type: String, default: "statenvertaling" },

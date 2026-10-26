@@ -5,7 +5,7 @@ import Link from "next/link"
 import {
   Search, ShieldCheck, MoreVertical,
   Trash2, ShieldOff, ShieldPlus, UserCheck, UserX, X,
-  AlertTriangle, RefreshCw, Apple, Smartphone, ChevronLeft, Gift,
+  AlertTriangle, RefreshCw, Apple, Smartphone, ChevronLeft, Gift, Globe,
 } from "lucide-react"
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
@@ -56,7 +56,15 @@ interface AdminUser {
   hasStripe: boolean
   onboardingCompleted: boolean
   noteCount: number
+  /** Null on accounts made before this was recorded. */
+  signupPlatform: ClientPlatform | "unknown" | null
+  /** Last use per client; null = never seen there. */
+  platformsSeenAt?: Record<ClientPlatform, string | null>
 }
+
+type ClientPlatform = "ios" | "android" | "web"
+
+const PLATFORM_LABEL: Record<ClientPlatform, string> = { ios: "iOS", android: "Android", web: "Web" }
 
 type Filter = "all" | "pro" | "free" | "admin"
 
@@ -342,6 +350,9 @@ export default function AdminUsersPage() {
                         <div className="mt-1">
                           <LastActive iso={u.lastStreakDate} />
                         </div>
+                        <div className="mt-2">
+                          <Platforms user={u} />
+                        </div>
                       </div>
                       <div className="flex-none">{actions(u)}</div>
                     </li>
@@ -350,11 +361,12 @@ export default function AdminUsersPage() {
 
                 {/* -- md and up: the table --------------------------------- */}
                 <div className="hidden overflow-x-auto md:block">
-                  <table className="w-full min-w-[760px]">
+                  <table className="w-full min-w-[880px]">
                     <thead>
                       <tr className={`border-t ${ROW_LINE} ${TABLE_HEAD}`}>
                         <th scope="col" className="px-5 py-[10px] font-semibold">Gebruiker</th>
                         <th scope="col" className="px-3 py-[10px] font-semibold">Status</th>
+                        <th scope="col" className="px-3 py-[10px] font-semibold">Platform</th>
                         <th scope="col" className="px-3 py-[10px] font-semibold">Notities</th>
                         <th scope="col" className="px-3 py-[10px] font-semibold">Reeks</th>
                         <th scope="col" className="px-3 py-[10px] font-semibold">Lid sinds</th>
@@ -381,6 +393,9 @@ export default function AdminUsersPage() {
                           </td>
                           <td className="px-3 py-3">
                             <StatusFlags user={u} />
+                          </td>
+                          <td className="px-3 py-3">
+                            <Platforms user={u} />
                           </td>
                           <td className="px-3 py-3 text-[12.5px] tabular-nums text-ink-body">{u.noteCount}</td>
                           <td className="px-3 py-3 text-[12.5px] tabular-nums text-ink-body">{u.streak}</td>
@@ -452,6 +467,43 @@ function LastActive({ iso }: { iso?: string | null }) {
       </span>
     </span>
   )
+}
+
+/**
+ * Where the account was made, then a chip per client it has been used on,
+ * most recent first. Hover a chip for when.
+ */
+function Platforms({ user: u }: { user: AdminUser }) {
+  const seen = (Object.keys(PLATFORM_LABEL) as ClientPlatform[])
+    .filter(p => u.platformsSeenAt?.[p])
+    .sort((a, b) => Date.parse(u.platformsSeenAt![b]!) - Date.parse(u.platformsSeenAt![a]!))
+  const signup =
+    u.signupPlatform && u.signupPlatform !== "unknown" ? PLATFORM_LABEL[u.signupPlatform] : "onbekend"
+  return (
+    <div className="flex min-w-0 flex-col gap-1">
+      <span className="whitespace-nowrap text-[11.5px] text-ink-muted">Aangemaakt: {signup}</span>
+      {seen.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5">
+          {seen.map(p => (
+            <span
+              key={p}
+              title={`Laatst gebruikt op ${PLATFORM_LABEL[p]}: ${formatDate(u.platformsSeenAt![p]!)}`}
+              className={FLAG}
+            >
+              <PlatformIcon platform={p} />
+              {PLATFORM_LABEL[p].toUpperCase()}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function PlatformIcon({ platform }: { platform: ClientPlatform }) {
+  if (platform === "ios") return <Apple size={10} aria-hidden />
+  if (platform === "android") return <Smartphone size={10} aria-hidden />
+  return <Globe size={10} aria-hidden />
 }
 
 function StatusFlags({ user: u }: { user: AdminUser }) {

@@ -20,7 +20,7 @@ export const metadata: Metadata = generatePageMetadata("privacyPolicy");
 /** Prerendered: the text is the same for everyone. See app/bijbelstudie/[slug]/page.tsx. */
 export const dynamic = "force-static";
 
-const LAST_UPDATED = "2 oktober 2026";
+const LAST_UPDATED = "26 oktober 2026";
 const SUPPORT_EMAIL = "info@bijbelstudie.io";
 
 type Item = { title: string; body: string };
@@ -64,7 +64,7 @@ const DATA: Item[] = [
   },
   {
     title: "Technische gegevens",
-    body: "Bij elk verzoek verwerkt onze server je IP-adres, je browser- of apptype en de opgevraagde pagina; die staan kort in de serverlogs van onze hostingpartij. Je IP-adres gebruiken we ook om misbruik te beperken (een maximum aantal verzoeken per uur of dag). Bij inloggen in de app slaan we het platform (iOS of Android) op bij je inlogsessie.",
+    body: "Bij elk verzoek verwerkt onze server je IP-adres, je browser- of apptype en de opgevraagde pagina; die staan kort in de serverlogs van onze hostingpartij. Je IP-adres gebruiken we ook om misbruik te beperken (een maximum aantal verzoeken per uur of dag). Bij inloggen in de app slaan we het platform (iOS of Android) op bij je inlogsessie. Bij je account bewaren we op welk platform je het hebt aangemaakt (iOS, Android of de website) en wanneer je het voor het laatst op elk platform gebruikte, zonder apparaatmodel of IP-adres.",
   },
   {
     title: "Overig",

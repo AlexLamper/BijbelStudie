@@ -56,7 +56,7 @@ export type RotateFailure = 'unknown' | 'expired' | 'replayed';
 // cast: this repo compiles with `strict: false`, where discriminated-union
 // narrowing on a boolean literal is not reliable enough to lean on.
 export type RotateResult =
-  | { ok: true; userId: string; refreshToken: string; family: string; reason?: undefined }
+  | { ok: true; userId: string; refreshToken: string; family: string; platform: Platform; reason?: undefined }
   | { ok: false; reason: RotateFailure };
 
 /**
@@ -99,6 +99,7 @@ export async function rotateRefreshToken(rawToken: string): Promise<RotateResult
     userId: existing.userId.toString(),
     refreshToken: issued.refreshToken,
     family: issued.family,
+    platform: normalisePlatform(existing.platform),
   };
 }
 

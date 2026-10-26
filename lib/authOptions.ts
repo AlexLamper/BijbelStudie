@@ -8,6 +8,7 @@ import User from "../models/User";
 import { isAdminEmail } from "./adminEmails";
 import { resolveIsPro } from "./mobilePremium";
 import { emailMatchFilters, findUserByEmail, normaliseEmail } from "./userLookup";
+import { recordPlatformSeen } from "./clientPlatform";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -89,6 +90,7 @@ export const authOptions: NextAuthOptions = {
             email: normaliseEmail(user.email),
             image: user.image || "",
             bio: "",
+            signupPlatform: "web",
           });
         }
         return true;
@@ -155,6 +157,10 @@ export const authOptions: NextAuthOptions = {
             // instead of rearranging itself once a client fetch comes back.
             // Left undefined when unanswered; the reader defaults it.
             if (user.preferences?.studyStyle) session.user.studyStyle = user.preferences.studyStyle;
+            // Only a website cookie reaches this callback - the apps send a
+            // bearer token, read through getToken() - so this is "used the
+            // website". Throttled to one write an hour inside the helper.
+            await recordPlatformSeen(user._id, "web");
           }
         } catch {
           // Non-critical - return session without extra fields

@@ -4,6 +4,7 @@ import User from '../../../../../models/User';
 import { corsPreflight, errorV1, handleV1Error, jsonV1 } from '../../../../../lib/apiV1';
 import { checkRateLimit, clientIp } from '../../../../../lib/mobileRateLimit';
 import { issueSession } from '../../../../../lib/mobileAuthFlow';
+import { normalisePlatform } from '../../../../../lib/mobileTokens';
 import { verifyAppleIdentityToken } from '../../../../../lib/oauthVerify';
 import { provisionOAuthUser } from '../../../../../lib/oauthUsers';
 
@@ -73,6 +74,7 @@ export async function POST(req: NextRequest) {
         providerId: identity.sub,
         email: resolvedEmail,
         name: displayName,
+        signupPlatform: normalisePlatform(platform),
       });
     }
 

@@ -1,4 +1,5 @@
 import User from '../models/User';
+import type { Platform } from './mobileTokens';
 import { findUserByEmail, normaliseEmail, type UserModelLike } from './userLookup';
 
 /**
@@ -56,6 +57,8 @@ export type ProvisionParams = {
   email: string;
   name: string;
   image?: string | null;
+  /** The client the request came from; stored only when this creates the account. */
+  signupPlatform?: Platform;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -107,6 +110,7 @@ export async function provisionOAuthUser(
     image: params.image ?? '',
     bio: '',
     [idField]: params.providerId,
+    signupPlatform: params.signupPlatform ?? 'unknown',
   };
 
   try {
