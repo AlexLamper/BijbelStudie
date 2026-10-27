@@ -29,7 +29,10 @@ type SubscriberEntitlement = {
 type SubscriberResponse = {
   subscriber?: {
     entitlements?: Record<string, SubscriberEntitlement | undefined>;
-    subscriptions?: Record<string, { store?: string | null } | undefined>;
+    subscriptions?: Record<
+      string,
+      { store?: string | null; period_type?: string | null } | undefined
+    >;
     non_subscriptions?: Record<string, Array<{ store?: string | null }> | undefined>;
   };
 };
@@ -38,7 +41,36 @@ export type StorePremiumPatch = {
   storePremium: boolean;
   storePremiumPlatform: 'apple' | 'google' | null;
   storePremiumExpiresAt: Date | null;
+  /**
+   * The entitlement is a free trial (RevenueCat `period_type` "trial").
+   * Optional so older callers and tests that predate trials keep compiling;
+   * absent means "not a trial".
+   */
+  storeTrial?: boolean;
+  /** monthly / annual, read from the product id. Null when it is neither. */
+  storePremiumInterval?: 'monthly' | 'annual' | null;
 };
+
+const NO_STORE_PREMIUM: StorePremiumPatch = {
+  storePremium: false,
+  storePremiumPlatform: null,
+  storePremiumExpiresAt: null,
+  storeTrial: false,
+  storePremiumInterval: null,
+};
+
+/**
+ * The plan a store product id stands for. Google reports
+ * `subscriptionId:basePlanId`, Apple the bare id; both carry the app's own
+ * `bijbelstudie_pro_monthly` / `bijbelstudie_pro_yearly` naming.
+ */
+export function intervalFromProductId(productId: string | null | undefined): 'monthly' | 'annual' | null {
+  if (!productId) return null;
+  const id = productId.toLowerCase();
+  if (id.includes('year') || id.includes('annual')) return 'annual';
+  if (id.includes('month')) return 'monthly';
+  return null;
+}
 
 function parseDate(value: string | null | undefined): Date | null {
   if (!value) return null;
@@ -65,23 +97,24 @@ export function storePremiumFromSubscriber(
 ): StorePremiumPatch {
   const subscriber = data.subscriber;
   const ent = subscriber?.entitlements?.[PRO_ENTITLEMENT_ID];
-  if (!ent) return { storePremium: false, storePremiumPlatform: null, storePremiumExpiresAt: null };
+  if (!ent) return { ...NO_STORE_PREMIUM };
 
   const until = accessUntil(ent);
   // An unparseable expires_date counts as expired, never as lifetime.
   const unparseable = Boolean(ent.expires_date) && !until;
   const active = !unparseable && (until === null || until > now);
-  if (!active) return { storePremium: false, storePremiumPlatform: null, storePremiumExpiresAt: null };
+  if (!active) return { ...NO_STORE_PREMIUM };
 
   const productId = ent.product_identifier ?? '';
-  const store =
-    subscriber?.subscriptions?.[productId]?.store ??
-    subscriber?.non_subscriptions?.[productId]?.at(-1)?.store;
+  const subscription = subscriber?.subscriptions?.[productId];
+  const store = subscription?.store ?? subscriber?.non_subscriptions?.[productId]?.at(-1)?.store;
 
   return {
     storePremium: true,
     storePremiumPlatform: storeToPlatform(store),
     storePremiumExpiresAt: until,
+    storeTrial: (subscription?.period_type ?? '').toLowerCase() === 'trial',
+    storePremiumInterval: intervalFromProductId(productId),
   };
 }
 
@@ -119,6 +152,9 @@ export type RevenueCatWebhookEvent = {
   entitlement_ids?: string[] | null;
   expiration_at_ms?: number | null;
   store?: string | null;
+  /** "TRIAL", "INTRO", "NORMAL", "PROMOTIONAL" on purchase/renewal events. */
+  period_type?: string | null;
+  product_id?: string | null;
 };
 
 /**
@@ -134,7 +170,7 @@ export function inferStorePremiumFromEvent(
 
   if (type === 'TEST') return null;
   if (type === 'EXPIRATION') {
-    return { storePremium: false, storePremiumPlatform: null, storePremiumExpiresAt: null };
+    return { ...NO_STORE_PREMIUM };
   }
 
   const grantTypes = new Set([
@@ -152,6 +188,8 @@ export function inferStorePremiumFromEvent(
       storePremium: true,
       storePremiumPlatform: storeToPlatform(event.store) ?? 'apple',
       storePremiumExpiresAt: typeof ms === 'number' && ms > 0 ? new Date(ms) : null,
+      storeTrial: (event.period_type ?? '').toUpperCase() === 'TRIAL',
+      storePremiumInterval: intervalFromProductId(event.product_id),
     };
   }
 
@@ -175,8 +213,8 @@ export async function applyStorePremium(
   // `.lean()`, for the same reason as lib/subscriptionSync: an unrelated
   // corrupt field must never be able to block an entitlement write.
   const before = await User.findById(_id)
-    .select('subscribed storePremium isAdmin')
-    .lean<PremiumUserFields>();
+    .select('subscribed storePremium isAdmin storeTrialStartedAt firstPaidAt')
+    .lean<PremiumUserFields & { storeTrialStartedAt?: Date | null; firstPaidAt?: Date | null }>();
   if (!before) {
     throw new Error(`User not found for app_user_id: ${appUserId}`);
   }
@@ -188,12 +226,37 @@ export async function applyStorePremium(
         storePremium: patch.storePremium,
         storePremiumPlatform: patch.storePremiumPlatform,
         storePremiumExpiresAt: patch.storePremiumExpiresAt,
+        storeTrial: patch.storePremium && patch.storeTrial === true,
+        ...(patch.storePremiumInterval !== undefined && patch.storePremium
+          ? { storePremiumInterval: patch.storePremiumInterval }
+          : {}),
+        ...funnelDates(before, patch),
         ...proRingGrant(before, { ...before, storePremium: patch.storePremium }),
       },
     },
   );
   // NOTE: `subscribed` (Stripe) is deliberately left alone. Effective Pro is
   // the OR of the two - see lib/mobilePremium.ts.
+}
+
+/**
+ * The write-once funnel dates a patch implies: the first trial and the first
+ * paid period. Exported for tests. Never overwrites an existing date, so a
+ * renewal, restore or reconciliation cannot move a cohort's conversion day.
+ */
+export function funnelDates(
+  before: { storeTrialStartedAt?: Date | null; firstPaidAt?: Date | null },
+  patch: StorePremiumPatch,
+  now: Date = new Date(),
+): { storeTrialStartedAt?: Date; firstPaidAt?: Date } {
+  const out: { storeTrialStartedAt?: Date; firstPaidAt?: Date } = {};
+  if (!patch.storePremium) return out;
+  if (patch.storeTrial === true) {
+    if (!before.storeTrialStartedAt) out.storeTrialStartedAt = now;
+  } else if (!before.firstPaidAt) {
+    out.firstPaidAt = now;
+  }
+  return out;
 }
 
 export async function syncStorePremiumForAppUser(

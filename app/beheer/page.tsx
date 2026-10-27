@@ -76,6 +76,23 @@ interface Stats {
     groups: number | null
     plans: number | null
   }
+  /** Signup-week cohorts (lib/adminCohorts). Absent on an older API. */
+  cohorts?: {
+    weeks: Array<{
+      weekStart: string
+      signups: number
+      trialsD7: number
+      paidD7: number
+      paidD35: number
+      matureD35: boolean
+      revenuePerSignupD60Eur: number
+      matureD60: boolean
+    }>
+    recentD35Percent: number | null
+    recentD7Percent: number | null
+    recentTrialD7Percent: number | null
+    recentRevenuePerSignupD60Eur: number | null
+  } | null
   /** Dutch labels of the figures that could not be read. Empty when healthy. */
   degraded?: string[]
 }
@@ -358,15 +375,22 @@ export default function AdminDashboardPage() {
             value={formatNumber(stats?.users.total)}
             delta={stats?.users.newLast7d != null ? `+${formatNumber(stats.users.newLast7d)}` : undefined}
           />
+          {/* Signup-to-paid within 35 days over the last four finished signup
+              weeks - the figure the 7% target is about. The all-time ratio
+              (everyone paying / every account ever) barely moves when new users
+              convert better, so it is kept only as the small print. */}
           <StatCard
             className="min-w-0"
-            label="Conversie"
-            value={stats?.users.premiumPercent != null ? `${stats.users.premiumPercent.toLocaleString("nl-NL", { maximumFractionDigits: 1 })} %` : "-"}
+            label="Conversie nieuwe accounts (35 d)"
+            value={formatPercent(stats?.cohorts?.recentD35Percent ?? stats?.cohorts?.recentD7Percent)}
+            delta={stats?.users.premiumPercent != null ? `alle accounts ${formatPercent(stats.users.premiumPercent)}` : undefined}
           />
           <StatCard className="min-w-0" label="Actieve reeksen" value={formatNumber(stats?.users.activeStreak)} />
         </div>
 
         <NewFeedbackCard />
+
+        <CohortCard cohorts={stats?.cohorts} loading={loading} />
 
         {/* ── The users table ───────────────────────────────────────── */}
         <Card className="flex-none overflow-hidden">
@@ -913,5 +937,69 @@ function FunnelRow({ label, value, display, loading, last }: { label: string; va
         <dd className="text-[13px] font-bold text-ink tabular-nums">{display ?? formatNumber(value)}</dd>
       )}
     </div>
+  )
+}
+
+
+function formatPercent(value: number | null | undefined): string {
+  return value == null ? "-" : `${value.toLocaleString("nl-NL", { maximumFractionDigits: 1 })} %`
+}
+
+/**
+ * Signup-week cohorts: of the accounts made in a week, how many started a trial
+ * and paid within 7 and 35 days, and the estimated first-payment revenue per
+ * signup. Grey figures belong to weeks that are still too young to be final.
+ */
+function CohortCard({ cohorts, loading }: { cohorts: Stats["cohorts"]; loading: boolean }) {
+  const weeks = (cohorts?.weeks ?? []).slice(-10).reverse()
+  const pct = (n: number, d: number) => (d > 0 ? formatPercent(Math.round((n / d) * 1000) / 10) : "-")
+  return (
+    <Card className="flex-none p-4 sm:p-[17px]">
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <h2 className="flex-1 text-[14.5px] font-bold text-ink">Conversie per aanmeldweek</h2>
+        {cohorts?.recentRevenuePerSignupD60Eur != null && (
+          <span className="text-[12px] text-ink-faint tabular-nums">
+            ≈ €{cohorts.recentRevenuePerSignupD60Eur.toLocaleString("nl-NL", { minimumFractionDigits: 2 })} per aanmelding (60 d)
+          </span>
+        )}
+      </div>
+      <p className="mt-1 text-[12.5px] text-ink-muted">
+        Doel: 7 % betaalt binnen 35 dagen. Grijze cijfers lopen nog op.
+      </p>
+      {loading ? (
+        <p className="mt-3 text-[12.5px] text-ink-faint">Laden…</p>
+      ) : weeks.length === 0 ? (
+        <p className="mt-3 text-[12.5px] text-ink-faint">Nog geen cohortgegevens.</p>
+      ) : (
+        <div className="mt-3 overflow-x-auto">
+          <table className="w-full text-[12.5px] tabular-nums">
+            <thead className="text-left text-ink-faint">
+              <tr>
+                <th className="py-1 pr-3 font-medium">Week van</th>
+                <th className="py-1 pr-3 font-medium">Aanmeldingen</th>
+                <th className="py-1 pr-3 font-medium">Proef (7 d)</th>
+                <th className="py-1 pr-3 font-medium">Betaald (7 d)</th>
+                <th className="py-1 pr-3 font-medium">Betaald (35 d)</th>
+                <th className="py-1 font-medium">€ / aanmelding (60 d)</th>
+              </tr>
+            </thead>
+            <tbody className="text-ink">
+              {weeks.map((w) => (
+                <tr key={w.weekStart} className="border-t border-line-soft">
+                  <td className="py-1 pr-3">{new Date(w.weekStart).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}</td>
+                  <td className="py-1 pr-3">{w.signups}</td>
+                  <td className="py-1 pr-3">{pct(w.trialsD7, w.signups)}</td>
+                  <td className="py-1 pr-3">{pct(w.paidD7, w.signups)}</td>
+                  <td className={`py-1 pr-3 ${w.matureD35 ? "" : "text-ink-faint"}`}>{pct(w.paidD35, w.signups)}</td>
+                  <td className={`py-1 ${w.matureD60 ? "" : "text-ink-faint"}`}>
+                    €{w.revenuePerSignupD60Eur.toLocaleString("nl-NL", { minimumFractionDigits: 2 })}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </Card>
   )
 }

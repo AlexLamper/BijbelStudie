@@ -160,6 +160,20 @@ const UserSchema = new mongoose.Schema(
     storePremium: { type: Boolean, default: false },
     storePremiumPlatform: { type: String, enum: ["apple", "google", null], default: null },
     storePremiumExpiresAt: { type: Date, default: null },
+    // True while the store entitlement is a free trial (RevenueCat
+    // `period_type: "trial"`). Store Pro during a trial is access, not revenue:
+    // the admin's paying and conversion figures leave these accounts out.
+    storeTrial: { type: Boolean, default: false },
+    // The plan behind the store entitlement, from its product id. Lets the
+    // cohort view estimate first-payment revenue without a RevenueCat call.
+    storePremiumInterval: { type: String, enum: ["monthly", "annual", null], default: null },
+    // Write-once funnel dates for the cohort conversion view (lib/adminCohorts).
+    // Never cleared, so a lapsed subscriber still counts as converted in the
+    // cohort they signed up in.
+    storeTrialStartedAt: { type: Date, default: null },
+    // First moment any channel (Stripe or a store) reported a *paid* period,
+    // i.e. not a trial. This is the numerator of signup-to-paid conversion.
+    firstPaidAt: { type: Date, default: null },
     // Apple's `sub` claim. Stable across sign-ins even when the user hides
     // their email behind a private-relay address.
     appleId: { type: String, index: true, sparse: true },

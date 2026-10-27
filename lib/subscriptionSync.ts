@@ -166,6 +166,8 @@ export interface LocalBilling {
   subscriptionStartedAt?: Date | null;
   /** Set once, never cleared: this account has already had its free trial. */
   proTrialUsedAt?: Date | null;
+  /** Write-once: the first paid (non-trial) period on any channel. */
+  firstPaidAt?: Date | null;
   billingIssueSince?: Date | null;
   stripeCustomerId?: string | null;
   /** Store entitlement, so a comped account is not confused with an App Store one. */
@@ -180,7 +182,7 @@ export interface LocalBilling {
 export const BILLING_SELECT =
   "email subscribed subscriptionStatus stripeSubscriptionId stripePriceId " +
   "subscriptionInterval cancelAtPeriodEnd currentPeriodEnd pausedUntil " +
-  "subscriptionStartedAt proTrialUsedAt billingIssueSince stripeCustomerId storePremium isAdmin";
+  "subscriptionStartedAt proTrialUsedAt firstPaidAt billingIssueSince stripeCustomerId storePremium isAdmin";
 
 function sameDate(a: Date | null | undefined, b: Date | null | undefined): boolean {
   const ta = a ? new Date(a).getTime() : null;
@@ -326,6 +328,20 @@ export function diffSnapshot(
   if (snapshot.trialStartedAt && !local.proTrialUsedAt) {
     set.proTrialUsedAt = snapshot.trialStartedAt;
     changed.push("proTrialUsedAt");
+  }
+
+  // The cohort view's conversion moment: the first time Stripe reports a paid
+  // period. `trialing` is access, not revenue, so it does not count; neither
+  // does a comped grant, which never carries a Stripe status. Write-once.
+  if (snapshot.subscribed && snapshot.subscriptionStatus === "active" && !local.firstPaidAt) {
+    // A subscription that never had a trial was paid from its start date, which
+    // also back-fills historical subscribers onto the right day. One that had
+    // a trial is dated when it is first seen active: close to the trial's end.
+    set.firstPaidAt =
+      !snapshot.trialStartedAt && snapshot.subscriptionStartedAt
+        ? snapshot.subscriptionStartedAt
+        : new Date();
+    changed.push("firstPaidAt");
   }
 
   // A healthy subscription means any recorded payment problem is over.
