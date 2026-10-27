@@ -44,6 +44,7 @@ type UserDoc = {
   storePremium?: boolean;
   storePremiumPlatform?: 'apple' | 'google' | null;
   storePremiumExpiresAt?: Date | null;
+  compedProUntil?: Date | null;
 };
 
 export function toAuthUser(doc: UserDoc): AuthUser {

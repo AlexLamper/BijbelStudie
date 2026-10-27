@@ -66,6 +66,13 @@ export const EVENTS = {
       "app_levensboom",
       // The group limit, the note limit and the app's own paywall screen.
       "app_groups", "app_notes", "app_funnel",
+      // One source per app gate, so commentary, grondtekst, offline and music
+      // no longer all report as "app_study". "app_crossrefs" was already sent
+      // by the app and silently dropped here until now.
+      "app_commentary", "app_grondtekst", "app_offline", "app_music", "app_crossrefs",
+      // The paywall at the end of onboarding, the Start promo, and the
+      // moments a free Pro week (trial or referral) is about to run out.
+      "app_onboarding", "app_promo", "app_streak", "app_referral_end",
     ],
     logged_in: ["yes", "no"],
     platform: PLATFORM,
@@ -77,10 +84,13 @@ export const EVENTS = {
   },
   checkout_started: {
     interval: ["monthly", "annual"],
+    // Whether the store offered this purchase with a free trial.
+    trial: ["yes", "no"],
     platform: PLATFORM,
   },
   checkout_completed: {
     interval: ["monthly", "annual"],
+    trial: ["yes", "no"],
     platform: PLATFORM,
   },
   checkout_abandoned: {
@@ -108,6 +118,42 @@ export const EVENTS = {
   },
   paywall_cta_clicked: {
     surface: ["commentary", "ai_limit", "original_text", "plan_limit", "offline", "resources", "crossrefs", "music"],
+    platform: PLATFORM,
+  },
+  /**
+   * The app's paywall was closed without buying. With `pricing_viewed` this
+   * gives the dismiss rate per entry point; `trial` says whether a free trial
+   * was on offer at the time.
+   */
+  paywall_dismissed: {
+    source: [
+      "app_profile", "app_resources", "app_study", "app_ai", "app_levensboom",
+      "app_groups", "app_notes", "app_funnel",
+      "app_commentary", "app_grondtekst", "app_offline", "app_music", "app_crossrefs",
+      "app_onboarding", "app_promo", "app_streak", "app_referral_end", "direct",
+    ],
+    trial: ["yes", "no"],
+    platform: PLATFORM,
+  },
+  /** The app's Pro promo was put on screen, and what earned it the slot. */
+  promo_shown: {
+    trigger: ["session", "value_moment", "streak", "tree_level", "note_limit_near", "ai_last_question", "referral_end"],
+    platform: PLATFORM,
+  },
+  /** One screen of the app's three-screen Pro pitch (/pro-intro). */
+  presell_step_viewed: {
+    step: ["goal", "demo", "benefits"],
+    source: ["app_funnel", "app_profile", "app_promo", "app_onboarding", "app_streak", "app_referral_end"],
+    platform: PLATFORM,
+  },
+  /** The study goal picked in onboarding or the pitch - drives the paywall's headline. */
+  onboarding_goal_selected: {
+    goal: ["understand_bible", "difficult_passages", "daily_habit", "learn_about_jesus", "theology", "skip"],
+    platform: PLATFORM,
+  },
+  /** A store purchase that started a free trial rather than a paid period. */
+  trial_started: {
+    interval: ["monthly", "annual"],
     platform: PLATFORM,
   },
   /** Signup that was started in order to buy, so the resume flow can be measured. */

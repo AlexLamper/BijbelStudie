@@ -5,6 +5,7 @@ import ReadingSession from "../models/ReadingSession";
 import StudyGroup from "../models/StudyGroup";
 import BiblePlan from "../models/BiblePlan";
 import { PLANS } from "./pricing";
+import { cohortConversion } from "./adminCohorts";
 import {
   COMPED_ACCESS_FILTER,
   PAYING_STRIPE_FILTER,
@@ -187,10 +188,13 @@ async function buildStats(): Promise<AdminPayload> {
     googleSubscribers,
     signupPlatformCounts,
     platformUsage,
+    storeTrials,
+    cohorts,
   ] = await Promise.all([
     q("Totaal gebruikers", () => User.countDocuments()),
     q("Stripe-abonnees", () => User.countDocuments(PAYING_STRIPE_FILTER)),
-    q("Store-abonnees", () => User.countDocuments({ storePremium: true })),
+    // Paying only: a store free trial is access, not a subscriber yet.
+    q("Store-abonnees", () => User.countDocuments({ storePremium: true, storeTrial: { $ne: true } })),
     q("Pro-toegang", () => User.countDocuments(effectivePro)),
     q("Gratis Pro-toegang", () => User.countDocuments(COMPED_ACCESS_FILTER)),
     q("Beheerders", () => User.countDocuments({ isAdmin: true })),
@@ -276,6 +280,9 @@ async function buildStats(): Promise<AdminPayload> {
           },
         },
       ])),
+    q("Store-proefperiodes", () => User.countDocuments({ storePremium: true, storeTrial: true })),
+    // Signup-week cohorts: the conversion figure paywall changes are judged on.
+    q("Cohortconversie", () => cohortConversion(now)),
   ]);
 
   // A *paying* subscriber whose interval was never recorded is still real
@@ -353,6 +360,8 @@ async function buildStats(): Promise<AdminPayload> {
       paying,
       stripeSubscribers,
       storeSubscribers,
+      // In a store free trial right now: Pro access, not yet revenue.
+      storeTrials,
       // Access granted without payment: the App Store review account, admin
       // grants. Reported so it is visible, never folded into revenue.
       comped: compedUsers,
@@ -361,6 +370,9 @@ async function buildStats(): Promise<AdminPayload> {
       newLast7d: usersLast7d,
       newLast30d: usersLast30d,
       activeStreak: activeStreakUsers,
+      // ALL-TIME ratio: everyone paying today over every account ever made. Kept
+      // for continuity, but it barely moves when new users convert better - the
+      // `cohorts` block below is the conversion figure to steer on.
       // Conversion means paid conversion, so comped access is excluded. An empty
       // user table is 0% rather than a division by zero; an unknown numerator or
       // denominator is null, because it is not 0%.
@@ -424,6 +436,9 @@ async function buildStats(): Promise<AdminPayload> {
         ? { ios: usage.ios, android: usage.android, web: usage.web, any: usage.any, multi: usage.multi }
         : null,
     },
+    // Signup-to-paid by signup week (lib/adminCohorts). `recentD35Percent` is
+    // the number to hold against the conversion target.
+    cohorts,
     content: {
       notes: totalNotes,
       notesLast7d,

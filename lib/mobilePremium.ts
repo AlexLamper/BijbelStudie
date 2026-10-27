@@ -16,6 +16,8 @@ export type PremiumUserFields = {
   storePremium?: boolean;
   storePremiumPlatform?: 'apple' | 'google' | null;
   storePremiumExpiresAt?: Date | null;
+  /** End of a time-boxed free grant: a referral week or an admin month. */
+  compedProUntil?: Date | null;
 };
 
 export function resolveIsPro(user: PremiumUserFields, adminByEmail = false): boolean {
@@ -31,6 +33,14 @@ export function resolveProSource(user: PremiumUserFields, adminByEmail = false):
   return null;
 }
 
+/**
+ * When the caller's Pro ends, if it is known to end. A store subscription
+ * reports its period end; a gifted week or month (referral, admin grant)
+ * reports `compedProUntil`, so the app can offer to continue *before* the gift
+ * lapses rather than the reader discovering it on the next gated tap. A
+ * paying Stripe subscriber renews and reports null, as before.
+ */
 export function resolveProExpiresAt(user: PremiumUserFields): Date | null {
-  return user.storePremium ? (user.storePremiumExpiresAt ?? null) : null;
+  if (user.storePremium) return user.storePremiumExpiresAt ?? null;
+  return user.compedProUntil ?? null;
 }
