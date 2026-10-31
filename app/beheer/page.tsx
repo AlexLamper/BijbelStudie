@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { BarChart3, CreditCard, MessageSquare, RefreshCw, Search, Settings, Users } from "lucide-react"
 import BillingHealthCard, { type BillingStats } from "../../components/admin/BillingHealthCard"
 import NewFeedbackCard from "../../components/admin/NewFeedbackCard"
+import TrialsCard from "../../components/admin/TrialsCard"
 import { ADMIN_BUTTON, ADMIN_FIELD, ADMIN_PRIMARY, isRecentlyActive, relativeTime } from "../../components/admin/adminSurface"
 import OnboardingPreviewButton from "../../components/admin/OnboardingPreviewButton"
 import AppShell from "../../components/shell/AppShell"
@@ -389,6 +390,8 @@ export default function AdminDashboardPage() {
         </div>
 
         <NewFeedbackCard />
+
+        <TrialsCard />
 
         <CohortCard cohorts={stats?.cohorts} loading={loading} />
 
