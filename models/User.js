@@ -147,6 +147,11 @@ const UserSchema = new mongoose.Schema(
     // When this account's activity was counted for its inviter. Set once, by the
     // conditional write in lib/referral.ts, so a reward can never be paid twice.
     referralCreditedAt: { type: Date },
+    // When the app's hands-on onboarding guide paid its one-time XP. Set once,
+    // by the conditional write in lib/onboardingGuide.ts, so a reinstall, a
+    // second device or a replay from Profiel can never pay it twice. No
+    // default: a missing field is what "not yet" looks like.
+    onboardingGuideRewardedAt: { type: Date },
     // Free-text reason captured on the cancellation screen. Without it every
     // later retention decision is guesswork.
     cancellationReason: { type: String },
@@ -210,8 +215,10 @@ const UserSchema = new mongoose.Schema(
       // the guided order either way, which is the order the menu already had.
       studyStyle: { type: String, enum: ["guided", "self", null] },
       onboardingCompleted: { type: Boolean, default: false },
-      // Legacy: the removed guided tour's "seen" flag. Nothing reads or writes
-      // it any more; kept so stored documents that carry it stay valid.
+      // The app's onboarding guide was walked or closed (the website's own tour
+      // was removed). The app writes it through /api/v1/preferences and reads
+      // it back on sign-in, so a second device or a reinstall does not start
+      // the guide again.
       tourCompleted: { type: Boolean, default: false },
       fontSize: { type: String, default: "base" },
       fontFamily: { type: String, default: "sans" },

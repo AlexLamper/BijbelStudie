@@ -28,7 +28,8 @@ export type XpEvent =
   | 'study_completed'
   | 'plan_completed'
   | 'streak_day'
-  | 'note_written';
+  | 'note_written'
+  | 'onboarding_guide';
 
 export const XP_VALUES: Record<XpEvent, number> = {
   chapter_read: 5,
@@ -42,6 +43,14 @@ export const XP_VALUES: Record<XpEvent, number> = {
   // thing to fake, so it sits below a read chapter's neighbours and is capped
   // per day in lib/noteXp.ts rather than being paid on every save.
   note_written: 8,
+  // The app's hands-on guide after signup: mark a verse, swipe to Studie, ask
+  // the assistant, open the commentary. Paid once per account, ever - the
+  // conditional write in lib/onboardingGuide.ts is what makes it once. Sized
+  // to grow a brand-new tree visibly without levelling it up (the guide's own
+  // reward card is the celebration, not a second dialog), and kept with the
+  // guide's note and chapter under REFERRAL_ACTIVATION_XP (60), so finishing
+  // the guide alone never counts as "actually used it" for an inviter.
+  onboarding_guide: 40,
 };
 
 export const XP_LABELS: Record<XpEvent, string> = {
@@ -53,7 +62,15 @@ export const XP_LABELS: Record<XpEvent, string> = {
   plan_completed: 'Leesplan voltooid',
   streak_day: 'Dagelijkse reeks',
   note_written: 'Aantekening gemaakt',
+  onboarding_guide: 'Rondleiding afgerond',
 };
+
+/**
+ * Events that are paid once per account rather than per action. Left out of
+ * the "how do I earn XP" table the app's Groei tab shows: a row the reader can
+ * never earn again is not a way to grow the tree.
+ */
+export const ONE_TIME_XP_EVENTS: ReadonlySet<XpEvent> = new Set<XpEvent>(['onboarding_guide']);
 
 /** Cumulative XP required to reach a level: 100, 300, 600, 1000, 1500, … */
 export function xpForLevel(level: number): number {

@@ -2,7 +2,13 @@ import { requireUser } from '../../../../lib/apiAuth';
 import { corsPreflight, handleV1Error, jsonV1 } from '../../../../lib/apiV1';
 import connectMongoDB from '../../../../lib/mongodb';
 import User from '../../../../models/User';
-import { XP_LABELS, XP_VALUES, readProgressSummary } from '../../../../lib/gamification';
+import {
+  ONE_TIME_XP_EVENTS,
+  XP_LABELS,
+  XP_VALUES,
+  readProgressSummary,
+  type XpEvent,
+} from '../../../../lib/gamification';
 import { buildProgressTreePayload, type ProgressTreePrefs } from '../../../../lib/progressTree/summary';
 import { ensureLegacyXp, floorForUser } from '../../../../lib/progressTree/legacy';
 import { fracOf } from '../../../../lib/progressTree/client';
@@ -57,11 +63,15 @@ export async function GET(req: Request) {
         longestStreak: user?.longestStreak ?? 0,
         isPro: auth.isPro,
       }),
-      xpTable: Object.entries(XP_VALUES).map(([event, value]) => ({
-        event,
-        value,
-        label: XP_LABELS[event as keyof typeof XP_LABELS],
-      })),
+      // Only the repeatable ways to grow: the one-time onboarding reward is
+      // not something the reader can go and do again.
+      xpTable: Object.entries(XP_VALUES)
+        .filter(([event]) => !ONE_TIME_XP_EVENTS.has(event as XpEvent))
+        .map(([event, value]) => ({
+          event,
+          value,
+          label: XP_LABELS[event as keyof typeof XP_LABELS],
+        })),
     });
   } catch (error) {
     return handleV1Error(error);

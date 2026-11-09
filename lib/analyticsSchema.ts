@@ -38,6 +38,9 @@ function num(min: number, max: number, integer = true): NumberProp {
 }
 const BOOL: BooleanProp = { kind: "boolean" };
 
+/** The app's onboarding guide steps, in the order the reader meets them. */
+const GUIDE_STEPS = ["mark", "swipe", "ask", "study"] as const;
+
 export const EVENTS = {
   /**
    * A page was opened. `path` is a ROUTE KEY, not a pathname - the client sends
@@ -238,6 +241,37 @@ export const EVENTS = {
   /** The one-time announcement card for existing accounts - not built yet. */
   tree_announcement_seen: {
     action: ["open", "close"],
+  },
+  /**
+   * The app's hands-on onboarding guide, right after setup: four steps the
+   * reader does for real (mark a verse and write a note, swipe to Studie, ask
+   * the assistant, open the commentary). `guide_started` is the denominator;
+   * per step, `guide_step_completed` and `guide_step_skipped` show where people
+   * drop off. `how` on a completed step is `fallback` when the action itself
+   * failed or was gated (offline, AI error) and the guide moved on anyway;
+   * on a skipped step it is `skip` (the Overslaan link) or `close` (the guide
+   * was stopped there - every later step is then left out, not reported).
+   * `replay` marks a run started again from Profiel.
+   */
+  guide_started: {
+    replay: BOOL,
+    platform: PLATFORM,
+  },
+  guide_step_completed: {
+    step: GUIDE_STEPS,
+    how: ["done", "fallback"],
+    platform: PLATFORM,
+  },
+  guide_step_skipped: {
+    step: GUIDE_STEPS,
+    how: ["skip", "close"],
+    platform: PLATFORM,
+  },
+  /** Walked to the end. `done` / `skipped` count the four steps. */
+  guide_finished: {
+    done: num(0, 4),
+    skipped: num(0, 4),
+    platform: PLATFORM,
   },
 } as const;
 

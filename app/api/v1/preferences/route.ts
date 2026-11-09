@@ -39,6 +39,10 @@ const ALLOWED_STRING_KEYS = [
 
 const ALLOWED_BOOLEAN_KEYS = [
   'onboardingCompleted',
+  // The app's onboarding guide, done or closed. The app has always sent it and
+  // read it back on sign-in; until it was listed here it was dropped, so every
+  // new device started the guide again.
+  'tourCompleted',
   'highContrast',
   'showVerseNumbers',
   // The daily reading reminder. The notification still fires locally on the
