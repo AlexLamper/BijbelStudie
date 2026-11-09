@@ -7,7 +7,8 @@ import {
 } from '../../../../../../lib/apiV1';
 import { getMobileOriginalChapter } from '../../../../../../lib/mobileContent';
 import { resolveUser } from '../../../../../../lib/apiAuth';
-import { gateOriginal } from '../../../../../../lib/proContent';
+import { gateByAllowance, gateOriginal } from '../../../../../../lib/proContent';
+import { personalLimitField, studyAccess } from '../../../../../../lib/studyAllowance';
 
 export const runtime = 'nodejs';
 
@@ -39,11 +40,21 @@ export async function GET(
     // anonymous reader still gets the preview, which is the whole point of
     // truncating rather than refusing.
     const user = await resolveUser(req);
-    const gated = gateOriginal(payload.verses, { isPro: user?.isPro ?? false });
+    const access = await studyAccess(user, decodeURIComponent(book), chapterNumber);
+    const gated =
+      access.mode === 'allowance'
+        ? gateByAllowance(payload.verses, access.allowed)
+        : gateOriginal(payload.verses, { isPro: user?.isPro ?? false });
 
     return cachedJsonV1(
       req,
-      { ...payload, verses: gated.items, locked: gated.locked, totalVerses: payload.verses.length },
+      {
+        ...payload,
+        verses: gated.items,
+        locked: gated.locked,
+        totalVerses: payload.verses.length,
+        ...personalLimitField(access),
+      },
       { private: true },
     );
   } catch (error) {

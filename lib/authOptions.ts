@@ -9,6 +9,17 @@ import { isAdminEmail } from "./adminEmails";
 import { resolveIsPro } from "./mobilePremium";
 import { emailMatchFilters, findUserByEmail, normaliseEmail } from "./userLookup";
 import { recordPlatformSeen } from "./clientPlatform";
+import { touchReverseTrial } from "./reverseTrial";
+import {
+  TRIAL_ACCOUNT_FIELDS,
+  accountLimits,
+  applyTouch,
+  isCompOnly,
+  isNothing,
+  trialState,
+  trialSummary,
+  type TrialAccountFields,
+} from "./reverseTrialRules";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -114,18 +125,27 @@ export const authOptions: NextAuthOptions = {
             subscribed?: boolean;
             storePremium?: boolean;
             preferences?: { onboardingCompleted?: boolean; studyStyle?: string };
-          };
+          } & TrialAccountFields;
           const fields =
-            "name isAdmin subscribed storePremium preferences.onboardingCompleted preferences.studyStyle";
+            "name isAdmin subscribed storePremium preferences.onboardingCompleted preferences.studyStyle " +
+            TRIAL_ACCOUNT_FIELDS;
           // Case-insensitive, the same two filters findUserByEmail tries. A
           // plain `{ email: session.user.email }` is case-SENSITIVE, so an
           // account whose stored address was written before emails were
           // normalised found nobody here - and "nobody" is indistinguishable
           // from "a brand-new account" in the fields below.
           const [exactFilter, insensitiveFilter] = emailMatchFilters(session.user.email);
-          const user =
+          let user =
             (await User.findOne(exactFilter).select(fields).lean<SessionUserRow>()) ??
             (await User.findOne(insensitiveFilter).select(fields).lean<SessionUserRow>());
+          if (user) {
+            // The reverse trial counts website visits as active days. Almost
+            // always a no-op; on the first visit of a day it records the day
+            // (or starts / closes the trial) and the row is patched in place,
+            // so Pro below is already right for this very render.
+            const plan = await touchReverseTrial(user, { platform: "web" });
+            if (!isNothing(plan)) user = applyTouch(user, plan, new Date());
+          }
           if (user) {
             // Everything below was read from the account, so it may be trusted
             // to mean what it says. Without this flag an absent field is
@@ -150,6 +170,16 @@ export const authOptions: NextAuthOptions = {
             // account. `resolveIsPro` is the same helper /api/v1/me uses, so
             // the two surfaces cannot disagree about who has paid.
             session.user.isSubscribed = resolveIsPro(user, isAdmin);
+            // The reverse trial and the limits this account has right now, for
+            // the paywall, the recap and the gates that mirror the routes.
+            const now = new Date();
+            const trial = user.reverseTrial ?? null;
+            session.user.trial = trialSummary(trial, session.user.isSubscribed, now);
+            // Pro that is nothing but the reverse trial: the pricing page keeps
+            // the plans on offer instead of saying "je huidige plan".
+            session.user.proIsTrial =
+              session.user.isSubscribed && !isAdmin && isCompOnly(user) && trialState(trial, now) === "active";
+            session.user.limits = accountLimits(trial, session.user.isSubscribed, now);
             session.user.onboardingCompleted = user.preferences?.onboardingCompleted || false;
             // Onboarding's guided-vs-self answer. It rides along on this query
             // - which the root layout already runs on every render - so the

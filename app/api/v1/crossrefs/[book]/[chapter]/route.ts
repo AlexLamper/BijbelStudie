@@ -9,6 +9,7 @@ import { resolveUser } from '../../../../../../lib/apiAuth';
 import { getMobileCrossRefChapter } from '../../../../../../lib/mobileContent';
 import { assertMobileAllowed } from '../../../../../../lib/mobileLicensing';
 import { gateCrossRefChapter } from '../../../../../../lib/proContent';
+import { recordTrialUsage } from '../../../../../../lib/reverseTrial';
 
 export const runtime = 'nodejs';
 
@@ -98,7 +99,12 @@ export async function GET(
     }
 
     const user = await resolveUser(req);
-    return cachedJsonV1(req, gateCrossRefChapter(payload, { isPro: user?.isPro ?? false }), {
+    // `limits.crossRefs` is FREE_CROSS_REFS, or TINY_CROSS_REFS when study
+    // material is the reader's personal limit (an app build that knows about
+    // it asks for `full=1` for that reason; the public URL stays the free slice).
+    if (user?.isPro) void recordTrialUsage(user.id, 'study', user.reverseTrial);
+    const limit = user ? user.limits.crossRefs : undefined;
+    return cachedJsonV1(req, gateCrossRefChapter(payload, { isPro: user?.isPro ?? false, limit }), {
       // `private` drops `s-maxage` and adds `Vary: Authorization`. No device
       // max-age either: a lapsed subscription must not keep the full list
       // alive in a client cache; the ETag keeps the re-check cheap.

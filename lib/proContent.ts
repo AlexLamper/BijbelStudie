@@ -135,16 +135,22 @@ export type GatedCrossRefs<T> = Gated<T> & {
  * material, not a random sample. A verse with `FREE_CROSS_REFS` or fewer is
  * returned untouched and unlocked - there is nothing to sell there.
  */
-export function gateCrossRefs<T>(refs: T[], options: { isPro: boolean }): GatedCrossRefs<T> {
+export function gateCrossRefs<T>(
+  refs: T[],
+  options: { isPro: boolean; limit?: number | null },
+): GatedCrossRefs<T> {
   const total = refs.length;
-  if (options.isPro || total <= FREE_CROSS_REFS) {
+  // `limit` is the account's `limits.crossRefs`: FREE_CROSS_REFS, or
+  // TINY_CROSS_REFS when study material is its personal limit.
+  const limit = options.limit === undefined ? FREE_CROSS_REFS : options.limit;
+  if (options.isPro || limit === null || total <= limit) {
     return { items: refs, locked: false, total, lockedCount: 0 };
   }
   return {
-    items: refs.slice(0, FREE_CROSS_REFS),
+    items: refs.slice(0, limit),
     locked: true,
     total,
-    lockedCount: total - FREE_CROSS_REFS,
+    lockedCount: total - limit,
   };
 }
 
@@ -157,7 +163,7 @@ export function gateCrossRefs<T>(refs: T[], options: { isPro: boolean }): GatedC
  */
 export function gateCrossRefChapter<R, V extends { n: number; refs: R[] }, E extends { verses: V[] }>(
   envelope: E,
-  options: { isPro: boolean },
+  options: { isPro: boolean; limit?: number | null },
 ): Omit<E, 'verses'> & {
   verses: Array<V & { total: number; lockedCount: number }>;
   locked: boolean;
@@ -175,6 +181,17 @@ export function gateCrossRefChapter<R, V extends { n: number; refs: R[] }, E ext
     verses,
     locked: lockedCount > 0,
     lockedCount,
-    freeLimit: FREE_CROSS_REFS,
+    freeLimit: options.limit === undefined || options.limit === null ? FREE_CROSS_REFS : options.limit,
   };
+}
+
+/**
+ * The personal study limit (lib/entitlements.ts TINY_STUDY_CHAPTERS_PER_DAY):
+ * a chapter whose daily slot was granted opens in full; any other chapter that
+ * day gets the lock and no preview. The slot itself is taken by the route
+ * (lib/reverseTrial.ts `claimAllowance`), keyed by book and chapter, so the
+ * commentaries and the grondtekst of one chapter share one slot.
+ */
+export function gateByAllowance<T>(items: T[], allowed: boolean): Gated<T> {
+  return allowed ? { items, locked: false } : { items: [], locked: true };
 }

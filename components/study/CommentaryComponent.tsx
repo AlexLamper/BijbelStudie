@@ -10,6 +10,7 @@ import { getPreferenceClasses, getPreferenceStyles } from '../../lib/preferenceC
 import SpeakButton from './SpeakButton';
 import { SpokenTextScope, useSpokenLocalRange } from './SpokenText';
 import UpgradePrompt from "../pricing/UpgradePrompt";
+import { personalLimitReason } from "../../lib/entitlements";
 import CalvinCoverageNotice from './CalvinCoverageNotice';
 import { calvinCoverageNotice, isCalvinSource } from '../../lib/calvinCoverage';
 
@@ -333,6 +334,9 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
   // the client can no longer tell a short chapter from a truncated one, because
   // the withheld text is not in the response to measure.
   const [locked, setLocked] = useState(false);
+  // Study material is this reader's personal limit (after the reverse trial)
+  // and today's chapter was already used: the server sent no text at all.
+  const [personalLocked, setPersonalLocked] = useState(false);
   // Start in loading when a fetch is about to fire; false here flashed the
   // "no commentary" empty state on the first render, before the effect ran.
   const [loading, setLoading] = useState(Boolean(book && chapter));
@@ -388,6 +392,7 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
       setError(null);
       setCommentary(null);
       setLocked(false);
+      setPersonalLocked(false);
       setNotFound(false);
 
       try {
@@ -416,6 +421,12 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
 
         const data = await res.json();
         const verses = data?.verses;
+
+        if (data?.locked && data?.personalLimit && data.personalLimit.allowed === false) {
+          setLocked(true);
+          setPersonalLocked(true);
+          return;
+        }
 
         if (!verses || Object.keys(verses).length === 0) {
           setNotFound(true);
@@ -586,6 +597,20 @@ const CommentaryComponent: React.FC<CommentaryComponentProps> = ({
                     setSelectedSource(newSource);
                     if (onSourceChange) onSourceChange(newSource);
                   }}
+                />
+              </div>
+          ) : personalLocked ? (
+              <div className="flex flex-col items-center justify-center py-10 text-center space-y-4">
+                <div className="bg-amber-100 dark:bg-amber-900/20 p-4 rounded-full">
+                  <Lock className="h-8 w-8 text-amber-600 dark:text-amber-500" />
+                </div>
+                <p className="max-w-md text-muted-foreground text-sm">{personalLimitReason('study')}</p>
+                <UpgradePrompt
+                  surface="commentary"
+                  title="Elk hoofdstuk, elk commentaar"
+                  body="Met Pro lees je Matthew Henry, Calvijn, Dachsel en de grondtekst bij elk hoofdstuk volledig. KingComments blijft gratis."
+                  cta="Verder lezen met Pro"
+                  compact
                 />
               </div>
           ) : notFound ? (

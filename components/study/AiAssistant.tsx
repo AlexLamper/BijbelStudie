@@ -11,7 +11,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import UpgradePrompt from "../pricing/UpgradePrompt";
 import { openProOffer } from "../../lib/proOffer";
-import { FREE_AI_DAILY_CAP, PRO_AI_DAILY_CAP } from "../../lib/entitlements";
+import { FREE_AI_DAILY_CAP, PRO_AI_DAILY_CAP, personalLimitReason } from "../../lib/entitlements";
 import AiAnswerThumbs from '../feedback/AiAnswerThumbs';
 import {
   Dialog,
@@ -273,7 +273,11 @@ export default function AiAssistant({
               if ((data.cap ?? FREE_AI_DAILY_CAP) < PRO_AI_DAILY_CAP) {
                 openProOffer({
                   surface: 'ai_limit',
-                  reason: `Je hebt je ${data.cap ?? FREE_AI_DAILY_CAP} gratis AI-vragen voor vandaag gebruikt. Met Pro stel je er ${PRO_AI_DAILY_CAP} per dag.`,
+                  // A personal limit (after the reverse trial) says so in the
+                  // server's own words; the offer leads with the reader's numbers.
+                  reason: data.personal
+                    ? personalLimitReason('ai')
+                    : `Je hebt je ${data.cap ?? FREE_AI_DAILY_CAP} gratis AI-vragen voor vandaag gebruikt. Met Pro stel je er ${PRO_AI_DAILY_CAP} per dag.`,
                 });
               }
               setQuota((q) => (q ? { ...q, used: data.used ?? q.used } : q));
@@ -563,7 +567,7 @@ export default function AiAssistant({
             <UpgradePrompt
               surface="ai_limit"
               title="Dagelijkse limiet bereikt"
-              body={`Je hebt je ${quota?.cap ?? FREE_AI_DAILY_CAP} gratis vragen voor vandaag gesteld. Morgen kun je weer verder, of stel er tot ${PRO_AI_DAILY_CAP} per dag met Pro.`}
+              body={`Je hebt je ${(quota?.cap ?? FREE_AI_DAILY_CAP) === 1 ? 'gratis vraag' : `${quota?.cap ?? FREE_AI_DAILY_CAP} gratis vragen`} voor vandaag gesteld. Morgen kun je weer verder, of stel er tot ${PRO_AI_DAILY_CAP} per dag met Pro.`}
               cta="Meer vragen met Pro"
             />
           ) : (

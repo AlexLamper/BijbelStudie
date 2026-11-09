@@ -20,12 +20,13 @@ import { useRouter, useSearchParams } from "next/navigation"
 import {
   PLANS,
   RECOMMENDED,
-  annualDiscountPercent,
-  effectivePerMonth,
+  annualDeal,
   euro,
-  perWeek,
+  type AnnualDeal,
   type BillingInterval,
 } from "../../lib/pricing"
+import { useLivePrices } from "../../hooks/useLivePrices"
+import AnnualDealLine from "../../components/pricing/AnnualDealLine"
 import { PRO_TRIAL_DAYS } from "../../lib/promo"
 import { signupForCheckoutHref, startCheckout as requestCheckout } from "../../lib/startCheckout"
 import { track, trackNow } from "../../lib/analytics"
@@ -44,17 +45,9 @@ function spaced(amount: string): string {
   return amount.replace("€", "€ ")
 }
 
-const PLAN_COPY: Record<BillingInterval, { name: string; derived: string; period: string }> = {
-  annual: {
-    name: "Jaarlijks",
-    derived: `${spaced(effectivePerMonth(PLANS.annual))} per maand`,
-    period: "per jaar",
-  },
-  monthly: {
-    name: "Maandelijks",
-    derived: `${spaced(perWeek(PLANS.monthly))} per week`,
-    period: "per maand",
-  },
+const PLAN_COPY: Record<BillingInterval, { name: string; period: string }> = {
+  annual: { name: "Jaarlijks", period: "per jaar" },
+  monthly: { name: "Maandelijks", period: "per maand" },
 }
 
 /** The filled or empty circle at the head of a plan card. Also marks the current plan for a Pro reader. */
@@ -73,16 +66,21 @@ function RadioMark({ selected }: { selected: boolean }) {
 
 function PlanOption({
   interval,
+  amountCents,
+  deal,
   selected,
   disabled,
   onSelect,
 }: {
   interval: BillingInterval
+  /** What this plan costs per period - the live Stripe price when known. */
+  amountCents: number
+  /** The yearly-vs-monthly comparison, from live prices only; null hides it. */
+  deal: AnnualDeal | null
   selected: boolean
   disabled: boolean
   onSelect: () => void
 }) {
-  const plan = PLANS[interval]
   const copy = PLAN_COPY[interval]
   return (
     // 1 px border plus a 1 px ring when selected, rather than a 2 px border:
@@ -104,9 +102,9 @@ function PlanOption({
 
       {/* Stays on Jaarlijks whichever card is selected: it compares the two
           tariffs, it does not describe the selection. */}
-      {interval === "annual" && (
+      {interval === "annual" && deal && (
         <span className="absolute -top-[11px] right-5 whitespace-nowrap rounded-full bg-teal-dark px-[11px] py-[5px] text-[11px] font-bold uppercase leading-none tracking-[0.6px] text-white">
-          Bespaar {annualDiscountPercent()}%
+          Bespaar {deal.savePercent}%
           <span className="sr-only"> ten opzichte van maandelijks betalen</span>
         </span>
       )}
@@ -117,12 +115,16 @@ function PlanOption({
         <span className="block text-[19px] font-bold leading-[1.2] tracking-[-0.3px] text-ink max-md:text-[17px]">
           {copy.name}
         </span>
-        <span className="mt-[3px] block text-[14px] text-ink-muted tabular-nums">{copy.derived}</span>
+        {interval === "annual" ? (
+          <AnnualDealLine deal={deal} className="mt-[3px] text-[13px] leading-[1.45] text-ink-muted" />
+        ) : (
+          <span className="mt-[3px] block text-[14px] text-ink-muted tabular-nums">Maandelijks opzegbaar</span>
+        )}
       </span>
 
       <span className="flex-none text-right">
         <span className="block text-[26px] font-bold leading-none tracking-[-0.6px] text-ink tabular-nums max-md:text-[22px]">
-          {spaced(euro(plan.amountCents))}
+          {spaced(euro(amountCents))}
         </span>
         <span className="mt-[5px] block text-[13px] text-ink-muted">{copy.period}</span>
       </span>
@@ -185,7 +187,21 @@ export default function PricingPlans() {
   const [busy, setBusy] = useState(false)
 
   const signedIn = Boolean(session)
-  const sessionPro = Boolean(session?.user?.isSubscribed)
+  // During the reverse trial the session says Pro, but nothing has been
+  // bought: the plans stay on offer, with a line saying how the days run.
+  const inReverseTrial = Boolean(session?.user?.proIsTrial)
+  const sessionPro = Boolean(session?.user?.isSubscribed) && !inReverseTrial
+
+  // The live Stripe prices; the constants only stand in until they arrive.
+  const live = useLivePrices()
+  const amounts: Record<BillingInterval, number> = {
+    annual: live?.annual?.amountCents ?? PLANS.annual.amountCents,
+    monthly: live?.monthly?.amountCents ?? PLANS.monthly.amountCents,
+  }
+  const deal = annualDeal(live?.monthly, live?.annual)
+  const trialDaysLeft = session?.user?.trial
+    ? Math.max(0, session.user.trial.daysTotal - session.user.trial.daysUsed)
+    : 0
 
   // /api/trial runs the same checks as app/api/checkout (lib/trialEligibility.ts)
   // and the same `resolveIsPro` as the session, so one request answers both
@@ -212,14 +228,17 @@ export default function PricingPlans() {
     return () => { cancelled = true }
   }, [needsLookup])
 
-  const isPro = sessionPro || Boolean(trial?.isPro)
+  const isPro = sessionPro || (Boolean(trial?.isPro) && !inReverseTrial)
   // A failed lookup promises nothing: the button falls back to "Start met Pro".
   const offersTrial = !isPro && (signedIn ? Boolean(trial?.eligible) : true)
   const trialDays = trial?.trialDays ?? PRO_TRIAL_DAYS
 
   useEffect(() => {
     if (status === "loading") return
-    const allowed = ["sidebar_cta", "paywall_commentary", "paywall_ai", "paywall_plan", "nav", "direct", "landing"]
+    const allowed = [
+      "sidebar_cta", "paywall_commentary", "paywall_ai", "paywall_plan", "nav", "direct", "landing",
+      "personal_limit", "trial_recap",
+    ]
     track("pricing_viewed", {
       source: sourceParam && allowed.includes(sourceParam) ? sourceParam : "direct",
       logged_in: session ? "yes" : "no",
@@ -276,11 +295,23 @@ export default function PricingPlans() {
         Kies je plan
       </h2>
 
+      {inReverseTrial && (
+        <p className="rounded-btn bg-teal-faint px-4 py-3 text-[13.5px] leading-[1.5] text-ink-body">
+          Je gebruikt nu je gratis Pro-dagen
+          {trialDaysLeft > 0
+            ? ` (nog ${trialDaysLeft === 1 ? "1 dag" : `${trialDaysLeft} dagen`} waarop je BijbelStudie opent)`
+            : " (vandaag is je laatste dag)"}
+          . Kies je nu een plan, dan loopt Pro daarna gewoon door.
+        </p>
+      )}
+
       <div role="radiogroup" aria-labelledby="kies-je-plan" className="flex flex-col gap-[18px]">
         {(["annual", "monthly"] as const).map((interval) => (
           <PlanOption
             key={interval}
             interval={interval}
+            amountCents={amounts[interval]}
+            deal={deal}
             selected={selected === interval}
             disabled={busy}
             onSelect={() => setSelected(interval)}

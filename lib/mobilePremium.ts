@@ -8,7 +8,11 @@
  * never show them a purchase button.
  */
 
-export type ProSource = 'stripe' | 'apple' | 'google' | 'admin' | null;
+/**
+ * `trial`: Pro during a new account's first active days (lib/reverseTrial.ts).
+ * Not a purchase, so the app may offer one - unlike `stripe` and `admin`.
+ */
+export type ProSource = 'stripe' | 'apple' | 'google' | 'admin' | 'trial' | null;
 
 export type PremiumUserFields = {
   subscribed?: boolean;

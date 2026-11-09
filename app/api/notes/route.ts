@@ -4,7 +4,8 @@ import { authOptions } from "../../../lib/authOptions";
 import connectMongoDB from "../../../lib/mongodb";
 import Note from "../../../models/Note";
 import User from "../../../models/User";
-import { grantNoteXp, canCreateAnotherNote, limitedNotesFilter, NOTE_LIMIT_MESSAGE } from "../../../lib/noteXp";
+import { grantNoteXp, canCreateAnotherNote, limitedNotesFilter, noteLimitMessage, recordNoteUsage } from "../../../lib/noteXp";
+import { accountLimits } from "../../../lib/reverseTrialRules";
 import { resolveIsPro } from "../../../lib/mobilePremium";
 import { isAdminEmail } from "../../../lib/adminEmails";
 import { randomUUID } from "crypto";
@@ -99,11 +100,15 @@ export async function POST(request: NextRequest) {
     // The free limit is on written notes only - a highlight is never blocked
     // and never counted. See limitedNotesFilter.
     const isPro = resolveIsPro(user, isAdminEmail(session.user.email));
+    // `limits.notes` is FREE_NOTE_LIMIT, or 0 when notes are this account's
+    // personal limit after the reverse trial (lib/entitlements.ts).
+    const trial = user.reverseTrial?.startedAt ? user.toObject().reverseTrial : null;
+    const limits = accountLimits(trial, isPro, new Date());
     if (!isPro && body?.type !== "highlight") {
-      const noteCount = await Note.countDocuments(limitedNotesFilter(user._id));
-      if (!canCreateAnotherNote(noteCount, isPro)) {
+      const noteCount = limits.notes === 0 ? 0 : await Note.countDocuments(limitedNotesFilter(user._id));
+      if (!canCreateAnotherNote(noteCount, isPro, limits.notes)) {
         return NextResponse.json(
-          { error: NOTE_LIMIT_MESSAGE, code: "NOTE_LIMIT_REACHED" },
+          { error: noteLimitMessage(limits), code: "NOTE_LIMIT_REACHED", personal: limits.limitedFeature === "notes" },
           { status: 403 }
         );
       }
@@ -158,6 +163,7 @@ export async function POST(request: NextRequest) {
     });
 
     const savedNote = await newNote.save();
+    recordNoteUsage(user._id, trial, type || "note", true);
 
     // Feeds the ProgressTree the same way reading and studying do. The guardrails
     // (creates only, 15 characters, three a day) live in lib/noteXp.ts so this

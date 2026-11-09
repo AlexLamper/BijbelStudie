@@ -1,5 +1,12 @@
 import type { Guide } from "./types";
-import { FREE_AI_DAILY_CAP, FREE_NOTE_LIMIT } from "../../entitlements";
+import {
+  FREE_AI_DAILY_CAP,
+  FREE_NOTE_LIMIT,
+  PERSONAL_LIMIT_SUMMARY,
+  REVERSE_TRIAL_DAYS,
+  REVERSE_TRIAL_SUMMARY,
+} from "../../entitlements";
+import { PLANS, euro } from "../../pricing";
 
 /** /bijbelstudie/gratis - target: "gratis bijbelstudie", "gratis bijbelstudie materiaal". */
 export const GUIDE_FREE: Guide = {
@@ -82,7 +89,8 @@ export const GUIDE_FREE: Guide = {
       id: "gratis-op-bijbelstudie",
       heading: "Wat op BijbelStudie gratis is",
       body: [
-        "Om eerlijk te zijn over waar de grens ligt: hieronder staat precies wat het gratis account biedt en wat niet. Er is geen creditcard nodig om te beginnen en er zit geen proefperiode aan vast die stilzwijgend overgaat in een abonnement.",
+        "Om eerlijk te zijn over waar de grens ligt: hieronder staat precies wat het gratis account biedt en wat niet.",
+        `${REVERSE_TRIAL_SUMMARY} ${PERSONAL_LIMIT_SUMMARY}`,
       ],
       list: [
         {
@@ -91,7 +99,7 @@ export const GUIDE_FREE: Guide = {
         },
         {
           title: "Gratis: notities en markeringen",
-          text: "Onbeperkt markeringen, en notities per hoofdstuk en vers: op de website zeven, in de app onbeperkt. Je antwoorden uit de studies tellen niet mee. Doorzoekbaar en op elk apparaat beschikbaar.",
+          text: `Onbeperkt markeringen, en ${FREE_NOTE_LIMIT} notities per account, op de website en in de app samen. Je antwoorden uit de studies tellen niet mee. Doorzoekbaar en op elk apparaat beschikbaar.`,
         },
         {
           title: "Gratis: begeleide studies",
@@ -107,7 +115,7 @@ export const GUIDE_FREE: Guide = {
         },
         {
           title: "Pro: de overige commentaren, meer AI en de grondtekst",
-          text: "€9,99 per maand of €89,99 per jaar. Alleen nodig als je die onderdelen wilt gebruiken - de rest hierboven blijft gratis.",
+          text: `${euro(PLANS.monthly.amountCents)} per maand of ${euro(PLANS.annual.amountCents)} per jaar. Alleen nodig als je die onderdelen wilt gebruiken - de rest hierboven blijft gratis.`,
         },
       ],
     },
@@ -140,7 +148,7 @@ export const GUIDE_FREE: Guide = {
   faqs: [
     {
       q: "Is bijbelstudie online echt gratis?",
-      a: `Voor een groot deel wel. Bijbel lezen in meerdere vertalingen, notities maken, begeleide studies doorlopen en het KingComments-commentaar lezen kan zonder te betalen. Op BijbelStudie is daarnaast elke dag ${FREE_AI_DAILY_CAP} keer de AI-assistent te gebruiken en schrijf je ${FREE_NOTE_LIMIT} notities. De overige bijbelcommentaren, de ruimere AI-limiet, onbeperkt notities en de volledige grondtekst zitten in het betaalde Pro-abonnement.`,
+      a: `Voor een groot deel wel. Bijbel lezen in meerdere vertalingen, notities maken, begeleide studies doorlopen en het KingComments-commentaar lezen kan zonder te betalen. Op BijbelStudie is daarnaast elke dag ${FREE_AI_DAILY_CAP} keer de AI-assistent te gebruiken en schrijf je ${FREE_NOTE_LIMIT} notities. Wat je in je eerste ${REVERSE_TRIAL_DAYS} Pro-dagen het meest gebruikte, houd je daarna in een kleiner dagelijks deel. De overige bijbelcommentaren, de ruimere AI-limiet, onbeperkt notities en de volledige grondtekst zitten in het betaalde Pro-abonnement.`,
     },
     {
       q: "Welke bijbelvertalingen zijn gratis te gebruiken?",
@@ -152,7 +160,7 @@ export const GUIDE_FREE: Guide = {
     },
     {
       q: "Heb ik een account nodig om gratis te beginnen?",
-      a: "Voor bijbellezen, notities en voortgang wel, omdat je voortgang aan je account gekoppeld wordt. Aanmelden kost minder dan een minuut en er is geen creditcard voor nodig. De begeleide studies zijn zonder account te bekijken.",
+      a: "Voor bijbellezen, notities en voortgang wel, omdat je voortgang aan je account gekoppeld wordt. Aanmelden kost minder dan een minuut. De begeleide studies zijn zonder account te bekijken.",
     },
   ],
   related: [

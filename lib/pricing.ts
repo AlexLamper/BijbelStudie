@@ -161,3 +161,52 @@ export const PRO_FEATURES_SHORT = [
   "Streakbescherming",
   "Extra bomen en landschappen",
 ];
+
+/**
+ * The yearly plan as a deal against paying monthly, from two LIVE prices
+ * (Stripe on the website, the store's offering in the app - never the
+ * constants above): "€119,88 → €89,99 per jaar - bespaar 25%, €7,50 per maand".
+ *
+ * Legal note (prijsaanduiding, Omnibus): the struck-through amount is NOT a
+ * former price. It is twelve times the monthly tariff we charge today, and it
+ * is always labelled as such ("12 x maandprijs"). A real "was" price would
+ * have to be the lowest price of the last 30 days, which is why this
+ * comparison is the only strikethrough allowed anywhere. Null - so nothing is
+ * shown - when either price is unknown, the currencies differ, or the yearly
+ * plan is not actually cheaper.
+ */
+export interface AnnualDeal {
+  /** 12 x the monthly price, in cents. Shown struck through, labelled "12 x maandprijs". */
+  monthlyTimesTwelveCents: number;
+  annualCents: number;
+  /** Whole percent saved against twelve monthly payments, rounded down. */
+  savePercent: number;
+  /** The yearly price per month, rounded to the cent. */
+  perMonthCents: number;
+}
+
+export function annualDeal(
+  monthly: { amountCents: number; currency?: string } | null | undefined,
+  annual: { amountCents: number; currency?: string } | null | undefined,
+): AnnualDeal | null {
+  if (!monthly || !annual) return null;
+  if (!(monthly.amountCents > 0) || !(annual.amountCents > 0)) return null;
+  if (monthly.currency && annual.currency && monthly.currency.toLowerCase() !== annual.currency.toLowerCase()) {
+    return null;
+  }
+  const twelve = monthly.amountCents * MONTHS_PER_YEAR;
+  if (annual.amountCents >= twelve) return null;
+  return {
+    monthlyTimesTwelveCents: twelve,
+    annualCents: annual.amountCents,
+    // Floored, so the badge never claims more than the prices give.
+    savePercent: Math.floor(((twelve - annual.amountCents) / twelve) * 100),
+    perMonthCents: Math.round(annual.amountCents / MONTHS_PER_YEAR),
+  };
+}
+
+/** What /api/pricing answers: the prices Stripe charges right now, or null per plan when unknown. */
+export interface LivePrices {
+  monthly: { amountCents: number; currency: string } | null;
+  annual: { amountCents: number; currency: string } | null;
+}

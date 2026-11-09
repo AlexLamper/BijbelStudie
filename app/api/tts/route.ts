@@ -7,6 +7,9 @@ import TtsUsage from "../../../models/TtsUsage";
 import User from "../../../models/User";
 import { resolveIsPro, type PremiumUserFields } from "../../../lib/mobilePremium";
 import { isAdminEmail } from "../../../lib/adminEmails";
+import { personalLimitReason, type Limits } from "../../../lib/entitlements";
+import { accountLimits, type ReverseTrialFields } from "../../../lib/reverseTrialRules";
+import { claimAllowance, recordTrialUsage, spendTtsChars } from "../../../lib/reverseTrial";
 
 const MAX_CHARS_PER_REQUEST = 4500;
 const MONTHLY_CAP = 800_000; // hard cap (Google free tier = 1,000,000 chars/maand Wavenet)
@@ -45,13 +48,27 @@ const GENERIC_GOOGLE_HINT =
  * reader still has voorlezen through the browser's own voice (hooks/useTTS.ts),
  * which costs nothing - only this route is gated. Resolved from the account
  * through `resolveIsPro` (Stripe, App Store or admin), like every other gate.
+ *
+ * One exception: an account whose personal limit after the reverse trial is
+ * audio keeps one natural-voice reading a day (TINY_AUDIO_PER_DAY, counted per
+ * reading the browser names, with TINY_TTS_DAILY_CHARS behind it).
  */
-async function isProAccount(email: string): Promise<boolean> {
+type TtsAccount = { userId: unknown; isPro: boolean; limits: Limits; trial: ReverseTrialFields | null };
+
+async function ttsAccount(email: string): Promise<TtsAccount | null> {
   await connectMongoDB();
   const user = await User.findOne({ email })
-    .select("subscribed storePremium isAdmin")
-    .lean<PremiumUserFields>();
-  return user ? resolveIsPro(user, isAdminEmail(email)) : false;
+    .select("subscribed storePremium isAdmin reverseTrial")
+    .lean<PremiumUserFields & { _id: unknown; reverseTrial?: ReverseTrialFields }>();
+  if (!user) return null;
+  const isPro = resolveIsPro(user, isAdminEmail(email));
+  const trial = user.reverseTrial?.startedAt ? user.reverseTrial : null;
+  return { userId: user._id, isPro, limits: accountLimits(trial, isPro, new Date()), trial };
+}
+
+/** Whether this account may use a natural voice at all (Pro, or a daily audio allowance). */
+function mayUseCloud(account: TtsAccount | null): boolean {
+  return Boolean(account && (account.isPro || (account.limits.audioPerDay ?? 0) > 0));
 }
 
 function currentMonth(): string {
@@ -71,7 +88,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "TTS niet geconfigureerd" }, { status: 503 });
     }
 
-    if (!(await isProAccount(session.user.email))) {
+    const account = await ttsAccount(session.user.email);
+    if (!mayUseCloud(account) || !account) {
       return NextResponse.json(
         {
           error: "De natuurlijke voorleesstemmen horen bij Pro.",
@@ -90,6 +108,25 @@ export async function POST(req: NextRequest) {
     const text: string = body.text;
     if (text.length === 0) {
       return NextResponse.json({ error: "Lege tekst" }, { status: 400 });
+    }
+
+    // Which reading this chunk belongs to, as the browser names it
+    // (hooks/useTTS.ts): the first chunk of a reading counts once for the
+    // reverse trial, and the personal audio allowance is one reading a day.
+    const reading = typeof body.reading === "string" ? body.reading.slice(0, 64) : "";
+    const firstPart = body.part === 0;
+    if (account.isPro) {
+      if (firstPart) void recordTrialUsage(account.userId, "audio", account.trial);
+    } else {
+      const refuse = () =>
+        NextResponse.json(
+          { error: personalLimitReason("audio"), code: "PERSONAL_LIMIT", feature: "audio" },
+          { status: 403 },
+        );
+      if (!reading) return refuse();
+      const claim = await claimAllowance(account.userId, "audio", `tts:${reading}`, account.limits.audioPerDay ?? 0);
+      if (!claim.allowed) return refuse();
+      if (!(await spendTtsChars(account.userId, text.length))) return refuse();
     }
     if (text.length > MAX_CHARS_PER_REQUEST) {
       return NextResponse.json(
@@ -212,7 +249,7 @@ export async function GET() {
   if (configured) {
     try {
       const session = await getServerSession(authOptions);
-      allowed = session?.user?.email ? await isProAccount(session.user.email) : false;
+      allowed = session?.user?.email ? mayUseCloud(await ttsAccount(session.user.email)) : false;
     } catch { /* treated as not allowed */ }
   }
   let used = 0;

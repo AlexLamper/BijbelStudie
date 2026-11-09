@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../lib/authOptions';
 import { getCommentary } from '../../../lib/local-data';
-import { gateCommentary } from '../../../lib/proContent';
+import { gateByAllowance, gateCommentary, isProCommentary } from '../../../lib/proContent';
+import { personalLimitField, studyAccess } from '../../../lib/studyAllowance';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,18 +45,37 @@ export async function GET(request: Request) {
   // gate and the client depend on it: the preview has to be the *opening* of
   // the chapter, not an arbitrary slice of it.
   const entries = Object.entries(data).map(([key, text]) => ({ key, text }));
-  const gated = gateCommentary(
-    entries,
-    (entry) => entry.text,
-    (entry, text) => ({ ...entry, text }),
-    { commentaryId: source, isPro },
-  );
+  // Paid commentary only: the personal study limit (lib/studyAllowance.ts) and
+  // the reverse trial's count. KingComments is free and never touches either.
+  const access =
+    isProCommentary(source) && session?.user?.id
+      ? await studyAccess(
+          {
+            id: session.user.id,
+            isPro,
+            limits: session.user.limits,
+            trialActive: session.user.trial?.state === 'active',
+          },
+          book,
+          Number(chapter),
+        )
+      : null;
+  const gated =
+    access?.mode === 'allowance'
+      ? gateByAllowance(entries, access.allowed)
+      : gateCommentary(
+          entries,
+          (entry) => entry.text,
+          (entry, text) => ({ ...entry, text }),
+          { commentaryId: source, isPro },
+        );
 
   return NextResponse.json(
     {
       verses: Object.fromEntries(gated.items.map((entry) => [entry.key, entry.text])),
       locked: gated.locked,
       totalEntries: entries.length,
+      ...(access ? personalLimitField(access) : {}),
     },
     {
       // Never `public`: this body depends on who asked, and one CDN entry

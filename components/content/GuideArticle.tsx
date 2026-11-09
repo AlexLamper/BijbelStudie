@@ -340,7 +340,7 @@ function SideCta() {
       <p className="text-[15px] font-bold text-ink">Zelf aan de slag</p>
       <p className="mt-1 text-[13px] leading-[1.6] text-ink-muted">
         Lees de Bijbel met commentaar, grondtekst, begeleide studies en je eigen notities.
-        Gratis te beginnen, geen creditcard nodig.
+        Gratis te beginnen.
       </p>
       <Link
         href="/registreren"
@@ -414,7 +414,7 @@ export function GuideArticle({ guide }: { guide: Guide }) {
 
       <CtaCard
         title="Begin vandaag met bijbelstudie"
-        text="Lees de Bijbel in meerdere vertalingen, met commentaren, grondtekst, begeleide studies en notities. Gratis te beginnen, geen creditcard nodig."
+        text="Lees de Bijbel in meerdere vertalingen, met commentaren, grondtekst, begeleide studies en notities. Gratis te beginnen."
       >
         <Link href="/registreren" className={`${BUTTON_PRIMARY} max-sm:w-full`} style={TEAL_FILL}>
           Gratis account aanmaken

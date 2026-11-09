@@ -4,7 +4,8 @@ import { authOptions } from "../../../../lib/authOptions";
 import connectMongoDB from "../../../../lib/mongodb";
 import Note from "../../../../models/Note";
 import User from "../../../../models/User";
-import { canCreateAnotherNote, limitedNotesFilter, NOTE_LIMIT_MESSAGE } from "../../../../lib/noteXp";
+import { canCreateAnotherNote, limitedNotesFilter, noteLimitMessage } from "../../../../lib/noteXp";
+import { accountLimits } from "../../../../lib/reverseTrialRules";
 import { resolveIsPro } from "../../../../lib/mobilePremium";
 import { isAdminEmail } from "../../../../lib/adminEmails";
 
@@ -89,10 +90,12 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         .lean<{ type?: string }>();
       const isPro = resolveIsPro(user, isAdminEmail(session.user.email));
       if (existing?.type === "highlight" && !isPro) {
+        const trial = user.reverseTrial?.startedAt ? user.toObject().reverseTrial : null;
+        const limits = accountLimits(trial, isPro, new Date());
         const noteCount = await Note.countDocuments(limitedNotesFilter(user._id));
-        if (!canCreateAnotherNote(noteCount, isPro)) {
+        if (!canCreateAnotherNote(noteCount, isPro, limits.notes)) {
           return NextResponse.json(
-            { error: NOTE_LIMIT_MESSAGE, code: "NOTE_LIMIT_REACHED" },
+            { error: noteLimitMessage(limits), code: "NOTE_LIMIT_REACHED", personal: limits.limitedFeature === "notes" },
             { status: 403 }
           );
         }

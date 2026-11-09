@@ -100,6 +100,36 @@ const UserSchema = new mongoose.Schema(
     // is open-ended (the App Store review account, the plain "Pro activeren"
     // toggle), which is why expiry is opt-in rather than derived from a duration.
     compedProUntil: { type: Date, default: null },
+    // The reverse trial (lib/reverseTrial.ts, rules in lib/reverseTrialRules.ts):
+    // Pro for a new account's first three ACTIVE days, then a personal limit on
+    // the feature it used most. No defaults anywhere on purpose - an account
+    // created before the launch has no `reverseTrial` at all, and "never had
+    // one" must stay distinguishable from "had one". Pro itself is granted
+    // through `subscribed` + `compedProUntil` above, like any comp.
+    reverseTrial: {
+      startedAt: { type: Date },
+      // Amsterdam calendar days ("YYYY-MM-DD") on which the account was used,
+      // at most three. `default: undefined` so mongoose never writes an empty
+      // array onto an account that has no trial.
+      days: { type: [String], default: undefined },
+      // Midnight after the third active day: when the Pro days end.
+      endsAt: { type: Date },
+      // Set once, when the trial is closed and the top feature frozen.
+      endedAt: { type: Date },
+      // What the reader used while the trial ran, website and app together.
+      usage: {
+        ai: { type: Number },
+        notes: { type: Number },
+        highlights: { type: Number },
+        study: { type: Number },
+        audio: { type: Number },
+        chapters: { type: Number },
+      },
+      // "ai" | "notes" | "study" | "audio", or null when none was used.
+      topFeature: { type: String, enum: ["ai", "notes", "study", "audio", null] },
+      // "Je Pro-dagen zitten erop" was shown (on either client).
+      recapSeenAt: { type: Date },
+    },
     stripeCustomerId: { type: String },
     stripeSubscriptionId: { type: String },
     // --- Billing state, written by the Stripe webhook (app/api/webhooks/stripe).

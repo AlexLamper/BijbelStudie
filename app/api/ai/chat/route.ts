@@ -1,4 +1,6 @@
-import { FREE_AI_DAILY_CAP, PRO_AI_DAILY_CAP } from "../../../../lib/entitlements";
+import { PRO_AI_DAILY_CAP, personalLimitReason } from "../../../../lib/entitlements";
+import { accountLimits, type ReverseTrialFields } from "../../../../lib/reverseTrialRules";
+import { recordTrialUsage } from "../../../../lib/reverseTrial";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../lib/authOptions";
@@ -38,7 +40,8 @@ import {
 export const maxDuration = 60;
 
 // The caps live in lib/entitlements.ts, shared by the website and the app route.
-const FREE_DAILY_CAP = FREE_AI_DAILY_CAP;
+// A free account's cap is `accountLimits(...).aiDaily`: 1 instead of 3 when AI
+// is its personal limit after the reverse trial.
 const PREMIUM_DAILY_CAP = PRO_AI_DAILY_CAP;
 const MAX_MESSAGE_LENGTH = 2000;
 const MAX_HISTORY_MESSAGES = 10;
@@ -121,6 +124,7 @@ export async function POST(req: NextRequest) {
       subscribed?: boolean;
       storePremium?: boolean;
       isAdmin?: boolean;
+      reverseTrial?: ReverseTrialFields;
     }>();
     if (!user) {
       return NextResponse.json({ error: "Gebruiker niet gevonden" }, { status: 404 });
@@ -129,7 +133,9 @@ export async function POST(req: NextRequest) {
     // Server-side premium check through the same helper as the session, so an
     // App Store / RevenueCat subscriber (storePremium) is not capped as free.
     const unlimited = resolveIsPro(user, isAdminEmail(session.user.email));
-    const cap = unlimited ? PREMIUM_DAILY_CAP : FREE_DAILY_CAP;
+    const limits = accountLimits(user.reverseTrial, unlimited, new Date());
+    const personal = !unlimited && limits.limitedFeature === "ai";
+    const cap = unlimited ? PREMIUM_DAILY_CAP : limits.aiDaily;
 
     // ── Atomic quota increment (before the Gemini call) ─────────────
     const day = currentDay();
@@ -148,17 +154,22 @@ export async function POST(req: NextRequest) {
         {
           error: unlimited
             ? "Dagelijkse limiet bereikt. Probeer het morgen opnieuw."
-            : `Je hebt je ${FREE_DAILY_CAP} gratis vragen voor vandaag gebruikt.`,
+            : personal
+              ? personalLimitReason("ai")
+              : `Je hebt je ${cap} gratis vragen voor vandaag gebruikt.`,
           code: "QUOTA_EXCEEDED",
           used: newCount - 1,
           cap,
+          personal,
           hint: unlimited
             ? undefined
-            : `Morgen kun je weer ${FREE_DAILY_CAP} vragen stellen, of upgrade naar Pro voor ${PREMIUM_DAILY_CAP} vragen per dag.`,
+            : `Morgen kun je weer ${cap === 1 ? "1 vraag" : `${cap} vragen`} stellen, of upgrade naar Pro voor ${PREMIUM_DAILY_CAP} vragen per dag.`,
         },
         { status: 429 },
       );
     }
+
+    void recordTrialUsage(user._id, "ai", user.reverseTrial ?? null);
 
     // ── Cache lookup ───────────────────────────────────────────────
     // A hit costs no Gemini quota, which is the scarce resource. The user's own
@@ -342,13 +353,15 @@ export async function GET() {
       subscribed?: boolean;
       storePremium?: boolean;
       isAdmin?: boolean;
+      reverseTrial?: ReverseTrialFields;
     }>();
     if (!user) {
       return NextResponse.json({ error: "Gebruiker niet gevonden" }, { status: 404 });
     }
 
     const unlimited = resolveIsPro(user, isAdminEmail(session.user.email));
-    const cap = unlimited ? PREMIUM_DAILY_CAP : FREE_DAILY_CAP;
+    const limits = accountLimits(user.reverseTrial, unlimited, new Date());
+    const cap = unlimited ? PREMIUM_DAILY_CAP : limits.aiDaily;
 
     let used = 0;
     try {
@@ -369,6 +382,7 @@ export async function GET() {
       used,
       cap,
       unlimited,
+      personal: !unlimited && limits.limitedFeature === "ai",
       budgetExhausted: budget?.exhausted ?? false,
       budget: user.isAdmin || isAdminEmail(session.user.email) ? budget : undefined,
     });

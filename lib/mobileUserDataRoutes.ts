@@ -10,7 +10,7 @@ import {
   upsertRecord,
   type SyncKind,
 } from './mobileUserData';
-import { grantNoteXp, noteCreationGuard, NOTE_LIMIT_MESSAGE } from './noteXp';
+import { grantNoteXp, noteCreationGuard, noteLimitMessage, recordNoteUsage } from './noteXp';
 
 /**
  * The four user-data collections differ only in their kind, so they share one
@@ -55,14 +55,18 @@ export function collectionHandlers(kind: SyncKind) {
           id,
           data,
           parseDate(typeof body.updatedAt === 'string' ? body.updatedAt : null),
-          { canCreateNote: noteCreationGuard(user.id, user.isPro) },
+          { canCreateNote: noteCreationGuard(user.id, user.isPro, user.limits.notes) },
         );
 
         if (outcome.skipped === 'deleted') {
           return errorV1('RECORD_DELETED', 409, 'Dit item is verwijderd.');
         }
         if (outcome.skipped === 'limit') {
-          return errorV1('NOTE_LIMIT_REACHED', 403, NOTE_LIMIT_MESSAGE);
+          return errorV1('NOTE_LIMIT_REACHED', 403, noteLimitMessage(user.limits));
+        }
+
+        if (kind === 'note' || kind === 'highlight') {
+          recordNoteUsage(user.id, user.reverseTrial, kind === 'highlight' ? 'highlight' : data.type, outcome.created);
         }
 
         // Writing a reflection feeds the ProgressTree like reading and studying
@@ -106,14 +110,14 @@ export function itemHandlers(kind: SyncKind) {
           id,
           data,
           parseDate(typeof body.updatedAt === 'string' ? body.updatedAt : null),
-          { canCreateNote: noteCreationGuard(user.id, user.isPro) },
+          { canCreateNote: noteCreationGuard(user.id, user.isPro, user.limits.notes) },
         );
 
         if (outcome.skipped === 'deleted') {
           return errorV1('RECORD_DELETED', 409, 'Dit item is verwijderd.');
         }
         if (outcome.skipped === 'limit') {
-          return errorV1('NOTE_LIMIT_REACHED', 403, NOTE_LIMIT_MESSAGE);
+          return errorV1('NOTE_LIMIT_REACHED', 403, noteLimitMessage(user.limits));
         }
         return jsonV1({ item: outcome.record, skipped: outcome.skipped });
       } catch (error) {

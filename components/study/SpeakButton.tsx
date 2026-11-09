@@ -118,7 +118,7 @@ export default function SpeakButton({
     const fallback =
       tts.browserVoices.find(v => v.lang.toLowerCase().startsWith('nl')) ?? tts.browserVoices[0];
     if (fallback) tts.setSelected({ kind: 'browser', voice: fallback });
-    openProOffer({ surface: 'tts', reason: TTS_PRO_REASON });
+    openProOffer({ surface: 'tts', reason: tts.proRequiredReason ?? TTS_PRO_REASON });
   }, [tts]);
 
   // Hand the reader's position to whatever is rendering this text. Publishing

@@ -1,7 +1,9 @@
 import connectMongoDB from './mongodb';
 import Note from '../models/Note';
 import { grantXp, type GrantResult } from './gamification';
-import { FREE_NOTE_LIMIT } from './entitlements';
+import { FREE_NOTE_LIMIT, personalLimitReason, type Limits } from './entitlements';
+import { recordTrialUsage } from './reverseTrial';
+import type { ReverseTrialFields } from './reverseTrialRules';
 
 /**
  * XP for writing an aantekening.
@@ -28,8 +30,16 @@ export const NOTE_XP_DAILY_CAP = 3;
 // The number itself lives in lib/entitlements.ts, beside the other free limits.
 export { FREE_NOTE_LIMIT };
 
-export function canCreateAnotherNote(existingNoteCount: number, isPro: boolean): boolean {
-  return isPro || existingNoteCount < FREE_NOTE_LIMIT;
+/**
+ * [limit] is the account's `limits.notes`: FREE_NOTE_LIMIT normally,
+ * TINY_NOTE_LIMIT (0) when notes are its personal limit, null for Pro.
+ */
+export function canCreateAnotherNote(
+  existingNoteCount: number,
+  isPro: boolean,
+  limit: number | null = FREE_NOTE_LIMIT,
+): boolean {
+  return isPro || limit === null || existingNoteCount < limit;
 }
 
 /**
@@ -60,17 +70,41 @@ export const NOTE_LIMIT_MESSAGE =
   `Je hebt je ${FREE_NOTE_LIMIT} gratis notities gebruikt. Met Pro schrijf je onbeperkt notities. ` +
   'Markeringen en je antwoorden uit de studies tellen niet mee.';
 
+/** The refusal for this account: the personal one after the reverse trial, else the normal one. */
+export function noteLimitMessage(limits?: Pick<Limits, 'limitedFeature'> | null): string {
+  return limits?.limitedFeature === 'notes' ? personalLimitReason('notes') : NOTE_LIMIT_MESSAGE;
+}
+
 /**
  * For the v1 sync paths, which only learn whether a write creates a note once
  * they have looked the record up: answers "may this account add one more?"
  * lazily, so an edit of an existing note never pays for the count.
  */
-export function noteCreationGuard(userId: unknown, isPro: boolean): () => Promise<boolean> {
+export function noteCreationGuard(
+  userId: unknown,
+  isPro: boolean,
+  limit: number | null = FREE_NOTE_LIMIT,
+): () => Promise<boolean> {
   return async () => {
-    if (isPro) return true;
+    if (isPro || limit === null) return true;
+    if (limit <= 0) return false;
     const count = await Note.countDocuments(limitedNotesFilter(userId));
-    return canCreateAnotherNote(count, isPro);
+    return canCreateAnotherNote(count, isPro, limit);
   };
+}
+
+/**
+ * Counts a created note or highlight for the reverse trial ("notities" is one
+ * of the four features it weighs). Edits are never counted.
+ */
+export function recordNoteUsage(
+  userId: unknown,
+  trial: ReverseTrialFields | null | undefined,
+  type: unknown,
+  created: boolean,
+): void {
+  if (!created) return;
+  void recordTrialUsage(userId, type === 'highlight' ? 'highlights' : 'notes', trial);
 }
 
 function startOfDay(date: Date): Date {

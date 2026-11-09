@@ -1,3 +1,4 @@
+import { recordTrialUsage } from './reverseTrial';
 import connectMongoDB from './mongodb';
 import User from '../models/User';
 import StudyProgress from '../models/StudyProgress.js';
@@ -206,7 +207,7 @@ export async function grantXp(
 
   const amount = Math.max(0, Math.round(XP_VALUES[event] * (options?.multiplier ?? 1)));
 
-  const before = await User.findById(userId).select('xp level badges image createdAt streak subscribed');
+  const before = await User.findById(userId).select('xp level badges image createdAt streak subscribed reverseTrial');
   const levelBefore = before ? levelForXp(before.xp ?? 0) : 1;
 
   const updated = await User.findByIdAndUpdate(
@@ -219,6 +220,11 @@ export async function grantXp(
   );
   if (!updated) {
     return { xp: 0, level: 1, levelledUp: false, awarded: 0, newBadges: [] };
+  }
+
+  // Chapters read during the reverse trial, for its recap ("je las 12 hoofdstukken").
+  if (event === 'chapter_read' && before?.reverseTrial?.startedAt) {
+    void recordTrialUsage(userId, 'chapters', before.toObject().reverseTrial);
   }
 
   const xp = updated.xp ?? 0;

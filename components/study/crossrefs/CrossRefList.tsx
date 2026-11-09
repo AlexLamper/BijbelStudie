@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { ArrowRight, ChevronDown, ChevronRight, Lock } from 'lucide-react';
 
 import { track, trackNow } from '../../../lib/analytics';
-import { FREE_CROSS_REFS } from '../../../lib/entitlements';
+import { FREE_CROSS_REFS, personalLimitReason } from '../../../lib/entitlements';
+import { reportProUse } from '../../../lib/proUse';
 import { gateCrossRefs } from '../../../lib/proContent';
 import { openProOffer } from '../../../lib/proOffer';
 import { cn } from '../../../lib/utils';
@@ -129,8 +130,19 @@ export default function CrossRefList({
    * is the UI - see the route's doc comment for the trade-off.
    */
   const isPro = useIsPro();
-  const { status: sessionStatus } = useSession();
-  const gate = useMemo(() => gateCrossRefs(refs, { isPro }), [refs, isPro]);
+  const { data: session, status: sessionStatus } = useSession();
+  // FREE_CROSS_REFS, or TINY_CROSS_REFS when study material is this reader's
+  // personal limit after the reverse trial (lib/entitlements.ts).
+  const limit = session?.user?.limits?.crossRefs ?? FREE_CROSS_REFS;
+  const personal = session?.user?.limits?.limitedFeature === 'study';
+  const gate = useMemo(() => gateCrossRefs(refs, { isPro, limit }), [refs, isPro, limit]);
+
+  // During the reverse trial, opening cross-references counts toward "study
+  // material" - the server never sees it, the shards are static files.
+  const inTrial = session?.user?.trial?.state === 'active';
+  useEffect(() => {
+    if (inTrial && refs.length > 0) void reportProUse('crossrefs');
+  }, [inTrial, refs.length]);
   const shown = gate.items;
 
   const visible = showAll ? shown : shown.slice(0, initialCount);
@@ -345,7 +357,9 @@ export default function CrossRefList({
             trackNow('paywall_cta_clicked', { surface: 'crossrefs', platform: 'web' });
             openProOffer({
               surface: 'crossrefs',
-              reason: c('locked_reason', { n: gate.total, free: FREE_CROSS_REFS }),
+              reason: personal
+                ? personalLimitReason('study')
+                : c('locked_reason', { n: gate.total, free: limit ?? FREE_CROSS_REFS }),
             });
           }}
         />

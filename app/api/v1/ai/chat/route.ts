@@ -1,4 +1,5 @@
-import { FREE_AI_DAILY_CAP, PRO_AI_DAILY_CAP } from '../../../../../lib/entitlements';
+import { PRO_AI_DAILY_CAP, personalLimitReason } from '../../../../../lib/entitlements';
+import { recordTrialUsage } from '../../../../../lib/reverseTrial';
 import { requireUser } from '../../../../../lib/apiAuth';
 import { corsPreflight, errorV1, handleV1Error, jsonV1 } from '../../../../../lib/apiV1';
 import connectMongoDB from '../../../../../lib/mongodb';
@@ -41,8 +42,9 @@ export async function OPTIONS() {
 }
 
 // Mirrors `/api/ai/chat` on the website: same model, same caps, same prompt.
-// The caps live in lib/entitlements.ts, shared by the website and the app route.
-const FREE_DAILY_CAP = FREE_AI_DAILY_CAP;
+// The caps live in lib/entitlements.ts, shared by the website and the app route;
+// a free account's cap is `limits.aiDaily`, which is 1 instead of 3 when AI is
+// its personal limit after the reverse trial.
 const PREMIUM_DAILY_CAP = PRO_AI_DAILY_CAP;
 const MAX_MESSAGE_LENGTH = 2000;
 const MAX_HISTORY_MESSAGES = 10;
@@ -86,7 +88,7 @@ export async function GET(req: Request) {
     await connectMongoDB();
 
     const unlimited = auth.isPro || auth.isAdmin;
-    const cap = unlimited ? PREMIUM_DAILY_CAP : FREE_DAILY_CAP;
+    const cap = unlimited ? PREMIUM_DAILY_CAP : auth.limits.aiDaily;
 
     const doc = await AiUsage.findOne({ userId: auth.id, day: currentDay() }).lean<{
       count: number;
@@ -97,6 +99,8 @@ export async function GET(req: Request) {
       used: doc?.count ?? 0,
       cap,
       unlimited,
+      // Additive: true when this cap is the reader's personal limit.
+      personal: !unlimited && auth.limits.limitedFeature === 'ai',
     });
   } catch (error) {
     return handleV1Error(error);
@@ -141,7 +145,8 @@ export async function POST(req: Request) {
     await connectMongoDB();
 
     const unlimited = auth.isPro || auth.isAdmin;
-    const cap = unlimited ? PREMIUM_DAILY_CAP : FREE_DAILY_CAP;
+    const personal = !unlimited && auth.limits.limitedFeature === 'ai';
+    const cap = unlimited ? PREMIUM_DAILY_CAP : auth.limits.aiDaily;
 
     // Atomic quota increment before the model call, refunded on any failure.
     const day = currentDay();
@@ -160,13 +165,18 @@ export async function POST(req: Request) {
           error: 'QUOTA_EXCEEDED',
           message: unlimited
             ? 'Dagelijkse limiet bereikt. Probeer het morgen opnieuw.'
-            : `Je hebt je ${FREE_DAILY_CAP} gratis vragen voor vandaag gebruikt.`,
+            : personal
+              ? personalLimitReason('ai')
+              : `Je hebt je ${cap} gratis vragen voor vandaag gebruikt.`,
           used: newCount - 1,
           cap,
+          personal,
         },
         { status: 429 },
       );
     }
+
+    void recordTrialUsage(auth.id, 'ai', auth.reverseTrial);
 
     // A cache hit costs no Gemini quota, which is the scarce resource. The
     // user's own daily count is still spent, so the advertised cap holds.

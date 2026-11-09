@@ -2,7 +2,7 @@ import type { NextRequest } from 'next/server';
 import connectMongoDB from '../../../../lib/mongodb';
 import { corsPreflight, errorV1, handleV1Error, jsonV1 } from '../../../../lib/apiV1';
 import { requireUser } from '../../../../lib/apiAuth';
-import { noteCreationGuard } from '../../../../lib/noteXp';
+import { noteCreationGuard, recordNoteUsage } from '../../../../lib/noteXp';
 import {
   SYNC_KINDS,
   assertClientId,
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
     await connectMongoDB();
 
     // One guard for the whole batch; it counts lazily, and only for creates.
-    const canCreateNote = noteCreationGuard(user.id, user.isPro);
+    const canCreateNote = noteCreationGuard(user.id, user.isPro, user.limits.notes);
 
     let applied = 0;
     const rejected: Array<{ id: string; reason: string }> = [];
@@ -108,6 +108,10 @@ export async function POST(req: NextRequest) {
           rejected.push({ id, reason: SKIP_REASON[outcome.skipped] });
         } else {
           applied += 1;
+          if (kind === 'note' || kind === 'highlight') {
+            const data = (change.data ?? {}) as Record<string, unknown>;
+            recordNoteUsage(user.id, user.reverseTrial, kind === 'highlight' ? 'highlight' : data.type, outcome.created);
+          }
         }
       } catch (e) {
         rejected.push({

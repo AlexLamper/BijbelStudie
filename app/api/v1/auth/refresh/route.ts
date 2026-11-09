@@ -5,7 +5,7 @@ import { corsPreflight, errorV1, handleV1Error, jsonV1 } from '../../../../../li
 import { rotateRefreshToken } from '../../../../../lib/mobileTokens';
 import { signAccessToken } from '../../../../../lib/mobileJwt';
 import { serialiseUser } from '../../../../../lib/mobileAuthFlow';
-import { toAuthUser } from '../../../../../lib/apiAuth';
+import { toAuthUser, touched } from '../../../../../lib/apiAuth';
 import { recordPlatformSeen } from '../../../../../lib/clientPlatform';
 
 export const runtime = 'nodejs';
@@ -45,7 +45,8 @@ export async function POST(req: NextRequest) {
     // on the platform the login was made from.
     await recordPlatformSeen(result.userId, result.platform);
 
-    const user = toAuthUser(doc);
+    // Also the first request of a day for most app sessions: count the trial day here.
+    const user = toAuthUser(await touched(doc, () => User.findById(result.userId)));
     const { accessToken, expiresIn } = await signAccessToken({
       userId: user.id,
       email: user.email,

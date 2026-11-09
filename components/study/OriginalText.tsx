@@ -4,6 +4,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { AlertCircle, ExternalLink } from 'lucide-react';
 import { SkeletonBlock } from '../ui/skeletons';
 import { useSession } from 'next-auth/react';
+import { personalLimitReason } from '../../lib/entitlements';
+import { reportProUse } from '../../lib/proUse';
 import { bookNameMap } from '../../lib/book-mapping';
 import UpgradePrompt from "../pricing/UpgradePrompt";
 
@@ -221,6 +223,14 @@ export default function OriginalText({ book, chapter, highlightVerses, embedded 
   const [error, setError] = useState<string | null>(null);
   const { data: session } = useSession();
   const isSubscribed = session?.user?.isSubscribed;
+  // Study material as this reader's personal limit (lib/entitlements.ts
+  // TINY_STUDY_CHAPTERS_PER_DAY): one chapter a day in full, website and app
+  // together - the server keeps the count (POST /api/v1/allowance) - and no
+  // preview on any other chapter that day.
+  const studyCap = session?.user?.limits?.studyChaptersPerDay ?? null;
+  const personalLimit = !isSubscribed && studyCap !== null;
+  const inTrial = session?.user?.trial?.state === 'active';
+  const [allowance, setAllowance] = useState<'unknown' | 'open' | 'closed'>('unknown');
 
   useEffect(() => {
     let cancelled = false;
@@ -241,6 +251,22 @@ export default function OriginalText({ book, chapter, highlightVerses, embedded 
 
     return () => { cancelled = true; };
   }, [book, chapter]);
+
+  useEffect(() => {
+    if (!data) return;
+    let cancelled = false;
+    if (isSubscribed) {
+      // During the reverse trial this counts toward "study material".
+      if (inTrial) void reportProUse('grondtekst', `${book}:${chapter}`);
+      return;
+    }
+    if (!personalLimit) return;
+    setAllowance('unknown');
+    void reportProUse('grondtekst', `${book}:${chapter}`).then((answer) => {
+      if (!cancelled) setAllowance(answer?.allowed ? 'open' : 'closed');
+    });
+    return () => { cancelled = true; };
+  }, [data, book, chapter, isSubscribed, personalLimit, inTrial]);
 
   const langLabel = isHebrew ? 'Hebreeuws' : 'Grieks';
   const testamentLabel = isHebrew ? 'Oude Testament' : 'Nieuwe Testament';
@@ -317,8 +343,10 @@ export default function OriginalText({ book, chapter, highlightVerses, embedded 
 
       {/* Verses */}
       {!loading && !error && verses.length > 0 && (() => {
-        const displayVerses = isSubscribed ? verses : verses.slice(0, 1);
-        const showPaywall = !isSubscribed && verses.length > 0;
+        if (personalLimit && allowance === 'unknown') return null;
+        const fullAccess = isSubscribed || (personalLimit && allowance === 'open');
+        const displayVerses = fullAccess ? verses : personalLimit ? [] : verses.slice(0, 1);
+        const showPaywall = !fullAccess && verses.length > 0;
         return (
           <div className="content-in space-y-0">
             <div
@@ -343,16 +371,25 @@ export default function OriginalText({ book, chapter, highlightVerses, embedded 
 
             {showPaywall && (
               <div className="mt-6">
-                <UpgradePrompt
-                  surface="original_text"
-                  title="Bekijk de volledige grondtekst"
-                  body={`Lees alle verzen in de originele grondtekst in het ${langLabel}, met uitspraak en betekenis.`}
-                  cta="Grondtekst ontgrendelen"
-                />
+                {personalLimit ? (
+                  <UpgradePrompt
+                    surface="original_text"
+                    title="Je studiehoofdstuk voor vandaag is gebruikt"
+                    body={personalLimitReason('study')}
+                    cta="Grondtekst ontgrendelen"
+                  />
+                ) : (
+                  <UpgradePrompt
+                    surface="original_text"
+                    title="Bekijk de volledige grondtekst"
+                    body={`Lees alle verzen in de originele grondtekst in het ${langLabel}, met uitspraak en betekenis.`}
+                    cta="Grondtekst ontgrendelen"
+                  />
+                )}
               </div>
             )}
 
-            {isSubscribed && (
+            {fullAccess && (
               <div className="mt-8 pt-4 border-t border-line dark:border-border text-[11px] text-ink-muted dark:text-muted-foreground leading-relaxed">
                 <p>
                   Brontekst: <a

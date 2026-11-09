@@ -9,7 +9,8 @@ import {
 import { calvinCoverageEnvelope } from '../../../../../../../lib/calvinCoverage';
 import { getMobileCommentaryChapter } from '../../../../../../../lib/mobileContent';
 import { resolveUser } from '../../../../../../../lib/apiAuth';
-import { gateCommentary } from '../../../../../../../lib/proContent';
+import { gateByAllowance, gateCommentary, isProCommentary } from '../../../../../../../lib/proContent';
+import { personalLimitField, studyAccess } from '../../../../../../../lib/studyAllowance';
 
 export const runtime = 'nodejs';
 
@@ -58,12 +59,19 @@ export async function GET(
     });
 
     const user = await resolveUser(req);
-    const gated = gateCommentary(
-      payload.verses,
-      (v) => v.t,
-      (v, t) => ({ ...v, t }),
-      { commentaryId, isPro: user?.isPro ?? false },
-    );
+    // KingComments is free for everyone and never touches the allowance.
+    const access = isProCommentary(commentaryId)
+      ? await studyAccess(user, decodedBook, chapterNumber)
+      : null;
+    const gated =
+      access?.mode === 'allowance'
+        ? gateByAllowance(payload.verses, access.allowed)
+        : gateCommentary(
+            payload.verses,
+            (v) => v.t,
+            (v, t) => ({ ...v, t }),
+            { commentaryId, isPro: user?.isPro ?? false },
+          );
 
     return cachedJsonV1(
       req,
@@ -72,6 +80,8 @@ export async function GET(
         verses: gated.items,
         locked: gated.locked,
         totalVerses: payload.verses.length,
+        // Additive, only for an account whose personal limit is study material.
+        ...(access ? personalLimitField(access) : {}),
         // Only present for Calvin sources, so other payloads are unchanged.
         ...(coverage ? { coverage } : {}),
       },

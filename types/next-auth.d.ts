@@ -1,4 +1,6 @@
 import { DefaultSession } from "next-auth";
+import type { Limits } from "../lib/entitlements";
+import type { TrialSummary } from "../lib/reverseTrialRules";
 
 declare module "next-auth" {
   interface Session {
@@ -16,6 +18,12 @@ declare module "next-auth" {
       onboardingCompleted?: boolean;
       /** Raw `preferences.studyStyle`; narrowed by normaliseStudyStyle(). */
       studyStyle?: string;
+      /** The reverse trial (lib/reverseTrialRules.ts); null without one. */
+      trial?: TrialSummary | null;
+      /** What this account may do right now (lib/entitlements.ts `Limits`). */
+      limits?: Limits;
+      /** Pro only because of the reverse trial: nothing bought yet. */
+      proIsTrial?: boolean;
     } & DefaultSession["user"];
   }
 

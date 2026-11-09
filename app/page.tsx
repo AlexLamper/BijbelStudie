@@ -10,7 +10,7 @@ import { graph, webPageNode, faqNode } from "../lib/seo/structuredData"
 const HOME_TITLE = "Bijbelstudie Online - Gratis de Bijbel Bestuderen | BijbelStudie"
 // Kept under ~155 characters: Google cuts a longer snippet off mid-sentence.
 const HOME_DESCRIPTION =
-  "Online bijbelstudie in het Nederlands: vier vertalingen, bijbelcommentaren, grondtekst, begeleide studies en een AI-assistent. Gratis, zonder creditcard."
+  "Online bijbelstudie in het Nederlands: vier vertalingen, bijbelcommentaren, grondtekst, begeleide studies en een AI-assistent. Gratis te gebruiken."
 
 const HOME_OG = ogImageUrl({
   title: "Bijbelstudie online",

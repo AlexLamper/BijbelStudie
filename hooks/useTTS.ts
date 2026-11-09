@@ -62,6 +62,8 @@ export interface UseTTSReturn {
    * error to report but a reason to show the Pro offer.
    */
   proRequired: boolean;
+  /** Set when the refusal was the reader's personal limit, in the server's words. */
+  proRequiredReason: string | null;
   clearProRequired: () => void;
 }
 
@@ -129,6 +131,19 @@ function fetchCloudConfigOnce(): Promise<CloudConfig> {
       .catch(() => ({ configured: false, allowed: false }));
   }
   return _cloudConfigPromise;
+}
+
+/**
+ * A short, stable name for a text, so the server can tell one reading from
+ * the next without receiving the text twice: 32-bit FNV-1a plus the length.
+ */
+function readingId(text: string): string {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < text.length; i += 1) {
+    hash ^= text.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return `${(hash >>> 0).toString(36)}-${text.length.toString(36)}`;
 }
 
 function fetchAccountVoiceOnce(): Promise<string | null> {
@@ -400,6 +415,10 @@ export function useTTS(): UseTTSReturn {
   const [authRequired, setAuthRequired] = useState(false);
   const clearAuthRequired = useCallback(() => setAuthRequired(false), []);
   const [proRequired, setProRequired] = useState(false);
+  // Which reading the cloud chunks belong to; see speakCloudChunk.
+  const readingRef = useRef('');
+  // The server's own words when a personal limit (not Pro itself) refused.
+  const proReasonRef = useRef<string | null>(null);
   const clearProRequired = useCallback(() => setProRequired(false), []);
 
   const [spokenRange, setSpokenRange] = useState<SpokenRange | null>(null);
@@ -681,7 +700,10 @@ export function useTTS(): UseTTSReturn {
       res = await fetch('/api/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: chunk.text, voice: voice.id, rate }),
+        // `reading` names this whole text and `part` the chunk: the server
+        // counts a reading once, and the personal audio allowance after the
+        // reverse trial is one reading a day (app/api/tts).
+        body: JSON.stringify({ text: chunk.text, voice: voice.id, rate, reading: readingRef.current, part: idxRef.current }),
       });
     } catch {
       // Offline, DNS, blocked request. This used to land in the same bare
@@ -708,7 +730,10 @@ export function useTTS(): UseTTSReturn {
 
     if (res.status === 403) {
       // The cloud voices are Pro (app/api/tts). Same reset as above; the
-      // button answers with the Pro offer rather than an error banner.
+      // button answers with the Pro offer rather than an error banner. A
+      // personal limit says so in its own words, which the offer leads with.
+      const refusal = (await res.json().catch(() => null)) as { code?: string; error?: string } | null;
+      proReasonRef.current = refusal?.code === 'PERSONAL_LIMIT' && refusal.error ? refusal.error : null;
       if (!stoppedRef.current) {
         queueRef.current = [];
         idxRef.current = 0;
@@ -838,6 +863,7 @@ export function useTTS(): UseTTSReturn {
 
     stoppedRef.current = false;
     mapRef.current = map;
+    readingRef.current = readingId(normalized);
     queueRef.current = ranges.map(range => ({
       text: normalized.slice(range.start, range.end),
       normStart: range.start,
@@ -897,5 +923,6 @@ export function useTTS(): UseTTSReturn {
     error, clearError,
     authRequired, clearAuthRequired,
     cloudLocked, proRequired, clearProRequired,
+    proRequiredReason: proReasonRef.current,
   };
 }

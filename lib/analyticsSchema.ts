@@ -88,6 +88,9 @@ export const EVENTS = {
       // The paywall at the end of onboarding, the Start promo, and the
       // moments a free Pro week (trial or referral) is about to run out.
       "app_onboarding", "app_promo", "app_streak", "app_referral_end",
+      // The reverse trial (lib/reverseTrial.ts): the paywall behind a personal
+      // limit, and the upgrade button on "Je Pro-dagen zitten erop".
+      "personal_limit", "trial_recap", "app_personal_limit", "app_trial_recap",
     ],
     logged_in: ["yes", "no"],
     platform: PLATFORM,
@@ -146,13 +149,18 @@ export const EVENTS = {
       "app_groups", "app_notes", "app_funnel",
       "app_commentary", "app_grondtekst", "app_offline", "app_music", "app_crossrefs",
       "app_onboarding", "app_promo", "app_streak", "app_referral_end", "direct",
+      "app_personal_limit", "app_trial_recap",
     ],
     trial: ["yes", "no"],
     platform: PLATFORM,
   },
   /** The app's Pro promo was put on screen, and what earned it the slot. */
   promo_shown: {
-    trigger: ["session", "value_moment", "streak", "tree_level", "note_limit_near", "ai_last_question", "referral_end"],
+    trigger: [
+      "session", "value_moment", "streak", "tree_level", "note_limit_near", "ai_last_question", "referral_end",
+      // After the reverse trial: the recap, and a personal limit reached.
+      "trial_recap", "personal_limit",
+    ],
     platform: PLATFORM,
   },
   /** One screen of the app's three-screen Pro pitch (/pro-intro). */
@@ -169,6 +177,35 @@ export const EVENTS = {
   /** A store purchase that started a free trial rather than a paid period. */
   trial_started: {
     interval: ["monthly", "annual"],
+    platform: PLATFORM,
+  },
+  /**
+   * The reverse trial: Pro for a new account's first three active days, then a
+   * personal limit on the feature it used most (lib/reverseTrial.ts). Not the
+   * store or Stripe trial above, hence the separate names. Started and ended
+   * are written by the server, never sent by a client.
+   */
+  reverse_trial_started: {
+    platform: PLATFORM,
+  },
+  reverse_trial_ended: {
+    /** The feature that became the personal limit; "none" when none was used. */
+    feature: ["ai", "notes", "study", "audio", "none"],
+    platform: PLATFORM,
+  },
+  /** "Je Pro-dagen zitten erop" was put on screen - once per account, recorded by the server. */
+  trial_recap_shown: {
+    platform: PLATFORM,
+  },
+  /** What the reader did on the recap. */
+  trial_recap_action: {
+    action: ["upgrade", "continue_free"],
+    feature: ["ai", "notes", "study", "audio", "none"],
+    platform: PLATFORM,
+  },
+  /** A gate refused the reader because of their personal limit, not the normal free one. */
+  personal_limit_hit: {
+    feature: ["ai", "notes", "study", "audio"],
     platform: PLATFORM,
   },
   /** Signup that was started in order to buy, so the resume flow can be measured. */

@@ -1,0 +1,341 @@
+/**
+ * The reverse trial, as pure rules: no Mongoose, no clock of its own, so every
+ * edge is tested without a database (tests/reverseTrial.test.ts, local only).
+ * The writes live in lib/reverseTrial.ts.
+ *
+ * Alex, November 2026: instead of a paywall a reader meets before they know the
+ * app, every NEW account gets Pro for its first three ACTIVE days - Dutch
+ * calendar days on which the reader actually opened the app or the website.
+ * While those days run the server counts how much they lean on four features
+ * (lib/entitlements.ts `ProFeature`). When they end, the one they used most
+ * keeps a tiny daily allowance (`limitsFor`) and every other feature drops to
+ * the normal free limits.
+ *
+ * HOW PRO IS GIVEN. Through the comp mechanism (lib/compedPro.ts): `subscribed`
+ * plus `compedProUntil`, so the dozens of places that gate on `subscribed`
+ * treat a trial reader as Pro without a line changed. `compedProUntil` is kept
+ * at the end of the current active day (Amsterdam midnight) and moved on each
+ * new active day while days remain, so it always states truthfully until when
+ * the reader has Pro. A reader who stays away is dropped to free by the daily
+ * sweep and picked up again - same trial, next day - on their next visit.
+ *
+ * Never shortened: the grant is `$max(current, end of today)`, so a referral
+ * week (lib/referralRules.ts `compWeekUpdate`, which stacks on the same field)
+ * always survives the trial, and the reader ends up with the longer of the two.
+ */
+
+import {
+  REVERSE_TRIAL_DAYS,
+  isProFeature,
+  limitsFor,
+  pickTopFeature,
+  type Limits,
+  type ProFeature,
+  type TrialUsage,
+} from './entitlements';
+
+export const TRIAL_TIME_ZONE = 'Europe/Amsterdam';
+
+/**
+ * Accounts created at or after this moment get the reverse trial; older free
+ * accounts are left exactly as they were (Alex: nothing is granted to them
+ * automatically). Set to when this shipped.
+ */
+export const REVERSE_TRIAL_LAUNCH = new Date('2026-11-09T17:00:00Z');
+
+/** The stored subdocument, `User.reverseTrial`. Every field absent on an account without a trial. */
+export interface ReverseTrialFields {
+  startedAt?: Date | string | null;
+  /** Amsterdam calendar days ('YYYY-MM-DD') with activity, at most REVERSE_TRIAL_DAYS. */
+  days?: string[] | null;
+  /** End of the last active day; set when the last day is recorded. */
+  endsAt?: Date | string | null;
+  /** When the trial was closed and its top feature frozen. */
+  endedAt?: Date | string | null;
+  usage?: TrialUsage | null;
+  topFeature?: string | null;
+  recapSeenAt?: Date | string | null;
+}
+
+/** The billing fields the touch needs, beside the trial itself. */
+export interface TrialAccountFields {
+  createdAt?: Date | null;
+  reverseTrial?: ReverseTrialFields | null;
+  subscribed?: boolean;
+  compedProUntil?: Date | null;
+  storePremium?: boolean | null;
+  stripeSubscriptionId?: string | null;
+  subscriptionStatus?: string | null;
+}
+
+/** The `.select()` for everything here, for routes that load a lean row. */
+export const TRIAL_ACCOUNT_FIELDS =
+  'createdAt reverseTrial subscribed compedProUntil storePremium stripeSubscriptionId subscriptionStatus';
+
+export type TrialState = 'none' | 'active' | 'ended';
+
+function toDate(value: Date | string | null | undefined): Date | null {
+  if (!value) return null;
+  const date = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+/* ------------------------------ day arithmetic ----------------------------- */
+
+const dayFormat = new Intl.DateTimeFormat('en-CA', {
+  timeZone: TRIAL_TIME_ZONE,
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+});
+
+const wallClock = new Intl.DateTimeFormat('en-GB', {
+  timeZone: TRIAL_TIME_ZONE,
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+  hourCycle: 'h23',
+});
+
+/** 'YYYY-MM-DD' of [date] in Amsterdam. */
+export function amsterdamDay(date: Date): string {
+  return dayFormat.format(date);
+}
+
+/** Minutes Amsterdam is ahead of UTC at [date]: 60 in winter, 120 in summer. */
+function offsetMinutes(date: Date): number {
+  const parts = wallClock.formatToParts(date);
+  const part = (type: string) => Number(parts.find((p) => p.type === type)?.value ?? 0);
+  const asUtc = Date.UTC(part('year'), part('month') - 1, part('day'), part('hour'), part('minute'), part('second'));
+  return Math.round((asUtc - Math.floor(date.getTime() / 1000) * 1000) / 60_000);
+}
+
+/** The instant the Amsterdam day after [date] begins - "tonight at midnight". DST-safe. */
+export function endOfAmsterdamDay(date: Date): Date {
+  const [y, m, d] = amsterdamDay(date).split('-').map(Number);
+  const midnightAsUtc = Date.UTC(y, m - 1, d + 1);
+  // Two passes: the offset at the guess can differ from the one at the answer
+  // when the clocks change that night.
+  let instant = midnightAsUtc - offsetMinutes(new Date(midnightAsUtc)) * 60_000;
+  instant = midnightAsUtc - offsetMinutes(new Date(instant)) * 60_000;
+  return new Date(instant);
+}
+
+/* --------------------------------- state ---------------------------------- */
+
+export function trialState(trial: ReverseTrialFields | null | undefined, now: Date): TrialState {
+  if (!trial || !toDate(trial.startedAt)) return 'none';
+  const days = trial.days?.length ?? 0;
+  if (days < REVERSE_TRIAL_DAYS) return 'active';
+  const endsAt = toDate(trial.endsAt);
+  return endsAt && endsAt.getTime() > now.getTime() ? 'active' : 'ended';
+}
+
+/** The frozen top feature, or the one the counters point at if the trial was not closed yet. */
+export function trialTopFeature(trial: ReverseTrialFields | null | undefined): ProFeature | null {
+  if (!trial) return null;
+  if (isProFeature(trial.topFeature)) return trial.topFeature;
+  if (trial.endedAt && trial.topFeature === null) return null;
+  return pickTopFeature(trial.usage);
+}
+
+/**
+ * The feature with a personal limit on this account right now: only after the
+ * trial ended, only while the account is not Pro.
+ */
+export function personalLimitFeature(
+  trial: ReverseTrialFields | null | undefined,
+  isPro: boolean,
+  now: Date,
+): ProFeature | null {
+  if (isPro) return null;
+  if (trialState(trial, now) !== 'ended') return null;
+  return trialTopFeature(trial);
+}
+
+/** The limits for an account, trial included. Pure; every route and both clients start here. */
+export function accountLimits(
+  trial: ReverseTrialFields | null | undefined,
+  isPro: boolean,
+  now: Date,
+): Limits {
+  return limitsFor(isPro, personalLimitFeature(trial, isPro, now));
+}
+
+/** May this account still be counted? Only while the trial runs. */
+export function isCountingUsage(trial: ReverseTrialFields | null | undefined, now: Date): boolean {
+  return trialState(trial, now) === 'active';
+}
+
+/* --------------------------------- touch ---------------------------------- */
+
+/** Comp-only access: the only kind the trial may revoke. Mirrors COMPED_ACCESS_FILTER. */
+export function isCompOnly(account: TrialAccountFields): boolean {
+  return Boolean(
+    account.subscribed &&
+      !account.storePremium &&
+      !account.stripeSubscriptionId &&
+      !account.subscriptionStatus,
+  );
+}
+
+/** Mirrors referralRules `canReceiveCompWeek`: a grant may be written here. */
+export function canGrantComp(account: TrialAccountFields): boolean {
+  if (account.storePremium) return false;
+  if (account.stripeSubscriptionId || account.subscriptionStatus) return false;
+  return !account.subscribed || Boolean(account.compedProUntil);
+}
+
+export interface TouchPlan {
+  /** Begin the trial on this account (first visit after REVERSE_TRIAL_LAUNCH). */
+  start: boolean;
+  /** Record today as an active day. */
+  addDay: string | null;
+  /** Set when [addDay] is the last trial day: Pro ends tonight. */
+  endsAt: Date | null;
+  /** Make sure the account has Pro until at least this moment. */
+  grantUntil: Date | null;
+  /** Close the trial and freeze this top feature (null: none was used). */
+  finalise: { topFeature: ProFeature | null } | null;
+  /** The comp ran out and the daily sweep has not caught it yet: drop to free now. */
+  revoke: boolean;
+}
+
+const NOTHING: TouchPlan = { start: false, addDay: null, endsAt: null, grantUntil: null, finalise: null, revoke: false };
+
+export function isNothing(plan: TouchPlan): boolean {
+  return !plan.start && !plan.addDay && !plan.grantUntil && !plan.finalise && !plan.revoke;
+}
+
+/**
+ * What a visit at [now] should write. Called on every authenticated request
+ * (the app's bearer, the website's session) and almost always answers
+ * "nothing": the writes happen once per active day at most.
+ */
+export function planTouch(account: TrialAccountFields, now: Date): TouchPlan {
+  const trial = account.reverseTrial ?? null;
+  const today = amsterdamDay(now);
+  const tonight = endOfAmsterdamDay(now);
+
+  if (!trial || !toDate(trial.startedAt)) {
+    const created = toDate(account.createdAt);
+    if (!created || created.getTime() < REVERSE_TRIAL_LAUNCH.getTime()) return NOTHING;
+    return {
+      ...NOTHING,
+      start: true,
+      addDay: today,
+      endsAt: (REVERSE_TRIAL_DAYS as number) <= 1 ? tonight : null,
+      grantUntil: canGrantComp(account) ? tonight : null,
+    };
+  }
+
+  const days = trial.days ?? [];
+  const state = trialState(trial, now);
+
+  if (state === 'active') {
+    if (days.includes(today) || days.length >= REVERSE_TRIAL_DAYS) {
+      // Today is already counted (or the last day is still running). Pro
+      // normally runs until tonight already; this only repairs a grant that
+      // went missing (a write that failed half-way), never extends one.
+      const until = toDate(account.compedProUntil);
+      const missing = !account.subscribed || !until || until.getTime() < tonight.getTime();
+      return days.includes(today) && missing && canGrantComp(account)
+        ? { ...NOTHING, grantUntil: tonight }
+        : NOTHING;
+    }
+    const last = days.length + 1 === REVERSE_TRIAL_DAYS;
+    return {
+      ...NOTHING,
+      addDay: today,
+      endsAt: last ? tonight : null,
+      grantUntil: canGrantComp(account) ? tonight : null,
+    };
+  }
+
+  // Ended.
+  const plan: TouchPlan = { ...NOTHING };
+  if (!toDate(trial.endedAt)) plan.finalise = { topFeature: pickTopFeature(trial.usage) };
+  const until = toDate(account.compedProUntil);
+  if (isCompOnly(account) && until && until.getTime() <= now.getTime()) plan.revoke = true;
+  return plan;
+}
+
+/** [account] as it reads after [plan] was written, so the caller need not reload it. */
+export function applyTouch<T extends TrialAccountFields>(account: T, plan: TouchPlan, now: Date): T {
+  if (isNothing(plan)) return account;
+  const trial: ReverseTrialFields = { ...(account.reverseTrial ?? {}) };
+  if (plan.start) {
+    trial.startedAt = now;
+    trial.days = [];
+  }
+  if (plan.addDay && !(trial.days ?? []).includes(plan.addDay)) {
+    trial.days = [...(trial.days ?? []), plan.addDay];
+  }
+  if (plan.endsAt) trial.endsAt = plan.endsAt;
+  if (plan.finalise) {
+    trial.endedAt = now;
+    trial.topFeature = plan.finalise.topFeature;
+  }
+  const next: T = { ...account, reverseTrial: trial };
+  if (plan.grantUntil) {
+    const current = toDate(account.compedProUntil);
+    next.subscribed = true;
+    next.compedProUntil =
+      current && current.getTime() > plan.grantUntil.getTime() ? current : plan.grantUntil;
+  }
+  if (plan.revoke) {
+    next.subscribed = false;
+    next.compedProUntil = null;
+  }
+  return next;
+}
+
+/* ------------------------------ what clients see --------------------------- */
+
+export interface TrialSummary {
+  state: 'active' | 'ended';
+  daysUsed: number;
+  daysTotal: number;
+  /** Known once the last day is under way. */
+  endsAt: string | null;
+  /** The feature that is (or will be, judging by now) the personal limit. */
+  topFeature: ProFeature | null;
+  usage: Required<TrialUsage>;
+  /** Show "Je Pro-dagen zitten erop" on the next screen. Once, on either client. */
+  recapPending: boolean;
+}
+
+function counter(value: unknown): number {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0 ? Math.round(value) : 0;
+}
+
+/** The `trial` object on /api/v1/me and in the website session; null without a reverse trial. */
+export function trialSummary(
+  trial: ReverseTrialFields | null | undefined,
+  isPro: boolean,
+  now: Date,
+): TrialSummary | null {
+  const state = trialState(trial, now);
+  if (state === 'none' || !trial) return null;
+  const usage = trial.usage ?? {};
+  const endsAt = toDate(trial.endsAt);
+  return {
+    state,
+    daysUsed: Math.min(trial.days?.length ?? 0, REVERSE_TRIAL_DAYS),
+    daysTotal: REVERSE_TRIAL_DAYS,
+    endsAt: endsAt ? endsAt.toISOString() : null,
+    topFeature: trialTopFeature(trial),
+    usage: {
+      ai: counter(usage.ai),
+      notes: counter(usage.notes),
+      highlights: counter(usage.highlights),
+      study: counter(usage.study),
+      audio: counter(usage.audio),
+      chapters: counter(usage.chapters),
+    },
+    recapPending: state === 'ended' && !isPro && !toDate(trial.recapSeenAt),
+  };
+}

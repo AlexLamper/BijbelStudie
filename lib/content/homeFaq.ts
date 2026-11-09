@@ -7,7 +7,8 @@
  * hand-kept copies would drift into structured data that does not match the
  * visible page - which Google treats as a spam signal, not a typo.
  */
-import { FREE_AI_DAILY_CAP, FREE_NOTE_LIMIT, PRO_AI_DAILY_CAP } from "../entitlements";
+import { FREE_AI_DAILY_CAP, FREE_NOTE_LIMIT, PRO_AI_DAILY_CAP, REVERSE_TRIAL_DAYS } from "../entitlements";
+import { PLANS, euro } from "../pricing";
 
 export interface Faq {
   q: string;
@@ -17,7 +18,7 @@ export interface Faq {
 export const HOME_FAQS: Faq[] = [
   {
     q: "Is BijbelStudie helemaal gratis?",
-    a: `Het gratis plan geeft volledige toegang tot bijbellezen, markeringen, begeleide studies, het KingComments-commentaar, studiegroepen en ${FREE_AI_DAILY_CAP} vragen per dag aan de AI-assistent, en u schrijft gratis ${FREE_NOTE_LIMIT} notities. De Pro versie (€9,99 per maand of €89,99 per jaar) voegt de overige bijbelcommentaren, de grondtekst bij elk vers, ${PRO_AI_DAILY_CAP} AI-vragen per dag, onbeperkt notities en voorlezen met natuurlijke stemmen toe.`,
+    a: `Het gratis plan geeft volledige toegang tot bijbellezen, markeringen, begeleide studies, het KingComments-commentaar, studiegroepen en ${FREE_AI_DAILY_CAP} vragen per dag aan de AI-assistent, en u schrijft gratis ${FREE_NOTE_LIMIT} notities. De Pro versie (${euro(PLANS.monthly.amountCents)} per maand of ${euro(PLANS.annual.amountCents)} per jaar) voegt de overige bijbelcommentaren, de grondtekst bij elk vers, ${PRO_AI_DAILY_CAP} AI-vragen per dag, onbeperkt notities en voorlezen met natuurlijke stemmen toe. Een nieuw account heeft op de eerste ${REVERSE_TRIAL_DAYS} dagen waarop u BijbelStudie opent alles van Pro; daarna gaat u vanzelf verder met de gratis versie, en houdt u van wat u het meest gebruikte een klein dagelijks deel.`,
   },
   {
     q: "Wat doet de AI-assistent?",
@@ -37,7 +38,7 @@ export const HOME_FAQS: Faq[] = [
   },
   {
     q: "Heb ik een account nodig om te beginnen?",
-    a: "Voor bijbellezen, notities en voortgang is een gratis account nodig, zodat uw voortgang bewaard blijft. Aanmelden duurt minder dan een minuut en er is geen creditcard voor nodig. De begeleide studies kunt u zonder account bekijken.",
+    a: "Voor bijbellezen, notities en voortgang is een gratis account nodig, zodat uw voortgang bewaard blijft. Aanmelden duurt minder dan een minuut. De begeleide studies kunt u zonder account bekijken.",
   },
   {
     q: "Is mijn persoonlijke data veilig?",

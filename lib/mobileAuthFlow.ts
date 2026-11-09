@@ -1,6 +1,7 @@
 import { signAccessToken } from './mobileJwt';
 import { issueRefreshToken, normalisePlatform, type Platform } from './mobileTokens';
-import { toAuthUser, type AuthUser } from './apiAuth';
+import { toAuthUser, touched, type AuthUser } from './apiAuth';
+import User from '../models/User';
 import { recordPlatformSeen } from './clientPlatform';
 
 /**
@@ -40,6 +41,12 @@ export function serialiseUser(user: AuthUser) {
     proSource: user.proSource,
     proExpiresAt: isoOrNull(user.proExpiresAt),
     isAdmin: user.isAdmin,
+    // Additive, so installed builds keep parsing: the reverse trial
+    // (lib/reverseTrialRules.ts `trialSummary`, null on older accounts) and the
+    // limits this account has right now, which the app mirrors in its UI. The
+    // routes enforce the same object.
+    trial: user.trial,
+    limits: user.limits,
   };
 }
 
@@ -49,7 +56,9 @@ export async function issueSession(
   doc: UserDocLike,
   options?: { platform?: unknown; deviceName?: unknown },
 ): Promise<SessionPayload> {
-  const user = toAuthUser(doc);
+  // A brand-new account starts its reverse trial here, so the very first
+  // response already says Pro (lib/reverseTrial.ts).
+  const user = toAuthUser(await touched(doc, () => User.findById(doc._id)));
   const { accessToken, expiresIn } = await signAccessToken({
     userId: user.id,
     email: user.email,

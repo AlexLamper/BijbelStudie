@@ -10,14 +10,16 @@ import {
   PLANS,
   PRO_FEATURES,
   RECOMMENDED,
-  annualDiscountPercent,
+  annualDeal,
   euro,
-  perWeek,
   type BillingInterval,
 } from "../../lib/pricing"
-import { PRO_OFFER_EVENT, type ProOfferRequest } from "../../lib/proOffer"
+import type { ProFeature } from "../../lib/entitlements"
+import { PRO_OFFER_EVENT, type ProOfferRequest, type ProOfferSurface } from "../../lib/proOffer"
 import { signupForCheckoutHref, startCheckout } from "../../lib/startCheckout"
-import { trackNow } from "../../lib/analytics"
+import { track, trackNow } from "../../lib/analytics"
+import { useLivePrices } from "../../hooks/useLivePrices"
+import AnnualDealLine from "./AnnualDealLine"
 
 /** What /api/trial answers. */
 interface TrialStatus {
@@ -47,6 +49,58 @@ function fetchTrialStatus(): Promise<TrialStatus | null> {
   }
   return statusPromise
 }
+
+/** What /api/v1/reverse-trial answers, as far as the offer uses it. */
+interface PersonalStatus {
+  isPro: boolean
+  limits: { limitedFeature: ProFeature | null } | null
+  personal: { feature: ProFeature; headline: string | null; limitLine: string } | null
+}
+
+/**
+ * The reader's own reverse-trial numbers, once per page load: they are frozen
+ * when the trial ends, and the offer only leads with them after that.
+ */
+let personalPromise: Promise<PersonalStatus | null> | null = null
+
+function fetchPersonal(): Promise<PersonalStatus | null> {
+  if (!personalPromise) {
+    personalPromise = fetch("/api/v1/reverse-trial", { cache: "no-store" })
+      .then((res) => (res.ok ? (res.json() as Promise<PersonalStatus>) : null))
+      .catch(() => null)
+  }
+  return personalPromise
+}
+
+/** Which feature a gate belongs to, to tell a personal limit from the normal one. */
+const SURFACE_FEATURE: Partial<Record<ProOfferSurface, ProFeature>> = {
+  ai_limit: "ai",
+  note_limit: "notes",
+  original_text: "study",
+  commentary: "study",
+  crossrefs: "study",
+  tts: "audio",
+}
+
+/**
+ * The PRO_FEATURES lines that belong to a feature, so a reader whose top
+ * feature is the AI sees the AI line first, not a generic list.
+ */
+const FEATURE_LINES: Record<ProFeature, number[]> = {
+  ai: [2],
+  notes: [3],
+  study: [0, 1, 4],
+  audio: [6],
+}
+
+function featuresFirst(feature: ProFeature | null): string[] {
+  if (!feature) return PRO_FEATURES.slice(0, 4)
+  const lead = FEATURE_LINES[feature].map((i) => PRO_FEATURES[i])
+  return [...lead, ...PRO_FEATURES.filter((line) => !lead.includes(line))].slice(0, 4)
+}
+
+/** The close controls appear after this long (Alex: the X fades in after about 3 seconds). */
+const CLOSE_DELAY_MS = 3000
 
 /** "30 september" - the day the first payment is taken if the trial runs out. */
 function dayAfterTrial(days: number): string {
@@ -83,6 +137,9 @@ export default function ProOfferDialog() {
   const [interval, setPlanInterval] = useState<BillingInterval>(RECOMMENDED)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [personal, setPersonal] = useState<PersonalStatus | null>(null)
+  const [canClose, setCanClose] = useState(false)
+  const live = useLivePrices()
 
   useEffect(() => {
     const onOffer = (event: Event) => {
@@ -92,14 +149,32 @@ export default function ProOfferDialog() {
       setBusy(false)
       setRequest(detail)
       setLoadingStatus(true)
-      void fetchTrialStatus().then((next) => {
+      void Promise.all([fetchTrialStatus(), fetchPersonal()]).then(([next, mine]) => {
         setStatus(next)
+        setPersonal(next?.signedIn ? mine : null)
         setLoadingStatus(false)
+        // A gate that refused because of the reader's PERSONAL limit, not the
+        // normal free one: counted per feature.
+        const feature = SURFACE_FEATURE[detail.surface]
+        if (feature && mine?.limits?.limitedFeature === feature && !mine.isPro) {
+          track("personal_limit_hit", { feature })
+        }
       })
     }
     window.addEventListener(PRO_OFFER_EVENT, onOffer)
     return () => window.removeEventListener(PRO_OFFER_EVENT, onOffer)
   }, [])
+
+  // The offer can always be closed, but the close controls fade in after a
+  // moment, so the reader takes in what they were offered first.
+  useEffect(() => {
+    if (!request) {
+      setCanClose(false)
+      return
+    }
+    const timer = window.setTimeout(() => setCanClose(true), CLOSE_DELAY_MS)
+    return () => window.clearTimeout(timer)
+  }, [request])
 
   // A reader who already has Pro reached a gate on a stale session (the page
   // was open when they upgraded). There is nothing to sell them; a reload
@@ -109,14 +184,22 @@ export default function ProOfferDialog() {
   }, [request, status])
 
   const close = useCallback(() => {
-    if (!busy) setRequest(null)
-  }, [busy])
+    if (!busy && canClose) setRequest(null)
+  }, [busy, canClose])
 
   const trialDays = status?.trialDays ?? 7
   // A guest is offered the trial too: a new account has never had one, and the
   // checkout after sign-up checks it for real.
   const offersTrial = !loadingStatus && (status?.eligible ?? false)
-  const plan = PLANS[interval]
+  // Live Stripe prices; the constants only stand in until they arrive.
+  const amountCents = (key: BillingInterval) => live?.[key]?.amountCents ?? PLANS[key].amountCents
+  const deal = annualDeal(live?.monthly, live?.annual)
+  const plan = { ...PLANS[interval], amountCents: amountCents(interval) }
+  const billedLabel = (key: BillingInterval) =>
+    `${euro(amountCents(key))} per ${key === "annual" ? "jaar, in één keer" : "maand, maandelijks"} gefactureerd`
+  // After the reverse trial the offer leads with the reader's own top feature
+  // and numbers ("Je stelde 9 vragen aan de AI in 3 dagen"), not a generic pitch.
+  const mine = personal && !personal.isPro ? personal.personal : null
 
   const handleContinue = async () => {
     if (!request) return
@@ -161,6 +244,8 @@ export default function ProOfferDialog() {
         />
         <DialogPrimitive.Content
           aria-describedby="pro-offer-summary"
+          onEscapeKeyDown={(event) => { if (!canClose) event.preventDefault() }}
+          onPointerDownOutside={(event) => { if (!canClose) event.preventDefault() }}
           className="fixed left-1/2 top-1/2 z-[131] flex max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-[440px]
             -translate-x-1/2 -translate-y-1/2 flex-col overflow-y-auto rounded-card border border-line bg-surface
             p-6 shadow-xl outline-none max-md:p-5
@@ -169,8 +254,12 @@ export default function ProOfferDialog() {
         >
           <DialogPrimitive.Close
             aria-label="Sluiten"
-            disabled={busy}
-            className="absolute right-3 top-3 rounded-btn p-1.5 text-ink-faint transition-colors hover:bg-sunken hover:text-ink"
+            aria-hidden={!canClose}
+            tabIndex={canClose ? 0 : -1}
+            disabled={busy || !canClose}
+            className={`absolute right-3 top-3 rounded-btn p-1.5 text-ink-faint transition-[opacity,colors] duration-500 hover:bg-sunken hover:text-ink motion-reduce:transition-none ${
+              canClose ? "opacity-100" : "pointer-events-none opacity-0"
+            }`}
           >
             <X size={18} aria-hidden />
           </DialogPrimitive.Close>
@@ -187,6 +276,8 @@ export default function ProOfferDialog() {
                 <span className="sr-only">BijbelStudie Pro</span>
                 <span className="block h-7 w-3/4 animate-pulse rounded bg-sunken" aria-hidden />
               </>
+            ) : mine?.headline ? (
+              `${mine.headline}.`
             ) : offersTrial ? (
               `Probeer Pro ${trialDays} dagen gratis`
             ) : (
@@ -197,12 +288,19 @@ export default function ProOfferDialog() {
           <p id="pro-offer-summary" className="mt-1.5 text-[13.5px] leading-[1.5] text-ink-muted">
             {request?.reason ?? "Alles om een gedeelte grondig te bestuderen."}
           </p>
+          {mine && !loadingStatus && (
+            <p className="mt-1.5 text-[13.5px] leading-[1.5] text-ink-muted">
+              Gratis houd je {mine.limitLine}. Met Pro heb je het weer helemaal
+              {offersTrial ? `, en de eerste ${trialDays} dagen zijn gratis` : ""}.
+            </p>
+          )}
 
           {/* The full list lives on /abonnement ("Alles over Pro" below); a
               dialog raised mid-task only needs the headline reasons, not all
-              eight - the first four cover what most readers reach for. */}
+              eight - the first four cover what most readers reach for, and
+              the reader's own top feature goes first. */}
           <ul className="mt-4 space-y-[7px]">
-            {PRO_FEATURES.slice(0, 4).map((feature) => (
+            {featuresFirst(mine?.feature ?? null).map((feature) => (
               <li key={feature} className="flex items-start gap-2 text-[13.5px] text-ink-body">
                 <Check size={16} strokeWidth={2.2} aria-hidden className="mt-[1px] flex-shrink-0 text-teal" />
                 {feature}
@@ -213,7 +311,6 @@ export default function ProOfferDialog() {
           <fieldset className="mt-4 space-y-2">
             <legend className="sr-only">Kies je plan</legend>
             {(["annual", "monthly"] as const).map((key) => {
-              const option = PLANS[key]
               const selected = interval === key
               return (
                 <label
@@ -235,16 +332,17 @@ export default function ProOfferDialog() {
                       <span className="text-[14px] font-semibold text-ink">
                         {key === "annual" ? "Jaarlijks" : "Maandelijks"}
                       </span>
-                      {key === "annual" && (
+                      {key === "annual" && deal && (
                         <span className="rounded-full bg-teal-soft px-2 py-[1px] text-[11px] font-bold text-teal-dark">
-                          {annualDiscountPercent()}% goedkoper
+                          bespaar {deal.savePercent}%
                         </span>
                       )}
                     </span>
-                    <span className="mt-0.5 block text-[12.5px] text-ink-muted">
-                      {key === "annual" ? `${perWeek(option)} per week · ` : ""}
-                      {option.billedLabel}
-                    </span>
+                    {key === "annual" && deal ? (
+                      <AnnualDealLine deal={deal} className="mt-0.5 text-[12.5px] leading-[1.45] text-ink-muted" />
+                    ) : (
+                      <span className="mt-0.5 block text-[12.5px] text-ink-muted">{billedLabel(key)}</span>
+                    )}
                   </span>
                 </label>
               )
@@ -273,7 +371,7 @@ export default function ProOfferDialog() {
                   Instellingen.
                 </>
               ) : (
-                <>{plan.billedLabel}. Het abonnement verlengt automatisch tot je opzegt; opzeggen kan altijd via Instellingen.</>
+                <>{billedLabel(interval)}. Het abonnement verlengt automatisch tot je opzegt; opzeggen kan altijd via Instellingen.</>
               )}
             </p>
           )}
@@ -288,13 +386,17 @@ export default function ProOfferDialog() {
             <button
               type="button"
               onClick={close}
-              disabled={busy}
-              className="font-medium text-ink-muted underline-offset-2 hover:text-ink hover:underline"
+              disabled={busy || !canClose}
+              aria-hidden={!canClose}
+              tabIndex={canClose ? 0 : -1}
+              className={`font-medium text-ink-muted underline-offset-2 transition-opacity duration-500 hover:text-ink hover:underline motion-reduce:transition-none ${
+                canClose ? "opacity-100" : "pointer-events-none opacity-0"
+              }`}
             >
-              Niet nu
+              {mine ? "Gratis verder" : "Niet nu"}
             </button>
             <Link
-              href={`/abonnement?source=${request?.surface ?? "direct"}`}
+              href={`/abonnement?source=${mine ? "personal_limit" : (request?.surface ?? "direct")}`}
               onClick={() => setRequest(null)}
               className="font-semibold text-teal-dark underline-offset-2 hover:underline"
             >

@@ -22,6 +22,7 @@ import EnvironmentBanner from "../components/layout/EnvironmentBanner";
 import AppPromoBanner from "../components/layout/AppPromoBanner";
 import { Toaster } from "../components/ui/toaster";
 import ProOfferDialog from "../components/pricing/ProOfferDialog";
+import TrialRecapDialog from "../components/pricing/TrialRecapDialog";
 import CookieConsent from "../components/ui/CookieConsent";
 import { APP_STORE_URL } from "../lib/appStore";
 import { appStoreIdFromUrl } from "../lib/mobilePlatform";
@@ -300,6 +301,10 @@ export default async function RootLayout({
         {/* The Pro offer (free trial or upgrade), raised by a paywall through
             lib/proOffer.ts - never on its own. Renders nothing until then. */}
         <ProOfferDialog />
+        {/* "Je Pro-dagen zitten erop", once, after a new account's reverse
+            trial (lib/reverseTrial.ts). `pending` comes from the session, so
+            nobody else pays a request for it. */}
+        <TrialRecapDialog pending={Boolean(session?.user?.trial?.recapPending)} />
         {/* Asks once, remembers the answer, and gates the usage statistics in
             lib/analytics.ts behind it. Renders nothing until mounted, nothing
             once answered, and nothing inside the /studie flow - see
