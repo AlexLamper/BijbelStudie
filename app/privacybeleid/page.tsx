@@ -20,7 +20,7 @@ export const metadata: Metadata = generatePageMetadata("privacyPolicy");
 /** Prerendered: the text is the same for everyone. See app/bijbelstudie/[slug]/page.tsx. */
 export const dynamic = "force-static";
 
-const LAST_UPDATED = "26 oktober 2026";
+const LAST_UPDATED = "9 november 2026";
 const SUPPORT_EMAIL = "info@bijbelstudie.io";
 
 type Item = { title: string; body: string };
@@ -45,6 +45,14 @@ const DATA: Item[] = [
   {
     title: "Groepen (website)",
     body: "De groepen waarvan je lid bent, je berichten en reacties, notities die je met een groep deelt en je voortgang in de groep. De andere leden van die groep zien je naam, profielfoto, berichten en voortgang.",
+  },
+  {
+    title: "Vriendenkring",
+    body: "Je vrienden, verzoeken die je stuurt en krijgt, berichten en reacties die je deelt, wie je blokkeert of meldt en je instellingen voor de kring. Je vrienden zien je naam, profielfoto, reeks en wat je met de kring deelt. Ben je vindbaar voor je contacten, dan bewaren we een versleutelde code (een hash) van je e-mailadres en, als je dat invult, van je telefoonnummer, zodat iemand die jou in zijn contacten heeft je kan vinden. Het nummer en adres zelf zijn voor niemand te zien.",
+  },
+  {
+    title: "Contacten (alleen in de app)",
+    body: "Als je in de app je contacten verbindt, leest de app namen, telefoonnummers en e-mailadressen uit je adresboek. Namen blijven op je telefoon en gaan nooit naar ons. Van de nummers en e-mailadressen maakt de app eerst versleutelde codes (een hash met een geheime sleutel die alleen onze server kent); alleen die codes gaan naar onze server, om te zien wie van je contacten BijbelStudie gebruikt en vindbaar is. Staat Melding als een contact lid wordt aan, dan bewaren we die codes, gekoppeld aan jouw account, om je te laten weten als iemand uit je contacten later lid wordt en vindbaar is (hooguit één melding per dag). Zet je die melding uit of kies je Contacten vergeten, dan gooien we de codes direct weg. Nodig je iemand uit via WhatsApp of sms, dan verstuur je dat zelf vanuit die app; wij zien dat bericht niet.",
   },
   {
     title: "AI-assistent",
@@ -77,7 +85,8 @@ const DEVICE_ONLY = [
   "Gedownloade hoofdstukken en commentaren, zodat je offline kunt lezen",
   "Je recente zoekopdrachten. Een zoekopdracht gaat wel naar onze server om resultaten te vinden, maar we slaan hem daar niet op",
   "Wijzigingen die nog niet zijn gesynchroniseerd",
-  "Herinneringen en meldingen: die plant de app op je apparaat in. We gebruiken geen pushdienst",
+  "Herinneringen om te lezen: die plant de app op je apparaat in. Alleen meldingen uit je vriendenkring (een verzoek, een reactie, een contact dat lid wordt) sturen we op een iPhone via de pushdienst van Apple; daarvoor bewaren we een apparaatcode van je iPhone",
+  "De namen in je contacten, en welke contacten je al hebt uitgenodigd. Alleen versleutelde codes van nummers en e-mailadressen gaan naar onze server",
   "Instellingen die alleen voor dit apparaat gelden, zoals het thema, en of we je al eens vroegen de app te beoordelen",
 ];
 
@@ -92,7 +101,7 @@ const BASES: Item[] = [
   },
   {
     title: "Toestemming",
-    body: "De gebruiksstatistieken van de website, inclusief Google Analytics, waar we in de cookiebanner toestemming voor vragen; meldingen en herinneringen op je apparaat (via de toestemming van iOS of Android), een openbaar voortgangsprofiel en contactgegevens die je vrijwillig bij feedback invult. Je kunt je toestemming altijd intrekken, bijvoorbeeld door meldingen of je openbare profiel uit te zetten, of via Cookie-instellingen op de website.",
+    body: "De gebruiksstatistieken van de website, inclusief Google Analytics, waar we in de cookiebanner toestemming voor vragen; meldingen en herinneringen op je apparaat (via de toestemming van iOS of Android), een openbaar voortgangsprofiel, contactgegevens die je vrijwillig bij feedback invult, het verbinden van je contacten in de app (en het bewaren van de versleutelde codes voor meldingen als een contact lid wordt) en vindbaar zijn voor je contacten. Je kunt je toestemming altijd intrekken, bijvoorbeeld door meldingen of je openbare profiel uit te zetten, of via Cookie-instellingen op de website.",
   },
   {
     title: "Wettelijke plicht",
@@ -134,6 +143,12 @@ const RECIPIENTS: Recipient[] = [
     location: "Ierland en Verenigde Staten",
   },
   {
+    name: "Apple (Apple Push Notification service)",
+    role: "Meldingen uit je vriendenkring op een iPhone",
+    data: "De tekst van de melding, zoals de voornaam van een vriend, en een apparaatcode van je iPhone. Geen e-mailadres of account-ID",
+    location: "Verenigde Staten",
+  },
+  {
     name: "Resend Inc.",
     role: "E-mail om je wachtwoord te herstellen",
     data: "Je e-mailadres, naam en de inhoud van de e-mail",
@@ -157,6 +172,10 @@ const RETENTION: Item[] = [
   {
     title: "Account, profiel, instellingen, notities, markeringen, bladwijzers, leesgeschiedenis, voortgang, je boom en groepsberichten",
     body: "Zolang je account bestaat. Verwijder je je account, dan wissen we ze direct.",
+  },
+  {
+    title: "Versleutelde codes uit je contacten",
+    body: "Zolang Melding als een contact lid wordt aanstaat en de app ze ververst. Ververst de app ze 180 dagen niet, dan wissen we ze automatisch. Zet je de melding uit, kies je Contacten vergeten of verwijder je je account, dan wissen we ze direct; ze gaan ook niet mee in de beveiligingskopie van een verwijderd account.",
   },
   {
     title: "Beveiligingskopie van een verwijderd account",

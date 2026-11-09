@@ -17,8 +17,11 @@ export async function OPTIONS() {
  * five paths has to thread a code through. The web posts the code it kept from
  * /uitnodiging; the app posts what the reader typed.
  *
- * 200 `{ ok: true, proUntil }` or 400 `{ error, message }`, where `message` is
- * Dutch and ready to show.
+ * 200 `{ ok: true, proUntil, granted, message }` or 400 `{ error, message }`,
+ * where `message` is Dutch and ready to show. The inviter's week is written in
+ * the same call (lib/referral.ts). `granted` is false, and `proUntil` null,
+ * for a new account that already pays: it is still linked, it just gets no
+ * comp week on top.
  */
 export async function POST(req: Request) {
   try {
@@ -31,7 +34,7 @@ export async function POST(req: Request) {
         { status: 400 },
       );
     }
-    return jsonV1({ ok: true, proUntil: result.proUntil });
+    return jsonV1({ ok: true, proUntil: result.proUntil, granted: result.granted, message: result.message });
   } catch (error) {
     return handleV1Error(error);
   }

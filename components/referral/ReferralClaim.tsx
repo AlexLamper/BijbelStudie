@@ -46,10 +46,15 @@ export default function ReferralClaim() {
         if (res.status !== 200 && res.status !== 400) return;
         forgetInviteCode();
         const data = (await res.json().catch(() => null)) as
-          | { ok?: boolean; proUntil?: string | null; message?: string }
+          | { ok?: boolean; proUntil?: string | null; granted?: boolean; message?: string }
           | null;
 
-        if (res.ok) {
+        if (res.ok && data?.granted === false) {
+          // Linked to the friend who invited them, but this account already pays.
+          toast({ title: 'Uitnodiging gebruikt', description: data.message ?? '' });
+          await update?.();
+          router.refresh();
+        } else if (res.ok) {
           toast({
             title: 'Je week Pro is gestart',
             description: data?.proUntil

@@ -56,10 +56,14 @@ export default function InviteDetails() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code }),
       });
-      const data = (await res.json().catch(() => null)) as { message?: string } | null;
+      const data = (await res.json().catch(() => null)) as { granted?: boolean; message?: string } | null;
       if (res.ok) {
         forgetInviteCode();
-        setResult({ ok: true, message: "Je week Pro is gestart. Veel studieplezier!" });
+        setResult({
+          ok: true,
+          message:
+            data?.granted === false && data.message ? data.message : "Je week Pro is gestart. Veel studieplezier!",
+        });
         await update();
         router.refresh();
       } else {
@@ -98,8 +102,8 @@ export default function InviteDetails() {
       <p className="mx-auto mt-2 text-sm leading-relaxed text-ink-muted">
         Maak een gratis account aan bij Bijbel<span style={{ color: TEAL }}>Studie</span> en krijg{" "}
         {REFERRAL_REWARD_DAYS === 7 ? "een week" : `${REFERRAL_REWARD_DAYS} dagen`} Pro cadeau: Matthew Henry,
-        Calvijn en Dachsel, de grondtekst en tot 200 AI-vragen per dag. Wie je uitnodigde krijgt er ook een week bij
-        zodra je aan de slag gaat.
+        Calvijn en Dachsel, de grondtekst en tot 200 AI-vragen per dag. Wie je uitnodigde krijgt er ook een week bij,
+        zodra je account er is.
       </p>
 
       {status === "authenticated" ? (

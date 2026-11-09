@@ -6,6 +6,7 @@ import FriendPostComment from '../../models/FriendPostComment';
 import FriendRequest from '../../models/FriendRequest';
 import FriendProfile from '../../models/FriendProfile';
 import { blockedIdsFor } from '../friends/blocks';
+import { contactAlertTokens, contactAlertsSince } from '../friends/contactAlerts';
 import { firstNameOf, pickVariant, type CopyTokens, type SocialNotificationType } from '../notificationCopy';
 import { isApnsConfigured } from './apns';
 
@@ -104,6 +105,8 @@ type Raw = {
   postId: string | null;
   /** Only a comment has one. */
   snippet?: string;
+  /** Only a grouped contact alert has one: how many joined in total. */
+  total?: number;
 };
 
 function oid(value: string): mongoose.Types.ObjectId {
@@ -145,7 +148,7 @@ export async function socialNotifications(
     options.since ?? profile?.socialSeenAt ?? new Date(now.getTime() - COLD_START_DAYS * DAY_MS);
   const since = requested < floor ? floor : requested;
 
-  const [blocked, pendingRequests, incoming, accepted, ownPosts] = await Promise.all([
+  const [blocked, pendingRequests, incoming, accepted, ownPosts, contactAlerts] = await Promise.all([
     blockedIdsFor(userId),
     FriendRequest.countDocuments({ toUserId: me, status: 'pending' }),
     // `updatedAt`, not `createdAt`. `sendRequest` re-opens a declined request by
@@ -174,6 +177,9 @@ export async function socialNotifications(
       .limit(POSTS_SCANNED)
       .select('_id likes')
       .lean<{ _id: mongoose.Types.ObjectId; likes?: { userId?: mongoose.Types.ObjectId; at?: Date }[] }[]>(),
+    // "<Naam> uit je contacten zit nu op BijbelStudie", already grouped and
+    // rate-limited to one a day when it was written (lib/friends/contactAlerts.ts).
+    contactAlertsSince(userId, since),
   ]);
 
   const postIds = ownPosts.map((post) => post._id);
@@ -253,6 +259,19 @@ export async function socialNotifications(
     });
   }
 
+  for (const alert of contactAlerts) {
+    const first = alert.userIds[0];
+    if (!first) continue;
+    raw.push({
+      id: alert.id,
+      type: 'contact_joined',
+      at: new Date(alert.at),
+      actorId: String(first),
+      postId: null,
+      total: alert.userIds.length,
+    });
+  }
+
   // A block hides both directions, here as everywhere.
   const visible = raw.filter((item) => !blocked.has(item.actorId));
   visible.sort((a, b) => a.at.getTime() - b.at.getTime() || a.id.localeCompare(b.id));
@@ -275,12 +294,15 @@ export async function socialNotifications(
 
   const items: SocialNotificationItem[] = page.map((item) => {
     const actor = actorById.get(item.actorId);
-    const tokens: CopyTokens = {
-      vriend: firstNameOf(actor?.name),
-      vriendId: item.actorId,
-      berichtId: item.postId ?? undefined,
-      reactie: item.snippet,
-    };
+    const tokens: CopyTokens =
+      item.type === 'contact_joined'
+        ? contactAlertTokens(item.actorId, firstNameOf(actor?.name), item.total ?? 1)
+        : {
+            vriend: firstNameOf(actor?.name),
+            vriendId: item.actorId,
+            berichtId: item.postId ?? undefined,
+            reactie: item.snippet,
+          };
     // The same seed as lib/friends/notify.ts uses, so the text an Android phone
     // raises locally is the same sentence an iPhone received by push.
     const rendered = pickVariant(item.type, tokens, { seed: `${userId}:${item.id}` });

@@ -11,8 +11,10 @@ import mongoose from "mongoose";
  *
  * `phoneHashes` / `emailHashes` hold the owner's OWN identifiers, hashed, and
  * only when they chose to be findable. Hashes uploaded by someone else while
- * matching their address book are never stored anywhere (VRIENDENKRING_PLAN.md
- * §6).
+ * matching their address book never land here: when the uploader allows it
+ * they are kept in their own collection, linked to the uploader only
+ * (models/FriendContactBook.js), so the uploader can be told when a contact
+ * joins.
  */
 const FriendProfileSchema = new mongoose.Schema(
   {
@@ -34,6 +36,15 @@ const FriendProfileSchema = new mongoose.Schema(
      * into a publishing permission nobody granted.
      */
     publicPosts: { type: Boolean, default: false },
+
+    /**
+     * May the app keep this reader's hashed address book, to tell them when a
+     * contact joins (models/FriendContactBook.js)? On unless switched off;
+     * switching it off deletes the stored book. Absent on older documents,
+     * which reads as on - the book itself is only written when a current app
+     * build asks for it, after showing the disclosure that says so.
+     */
+    contactJoinAlerts: { type: Boolean, default: true },
 
     /** HMAC-SHA256(pepper, normalised value), hex, truncated to 32 chars. */
     phoneHashes: { type: [String], default: [] },

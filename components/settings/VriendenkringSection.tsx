@@ -11,6 +11,7 @@ import {
   AUTO_SHARE_COPY,
   AUTO_SHARE_FOOTNOTE,
   BLOCKED_COPY,
+  CONTACT_ALERTS_COPY,
   DISCOVERABLE_COPY,
   FORGET_CONTACTS_COPY,
   PUBLIC_POSTS_COPY,
@@ -87,6 +88,15 @@ export default function VriendenkringSection() {
     void write({ discoverable: value }, { ...settings, discoverable: value });
   }
 
+  function setContactJoinAlerts(value: boolean) {
+    if (!settings) return;
+    // Off deletes the stored address book server-side, so the count goes too.
+    void write(
+      { contactJoinAlerts: value },
+      { ...settings, contactJoinAlerts: value, contactBookSize: value ? settings.contactBookSize : 0 },
+    );
+  }
+
   function setPublicPosts(value: boolean) {
     if (!settings) return;
     void write({ publicPosts: value }, { ...settings, publicPosts: value });
@@ -151,6 +161,16 @@ export default function VriendenkringSection() {
           disabled={busy}
           onChange={setDiscoverable}
         />
+        {/* Absent reads as on, like the server's default; the book itself is
+            only ever kept by an app build that said so before reading. */}
+        <Row
+          id="instelling-contact-meldingen"
+          label={CONTACT_ALERTS_COPY.label}
+          hint={CONTACT_ALERTS_COPY.hint}
+          checked={settings?.contactJoinAlerts !== false}
+          disabled={busy}
+          onChange={setContactJoinAlerts}
+        />
         {/* Absent reads as off: a deployed API that predates the switch, or a
             profile written before it existed, must not look like permission to
             publish outside the kring. */}
@@ -203,7 +223,7 @@ export default function VriendenkringSection() {
             <button
               type="button"
               onClick={() => setConfirmForget(true)}
-              disabled={busy || !settings?.hasContactHashes}
+              disabled={busy || !(settings?.hasContactHashes || (settings?.contactBookSize ?? 0) > 0)}
               className="flex h-9 items-center rounded-[9px] border border-line bg-surface px-[14px] text-[13px] font-semibold text-ink-body transition-colors hover:bg-line-soft disabled:cursor-not-allowed disabled:opacity-60"
             >
               {FORGET_CONTACTS_COPY.action}

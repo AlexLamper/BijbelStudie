@@ -94,6 +94,7 @@ export type FeedQuery = { limit?: number; before?: string | null };
 export type FriendSettingsPatch = {
   discoverable?: boolean;
   publicPosts?: boolean;
+  contactJoinAlerts?: boolean;
   autoShare?: Partial<FriendSettings['autoShare']>;
 };
 

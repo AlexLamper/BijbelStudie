@@ -16,6 +16,7 @@ import FriendRequest from '../models/FriendRequest';
 import FriendProfile from '../models/FriendProfile';
 import FriendPost from '../models/FriendPost';
 import FriendPostComment from '../models/FriendPostComment';
+import FriendContactBook from '../models/FriendContactBook';
 import Report from '../models/Report';
 import DeletedAccount from '../models/DeletedAccount';
 import { isAdminEmail } from './adminEmails';
@@ -73,6 +74,21 @@ function pairKeyed(model: LeanFindModel, fields: readonly [string, string]): Lea
   };
 }
 
+/**
+ * The same contract with fields left out of the copy. For the hashed address
+ * book kept for contact alerts: the archive is there to restore an account,
+ * and the hashes are rebuilt by the app on its next match anyway, so keeping
+ * them 90 days after the reader asked to be deleted would be keeping contact
+ * data for nothing. What is archived is the document without them - which says
+ * a book existed, when it was refreshed and what was announced.
+ */
+function withoutFields(
+  model: { find(filter: Record<string, unknown>): { select(fields: string): ReturnType<LeanFindModel['find']> } },
+  exclude: string,
+): LeanFindModel {
+  return { find: (filter) => model.find(filter).select(exclude) };
+}
+
 export type ArchiveDeps = {
   user: { findById(id: unknown): { lean(): Promise<any> } };
   related: Record<string, LeanFindModel>;
@@ -104,6 +120,8 @@ const defaultDeps: ArchiveDeps = {
     friendpostcomments: FriendPostComment,
     friendships: pairKeyed(Friendship, ['userAId', 'userBId']),
     friendrequests: pairKeyed(FriendRequest, ['fromUserId', 'toUserId']),
+    // Contact alerts: archived WITHOUT the hashes (see `withoutFields`).
+    friendcontactbooks: withoutFields(FriendContactBook, '-hashes -digest'),
     // Moderation. Both sides: the reports this person made (their own free
     // text) and the reports about them, because the purge deletes both and an
     // archive that keeps only one half cannot restore the account.

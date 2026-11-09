@@ -76,11 +76,17 @@ export default function InviteCard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code: codeInput }),
       })
-      const data = (await res.json().catch(() => null)) as { proUntil?: string | null; message?: string } | null
+      const data = (await res.json().catch(() => null)) as
+        | { proUntil?: string | null; granted?: boolean; message?: string }
+        | null
       if (res.ok) {
         setClaimMessage({
           ok: true,
-          text: data?.proUntil ? `Je week Pro is gestart, tot ${formatDay(data.proUntil)}.` : "Je week Pro is gestart.",
+          text: data?.proUntil
+            ? `Je week Pro is gestart, tot ${formatDay(data.proUntil)}.`
+            : data?.granted === false && data.message
+              ? data.message
+              : "Je week Pro is gestart.",
         })
         await update()
         router.refresh()
@@ -110,10 +116,11 @@ export default function InviteCard() {
             {/* Pro members (paying, trial, comp) give the week; it is no sales pitch to them.
                 The server decides (`copyVariant`); the client's own Pro check is only the
                 fallback for a response from before that field existed. */}
-            {(overview.copyVariant ?? (isPro ? "gift" : "offer")) === "gift"
-              ? "Geef een vriend een week Pro cadeau. Maakt die via jouw link een account, dan gaat de week meteen in."
-              : "Maakt een vriend via jouw link een account, dan krijgt die meteen een week Pro."}
-            {overview.youEarn ? " Gaat je vriend echt aan de slag, dan krijg jij er ook een week bij." : ""}
+            {overview.youEarn
+              ? "Maakt een vriend via jouw link een account, dan krijgen jullie allebei een week Pro."
+              : (overview.copyVariant ?? (isPro ? "gift" : "offer")) === "gift"
+                ? "Geef een vriend een week Pro cadeau. Maakt die via jouw link een account, dan gaat de week meteen in."
+                : "Maakt een vriend via jouw link een account, dan krijgt die meteen een week Pro."}
           </p>
 
           <div className="mt-3 truncate rounded-btn border border-line bg-line-soft px-3 py-2 text-[12.5px] text-ink-muted" title={overview.url}>
@@ -151,7 +158,6 @@ export default function InviteCard() {
               {overview.joined > 0 && (
                 <p>
                   {overview.joined} {overview.joined === 1 ? "vriend" : "vrienden"} via jouw link
-                  {overview.active > 0 ? ` · ${overview.active} al aan de slag` : ""}
                 </p>
               )}
               {overview.youEarn && overview.proUntil && <p>Je hebt Pro tot {formatDay(overview.proUntil)}.</p>}

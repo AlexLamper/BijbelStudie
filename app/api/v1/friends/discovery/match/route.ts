@@ -14,9 +14,12 @@ export async function OPTIONS() {
 /**
  * POST /api/v1/friends/discovery/match
  *
- * Hashed contacts in, matching accounts out. Nothing uploaded here is stored -
- * the match runs and the hashes are dropped - and only accounts that chose to
- * be findable come back, with their name and picture alone.
+ * Hashed contacts in, matching accounts out. Only accounts that chose to be
+ * findable come back, with their name and picture and which of the caller's
+ * own hashes matched them. The uploaded hashes are dropped after the match
+ * unless the app sent `retain: true` and the reader left contact alerts on;
+ * then they are kept, linked to the reader only, to tell them when a contact
+ * joins (lib/friends/contactAlerts.ts).
  *
  * Throttled hardest of all the friends routes, because this is the one place a
  * caller could try to walk a hash space: 5 calls an hour per account, at most

@@ -73,17 +73,33 @@ export const FORGET_CONTACTS_COPY = {
   label: 'Vergeet mijn contactgegevens',
   hint:
     'De app bewaart een versleutelde afdruk van je telefoonnummer en e-mailadres, zodat ' +
-    'mensen die je al kennen je kunnen vinden. Hiermee gooi je die weg. Je vriendschappen ' +
-    'blijven; alleen vinden via contacten werkt daarna niet meer tot je het in de app opnieuw ' +
-    'aanzet.',
+    'mensen die je al kennen je kunnen vinden, en versleutelde codes uit je contacten voor ' +
+    'meldingen als iemand lid wordt. Hiermee gooi je alles weg. Je vriendschappen blijven; ' +
+    'vinden via contacten werkt daarna niet meer tot je het in de app opnieuw aanzet.',
   action: 'Vergeten',
   confirmTitle: 'Je contactgegevens vergeten?',
   confirmBody:
-    'We verwijderen de versleutelde afdruk van je telefoonnummer en e-mailadres. Je vrienden ' +
-    'en je berichten blijven staan. Mensen die je nummer hebben, vinden je hierna niet meer ' +
-    'in BijbelStudie.',
+    'We verwijderen de versleutelde afdruk van je telefoonnummer en e-mailadres en de codes ' +
+    'uit je contacten. Je vrienden en je berichten blijven staan. Mensen die je nummer hebben, ' +
+    'vinden je hierna niet meer in BijbelStudie.',
   confirmAction: 'Ja, vergeet ze',
   done: 'Je contactgegevens zijn verwijderd.',
+} as const;
+
+/**
+ * "Melding als een contact lid wordt" - whether the app may keep the reader's
+ * address book as hashes, to tell them when somebody in it joins
+ * (lib/friends/contactAlerts.ts). The book is only ever sent by the app, which
+ * a browser cannot be, so on the website this is the off switch and the
+ * honest description of what is kept.
+ */
+export const CONTACT_ALERTS_COPY = {
+  label: 'Melding als een contact lid wordt',
+  hint:
+    'De app bewaart dan versleutelde codes van de nummers en e-mailadressen in je contacten, ' +
+    'nooit de namen of nummers zelf. Wordt iemand uit je contacten lid en is diegene vindbaar, ' +
+    'dan krijg je een melding, hooguit één per dag. Zet je dit uit, dan gooien we die codes ' +
+    'meteen weg.',
 } as const;
 
 export const BLOCKED_COPY = {

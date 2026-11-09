@@ -5,6 +5,7 @@ import User from '../models/User';
 import { TRIAL_USER_FIELDS } from './proHistory';
 import {
   canReceiveCompWeek,
+  CLAIM_LINKED_NO_WEEK_MESSAGE,
   claimantRefusal,
   COMP_WRITABLE_FILTER,
   compWeekEnd,
@@ -82,8 +83,9 @@ export type ReferralOverview = {
   joined: number;
   /** Of those, the ones whose activity has been counted for this account. */
   active: number;
-  /** Whether a friend's activity would add a week to this account. False for
-   * paying and open-ended Pro, where a comp week would change nothing. */
+  /** Whether a friend joining now would add a week to this account. False for
+   * paying and open-ended Pro, where a comp week would change nothing, and
+   * while the monthly cap on inviter weeks is reached. */
   youEarn: boolean;
   /** End of this account's current comp period, if it has one. */
   proUntil: string | null;
@@ -101,12 +103,14 @@ export async function referralOverview(userId: string, isPro: boolean, now = new
   if (!me) return null;
 
   const code = me.referralCode ?? (await ensureReferralCode(userId));
-  const [joined, active] = await Promise.all([
+  const [joined, active, recentCredits] = await Promise.all([
     User.countDocuments({ referredBy: me._id }),
     User.countDocuments({ referredBy: me._id, referralCreditedAt: { $ne: null } }),
+    User.countDocuments({ referredBy: me._id, referralCreditedAt: { $gte: creditCapWindowStart(now) } }),
   ]);
 
-  const youEarn = canReceiveCompWeek(me) && !(isPro && !me.compedProUntil);
+  const youEarn =
+    canReceiveCompWeek(me) && !(isPro && !me.compedProUntil) && recentCredits < REFERRAL_CREDIT_CAP;
   return {
     code,
     url: inviteUrl(code),
@@ -122,16 +126,33 @@ export async function referralOverview(userId: string, isPro: boolean, now = new
 }
 
 export type ClaimResult =
-  | { ok: true; proUntil: string | null }
+  | {
+      ok: true;
+      /** The friend's new comp end, or null when no week could be written (a paying account). */
+      proUntil: string | null;
+      /** Whether the friend got a week. */
+      granted: boolean;
+      /** Whether the inviter got a week for this signup. */
+      inviterRewarded: boolean;
+      /** Dutch, for a client that shows the server's own line. */
+      message: string;
+    }
   | { ok: false; reason: ClaimRefusal };
 
 /**
- * Enter an invite code: link this account to its inviter and start its week
- * of Pro.
+ * Enter an invite code: link this account to its inviter and start the week
+ * of Pro - for both of them.
  *
  * The conditional `referredBy: null` write is the lock. Two taps racing past
  * the checks above it still only link once, and only the request that linked
- * grants the week - so nobody gets two.
+ * grants anything - so nobody gets two weeks for one signup.
+ *
+ * Interaction with a trial every new account may already have: the friend's
+ * week goes through the comp path, which extends from the later of now and an
+ * existing comp end. A trial given as a comp therefore grows by the week (3
+ * days become 10); a trial held anywhere else runs side by side with the comp,
+ * so the friend has Pro for at least the full week from the claim either way -
+ * it never shrinks to the trial's length.
  */
 export async function claimReferral(
   userId: string,
@@ -165,10 +186,42 @@ export async function claimReferral(
   if (linked.modifiedCount !== 1) return { ok: false, reason: 'ALREADY_CLAIMED' };
 
   const granted = await User.updateOne({ _id: userId, ...COMP_WRITABLE_FILTER }, compWeekUpdate(now));
+  const inviterRewarded = await rewardInviter(userId, inviter._id, now);
+  const friendGotWeek = granted.modifiedCount === 1;
   return {
     ok: true,
-    proUntil: granted.modifiedCount === 1 ? compWeekEnd(me.compedProUntil, now).toISOString() : null,
+    proUntil: friendGotWeek ? compWeekEnd(me.compedProUntil, now).toISOString() : null,
+    granted: friendGotWeek,
+    inviterRewarded,
+    message: friendGotWeek ? 'Je week Pro is gestart.' : CLAIM_LINKED_NO_WEEK_MESSAGE,
   };
+}
+
+/**
+ * The inviter's week for one friend's signup, at most REFERRAL_CREDIT_CAP a
+ * rolling month.
+ *
+ * The friend is marked credited FIRST, conditionally, and the window is counted
+ * after - including this friend. Two signups racing each other can then only
+ * under-reward (both see the other and both may land over the cap), never pay
+ * out a fifth week. Past the cap the friend stays marked, so a later activity
+ * check (`creditReferrerIfActivated`) does not pay for them either.
+ */
+async function rewardInviter(friendId: string | Types.ObjectId, inviterId: Types.ObjectId, now: Date): Promise<boolean> {
+  const marked = await User.updateOne(
+    { _id: friendId, referredBy: inviterId, referralCreditedAt: null },
+    { $set: { referralCreditedAt: now } },
+  );
+  if (marked.modifiedCount !== 1) return false;
+
+  const recent = await User.countDocuments({
+    referredBy: inviterId,
+    referralCreditedAt: { $gte: creditCapWindowStart(now) },
+  });
+  if (recent > REFERRAL_CREDIT_CAP) return false;
+
+  const rewarded = await User.updateOne({ _id: inviterId, ...COMP_WRITABLE_FILTER }, compWeekUpdate(now));
+  return rewarded.modifiedCount === 1;
 }
 
 export type ReferredFriend = {
@@ -184,9 +237,10 @@ export type ReferredFriend = {
  * account was invited, has not been counted yet, and has now been active
  * enough (lib/referralRules `isReferralActivated`).
  *
- * The friend is marked counted first, conditionally, so concurrent XP grants
- * cannot reward the inviter twice. Past the cap the friend is still marked,
- * and the inviter simply gets no extra week for them.
+ * Since inviter weeks moved to the moment of signup (`claimReferral`) every new
+ * claim is credited at once, so this only still pays for friends who claimed
+ * before that change and had not been active enough yet. Same cap, same
+ * mark-first order (`rewardInviter`).
  */
 export async function creditReferrerIfActivated(
   friend: ReferredFriend,
@@ -201,18 +255,5 @@ export async function creditReferrerIfActivated(
     now,
   });
   if (!activated) return;
-
-  const recent = await User.countDocuments({
-    referredBy: friend.referredBy,
-    referralCreditedAt: { $gte: creditCapWindowStart(now) },
-  });
-
-  const marked = await User.updateOne(
-    { _id: friend._id, referredBy: friend.referredBy, referralCreditedAt: null },
-    { $set: { referralCreditedAt: now } },
-  );
-  if (marked.modifiedCount !== 1) return;
-  if (recent >= REFERRAL_CREDIT_CAP) return;
-
-  await User.updateOne({ _id: friend.referredBy, ...COMP_WRITABLE_FILTER }, compWeekUpdate(now));
+  await rewardInviter(friend._id, friend.referredBy, now);
 }

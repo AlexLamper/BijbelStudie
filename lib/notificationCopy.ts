@@ -33,7 +33,7 @@
 import { createHash } from 'crypto';
 
 /**
- * The four vriendenkring events worth a push.
+ * The vriendenkring events worth a push.
  *
  * These differ from the five above in one way that changes everything about
  * them: somebody else caused them. A reading reminder is a clock going off and
@@ -48,13 +48,15 @@ export type SocialNotificationType =
   | 'friend_request'
   | 'friend_accepted'
   | 'post_like'
-  | 'post_comment';
+  | 'post_comment'
+  | 'contact_joined';
 
 export const SOCIAL_NOTIFICATION_TYPES: readonly SocialNotificationType[] = [
   'friend_request',
   'friend_accepted',
   'post_like',
   'post_comment',
+  'contact_joined',
 ];
 
 export type NotificationType =
@@ -89,6 +91,11 @@ export type CopyTokens = {
   berichtId?: string;
   /** A comment, quoted. Trimmed at a word boundary like `vers`. */
   reactie?: string;
+  /**
+   * For a grouped contact alert: how many more contacts joined besides
+   * `vriend`. Absent or 0 for a single one.
+   */
+  anderen?: number;
 };
 
 export type Variant = {
@@ -231,6 +238,27 @@ const POST_COMMENT: Variant[] = [
 ];
 
 /**
+ * "<Naam> uit je contacten zit nu op BijbelStudie" - somebody in the reader's
+ * address book became findable (lib/friends/contactAlerts.ts). Sent at most
+ * once a day; whoever else joined that day rides along in the grouped pool,
+ * which `poolFor` picks when `anderen` is above 0.
+ */
+const CONTACT_JOINED: Variant[] = [
+  { id: 'c01', title: 'Nieuw uit je contacten', body: '{vriend} uit je contacten zit nu op BijbelStudie.', needs: ['vriend'] },
+  { id: 'c02', title: '{vriend} is erbij', body: '{vriend} uit je contacten zit nu op BijbelStudie. Voeg elkaar toe in je kring.', needs: ['vriend'] },
+  { id: 'c03', title: 'Iemand uit je contacten', body: 'Iemand uit je contacten zit nu op BijbelStudie. Kijk wie het is.', needs: [] },
+  { id: 'c04', title: 'Nieuw uit je contacten', body: 'Een van je contacten gebruikt nu ook BijbelStudie.', needs: [] },
+  { id: 'c05', title: 'Een bekende is erbij', body: 'Iemand die je kent zit nu op BijbelStudie. Je vindt diegene in je kring.', needs: [] },
+];
+
+const CONTACT_JOINED_GROUP: Variant[] = [
+  { id: 'c11', title: 'Nieuw uit je contacten', body: '{vriend} en nog {anderen} uit je contacten zitten nu op BijbelStudie.', needs: ['vriend', 'anderen'] },
+  { id: 'c12', title: 'Bekenden zijn erbij', body: 'Een paar mensen uit je contacten zitten nu op BijbelStudie. Kijk wie het zijn.', needs: [] },
+  { id: 'c13', title: 'Nieuw uit je contacten', body: 'Meer mensen uit je contacten gebruiken nu BijbelStudie.', needs: [] },
+  { id: 'c14', title: 'Je kring kan groeien', body: 'Er zitten nieuwe mensen uit je contacten op BijbelStudie.', needs: [] },
+];
+
+/**
  * One-off product announcements. The only pool here with a single variant, and
  * that is the point: a broadcast is one message everybody gets, not a rotation.
  * Rotation exists so a daily reminder does not turn into furniture; an
@@ -279,6 +307,8 @@ export function poolFor(type: NotificationType, tokens: CopyTokens): Variant[] {
       return POST_LIKE;
     case 'post_comment':
       return POST_COMMENT;
+    case 'contact_joined':
+      return (tokens.anderen ?? 0) > 0 ? CONTACT_JOINED_GROUP : CONTACT_JOINED;
   }
 }
 
@@ -344,6 +374,9 @@ export function deepLinkFor(type: NotificationType, tokens: CopyTokens): string 
   if (type === 'friend_accepted') {
     return tokens.vriendId ? `/vriendenkring/${encodeURIComponent(tokens.vriendId)}` : '/vriendenkring';
   }
+  // The contacts section sits at the top of the kring, and `/vriendenkring` is
+  // on every installed build's notification whitelist.
+  if (type === 'contact_joined') return '/vriendenkring';
   if (type === 'post_like' || type === 'post_comment') {
     return tokens.berichtId
       ? `/vriendenkring?post=${encodeURIComponent(tokens.berichtId)}`
@@ -445,7 +478,7 @@ export function pickSeries(
   return out;
 }
 
-/** True for the four vriendenkring types, narrowing as it goes. */
+/** True for the vriendenkring types, narrowing as it goes. */
 export function isSocialNotificationType(value: string): value is SocialNotificationType {
   return (SOCIAL_NOTIFICATION_TYPES as readonly string[]).includes(value);
 }

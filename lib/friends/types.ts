@@ -257,6 +257,26 @@ export type FriendMutationResponse = {
   message?: string;
 };
 
+/**
+ * One row of `POST /friends/discovery/match`: the account, plus which of the
+ * caller's own uploaded hashes belong to it. The app uses `matchedHashes` to
+ * leave those address-book entries out of "Nodig uit"; it is never anyone
+ * else's hash. Optional for a client, which treats absent as "unknown".
+ */
+export type ContactMatch = FriendSummary & { matchedHashes: string[] };
+
+export type ContactMatchResponse = {
+  found: ContactMatch[];
+  /** Whether the uploaded hashes were kept for contact alerts. */
+  retained?: boolean;
+  /**
+   * The caller's own hashes that belong to any findable account they may see,
+   * friends and pending verzoeken included (blocked accounts never), so "Nodig
+   * uit" can leave out everyone who already uses the app. Optional, additive.
+   */
+  knownHashes?: string[];
+};
+
 /** The reader's own Vriendenkring settings. */
 export type FriendSettings = {
   discoverable: boolean;
@@ -273,6 +293,18 @@ export type FriendSettings = {
   autoShare: { milestones: boolean; verses: boolean; notes: boolean };
   /** Whether contact hashes are on file, so the client can offer "vergeten". */
   hasContactHashes: boolean;
+  /**
+   * "Melding als een contact lid wordt": may the app keep the reader's hashed
+   * address book to tell them when somebody in it joins? Optional and
+   * additive; absent reads as on, which is also the default. Off deletes the
+   * stored book.
+   */
+  contactJoinAlerts?: boolean;
+  /**
+   * How many hashed contacts are on file for those alerts. A count only - the
+   * hashes themselves never leave the server. Optional and additive.
+   */
+  contactBookSize?: number;
   /**
    * Who the reader blocked, with enough to render a row and undo it. On the
    * settings response rather than its own endpoint: blocking is a setting, the

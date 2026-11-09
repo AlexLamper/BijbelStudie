@@ -1,4 +1,4 @@
-import { createHmac } from 'crypto';
+import { createHash, createHmac } from 'crypto';
 
 /**
  * Pure normalisation and hashing for contact matching. No database and no
@@ -6,10 +6,12 @@ import { createHmac } from 'crypto';
  * and can be reasoned about without reading the routes.
  *
  * The rule the whole feature rests on: an address book never leaves a phone in
- * the clear, and a hash someone uploads while matching is never stored. See
- * VRIENDENKRING_PLAN.md §6, including the honest note that phone-number hashes
- * are brute-forceable by nature - the server-held pepper, the rate limit and
- * not retaining uploads are what keep that expensive.
+ * the clear. See VRIENDENKRING_PLAN.md §6, including the honest note that
+ * phone-number hashes are brute-forceable by nature - the server-held pepper
+ * and the rate limit are what keep that expensive. Since contact alerts, the
+ * hashes of a match call MAY be kept (models/FriendContactBook.js), linked to
+ * the uploader only and only when the app asked for it after saying so in its
+ * disclosure; rotating the pepper still invalidates every one of them.
  */
 
 /** Hex characters kept from the HMAC. 32 hex = 128 bits, plenty for matching. */
@@ -37,7 +39,7 @@ export function normalisePhone(raw: string, country = 'NL'): string | null {
   if (value.startsWith('00')) value = `+${value.slice(2)}`;
 
   if (value.startsWith('+')) {
-    const digits = value.slice(1).replace(/\D/g, '');
+    const digits = dropTrunkZero(value.slice(1).replace(/\D/g, ''));
     return digits.length >= 8 ? `+${digits}` : null;
   }
 
@@ -52,6 +54,25 @@ export function normalisePhone(raw: string, country = 'NL'): string | null {
   const national = digits.startsWith('0') ? digits.slice(1) : digits;
   if (national.length < 8) return null;
   return `+${prefix}${national}`;
+}
+
+/**
+ * Country codes whose numbers drop a national trunk 0 when written
+ * internationally. `+31 06 12345678` is a common way to write a Dutch mobile in
+ * an address book, and without this it hashes as `+310612345678`, which
+ * matches nobody. No valid number in these countries has a 0 straight after
+ * the country code, so dropping it cannot turn a real number into another one.
+ *
+ * Mirrored in the app's `contact_hashing.dart` (`_trunkZeroCountryCodes`): the
+ * two sides only ever compare hashes, so they must agree digit for digit.
+ */
+const TRUNK_ZERO_COUNTRY_CODES = ['31', '32', '49', '44', '27'];
+
+function dropTrunkZero(digits: string): string {
+  for (const code of TRUNK_ZERO_COUNTRY_CODES) {
+    if (digits.startsWith(`${code}0`)) return `${code}${digits.slice(code.length + 1)}`;
+  }
+  return digits;
 }
 
 /** Only the countries the app actually ships in; NL is the fallback. */
@@ -103,6 +124,18 @@ export function sanitiseHashes(raw: unknown, max = 2000): string[] {
     if (out.size >= max) break;
   }
   return [...out];
+}
+
+/**
+ * Hashes a reader may keep on file for contact alerts: every hash of a match
+ * call, phone and e-mail together, capped. A cap rather than a refusal, because
+ * the match itself already accepted the call.
+ */
+export const MAX_KEPT_CONTACT_HASHES = 4000;
+
+/** sha256 over the sorted set, so "the same book again" costs no write. */
+export function contactBookDigest(hashes: readonly string[]): string {
+  return createHash('sha256').update([...hashes].sort().join(',')).digest('hex');
 }
 
 /**

@@ -17,6 +17,7 @@ import FriendRequest from '../models/FriendRequest';
 import FriendProfile from '../models/FriendProfile';
 import FriendPost from '../models/FriendPost';
 import FriendPostComment from '../models/FriendPostComment';
+import FriendContactBook from '../models/FriendContactBook';
 import Report from '../models/Report';
 import StudyGroup from '../models/StudyGroup';
 import BiblePlan from '../models/BiblePlan';
@@ -73,6 +74,21 @@ export async function deleteAccountData(userId: mongoose.Types.ObjectId): Promis
     // block list. `$pull` rather than delete - the list belongs to the other
     // reader - and without it a deleted id would sit in `blocked` forever.
     await FriendProfile.updateMany({ blocked: userId }, { $pull: { blocked: userId } }, opts);
+    // The hashed address book kept for contact alerts goes with its owner, and
+    // this person is taken out of everyone else's alerts: queued, sent, or
+    // remembered as already announced.
+    await FriendContactBook.deleteMany({ userId }, opts);
+    await FriendContactBook.updateMany(
+      { 'pending.userId': userId },
+      { $pull: { pending: { userId } } },
+      opts,
+    );
+    await FriendContactBook.updateMany({ announced: userId }, { $pull: { announced: userId } }, opts);
+    await FriendContactBook.updateMany(
+      { 'alerts.userIds': userId },
+      { $pull: { alerts: { userIds: userId } } },
+      opts,
+    );
 
     // Feedback answers and analytics events describe the product, not the
     // person. Cut the link and keep the row - the same fields the 2-year

@@ -11,6 +11,7 @@ import { isPublicTree } from '../progressTree/summary';
 import { normaliseReferralCode } from '../referralRules';
 import { ensureReferralCode } from '../referral';
 import { contactPepper, hashIdentifier, normaliseEmail, normalisePhone, sanitiseHashes } from './discovery';
+import { announceFindable, contactBookSize, deleteContactBook, keepContactBook } from './contactAlerts';
 import {
   notifyFriendRequest,
   notifyPostComment,
@@ -20,6 +21,8 @@ import {
 import { REPORT_REASONS } from './types';
 import type {
   BlockedUser,
+  ContactMatch,
+  ContactMatchResponse,
   FriendMutationResponse,
   FriendPost as FriendPostView,
   FriendPostBody,
@@ -1130,6 +1133,12 @@ export async function getSettings(userId: string): Promise<FriendSettings> {
       notes: Boolean(profile?.autoShare?.notes),
     },
     hasContactHashes: Boolean((profile?.phoneHashes?.length ?? 0) + (profile?.emailHashes?.length ?? 0)),
+    // Absent reads as on, like the schema default: the book itself is only
+    // ever written by a build that showed the disclosure saying so.
+    contactJoinAlerts: profile?.contactJoinAlerts !== false,
+    // A count, never the hashes: enough for "vergeten" to know there is
+    // something to forget, and for an export to say how much.
+    contactBookSize: await contactBookSize(userId),
     // Blocking had no reverse and no list: a reader could block someone and
     // then had no way to see or undo it. The list is nearly always empty, so
     // it rides along with the switches rather than costing its own call.
@@ -1142,11 +1151,13 @@ export async function updateSettings(userId: string, body: unknown): Promise<Fri
   const input = (body ?? {}) as {
     discoverable?: unknown;
     publicPosts?: unknown;
+    contactJoinAlerts?: unknown;
     autoShare?: Record<string, unknown>;
   };
   const set: Record<string, unknown> = {};
   if (typeof input.discoverable === 'boolean') set.discoverable = input.discoverable;
   if (typeof input.publicPosts === 'boolean') set.publicPosts = input.publicPosts;
+  if (typeof input.contactJoinAlerts === 'boolean') set.contactJoinAlerts = input.contactJoinAlerts;
   for (const key of ['milestones', 'verses', 'notes'] as const) {
     const value = input.autoShare?.[key];
     // `$set` on the named path only - never the whole `autoShare` object, so
@@ -1159,6 +1170,16 @@ export async function updateSettings(userId: string, body: unknown): Promise<Fri
       { $set: set, $setOnInsert: { userId: oid(userId) } },
       { upsert: true },
     );
+  }
+  // Off is a deletion, not a flag: the stored address book goes with it.
+  if (input.contactJoinAlerts === false) await deleteContactBook(userId);
+  // Findable again with hashes still on file is the same news as becoming
+  // findable for the first time, for whoever has this reader in their contacts.
+  if (input.discoverable === true) {
+    const profile = await FriendProfile.findOne({ userId: oid(userId) })
+      .select('phoneHashes emailHashes')
+      .lean<{ phoneHashes?: string[]; emailHashes?: string[] } | null>();
+    await announceFindable(userId, [...(profile?.phoneHashes ?? []), ...(profile?.emailHashes ?? [])]);
   }
   return getSettings(userId);
 }
@@ -1217,27 +1238,46 @@ export async function saveOwnHashes(
     },
     { upsert: true },
   );
+
+  // Only somebody who chose to be findable is ever announced to the people
+  // who have them in their contacts (lib/friends/contactAlerts.ts).
+  if (set.discoverable === true) {
+    const saved = await FriendProfile.findOne({ userId: oid(userId) })
+      .select('phoneHashes emailHashes')
+      .lean<{ phoneHashes?: string[]; emailHashes?: string[] } | null>();
+    await announceFindable(userId, [...(saved?.phoneHashes ?? []), ...(saved?.emailHashes ?? [])]);
+  }
   return { ok: true };
 }
 
 /**
  * `POST /api/v1/friends/discovery/match`.
  *
- * The uploaded hashes are matched and dropped - nothing from someone else's
- * address book is ever written. Only accounts that chose to be findable come
- * back, and only their name and picture.
+ * Only accounts that chose to be findable come back, with their name and
+ * picture, plus `matchedHashes`: which of the caller's OWN uploaded hashes
+ * belong to that account, so the app can tell which address-book entries
+ * already use BijbelStudie and leave them out of "Nodig uit". That tells the
+ * caller nothing they could not learn by matching one contact at a time; it
+ * only saves the round trips. A row never carries any other hash.
+ *
+ * The uploaded hashes are dropped after the match, unless the app asked for
+ * them to be kept (`retain: true`, sent only by builds whose disclosure says
+ * so) and the reader left contact alerts on - then they go into their own
+ * `FriendContactBook`, linked to the reader only (lib/friends/contactAlerts.ts).
  */
 export async function matchContacts(
   userId: string,
   body: unknown,
-): Promise<{ found: FriendSummary[] }> {
+): Promise<ContactMatchResponse> {
   if (!contactPepper()) throw new FriendsError('UNAVAILABLE', 503, 'Vrienden vinden via contacten kan nu niet.');
   await connectMongoDB();
 
-  const input = (body ?? {}) as { phoneHashes?: unknown; emailHashes?: unknown };
+  const input = (body ?? {}) as { phoneHashes?: unknown; emailHashes?: unknown; retain?: unknown };
   const phoneHashes = sanitiseHashes(input.phoneHashes, MAX_MATCH_HASHES);
   const emailHashes = sanitiseHashes(input.emailHashes, MAX_MATCH_HASHES);
   if (phoneHashes.length === 0 && emailHashes.length === 0) return { found: [] };
+
+  const retained = input.retain === true ? await keepContactBook(userId, [...phoneHashes, ...emailHashes]) : false;
 
   const rows = await FriendProfile.find({
     discoverable: true,
@@ -1247,33 +1287,70 @@ export async function matchContacts(
       ...(emailHashes.length > 0 ? [{ emailHashes: { $in: emailHashes } }] : []),
     ],
   })
-    .select('userId')
+    .select('userId phoneHashes emailHashes')
     .limit(200)
-    .lean<{ userId: mongoose.Types.ObjectId }[]>();
+    .lean<{ userId: mongoose.Types.ObjectId; phoneHashes?: string[]; emailHashes?: string[] }[]>();
 
   // A verzoek already in flight either way is left out too, as
   // `getSuggestions` does: the app folds these into "Mensen die je misschien
-  // kent", where a row offering "Uitnodigen" for a pending verzoek is wrong.
+  // kent", where a row offering "Toevoegen" for a pending verzoek is wrong.
   const [existing, blocked, inFlight] = await Promise.all([
     friendIdsFor(userId),
     blockedBetween(userId),
     requestsInFlight(userId),
   ]);
   const already = new Set(existing);
-  const ids = rows
-    .map((row) => String(row.userId))
-    .filter((id) => !already.has(id) && !blocked.has(id) && !inFlight.has(id));
+  const uploadedPhones = new Set(phoneHashes);
+  const uploadedEmails = new Set(emailHashes);
+  const matched = new Map<string, string[]>();
+  // Every one of the caller's own hashes that belongs to a findable account
+  // they may see - including existing friends and pending verzoeken, who are
+  // not offered "Toevoegen" but must not be offered "Uitnodigen" either.
+  // Never a blocked account's: whether they use the app is theirs to keep.
+  const known = new Set<string>();
+  for (const row of rows) {
+    const id = String(row.userId);
+    if (blocked.has(id)) continue;
+    const hashes = [
+      ...(row.phoneHashes ?? []).filter((hash) => uploadedPhones.has(hash)),
+      ...(row.emailHashes ?? []).filter((hash) => uploadedEmails.has(hash)),
+    ];
+    for (const hash of hashes) known.add(hash);
+    if (already.has(id) || inFlight.has(id)) continue;
+    matched.set(id, hashes);
+  }
 
-  return { found: await summariesFor(ids) };
+  const summaries = await summariesFor([...matched.keys()]);
+  const found: ContactMatch[] = summaries.map((summary) => ({
+    ...summary,
+    matchedHashes: matched.get(summary.userId) ?? [],
+  }));
+  return { found, retained, knownHashes: [...known] };
 }
 
-/** `DELETE /api/v1/friends/discovery` - forget my hashes, stop being findable. */
-export async function forgetDiscovery(userId: string): Promise<FriendMutationResponse> {
+/**
+ * What `DELETE /api/v1/friends/discovery` forgets:
+ * - `own`: my own hashes, so nobody finds me by contact (the findability
+ *   switch going off);
+ * - `contacts`: the hashed address book kept for contact alerts;
+ * - `all` (the default, and what every older client sends): both.
+ */
+export type ForgetScope = 'own' | 'contacts' | 'all';
+
+export function forgetScopeFrom(raw: string | null | undefined): ForgetScope {
+  return raw === 'own' || raw === 'contacts' ? raw : 'all';
+}
+
+/** `DELETE /api/v1/friends/discovery` - forget what `scope` names, really. */
+export async function forgetDiscovery(userId: string, scope: ForgetScope = 'all'): Promise<FriendMutationResponse> {
   await connectMongoDB();
-  await FriendProfile.updateOne(
-    { userId: oid(userId) },
-    { $set: { discoverable: false, phoneHashes: [], emailHashes: [] } },
-  );
+  if (scope !== 'contacts') {
+    await FriendProfile.updateOne(
+      { userId: oid(userId) },
+      { $set: { discoverable: false, phoneHashes: [], emailHashes: [] } },
+    );
+  }
+  if (scope !== 'own') await deleteContactBook(userId);
   return { ok: true };
 }
 

@@ -1,19 +1,31 @@
 import { BASE_URL } from './seo/constants';
-import { hasHadProOrTrial, type TrialUserFields } from './proHistory';
+import { type TrialUserFields } from './proHistory';
 
 /**
  * "Nodig een vriend uit": the rules, pure, so every edge is tested without a
  * database. The writes live in lib/referral.ts.
  *
- * A friend who signs up through someone's link gets a week of Pro straight
- * away. The one who invited them gets a week too, but only once the friend has
- * actually used the app: registration here verifies nothing (the register route
- * writes `emailVerified: false` and nothing ever flips it), so a reward for the
- * signup alone would pay out for made-up addresses.
+ * A friend who signs up through someone's link (or types their code) gets a
+ * week of Pro straight away, and so does the one who invited them - both at
+ * the moment the friend's account is linked (the owner's decision of
+ * 2026-11-09: "jullie krijgen allebei een week").
+ *
+ * Registration here verifies nothing (the register route writes
+ * `emailVerified: false` and nothing ever flips it), so a reward for the signup
+ * alone could pay out for made-up addresses. What keeps that small:
+ * - one claim per account, ever, and only within REFERRAL_CLAIM_WINDOW_DAYS of
+ *   creating it - so one new account is at most one reward for one inviter;
+ * - never your own code;
+ * - at most REFERRAL_CREDIT_CAP inviter weeks per rolling
+ *   REFERRAL_CREDIT_CAP_WINDOW_DAYS: a farm of fake accounts buys at most four
+ *   weeks a month, which is less than the effort of making them.
  *
  * Both weeks are the admin comp mechanism (lib/compedPro.ts): `subscribed` plus
  * `compedProUntil`, expired by the daily sweep. One mechanism on web and app,
- * no store or Stripe involvement.
+ * no store or Stripe involvement. A week lands on top of time already left
+ * (`compWeekUpdate` extends from the later of now and the current end), and an
+ * account that pays - or has open-ended Pro - gets nothing written at all
+ * (`COMP_WRITABLE_FILTER`), so nothing it pays for can be cut short.
  */
 
 export const REFERRAL_REWARD_DAYS = 7;
@@ -22,15 +34,19 @@ export const REFERRAL_REWARD_DAYS = 7;
  * to install the app from the invite page and sign up there. */
 export const REFERRAL_CLAIM_WINDOW_DAYS = 7;
 
-/** How long the friend has to become active for the inviter to be rewarded. */
+/**
+ * How long a friend who claimed BEFORE inviter weeks moved to signup has to
+ * become active for the inviter to be rewarded. Only `creditReferrerIfActivated`
+ * still reads it, for those older claims.
+ */
 export const REFERRAL_ACTIVATION_WINDOW_DAYS = 30;
 
 /** XP that counts as "actually used it" when no lesson was finished: about a
  * dozen chapters, or two studied plan days. */
 export const REFERRAL_ACTIVATION_XP = 60;
 
-/** Activations per inviter per rolling window that still earn a week. */
-export const REFERRAL_CREDIT_CAP = 10;
+/** Inviter weeks per rolling window. Four weeks a month, at most. */
+export const REFERRAL_CREDIT_CAP = 4;
 export const REFERRAL_CREDIT_CAP_WINDOW_DAYS = 30;
 
 /** No 0/O or 1/I/L: codes get read aloud and typed over from a screenshot. */
@@ -62,9 +78,10 @@ export function inviteUrl(code: string): string {
 }
 
 /**
- * The message the share sheet sends. "We allebei" only when the inviter can
- * actually earn a week (`youEarn`): a paying or trialling Pro member never
- * does, so their message offers the friend's week alone.
+ * The message the share sheet (and the app's WhatsApp invite) sends. "We
+ * allebei" only when the inviter can actually earn a week (`youEarn`): a paying
+ * Pro member, or an inviter at the monthly cap, does not, so their message
+ * offers the friend's week alone.
  */
 export function inviteShareText(code: string, inviterEarns = true): string {
   const reward = inviterEarns ? 'dan krijgen we allebei een week Pro' : 'dan krijg je meteen een week Pro';
@@ -146,16 +163,26 @@ export interface ClaimantFields extends Omit<TrialUserFields, '_id'>, CompFields
  * Why this account may not enter a code, or null when it may. The code itself
  * is checked separately (it needs a lookup); this is everything about the
  * person entering it.
+ *
+ * Having Pro is no longer a refusal. A new account that already pays (an
+ * onboarding purchase) or runs a trial still links to whoever invited it - the
+ * inviter earned their week either way - and simply gets no comp week written
+ * for itself, because `COMP_WRITABLE_FILTER` never writes one onto a paying
+ * account. A dated comp (the admin grant, or a trial given as a comp) does get
+ * the week on top. `ALREADY_PRO` stays in the type for clients that know it.
  */
-export function claimantRefusal(user: ClaimantFields, isPro: boolean, now: Date): ClaimRefusal | null {
+export function claimantRefusal(user: ClaimantFields, _isPro: boolean, now: Date): ClaimRefusal | null {
   if (user.referredBy) return 'ALREADY_CLAIMED';
   const created = user.createdAt ? new Date(user.createdAt).getTime() : NaN;
   if (!Number.isFinite(created) || now.getTime() - created > REFERRAL_CLAIM_WINDOW_DAYS * DAY_MS) {
     return 'NOT_NEW_ACCOUNT';
   }
-  if (isPro || hasHadProOrTrial(user) || !canReceiveCompWeek(user)) return 'ALREADY_PRO';
   return null;
 }
+
+/** What the friend reads after a claim that linked but could not add a week. */
+export const CLAIM_LINKED_NO_WEEK_MESSAGE =
+  'Gelukt, je bent gekoppeld aan je vriend. Je hebt al Pro, dus voor jou komt er geen week bij.';
 
 /** Dutch, for the web card and the app alike. */
 export const CLAIM_REFUSAL_MESSAGES: Record<ClaimRefusal, string> = {
