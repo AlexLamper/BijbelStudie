@@ -257,7 +257,7 @@ export function generateTree(input: TreeInput): TreeScene {
     ? Math.max(1, Math.floor(input.at.step ?? e + 1e-9))
     : structuralStep(level, floor);
   const size = sizeAt(form, e);
-  const droopT = (1 - health) * 0.25;
+  const droopT = (1 - health) * 0.45;
   /** The step a level-gated feature arrived at, never later than now. */
   const stepOfLevel = (lvl: number) => Math.min(k, input.at ? lvl : structuralStep(lvl, floor));
 
@@ -721,7 +721,7 @@ export function generateTree(input: TreeInput): TreeScene {
 
   // Wilt sheds a scatter rather than a block, and the same leaves return on
   // recovery because `hardiness` is seeded. Older leaves open first.
-  const visibleCut = 0.55 + 0.45 * health;
+  const visibleCut = 0.3 + 0.7 * health;
   const order = leaves.map((_, i) => i);
   order.sort((a, b) => {
     const la = leaves[a];

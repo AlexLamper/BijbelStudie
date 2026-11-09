@@ -17,6 +17,7 @@ import DashboardFeedbackSlot from "../../components/feedback/DashboardFeedbackSl
 import { FriendsDashboardSection } from "../../components/friends/FriendsDashboardSection"
 import { useTreeSummary } from "../../components/dashboard/ProgressTree"
 import TreeCard from "../../components/dashboard/TreeCard"
+import DailyGoalCard from "../../components/dailyGoal/DailyGoalCard"
 import AppShell from "../../components/shell/AppShell"
 import StreakPill from "../../components/kit/StreakPill"
 import {
@@ -169,6 +170,17 @@ export default function DashboardPage() {
               level on it, three lines of text, a chevron. The card is the link;
               the progress is the ring, so there is no bar and no "Bekijken →".
               components/dashboard/TreeCard.tsx owns the lay-out. */}
+          {/* Vandaag: the daily goal ring and the level with its XP bar,
+              above the tree it feeds. Signed in only - a guest has no goal to
+              keep. The tree's thirst is TreeCard's third line. */}
+          {!isGuest && (
+            <DailyGoalCard
+              level={level}
+              xpIntoLevel={d.level?.xpIntoLevel ?? 0}
+              xpForNextLevel={d.level?.xpForNextLevel ?? Math.max(1, remainingXp)}
+            />
+          )}
+
           <TreeCard level={level} pct={pct} remainingXp={remainingXp} />
 
           {/* Deze week */}

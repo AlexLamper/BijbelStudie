@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../lib/authOptions";
 import SessionProvider from "../../components/providers/SessionProvider";
+import ReadingClock from "../../components/dailyGoal/ReadingClock";
 import { cookies } from "next/headers";
 import { cookieName, fallbackLng } from "../i18n/settings";
 import { generatePageMetadata } from "../../lib/pageMetadata";
@@ -40,6 +41,8 @@ export default async function ReadLayout({
 
   return (
     <SessionProvider session={session}>
+      {/* Counts reading time for the daily goal (lib/dailyGoal.ts). */}
+      <ReadingClock />
       {children}
     </SessionProvider>
   );

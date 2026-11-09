@@ -18,6 +18,18 @@ import { CLICK_TARGETS, ROUTE_KEYS } from "./analyticsRoutes";
  */
 const PLATFORM = ["web", "ios", "android"] as const;
 
+/** The app's local reminder types that count as a reminder (push_opened / push_ignored). */
+const REMINDER_TYPES = [
+  "morning", "evening", "streakAtRisk", "streakLost", "lessonHalfway",
+  "weeklyGoal", "dormant", "treeWilting",
+] as const;
+
+/** The four daily goals, as strings (lib/dailyGoal.ts DAILY_GOAL_OPTIONS). */
+const DAILY_GOAL_MINUTES = ["5", "10", "15", "20"] as const;
+
+/** Win-back mail stages, in days away (lib/winback.ts WINBACK_STAGES). */
+const WINBACK_STAGES = ["3", "7", "14"] as const;
+
 /**
  * Every prop above is a closed set of strings. The tree events below need a
  * couple of real numbers (a level, a step) and one boolean, so this adds two
@@ -272,6 +284,52 @@ export const EVENTS = {
     done: num(0, 4),
     skipped: num(0, 4),
     platform: PLATFORM,
+  },
+
+  /**
+   * Retention (smart reminders, daily goal, levels, win-back mail). Every prop
+   * is a closed set or a bounded number, like the rest of this file.
+   *
+   * `type` is the app's local notification type id (NotifType.id in
+   * lib/core/notifications/notification_service.dart). `push_ignored` is sent
+   * by the app when it next opens: a reminder that fired and was neither
+   * tapped nor followed by an open within three hours.
+   */
+  push_opened: {
+    type: REMINDER_TYPES,
+    platform: PLATFORM,
+  },
+  push_ignored: {
+    type: REMINDER_TYPES,
+    platform: PLATFORM,
+  },
+  /** The reminders went quiet: this many ignored in a row (lib/core/notifications/reminder_policy.dart). */
+  reminders_paused: {
+    ignored: num(0, 50),
+    platform: PLATFORM,
+  },
+  /** A daily goal was picked or changed. */
+  daily_goal_set: {
+    minutes: DAILY_GOAL_MINUTES,
+    source: ["setup", "settings", "start", "web_dashboard", "web_settings"],
+    platform: PLATFORM,
+  },
+  /** Written by the server, once per day, the moment the goal is met (lib/dailyGoal.ts). */
+  daily_goal_reached: {
+    minutes: DAILY_GOAL_MINUTES,
+    platform: PLATFORM,
+  },
+  /** Written by the server in lib/gamification.ts `grantXp` whenever XP crosses a level. */
+  level_up: {
+    level: num(1, 1000),
+  },
+  /** Written by the win-back cron (lib/winback.ts), one per mail that left. */
+  winback_email_sent: {
+    stage: WINBACK_STAGES,
+  },
+  /** The mail's button, counted by the redirect at /api/email/c. */
+  winback_email_clicked: {
+    stage: WINBACK_STAGES,
   },
 } as const;
 

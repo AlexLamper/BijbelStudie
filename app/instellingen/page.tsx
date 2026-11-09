@@ -17,6 +17,7 @@ import { VRIENDENKRING_SECTION } from "../../components/settings/vriendenkringCo
 import PasswordSection from "../../components/settings/PasswordSection"
 import DeleteAccountSection from "../../components/settings/DeleteAccountSection"
 import FeedbackPromptsSetting from "../../components/settings/FeedbackPromptsSetting"
+import RetentionSettings from "../../components/settings/RetentionSettings"
 import AppShell from "../../components/shell/AppShell"
 import { INSTELLINGEN_SECTIES, INTENT_EVENT, consumeHash, readIntent, scrollToSetting, settingHash, writeParam } from "../../lib/commands/deepLink"
 import { Card, Skeleton } from "../../components/kit/primitives"
@@ -543,6 +544,8 @@ export default function SettingsPage() {
                 </p>
               </SectionCard>
             )}
+
+            {section === "meldingen" && <RetentionSettings />}
 
             {section === "meldingen" && <FeedbackPromptsSetting />}
 

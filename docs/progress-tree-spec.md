@@ -214,7 +214,7 @@ tD     = draws("T")
 lean   = (tD[7] · 2 − 1) · GEOMETRY.lean · sp.leanMul        # degrees, applied to the trunk
 angle0 = −90 + lean
 size   = sizeAt(form, e)                                     # §4.5
-droopT = (1 − health) · 0.25
+droopT = (1 − health) · 0.45
 
 1. main tree - palm: growPalm("T", 50, angle0, 1, 1, 1)                        (§4.8)
                else: node T at (50, 88), heading angle0, born 1, depth 0;
@@ -578,7 +578,7 @@ leafSizeAtDepth(d) = max(leafSizeDepthMin, leafSizeDepthBase − leafSizeDepthDr
 
 Set once the whole tree exists:
 
-- **visible** - `hardiness <= 0.55 + 0.45 · health`. A wilting tree sheds a
+- **visible** - `hardiness <= 0.3 + 0.7 · health`. A wilting tree sheds a
   scatter of leaves rather than a block, and the same leaves come back on
   recovery because `hardiness` is seeded.
 - **open** - all `n` leaves sorted by `(birth, path)`; `bloomOrder` is the
@@ -640,6 +640,10 @@ Recovery is immediate: any XP event moves `lastStreakDate` to today through the
 existing streak flow, so the next `GET /api/v1/gamification` returns `1.0` and
 the client animates the tree back up over ~1.5 s.
 
+The retention pass (Nov 2026) made the three wilt terms stronger, so a
+skipped day shows: at the 0.3 floor about half the leaves are down, the tips
+hang and the green dulls. Health itself and its floor did not change.
+
 Visual mapping: `droopT` (§4.5, fronds §4.8), leaf `visible` (§4.11), plus
 canopy saturation × `(0.6 + 0.4 * health)` in the renderers. `health` never
 touches `xp`, `level` or what exists.
@@ -687,7 +691,7 @@ RNG. Sky is a two-stop vertical gradient; every other colour is a flat hex.
 | winter | `#7D8B7A` | `#9AA79A` | - | `#5B6660` |
 
 Bark is `#4A3A2E`, lit edge `#6B5442`; night desaturates everything by mixing
-25 % toward `#1B2340`. Wilt mixes the leaf colours `(1 - health) * 0.4` toward
+25 % toward `#1B2340`. Wilt mixes the leaf colours `(1 - health) * 0.6` toward
 `#8A8F7A`.
 
 ### 7.1 Species and the seasons

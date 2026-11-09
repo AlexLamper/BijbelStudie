@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../lib/authOptions";
 import SessionProvider from "../../components/providers/SessionProvider";
 import LessonRail from "../../components/shell/LessonRail";
+import ReadingClock from "../../components/dailyGoal/ReadingClock";
 import { generatePageMetadata } from "../../lib/pageMetadata";
 
 import { cookies } from "next/headers";
@@ -63,6 +64,8 @@ export default async function StudyLayout({
     // without them is sized to its content rather than to the viewport.
     <div className="relative flex h-[100dvh] w-full min-w-0 overflow-hidden bg-les-bg text-les-ink antialiased">
       <SessionProvider session={session}>
+        {/* Counts reading time for the daily goal (lib/dailyGoal.ts). */}
+        <ReadingClock />
         {/* The app's sidebar, collapsed to 64 px of icons. Same items, same
             order - see components/shell/nav.ts.
 

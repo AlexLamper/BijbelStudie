@@ -36,6 +36,8 @@ export type FooterLinks = {
   unsubscribeTypeUrl: string;
   /** Turns off every engagement email. */
   unsubscribeAllUrl: string;
+  /** Why this mail came, in one sentence. Defaults to the notifications line. */
+  reason?: string;
 };
 
 /** `&`, `<`, `>` and quotes, so an interpolated book title cannot break out. */
@@ -85,7 +87,7 @@ function footer(links: FooterLinks | null): string {
   return `<tr>
   <td style="padding:20px 32px 32px;border-top:1px solid ${BORDER};">
     <p style="margin:0 0 8px;font-family:${FONT};font-size:12px;line-height:1.6;color:${SLATE_400};">
-      Je krijgt deze mail omdat je meldingen hebt aanstaan in je BijbelStudie-account.
+      ${escapeHtml(links.reason ?? 'Je krijgt deze mail omdat je meldingen hebt aanstaan in je BijbelStudie-account.')}
     </p>
     <p style="margin:0 0 8px;font-family:${FONT};font-size:12px;line-height:1.6;color:${SLATE_400};">
       <a href="${escapeHtml(links.unsubscribeTypeUrl)}" style="color:${TEAL};">Deze soort uitzetten</a>

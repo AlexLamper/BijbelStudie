@@ -132,6 +132,11 @@ export type ScheduleTask = StudyTask | ChapterTask | { kind: 'verse' };
 export type ScheduleContext = {
   study: StudyTask | null;
   chapter: ChapterTask | null;
+  /**
+   * The reader's chosen daily goal in minutes (lib/dailyGoal.ts), or null when
+   * they never picked one. With a goal, the evening's first variant names it.
+   */
+  goalMinutes?: number | null;
 };
 
 export type ScheduleVerse = NonNullable<NotificationScheduleDay['verse']>;
@@ -278,7 +283,29 @@ function morningTaskLines(task: ScheduleTask): string[] {
   }
 }
 
-function eveningLines(task: ScheduleTask, verse: ScheduleVerse | null): Line[] {
+/**
+ * The evening's first variant when the reader has a daily goal: the task as a
+ * question, the goal as the reason it is a small one.
+ */
+function goalEveningLine(task: ScheduleTask, goal: number): Line {
+  const rest = `${goal} minuten en je dagdoel is binnen.`;
+  switch (task.kind) {
+    case 'study':
+      return { title: fitTitle((s) => `Verder met ${s}?`, task.title), body: `Les ${task.lessonDay} ligt klaar. ${rest}` };
+    case 'chapter':
+      return { title: `Verder in ${task.book} ${task.chapter}?`, body: rest };
+    case 'verse':
+      return { title: 'Even tijd voor het Woord?', body: `${goal} minuten lezen en je dagdoel is binnen.` };
+  }
+}
+
+function eveningLines(task: ScheduleTask, verse: ScheduleVerse | null, goalMinutes?: number | null): Line[] {
+  const lines = baseEveningLines(task, verse);
+  if (goalMinutes && goalMinutes > 0) lines[0] = goalEveningLine(task, goalMinutes);
+  return lines;
+}
+
+function baseEveningLines(task: ScheduleTask, verse: ScheduleVerse | null): Line[] {
   switch (task.kind) {
     case 'study': {
       const min = remainingStudyMinutes(task);
@@ -338,8 +365,9 @@ export function buildEvening(
   task: ScheduleTask,
   verse: ScheduleVerse | null,
   date: string,
+  goalMinutes?: number | null,
 ): ScheduledNotificationContent {
-  const lines = eveningLines(task, verse);
+  const lines = eveningLines(task, verse, goalMinutes);
   return content(task.kind, lines[variantIndex(date, lines.length, 2)], routeForTask(task));
 }
 
@@ -354,7 +382,7 @@ export function buildScheduleDay(
     date,
     verse,
     morning: buildMorning(task, verse, date),
-    evening: buildEvening(task, verse, date),
+    evening: buildEvening(task, verse, date, ctx.goalMinutes),
   };
 }
 
@@ -364,12 +392,70 @@ export function buildScheduleResponse(input: {
   ctx: ScheduleContext;
   verses: (ScheduleVerse | null)[];
   now?: Date;
+  habit?: ReadingHabit | null;
 }): NotificationScheduleResponse {
   return {
     generatedAt: (input.now ?? new Date()).toISOString(),
     timeZone: input.timeZone,
     days: input.dates.map((date, i) => buildScheduleDay(date, input.ctx, input.verses[i] ?? null)),
+    habit: input.habit ?? { minutes: null, days: 0 },
   };
+}
+
+// ---------------------------------------------------------------------------
+// Reading habit: when this reader usually reads
+// ---------------------------------------------------------------------------
+
+export type ReadingHabit = NonNullable<NotificationScheduleResponse['habit']>;
+
+/** Sittings on fewer distinct days than this are not a habit yet. */
+export const HABIT_MIN_DAYS = 3;
+/** How far back sittings count. */
+export const HABIT_LOOKBACK_DAYS = 28;
+/** The reminder comes this long before the usual time, so it can be acted on. */
+export const HABIT_LEAD_MINUTES = 15;
+
+function minuteOfDay(instant: Date, timeZone: string): number {
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone,
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(instant);
+  const h = Number(parts.find((p) => p.type === 'hour')?.value);
+  const m = Number(parts.find((p) => p.type === 'minute')?.value);
+  return (Number.isFinite(h) ? h % 24 : 0) * 60 + (Number.isFinite(m) ? m : 0);
+}
+
+/**
+ * When to remind a reader who reads at these instants, in minutes past local
+ * midnight, or null while there is no habit to go on.
+ *
+ * The first sitting of each day counts (a reader who opens the app three times
+ * one evening has one habit, not three), then the median of those minutes,
+ * with the day starting at 04:00 so a 23:50 and a 00:20 read sit together.
+ * The reminder is [HABIT_LEAD_MINUTES] before that, on the nearest quarter hour. Pure:
+ * the loader passes the instants in, tests pass their own.
+ */
+export function habitFromSittings(instants: Date[], timeZone: string): ReadingHabit {
+  const firstPerDay = new Map<string, number>();
+  const sorted = [...instants].filter((d) => Number.isFinite(d.getTime())).sort((a, b) => a.getTime() - b.getTime());
+  for (const instant of sorted) {
+    // Shifting by four hours files a 01:00 read under the evening before.
+    const key = localDateKey(new Date(instant.getTime() - 4 * 3_600_000), timeZone);
+    if (!firstPerDay.has(key)) {
+      const m = minuteOfDay(instant, timeZone);
+      firstPerDay.set(key, m < 240 ? m + 1440 : m);
+    }
+  }
+  const days = firstPerDay.size;
+  if (days < HABIT_MIN_DAYS) return { minutes: null, days };
+  const values = [...firstPerDay.values()].sort((a, b) => a - b);
+  const mid = Math.floor(values.length / 2);
+  const median = values.length % 2 === 1 ? values[mid] : Math.round((values[mid - 1] + values[mid]) / 2);
+  const lead = median - HABIT_LEAD_MINUTES;
+  const quarter = Math.round(lead / 15) * 15;
+  return { minutes: ((quarter % 1440) + 1440) % 1440, days };
 }
 
 // ---------------------------------------------------------------------------
@@ -377,7 +463,10 @@ export function buildScheduleResponse(input: {
 // ---------------------------------------------------------------------------
 
 type LastReadChapter = { book?: string | null; chapter?: number | null; updatedAt?: Date | string | null };
-type LeanUserChapter = { lastReadChapter?: LastReadChapter | null } | null;
+type LeanUserChapter = {
+  lastReadChapter?: LastReadChapter | null;
+  dailyGoal?: { minutes?: number | null } | null;
+} | null;
 type LeanEnrollment = {
   studyId: string;
   status: string;
@@ -421,7 +510,7 @@ export async function loadScheduleContext(
   await connectMongoDB();
 
   const [user, enrollments] = await Promise.all([
-    User.findById(userId).select('lastReadChapter').lean<LeanUserChapter>(),
+    User.findById(userId).select('lastReadChapter dailyGoal.minutes').lean<LeanUserChapter>(),
     StudyEnrollment.find({ userId, status: 'active' })
       .sort({ lastActivityAt: -1 })
       .limit(RUNNING_LIMIT)
@@ -437,8 +526,30 @@ export async function loadScheduleContext(
     now,
   );
   const study = running[0] && !studyIsStale ? studyTaskFor(running[0], resume.resolveStudyCursor) : null;
+  const goal = user?.dailyGoal?.minutes;
+  const goalMinutes = typeof goal === 'number' && [5, 10, 15, 20].includes(goal) ? goal : null;
 
-  return { study, chapter };
+  return { study, chapter, goalMinutes };
+}
+
+/** The reader's habit from their sittings of the last four weeks (ReadingSession). */
+export async function loadReadingHabit(userId: string, timeZone: string, now: Date = new Date()): Promise<ReadingHabit> {
+  try {
+    const [{ default: connectMongoDB }, { default: ReadingSession }] = await Promise.all([
+      import('./mongodb'),
+      import('../models/ReadingSession'),
+    ]);
+    await connectMongoDB();
+    const since = new Date(now.getTime() - HABIT_LOOKBACK_DAYS * 86_400_000);
+    const rows = await ReadingSession.find({ userId, createdAt: { $gte: since } })
+      .sort({ createdAt: -1 })
+      .limit(300)
+      .select('createdAt')
+      .lean<{ createdAt: Date }[]>();
+    return habitFromSittings(rows.map((r) => new Date(r.createdAt)), timeZone);
+  } catch {
+    return { minutes: null, days: 0 };
+  }
 }
 
 function studyTaskFor(
@@ -497,7 +608,7 @@ export async function buildNotificationSchedule(
   const dates = localDates(options.timeZone, options.days, now);
   const { fetchDayTextForDate } = await import('./mobileDayText');
 
-  const [loaded, verses] = await Promise.all([
+  const [loaded, verses, habit] = await Promise.all([
     loadScheduleContext(userId, now),
     exclude.has('verse')
       ? Promise.resolve(dates.map(() => null))
@@ -507,6 +618,7 @@ export async function buildNotificationSchedule(
             return v ? { text: v.text, reference: v.reference, translation: v.version || 'Statenvertaling' } : null;
           }),
         ),
+    loadReadingHabit(userId, options.timeZone, now),
   ]);
   // A switched-off kind falls through to the next priority (taskForDate).
   const ctx: ScheduleContext = {
@@ -514,5 +626,5 @@ export async function buildNotificationSchedule(
     study: exclude.has('study') ? null : loaded.study,
   };
 
-  return buildScheduleResponse({ dates, timeZone: options.timeZone, ctx, verses, now });
+  return buildScheduleResponse({ dates, timeZone: options.timeZone, ctx, verses, now, habit });
 }

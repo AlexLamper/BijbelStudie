@@ -6,6 +6,7 @@ import BibleYearEnrollment from '../models/BibleYearEnrollment.js';
 import { creditReferrerIfActivated } from './referral';
 import { announceBadges, announceStreak } from './friends/milestones';
 import { availableFreezes, currentStreak } from './streak';
+import { recordServerEvent } from './serverAnalytics';
 
 /**
  * XP, levels and badges.
@@ -29,7 +30,8 @@ export type XpEvent =
   | 'plan_completed'
   | 'streak_day'
   | 'note_written'
-  | 'onboarding_guide';
+  | 'onboarding_guide'
+  | 'daily_goal';
 
 export const XP_VALUES: Record<XpEvent, number> = {
   chapter_read: 5,
@@ -51,6 +53,10 @@ export const XP_VALUES: Record<XpEvent, number> = {
   // guide's note and chapter under REFERRAL_ACTIVATION_XP (60), so finishing
   // the guide alone never counts as "actually used it" for an inviter.
   onboarding_guide: 40,
+  // The daily goal (lib/dailyGoal.ts): paid once per day, the moment the
+  // reader's own minutes are in. Small on purpose - the reading that got them
+  // there already earned its own XP; this is the "you did what you meant to".
+  daily_goal: 10,
 };
 
 export const XP_LABELS: Record<XpEvent, string> = {
@@ -63,6 +69,7 @@ export const XP_LABELS: Record<XpEvent, string> = {
   streak_day: 'Dagelijkse reeks',
   note_written: 'Aantekening gemaakt',
   onboarding_guide: 'Rondleiding afgerond',
+  daily_goal: 'Dagdoel gehaald',
 };
 
 /**
@@ -266,6 +273,10 @@ export async function grantXp(
   // reader's XP cannot be lost to a feed card.
   await announceBadges(String(userId), newBadges);
   if (event === 'streak_day') await announceStreak(String(userId), updated.streak ?? 0);
+
+  // Retention measurement: one row per level crossed, whichever client earned
+  // it. Never throws (lib/serverAnalytics.ts).
+  if (level > levelBefore) await recordServerEvent('level_up', userId, { level });
 
   return { xp, level, levelledUp: level > levelBefore, awarded: amount, newBadges };
 }

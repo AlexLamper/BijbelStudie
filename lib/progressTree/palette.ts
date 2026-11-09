@@ -134,7 +134,7 @@ export function buildPalette(
   // Always lower-case hex out, whether or not a mix touched the colour, so a
   // renderer key or a test never sees the same colour spelled two ways.
   const desaturate = (color: string) => (night ? mix(color, NIGHT_MIX, 0.25) : color.toLowerCase());
-  const wilt = (color: string) => mix(color, WILT_MIX, (1 - health) * 0.4);
+  const wilt = (color: string) => mix(color, WILT_MIX, (1 - health) * 0.6);
 
   // A species with its own green keeps it in spring and summer. Deciduous ones
   // turn with the season like the eik; evergreens only dull a little in winter.

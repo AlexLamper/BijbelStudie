@@ -245,6 +245,38 @@ const UserSchema = new mongoose.Schema(
       updatedAt: { type: Date }
     },
     readChapters: { type: Map, of: [Number], default: {} },
+    // --- Retention (lib/dailyGoal.ts, lib/winback.ts). All additive: a
+    // document without these reads as "goal not chosen yet, mail allowed,
+    // nothing sent", which is exactly what every existing account is.
+    //
+    // The daily goal in minutes (5/10/15/20), picked in setup or Settings and
+    // shared by web and app. `day` is the reader's own local calendar day the
+    // `seconds` counter belongs to; a report for a later day restarts it, one
+    // for an earlier day is ignored. `reachedDay` is what makes the goal pay
+    // its XP and fire its event once per day, whichever client got there.
+    dailyGoal: {
+      minutes: { type: Number, default: null },
+      day: { type: String, default: null },
+      seconds: { type: Number, default: 0 },
+      reachedDay: { type: String, default: null },
+      updatedAt: { type: Date },
+    },
+    // Engagement email switches. Opt-out: absent means on. `all: false` is the
+    // footer's "Alle e-mails uitzetten" and wins over every type below it.
+    emailPrefs: {
+      winback: { type: Boolean, default: true },
+      all: { type: Boolean, default: true },
+      updatedAt: { type: Date },
+    },
+    // Win-back mail bookkeeping. `awayFrom` is the last-active instant the
+    // current absence is measured from; `stage` the highest stage (3, 7, 14)
+    // already sent for it. Coming back moves the last-active instant, which is
+    // what starts a fresh absence at stage 0.
+    winback: {
+      awayFrom: { type: Date, default: null },
+      stage: { type: Number, default: 0 },
+      sentAt: { type: Date, default: null },
+    },
   },
   { timestamps: true },
 )

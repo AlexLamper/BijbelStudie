@@ -44,4 +44,12 @@ export type NotificationScheduleResponse = {
   generatedAt: string;
   timeZone: string;
   days: NotificationScheduleDay[];
+  /**
+   * When this reader usually reads, learned from their sittings
+   * (lib/notificationSchedule.ts `habitFromSittings`): `minutes` past local
+   * midnight for the reminder, already a little before the usual time, or
+   * null while there are fewer than three days to go on. `days` is how many
+   * distinct days it is based on. Additive: older app builds ignore it.
+   */
+  habit?: { minutes: number | null; days: number };
 };

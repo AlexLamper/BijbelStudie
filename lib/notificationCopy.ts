@@ -183,6 +183,7 @@ const STUDY_NUDGE: Variant[] = [
  * (lib/progressTree/health.ts) precisely so this copy never has to threaten.
  */
 const TREE_WILTING: Variant[] = [
+  { id: 'b06', title: 'Je boom heeft dorst', body: 'Hij laat zijn blaadjes wat hangen. Even lezen en hij staat weer recht.', needs: [] },
   { id: 'b01', title: 'Je boom mist wat licht', body: 'Twee dagen zonder lezen. Een paar verzen en hij staat er weer fris bij.', needs: [] },
   { id: 'b02', title: 'Je boom wacht op je', body: 'Eén kort stuk laat hem weer opveren.', needs: [] },
   { id: 'b03', title: 'Even water geven', body: 'Je boom hangt wat slap. Tien minuten lezen is genoeg.', needs: [] },

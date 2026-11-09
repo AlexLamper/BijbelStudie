@@ -136,10 +136,18 @@ export default function TreeCard({
               {hasSteps ? tree.stageName : `Niveau ${shownLevel}`}
             </div>
             {hasSteps && <div className="mt-[3px] text-[13px] text-ink-muted">{tree.stepOnly}</div>}
-            {xpLine && (
+            {tree.hasTree && tree.wilting ? (
+              // The tree's condition wins the third line while it droops: it is
+              // the one thing on this card the reader can change today.
               <div className="mt-[7px] text-[13px] font-semibold text-teal-dark dark:text-teal-400">
-                {xpLine}
+                Heeft dorst. Even lezen en hij knapt op.
               </div>
+            ) : (
+              xpLine && (
+                <div className="mt-[7px] text-[13px] font-semibold text-teal-dark dark:text-teal-400">
+                  {xpLine}
+                </div>
+              )
             )}
           </div>
 
