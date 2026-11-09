@@ -324,8 +324,8 @@ export function personalLimitReason(feature: ProFeature): string {
 export function freeIncludes(limited: ProFeature | null): string[] {
   const lines = ["de Bijbel lezen in alle vertalingen", "alle begeleide studies", "het KingComments-commentaar"];
   if (limited !== "ai") lines.push(`${FREE_AI_DAILY_CAP} AI-vragen per dag`);
-  if (limited !== "notes") lines.push(`${FREE_NOTE_LIMIT} notities, en markeren zoveel je wilt`);
-  else lines.push("markeren zoveel je wilt");
+  if (limited !== "notes") lines.push(`${FREE_NOTE_LIMIT} notities (markeren onbeperkt)`);
+  else lines.push("onbeperkt markeren");
   if (limited !== "study") lines.push(`${FREE_CROSS_REFS} kruisverwijzingen per vers`);
   return lines;
 }

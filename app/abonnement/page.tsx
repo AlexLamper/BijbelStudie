@@ -68,7 +68,7 @@ function AboutPro() {
           Pro days and the personal limit after them (lib/entitlements.ts). */}
       <h2 className={`mt-7 ${LABEL} text-ink-faint`}>Gratis</h2>
       <p className="mt-[10px] max-w-[520px] text-[14px] leading-[1.55] text-ink-body">
-        Gratis heb je {dutchList(freeIncludes(null))}. De eerste {REVERSE_TRIAL_DAYS} dagen waarop je
+        Gratis: {dutchList(freeIncludes(null))}. De eerste {REVERSE_TRIAL_DAYS} dagen waarop je
         BijbelStudie opent heb je alles van Pro. Daarna houd je van wat je het meest gebruikte een klein
         dagelijks deel, en de rest de gewone gratis limieten.
       </p>

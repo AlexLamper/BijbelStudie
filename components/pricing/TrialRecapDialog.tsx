@@ -68,7 +68,7 @@ export default function TrialRecapDialog({ pending }: { pending: boolean }) {
     { icon: BookOpen, value: trial.usage.chapters, label: trial.usage.chapters === 1 ? "hoofdstuk gelezen" : "hoofdstukken gelezen" },
     { icon: NotebookPen, value: trial.usage.notes, label: trial.usage.notes === 1 ? "notitie" : "notities" },
     { icon: MessageCircle, value: trial.usage.ai, label: trial.usage.ai === 1 ? "AI-vraag" : "AI-vragen" },
-    { icon: Flame, value: data.streak, label: data.streak === 1 ? "dag reeks" : "dagen reeks" },
+    { icon: Flame, value: data.streak, label: data.streak === 1 ? "dag op rij" : "dagen op rij" },
   ]
 
   return (
