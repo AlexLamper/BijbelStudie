@@ -2,6 +2,7 @@ import type { Faq } from "./homeFaq";
 import {
   FREE_AI_DAILY_CAP,
   FREE_NOTE_LIMIT,
+  EXISTING_ACCOUNT_TRIAL_LINE,
   PERSONAL_LIMIT_SUMMARY,
   PRO_AI_DAILY_CAP,
   REVERSE_TRIAL_SUMMARY,
@@ -139,7 +140,7 @@ export const HELP_TOPICS: HelpTopic[] = [
       },
       {
         q: "Hoe werken de gratis Pro-dagen?",
-        a: `${REVERSE_TRIAL_SUMMARY} ${PERSONAL_LIMIT_SUMMARY}`,
+        a: `${REVERSE_TRIAL_SUMMARY} ${EXISTING_ACCOUNT_TRIAL_LINE} ${PERSONAL_LIMIT_SUMMARY}`,
       },
       {
         q: "Wat krijg ik met Pro?",

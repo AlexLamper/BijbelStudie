@@ -20,6 +20,8 @@ import {
 import { promoteReflectionToNote, recordLessonCompletion } from '../../../../lib/studyCompletion';
 import { resolveLessonSteps } from '../../../../lib/lessonPayload';
 import { upsertLessonState } from '../../../../lib/lessonStateWrite';
+import { lessonAccess, lessonRefusal } from '../../../../lib/lessonAllowance';
+import { recordTrialUsage } from '../../../../lib/reverseTrial';
 import { nextPrompt } from '../../../../lib/feedbackService';
 import type { SerialisedPrompt } from '../../../../lib/feedbackPrompts';
 import {
@@ -181,6 +183,21 @@ export async function PATCH(req: Request) {
 
     await connectMongoDB();
 
+    // A write to a lesson that was never opened is starting it: the personal
+    // studies limit applies here too, not only where the lesson is served.
+    const access = await lessonAccess(auth, studyId, lessonDay);
+    if (!access.allowed) return jsonV1(lessonRefusal(access), { status: 403 });
+
+    // During the reverse trial a step worked through for the first time
+    // counts toward "studies"; read before the write so a repeat does not.
+    const counting = auth.trial?.state === 'active';
+    const before =
+      counting && typeof body.completeStep === 'string'
+        ? await StudyLessonState.findOne({ userId: auth.id, studyId, lessonDay })
+            .select('stepsCompleted')
+            .lean<{ stepsCompleted?: string[] }>()
+        : null;
+
     const set: Record<string, unknown> = {};
     const addToSet: Record<string, unknown> = {};
 
@@ -252,6 +269,10 @@ export async function PATCH(req: Request) {
     // flow fires both at once on the quiz step. See lib/lessonStateWrite.
     await upsertLessonState({ userId: auth.id, studyId, lessonDay }, update);
 
+    if (counting && typeof body.completeStep === 'string' && !before?.stepsCompleted?.includes(body.completeStep)) {
+      void recordTrialUsage(auth.id, 'lessonSteps', auth.reverseTrial);
+    }
+
     let completion: Awaited<ReturnType<typeof recordLessonCompletion>> | null = null;
     let noteId: string | null = null;
     let feedbackPrompt: SerialisedPrompt | null = null;
@@ -272,6 +293,7 @@ export async function PATCH(req: Request) {
         verseStart: passage.verseStart,
         verseEnd: passage.verseEnd,
       });
+      if (counting && completion.recorded) void recordTrialUsage(auth.id, 'lessons', auth.reverseTrial);
 
       const current = await StudyLessonState.findOne({
         userId: auth.id,

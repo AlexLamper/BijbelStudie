@@ -80,6 +80,7 @@ const SURFACE_FEATURE: Partial<Record<ProOfferSurface, ProFeature>> = {
   commentary: "study",
   crossrefs: "study",
   tts: "audio",
+  lessons: "studies",
 }
 
 /**
@@ -87,15 +88,26 @@ const SURFACE_FEATURE: Partial<Record<ProOfferSurface, ProFeature>> = {
  * feature is the AI sees the AI line first, not a generic list.
  */
 const FEATURE_LINES: Record<ProFeature, number[]> = {
+  studies: [],
   ai: [2],
   notes: [3],
   study: [0, 1, 4],
   audio: [6],
 }
 
+/**
+ * Lessons are free for every account but one whose personal limit they are,
+ * so "zoveel lessen als je wilt" is not in PRO_FEATURES (it would tell every
+ * free reader they lack something they have). It leads only for that reader.
+ */
+const STUDIES_LINE = "Zoveel nieuwe lessen per dag als je wilt"
+
 function featuresFirst(feature: ProFeature | null): string[] {
   if (!feature) return PRO_FEATURES.slice(0, 4)
-  const lead = FEATURE_LINES[feature].map((i) => PRO_FEATURES[i])
+  const lead = [
+    ...(feature === "studies" ? [STUDIES_LINE] : []),
+    ...FEATURE_LINES[feature].map((i) => PRO_FEATURES[i]),
+  ]
   return [...lead, ...PRO_FEATURES.filter((line) => !lead.includes(line))].slice(0, 4)
 }
 

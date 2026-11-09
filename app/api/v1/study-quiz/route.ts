@@ -7,6 +7,7 @@ import { findLesson, resolvePassage } from '../../../../lib/studyFlow';
 import { findStudy } from '../../../../lib/studyEnrollmentService';
 import { fetchQuestions, gradeAnswers, isQuizBankConfigured } from '../../../../lib/quizBank';
 import { upsertLessonState } from '../../../../lib/lessonStateWrite';
+import { lessonAccess, lessonRefusal } from '../../../../lib/lessonAllowance';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,6 +38,11 @@ export async function GET(req: Request) {
 
     const lesson = findLesson(study, lessonDay);
     if (!lesson) return errorV1('NOT_FOUND', 404, 'Onbekende les');
+
+    // Asking for a lesson's quiz opens that lesson: the personal studies limit
+    // applies (lib/lessonAllowance) - a lesson already begun always passes.
+    const access = await lessonAccess(auth, studyId, lessonDay);
+    if (!access.allowed) return jsonV1(lessonRefusal(access), { status: 403 });
 
     const content = getLessonContent(studyId, lessonDay);
 

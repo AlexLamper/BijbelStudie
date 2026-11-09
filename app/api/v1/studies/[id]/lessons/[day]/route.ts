@@ -3,6 +3,7 @@ import { corsPreflight, errorV1, handleV1Error, jsonV1 } from '../../../../../..
 import { findLesson, resolveCommentaryId } from '../../../../../../../lib/studyFlow';
 import { findStudy, getEnrollment } from '../../../../../../../lib/studyEnrollmentService';
 import { buildLessonCore } from '../../../../../../../lib/lessonPayload';
+import { lessonAccess, lessonRefusal } from '../../../../../../../lib/lessonAllowance';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,6 +45,11 @@ export async function GET(req: Request, { params }: RouteContext) {
 
     const lesson = findLesson(study, lessonDay);
     if (!lesson) return errorV1('NOT_FOUND', 404, 'Onbekende les');
+
+    // The personal studies limit after the reverse trial: one NEW lesson a
+    // day; a lesson already begun or finished always opens (lib/lessonAllowance).
+    const access = await lessonAccess(auth, id, lessonDay);
+    if (!access.allowed) return jsonV1(lessonRefusal(access), { status: 403 });
 
     const enrollment = await getEnrollment(auth.id, id);
 

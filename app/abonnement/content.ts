@@ -3,6 +3,7 @@ import {
   FREE_AI_DAILY_CAP,
   FREE_GROUP_LIMIT,
   FREE_NOTE_LIMIT,
+  EXISTING_ACCOUNT_TRIAL_LINE,
   PERSONAL_LIMIT_SUMMARY,
   PRO_AI_DAILY_CAP,
   REVERSE_TRIAL_DAYS,
@@ -34,7 +35,8 @@ import { PRO_TRIAL_DAYS } from "../../lib/promo";
  *  - trial: lib/promo.ts `PRO_TRIAL_DAYS`, once per account (lib/trialEligibility.ts)
  *  - the free Pro days and the personal limit: lib/entitlements.ts
  *    (REVERSE_TRIAL_DAYS, TINY_*), enforced by the same routes as the free
- *    limits and counted in lib/reverseTrial.ts
+ *    limits and counted in lib/reverseTrial.ts; the lesson limit by
+ *    lib/lessonAllowance.ts on every route that serves or writes a lesson
  *  - payment methods: app/api/checkout/route.ts `payment_method_types`
  *  - pause 1-3 months: app/api/subscription/pause/route.ts (Stripe only)
  *  - cancel, withdrawal, App Store: app/i18n/locales/nl/terms-of-service.json
@@ -63,7 +65,7 @@ export const ABONNEMENT_FAQ: { q: string; a: string }[] = [
   },
   {
     q: "Wat zijn de gratis Pro-dagen?",
-    a: `${REVERSE_TRIAL_SUMMARY} De dagen tellen alleen als je BijbelStudie echt gebruikt, op de website en in de app samen; een dag waarop je niets opent, telt niet mee. ${PERSONAL_LIMIT_SUMMARY}`,
+    a: `${REVERSE_TRIAL_SUMMARY} De dagen tellen alleen als je BijbelStudie echt gebruikt, op de website en in de app samen; een dag waarop je niets opent, telt niet mee. ${EXISTING_ACCOUNT_TRIAL_LINE} ${PERSONAL_LIMIT_SUMMARY}`,
   },
   {
     q: "Wat kost BijbelStudie Pro?",

@@ -12,6 +12,7 @@ import {
 } from '../../../../../../lib/chapterStudy';
 import { buildLessonCore } from '../../../../../../lib/lessonPayload';
 import { isMobileAllowed } from '../../../../../../lib/mobileLicensing';
+import { lessonAccess, lessonRefusal } from '../../../../../../lib/lessonAllowance';
 
 export const dynamic = 'force-dynamic';
 
@@ -61,6 +62,13 @@ export async function GET(req: Request, { params }: RouteContext) {
     const context = chapterStudyContext(target);
 
     const auth = await resolveUser(req);
+
+    // The personal studies limit (lib/lessonAllowance): a single-chapter study
+    // is a lesson of the book study, and counts like any other.
+    if (auth) {
+      const access = await lessonAccess(auth, study.id, lesson.day);
+      if (!access.allowed) return jsonV1(lessonRefusal(access), { status: 403 });
+    }
 
     let userPreference: string | null = null;
     let enrollment: Awaited<ReturnType<typeof getEnrollment>> = null;

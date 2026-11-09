@@ -14,7 +14,7 @@ const DailyAllowanceSchema = new mongoose.Schema(
   {
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     day: { type: String, required: true }, // Amsterdam "YYYY-MM-DD"
-    feature: { type: String, enum: ["study", "audio"], required: true },
+    feature: { type: String, enum: ["study", "audio", "studies"], required: true },
     keys: { type: [String], default: [] },
     // Characters of natural-voice reading spent today (TINY_TTS_DAILY_CHARS).
     chars: { type: Number, default: 0 },

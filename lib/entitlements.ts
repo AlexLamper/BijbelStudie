@@ -79,10 +79,15 @@ export const REVERSE_TRIAL_DAYS = 3;
  *  - study: Pro study material opened - a Matthew Henry / Calvijn / Dachsel
  *    chapter, the grondtekst, the cross-references;
  *  - audio: background music, a chapter read aloud with a natural voice, a
- *    book downloaded for offline reading.
+ *    book downloaded for offline reading;
+ *  - studies: the guided lessons - steps worked through (quiz and reflection
+ *    included) and lessons finished. Free for everyone, without limit, unless
+ *    it becomes this account's personal limit.
+ * Studies lead the tie-break: they are what readers come back for (Alex, Nov
+ * 2026: 106 enrolments in 30 days, "volgende stap" the most clicked control).
  */
-export type ProFeature = "ai" | "notes" | "study" | "audio";
-export const PRO_FEATURE_KEYS: readonly ProFeature[] = ["ai", "notes", "study", "audio"];
+export type ProFeature = "studies" | "ai" | "notes" | "study" | "audio";
+export const PRO_FEATURE_KEYS: readonly ProFeature[] = ["studies", "ai", "notes", "study", "audio"];
 
 export function isProFeature(value: unknown): value is ProFeature {
   return typeof value === "string" && (PRO_FEATURE_KEYS as readonly string[]).includes(value);
@@ -123,6 +128,13 @@ export const TINY_AUDIO_PER_DAY = 1;
  * spend. Longer than the longest chapter (Psalm 119).
  */
 export const TINY_TTS_DAILY_CHARS = 40_000;
+/**
+ * New lessons a day when studies are the personal limit. Only STARTING a
+ * lesson counts: a lesson already begun - yesterday, last week - is always
+ * finished, and a finished one can always be reread. Enforced by
+ * lib/lessonAllowance.ts wherever a lesson is served or written.
+ */
+export const TINY_LESSONS_PER_DAY = 1;
 
 /**
  * What one account may do right now. `null` means unlimited (Pro). Both
@@ -146,6 +158,8 @@ export interface Limits {
   audioPerDay: number | null;
   /** Offline download of whole books. */
   offline: boolean;
+  /** New lessons a day; null = as many as you like (Pro, and every free account but one). */
+  lessonsPerDay: number | null;
   /** The feature with a personal limit, or null when every limit is the normal one. */
   limitedFeature: ProFeature | null;
 }
@@ -157,6 +171,7 @@ export const PRO_LIMITS: Limits = {
   studyChaptersPerDay: null,
   audioPerDay: null,
   offline: true,
+  lessonsPerDay: null,
   limitedFeature: null,
 };
 
@@ -167,6 +182,7 @@ export const FREE_LIMITS: Limits = {
   studyChaptersPerDay: null,
   audioPerDay: 0,
   offline: false,
+  lessonsPerDay: null,
   limitedFeature: null,
 };
 
@@ -187,6 +203,8 @@ export function limitsFor(isPro: boolean, limitedFeature: ProFeature | null = nu
       };
     case "audio":
       return { ...FREE_LIMITS, audioPerDay: TINY_AUDIO_PER_DAY, limitedFeature };
+    case "studies":
+      return { ...FREE_LIMITS, lessonsPerDay: TINY_LESSONS_PER_DAY, limitedFeature };
     default:
       return FREE_LIMITS;
   }
@@ -199,12 +217,24 @@ export interface TrialUsage {
   highlights?: number;
   study?: number;
   audio?: number;
+  /** Lessons finished. */
+  lessons?: number;
+  /** Lesson steps worked through for the first time (quiz and reflection are steps). */
+  lessonSteps?: number;
   /** Not a feature: chapters read, for the recap only. */
   chapters?: number;
 }
 
 /** A highlight is a tap; a note is a sentence. Half weight keeps a highlighter from outranking a writer. */
 export const HIGHLIGHT_WEIGHT = 0.5;
+
+/**
+ * A lesson step is a tap on "volgende stap" through one part of a lesson;
+ * a lesson has five or six. Four steps weigh one point, so a finished lesson
+ * (1 for finishing it, plus its steps) counts about two and a half - about
+ * as much as two or three AI questions, which is roughly the effort.
+ */
+export const LESSON_STEP_WEIGHT = 0.25;
 
 /** Below this score a feature was not really used, and is never the personal limit. */
 export const MIN_TOP_FEATURE_SCORE = 1;
@@ -220,6 +250,7 @@ export function featureScores(usage: TrialUsage | null | undefined): Record<ProF
     notes: count(u.notes) + count(u.highlights) * HIGHLIGHT_WEIGHT,
     study: count(u.study),
     audio: count(u.audio),
+    studies: count(u.lessons) + count(u.lessonSteps) * LESSON_STEP_WEIGHT,
   };
 }
 
@@ -275,6 +306,12 @@ export function usageHeadline(feature: ProFeature, usage: TrialUsage | null | un
       const n = count(u.audio);
       return n > 0 ? `Je luisterde ${plural(n, "keer", "keer")} naar muziek of voorlezen${inDays(days)}` : null;
     }
+    case "studies": {
+      const lessons = count(u.lessons);
+      if (lessons > 0) return `Je deed ${plural(lessons, "les", "lessen")}${inDays(days)}`;
+      const steps = count(u.lessonSteps);
+      return steps > 0 ? `Je zette ${plural(steps, "stap", "stappen")} in je lessen${inDays(days)}` : null;
+    }
   }
 }
 
@@ -288,6 +325,7 @@ export const PERSONAL_LIMIT_LINES: Record<ProFeature, string> = {
   notes: "geen nieuwe notities; je bestaande notities blijf je lezen en bewerken",
   study: `elke dag ${plural(TINY_STUDY_CHAPTERS_PER_DAY, "hoofdstuk", "hoofdstukken")} met al het commentaar en de grondtekst, en ${plural(TINY_CROSS_REFS, "kruisverwijzing", "kruisverwijzingen")} per vers`,
   audio: `${TINY_AUDIO_PER_DAY} muzieknummer of voorgelezen hoofdstuk per dag`,
+  studies: `${plural(TINY_LESSONS_PER_DAY, "nieuwe les", "nieuwe lessen")} per dag; een les waar je al aan begonnen bent, maak je altijd af`,
 };
 
 /** The feature's name in running text: "Je AI-vragen", "Je notities"... */
@@ -296,6 +334,7 @@ export const PRO_FEATURE_NAMES: Record<ProFeature, string> = {
   notes: "notities",
   study: "studiemateriaal",
   audio: "muziek en voorlezen",
+  studies: "de lessen",
 };
 
 /**
@@ -313,6 +352,8 @@ export function personalLimitReason(feature: ProFeature): string {
       return `Je gratis hoofdstuk met al het studiemateriaal is voor vandaag gebruikt. Morgen opent er weer ${TINY_STUDY_CHAPTERS_PER_DAY}.`;
     case "audio":
       return `Je gratis muzieknummer of voorgelezen hoofdstuk is voor vandaag gebruikt. Morgen kun je er weer ${TINY_AUDIO_PER_DAY} kiezen.`;
+    case "studies":
+      return `Je nieuwe les voor vandaag ben je al begonnen. Morgen kun je weer ${TINY_LESSONS_PER_DAY} nieuwe les beginnen; een les waar je al in zit, maak je gewoon af.`;
   }
 }
 
@@ -322,7 +363,11 @@ export function personalLimitReason(feature: ProFeature): string {
  * so the list can never promise a number the routes do not allow.
  */
 export function freeIncludes(limited: ProFeature | null): string[] {
-  const lines = ["de Bijbel lezen in alle vertalingen", "alle begeleide studies", "het KingComments-commentaar"];
+  const lines = [
+    "de Bijbel lezen in alle vertalingen",
+    limited === "studies" ? `${plural(TINY_LESSONS_PER_DAY, "nieuwe les", "nieuwe lessen")} per dag in de begeleide studies` : "alle begeleide studies",
+    "het KingComments-commentaar",
+  ];
   if (limited !== "ai") lines.push(`${FREE_AI_DAILY_CAP} AI-vragen per dag`);
   if (limited !== "notes") lines.push(`${FREE_NOTE_LIMIT} notities (markeren onbeperkt)`);
   else lines.push("onbeperkt markeren");
@@ -345,11 +390,20 @@ export const REVERSE_TRIAL_SUMMARY =
   `Een nieuw account heeft op de eerste ${REVERSE_TRIAL_DAYS} dagen waarop je BijbelStudie opent alles van Pro. ` +
   "Daarna ga je vanzelf verder met de gratis versie.";
 
+/** For accounts from before the reverse trial: they get it once, too. */
+export const EXISTING_ACCOUNT_TRIAL_LINE =
+  `Had je al een account van voor deze regeling en nooit Pro, dan krijg je de ${REVERSE_TRIAL_DAYS} Pro-dagen één keer, vanaf je eerstvolgende bezoek.`;
+
+/** The studies line in the free list: what a reader whose personal limit is studies keeps. */
+export const STUDIES_LIMIT_NOTE =
+  `Waren de lessen wat je het meest gebruikte in je Pro-dagen, dan begin je daarna ${TINY_LESSONS_PER_DAY} nieuwe les per dag; een les waar je al aan begonnen bent, maak je altijd af.`;
+
 export const PERSONAL_LIMIT_SUMMARY =
   "Wat je in die dagen het meest gebruikte, houd je daarna in een klein dagelijks deel: " +
   `bij AI-vragen ${PERSONAL_LIMIT_LINES.ai}; ` +
   `bij notities ${PERSONAL_LIMIT_LINES.notes}; ` +
   `bij studiemateriaal ${PERSONAL_LIMIT_LINES.study}; ` +
-  `bij muziek en voorlezen ${PERSONAL_LIMIT_LINES.audio}. ` +
-  "Al het andere houdt de gewone gratis limieten, en gebruikte je geen van die vier, dan gelden overal de gewone gratis limieten. " +
+  `bij muziek en voorlezen ${PERSONAL_LIMIT_LINES.audio}; ` +
+  `bij de lessen ${PERSONAL_LIMIT_LINES.studies}. ` +
+  "Al het andere houdt de gewone gratis limieten, en gebruikte je geen van die vijf, dan gelden overal de gewone gratis limieten. " +
   "De Bijbel lezen blijft altijd gratis.";

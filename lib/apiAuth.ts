@@ -13,6 +13,7 @@ import {
   trialState,
   trialSummary,
   type ReverseTrialFields,
+  type TrialAccountFields,
   type TrialSummary,
 } from './reverseTrialRules';
 import { touchReverseTrial } from './reverseTrial';
@@ -111,19 +112,13 @@ export async function touched<T extends UserDoc>(
   reload: () => Promise<T | null>,
   platform: 'web' | null = null,
 ): Promise<T> {
-  const plan = await touchReverseTrial(
-    {
-      _id: doc._id,
-      createdAt: doc.createdAt,
-      subscribed: doc.subscribed,
-      compedProUntil: doc.compedProUntil,
-      storePremium: doc.storePremium,
-      stripeSubscriptionId: doc.stripeSubscriptionId,
-      subscriptionStatus: doc.subscriptionStatus,
-      reverseTrial: plainTrial(doc),
-    },
-    { platform },
-  );
+  // Every field the rules read (lib/reverseTrialRules.ts TrialAccountFields),
+  // as plain data: a hydrated document answers through getters.
+  const source = doc as T & { toObject?: () => Record<string, unknown> };
+  const plain = (typeof source.toObject === 'function' ? source.toObject() : doc) as TrialAccountFields & {
+    _id: unknown;
+  };
+  const plan = await touchReverseTrial({ ...plain, _id: doc._id, reverseTrial: plainTrial(doc) }, { platform });
   if (isNothing(plan)) return doc;
   return (await reload()) ?? doc;
 }

@@ -25,6 +25,8 @@ import StudyFlowShell, {
   type LessonStatePayload,
 } from '../../../../components/study/flow/StudyFlowShell';
 import { generatePageMetadata } from '../../../../lib/pageMetadata';
+import { lessonAccess } from '../../../../lib/lessonAllowance';
+import LessonLimitNotice from '../../../../components/study/flow/LessonLimitNotice';
 
 export const dynamic = 'force-dynamic';
 
@@ -83,6 +85,17 @@ export default async function StudyLessonPage({ params, searchParams }: PageProp
   // started, so send them there rather than silently enrolling them.
   const enrollment = await getEnrollment(userId, studyId);
   if (!enrollment) redirect(`/studies/${studyId}`);
+
+  // The personal studies limit after the reverse trial: one NEW lesson a day;
+  // a lesson already begun or finished always opens (lib/lessonAllowance).
+  const access = await lessonAccess(
+    { id: userId, isPro: Boolean(session.user.isSubscribed), limits: session.user.limits },
+    studyId,
+    lessonDay,
+  );
+  if (!access.allowed) {
+    return <LessonLimitNotice reason={access.message ?? ''} backHref={`/studies/${studyId}`} />;
+  }
 
   // Every translation the reader may switch to on the passage step. Resolved
   // here rather than fetched from the client: the list is static, and a select

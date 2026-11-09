@@ -25,6 +25,8 @@ import {
 } from '../../../../../lib/lessonPayload';
 import StudyFlowShell from '../../../../../components/study/flow/StudyFlowShell';
 import { generatePageMetadata } from '../../../../../lib/pageMetadata';
+import { lessonAccess } from '../../../../../lib/lessonAllowance';
+import LessonLimitNotice from '../../../../../components/study/flow/LessonLimitNotice';
 
 export const dynamic = 'force-dynamic';
 
@@ -105,6 +107,17 @@ export default async function ChapterStudyPage({ params, searchParams }: PagePro
     .lean<{ _id: unknown; preferences?: { commentary?: string } }>();
   if (!user) redirect('/inloggen');
   const userId = String(user._id);
+
+  // A single-chapter study is a lesson of the book study: the personal studies
+  // limit applies like anywhere else (lib/lessonAllowance).
+  const access = await lessonAccess(
+    { id: userId, isPro: Boolean(session.user.isSubscribed), limits: session.user.limits },
+    study.id,
+    lesson.day,
+  );
+  if (!access.allowed) {
+    return <LessonLimitNotice reason={access.message ?? ''} backHref="/studies" />;
+  }
 
   // Read only. An enrollment in the book study lends its translation and
   // commentary; its absence is fine and nothing is created.

@@ -23,6 +23,7 @@ import AppPromoBanner from "../components/layout/AppPromoBanner";
 import { Toaster } from "../components/ui/toaster";
 import ProOfferDialog from "../components/pricing/ProOfferDialog";
 import TrialRecapDialog from "../components/pricing/TrialRecapDialog";
+import TrialAnnouncementDialog from "../components/pricing/TrialAnnouncementDialog";
 import CookieConsent from "../components/ui/CookieConsent";
 import { APP_STORE_URL } from "../lib/appStore";
 import { appStoreIdFromUrl } from "../lib/mobilePlatform";
@@ -305,6 +306,12 @@ export default async function RootLayout({
             trial (lib/reverseTrial.ts). `pending` comes from the session, so
             nobody else pays a request for it. */}
         <TrialRecapDialog pending={Boolean(session?.user?.trial?.recapPending)} />
+        {/* "Je hebt 3 dagen Pro gekregen", once, when an older free account is
+            given the reverse trial on its next visit. */}
+        <TrialAnnouncementDialog
+          pending={Boolean(session?.user?.trial?.announce)}
+          daysUsed={session?.user?.trial?.daysUsed ?? 1}
+        />
         {/* Asks once, remembers the answer, and gates the usage statistics in
             lib/analytics.ts behind it. Renders nothing until mounted, nothing
             once answered, and nothing inside the /studie flow - see

@@ -123,12 +123,20 @@ const UserSchema = new mongoose.Schema(
         highlights: { type: Number },
         study: { type: Number },
         audio: { type: Number },
+        // Lessons finished, and lesson steps worked through for the first time.
+        lessons: { type: Number },
+        lessonSteps: { type: Number },
         chapters: { type: Number },
       },
-      // "ai" | "notes" | "study" | "audio", or null when none was used.
-      topFeature: { type: String, enum: ["ai", "notes", "study", "audio", null] },
+      // "studies" | "ai" | "notes" | "study" | "audio", or null when none was used.
+      topFeature: { type: String, enum: ["studies", "ai", "notes", "study", "audio", null] },
       // "Je Pro-dagen zitten erop" was shown (on either client).
       recapSeenAt: { type: Date },
+      // "new": an account created after the launch. "existing": the one-time
+      // trial an older free account gets on its next visit. Absent = "new".
+      origin: { type: String, enum: ["new", "existing"] },
+      // "Je hebt 3 dagen Pro gekregen" was shown (existing accounts only).
+      announceSeenAt: { type: Date },
     },
     stripeCustomerId: { type: String },
     stripeSubscriptionId: { type: String },

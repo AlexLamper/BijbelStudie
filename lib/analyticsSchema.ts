@@ -91,6 +91,8 @@ export const EVENTS = {
       // The reverse trial (lib/reverseTrial.ts): the paywall behind a personal
       // limit, and the upgrade button on "Je Pro-dagen zitten erop".
       "personal_limit", "trial_recap", "app_personal_limit", "app_trial_recap",
+      // A new lesson refused by the personal studies limit (app gate).
+      "app_lessons",
     ],
     logged_in: ["yes", "no"],
     platform: PLATFORM,
@@ -131,11 +133,11 @@ export const EVENTS = {
   /** Fired the moment a gated surface refuses the user. `surface` ranks them. */
   // "music": the app's background-music picker (play without Pro). App-only.
   paywall_hit: {
-    surface: ["commentary", "ai_limit", "original_text", "plan_limit", "offline", "resources", "crossrefs", "music"],
+    surface: ["commentary", "ai_limit", "original_text", "plan_limit", "offline", "resources", "crossrefs", "music", "lessons"],
     platform: PLATFORM,
   },
   paywall_cta_clicked: {
-    surface: ["commentary", "ai_limit", "original_text", "plan_limit", "offline", "resources", "crossrefs", "music"],
+    surface: ["commentary", "ai_limit", "original_text", "plan_limit", "offline", "resources", "crossrefs", "music", "lessons"],
     platform: PLATFORM,
   },
   /**
@@ -149,7 +151,7 @@ export const EVENTS = {
       "app_groups", "app_notes", "app_funnel",
       "app_commentary", "app_grondtekst", "app_offline", "app_music", "app_crossrefs",
       "app_onboarding", "app_promo", "app_streak", "app_referral_end", "direct",
-      "app_personal_limit", "app_trial_recap",
+      "app_personal_limit", "app_trial_recap", "app_lessons",
     ],
     trial: ["yes", "no"],
     platform: PLATFORM,
@@ -186,11 +188,17 @@ export const EVENTS = {
    * are written by the server, never sent by a client.
    */
   reverse_trial_started: {
+    /** "existing": the one-time trial an older free account gets on its next visit. */
+    origin: ["new", "existing"],
     platform: PLATFORM,
   },
   reverse_trial_ended: {
     /** The feature that became the personal limit; "none" when none was used. */
-    feature: ["ai", "notes", "study", "audio", "none"],
+    feature: ["studies", "ai", "notes", "study", "audio", "none"],
+    platform: PLATFORM,
+  },
+  /** "Je hebt 3 dagen Pro gekregen" was put on screen - once per existing account, recorded by the server. */
+  trial_announcement_shown: {
     platform: PLATFORM,
   },
   /** "Je Pro-dagen zitten erop" was put on screen - once per account, recorded by the server. */
@@ -200,12 +208,12 @@ export const EVENTS = {
   /** What the reader did on the recap. */
   trial_recap_action: {
     action: ["upgrade", "continue_free"],
-    feature: ["ai", "notes", "study", "audio", "none"],
+    feature: ["studies", "ai", "notes", "study", "audio", "none"],
     platform: PLATFORM,
   },
   /** A gate refused the reader because of their personal limit, not the normal free one. */
   personal_limit_hit: {
-    feature: ["ai", "notes", "study", "audio"],
+    feature: ["studies", "ai", "notes", "study", "audio"],
     platform: PLATFORM,
   },
   /** Signup that was started in order to buy, so the resume flow can be measured. */

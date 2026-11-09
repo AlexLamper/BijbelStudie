@@ -4,7 +4,7 @@ import User from '../../../../models/User';
 import { corsPreflight, errorV1, handleV1Error, jsonV1 } from '../../../../lib/apiV1';
 import { requireUser } from '../../../../lib/apiAuth';
 import { PERSONAL_LIMIT_LINES, usageHeadline } from '../../../../lib/entitlements';
-import { markRecapSeen, type TouchPlatform } from '../../../../lib/reverseTrial';
+import { markAnnounceSeen, markRecapSeen, type TouchPlatform } from '../../../../lib/reverseTrial';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -53,17 +53,20 @@ function asPlatform(value: unknown): TouchPlatform {
 }
 
 /**
- * POST /api/v1/reverse-trial `{ action: "recap_seen", platform }` - the recap
- * ("Je Pro-dagen zitten erop") was shown. Once per account across both
- * clients: the other client will not show it again.
+ * POST /api/v1/reverse-trial `{ action, platform }`, once per account across
+ * both clients - the other client will not show it again:
+ *  - `recap_seen`: "Je Pro-dagen zitten erop" was shown;
+ *  - `announce_seen`: "Je hebt 3 dagen Pro gekregen" was shown (the one-time
+ *    trial of an older account).
  */
 export async function POST(req: NextRequest) {
   try {
     const user = await requireUser(req);
     const body = (await req.json().catch(() => null)) as Record<string, unknown> | null;
-    if (body?.action !== 'recap_seen') return errorV1('UNKNOWN_ACTION', 400, 'Onbekende actie.');
-    const first = await markRecapSeen(user.id, asPlatform(body.platform));
-    return jsonV1({ ok: true, first });
+    const platform = asPlatform(body?.platform);
+    if (body?.action === 'recap_seen') return jsonV1({ ok: true, first: await markRecapSeen(user.id, platform) });
+    if (body?.action === 'announce_seen') return jsonV1({ ok: true, first: await markAnnounceSeen(user.id, platform) });
+    return errorV1('UNKNOWN_ACTION', 400, 'Onbekende actie.');
   } catch (error) {
     return handleV1Error(error);
   }

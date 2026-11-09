@@ -5,6 +5,7 @@ import {
   PERSONAL_LIMIT_SUMMARY,
   REVERSE_TRIAL_DAYS,
   REVERSE_TRIAL_SUMMARY,
+  STUDIES_LIMIT_NOTE,
 } from "../../entitlements";
 import { PLANS, euro } from "../../pricing";
 
@@ -103,7 +104,7 @@ export const GUIDE_FREE: Guide = {
         },
         {
           title: "Gratis: begeleide studies",
-          text: "Uitgewerkte studies over personen, gedeelten en onderwerpen, en een studie bij elk bijbelboek.",
+          text: `Uitgewerkte studies over personen, gedeelten en onderwerpen, en een studie bij elk bijbelboek. ${STUDIES_LIMIT_NOTE}`,
         },
         {
           title: `Gratis: ${FREE_AI_DAILY_CAP} AI-vragen per dag`,

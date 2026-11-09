@@ -23,7 +23,8 @@ export type ProOfferSurface =
   | 'commentary'
   | 'tts'
   | 'plan_limit'
-  | 'crossrefs';
+  | 'crossrefs'
+  | 'lessons';
 
 export interface ProOfferRequest {
   surface: ProOfferSurface;

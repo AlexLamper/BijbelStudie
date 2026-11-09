@@ -3,7 +3,7 @@
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import { BookOpen, Flame, MessageCircle, NotebookPen } from "lucide-react"
+import { BookOpen, Flame, GraduationCap, MessageCircle, NotebookPen } from "lucide-react"
 
 import {
   PRO_FEATURE_NAMES,
@@ -66,7 +66,10 @@ export default function TrialRecapDialog({ pending }: { pending: boolean }) {
 
   const stats = [
     { icon: BookOpen, value: trial.usage.chapters, label: trial.usage.chapters === 1 ? "hoofdstuk gelezen" : "hoofdstukken gelezen" },
-    { icon: NotebookPen, value: trial.usage.notes, label: trial.usage.notes === 1 ? "notitie" : "notities" },
+    // Lessons take the notes tile when they were the reader's thing.
+    feature === "studies"
+      ? { icon: GraduationCap, value: trial.usage.lessons, label: trial.usage.lessons === 1 ? "les gedaan" : "lessen gedaan" }
+      : { icon: NotebookPen, value: trial.usage.notes, label: trial.usage.notes === 1 ? "notitie" : "notities" },
     { icon: MessageCircle, value: trial.usage.ai, label: trial.usage.ai === 1 ? "AI-vraag" : "AI-vragen" },
     { icon: Flame, value: data.streak, label: data.streak === 1 ? "dag op rij" : "dagen op rij" },
   ]

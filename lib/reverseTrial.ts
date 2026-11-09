@@ -67,11 +67,14 @@ export async function touchReverseTrial(
           $set: {
             'reverseTrial.startedAt': now,
             'reverseTrial.days': [plan.addDay],
+            'reverseTrial.origin': plan.origin ?? 'new',
             ...(plan.endsAt ? { 'reverseTrial.endsAt': plan.endsAt } : {}),
           },
         },
       );
-      if (started.modifiedCount === 1) void serverEvent('reverse_trial_started', _id, { platform });
+      if (started.modifiedCount === 1) {
+        void serverEvent('reverse_trial_started', _id, { platform, origin: plan.origin ?? 'new' });
+      }
     } else if (plan.addDay) {
       await User.updateOne(
         {
@@ -172,9 +175,21 @@ export async function markRecapSeen(userId: unknown, platform?: TouchPlatform): 
   return first;
 }
 
+/** "Je hebt 3 dagen Pro gekregen" was shown. Once per account, whichever client showed it. */
+export async function markAnnounceSeen(userId: unknown, platform?: TouchPlatform): Promise<boolean> {
+  await connectMongoDB();
+  const result = await User.updateOne(
+    { _id: userId, 'reverseTrial.origin': 'existing', 'reverseTrial.announceSeenAt': { $exists: false } },
+    { $set: { 'reverseTrial.announceSeenAt': new Date() } },
+  );
+  const first = result.modifiedCount === 1;
+  if (first) void serverEvent('trial_announcement_shown', userId, { platform: platform ?? undefined });
+  return first;
+}
+
 /* -------------------------------- allowances ------------------------------- */
 
-export type AllowanceFeature = 'study' | 'audio';
+export type AllowanceFeature = 'study' | 'audio' | 'studies';
 
 export interface AllowanceClaim {
   allowed: boolean;

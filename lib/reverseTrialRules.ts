@@ -55,6 +55,15 @@ export interface ReverseTrialFields {
   usage?: TrialUsage | null;
   topFeature?: string | null;
   recapSeenAt?: Date | string | null;
+  /**
+   * `new`: started on an account created after REVERSE_TRIAL_LAUNCH.
+   * `existing`: given once to an older free account that never paid
+   * (`isExistingFreeAccount`), announced with "Je hebt 3 dagen Pro gekregen".
+   * Absent on trials started before this field existed: those are `new`.
+   */
+  origin?: 'new' | 'existing' | null;
+  /** The announcement was shown (either client). */
+  announceSeenAt?: Date | string | null;
 }
 
 /** The billing fields the touch needs, beside the trial itself. */
@@ -66,11 +75,21 @@ export interface TrialAccountFields {
   storePremium?: boolean | null;
   stripeSubscriptionId?: string | null;
   subscriptionStatus?: string | null;
+  // What "never paid, never had Pro by a store or Stripe" is read from, for
+  // the one-time trial of an existing account (`isExistingFreeAccount`).
+  isAdmin?: boolean | null;
+  subscriptionStartedAt?: Date | null;
+  proTrialUsedAt?: Date | null;
+  storePremiumPlatform?: 'apple' | 'google' | null;
+  storePremiumExpiresAt?: Date | null;
+  storeTrialStartedAt?: Date | null;
+  firstPaidAt?: Date | null;
 }
 
 /** The `.select()` for everything here, for routes that load a lean row. */
 export const TRIAL_ACCOUNT_FIELDS =
-  'createdAt reverseTrial subscribed compedProUntil storePremium stripeSubscriptionId subscriptionStatus';
+  'createdAt reverseTrial subscribed compedProUntil storePremium stripeSubscriptionId subscriptionStatus ' +
+  'isAdmin subscriptionStartedAt proTrialUsedAt storePremiumPlatform storePremiumExpiresAt storeTrialStartedAt firstPaidAt';
 
 export type TrialState = 'none' | 'active' | 'ended';
 
@@ -189,9 +208,36 @@ export function canGrantComp(account: TrialAccountFields): boolean {
   return !account.subscribed || Boolean(account.compedProUntil);
 }
 
+/**
+ * An account from before the reverse trial that gets it once, on its next
+ * visit (Alex, Nov 2026): created before REVERSE_TRIAL_LAUNCH (or with no
+ * creation date at all), never paid or trialled through Stripe or a store,
+ * not an admin, and not Pro right now by any route - a subscription, an admin
+ * grant or a referral week. "Not already given one" is the caller's check
+ * (no `reverseTrial.startedAt`). Decided per visit, so nothing is migrated.
+ */
+export function isExistingFreeAccount(account: TrialAccountFields): boolean {
+  const created = toDate(account.createdAt);
+  if (created && created.getTime() >= REVERSE_TRIAL_LAUNCH.getTime()) return false;
+  if (account.subscribed || account.storePremium || account.isAdmin) return false;
+  if (toDate(account.compedProUntil)) return false;
+  return !(
+    account.stripeSubscriptionId ||
+    account.subscriptionStatus ||
+    account.subscriptionStartedAt ||
+    account.proTrialUsedAt ||
+    account.storePremiumPlatform ||
+    account.storePremiumExpiresAt ||
+    account.storeTrialStartedAt ||
+    account.firstPaidAt
+  );
+}
+
 export interface TouchPlan {
   /** Begin the trial on this account (first visit after REVERSE_TRIAL_LAUNCH). */
   start: boolean;
+  /** Which kind of account the trial is started on; set with [start]. */
+  origin?: 'new' | 'existing';
   /** Record today as an active day. */
   addDay: string | null;
   /** Set when [addDay] is the last trial day: Pro ends tonight. */
@@ -222,10 +268,12 @@ export function planTouch(account: TrialAccountFields, now: Date): TouchPlan {
 
   if (!trial || !toDate(trial.startedAt)) {
     const created = toDate(account.createdAt);
-    if (!created || created.getTime() < REVERSE_TRIAL_LAUNCH.getTime()) return NOTHING;
+    const isNew = Boolean(created && created.getTime() >= REVERSE_TRIAL_LAUNCH.getTime());
+    if (!isNew && !isExistingFreeAccount(account)) return NOTHING;
     return {
       ...NOTHING,
       start: true,
+      origin: isNew ? 'new' : 'existing',
       addDay: today,
       endsAt: (REVERSE_TRIAL_DAYS as number) <= 1 ? tonight : null,
       grantUntil: canGrantComp(account) ? tonight : null,
@@ -270,6 +318,7 @@ export function applyTouch<T extends TrialAccountFields>(account: T, plan: Touch
   if (plan.start) {
     trial.startedAt = now;
     trial.days = [];
+    trial.origin = plan.origin ?? 'new';
   }
   if (plan.addDay && !(trial.days ?? []).includes(plan.addDay)) {
     trial.days = [...(trial.days ?? []), plan.addDay];
@@ -306,6 +355,10 @@ export interface TrialSummary {
   usage: Required<TrialUsage>;
   /** Show "Je Pro-dagen zitten erop" on the next screen. Once, on either client. */
   recapPending: boolean;
+  /** `existing` for the one-time trial of an older account; `new` otherwise. */
+  origin: 'new' | 'existing';
+  /** Show "Je hebt 3 dagen Pro gekregen" (existing accounts, once, while it runs). */
+  announce: boolean;
 }
 
 function counter(value: unknown): number {
@@ -334,8 +387,12 @@ export function trialSummary(
       highlights: counter(usage.highlights),
       study: counter(usage.study),
       audio: counter(usage.audio),
+      lessons: counter(usage.lessons),
+      lessonSteps: counter(usage.lessonSteps),
       chapters: counter(usage.chapters),
     },
     recapPending: state === 'ended' && !isPro && !toDate(trial.recapSeenAt),
+    origin: trial.origin === 'existing' ? 'existing' : 'new',
+    announce: trial.origin === 'existing' && state === 'active' && !toDate(trial.announceSeenAt),
   };
 }

@@ -2,7 +2,7 @@ import { Suspense } from "react"
 import { Check } from "lucide-react"
 import AppShell from "../../components/shell/AppShell"
 import { PRO_FEATURES_SHORT } from "../../lib/pricing"
-import { REVERSE_TRIAL_DAYS, dutchList, freeIncludes } from "../../lib/entitlements"
+import { REVERSE_TRIAL_DAYS, TINY_LESSONS_PER_DAY, dutchList, freeIncludes } from "../../lib/entitlements"
 import PricingPlans, { PricingSkeleton } from "./PricingPlans"
 import FaqAccordion from "./FaqAccordion"
 import { ABONNEMENT_FAQ } from "./content"
@@ -70,7 +70,8 @@ function AboutPro() {
       <p className="mt-[10px] max-w-[520px] text-[14px] leading-[1.55] text-ink-body">
         Gratis: {dutchList(freeIncludes(null))}. De eerste {REVERSE_TRIAL_DAYS} dagen waarop je
         BijbelStudie opent heb je alles van Pro. Daarna houd je van wat je het meest gebruikte een klein
-        dagelijks deel, en de rest de gewone gratis limieten.
+        dagelijks deel - bij de lessen bijvoorbeeld {TINY_LESSONS_PER_DAY} nieuwe les per dag, en een begonnen les maak je altijd af -
+        en de rest de gewone gratis limieten.
       </p>
 
       {/* Pinned to the foot of the column; the free space sits above it. */}
