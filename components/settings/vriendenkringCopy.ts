@@ -46,9 +46,8 @@ export const AUTO_SHARE_COPY = {
   milestones: {
     label: 'Mijlpalen',
     hint:
-      'Rond je een dag van je leesplan af, maak je een studie af, haal je een badge of lees je ' +
-      '7, 30 of 100 dagen op rij? Dan komt dat als bericht in je kring. Dit is het enige wat ' +
-      'vanzelf geplaatst wordt.',
+      'Maak je een studie af, haal je een badge of lees je 7, 30 of 100 dagen op rij? Dan komt ' +
+      'dat als bericht in je kring. Dit is het enige wat vanzelf geplaatst wordt.',
   },
   verses: {
     label: 'Tekst van de dag',

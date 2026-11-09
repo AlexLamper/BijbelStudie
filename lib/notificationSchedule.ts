@@ -16,7 +16,6 @@
 import { CHAPTER_COUNTS } from './data/bible-chapter-counts';
 import { toCanonicalDutchBook } from './readChaptersCanon';
 import { STEP_LABELS, type StepKey } from './studyFlow';
-import type { BibleYearPortion } from './bibleYear/types';
 import type {
   NotificationKind,
   NotificationScheduleDay,
@@ -113,42 +112,6 @@ export function variantIndex(dateKey: string, poolSize: number, salt = 0): numbe
 // Tasks
 // ---------------------------------------------------------------------------
 
-/**
- * One day of a Bijbel-in-een-jaar plan, as the notification needs it.
- * Built by the bible-year service from its schedule + enrollment.
- */
-export type BibleYearNotificationDay = {
-  /** 1..totalDays, after shiftDays. */
-  dayNumber: number;
-  totalDays: number;
-  portions: Pick<BibleYearPortion, 'label'>[];
-  minutes: number;
-  /** Already fully read (reading ahead counts): the day falls through to the next task. */
-  done?: boolean;
-  /** First requested date only: earlier plan days with unread chapters. */
-  behindDays?: number;
-};
-
-/**
- * Hook for the Bijbel-in-een-jaar backend: the plan portion per local date, or
- * null when the user has no active plan. Dates outside the plan (before the
- * start, after the end) are simply absent from the map.
- */
-export type BibleYearNotificationProvider = (
-  userId: string,
-  dates: string[],
-) => Promise<Map<string, BibleYearNotificationDay> | null>;
-
-/**
- * One indexed findOne on the active BibleYearEnrollment, then pure lookups in
- * the static schedule per date (lib/bibleYear/service.ts
- * `getBibleYearDaysOnDates`). Dynamic import: this module stays Mongoose-free.
- */
-export const getBibleYearNotificationInfo: BibleYearNotificationProvider = async (userId, dates) => {
-  const { getBibleYearDaysOnDates } = await import('./bibleYear/service');
-  return getBibleYearDaysOnDates(userId, dates);
-};
-
 export type StudyTask = {
   kind: 'study';
   studyId: string;
@@ -164,18 +127,9 @@ export type StudyTask = {
 
 export type ChapterTask = { kind: 'chapter'; book: string; chapter: number };
 
-export type BibleYearTask = {
-  kind: 'bibleYear';
-  dayNumber: number;
-  totalDays: number;
-  label: string;
-  minutes: number;
-};
-
-export type ScheduleTask = BibleYearTask | StudyTask | ChapterTask | { kind: 'verse' };
+export type ScheduleTask = StudyTask | ChapterTask | { kind: 'verse' };
 
 export type ScheduleContext = {
-  bibleYear: Map<string, BibleYearNotificationDay> | null;
   study: StudyTask | null;
   chapter: ChapterTask | null;
 };
@@ -195,18 +149,8 @@ export function nextChapterAfter(book: string, chapter: number): ChapterTask | n
   return next ? { kind: 'chapter', book: next, chapter: 1 } : null;
 }
 
-/** Priority: Bijbel in een jaar > study in progress > last chapter read > the verse. */
-export function taskForDate(ctx: ScheduleContext, date: string): ScheduleTask {
-  const plan = ctx.bibleYear?.get(date);
-  if (plan && !plan.done && plan.portions.length > 0) {
-    return {
-      kind: 'bibleYear',
-      dayNumber: plan.dayNumber,
-      totalDays: plan.totalDays,
-      label: plan.portions.map((p) => p.label).join(', '),
-      minutes: Math.max(1, Math.round(plan.minutes)),
-    };
-  }
+/** Priority: study in progress > last chapter read > the verse. */
+export function taskForDate(ctx: ScheduleContext): ScheduleTask {
   if (ctx.study) return ctx.study;
   if (ctx.chapter) return ctx.chapter;
   return { kind: 'verse' };
@@ -215,8 +159,6 @@ export function taskForDate(ctx: ScheduleContext, date: string): ScheduleTask {
 /** The app route a task opens. Always one of the app's whitelisted shapes. */
 export function routeForTask(task: ScheduleTask): string {
   switch (task.kind) {
-    case 'bibleYear':
-      return '/studies/bijbel-in-een-jaar';
     case 'study':
       return `/studie/${encodeURIComponent(task.studyId)}/${task.lessonDay}?stap=${task.step}`;
     case 'chapter':
@@ -228,7 +170,6 @@ export function routeForTask(task: ScheduleTask): string {
 
 const ROUTE_WHITELIST = [
   /^\/studie\/[A-Za-z0-9%._~-]+\/\d+\?stap=(intro|context|word|depth|quiz|reflection)$/,
-  /^\/studies\/bijbel-in-een-jaar$/,
   /^\/read$/,
   /^\/dashboard$/,
 ];
@@ -291,12 +232,6 @@ function fitTitle(make: (part: string) => string, part: string): string {
 
 function morningTitles(task: ScheduleTask): string[] {
   switch (task.kind) {
-    case 'bibleYear':
-      return [
-        fitTitle((l) => `Dag ${task.dayNumber} · ${l}`, task.label),
-        fitTitle((l) => `Vandaag: ${l}`, task.label),
-        fitTitle((l) => `Je leesdeel: ${l}`, task.label),
-      ];
     case 'study': {
       const label = STEP_LABELS[task.step];
       const n = task.lessonDay;
@@ -320,12 +255,6 @@ function morningTitles(task: ScheduleTask): string[] {
 /** The morning body when there is no verse: a line about the task itself. */
 function morningTaskLines(task: ScheduleTask): string[] {
   switch (task.kind) {
-    case 'bibleYear':
-      return [
-        `Ongeveer ${task.minutes} minuten lezen.`,
-        `Je leesdeel staat klaar. Ongeveer ${task.minutes} minuten.`,
-        'Lees zo ver als je komt.',
-      ];
     case 'study': {
       const min = remainingStudyMinutes(task);
       return [
@@ -351,12 +280,6 @@ function morningTaskLines(task: ScheduleTask): string[] {
 
 function eveningLines(task: ScheduleTask, verse: ScheduleVerse | null): Line[] {
   switch (task.kind) {
-    case 'bibleYear':
-      return [
-        { title: 'Je leesdeel van vandaag staat nog klaar', body: `${task.label}. Ongeveer ${task.minutes} minuten.` },
-        { title: `Dag ${task.dayNumber} ligt nog open`, body: `${task.label}. Lees zo ver als je komt.` },
-        { title: 'Nog even lezen?', body: `${task.label} staat klaar. Ongeveer ${task.minutes} minuten.` },
-      ];
     case 'study': {
       const min = remainingStudyMinutes(task);
       const left = task.stepCount - task.stepIndex + 1;
@@ -426,7 +349,7 @@ export function buildScheduleDay(
   rawVerse: ScheduleVerse | null,
 ): NotificationScheduleDay {
   const verse = rawVerse ? { ...rawVerse, reference: notificationReference(rawVerse.reference) } : null;
-  const task = taskForDate(ctx, date);
+  const task = taskForDate(ctx);
   return {
     date,
     verse,
@@ -480,15 +403,13 @@ export function chapterTaskFrom(last: LastReadChapter | null | undefined): Chapt
 
 /**
  * Two indexed reads in parallel (the user by _id, the running enrollments on
- * {userId, lastActivityAt}) plus the bible-year hook. The study is chosen by
+ * {userId, lastActivityAt}). The study is chosen by
  * the resume card's own rule (lib/dashboardResume.ts selectRunningStudies), so
  * a push never names a different study than the dashboard. Everything else is
  * static content in memory.
  */
 export async function loadScheduleContext(
   userId: string,
-  dates: string[],
-  bibleYear: BibleYearNotificationProvider = getBibleYearNotificationInfo,
   now: Date = new Date(),
 ): Promise<ScheduleContext> {
   const [{ default: connectMongoDB }, { default: User }, { default: StudyEnrollment }, resume] = await Promise.all([
@@ -499,14 +420,13 @@ export async function loadScheduleContext(
   ]);
   await connectMongoDB();
 
-  const [user, enrollments, plan] = await Promise.all([
+  const [user, enrollments] = await Promise.all([
     User.findById(userId).select('lastReadChapter').lean<LeanUserChapter>(),
     StudyEnrollment.find({ userId, status: 'active' })
       .sort({ lastActivityAt: -1 })
       .limit(RUNNING_LIMIT)
       .select('studyId status currentLessonDay currentStep lastActivityAt completedAt')
       .lean<LeanEnrollment[]>(),
-    bibleYear(userId, dates).catch(() => null),
   ]);
 
   const last = user?.lastReadChapter;
@@ -518,7 +438,7 @@ export async function loadScheduleContext(
   );
   const study = running[0] && !studyIsStale ? studyTaskFor(running[0], resume.resolveStudyCursor) : null;
 
-  return { bibleYear: plan, study, chapter };
+  return { study, chapter };
 }
 
 function studyTaskFor(
@@ -547,14 +467,18 @@ function studyTaskFor(
 }
 
 /** The whole answer for one user. Verses are fetched per date, in parallel, never written. */
-/** Kinds the app's content toggles can switch off (`?exclude=bibleYear,study,verse`). */
-export type ExcludableKind = 'bibleYear' | 'study' | 'verse';
+/**
+ * Kinds the app's content toggles can switch off (`?exclude=study,verse`).
+ * Installed app builds may still send `bibleYear` (the removed "Bijbel in een
+ * jaar" switch); like any unknown key it is ignored.
+ */
+export type ExcludableKind = 'study' | 'verse';
 
 export function parseExclude(raw: string | null | undefined): Set<ExcludableKind> {
   const out = new Set<ExcludableKind>();
   for (const part of (raw ?? '').split(',')) {
     const key = part.trim();
-    if (key === 'bibleYear' || key === 'study' || key === 'verse') out.add(key);
+    if (key === 'study' || key === 'verse') out.add(key);
   }
   return out;
 }
@@ -565,7 +489,6 @@ export async function buildNotificationSchedule(
     days: number;
     timeZone: string;
     now?: Date;
-    bibleYear?: BibleYearNotificationProvider;
     exclude?: Set<ExcludableKind>;
   },
 ): Promise<NotificationScheduleResponse> {
@@ -575,7 +498,7 @@ export async function buildNotificationSchedule(
   const { fetchDayTextForDate } = await import('./mobileDayText');
 
   const [loaded, verses] = await Promise.all([
-    loadScheduleContext(userId, dates, options.bibleYear, now),
+    loadScheduleContext(userId, now),
     exclude.has('verse')
       ? Promise.resolve(dates.map(() => null))
       : Promise.all(
@@ -588,7 +511,6 @@ export async function buildNotificationSchedule(
   // A switched-off kind falls through to the next priority (taskForDate).
   const ctx: ScheduleContext = {
     ...loaded,
-    bibleYear: exclude.has('bibleYear') ? null : loaded.bibleYear,
     study: exclude.has('study') ? null : loaded.study,
   };
 

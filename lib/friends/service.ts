@@ -7,9 +7,6 @@ import FriendProfile from '../../models/FriendProfile';
 import FriendPost from '../../models/FriendPost';
 import FriendPostComment from '../../models/FriendPostComment';
 import Report from '../../models/Report';
-import BibleYearEnrollment from '../../models/BibleYearEnrollment';
-import { scheduledDayNumber } from '../bibleYear/progress';
-import { PLAN_DAYS } from '../bibleYear/schedule';
 import { isPublicTree } from '../progressTree/summary';
 import { normaliseReferralCode } from '../referralRules';
 import { ensureReferralCode } from '../referral';
@@ -43,8 +40,7 @@ import type {
 } from './types';
 
 /**
- * The only writer of the Vriendenkring collections, the way
- * lib/bibleYear/service.ts is the only writer of its enrollment.
+ * The only writer of the Vriendenkring collections.
  *
  * Every write here is a targeted operator - `$addToSet`, `$pull`, `$inc`, or a
  * `$set` on a named path - and nothing in this file touches a `User` document
@@ -94,16 +90,6 @@ type UserCard = {
   /** The day the streak was last credited, which is "read something". */
   lastStreakDate?: Date | string | null;
   levensboom?:{ publicProfile?: boolean | null; disabled?: boolean | null } | null;
-};
-
-type PlanRow = {
-  userId: mongoose.Types.ObjectId;
-  planKey: 'jaar-1' | 'jaar-2';
-  track: 'gemengd' | 'canoniek';
-  scheduleVersion: number;
-  startDate: string;
-  timeZone?: string;
-  shiftDays?: number;
 };
 
 type PairRow = {
@@ -217,35 +203,11 @@ async function summariesFor(ids: string[], since: Map<string, Date | null> = new
     .select(USER_CARD_FIELDS)
     .lean<UserCard[]>();
 
-  // "Dag 42 van 365" is not stored - it is a function of the start date, the
-  // zone and the catch-up shift - so it is derived here with the plan's own
-  // pure helper rather than re-counted by hand.
-  const plans = await BibleYearEnrollment.find({ userId: { $in: objectIds }, status: 'active' })
-    .select('userId planKey track scheduleVersion startDate timeZone shiftDays')
-    .lean<PlanRow[]>();
-  const now = new Date();
-  const planByUser = new Map<string, { day: number; total: number }>();
-  for (const plan of plans) {
-    try {
-      planByUser.set(String(plan.userId), {
-        // The schema defaults both, but a lean read types them as optional.
-        day: scheduledDayNumber(
-          { ...plan, timeZone: plan.timeZone || 'Europe/Amsterdam', shiftDays: plan.shiftDays ?? 0 },
-          now,
-        ),
-        total: PLAN_DAYS[plan.planKey] ?? 365,
-      });
-    } catch {
-      // A malformed or retired enrollment must not take out the whole list.
-    }
-  }
-
-  const today = amsterdamDay(now);
+  const today = amsterdamDay(new Date());
   const order = new Map(ids.map((value, index) => [value, index]));
   return users
     .map((user) => {
       const key = String(user._id);
-      const plan = planByUser.get(key);
       return {
         userId: key,
         name: user.name ?? '',
@@ -256,8 +218,6 @@ async function summariesFor(ids: string[], since: Map<string, Date | null> = new
         // today" - no new field, and nothing finer grained than a day, which
         // is as much as a kring row is allowed to tell.
         activeToday: user.lastStreakDate ? amsterdamDay(new Date(user.lastStreakDate)) === today : false,
-        planDay: plan ? plan.day : null,
-        planTotalDays: plan ? plan.total : null,
         friendsSince: isoOrNull(since.get(key) ?? null),
         publicProfile: isPublicTree(user.levensboom),
       };
@@ -468,8 +428,6 @@ export async function getFriendProfile(userId: string, otherId: string): Promise
           // suggestion is recognisable; the numbers wait for a vriendschap.
           ...card,
           streak: 0,
-          planDay: null,
-          planTotalDays: null,
           friendsSince: null,
           mutualCount: mutualIds.length,
         },

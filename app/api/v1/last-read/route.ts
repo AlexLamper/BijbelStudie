@@ -106,6 +106,8 @@ export async function POST(req: Request) {
     // it catches and logs its own errors - never fails the read. Apps from
     // 1.1.4 send `planTick: false`: they tick a plan chapter only once it is
     // read to the end (POST /bible-year/mark), not when it is opened.
+    // LEGACY: the feature is removed; this stays only for installed app builds
+    // older than 1.1.4 and goes together with lib/bibleYear/.
     if (planTick !== false) {
       after(() => recordBibleYearChapter(auth.id, progressKey, chapter, { isPro: auth.isPro }));
     }

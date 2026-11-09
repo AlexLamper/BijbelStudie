@@ -65,9 +65,7 @@ export function SuggestionsCard({ onInvited }: { onInvited?: () => void }) {
           const name = person.name || "Een lezer"
           // Shared friends when the server counted them, otherwise the one
           // other thing two strangers demonstrably have in common.
-          const why =
-            mutualLabel(person) ??
-            (person.planTotalDays ? "leest ook Bijbel in een jaar" : "leest ook mee")
+          const why = mutualLabel(person) ?? "leest ook mee"
           const invited = sent.includes(person.userId)
           return (
             <li key={person.userId} className="flex items-center gap-2.5">

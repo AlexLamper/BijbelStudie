@@ -9,7 +9,7 @@ import {
 } from "../ui/dropdown-menu"
 import { ConfirmDialog } from "../ui/ConfirmDialog"
 import { Card, Skeleton } from "../kit/primitives"
-import { friendsClient, mutualLabel, planLabel, profileHref, theirKringState } from "../../lib/friends/client"
+import { friendsClient, mutualLabel, profileHref, theirKringState } from "../../lib/friends/client"
 import type { FriendProfileView, FriendSummary } from "../../lib/friends/types"
 import { BLOCK_CONFIRM_COPY, blockConfirmTitle } from "../settings/vriendenkringCopy"
 import { FriendAvatar } from "./FriendAvatar"
@@ -35,7 +35,7 @@ import {
  *
  * What is shown is graded by the server, not here (lib/friends/service.ts):
  *
- * - a non-friend's `streak`, `planDay` and `friendsSince` come back zeroed, so
+ * - a non-friend's `streak` and `friendsSince` come back zeroed, so
  *   those lines are left off rather than rendered as zeros;
  * - `friends` is `null` for a non-friend, which means "not yours to see" and
  *   gets no section at all. An empty-list state there would read as "they have
@@ -119,7 +119,6 @@ export function FriendProfilePanel({ userId }: { userId: string }) {
 
   const person = view.user
   const name = person.name || "Een lezer"
-  const plan = view.isFriend ? planLabel(person) : null
   const since = view.isFriend ? friendsSinceLabel(person.friendsSince) : null
   const mutual = mutualLabel({ mutualCount: view.mutualCount })
   const hiddenMutuals = moreMutualsLabel(view.mutualCount - view.mutuals.length)
@@ -137,7 +136,7 @@ export function FriendProfilePanel({ userId }: { userId: string }) {
                 left off rather than printed as a row of zeros. */}
             {view.isFriend && (
               <p className="mt-0.5 truncate text-[13px] text-ink-faint">
-                {plan ?? PROFILE_COPY.readsAlong}
+                {PROFILE_COPY.readsAlong}
                 {person.streak > 0 && (
                   <span className="ml-2 inline-flex items-center gap-1 align-middle">
                     <Flame size={13} className="text-warn" />

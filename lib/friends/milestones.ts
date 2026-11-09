@@ -13,9 +13,9 @@ import { postMilestone } from './service';
  * Three rules hold for every function here:
  *
  * 1. **It never throws.** Each call is wrapped, and a failure is logged and
- *    dropped. These run next to a progress write - a plan day, a finished
- *    lesson, XP - and losing a reader's progress because a feed card could
- *    not be written would be the wrong trade by a wide margin. The same
+ *    dropped. These run next to a progress write - a finished lesson, XP -
+ *    and losing a reader's progress because a feed card could not be
+ *    written would be the wrong trade by a wide margin. The same
  *    arrangement `grantXp` already uses for `creditReferrerIfActivated`.
  * 2. **Dedupe is the `sourceId`.** `postMilestone` guards on
  *    `{userId, kind, sourceId}` (indexed in models/FriendPost.js), so the ids
@@ -45,24 +45,6 @@ async function announce(
     // Logged, never rethrown. See rule 1 above.
     console.error(`[friends-milestone] ${label} niet geplaatst voor ${userId}`, error);
   }
-}
-
-/**
- * A finished day of "Bijbel in een jaar".
- *
- * Keyed on the enrollment as well as the day: a reader who restarts the plan
- * is on a new run, and day 1 of that run is a real event again.
- */
-export async function announcePlanDay(
-  userId: string,
-  input: { enrollmentId: string; day: number; totalDays: number },
-): Promise<void> {
-  if (!Number.isFinite(input.day) || input.day < 1) return;
-  await announce('plandag', userId, {
-    sourceId: `plan-day:${input.enrollmentId}:${input.day}`,
-    body: `Dag ${input.day} van ${input.totalDays} van Bijbel in een jaar gelezen.`,
-    reference: 'Bijbel in een jaar',
-  });
 }
 
 /** The last lesson of a curated study. */

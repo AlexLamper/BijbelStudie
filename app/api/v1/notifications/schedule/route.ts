@@ -14,7 +14,7 @@ export async function OPTIONS() {
 }
 
 /**
- * GET /api/v1/notifications/schedule?days=14&tz=Europe/Amsterdam&exclude=bibleYear,study,verse
+ * GET /api/v1/notifications/schedule?days=14&tz=Europe/Amsterdam&exclude=study,verse
  *
  * Morning + evening notification content per local date, for the app to
  * schedule on the device (DAILY_HABIT_PLAN.md §2). Shape:
@@ -24,7 +24,7 @@ export async function OPTIONS() {
  * Cheap on purpose: two indexed reads plus one upstream verse per date (each a
  * shared Data Cache entry, never written to the archive). The app refetches on
  * launch/resume and after progress. `no-cache`: a stale copy would announce a
- * lesson or plan day the reader has already done, so every fetch revalidates.
+ * lesson the reader has already done, so every fetch revalidates.
  */
 export async function GET(req: Request) {
   try {

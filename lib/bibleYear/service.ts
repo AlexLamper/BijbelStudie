@@ -2,6 +2,13 @@
  * "Bijbel in een jaar" persistence (DAILY_HABIT_PLAN.md §4). The only writer of
  * models/BibleYearEnrollment.js; the maths lives in ./progress and ./schedule.
  *
+ * LEGACY: the feature was removed from the website and the app. What is left
+ * of lib/bibleYear/ only serves app/api/v1/bible-year/** and the v1 last-read
+ * auto-tick, for app builds already installed on phones. Delete it (with those
+ * routes) once no supported app version calls /api/v1/bible-year any more.
+ * The model stays as long as account purge/export (lib/accountPurge.ts,
+ * lib/accountArchive.ts) and the badge counts (lib/gamification.ts) need it.
+ *
  * Data safety (CLAUDE.md): every write here is a targeted operator -
  *   enrollment  $addToSet / $pull readRefs, $addToSet paidDays ($each, one
  *               findOneAndUpdate returning the old array, so the days it
@@ -39,8 +46,7 @@ import {
   type BibleYearDayOnDate,
   type BibleYearProgressInput,
 } from './progress';
-import { PLAN_DAYS, SCHEDULE_VERSION, TOTAL_CHAPTERS, getSchedule, isPlanKey, isTrackKey } from './schedule';
-import { announcePlanDay } from '../friends/milestones';
+import { SCHEDULE_VERSION, TOTAL_CHAPTERS, getSchedule, isPlanKey, isTrackKey } from './schedule';
 import { isStudyPart, studyKey } from './study';
 import type {
   BibleYearMode,
@@ -297,15 +303,6 @@ export async function settleProgress(
       } catch (error) {
         console.error('[bible-year] plan_day_read XP failed', error);
       }
-      // Vriendenkring: one card for the day just reached, not one per day a
-      // catch-up settled - "Dag 12, 13, 14 gelezen" is three cards nobody
-      // wants. `paidDays` is the pay-once set, so this fires exactly as often
-      // as the XP does; `announcePlanDay` never throws.
-      await announcePlanDay(userId, {
-        enrollmentId: String(doc._id),
-        day: Math.max(...paidDays),
-        totalDays: PLAN_DAYS[doc.planKey] ?? 365,
-      });
     }
   }
 

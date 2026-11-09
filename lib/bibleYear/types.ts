@@ -1,11 +1,12 @@
 /**
  * Wire shapes for "Bijbel in een jaar" (1- and 2-year whole-Bible reading
- * plans). No database imports, so client components can `import type` these.
+ * plans). No database imports.
  *
- * This file is the contract shared by the schedule core (lib/bibleYear/*),
- * the API (app/api/v1/bible-year/**), the web UI (components/bibleYear/*) and
- * the Flutter app (features/bible_year/). Change it only in the same pass as
- * all of them. See DAILY_HABIT_PLAN.md §4.
+ * LEGACY: the feature was removed from the website and the app. This file is
+ * now only the contract of app/api/v1/bible-year/**, kept for app builds
+ * already installed on phones (they still have features/bible_year/). Do not
+ * change the shapes; delete the whole of lib/bibleYear/ with those routes once
+ * no supported app version calls them. See DAILY_HABIT_PLAN.md §4.
  */
 
 export type BibleYearPlanKey = 'jaar-1' | 'jaar-2';

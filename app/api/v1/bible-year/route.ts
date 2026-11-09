@@ -13,6 +13,10 @@ export async function OPTIONS() {
  * "Bijbel in een jaar" (DAILY_HABIT_PLAN.md §4, contract lib/bibleYear/types.ts).
  * Cookie or bearer auth, like every v1 route.
  *
+ * LEGACY: "Bijbel in een jaar" was removed from the website and the app. This
+ * route stays only for app builds already installed on phones; delete it
+ * (with lib/bibleYear/) once no supported app version calls it.
+ *
  * GET   -> BibleYearStateResponse (running plan, else the latest completed one, else null)
  * POST  BibleYearStartBody -> BibleYearMutationResponse; 409 ACTIVE_PLAN when one runs
  * PATCH BibleYearPatchBody (shift | stop | restart | update) -> BibleYearMutationResponse

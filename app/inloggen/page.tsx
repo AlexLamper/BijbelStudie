@@ -65,7 +65,7 @@ function FeaturePanel() {
             Log in of maak een account aan en begin je bijbelstudie.
           </h2>
           <p className="mt-4 text-sm leading-relaxed text-white/70">
-            Behoud je notities, volg je leesplan en vraag de AI-assistent om uitleg bij elke passage.
+            Behoud je notities, volg je studies en vraag de AI-assistent om uitleg bij elke passage.
           </p>
         </div>
 

@@ -4,8 +4,8 @@
  * No database imports, so client components can `import type` these. This file
  * is the contract shared by the service (lib/friends/service.ts), the API
  * (app/api/v1/friends/**), the web UI (components/friends/*) and the Flutter
- * app (features/friends/). Change it only in the same pass as all of them -
- * the same rule lib/bibleYear/types.ts carries. See VRIENDENKRING_PLAN.md.
+ * app (features/friends/). Change it only in the same pass as all of them.
+ * See VRIENDENKRING_PLAN.md.
  */
 
 /** What one post in the feed is about. An unknown kind renders as a note. */
@@ -32,9 +32,6 @@ export type FriendSummary = {
    * say", which renders as no dot - the quiet answer.
    */
   activeToday?: boolean;
-  /** "Dag 42 van 365" is built client-side from these two. */
-  planDay: number | null;
-  planTotalDays: number | null;
   friendsSince: string | null;
   /**
    * Friends this person and the reader have in common.
@@ -129,7 +126,7 @@ export type FriendsKring = {
  * - anyone who is not blocked sees the card, `friendCount`, `mutualCount` and
  *   the `mutuals` themselves (those are the reader's OWN friends, so no name
  *   reaches them that they could not already see in their kring);
- * - `streak`, `planDay`, `friendsSince` and the full `friends` list are for an
+ * - `streak`, `friendsSince` and the full `friends` list are for an
  *   actual friend only. `friends` is `null` otherwise, not an empty array, so
  *   "they have nobody" and "you may not look" cannot be confused.
  */

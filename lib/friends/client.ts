@@ -4,8 +4,7 @@
  *
  * Nothing throws: each call resolves to a result the UI can branch on, with
  * 401 as its own kind so a signed-out visitor is handled gently rather than as
- * an error. Same shape as lib/bibleYear/client.ts, deliberately - one less
- * thing to learn when reading either.
+ * an error.
  */
 
 import type {
@@ -269,12 +268,6 @@ export function kringProfileHref(userId: string): string {
 export function theirKringState(friends: readonly unknown[] | null | undefined): 'hidden' | 'empty' | 'list' {
   if (friends == null) return 'hidden';
   return friends.length === 0 ? 'empty' : 'list';
-}
-
-/** "Dag 42 van 365", or null when this person runs no plan. */
-export function planLabel(friend: FriendSummary): string | null {
-  if (!friend.planDay || !friend.planTotalDays) return null;
-  return `Dag ${friend.planDay} van ${friend.planTotalDays}`;
 }
 
 /**

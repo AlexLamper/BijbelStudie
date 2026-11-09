@@ -26,7 +26,7 @@ const QUIET_LINK =
 
 const BENEFITS = [
   "Persoonlijke notities bij elk vers",
-  "Begeleide studies en leesplannen",
+  "Begeleide studies per bijbelboek en thema",
   "Directe uitleg via de AI-assistent",
 ]
 
@@ -46,7 +46,7 @@ function FeaturePanel() {
             Maak een account en ga vandaag nog aan de slag.
           </h2>
           <p className="mt-4 text-sm leading-relaxed text-white/70">
-            Behoud je notities, volg je leesplan en krijg direct antwoord op je Bijbelvragen.
+            Behoud je notities, volg je studies en krijg direct antwoord op je Bijbelvragen.
           </p>
         </div>
 

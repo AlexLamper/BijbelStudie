@@ -6,16 +6,15 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "../ui/dropdown-menu"
 import { ConfirmDialog } from "../ui/ConfirmDialog"
-import { friendsClient, planLabel, type PublicProfileFlag } from "../../lib/friends/client"
+import { friendsClient, type PublicProfileFlag } from "../../lib/friends/client"
 import type { FriendSummary } from "../../lib/friends/types"
 import { BLOCK_CONFIRM_COPY, blockConfirmTitle } from "../settings/vriendenkringCopy"
 import { FriendAvatar } from "./FriendAvatar"
 import { FriendLink } from "./FriendLink"
 
 /**
- * One person in the kring: name, their streak, and the plan day they are on -
- * the three things that make reading together feel like company rather than a
- * list of accounts.
+ * One person in the kring: name and their streak - what makes reading
+ * together feel like company rather than a list of accounts.
  *
  * Both ways out ask first, and both live behind one menu rather than two icons
  * on the row: "uit je kring halen" is an ordinary choice, blocking is not, and
@@ -34,7 +33,6 @@ export function FriendRow({
 }) {
   const [confirming, setConfirming] = useState<"remove" | "block" | null>(null)
   const [busy, setBusy] = useState(false)
-  const plan = planLabel(friend)
   const name = friend.name || "Een vriend"
 
   async function act(what: "remove" | "block") {
@@ -58,7 +56,7 @@ export function FriendRow({
           <FriendLink person={friend}>{name}</FriendLink>
         </p>
         <p className="truncate text-[12.5px] text-ink-faint">
-          {plan ?? "Leest mee"}
+          Leest mee
           {friend.streak > 0 && (
             <span className="ml-2 inline-flex items-center gap-1 align-middle">
               <Flame size={13} className="text-warn" />

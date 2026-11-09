@@ -36,6 +36,13 @@ const nextConfig: NextConfig = {
       { source: "/plans/:path*",          destination: "/studies",                 permanent: true },
       { source: "/leesplannen",           destination: "/studies",                 permanent: true },
       { source: "/leesplannen/:path*",    destination: "/studies",                 permanent: true },
+      // "Bijbel in een jaar" was removed (website and app). Its page was
+      // indexed and linked from /studies, so it goes back to the catalogue.
+      // /leesplan is the app's own path for it, in case a shared link uses it.
+      { source: "/studies/bijbel-in-een-jaar",        destination: "/studies", permanent: true },
+      { source: "/studies/bijbel-in-een-jaar/:path*", destination: "/studies", permanent: true },
+      { source: "/leesplan",              destination: "/studies",                 permanent: true },
+      { source: "/leesplan/:path*",       destination: "/studies",                 permanent: true },
       { source: "/notes",                 destination: "/notities",                permanent: true },
       { source: "/notes/:path*",          destination: "/notities/:path*",         permanent: true },
       // /hulpbronnen was removed from the website (the app keeps its own

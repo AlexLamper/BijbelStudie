@@ -10,6 +10,10 @@ export async function OPTIONS() {
 }
 
 /**
+ * LEGACY: "Bijbel in een jaar" was removed from the website and the app. This
+ * route stays only for app builds already installed on phones; delete it
+ * (with lib/bibleYear/) once no supported app version calls it.
+ *
  * POST /api/v1/bible-year/mark
  *   { refs: [{code: "GEN", chapter: 1}], read: true } or { day: 12, read: false }
  * -> BibleYearMutationResponse. 404 without a running plan, 400 on an unknown

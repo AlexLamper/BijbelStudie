@@ -27,7 +27,6 @@ import {
 import { readChaptersRepairPipeline } from '../../../../lib/readChaptersRepair';
 import { buildDashboardResume } from '../../../../lib/dashboardResume';
 import { loadDashboardResume } from '../../../../lib/dashboardResumeService';
-import { getToday } from '../../../../lib/bibleYear/service';
 
 export const dynamic = 'force-dynamic';
 
@@ -133,7 +132,7 @@ export async function GET(req: Request) {
     const repair = readChaptersRepairPipeline(user.readChapters);
     const readChapters = canonicaliseReadChapters(stored);
 
-    const [notes, sessions, activeDaysThisYear, activePlan, dailyVerse, resume, bibleYear] =
+    const [notes, sessions, activeDaysThisYear, activePlan, dailyVerse, resume] =
       await Promise.all([
         Note.find({ userId: user._id }).sort({ createdAt: -1 }).limit(500).lean(),
         ReadingSession.find({ userId: user._id, createdAt: { $gte: sevenDaysAgo } })
@@ -166,12 +165,6 @@ export async function GET(req: Request) {
             readChapters,
             now,
           });
-        }),
-        // Bijbel in een jaar "Vandaag" (lib/bibleYear/types.ts BibleYearToday),
-        // null without a running plan. One indexed read; never fails the dashboard.
-        getToday(String(user._id), now).catch((error) => {
-          console.error('[v1/dashboard] bible-year failed:', error);
-          return null;
         }),
         repair
           ? User.updateOne({ _id: user._id }, repair).catch((error) => {
@@ -251,7 +244,9 @@ export async function GET(req: Request) {
       planSuggestions,
       dailyVerse,
       resume,
-      bibleYear,
+      // No `bibleYear` any more: "Bijbel in een jaar" was removed. Installed
+      // app builds read an absent field as "unknown" and ask GET
+      // /api/v1/bible-year themselves, which still answers for them.
     });
   } catch (error) {
     return handleV1Error(error);

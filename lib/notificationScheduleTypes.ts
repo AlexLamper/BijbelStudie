@@ -1,5 +1,5 @@
 /**
- * GET /api/v1/notifications/schedule?days=14&tz=Europe/Amsterdam[&exclude=bibleYear,study,verse]
+ * GET /api/v1/notifications/schedule?days=14&tz=Europe/Amsterdam[&exclude=study,verse]
  *
  * `exclude` mirrors the app's content toggles: a switched-off kind falls
  * through to the next priority, and `verse` leaves the verse out entirely.
@@ -12,7 +12,11 @@
  * Copy rules: Dutch, no emoji, no guilt or deadline wording.
  */
 
-export type NotificationKind = 'bibleYear' | 'study' | 'chapter' | 'verse';
+/**
+ * Installed app builds still know a 'bibleYear' kind ("Bijbel in een jaar",
+ * removed); the server no longer sends it.
+ */
+export type NotificationKind = 'study' | 'chapter' | 'verse';
 
 export type ScheduledNotificationContent = {
   kind: NotificationKind;
@@ -20,8 +24,7 @@ export type ScheduledNotificationContent = {
   body: string;
   /**
    * App go_router location, validated against the app's whitelist:
-   * '/studie/<id>/<day>?stap=<step>', '/studies/bijbel-in-een-jaar',
-   * '/read', '/dashboard'.
+   * '/studie/<id>/<day>?stap=<step>', '/read', '/dashboard'.
    */
   route: string;
 };

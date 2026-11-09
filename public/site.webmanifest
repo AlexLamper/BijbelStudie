@@ -1,7 +1,7 @@
 {
   "name": "BijbelStudie - Online bijbelstudie",
   "short_name": "BijbelStudie",
-  "description": "Lees en bestudeer de Bijbel online: meerdere vertalingen, bijbelcommentaren, grondtekst, leesplannen, notities en een AI-assistent.",
+  "description": "Lees en bestudeer de Bijbel online: meerdere vertalingen, bijbelcommentaren, grondtekst, begeleide studies, notities en een AI-assistent.",
   "lang": "nl-NL",
   "dir": "ltr",
   "categories": ["education", "books", "lifestyle"],

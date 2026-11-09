@@ -77,8 +77,6 @@ export type CopyTokens = {
   studie?: string;
   les?: number;
   lessenTotaal?: number;
-  plan?: string;
-  plandag?: number;
   vers?: string;
   versverwijzing?: string;
   /** The reader's ProgressTree level, for the tree nudge. */
@@ -165,8 +163,6 @@ const STUDY_NUDGE: Variant[] = [
   { id: 't01', title: '{studie}, les {les}', body: 'De volgende les staat klaar. Ongeveer tien minuten.', needs: ['studie', 'les'] },
   { id: 't02', title: 'Verder met {studie}', body: 'Je bent op les {les} van {lessenTotaal}.', needs: ['studie', 'les', 'lessenTotaal'] },
   { id: 't03', title: 'Les {les} wacht', body: '{studie}. Je kunt hem in één zitting doen.', needs: ['studie', 'les'] },
-  { id: 't04', title: 'Dag {plandag} van {plan}', body: '{boek} {hoofdstuk} staat vandaag op het rooster.', needs: ['plan', 'plandag', 'boek', 'hoofdstuk'] },
-  { id: 't05', title: 'Je leesplan', body: 'Dag {plandag} staat klaar in {plan}.', needs: ['plan', 'plandag'] },
 ];
 
 /**

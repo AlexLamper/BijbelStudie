@@ -16,6 +16,10 @@ export async function OPTIONS() {
 }
 
 /**
+ * LEGACY: "Bijbel in een jaar" was removed from the website and the app. This
+ * route stays only for app builds already installed on phones; delete it
+ * (with lib/bibleYear/) once no supported app version calls it.
+ *
  * GET /api/v1/bible-year/schedule?plan=jaar-1&track=gemengd&version=1[&detail=1][&day=1]
  *
  * The static schedule (BibleYearSchedule). Public and identical for every
