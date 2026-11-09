@@ -33,6 +33,7 @@ import {
   type ProFeature,
   type TrialUsage,
 } from './entitlements';
+import { isAdminEmail } from './adminEmails';
 
 export const TRIAL_TIME_ZONE = 'Europe/Amsterdam';
 
@@ -64,6 +65,12 @@ export interface ReverseTrialFields {
   origin?: 'new' | 'existing' | null;
   /** The announcement was shown (either client). */
   announceSeenAt?: Date | string | null;
+  /**
+   * An `existing` trial that should never have started because the account
+   * has Pro of its own (see [hasOwnPro]). A voided trial is invisible: no
+   * announcement, no recap, no personal limit.
+   */
+  voidedAt?: Date | string | null;
 }
 
 /** The billing fields the touch needs, beside the trial itself. */
@@ -84,12 +91,22 @@ export interface TrialAccountFields {
   storePremiumExpiresAt?: Date | null;
   storeTrialStartedAt?: Date | null;
   firstPaidAt?: Date | null;
+  /** For ADMIN_EMAILS: the owner is admin by address, not by the `isAdmin` flag. */
+  email?: string | null;
+  /**
+   * Per request, never stored: the app's store SDK says this reader has an
+   * active subscription or store trial (`X-Bs-Store-Pro: 1`). The app's first
+   * request of a launch can reach us before the RevenueCat sync does, and the
+   * account then looks free here. Client-asserted, but it can only ever
+   * withhold or void a trial, never grant anything.
+   */
+  storeProClaimed?: boolean;
 }
 
 /** The `.select()` for everything here, for routes that load a lean row. */
 export const TRIAL_ACCOUNT_FIELDS =
   'createdAt reverseTrial subscribed compedProUntil storePremium stripeSubscriptionId subscriptionStatus ' +
-  'isAdmin subscriptionStartedAt proTrialUsedAt storePremiumPlatform storePremiumExpiresAt storeTrialStartedAt firstPaidAt';
+  'isAdmin subscriptionStartedAt proTrialUsedAt storePremiumPlatform storePremiumExpiresAt storeTrialStartedAt firstPaidAt email';
 
 export type TrialState = 'none' | 'active' | 'ended';
 
@@ -147,6 +164,7 @@ export function endOfAmsterdamDay(date: Date): Date {
 
 export function trialState(trial: ReverseTrialFields | null | undefined, now: Date): TrialState {
   if (!trial || !toDate(trial.startedAt)) return 'none';
+  if (toDate(trial.voidedAt)) return 'ended';
   const days = trial.days?.length ?? 0;
   if (days < REVERSE_TRIAL_DAYS) return 'active';
   const endsAt = toDate(trial.endsAt);
@@ -208,6 +226,28 @@ export function canGrantComp(account: TrialAccountFields): boolean {
   return !account.subscribed || Boolean(account.compedProUntil);
 }
 
+/** Admin by the database flag or by ADMIN_EMAILS - the session and /me use both. */
+export function isAdminAccount(account: TrialAccountFields): boolean {
+  return Boolean(account.isAdmin) || isAdminEmail(account.email);
+}
+
+const LIVE_STRIPE_STATUSES = new Set(['active', 'trialing', 'past_due']);
+
+/**
+ * Pro that is not the reverse trial's own comp: admin, a store subscription or
+ * store trial (known here, or claimed by the app's store SDK), or a live
+ * Stripe subscription. Nobody with Pro of their own is ever in a reverse
+ * trial, and nobody is told "Je hebt 3 dagen Pro gekregen" while they pay.
+ */
+export function hasOwnPro(account: TrialAccountFields): boolean {
+  return Boolean(
+    isAdminAccount(account) ||
+      account.storePremium ||
+      account.storeProClaimed ||
+      (account.subscriptionStatus && LIVE_STRIPE_STATUSES.has(account.subscriptionStatus)),
+  );
+}
+
 /**
  * An account from before the reverse trial that gets it once, on its next
  * visit (Alex, Nov 2026): created before REVERSE_TRIAL_LAUNCH (or with no
@@ -219,7 +259,8 @@ export function canGrantComp(account: TrialAccountFields): boolean {
 export function isExistingFreeAccount(account: TrialAccountFields): boolean {
   const created = toDate(account.createdAt);
   if (created && created.getTime() >= REVERSE_TRIAL_LAUNCH.getTime()) return false;
-  if (account.subscribed || account.storePremium || account.isAdmin) return false;
+  if (account.subscribed || account.storePremium || isAdminAccount(account)) return false;
+  if (account.storeProClaimed) return false;
   if (toDate(account.compedProUntil)) return false;
   return !(
     account.stripeSubscriptionId ||
@@ -248,12 +289,44 @@ export interface TouchPlan {
   finalise: { topFeature: ProFeature | null } | null;
   /** The comp ran out and the daily sweep has not caught it yet: drop to free now. */
   revoke: boolean;
+  /** An `existing` trial on an account with Pro of its own: void it (see [hasOwnPro]). */
+  void: boolean;
+  /**
+   * The comp a voided trial wrote (Pro until tonight at most) on an account
+   * the server now knows pays through a store. Cleared so it cannot linger as
+   * a "stripe" Pro after the store subscription ends - the comp sweep skips
+   * store accounts.
+   */
+  clearTrialComp: boolean;
 }
 
-const NOTHING: TouchPlan = { start: false, addDay: null, endsAt: null, grantUntil: null, finalise: null, revoke: false };
+const NOTHING: TouchPlan = {
+  start: false,
+  addDay: null,
+  endsAt: null,
+  grantUntil: null,
+  finalise: null,
+  revoke: false,
+  void: false,
+  clearTrialComp: false,
+};
 
 export function isNothing(plan: TouchPlan): boolean {
-  return !plan.start && !plan.addDay && !plan.grantUntil && !plan.finalise && !plan.revoke;
+  return (
+    !plan.start && !plan.addDay && !plan.grantUntil && !plan.finalise && !plan.revoke && !plan.void && !plan.clearTrialComp
+  );
+}
+
+/** A comp that can only be the trial's own grant: comp-only billing, ending tonight at the latest. */
+function isTrialGrant(account: TrialAccountFields, tonight: Date): boolean {
+  const until = toDate(account.compedProUntil);
+  return Boolean(
+    account.subscribed &&
+      until &&
+      until.getTime() <= tonight.getTime() &&
+      !account.stripeSubscriptionId &&
+      !account.subscriptionStatus,
+  );
 }
 
 /**
@@ -267,6 +340,8 @@ export function planTouch(account: TrialAccountFields, now: Date): TouchPlan {
   const tonight = endOfAmsterdamDay(now);
 
   if (!trial || !toDate(trial.startedAt)) {
+    // Admins and anyone the store already says has Pro never start one.
+    if (isAdminAccount(account) || account.storeProClaimed) return NOTHING;
     const created = toDate(account.createdAt);
     const isNew = Boolean(created && created.getTime() >= REVERSE_TRIAL_LAUNCH.getTime());
     if (!isNew && !isExistingFreeAccount(account)) return NOTHING;
@@ -278,6 +353,19 @@ export function planTouch(account: TrialAccountFields, now: Date): TouchPlan {
       endsAt: (REVERSE_TRIAL_DAYS as number) <= 1 ? tonight : null,
       grantUntil: canGrantComp(account) ? tonight : null,
     };
+  }
+
+  if (toDate(trial.voidedAt)) {
+    // The trial's own comp can outlive a void that came from the app's header
+    // before the store sync did: once the sync confirms the store, clear it.
+    return account.storePremium && isTrialGrant(account, tonight) ? { ...NOTHING, clearTrialComp: true } : NOTHING;
+  }
+
+  // An older account's one-time trial that started before we knew it has Pro
+  // of its own (an admin by address, a store trial the RevenueCat sync had not
+  // delivered yet): take it back so nothing about it ever shows.
+  if (trial.origin === 'existing' && hasOwnPro(account)) {
+    return { ...NOTHING, void: true, clearTrialComp: Boolean(account.storePremium) && isTrialGrant(account, tonight) };
   }
 
   const days = trial.days ?? [];
@@ -339,6 +427,19 @@ export function applyTouch<T extends TrialAccountFields>(account: T, plan: Touch
     next.subscribed = false;
     next.compedProUntil = null;
   }
+  if (plan.void) {
+    trial.voidedAt = now;
+    trial.announceSeenAt = trial.announceSeenAt ?? now;
+    trial.recapSeenAt = trial.recapSeenAt ?? now;
+    if (!toDate(trial.endedAt)) {
+      trial.endedAt = now;
+      trial.topFeature = null;
+    }
+  }
+  if (plan.clearTrialComp) {
+    next.subscribed = false;
+    next.compedProUntil = null;
+  }
   return next;
 }
 
@@ -373,6 +474,7 @@ export function trialSummary(
 ): TrialSummary | null {
   const state = trialState(trial, now);
   if (state === 'none' || !trial) return null;
+  if (toDate(trial.voidedAt)) return null;
   const usage = trial.usage ?? {};
   const endsAt = toDate(trial.endsAt);
   return {

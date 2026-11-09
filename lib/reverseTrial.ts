@@ -8,6 +8,7 @@ import { sanitizeProps, type EventName } from './analyticsSchema';
 import { REVERSE_TRIAL_DAYS, TINY_TTS_DAILY_CHARS, type TrialUsage } from './entitlements';
 import {
   amsterdamDay,
+  endOfAmsterdamDay,
   isCountingUsage,
   isNothing,
   planTouch,
@@ -123,6 +124,44 @@ export async function touchReverseTrial(
       // date has passed - the same guard as the daily sweep in lib/compedPro.ts.
       await User.updateOne(
         { _id, ...COMPED_ACCESS_FILTER, compedProUntil: { $ne: null, $lte: now } },
+        { $set: { subscribed: false, compedProUntil: null } },
+      );
+    }
+
+    if (plan.void) {
+      // The account has Pro of its own (admin, store, Stripe): the trial is
+      // taken back and marked seen everywhere, so neither client shows the
+      // announcement, the recap or a personal limit for it.
+      await User.updateOne(
+        { _id, 'reverseTrial.startedAt': { $exists: true }, 'reverseTrial.voidedAt': { $exists: false } },
+        [
+          {
+            $set: {
+              'reverseTrial.voidedAt': now,
+              'reverseTrial.announceSeenAt': { $ifNull: ['$reverseTrial.announceSeenAt', now] },
+              'reverseTrial.recapSeenAt': { $ifNull: ['$reverseTrial.recapSeenAt', now] },
+              'reverseTrial.topFeature': {
+                $cond: [{ $ifNull: ['$reverseTrial.endedAt', false] }, '$reverseTrial.topFeature', null],
+              },
+              'reverseTrial.endedAt': { $ifNull: ['$reverseTrial.endedAt', now] },
+            },
+          },
+        ],
+      );
+    }
+
+    if (plan.clearTrialComp) {
+      // Only a short comp (comp-only billing, ending by tonight) on an account
+      // the store sync has confirmed - never a running referral week.
+      await User.updateOne(
+        {
+          _id,
+          storePremium: true,
+          subscribed: true,
+          stripeSubscriptionId: { $in: [null, ''] },
+          subscriptionStatus: { $in: [null, ''] },
+          compedProUntil: { $ne: null, $lte: endOfAmsterdamDay(now) },
+        },
         { $set: { subscribed: false, compedProUntil: null } },
       );
     }

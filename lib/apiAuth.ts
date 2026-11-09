@@ -111,6 +111,7 @@ export async function touched<T extends UserDoc>(
   doc: T,
   reload: () => Promise<T | null>,
   platform: 'web' | null = null,
+  storeProClaimed = false,
 ): Promise<T> {
   // Every field the rules read (lib/reverseTrialRules.ts TrialAccountFields),
   // as plain data: a hydrated document answers through getters.
@@ -118,9 +119,24 @@ export async function touched<T extends UserDoc>(
   const plain = (typeof source.toObject === 'function' ? source.toObject() : doc) as TrialAccountFields & {
     _id: unknown;
   };
-  const plan = await touchReverseTrial({ ...plain, _id: doc._id, reverseTrial: plainTrial(doc) }, { platform });
+  const plan = await touchReverseTrial(
+    { ...plain, _id: doc._id, reverseTrial: plainTrial(doc), storeProClaimed },
+    { platform },
+  );
   if (isNothing(plan)) return doc;
   return (await reload()) ?? doc;
+}
+
+/**
+ * `X-Bs-Store-Pro: 1`: the app's store SDK reports an active subscription or
+ * store trial. Read only to withhold or void the reverse trial for a reader
+ * whose store purchase has not reached us yet (lib/reverseTrialRules.ts
+ * `storeProClaimed`); it never grants anything.
+ */
+export const STORE_PRO_HEADER = 'x-bs-store-pro';
+
+export function claimsStorePro(req: Request): boolean {
+  return req.headers.get(STORE_PRO_HEADER) === '1';
 }
 
 function bearerToken(req: Request): string | null {
@@ -142,7 +158,7 @@ export async function resolveUser(req: Request): Promise<AuthUser | null> {
     await connectMongoDB();
     const doc = await User.findById(claims.sub);
     if (!doc) return null;
-    return toAuthUser(await touched(doc, () => User.findById(claims.sub), null));
+    return toAuthUser(await touched(doc, () => User.findById(claims.sub), null, claimsStorePro(req)));
   }
 
   // Fall back to the website's cookie session so a handler can be shared.

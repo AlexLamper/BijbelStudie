@@ -137,6 +137,11 @@ const UserSchema = new mongoose.Schema(
       origin: { type: String, enum: ["new", "existing"] },
       // "Je hebt 3 dagen Pro gekregen" was shown (existing accounts only).
       announceSeenAt: { type: Date },
+      // An "existing" trial that should never have started: the account turned
+      // out to have Pro of its own (admin, store or Stripe subscription, or a
+      // store trial the server had not heard of yet). A voided trial is
+      // invisible to both clients and never limits anything.
+      voidedAt: { type: Date },
     },
     stripeCustomerId: { type: String },
     stripeSubscriptionId: { type: String },
