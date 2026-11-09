@@ -98,8 +98,8 @@ const pageConfigs: Record<string, PageMetadataConfig> = {
     indexable: false
   },
   profileBible: {
-    title: 'Bijbel gelezen',
-    description: 'Alle 66 bijbelboeken met de hoofdstukken die je al gelezen hebt.',
+    title: 'Bijbelvoortgang',
+    description: 'Je boekenkast: alle 66 bijbelboeken met de hoofdstukken die je al gelezen hebt.',
     path: '/profiel/bijbel',
     type: 'profile',
     indexable: false
