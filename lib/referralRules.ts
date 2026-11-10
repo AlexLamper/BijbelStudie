@@ -136,6 +136,8 @@ export function compWeekUpdate(now: Date, days = REFERRAL_REWARD_DAYS) {
         compedProUntil: {
           $add: [{ $max: [{ $ifNull: ['$compedProUntil', now] }, now] }, days * DAY_MS],
         },
+        // A gift: never the older-account reverse trial afterwards.
+        proGiftedAt: now,
       },
     },
   ];

@@ -93,6 +93,8 @@ export interface TrialAccountFields {
   firstPaidAt?: Date | null;
   /** For ADMIN_EMAILS: the owner is admin by address, not by the `isAdmin` flag. */
   email?: string | null;
+  /** Pro was gifted at some point (admin grant, referral week); kept after the gift ends. */
+  proGiftedAt?: Date | null;
   /**
    * Per request, never stored: the app's store SDK says this reader has an
    * active subscription or store trial (`X-Bs-Store-Pro: 1`). The app's first
@@ -106,7 +108,7 @@ export interface TrialAccountFields {
 /** The `.select()` for everything here, for routes that load a lean row. */
 export const TRIAL_ACCOUNT_FIELDS =
   'createdAt reverseTrial subscribed compedProUntil storePremium stripeSubscriptionId subscriptionStatus ' +
-  'isAdmin subscriptionStartedAt proTrialUsedAt storePremiumPlatform storePremiumExpiresAt storeTrialStartedAt firstPaidAt email';
+  'isAdmin subscriptionStartedAt proTrialUsedAt storePremiumPlatform storePremiumExpiresAt storeTrialStartedAt firstPaidAt email proGiftedAt';
 
 export type TrialState = 'none' | 'active' | 'ended';
 
@@ -252,8 +254,10 @@ export function hasOwnPro(account: TrialAccountFields): boolean {
  * An account from before the reverse trial that gets it once, on its next
  * visit (Alex, Nov 2026): created before REVERSE_TRIAL_LAUNCH (or with no
  * creation date at all), never paid or trialled through Stripe or a store,
- * not an admin, and not Pro right now by any route - a subscription, an admin
- * grant or a referral week. "Not already given one" is the caller's check
+ * not an admin, not Pro right now by any route - a subscription, an admin
+ * grant or a referral week - and never gifted Pro before (`proGiftedAt`: when a
+ * gift ends the reader goes straight to the free limits, Alex Nov 2026).
+ * "Not already given one" is the caller's check
  * (no `reverseTrial.startedAt`). Decided per visit, so nothing is migrated.
  */
 export function isExistingFreeAccount(account: TrialAccountFields): boolean {
@@ -261,7 +265,8 @@ export function isExistingFreeAccount(account: TrialAccountFields): boolean {
   if (created && created.getTime() >= REVERSE_TRIAL_LAUNCH.getTime()) return false;
   if (account.subscribed || account.storePremium || isAdminAccount(account)) return false;
   if (account.storeProClaimed) return false;
-  if (toDate(account.compedProUntil)) return false;
+  // A gift running now, or one that ran and ended: straight to the free limits.
+  if (toDate(account.compedProUntil) || toDate(account.proGiftedAt)) return false;
   return !(
     account.stripeSubscriptionId ||
     account.subscriptionStatus ||

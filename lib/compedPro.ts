@@ -52,9 +52,13 @@ export async function expireCompedPro(now: Date = new Date()): Promise<CompExpir
     { $set: { compedProUntil: null } },
   );
 
+  // `proGiftedAt` survives the cleared date: a reader whose gift ended goes
+  // straight to the free limits, never into the older-account reverse trial
+  // (lib/reverseTrialRules.ts `isExistingFreeAccount`). Harmless on a lapsed
+  // reverse-trial comp - that account already had its trial.
   const lapsed = await User.updateMany(
     { ...COMPED_ACCESS_FILTER, compedProUntil: { $ne: null, $lte: now } },
-    { $set: { subscribed: false, compedProUntil: null } },
+    { $set: { subscribed: false, compedProUntil: null, proGiftedAt: now } },
   );
 
   return {

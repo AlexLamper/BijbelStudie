@@ -100,6 +100,12 @@ const UserSchema = new mongoose.Schema(
     // is open-ended (the App Store review account, the plain "Pro activeren"
     // toggle), which is why expiry is opt-in rather than derived from a duration.
     compedProUntil: { type: Date, default: null },
+    // Set when Pro was gifted - an admin grant or toggle, a referral week - and
+    // again when such a gift lapses in the sweep, because the sweep clears
+    // `compedProUntil`. An account with this date never gets the one-time
+    // reverse trial for older accounts (Alex, Nov 2026: when a gift ends the
+    // reader goes straight to the free limits). No default: absent = never.
+    proGiftedAt: { type: Date },
     // The reverse trial (lib/reverseTrial.ts, rules in lib/reverseTrialRules.ts):
     // Pro for a new account's first three ACTIVE days, then a personal limit on
     // the feature it used most. No defaults anywhere on purpose - an account

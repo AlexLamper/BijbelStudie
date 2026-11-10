@@ -170,6 +170,9 @@ export async function updateAdminUserPayload(
   const ring = proRingGrant(before, { ...before, ...update });
   if (ring) Object.assign(set, ring);
   if (compedProUntil !== undefined) set.compedProUntil = compedProUntil;
+  // Pro switched on or off by hand, or a month granted: a gift either way, so
+  // this account never gets the older-account reverse trial afterwards.
+  if (update.subscribed !== undefined) set.proGiftedAt = new Date();
   if (Object.keys(set).length > 0) await User.updateOne({ _id: target._id }, { $set: set });
 
   return {
