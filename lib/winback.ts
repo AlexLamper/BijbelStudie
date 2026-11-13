@@ -180,6 +180,69 @@ function trackedLink(stage: number, path: string): string {
   return `https://www.bijbelstudie.io/api/email/c?${q.toString()}`;
 }
 
+type ComposeDeps = {
+  renderWinbackEmail: typeof import('./emailTemplates/winback').renderWinbackEmail;
+  levelForXp: typeof import('./gamification').levelForXp;
+  readTreeHealth: typeof import('./progressTree/health').readTreeHealth;
+  loadScheduleContext: typeof import('./notificationSchedule').loadScheduleContext;
+  DEFAULT_DAILY_GOAL: typeof import('./dailyGoal').DEFAULT_DAILY_GOAL;
+  isDailyGoalMinutes: typeof import('./dailyGoal').isDailyGoalMinutes;
+};
+
+/**
+ * The mail itself, for one reader at one stage: where they left off, their
+ * tree, level, a recently lost streak, the verse. Shared by the cron and the
+ * admin preview, so the preview is exactly what readers get.
+ */
+async function composeWinbackMail(
+  user: LeanUser & { _id: unknown },
+  stage: import('./emailTemplates/winback').WinbackStage,
+  now: Date,
+  verse: { text: string; reference: string } | null,
+  urls: { typeUrl: string; allUrl: string },
+  deps: ComposeDeps,
+) {
+  const userId = String(user._id);
+  let resume = null as import('./emailTemplates/winback').WinbackResume | null;
+  let path = '/dashboard';
+  try {
+    const ctx = await deps.loadScheduleContext(userId, now);
+    if (ctx.study) {
+      resume = { kind: 'study', title: ctx.study.title, lessonDay: ctx.study.lessonDay };
+      path = `/studie/${encodeURIComponent(ctx.study.studyId)}/${ctx.study.lessonDay}`;
+    } else if (ctx.chapter) {
+      resume = { kind: 'chapter', book: ctx.chapter.book, chapter: ctx.chapter.chapter };
+      path = '/lezen';
+    }
+  } catch {
+    // A mail without "where you left off" is still a fine mail.
+  }
+
+  const health = deps.readTreeHealth(user.lastStreakDate ? new Date(user.lastStreakDate) : null, now);
+  const goalMinutes = deps.isDailyGoalMinutes(user.dailyGoal?.minutes) ? (user.dailyGoal!.minutes as number) : deps.DEFAULT_DAILY_GOAL;
+  const lostRecently =
+    user.lostStreak && user.lostStreakAt && now.getTime() - new Date(user.lostStreakAt).getTime() < 21 * 86_400_000
+      ? user.lostStreak
+      : null;
+
+  return deps.renderWinbackEmail({
+    stage,
+    firstName: firstNameOf(user.name, user.email),
+    resume,
+    tree: user.levensboom?.disabled ? null : { thirsty: health.wilting },
+    level: deps.levelForXp(user.xp ?? 0),
+    lostStreak: lostRecently,
+    goalMinutes,
+    verse,
+    ctaUrl: trackedLink(stage, path),
+    footer: {
+      unsubscribeTypeUrl: urls.typeUrl,
+      unsubscribeAllUrl: urls.allUrl,
+      reason: 'Je krijgt deze mail omdat je een BijbelStudie-account hebt en een tijdje niet hebt gelezen.',
+    },
+  });
+}
+
 export async function runWinback(options: WinbackRunOptions = {}): Promise<WinbackRunSummary> {
   const now = options.now ?? new Date();
   const dryRun = Boolean(options.dryRun);
@@ -271,43 +334,13 @@ export async function runWinback(options: WinbackRunOptions = {}): Promise<Winba
       continue;
     }
 
-    let resume = null as import('./emailTemplates/winback').WinbackResume | null;
-    let path = '/dashboard';
-    try {
-      const ctx = await loadScheduleContext(userId, now);
-      if (ctx.study) {
-        resume = { kind: 'study', title: ctx.study.title, lessonDay: ctx.study.lessonDay };
-        path = `/studie/${encodeURIComponent(ctx.study.studyId)}/${ctx.study.lessonDay}`;
-      } else if (ctx.chapter) {
-        resume = { kind: 'chapter', book: ctx.chapter.book, chapter: ctx.chapter.chapter };
-        path = '/lezen';
-      }
-    } catch {
-      // A mail without "where you left off" is still a fine mail.
-    }
-
-    const health = readTreeHealth(user.lastStreakDate ? new Date(user.lastStreakDate) : null, now);
-    const goalMinutes = isDailyGoalMinutes(user.dailyGoal?.minutes) ? (user.dailyGoal!.minutes as number) : DEFAULT_DAILY_GOAL;
-    const lostRecently =
-      user.lostStreak && user.lostStreakAt && now.getTime() - new Date(user.lostStreakAt).getTime() < 21 * 86_400_000
-        ? user.lostStreak
-        : null;
-
-    const mail = renderWinbackEmail({
-      stage: decision.stage,
-      firstName: firstNameOf(user.name, user.email),
-      resume,
-      tree: user.levensboom?.disabled ? null : { thirsty: health.wilting },
-      level: levelForXp(user.xp ?? 0),
-      lostStreak: lostRecently,
-      goalMinutes,
-      verse,
-      ctaUrl: trackedLink(decision.stage, path),
-      footer: {
-        unsubscribeTypeUrl: typeUrl,
-        unsubscribeAllUrl: allUrl,
-        reason: 'Je krijgt deze mail omdat je een BijbelStudie-account hebt en een tijdje niet hebt gelezen.',
-      },
+    const mail = await composeWinbackMail(user, decision.stage, now, verse, { typeUrl, allUrl }, {
+      renderWinbackEmail,
+      levelForXp,
+      readTreeHealth,
+      loadScheduleContext,
+      DEFAULT_DAILY_GOAL,
+      isDailyGoalMinutes,
     });
 
     const result = await sendEmail({
@@ -344,4 +377,82 @@ export async function runWinback(options: WinbackRunOptions = {}): Promise<Winba
   }
 
   return summary;
+}
+
+export type WinbackPreviewResult =
+  | { status: 'sent'; to: string; subject: string; id: string | null }
+  | { status: 'failed' | 'skipped'; error: string };
+
+/**
+ * Sends ONE win-back mail, built exactly as the cron builds it, to the admin
+ * who asks for it - their own account, their own address, nobody else's
+ * (Alex, Nov 2026: "I want to see the mail the others get"). It touches no
+ * win-back state and records no analytics, so it changes nothing about when
+ * the real mails go out.
+ */
+export async function sendWinbackPreview(
+  email: string,
+  stage: import('./emailTemplates/winback').WinbackStage,
+  now: Date = new Date(),
+): Promise<WinbackPreviewResult> {
+  const [
+    { default: connectMongoDB },
+    { default: User },
+    { unsubscribePageUrl, unsubscribeOneClickUrl },
+    { sendEmail },
+    { renderWinbackEmail },
+    { levelForXp },
+    { readTreeHealth },
+    { loadScheduleContext },
+    { fetchDayTextForDate },
+    { DEFAULT_DAILY_GOAL, isDailyGoalMinutes },
+  ] = await Promise.all([
+    import('./mongodb'),
+    import('../models/User'),
+    import('./emailPrefs'),
+    import('./channels/email'),
+    import('./emailTemplates/winback'),
+    import('./gamification'),
+    import('./progressTree/health'),
+    import('./notificationSchedule'),
+    import('./mobileDayText'),
+    import('./dailyGoal'),
+  ]);
+  await connectMongoDB();
+
+  const user = await User.findOne({ email })
+    .select(
+      'name email emailPrefs winback platformsSeenAt lastStreakDate createdAt xp lostStreak lostStreakAt dailyGoal.minutes levensboom.disabled',
+    )
+    .lean<LeanUser & { _id: unknown }>();
+  if (!user || typeof user.email !== 'string') return { status: 'skipped', error: 'account not found' };
+
+  const userId = String(user._id);
+  const typeUrl = unsubscribePageUrl(userId, 'winback');
+  const allUrl = unsubscribePageUrl(userId, 'all');
+  const oneClick = unsubscribeOneClickUrl(userId, 'winback');
+  if (!typeUrl || !allUrl || !oneClick) return { status: 'skipped', error: 'no unsubscribe secret' };
+
+  const verseRow = await fetchDayTextForDate(dayKey(now)).catch(() => null);
+  const verse = verseRow ? { text: verseRow.text, reference: verseRow.reference } : null;
+
+  const mail = await composeWinbackMail(user, stage, now, verse, { typeUrl, allUrl }, {
+    renderWinbackEmail,
+    levelForXp,
+    readTreeHealth,
+    loadScheduleContext,
+    DEFAULT_DAILY_GOAL,
+    isDailyGoalMinutes,
+  });
+
+  const result = await sendEmail({
+    to: user.email,
+    subject: mail.subject,
+    html: mail.html,
+    text: mail.text,
+    preheader: mail.preheader,
+    unsubscribeUrl: oneClick,
+  });
+  if (result.status === 'sent') return { status: 'sent', to: user.email, subject: mail.subject, id: result.id };
+  return { status: result.status, error: result.status === 'failed' ? result.error : 'not sent' };
 }
