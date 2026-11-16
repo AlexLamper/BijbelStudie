@@ -33,8 +33,10 @@
  * This is the product saying what it is for. A determined reader can still read
  * the chapter response in dev tools, and that is fine: the obligation we carry
  * is not to build DRM, it is to not *offer* a licensed translation as a
- * copyable corpus. Same posture as HsvVersePanel, which has worked this way
- * since the 50-verse allowance shipped (lib/hsvQuota.ts).
+ * copyable corpus. The server side adds the parts a client cannot: restricted
+ * chapters are never put in a shared CDN cache, carry `noindex`, and are
+ * throttled per IP (lib/restrictedText.ts), so walking the whole translation
+ * through the API is slow and loud.
  *
  * ── Keeping both clients in step ────────────────────────────────────────────
  *
@@ -70,11 +72,10 @@ export const MAX_COPY_VERSES = 1;
  * Why each one is here:
  *
  *   hsv                       Herziene Statenvertaling, (c) Stichting HSV.
- *                             Today it is not a readable version at all - 50
- *                             quoted verses, never the picker (lib/hsvQuota.ts).
- *                             The id is listed anyway so that the day a licence
- *                             turns it into a readable translation, the guard
- *                             is already standing.
+ *                             A readable translation since Nov 2026 under the
+ *                             licence for BijbelStudie; that licence is for
+ *                             reading in the product, not for handing out the
+ *                             text, so one verse at a time is the ceiling.
  *   statenvertaling_jongbloed Statenvertaling, Jongbloed-editie. The 1637 text
  *                             is public domain; this *edition* (spelling,
  *                             punctuation, verse layout, GBS/Jongbloed

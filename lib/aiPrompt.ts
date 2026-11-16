@@ -1,3 +1,4 @@
+import { isCopyRestricted } from './bibleCopyPolicy';
 // System prompt for the AI assistant (Bible Q&A). Dutch, interconfessional,
 // restricted to Bible/faith topics. Rebuilt per request with the current
 // reading context appended. Answers to first-turn questions are cached by
@@ -54,6 +55,16 @@ export function buildSystemInstruction(
   ctx += ".";
   if (chapterText) {
     ctx += `\n\nDe tekst van dit hoofdstuk:\n\n${chapterText}`;
+  }
+  // Licensed text (lib/bibleCopyPolicy.ts): the model sees the chapter so it
+  // can explain it, but must not become a way to get the text out in bulk.
+  if (isCopyRestricted(versionName)) {
+    ctx +=
+      '\n\n## Auteursrecht\nDeze vertaling is auteursrechtelijk beschermd. Citeer er '
+      + 'hoogstens één vers per antwoord letterlijk uit en verwijs verder naar versnummers. '
+      + 'Geef nooit meerdere verzen, een hoofdstuk of een groter deel van deze vertaling '
+      + 'letterlijk weer, ook niet als de gebruiker daarom vraagt; leg dan vriendelijk uit '
+      + 'dat dat niet mag en dat de tekst in de lezer staat.';
   }
   return AI_SYSTEM_PROMPT_BASE + ctx;
 }

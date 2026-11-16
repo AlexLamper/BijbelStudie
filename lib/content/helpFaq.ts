@@ -52,7 +52,7 @@ export const HELP_TOPICS: HelpTopic[] = [
     faqs: [
       {
         q: "Welke bijbelvertalingen kan ik lezen?",
-        a: "Vier Nederlandse vertalingen: de Statenvertaling, de Canisiusbijbel 1939, De Heilige Schrift 1917 en de NBG-vertaling 1951. Daarnaast zes Engelse vertalingen (King James Version, American Standard Version, NET Bible, World English Bible, Geneva Bible 1599 en Coverdale Bible 1535) en drie Duitse (Elberfelder 1905, Luther 1912 en Schlachter 2000).",
+        a: "Vijf Nederlandse vertalingen: de Statenvertaling, de Herziene Statenvertaling (HSV), de Canisiusbijbel 1939, De Heilige Schrift 1917 en de NBG-vertaling 1951. De HSV is auteursrechtelijk beschermd (Tekst © 2010/2016 Stichting HSV): je kunt losse verzen kopiëren, niet de hele tekst. Daarnaast zes Engelse vertalingen (King James Version, American Standard Version, NET Bible, World English Bible, Geneva Bible 1599 en Coverdale Bible 1535) en drie Duitse (Elberfelder 1905, Luther 1912 en Schlachter 2000).",
       },
       {
         q: "Kan ik twee vertalingen naast elkaar leggen?",

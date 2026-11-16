@@ -8,9 +8,14 @@ import {
 import { getMobileBibleChapter } from '../../../../../../../lib/mobileContent';
 import {
   COPY_GUARD_REFUSAL,
+  isCopyRestricted,
   mayServeToClient,
   requestCapabilities,
 } from '../../../../../../../lib/bibleCopyPolicy';
+import {
+  applyRestrictedTextHeaders,
+  restrictedChapterThrottle,
+} from '../../../../../../../lib/restrictedText';
 
 export const runtime = 'nodejs';
 
@@ -44,10 +49,26 @@ export async function GET(
       return errorV1(COPY_GUARD_REFUSAL.code, COPY_GUARD_REFUSAL.status, COPY_GUARD_REFUSAL.message);
     }
 
+    // Licensed text: a reader's pace, and never a shared CDN copy (which would
+    // answer the next caller without this throttle ever running).
+    const wait = restrictedChapterThrottle(req, versionId);
+    if (wait !== null) {
+      return errorV1('RATE_LIMITED', 429, `Probeer het over ${wait}s opnieuw.`);
+    }
+
     const decodedBook = decodeURIComponent(book);
     const payload = await getMobileBibleChapter(versionId, decodedBook, chapterNumber);
     if (!payload) return errorV1('NOT_FOUND', 404, 'Hoofdstuk niet gevonden.');
 
+    if (isCopyRestricted(versionId)) {
+      return applyRestrictedTextHeaders(
+        cachedJsonV1(req, payload, {
+          private: true,
+          maxAge: 60 * 60,
+          varyHeaders: ['X-Bs-Capabilities'],
+        }),
+      );
+    }
     return cachedJsonV1(req, payload);
   } catch (error) {
     return handleV1Error(error);

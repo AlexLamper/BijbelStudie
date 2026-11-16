@@ -103,6 +103,12 @@ export const VERSION_PROFILES: Readonly<Record<string, VersificationProfile>> = 
   // (`scripts/build-crossrefs.mjs` can emit the profile with
   // `--profiles=nbg` if that trade is ever revisited.)
   nbg51: 'sv',
+  // HSV (licensed, private data). Follows the Dutch tradition - numbered psalm
+  // titles - but differs from the `statenvertaling` files in 82 chapters (e.g.
+  // Joh. 1 has 52 verses in the HSV, 51 in our SV data), so it reads the `sv`
+  // shards and is listed in UNVERIFIED_VERSIONS: the reader is told the
+  // numbering may differ.
+  hsv: 'sv',
 };
 
 /**
@@ -110,7 +116,7 @@ export const VERSION_PROFILES: Readonly<Record<string, VersificationProfile>> = 
  * present after `npm run sync-data`. They use the fallback profile and the UI
  * shows `Versnummering kan in deze vertaling afwijken.`
  */
-export const UNVERIFIED_VERSIONS: ReadonlySet<string> = new Set(['schlachter', 'net']);
+export const UNVERIFIED_VERSIONS: ReadonlySet<string> = new Set(['schlachter', 'net', 'hsv']);
 
 /**
  * Books where a version's numbering is known to differ from the profile it is

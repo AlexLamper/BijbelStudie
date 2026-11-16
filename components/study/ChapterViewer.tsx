@@ -25,8 +25,6 @@ import CrossRefPanel from './crossrefs/CrossRefPanel';
 import type { CrossRefNavigateTarget } from './crossrefs/CrossRefList';
 import { useCrossRefCopy } from './crossrefs/copy';
 import OriginalVersePanel from './flow/OriginalVersePanel';
-import HsvVersePanel from './HsvVersePanel';
-import { HSV_SHORT_CODE, hsvVersesInChapter } from '../../lib/hsvQuota';
 
 type Props = {
   version: string | null;
@@ -112,19 +110,6 @@ export default function ChapterViewer({
    * not the ProOfferDialog.
    */
   const [originalVerse, setOriginalVerse] = useState<number | null>(null);
-  /**
-   * The verse whose HSV quotation is open under it, or null. One at a time.
-   *
-   * Which verses may have one at all is settled offline: `hsvVersesInChapter`
-   * reads the 50-verse allowlist, so the control appears on the right verses
-   * without a request, and the text is only ever fetched once the reader asks
-   * for it. See lib/hsvQuota.ts for the licence this sits inside.
-   */
-  const [hsvVerse, setHsvVerse] = useState<number | null>(null);
-  const hsvAvailable = useMemo(
-    () => new Set(hsvVersesInChapter(book, chapter)),
-    [book, chapter],
-  );
   const isPro = useIsPro();
   const router = useRouter();
   const toggleOriginal = (verse: number) => {
@@ -265,7 +250,6 @@ export default function ChapterViewer({
   useEffect(() => {
     setCrossRefVerse(null);
     setOriginalVerse(null);
-    setHsvVerse(null);
     setRevealedVerse(null);
     crossRefButtons.current.clear();
   }, [book, chapter, version]);
@@ -355,14 +339,11 @@ export default function ChapterViewer({
                 const isFocused = focusVerse === vNum;
                 const crossRefsOpen = crossRefVerse === vNum;
                 const originalOpen = originalVerse === vNum;
-                const hsvOpen = hsvVerse === vNum;
-                const hasHsv = hsvAvailable.has(vNum);
                 const clusterRevealed =
-                  revealedVerse === vNum || crossRefsOpen || originalOpen || hsvOpen;
+                  revealedVerse === vNum || crossRefsOpen || originalOpen;
                 // An IDREF, so no spaces: the book name never goes in here.
                 const crossRefPanelId = `crossrefs-verse-${verseNumber}`;
                 const originalPanelId = `lezen-grondtekst-verse-${verseNumber}`;
-                const hsvPanelId = `lezen-hsv-verse-${verseNumber}`;
                 return (
                 <div
                   key={verseNumber}
@@ -379,13 +360,12 @@ export default function ChapterViewer({
                     isFocused && !isHighlighted && !tint && 'bg-[var(--teal-wash)]',
                   )}
                   onKeyDown={
-                    crossRefsOpen || originalOpen || hsvOpen
+                    crossRefsOpen || originalOpen
                       ? (event) => {
                           if (event.key !== 'Escape') return;
                           event.stopPropagation();
                           if (crossRefsOpen) closeCrossRefs();
                           if (originalOpen) setOriginalVerse(null);
-                          if (hsvOpen) setHsvVerse(null);
                         }
                       : undefined
                   }
@@ -471,27 +451,6 @@ export default function ChapterViewer({
                     >
                       <Languages className="h-3.5 w-3.5" aria-hidden />
                     </button>
-                    {/* Only on the fifty verses we may quote. A text badge
-                        rather than a glyph: there is no icon for "another
-                        translation", and the code is the thing readers know. */}
-                    {hasHsv && (
-                      <button
-                        type="button"
-                        onClick={() => setHsvVerse((current) => (current === vNum ? null : vNum))}
-                        aria-expanded={hsvOpen}
-                        aria-controls={hsvPanelId}
-                        aria-label={`Herziene Statenvertaling van vers ${verseNumber}`}
-                        title={`Herziene Statenvertaling van vers ${verseNumber}`}
-                        className={cn(
-                          'inline-flex items-center justify-center rounded-md border px-1.5 py-1 font-sans text-[10px] font-bold leading-none tracking-[0.5px] shadow-field transition-colors',
-                          hsvOpen
-                            ? 'border-teal bg-teal-dark text-white'
-                            : 'border-line bg-surface text-gray-500 hover:border-teal-dark hover:bg-teal-dark hover:text-white dark:text-muted-foreground dark:hover:text-white',
-                        )}
-                      >
-                        {HSV_SHORT_CODE}
-                      </button>
-                    )}
                     <CopyVerseButton
                       verse={verseNumber}
                       text={text}
@@ -529,16 +488,6 @@ export default function ChapterViewer({
                       chapter={chapter}
                       verse={vNum}
                       onClose={() => setOriginalVerse(null)}
-                    />
-                  )}
-
-                  {hsvOpen && (
-                    <HsvVersePanel
-                      id={hsvPanelId}
-                      book={book}
-                      chapter={chapter}
-                      verse={vNum}
-                      onClose={() => setHsvVerse(null)}
                     />
                   )}
 

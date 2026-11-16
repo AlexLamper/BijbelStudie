@@ -429,14 +429,13 @@ function Hero({ reviews }: { reviews?: ReviewsData }) {
  * for the commentaries.
  *
  * Nothing in here may be quoted on this page. Only the Statenvertaling is
- * public domain; the NBG 1951 is licensed and BasisBijbel never ships at all,
- * so every source is named and nothing more. The HSV is not on this list
- * either: it is not a translation the product serves, only fifty verses it may
- * quote beside another translation (lib/hsvQuota.ts). The commentaries are
+ * public domain; the NBG 1951 and the HSV are licensed and BasisBijbel never
+ * ships at all, so every source is named and nothing more. The commentaries are
  * named for the same reason - KingComments may not be redistributed.
  */
 const TRANSLATIONS = [
   { name: "Statenvertaling",    year: "1637", note: "De klassieke Nederlandse vertaling" },
+  { name: "Herziene Statenvertaling", year: "2010", note: "De Statenvertaling in hedendaags Nederlands" },
   { name: "NBG-vertaling",      year: "1951", note: "Decennialang de kanselbijbel van de protestantse kerken" },
   { name: "De Heilige Schrift", year: "1917", note: "De eerste NBG-vertaling, in de taal van haar tijd" },
   { name: "Canisiusbijbel",     year: "1939", note: "Rooms-katholieke vertaling met deuterocanonieke boeken" },
