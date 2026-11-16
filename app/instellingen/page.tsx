@@ -28,6 +28,7 @@ interface OptionItem { id: string; name: string; language?: string }
 const AVAILABLE_VERSIONS: OptionItem[] = [
   // Nederlands
   { id: 'statenvertaling',      name: 'Statenvertaling',         language: 'nl' },
+  { id: 'hsv',                  name: 'Herziene Statenvertaling', language: 'nl' },
   { id: 'canisiusbijbel',       name: 'Canisiusvertaling',       language: 'nl' },
   { id: 'heilige_schrift_1917', name: 'De Heilige Schrift',      language: 'nl' },
   // English

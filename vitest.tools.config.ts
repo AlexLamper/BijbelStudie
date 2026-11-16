@@ -3,7 +3,7 @@ import path from 'path';
 
 /**
  * Generators that need to import TypeScript: the tree's design and calibration
- * tooling (`npm run tree:*`) and the HSV quotation file (`npm run hsv:quotes`).
+ * tooling (`npm run tree:*`).
  * They run as vitest files so they can import the real modules without extra
  * tooling; `npm test` never picks these up (its include is `tests/`).
  */

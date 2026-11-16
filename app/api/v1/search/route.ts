@@ -7,6 +7,8 @@ import {
   requestCapabilities,
 } from '../../../../lib/bibleCopyPolicy';
 import { checkRateLimit, clientIp } from '../../../../lib/mobileRateLimit';
+import { isCopyRestricted } from '../../../../lib/bibleCopyPolicy';
+import { RESTRICTED_SEARCH_MAX_HITS, RESTRICTED_TEXT_HEADERS } from '../../../../lib/restrictedText';
 
 export const runtime = 'nodejs';
 
@@ -43,20 +45,37 @@ export async function GET(req: NextRequest) {
       return errorV1('QUERY_TOO_SHORT', 400, 'Zoekopdracht moet minstens 2 tekens zijn.');
     }
 
+    // A licensed translation's search hits are its text, a verse at a time:
+    // a few at once and a tighter per-IP budget, so "de", "en", "het" cannot be
+    // used to page out the whole translation.
+    const restricted = isCopyRestricted(version);
+    if (restricted) {
+      const strict = checkRateLimit(`search-restricted:${clientIp(req)}`, 10, 60);
+      if (!strict.allowed) {
+        return errorV1('RATE_LIMITED', 429, `Probeer het over ${strict.retryAfterSeconds}s opnieuw.`);
+      }
+    }
+    const requested = max ? Number(max) : undefined;
     const result = await searchMobileBible({
       versionId: version,
       query: q,
       book,
-      limit: max ? Number(max) : undefined,
+      limit: restricted
+        ? Math.min(requested && requested > 0 ? requested : RESTRICTED_SEARCH_MAX_HITS, RESTRICTED_SEARCH_MAX_HITS)
+        : requested,
     });
 
-    return jsonV1({
+    const response = jsonV1({
       query: q,
       version,
       book: book ?? null,
       hits: result.hits,
       truncated: result.truncated,
     });
+    if (restricted) {
+      for (const [key, value] of Object.entries(RESTRICTED_TEXT_HEADERS)) response.headers.set(key, value);
+    }
+    return response;
   } catch (error) {
     return handleV1Error(error);
   }

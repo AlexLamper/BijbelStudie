@@ -25,6 +25,7 @@ export const DAYTEXT_DEFAULT_VERSION = 'statenvertaling';
 const VERSION_NAMES: Record<string, string> = {
   statenvertaling: 'Statenvertaling',
   nbg51: 'NBG-vertaling 1951',
+  hsv: 'Herziene Statenvertaling',
   heilige_schrift_1917: 'De Heilige Schrift 1917',
   canisiusbijbel: 'Canisiusbijbel 1939',
   kjv: 'King James Version',

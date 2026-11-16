@@ -20,6 +20,8 @@ const MOBILE_BIBLE_ATTRIBUTION: Record<string, string> = {
   // with the website so the two can never drift: reproduce EXACTLY, no dash
   // normalisation, no added year, no reworded licence note.
   nbg51: BIBLE_ATTRIBUTIONS.nbg51,
+  // Licensed (Stichting HSV), shared with the website for the same reason.
+  hsv: BIBLE_ATTRIBUTIONS.hsv,
   heilige_schrift_1917: 'De Heilige Schrift 1917 - publiek domein',
   canisiusbijbel:
     'Canisiusbijbel 1939 - publiek domein (bron: ebible.org, nld1939)',

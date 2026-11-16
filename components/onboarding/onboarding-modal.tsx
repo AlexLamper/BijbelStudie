@@ -63,6 +63,7 @@ interface Choice {
 const TRANSLATION_NOTES: Record<string, string> = {
   statenvertaling: "De klassieke Nederlandse vertaling (1637)",
   nbg51: "Vertrouwde kerkvertaling uit 1951",
+  hsv: "De Statenvertaling in hedendaags Nederlands (2010)",
   heilige_schrift_1917: "NBG-vertaling, lange tijd standaard in kerken",
   canisiusbijbel: "Rooms-katholieke vertaling met deuterocanonieke boeken",
 }
@@ -184,6 +185,7 @@ const TEAL_INK = "text-teal-700 dark:text-teal-400"
  */
 const TRANSLATION_ORDER = [
   "statenvertaling",
+  "hsv",
   "nbg51",
   "canisiusbijbel",
   "heilige_schrift_1917",

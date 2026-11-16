@@ -9,6 +9,7 @@ const VERSIONS = [
   // Nederlands
   { id: 'statenvertaling',      name: 'Statenvertaling',          language: 'nl' },
   { id: 'nbg51',                name: 'NBG-vertaling 1951',       language: 'nl' },
+  { id: 'hsv',                  name: 'Herziene Statenvertaling', language: 'nl' },
   { id: 'heilige_schrift_1917', name: 'De Heilige Schrift 1917',  language: 'nl' },
   { id: 'canisiusbijbel',       name: 'Canisiusbijbel 1939',      language: 'nl' },
   // English
@@ -22,7 +23,7 @@ const VERSIONS = [
 
 // Licensed translations live in ./private, not /public/data, so their chapter
 // lists come from the API instead of /data/bibles/{version}/{book}/chapters.json.
-const API_CHAPTER_VERSIONS = new Set<string>(['nbg51', 'net']);
+const API_CHAPTER_VERSIONS = new Set<string>(['nbg51', 'hsv', 'net']);
 
 // Flat-file translations that store book names in English internally (need Dutch→English mapping)
 const ENGLISH_INTERNAL_VERSIONS = new Set<string>();

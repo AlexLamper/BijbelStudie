@@ -12,12 +12,6 @@
  *   net              NET Bible, (c) Biblical Studies Press. Whole-text
  *                    electronic distribution needs written permission and
  *                    "cannot be bundled with anything sold". We sell Pro.
- *   hsv              Copyrighted (Stichting HSV). Not in manifest.json, and it
- *                    must never be added here: as a *readable version* it would
- *                    be the whole translation, which needs a contract we do not
- *                    have. What the product does have is the free-of-charge
- *                    allowance to quote 50 verses - served by its own endpoints
- *                    from a 50-verse file. See lib/hsvQuota.ts.
  *   basisbijbel      Copyrighted. Not in manifest.json. Keep out.
  *   schlachter       Schlachter 2000, (c) Genfer Bibelgesellschaft. In
  *                    manifest.json for the website but not public domain.
@@ -39,6 +33,12 @@ export const MOBILE_ALLOWED_BIBLES: ReadonlySet<string> = new Set([
   // /private (never a static asset) and only ever per chapter, exactly as on
   // the website - see `fetchJson` in lib/local-data.ts.
   'nbg51',
+  // Herziene Statenvertaling, (c) Stichting HSV. Licensed for BijbelStudie
+  // (website + app) since Nov 2026. Like nbg51 it lives only in /private and
+  // leaves one chapter at a time, and it is copy-restricted
+  // (lib/bibleCopyPolicy.ts): one verse at a time, never a chapter, never an
+  // offline download. Never add it to BijbelAPI or any /public folder.
+  'hsv',
   'heilige_schrift_1917', // Public domain
   'canisiusbijbel', // ebible.org cleared with KBS; treated as public domain
   'kjv', // Public domain
