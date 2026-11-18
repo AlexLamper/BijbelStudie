@@ -1,11 +1,12 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { Fragment, useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import {
   Search, ShieldCheck, MoreVertical,
   Trash2, ShieldOff, ShieldPlus, UserCheck, UserX, X,
   AlertTriangle, RefreshCw, Apple, Smartphone, ChevronLeft, Gift, Globe,
+  ChevronDown, ChevronUp, CreditCard, Receipt, Clock, Info,
 } from "lucide-react"
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
@@ -24,6 +25,8 @@ import {
   SEG_TRACK,
   TABLE_HEAD,
   WARN,
+  GOOD,
+  INSET,
   isRecentlyActive,
   relativeTime,
   tint,
@@ -60,13 +63,113 @@ interface AdminUser {
   signupPlatform: ClientPlatform | "unknown" | null
   /** Last use per client; null = never seen there. */
   platformsSeenAt?: Record<ClientPlatform, string | null>
+  /** The step this account is on, from lib/billingJourney. */
+  journey: JourneySummary
 }
+
+type BillingStage =
+  | "free" | "reverse_trial" | "free_after_reverse_trial" | "comped_until" | "comped_open" | "admin"
+  | "stripe_trial" | "stripe_active" | "stripe_canceling" | "stripe_paused" | "stripe_past_due"
+  | "stripe_payment_failed" | "stripe_canceled" | "store_trial" | "store_active" | "store_lapsed"
+
+interface BillingIssue {
+  code: string
+  level: "warn" | "error"
+  message: string
+}
+
+interface JourneySummary {
+  stage: BillingStage
+  label: string
+  explanation: string
+  channel: "stripe" | "apple" | "google" | "comp" | "reverse_trial" | "admin" | null
+  hasPaid: boolean
+  willCharge: boolean
+  nextChargeAt: string | null
+  accessUntil: string | null
+  interval: "monthly" | "annual" | null
+  trialKind: "reverse" | "stripe" | "store" | null
+  trialEndsAt: string | null
+  issues: BillingIssue[]
+}
+
+interface InvoiceLine {
+  id: string
+  status: string | null
+  amountPaidCents: number
+  amountDueCents: number
+  currency: string
+  createdAt: string
+  isTrialInvoice: boolean
+  hostedUrl: string | null
+}
+
+interface BillingReport {
+  user: { id: string; name: string | null; email: string | null; createdAt: string | null }
+  journey: JourneySummary & { plan: { interval: "monthly" | "annual" | null; priceId: string | null; biller: string | null }; trial: { kind: string | null; startedAt: string | null; endsAt: string | null; over: boolean; daysUsed: number | null }; firstPaidAt: string | null }
+  fields: Record<string, unknown>
+  stripe: {
+    configured: boolean
+    mode: string
+    customerId: string | null
+    subscription: {
+      id: string
+      status: string
+      priceId: string | null
+      amountCents: number | null
+      currency: string | null
+      interval: "monthly" | "annual" | null
+      trialStart: string | null
+      trialEnd: string | null
+      currentPeriodEnd: string | null
+      cancelAtPeriodEnd: boolean
+      hasPaymentMethod: boolean
+      collectionPaused: boolean
+    } | null
+    invoices: InvoiceLine[]
+    totalPaidCents: number | null
+    error: string | null
+  }
+}
+
+/**
+ * How each step reads on screen. `tone` is the hue, not the wording:
+ *  - good: money is coming in, or will;
+ *  - info: free access that ends by itself and never charges;
+ *  - warn: something is waiting on the reader (opzegging, gepauzeerd);
+ *  - bad: a payment problem.
+ */
+const STAGE_TONE: Record<BillingStage, "good" | "info" | "warn" | "bad" | "flat"> = {
+  free: "flat",
+  reverse_trial: "info",
+  free_after_reverse_trial: "flat",
+  comped_until: "info",
+  comped_open: "info",
+  admin: "info",
+  stripe_trial: "good",
+  stripe_active: "good",
+  stripe_canceling: "warn",
+  stripe_paused: "warn",
+  stripe_past_due: "bad",
+  stripe_payment_failed: "bad",
+  stripe_canceled: "flat",
+  store_trial: "good",
+  store_active: "good",
+  store_lapsed: "flat",
+}
+
+function euros(cents: number | null | undefined, currency = "EUR"): string {
+  if (cents === null || cents === undefined) return "-"
+  return `${currency === "EUR" ? "€" : `${currency} `}${(cents / 100).toFixed(2).replace(".", ",")}`
+}
+
+const INTERVAL_LABEL: Record<"monthly" | "annual", string> = { monthly: "Maandelijks", annual: "Jaarlijks" }
 
 type ClientPlatform = "ios" | "android" | "web"
 
 const PLATFORM_LABEL: Record<ClientPlatform, string> = { ios: "iOS", android: "Android", web: "Web" }
 
-type Filter = "all" | "pro" | "free" | "admin"
+type Filter = "all" | "pro" | "free" | "paying" | "issues" | "admin"
 
 /** `compMonths` is an action, not a field: it grants Pro for that many months. */
 type UserPatch = Partial<Pick<AdminUser, "isAdmin" | "subscribed">> & { compMonths?: number }
@@ -109,6 +212,8 @@ export default function AdminUsersPage() {
   const [filter, setFilter] = useState<Filter>("all")
   const [pendingId, setPendingId] = useState<string | null>(null)
   const [toast, setToast] = useState<{ type: "ok" | "err"; msg: string } | null>(null)
+  /** The account whose billing panel is open; one at a time, it costs a Stripe call. */
+  const [openBillingId, setOpenBillingId] = useState<string | null>(null)
 
   useEffect(() => {
     fetchUsers()
@@ -139,6 +244,8 @@ export default function AdminUsersPage() {
       if (filter === "pro" && !u.isPro) return false
       if (filter === "free" && u.isPro) return false
       if (filter === "admin" && !u.isAdmin) return false
+      if (filter === "paying" && !(u.journey?.hasPaid || u.journey?.willCharge)) return false
+      if (filter === "issues" && !(u.journey?.issues?.length)) return false
       if (!term) return true
       return u.name?.toLowerCase().includes(term) || u.email?.toLowerCase().includes(term)
     })
@@ -174,6 +281,10 @@ export default function AdminUsersPage() {
         type: "ok",
         msg: compMonths ? `Pro toegekend voor ${compMonths} ${compMonths === 1 ? "maand" : "maanden"}` : "Bijgewerkt",
       })
+      // The step is derived on the server from fields this patch moved, so the
+      // optimistic row above would keep showing the old one ("CADEAU" after the
+      // gift was revoked). Re-read rather than re-derive it here.
+      await fetchUsers()
     } catch {
       setToast({ type: "err", msg: "Netwerkfout" })
     } finally {
@@ -244,6 +355,10 @@ export default function AdminUsersPage() {
     all: users.length,
     pro: users.filter(u => u.isPro).length,
     free: users.filter(u => !u.isPro).length,
+    // Everyone money has come from or is coming from: the number "Pro" was
+    // being read as and never was.
+    paying: users.filter(u => u.journey?.hasPaid || u.journey?.willCharge).length,
+    issues: users.filter(u => u.journey?.issues?.length).length,
     admin: users.filter(u => u.isAdmin).length,
   }), [users])
 
@@ -300,6 +415,8 @@ export default function AdminUsersPage() {
                   { k: "all", label: "Alle", n: counts.all },
                   { k: "pro", label: "Pro", n: counts.pro },
                   { k: "free", label: "Gratis", n: counts.free },
+                  { k: "paying", label: "Betalend", n: counts.paying },
+                  { k: "issues", label: "Controleer", n: counts.issues },
                   { k: "admin", label: "Admins", n: counts.admin },
                 ] as { k: Filter; label: string; n: number }[]).map(opt => {
                   const active = filter === opt.k
@@ -344,6 +461,18 @@ export default function AdminUsersPage() {
                         <div className="mt-2">
                           <StatusFlags user={u} />
                         </div>
+                        <div className="mt-2">
+                          <BillingSummary user={u} />
+                          <BillingToggle
+                            open={openBillingId === u._id}
+                            onClick={() => setOpenBillingId(openBillingId === u._id ? null : u._id)}
+                          />
+                        </div>
+                        {openBillingId === u._id && (
+                          <div className="mt-2">
+                            <BillingPanel userId={u._id} />
+                          </div>
+                        )}
                         <p className="mt-2 text-[11.5px] text-ink-muted tabular-nums">
                           {`${u.noteCount} notities · ${u.streak} dagen reeks · lid sinds ${formatDate(u.createdAt)}`}
                         </p>
@@ -366,6 +495,7 @@ export default function AdminUsersPage() {
                       <tr className={`border-t ${ROW_LINE} ${TABLE_HEAD}`}>
                         <th scope="col" className="px-5 py-[10px] font-semibold">Gebruiker</th>
                         <th scope="col" className="px-3 py-[10px] font-semibold">Status</th>
+                        <th scope="col" className="px-3 py-[10px] font-semibold">Betaling</th>
                         <th scope="col" className="px-3 py-[10px] font-semibold">Platform</th>
                         <th scope="col" className="px-3 py-[10px] font-semibold">Notities</th>
                         <th scope="col" className="px-3 py-[10px] font-semibold">Reeks</th>
@@ -378,8 +508,8 @@ export default function AdminUsersPage() {
                     </thead>
                     <tbody>
                       {filtered.map(u => (
+                        <Fragment key={u._id}>
                         <tr
-                          key={u._id}
                           className={`border-t transition-colors hover:bg-sunken ${ROW_LINE}`}
                         >
                           <td className="max-w-[280px] px-5 py-3">
@@ -394,6 +524,13 @@ export default function AdminUsersPage() {
                           <td className="px-3 py-3">
                             <StatusFlags user={u} />
                           </td>
+                          <td className="max-w-[240px] px-3 py-3">
+                            <BillingSummary user={u} />
+                            <BillingToggle
+                              open={openBillingId === u._id}
+                              onClick={() => setOpenBillingId(openBillingId === u._id ? null : u._id)}
+                            />
+                          </td>
                           <td className="px-3 py-3">
                             <Platforms user={u} />
                           </td>
@@ -405,6 +542,14 @@ export default function AdminUsersPage() {
                           </td>
                           <td className="px-5 py-3 text-right">{actions(u)}</td>
                         </tr>
+                        {openBillingId === u._id && (
+                          <tr className={`border-t ${ROW_LINE}`}>
+                            <td colSpan={9} className="bg-sunken px-5 py-4">
+                              <BillingPanel userId={u._id} />
+                            </td>
+                          </tr>
+                        )}
+                        </Fragment>
                       ))}
                     </tbody>
                   </table>
@@ -626,5 +771,266 @@ function UserActions({
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+  )
+}
+
+/* ── Billing: which step, which plan, and whether money moved ─────────── */
+
+const TONE_COLOR: Record<"good" | "info" | "warn" | "bad" | "flat", string | null> = {
+  good: GOOD,
+  info: "var(--ad-teal)",
+  warn: WARN,
+  bad: DANGER,
+  flat: null,
+}
+
+/**
+ * The step itself. Deliberately not the same chip as PRO: "PRO" says what the
+ * reader can do, this says what the billing is doing - and the whole point of
+ * this screen is that those two are not the same thing.
+ */
+function StageChip({ journey }: { journey: JourneySummary }) {
+  const color = TONE_COLOR[STAGE_TONE[journey.stage] ?? "flat"]
+  if (!color) {
+    return <span className={FLAG} title={journey.explanation}>{journey.label}</span>
+  }
+  return (
+    <span
+      title={journey.explanation}
+      className="inline-flex items-center whitespace-nowrap rounded-full px-[7px] py-[2px] text-[10.5px] font-semibold"
+      style={{ backgroundColor: tint(color, 14), color }}
+    >
+      {journey.label}
+    </span>
+  )
+}
+
+/**
+ * One line under the chip that answers "en is er geld?" without opening
+ * anything: the plan, and the next charge or the date the free access stops.
+ */
+function BillingSummary({ user: u }: { user: AdminUser }) {
+  const j = u.journey
+  if (!j) return <span className="text-[11.5px] text-ink-faint">-</span>
+  const plan = j.interval ? INTERVAL_LABEL[j.interval] : null
+  const money = j.willCharge
+    ? `Afschrijving ${j.nextChargeAt ? shortDate(j.nextChargeAt) : "onbekend"}`
+    : j.accessUntil
+      ? `Gratis tot ${shortDate(j.accessUntil)}`
+      : j.hasPaid
+        ? "Geen nieuwe afschrijving"
+        : "Nooit betaald"
+  return (
+    <div className="flex min-w-0 flex-col gap-1">
+      <div className="flex flex-wrap items-center gap-1.5">
+        <StageChip journey={j} />
+        {j.hasPaid && (
+          <span className={FLAG} title="Er is minstens één keer echt geld afgeschreven">
+            <Receipt size={10} aria-hidden /> BETAALD
+          </span>
+        )}
+        {j.issues.length > 0 && (
+          <span
+            title={j.issues.map(i => i.message).join("\n")}
+            className="inline-flex items-center gap-1 whitespace-nowrap rounded-full px-[7px] py-[2px] text-[10.5px] font-semibold"
+            style={{
+              backgroundColor: tint(j.issues.some(i => i.level === "error") ? DANGER : WARN, 14),
+              color: j.issues.some(i => i.level === "error") ? DANGER : WARN,
+            }}
+          >
+            <AlertTriangle size={10} aria-hidden /> {j.issues.length}
+          </span>
+        )}
+      </div>
+      <span className="truncate text-[11.5px] text-ink-muted tabular-nums">
+        {plan ? `${plan} · ${money}` : money}
+      </span>
+    </div>
+  )
+}
+
+function BillingToggle({ open, onClick }: { open: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      aria-expanded={open}
+      className="mt-1 inline-flex items-center gap-1 text-[11.5px] font-semibold text-teal hover:underline"
+    >
+      {open ? <ChevronUp size={12} aria-hidden /> : <ChevronDown size={12} aria-hidden />}
+      {open ? "Verberg betaaldetails" : "Betaaldetails"}
+    </button>
+  )
+}
+
+/**
+ * Everything about one account's money, fetched on open.
+ *
+ * The Stripe half is a live read, which is why it is not in the list: it
+ * confirms what the derived step claims against the invoices Stripe actually
+ * issued. A missing Stripe key or an unreachable Stripe shows as a line of
+ * text, never as an empty panel.
+ */
+function BillingPanel({ userId }: { userId: string }) {
+  const [report, setReport] = useState<BillingReport | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let alive = true
+    setReport(null)
+    setError(null)
+    fetch(`/api/admin/users/${userId}/billing`)
+      .then(async res => {
+        const data = await res.json().catch(() => ({}))
+        if (!alive) return
+        if (!res.ok) setError(data?.error || "Kon de betaalgegevens niet laden")
+        else setReport(data as BillingReport)
+      })
+      .catch(() => alive && setError("Netwerkfout"))
+    return () => {
+      alive = false
+    }
+  }, [userId])
+
+  if (error) {
+    return <p className="text-[12.5px]" style={{ color: DANGER }}>{error}</p>
+  }
+  if (!report) {
+    return (
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-2/3" />
+        <Skeleton className="h-4 w-1/2" />
+      </div>
+    )
+  }
+
+  const j = report.journey
+  const sub = report.stripe.subscription
+  const paidInvoices = report.stripe.invoices.filter(i => i.amountPaidCents > 0)
+
+  return (
+    <div className="flex flex-col gap-3">
+      {/* What is happening, in one sentence. The answer to the question an
+          admin actually opened this for. */}
+      <div className={`${INSET} flex items-start gap-2 px-3 py-2.5`}>
+        <Info size={14} className="mt-[2px] flex-none text-ink-muted" aria-hidden />
+        <p className="text-[12.5px] leading-relaxed text-ink-body">{j.explanation}</p>
+      </div>
+
+      {j.issues.length > 0 && (
+        <ul className="flex flex-col gap-1.5">
+          {j.issues.map(issue => (
+            <li
+              key={issue.code}
+              className="flex items-start gap-2 rounded-[10px] px-3 py-2 text-[12.5px] leading-relaxed"
+              style={{
+                backgroundColor: tint(issue.level === "error" ? DANGER : WARN, 10),
+                color: issue.level === "error" ? DANGER : WARN,
+              }}
+            >
+              <AlertTriangle size={13} className="mt-[2px] flex-none" aria-hidden />
+              <span>{issue.message}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <dl className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-4">
+        <Field label="Stap" value={j.label} />
+        <Field
+          label="Gekozen abonnement"
+          value={
+            j.plan.interval
+              ? `${INTERVAL_LABEL[j.plan.interval]}${sub?.amountCents != null ? ` · ${euros(sub.amountCents, sub.currency ?? "EUR")}` : ""}`
+              : "geen"
+          }
+        />
+        <Field
+          label="Betaald"
+          value={
+            j.firstPaidAt
+              ? `ja, sinds ${shortDate(j.firstPaidAt)}`
+              : report.stripe.totalPaidCents
+                ? `ja, ${euros(report.stripe.totalPaidCents)}`
+                : "nee"
+          }
+        />
+        <Field
+          label={j.willCharge ? "Volgende afschrijving" : "Toegang tot"}
+          value={
+            j.willCharge
+              ? j.nextChargeAt
+                ? formatDate(j.nextChargeAt)
+                : "onbekend"
+              : j.accessUntil
+                ? formatDate(j.accessUntil)
+                : "-"
+          }
+        />
+        <Field label="Kanaal" value={j.channel ?? "geen"} />
+        <Field
+          label="Proefperiode"
+          value={
+            j.trial.kind
+              ? `${j.trial.kind === "reverse" ? "gratis dagen" : j.trial.kind === "stripe" ? "Stripe" : "store"}${
+                  j.trial.startedAt ? ` vanaf ${shortDate(j.trial.startedAt)}` : ""
+                }${j.trial.over ? " (voorbij)" : j.trial.endsAt ? ` tot ${shortDate(j.trial.endsAt)}` : ""}`
+              : "geen"
+          }
+        />
+        <Field
+          label="Kaart/mandaat"
+          value={sub ? (sub.hasPaymentMethod ? "ja" : "nee - er kan niets worden afgeschreven") : "n.v.t."}
+        />
+        <Field label="Stripe-status" value={sub ? `${sub.status} (${report.stripe.mode})` : "geen abonnement"} />
+      </dl>
+
+      {/* The money itself. A trial's EUR 0,00 invoice is marked, because it is
+          what makes "heeft betaald" look true when nothing was collected. */}
+      <div>
+        <h4 className="flex items-center gap-1.5 text-[12.5px] font-bold text-ink">
+          <CreditCard size={13} aria-hidden /> Facturen in Stripe
+        </h4>
+        {report.stripe.error ? (
+          <p className="mt-1 text-[12px]" style={{ color: WARN }}>{report.stripe.error}</p>
+        ) : report.stripe.invoices.length === 0 ? (
+          <p className="mt-1 text-[12px] text-ink-muted">
+            {report.stripe.customerId
+              ? "Stripe heeft geen facturen voor deze klant."
+              : "Dit account is nooit een Stripe-klant geworden - er is dus ook nooit iets afgeschreven."}
+          </p>
+        ) : (
+          <ul className="mt-1.5 flex flex-col gap-1">
+            {report.stripe.invoices.map(inv => (
+              <li key={inv.id} className="flex flex-wrap items-center gap-2 text-[12px] tabular-nums text-ink-body">
+                <Clock size={11} className="flex-none text-ink-faint" aria-hidden />
+                <span className="text-ink-muted">{shortDate(inv.createdAt)}</span>
+                <span className="font-semibold">{euros(inv.amountPaidCents, inv.currency)}</span>
+                <span className={FLAG}>{(inv.status ?? "?").toUpperCase()}</span>
+                {inv.isTrialInvoice && <span className={FLAG}>PROEF, GEEN BEDRAG</span>}
+                {inv.hostedUrl && (
+                  <a href={inv.hostedUrl} target="_blank" rel="noreferrer" className="text-teal hover:underline">
+                    bekijk
+                  </a>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+        {paidInvoices.length === 0 && report.stripe.invoices.length > 0 && (
+          <p className="mt-1.5 text-[12px] text-ink-muted">
+            Geen enkele factuur is met een bedrag betaald - er is tot nu toe niets geïnd.
+          </p>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function Field({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="min-w-0">
+      <dt className="text-[10.5px] font-semibold uppercase tracking-wide text-ink-faint">{label}</dt>
+      <dd className="mt-[2px] break-words text-[12.5px] text-ink-body">{value}</dd>
+    </div>
   )
 }
