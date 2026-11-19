@@ -11,11 +11,23 @@ type TrialRow = {
   email: string
   startedAt: string
   platform: "apple" | "google" | "web"
+  kind: "reverse" | "stripe" | "store"
   status: "trial" | "paying" | "stopped"
   endsAt: string | null
 }
 
 const PLATFORM: Record<TrialRow["platform"], string> = { apple: "iPhone", google: "Android", web: "Website" }
+
+/**
+ * Which trial this is, in the words that matter here: whether a payment can
+ * follow it at all. The free Pro days ask for no card, so "Gestopt" on one of
+ * those is the normal ending, not a lost sale.
+ */
+const KIND: Record<TrialRow["kind"], string> = {
+  reverse: "gratis Pro-dagen, geen kaart",
+  stripe: "proef met kaart",
+  store: "proef via de store",
+}
 const STATUS: Record<TrialRow["status"], { label: string; className: string }> = {
   trial: { label: "Loopt", className: "bg-teal/10 text-teal" },
   paying: { label: "Betaalt nu", className: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" },
@@ -32,7 +44,7 @@ const day = (iso: string) => new Date(iso).toLocaleDateString("nl-NL", { day: "n
  */
 export default function TrialsCard() {
   const [rows, setRows] = useState<TrialRow[] | null>(null)
-  const [counts, setCounts] = useState<{ last7d: number; running: number; paying: number } | null>(null)
+  const [counts, setCounts] = useState<{ last7d: number; running: number; paying: number; withCard?: number } | null>(null)
   const [all, setAll] = useState(false)
 
   useEffect(() => {
@@ -61,7 +73,9 @@ export default function TrialsCard() {
           <p className="mt-0.5 text-[12.5px] text-ink-muted">
             {counts === null
               ? "Laden..."
-              : `${counts.last7d} gestart in 7 dagen · ${counts.running} lopen nu · ${counts.paying} betalen nu`}
+              : `${counts.last7d} gestart in 7 dagen · ${counts.running} lopen nu · ${counts.paying} betalen nu${
+                  counts.withCard === undefined ? "" : ` · ${counts.withCard} met kaart`
+                }`}
           </p>
         </div>
       </div>
@@ -73,11 +87,11 @@ export default function TrialsCard() {
       {shown.length > 0 && (
         <ul className="mt-3 divide-y divide-line">
           {shown.map((r) => (
-            <li key={`${r.id}-${r.platform}`} className="flex items-center gap-3 py-2.5">
+            <li key={`${r.id}-${r.kind}`} className="flex items-center gap-3 py-2.5">
               <div className="min-w-0 flex-1">
                 <p className="truncate text-[13.5px] font-semibold text-ink">{r.name || r.email}</p>
                 <p className="truncate text-[12px] text-ink-muted">
-                  {r.email} · {PLATFORM[r.platform]} · gestart {day(r.startedAt)} ({relativeTime(r.startedAt)})
+                  {r.email} · {PLATFORM[r.platform]} · {KIND[r.kind]} · gestart {day(r.startedAt)} ({relativeTime(r.startedAt)})
                   {r.endsAt ? ` · eindigt ${day(r.endsAt)}` : ""}
                 </p>
               </div>

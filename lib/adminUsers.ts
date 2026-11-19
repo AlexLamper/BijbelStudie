@@ -9,6 +9,7 @@ import { isProtectedAccount } from "./accountArchive";
 import { archiveAndDeleteAccount } from "./accountDeletion";
 import { normaliseEmail } from "./userLookup";
 import { MAX_COMP_MONTHS, compedProExpiry } from "./compedPro";
+import { JOURNEY_FIELDS, billingJourney } from "./billingJourney";
 
 /**
  * The user list behind /beheer/gebruikers and /api/v1/admin/users.
@@ -38,11 +39,11 @@ export async function adminUsersPayload(params: {
 
   const users = await User.find(filter)
     .select(
-      "name email image isAdmin subscribed compedProUntil storePremium storePremiumPlatform subscriptionStatus " +
-        "stripeSubscriptionId " +
-        "subscriptionInterval currentPeriodEnd cancelAtPeriodEnd billingIssueSince streak " +
-        "createdAt lastStreakDate stripeCustomerId preferences.onboardingCompleted " +
-        "signupPlatform platformsSeenAt"
+      "name email image streak lastStreakDate preferences.onboardingCompleted " +
+        "signupPlatform platformsSeenAt " +
+        // Everything lib/billingJourney reads, so the step each account is on is
+        // derived here once instead of guessed from chips on the screen.
+        JOURNEY_FIELDS
     )
     .sort({ createdAt: -1 })
     .limit(limit)
@@ -55,11 +56,37 @@ export async function adminUsersPayload(params: {
   ]);
   const noteMap = new Map(noteCounts.map((n) => [String(n._id), n.count]));
 
+  const now = new Date();
+
   return {
     status: 200,
     body: {
     users: users.map((u) => ({
       _id: String(u._id),
+      /**
+       * The one field that answers "waar staat deze gebruiker nu?" - derived
+       * from the same function the per-account detail endpoint uses, so the
+       * chip in the list and the panel behind it can never disagree. No price
+       * is passed: the amount comes from Stripe, and that is a per-account
+       * lookup (lib/adminBilling).
+       */
+      journey: (() => {
+        const journey = billingJourney(u as Parameters<typeof billingJourney>[0], { now });
+        return {
+          stage: journey.stage,
+          label: journey.label,
+          explanation: journey.explanation,
+          channel: journey.channel,
+          hasPaid: journey.hasPaid,
+          willCharge: journey.willCharge,
+          nextChargeAt: journey.nextChargeAt,
+          accessUntil: journey.accessUntil,
+          interval: journey.plan.interval,
+          trialKind: journey.trial.kind,
+          trialEndsAt: journey.trial.endsAt,
+          issues: journey.issues,
+        };
+      })(),
       name: u.name,
       email: u.email,
       image: u.image,
