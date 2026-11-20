@@ -139,15 +139,14 @@ export async function POST(req: NextRequest) {
 
     const origin = ALLOWED_ORIGIN
 
-    // The free trial: once per account, ever, wherever it was offered (the
-    // landing banner, the pricing page, the Pro offer dialog). Checked on the
-    // account's billing fields AND live against Stripe - see
-    // lib/trialEligibility.ts. Stripe itself does not track "already had a
-    // trial", so this is the only thing standing between a cancelled
-    // subscriber and a second free week.
+    // The free trial, which since 20 November 2026 nobody gets: there is no
+    // proefperiode any more (lib/promo.ts `TRIALS_ENABLED`). The call stays
+    // because lib/trialEligibility.ts is the one place that decides, so this
+    // route and /api/trial can never put a different promise on the screen than
+    // the one Stripe is asked to keep. It returns false for every account while
+    // trials are off, and the session below is created without
+    // `trial_period_days` - the first charge happens straight away.
     const trialEligible = await resolveTrialEligibility(user, stripeCustomerId)
-
-    const trialDays = trialEligible ? PRO_TRIAL_DAYS : 0
 
     const stripeSession = await stripe.checkout.sessions.create({
       payment_method_types: ["card", "ideal", "bancontact", "sepa_debit"],
@@ -164,15 +163,12 @@ export async function POST(req: NextRequest) {
       // even before stripeCustomerId has been written locally.
       subscription_data: {
         metadata: { userId: user._id.toString(), interval },
-        // The "7 dagen gratis" the banner and the Pro offer promise. Without
-        // this line the promise was simply untrue: Stripe charged in full on
-        // day one.
-        //
-        // Payment-method behaviour is deliberately unchanged - Checkout in
-        // subscription mode defaults to `payment_method_collection: "always"`,
-        // so the card/iDEAL mandate is still collected up front and the first
-        // charge happens automatically when the trial ends.
-        ...(trialDays ? { trial_period_days: trialDays } : {}),
+        // No `trial_period_days`. While trials were on, this is where the
+        // "7 dagen gratis" promise was actually kept; now nothing is free and
+        // Stripe charges the full amount at checkout. `trialEligible` is always
+        // false (see above) - kept in a condition rather than deleted so
+        // switching trials back on in lib/promo.ts needs no change here.
+        ...(trialEligible ? { trial_period_days: PRO_TRIAL_DAYS } : {}),
       },
       metadata: { userId: user._id.toString(), interval },
       // Supports the 14-day withdrawal right: the customer actively agrees to

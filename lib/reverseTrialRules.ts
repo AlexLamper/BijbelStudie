@@ -38,6 +38,16 @@ import { isAdminEmail } from './adminEmails';
 export const TRIAL_TIME_ZONE = 'Europe/Amsterdam';
 
 /**
+ * Whether a new reverse trial may begin. False since 20 November 2026: Pro is
+ * bought or it is not had (lib/promo.ts).
+ *
+ * Only [planTouch] reads this, and only on an account that has no trial yet.
+ * Every rule for a trial that already exists is left exactly as it was, so the
+ * ones that were running when this shipped end by themselves.
+ */
+export const REVERSE_TRIAL_ENABLED = false;
+
+/**
  * Accounts created at or after this moment get the reverse trial; older free
  * accounts are left exactly as they were (Alex: nothing is granted to them
  * automatically). Set to when this shipped.
@@ -345,6 +355,16 @@ export function planTouch(account: TrialAccountFields, now: Date): TouchPlan {
   const tonight = endOfAmsterdamDay(now);
 
   if (!trial || !toDate(trial.startedAt)) {
+    // No account starts a reverse trial any more (Alex, 20 November 2026: hard
+    // paywall, see lib/promo.ts). This is the only place one could begin, so
+    // the switch sits here rather than in the dozen callers of `touch`.
+    //
+    // Deliberately placed *after* the "has a trial already" test above: a trial
+    // that was running when this shipped keeps every later branch of this
+    // function - its days still count, its last day still ends tonight, it is
+    // still finalised and its personal limit still lands. Nobody mid-trial lost
+    // Pro on the day of the change.
+    if (!REVERSE_TRIAL_ENABLED) return NOTHING;
     // Admins and anyone the store already says has Pro never start one.
     if (isAdminAccount(account) || account.storeProClaimed) return NOTHING;
     const created = toDate(account.createdAt);

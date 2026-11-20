@@ -3,13 +3,9 @@ import {
   FREE_AI_DAILY_CAP,
   FREE_GROUP_LIMIT,
   FREE_NOTE_LIMIT,
-  EXISTING_ACCOUNT_TRIAL_LINE,
   PERSONAL_LIMIT_SUMMARY,
   PRO_AI_DAILY_CAP,
-  REVERSE_TRIAL_DAYS,
-  REVERSE_TRIAL_SUMMARY,
 } from "../../lib/entitlements";
-import { PRO_TRIAL_DAYS } from "../../lib/promo";
 
 /**
  * The part of /abonnement that is not the offer: the questions people ask
@@ -61,11 +57,11 @@ const ANNUAL = PLANS.annual;
 export const ABONNEMENT_FAQ: { q: string; a: string }[] = [
   {
     q: "Is BijbelStudie gratis te gebruiken?",
-    a: `Ja. Met een gratis account lees je de Bijbel in alle beschikbare vertalingen, volg je alle begeleide studies, lees je het KingComments-commentaar volledig, stel je ${FREE_AI_DAILY_CAP} vragen per dag aan de AI-assistent, schrijf je ${FREE_NOTE_LIMIT} notities en doe je mee met elke studiegroep. Er zit geen tijdslimiet aan. Een nieuw account heeft de eerste ${REVERSE_TRIAL_DAYS} dagen alles van Pro; daarna houd je van wat je het meest gebruikte een klein dagelijks deel (zie hieronder). Pro voegt de volledige commentaren van Matthew Henry, Calvijn en Dachsel toe, de grondtekst bij elk vers, alle kruisverwijzingen, ${PRO_AI_DAILY_CAP} AI-vragen per dag, onbeperkt notities, meer dan ${groupsLed} leiden, voorlezen met natuurlijke stemmen, streakbescherming en extra bomen en landschappen voor je boom.`,
+    a: `Ja. Met een gratis account lees je de Bijbel in alle beschikbare vertalingen, volg je alle begeleide studies, lees je het KingComments-commentaar volledig, stel je ${FREE_AI_DAILY_CAP} vragen per dag aan de AI-assistent, schrijf je ${FREE_NOTE_LIMIT} notities en doe je mee met elke studiegroep. Er zit geen tijdslimiet aan. Pro voegt de volledige commentaren van Matthew Henry, Calvijn en Dachsel toe, de grondtekst bij elk vers, alle kruisverwijzingen, ${PRO_AI_DAILY_CAP} AI-vragen per dag, onbeperkt notities, meer dan ${groupsLed} leiden, voorlezen met natuurlijke stemmen, streakbescherming en extra bomen en landschappen voor je boom.`,
   },
   {
-    q: "Wat zijn de gratis Pro-dagen?",
-    a: `${REVERSE_TRIAL_SUMMARY} De dagen tellen alleen als je BijbelStudie echt gebruikt, op de website en in de app samen; een dag waarop je niets opent, telt niet mee. ${EXISTING_ACCOUNT_TRIAL_LINE} ${PERSONAL_LIMIT_SUMMARY}`,
+    q: "Ik had eerder gratis Pro-dagen. Hoe zit dat nu?",
+    a: `Nieuwe accounts krijgen geen gratis Pro-dagen meer. Had je ze wel, dan verandert er voor jou niets aan wat je daarna houdt. ${PERSONAL_LIMIT_SUMMARY}`,
   },
   {
     q: "Wat kost BijbelStudie Pro?",
@@ -73,7 +69,7 @@ export const ABONNEMENT_FAQ: { q: string; a: string }[] = [
   },
   {
     q: "Kan ik Pro eerst gratis proberen?",
-    a: `Ja. Een nieuw account heeft de eerste ${REVERSE_TRIAL_DAYS} dagen al alles van Pro. Neem je daarna een abonnement en had je er nog nooit een, dan zijn de eerste ${PRO_TRIAL_DAYS} dagen ook gratis. Je kiest een plan en een betaalmethode, maar betaalt vandaag niets. Zeg je binnen ${PRO_TRIAL_DAYS} dagen op via Instellingen, dan wordt er niets afgeschreven; anders gaat je abonnement daarna vanzelf in tegen de prijs van je plan. De proefperiode is er één keer per account.`,
+    a: "Er is geen proefperiode. Het gratis account is er wel zonder tijdslimiet: daarmee lees je de Bijbel in alle vertalingen, volg je alle begeleide studies en gebruik je elke dag een deel van de AI-assistent, zo lang je wilt. Kies je Pro, dan betaal je meteen en gaat je abonnement direct in. Opzeggen kan altijd via Instellingen, en je houdt Pro tot het einde van de periode die je betaald hebt.",
   },
   {
     q: "Hoe zeg ik mijn abonnement op?",

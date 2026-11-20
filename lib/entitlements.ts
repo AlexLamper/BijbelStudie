@@ -381,25 +381,24 @@ export function dutchList(items: string[]): string {
   return `${items.slice(0, -1).join(", ")} en ${items[items.length - 1]}`;
 }
 
-/**
- * The reverse trial in two sentences, for /abonnement, the help pages and the
- * guides. Every number comes from the constants above; nothing here may name
- * a limit the routes do not enforce.
+/*
+ * REVERSE_TRIAL_SUMMARY and EXISTING_ACCOUNT_TRIAL_LINE used to live here and
+ * described the free Pro days to a new reader. They are gone because the
+ * sentence is no longer true for anyone arriving today: no new trial starts
+ * (lib/promo.ts, lib/reverseTrialRules.ts `REVERSE_TRIAL_ENABLED`), so public
+ * copy may not announce one.
+ *
+ * What remains below is for the readers who DID have those days: their
+ * personal limit is still enforced, so the help pages still have to explain
+ * it. That copy is written in the past tense for exactly that reason.
  */
-export const REVERSE_TRIAL_SUMMARY =
-  `Een nieuw account heeft op de eerste ${REVERSE_TRIAL_DAYS} dagen waarop je BijbelStudie opent alles van Pro. ` +
-  "Daarna ga je vanzelf verder met de gratis versie.";
-
-/** For accounts from before the reverse trial: they get it once, too. */
-export const EXISTING_ACCOUNT_TRIAL_LINE =
-  `Had je al een account van voor deze regeling en nooit Pro, dan krijg je de ${REVERSE_TRIAL_DAYS} Pro-dagen één keer, vanaf je eerstvolgende bezoek.`;
 
 /** The studies line in the free list: what a reader whose personal limit is studies keeps. */
 export const STUDIES_LIMIT_NOTE =
   `Waren de lessen wat je het meest gebruikte in je Pro-dagen, dan begin je daarna ${TINY_LESSONS_PER_DAY} nieuwe les per dag; een les waar je al aan begonnen bent, maak je altijd af.`;
 
 export const PERSONAL_LIMIT_SUMMARY =
-  "Wat je in die dagen het meest gebruikte, houd je daarna in een klein dagelijks deel: " +
+  "Wat je in je gratis Pro-dagen het meest gebruikte, houd je daarna in een klein dagelijks deel: " +
   `bij AI-vragen ${PERSONAL_LIMIT_LINES.ai}; ` +
   `bij notities ${PERSONAL_LIMIT_LINES.notes}; ` +
   `bij studiemateriaal ${PERSONAL_LIMIT_LINES.study}; ` +
