@@ -7,7 +7,7 @@
  * hand-kept copies would drift into structured data that does not match the
  * visible page - which Google treats as a spam signal, not a typo.
  */
-import { FREE_AI_DAILY_CAP, FREE_NOTE_LIMIT, PRO_AI_DAILY_CAP, REVERSE_TRIAL_DAYS } from "../entitlements";
+import { FREE_AI_DAILY_CAP, FREE_NOTE_LIMIT, PRO_AI_DAILY_CAP } from "../entitlements";
 import { PLANS, euro } from "../pricing";
 
 export interface Faq {
@@ -18,7 +18,7 @@ export interface Faq {
 export const HOME_FAQS: Faq[] = [
   {
     q: "Is BijbelStudie helemaal gratis?",
-    a: `Het gratis plan geeft volledige toegang tot bijbellezen, markeringen, begeleide studies, het KingComments-commentaar, studiegroepen en ${FREE_AI_DAILY_CAP} vragen per dag aan de AI-assistent, en u schrijft gratis ${FREE_NOTE_LIMIT} notities. De Pro versie (${euro(PLANS.monthly.amountCents)} per maand of ${euro(PLANS.annual.amountCents)} per jaar) voegt de overige bijbelcommentaren, de grondtekst bij elk vers, ${PRO_AI_DAILY_CAP} AI-vragen per dag, onbeperkt notities en voorlezen met natuurlijke stemmen toe. Een nieuw account heeft op de eerste ${REVERSE_TRIAL_DAYS} dagen waarop u BijbelStudie opent alles van Pro; daarna gaat u vanzelf verder met de gratis versie, en houdt u van wat u het meest gebruikte een klein dagelijks deel.`,
+    a: `Het gratis plan geeft volledige toegang tot bijbellezen, markeringen, begeleide studies, het KingComments-commentaar, studiegroepen en ${FREE_AI_DAILY_CAP} vragen per dag aan de AI-assistent, en u schrijft gratis ${FREE_NOTE_LIMIT} notities. De Pro versie (${euro(PLANS.monthly.amountCents)} per maand of ${euro(PLANS.annual.amountCents)} per jaar) voegt de overige bijbelcommentaren, de grondtekst bij elk vers, ${PRO_AI_DAILY_CAP} AI-vragen per dag, onbeperkt notities en voorlezen met natuurlijke stemmen toe. Het gratis plan heeft geen tijdslimiet en er is geen proefperiode: Pro gaat in op het moment dat u het neemt.`,
   },
   {
     q: "Wat doet de AI-assistent?",

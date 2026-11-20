@@ -1,11 +1,25 @@
 import stripe from './stripe';
 import User from '../models/User';
+import { TRIALS_ENABLED } from './promo';
 import { hasHadProOrTrial, type TrialUserFields } from './proHistory';
 
 export { hasHadProOrTrial, TRIAL_USER_FIELDS, type TrialUserFields } from './proHistory';
 
 /**
- * Who may start the free Pro trial (lib/promo.ts `PRO_TRIAL_DAYS`).
+ * Who may start the free Pro trial: since 20 November 2026, nobody.
+ *
+ * `TRIALS_ENABLED` is false (lib/promo.ts), and this function is the single
+ * choke point both callers go through - app/api/checkout, which would pass
+ * `trial_period_days` to Stripe, and app/api/trial, which the pricing page and
+ * the Pro offer dialog ask before they put a promise on screen. One `false`
+ * here is therefore enough to make the whole product stop offering a trial
+ * without the screen and the charge being able to disagree.
+ *
+ * Everything below this comment is the old eligibility test. It is kept intact
+ * rather than deleted so switching trials back on is one line in lib/promo.ts
+ * and still lands on a rule that cannot hand the same account a second week.
+ *
+ * The original contract:
  *
  * Once per account, ever - whether it was started from the landing banner, the
  * pricing page or the Pro offer dialog, it is the same trial. Anyone who has
@@ -38,6 +52,9 @@ export async function resolveTrialEligibility(
   user: TrialUserFields,
   customerId: string | null | undefined = user.stripeCustomerId,
 ): Promise<boolean> {
+  // The hard paywall. Checked before anything else, so no Stripe round trip is
+  // spent deciding something that is already decided.
+  if (!TRIALS_ENABLED) return false;
   if (hasHadProOrTrial(user)) return false;
   if (!customerId) return true;
 

@@ -2,9 +2,6 @@ import type { Guide } from "./types";
 import {
   FREE_AI_DAILY_CAP,
   FREE_NOTE_LIMIT,
-  PERSONAL_LIMIT_SUMMARY,
-  REVERSE_TRIAL_DAYS,
-  REVERSE_TRIAL_SUMMARY,
   STUDIES_LIMIT_NOTE,
 } from "../../entitlements";
 import { PLANS, euro } from "../../pricing";
@@ -91,7 +88,7 @@ export const GUIDE_FREE: Guide = {
       heading: "Wat op BijbelStudie gratis is",
       body: [
         "Om eerlijk te zijn over waar de grens ligt: hieronder staat precies wat het gratis account biedt en wat niet.",
-        `${REVERSE_TRIAL_SUMMARY} ${PERSONAL_LIMIT_SUMMARY}`,
+        "Er is geen proefperiode: het gratis account heeft geen tijdslimiet, en Pro koop je wanneer je wilt.",
       ],
       list: [
         {
@@ -149,7 +146,7 @@ export const GUIDE_FREE: Guide = {
   faqs: [
     {
       q: "Is bijbelstudie online echt gratis?",
-      a: `Voor een groot deel wel. Bijbel lezen in meerdere vertalingen, notities maken, begeleide studies doorlopen en het KingComments-commentaar lezen kan zonder te betalen. Op BijbelStudie is daarnaast elke dag ${FREE_AI_DAILY_CAP} keer de AI-assistent te gebruiken en schrijf je ${FREE_NOTE_LIMIT} notities. Wat je in je eerste ${REVERSE_TRIAL_DAYS} Pro-dagen het meest gebruikte, houd je daarna in een kleiner dagelijks deel. De overige bijbelcommentaren, de ruimere AI-limiet, onbeperkt notities en de volledige grondtekst zitten in het betaalde Pro-abonnement.`,
+      a: `Voor een groot deel wel. Bijbel lezen in meerdere vertalingen, notities maken, begeleide studies doorlopen en het KingComments-commentaar lezen kan zonder te betalen. Op BijbelStudie is daarnaast elke dag ${FREE_AI_DAILY_CAP} keer de AI-assistent te gebruiken en schrijf je ${FREE_NOTE_LIMIT} notities. De overige bijbelcommentaren, de ruimere AI-limiet, onbeperkt notities en de volledige grondtekst zitten in het betaalde Pro-abonnement.`,
     },
     {
       q: "Welke bijbelvertalingen zijn gratis te gebruiken?",

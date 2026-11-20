@@ -124,12 +124,17 @@ function dayAfterTrial(days: number): string {
  * The Pro offer, raised at the moment a reader reaches for something Pro: a
  * limit they just hit, a Pro control they just tapped (lib/proOffer.ts).
  *
- * For an account that has never had Pro it offers the free trial the way an
- * app store would: "Probeer Pro 7 dagen gratis", pick a plan, and Stripe
- * Checkout asks for a payment method with €0 due today. The first payment
- * follows automatically when the trial ends, unless the reader cancels before
- * then - and the dialog says exactly that, with the date and the amount, next
- * to the button. Whether the trial applies is decided by the server
+ * Since 20 November 2026 it offers a purchase and nothing else: "Word Pro voor
+ * EUR x", and Stripe charges at checkout. There is no proefperiode any more
+ * (lib/promo.ts). Not a line of this component needed changing for that, which
+ * is the whole point of the arrangement described below: the trial branches are
+ * still here, they simply never run, because `eligible` comes from the server
+ * and the server now says no to everyone.
+ *
+ * While the trial existed, the dialog offered it the way an app store would:
+ * pick a plan, EUR 0 due today, and the first payment following automatically
+ * when the week ended unless the reader cancelled - stated next to the button
+ * with the date and the amount. Whether the trial applies is decided by the server
  * (app/api/checkout via lib/trialEligibility.ts); /api/trial only tells this
  * dialog what the checkout is going to do, so the promise on screen and the
  * charge cannot disagree. Once per account, ever: someone who already had the

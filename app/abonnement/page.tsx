@@ -2,7 +2,7 @@ import { Suspense } from "react"
 import { Check } from "lucide-react"
 import AppShell from "../../components/shell/AppShell"
 import { PRO_FEATURES_SHORT } from "../../lib/pricing"
-import { REVERSE_TRIAL_DAYS, TINY_LESSONS_PER_DAY, dutchList, freeIncludes } from "../../lib/entitlements"
+import { dutchList, freeIncludes } from "../../lib/entitlements"
 import PricingPlans, { PricingSkeleton } from "./PricingPlans"
 import FaqAccordion from "./FaqAccordion"
 import { ABONNEMENT_FAQ } from "./content"
@@ -64,14 +64,12 @@ function AboutPro() {
         ))}
       </ul>
 
-      {/* What free is, said plainly beside what Pro adds - including the free
-          Pro days and the personal limit after them (lib/entitlements.ts). */}
+      {/* What free is, said plainly beside what Pro adds. No trial is named:
+          there is none (lib/promo.ts). */}
       <h2 className={`mt-7 ${LABEL} text-ink-faint`}>Gratis</h2>
       <p className="mt-[10px] max-w-[520px] text-[14px] leading-[1.55] text-ink-body">
-        Gratis: {dutchList(freeIncludes(null))}. De eerste {REVERSE_TRIAL_DAYS} dagen waarop je
-        BijbelStudie opent heb je alles van Pro. Daarna houd je van wat je het meest gebruikte een klein
-        dagelijks deel - bij de lessen bijvoorbeeld {TINY_LESSONS_PER_DAY} nieuwe les per dag, en een begonnen les maak je altijd af -
-        en de rest de gewone gratis limieten.
+        Gratis: {dutchList(freeIncludes(null))}. Zonder tijdslimiet, en de Bijbel lezen blijft
+        altijd gratis. Pro koop je wanneer je de rest erbij wilt.
       </p>
 
       {/* Pinned to the foot of the column; the free space sits above it. */}

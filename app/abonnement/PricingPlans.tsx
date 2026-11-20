@@ -27,7 +27,6 @@ import {
 } from "../../lib/pricing"
 import { useLivePrices } from "../../hooks/useLivePrices"
 import AnnualDealLine from "../../components/pricing/AnnualDealLine"
-import { PRO_TRIAL_DAYS } from "../../lib/promo"
 import { signupForCheckoutHref, startCheckout as requestCheckout } from "../../lib/startCheckout"
 import { track, trackNow } from "../../lib/analytics"
 import { Skeleton } from "../../components/kit/primitives"
@@ -230,8 +229,10 @@ export default function PricingPlans() {
 
   const isPro = sessionPro || (Boolean(trial?.isPro) && !inReverseTrial)
   // A failed lookup promises nothing: the button falls back to "Start met Pro".
-  const offersTrial = !isPro && (signedIn ? Boolean(trial?.eligible) : true)
-  const trialDays = trial?.trialDays ?? PRO_TRIAL_DAYS
+  // A guest is promised nothing either. That used to be `true` - a new account
+  // had never had a trial - but there is no trial any more (lib/promo.ts), and
+  // a guest cannot be shown an offer that sign-up would not honour.
+  const offersTrial = !isPro && signedIn && Boolean(trial?.eligible)
 
   useEffect(() => {
     if (status === "loading") return
@@ -326,7 +327,7 @@ export default function PricingPlans() {
         className="press mt-2 flex h-[58px] w-full items-center justify-center gap-2 rounded-panel bg-teal-dark text-[17px] font-bold text-white outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[#0F766E] focus-visible:ring-offset-2 disabled:opacity-60"
       >
         {busy && <Loader2 size={18} aria-hidden className="animate-spin" />}
-        {offersTrial ? `Probeer ${trialDays} dagen gratis` : "Start met Pro"}
+        {offersTrial ? `Probeer ${trial?.trialDays} dagen gratis` : "Start met Pro"}
       </button>
 
       <p className="text-center text-[13px] text-ink-muted">

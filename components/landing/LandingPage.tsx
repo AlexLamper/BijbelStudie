@@ -18,7 +18,7 @@ import { PLANS, euro } from "../../lib/pricing"
 import { PromoBanner } from "./PromoBanner"
 import HeroDemo from "./heroDemo/HeroDemo"
 import { ReviewsRow, type ReviewsData } from "./ReviewsRow"
-import { FREE_AI_DAILY_CAP, FREE_NOTE_LIMIT, PRO_AI_DAILY_CAP, REVERSE_TRIAL_DAYS } from "../../lib/entitlements"
+import { FREE_AI_DAILY_CAP, FREE_NOTE_LIMIT, PRO_AI_DAILY_CAP } from "../../lib/entitlements"
 
 /* ─── Design tokens ──────────────────────────────────────────── */
 /* The neutrals are CSS variables so the page follows dark mode: the global
@@ -690,7 +690,6 @@ function Pricing() {
     "KingComments commentaar, volledig",
     `${FREE_AI_DAILY_CAP} vragen per dag aan de AI-assistent`,
     `Markeringen, en ${FREE_NOTE_LIMIT} notities bij verzen`,
-    `De eerste ${REVERSE_TRIAL_DAYS} dagen alles van Pro; daarna houd je van wat je het meest gebruikte een klein dagelijks deel`,
     "Meedoen met studiegroepen",
     "Historische context per hoofdstuk",
     "Voortgang bijhouden",
@@ -907,7 +906,7 @@ function CTA() {
               </div>
 
               <p className="mt-6 text-xs" style={{ color: T.muted }}>
-                Gratis te gebruiken · De eerste {REVERSE_TRIAL_DAYS} dagen alles van Pro
+                Gratis te gebruiken · Bijbel lezen blijft altijd gratis
               </p>
             </div>
           </div>

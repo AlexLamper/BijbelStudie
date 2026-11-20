@@ -2,10 +2,8 @@ import type { Faq } from "./homeFaq";
 import {
   FREE_AI_DAILY_CAP,
   FREE_NOTE_LIMIT,
-  EXISTING_ACCOUNT_TRIAL_LINE,
   PERSONAL_LIMIT_SUMMARY,
   PRO_AI_DAILY_CAP,
-  REVERSE_TRIAL_SUMMARY,
   TINY_AI_DAILY_CAP,
 } from "../entitlements";
 import { PLANS } from "../pricing";
@@ -139,12 +137,12 @@ export const HELP_TOPICS: HelpTopic[] = [
         a: `Pro kost ${PLANS.monthly.billedLabel}, of ${PLANS.annual.billedLabel}. Zonder Pro blijven bijbellezen, markeringen, begeleide studies, het KingComments-commentaar, meedoen met studiegroepen en ${FREE_AI_DAILY_CAP} AI-vragen per dag gratis. Zonder Pro schrijf je ${FREE_NOTE_LIMIT} notities, op de website en in de app samen.`,
       },
       {
-        q: "Hoe werken de gratis Pro-dagen?",
-        a: `${REVERSE_TRIAL_SUMMARY} ${EXISTING_ACCOUNT_TRIAL_LINE} ${PERSONAL_LIMIT_SUMMARY}`,
+        q: "Ik had eerder gratis Pro-dagen. Hoe zit dat nu?",
+        a: `Nieuwe accounts krijgen geen gratis Pro-dagen meer, en er is ook geen proefperiode bij een abonnement. Had je die dagen wel, dan verandert er voor jou niets aan wat je daarna houdt. ${PERSONAL_LIMIT_SUMMARY}`,
       },
       {
         q: "Wat krijg ik met Pro?",
-        a: `Toegang tot de overige bijbelcommentaren - Matthew Henry, Calvijn en Dachsel - naast het gratis KingComments, de Hebreeuwse en Griekse grondtekst bij elk vers, ${PRO_AI_DAILY_CAP} AI-vragen per dag in plaats van ${FREE_AI_DAILY_CAP}, onbeperkt notities, zoveel studiegroepen leiden als je wilt, voorlezen met natuurlijke stemmen, streakbescherming en extra bomen en landschappen voor je boom. Neem je Pro en had je het nog niet eerder als abonnement, dan zijn de eerste 7 dagen gratis.`,
+        a: `Toegang tot de overige bijbelcommentaren - Matthew Henry, Calvijn en Dachsel - naast het gratis KingComments, de Hebreeuwse en Griekse grondtekst bij elk vers, ${PRO_AI_DAILY_CAP} AI-vragen per dag in plaats van ${FREE_AI_DAILY_CAP}, onbeperkt notities, zoveel studiegroepen leiden als je wilt, voorlezen met natuurlijke stemmen, streakbescherming en extra bomen en landschappen voor je boom.`,
       },
       {
         q: "Hoe zeg ik mijn abonnement op?",
